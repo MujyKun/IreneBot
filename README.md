@@ -34,7 +34,7 @@ modules/Music.py - Commands for Music
 
 modules/Twitter2.py - Commands for Twitter
 
-modules/currency.db - Database that includes the economy.
+modules/currency.db - Database that includes the economy [Also has channel ids].
 
 modules/keys.py - All Keys/Tokens should be put here.
 

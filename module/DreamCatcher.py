@@ -4,15 +4,19 @@ from discord.ext import commands, tasks
 import aiohttp
 from bs4 import BeautifulSoup as soup
 import aiofiles
-
+import sqlite3
 
 client = 0
+path = 'module\currency.db'
+DBconn = sqlite3.connect(path)
+c = DBconn.cursor()
 
 
 def setup(client1):
     client1.add_cog(DreamCatcher(client1))
     global client
     client = client1
+
 
 class DreamCatcher(commands.Cog):
     def __init__(self, client):
@@ -32,45 +36,28 @@ class DreamCatcher(commands.Cog):
         """Send DC Updates to your current text channel [Format: %updates] | To Stop : [Format: %updates stop]"""
         channel = ctx.channel.id
         if solution == "stop":
-            ab = open("channels.txt", "r")
-            a1 = ab.readlines()
-            ac = open("newfile.txt", "w")
-            found = 0
-            for channel_number in a1:
-                if channel_number[:18] == str(channel):
-                    found = 1
-                    await ctx.send ("> **This channel will no longer receive updates.**")
-                if channel_number[:18] != str(channel):
-                    ac.write("{}\n".format(channel_number))
-            ac.close()
-            ab.close()
-            ab = 'channels.txt'
-            ac = 'newfile.txt'
-            os.replace(ac, ab)
-            if found == 0:
+            counter = c.execute("SELECT COUNT(*) From DreamCatcher WHERE ServerID = ?",(channel,)).fetchone()[0]
+            if counter == 1:
+                await ctx.send ("> **This channel will no longer receive updates.**")
+                c.execute("DELETE FROM DreamCatcher WHERE ServerID = ?",(channel,))
+                DBconn.commit()
+            if counter == 0:
                 await ctx.send("> **This channel does not currently receive updates.**")
         if solution != "stop":
-            ab = open("channels.txt", "r")
-            a1 = ab.readlines()
-            found = 0
-            for channel_number in a1:
-                if channel_number[:18] == str(channel):
-                    found = 1
-                    await ctx.send ("> **This channel already receives DC Updates**")
-            ab.close()
-            if found == 0:
+            counter = c.execute("SELECT COUNT(*) From DreamCatcher WHERE ServerID = ?", (channel,)).fetchone()[0]
+            if counter == 1:
+                await ctx.send ("> **This channel already receives DC Updates**")
+            if counter == 0:
                 channel_name = client.get_channel(channel)
                 await ctx.send("> **I Will Post All DC Updates In {}**".format(channel_name))
-                ab = open("channels.txt", "a+")
-                ab.write("{}\n".format(channel))
-                ab.close()
-
+                c.execute("INSERT INTO DreamCatcher VALUES (?)",(channel,))
+                DBconn.commit()
 
 
 
     @commands.command()
     @commands.is_owner()
-    async def scrape(self, ctx, *, number = 36582):
+    async def scrape(self, ctx, *, number = 36638):
         """Starts Loop Searching For New DC Post [Format: %scrape (post number to start at)]"""
         @tasks.loop(seconds=0, minutes=0, hours=0, reconnect=True)
         async def new_task3(ctx, number):
@@ -125,36 +112,32 @@ class DreamCatcher(commands.Cog):
                                         await fd.write(await resp.read())
                                         await fd.close()
                                         another_list.append(file_name)
-                                ab = open("channels.txt", "r+")
-                                a1 = ab.readlines()
-
+                                a1 = c.execute("SELECT ServerID FROM DreamCatcher").fetchall()
                                 for channel in a1:
-                                    if channel != '\n':
-                                        DC_Photos = []
-                                        for file_name in another_list:
-                                            dc_photo = discord.File(fp='DCApp/{}'.format(file_name),
-                                                                  filename= file_name)
-                                            DC_Photos.append(dc_photo)
-                                        channel = client.get_channel(int(channel[:18]))
-                                        if channel is not None:
-                                            if username == Gahyeon:
-                                                await channel.send(">>> **New Gahyeon Post\n<{}>**".format(my_url))
-                                            if username == Siyeon:
-                                                await channel.send(">>> **New Siyeon Post\n<{}>**".format(my_url))
-                                            if username == Yoohyeon:
-                                                await channel.send(">>> **New Yoohyeon Post\n<{}>**".format(my_url))
-                                            if username == JiU:
-                                                await channel.send(">>> **New JiU Post\n<{}>**".format(my_url))
-                                            if username == SuA:
-                                                await channel.send(">>> **New SuA Post\n<{}>**".format(my_url))
-                                            if username == DC:
-                                                await channel.send(">>> **New DreamCatcher Post\n<{}>**".format(my_url))
-                                            if username == Dami:
-                                                await channel.send(">>> **New Dami Post\n<{}>**".format(my_url))
-                                            if username == Handong:
-                                                await channel.send(">>> **New Handong Post\n<{}>**".format(my_url))
-                                            await channel.send(files=DC_Photos)
-                                ab.close()
+                                    channel = channel[0]
+                                    DC_Photos = []
+                                    for file_name in another_list:
+                                        dc_photo = discord.File(fp='DCApp/{}'.format(file_name),
+                                                              filename= file_name)
+                                        DC_Photos.append(dc_photo)
+                                    channel = client.get_channel(channel)
+                                    if username == Gahyeon:
+                                        await channel.send(">>> **New Gahyeon Post\n<{}>**".format(my_url))
+                                    if username == Siyeon:
+                                        await channel.send(">>> **New Siyeon Post\n<{}>**".format(my_url))
+                                    if username == Yoohyeon:
+                                        await channel.send(">>> **New Yoohyeon Post\n<{}>**".format(my_url))
+                                    if username == JiU:
+                                        await channel.send(">>> **New JiU Post\n<{}>**".format(my_url))
+                                    if username == SuA:
+                                        await channel.send(">>> **New SuA Post\n<{}>**".format(my_url))
+                                    if username == DC:
+                                        await channel.send(">>> **New DreamCatcher Post\n<{}>**".format(my_url))
+                                    if username == Dami:
+                                        await channel.send(">>> **New Dami Post\n<{}>**".format(my_url))
+                                    if username == Handong:
+                                        await channel.send(">>> **New Handong Post\n<{}>**".format(my_url))
+                                    await channel.send(files=DC_Photos)
                                 all_photos = os.listdir('DCApp')
                                 for photo in all_photos:
                                     try:

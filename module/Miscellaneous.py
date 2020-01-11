@@ -17,6 +17,7 @@ class Miscellaneous(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
+    "Extremely sloppy way of showing which servers the bot are in."
     async def servers(self, ctx):
         x = client.guilds
         await ctx.send(x)

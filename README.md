@@ -41,7 +41,27 @@ modules/keys.py - All Keys/Tokens should be put here.
 modules/quickstart.py - Google Drive API
 
 modules/twitter.py - Connection to Twitter API
-______
+
+______________________
+PLUGINS/LIBRARIES USED
+______________________
+Discord ---- pip install discord.py
+
+aiohttp ---- pip install aiohttp
+
+asyncio ---- pip install asyncio
+
+bs4 (BeautifulSoup) ---- pip install bs4
+
+aiofiles ---- pip install aiofiles
+
+youtube_dl ---- pip install youtube_dl ---- (ffmpeg needed)
+
+Google Client Library ---- pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
+
+Tweepy ---- pip install tweepy
+
+_______
 COMMANDS
 ________
 BlackJack:
@@ -146,24 +166,4 @@ recenttweets ---- Show Most Recents Tweets[Format: %recenttweets (amount)]
 
 tweet     ----   Tweets a status update on Twitter [Format: %tweet (status)]
 ________
-
-______________________
-PLUGINS/LIBRARIES USED
-______________________
-Discord ---- pip install discord.py
-
-aiohttp ---- pip install aiohttp
-
-asyncio ---- pip install asyncio
-
-bs4 (BeautifulSoup) ---- pip install bs4
-
-aiofiles ---- pip install aiofiles
-
-youtube_dl ---- pip install youtube_dl ---- (ffmpeg needed)
-
-Google Client Library - pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
-
-Tweepy - pip install tweepy
-______________________
 

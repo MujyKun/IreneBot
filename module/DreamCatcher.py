@@ -5,6 +5,7 @@ import aiohttp
 from bs4 import BeautifulSoup as soup
 import aiofiles
 import sqlite3
+import asyncio
 
 client = 0
 path = 'module\currency.db'
@@ -57,7 +58,7 @@ class DreamCatcher(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
-    async def scrape(self, ctx, *, number = 36638):
+    async def scrape(self, ctx, *, number = 36666):
         """Starts Loop Searching For New DC Post [Format: %scrape (post number to start at)]"""
         @tasks.loop(seconds=0, minutes=0, hours=0, reconnect=True)
         async def new_task3(ctx, number):
@@ -112,14 +113,45 @@ class DreamCatcher(commands.Cog):
                                         await fd.write(await resp.read())
                                         await fd.close()
                                         another_list.append(file_name)
+                                video_list = (page_soup.findAll("div", {"class": "swiper-slide img-box video-box width"}))
+                                count_numbers = 0
+                                video_name_list = []
+                                bat_name_list = []
+                                for video in video_list:
+                                    count_numbers += 1
+                                    new_video_url = video.source["src"]
+                                    bat_name = "{}DC.bat".format(count_numbers)
+                                    bat_name_list.append(bat_name)
+                                    ab = open("Videos\{}".format(bat_name), "a+")
+                                    video_name = "{}DCVideo.mp4".format(count_numbers)
+                                    info = 'ffmpeg -i "{}" -c:v libx264 -preset slow -crf 22 "Videos/{}"'.format(new_video_url, video_name)
+                                    video_name_list.append(video_name)
+                                    ab.write(info)
+                                    ab.close()
+                                for bat_name in bat_name_list:
+                                    # open bat file
+                                    check_bat = await asyncio.create_subprocess_exec("Videos\\{}".format(bat_name), stderr= asyncio.subprocess.PIPE)
+                                    await check_bat.wait()
                                 a1 = c.execute("SELECT ServerID FROM DreamCatcher").fetchall()
                                 for channel in a1:
                                     channel = channel[0]
+                                    DC_Videos = []
+                                    try:
+                                        if len(video_name_list) != 0:
+                                            for video_name in video_name_list:
+                                                dc_video = discord.File(fp='Videos/{}'.format(video_name), filename = video_name)
+                                                DC_Videos.append(dc_video)
+                                    except Exception as e:
+                                        print (e)
                                     DC_Photos = []
-                                    for file_name in another_list:
-                                        dc_photo = discord.File(fp='DCApp/{}'.format(file_name),
-                                                              filename= file_name)
-                                        DC_Photos.append(dc_photo)
+                                    try:
+                                        if len(another_list) != 0:
+                                            for file_name in another_list:
+                                                dc_photo = discord.File(fp='DCApp/{}'.format(file_name),
+                                                                      filename= file_name)
+                                                DC_Photos.append(dc_photo)
+                                    except Exception as e:
+                                        print(e)
                                     channel = client.get_channel(channel)
                                     if username == Gahyeon:
                                         await channel.send(">>> **New Gahyeon Post\n<{}>**".format(my_url))
@@ -137,7 +169,20 @@ class DreamCatcher(commands.Cog):
                                         await channel.send(">>> **New Dami Post\n<{}>**".format(my_url))
                                     if username == Handong:
                                         await channel.send(">>> **New Handong Post\n<{}>**".format(my_url))
-                                    await channel.send(files=DC_Photos)
+                                    try:
+                                        if len(another_list) != 0:
+                                            await channel.send(files=DC_Photos)
+                                        if len(video_name_list) != 0:
+                                            await channel.send(files=DC_Videos)
+                                    except Exception as e:
+                                        print(e)
+                                        pass
+                                all_videos = os.listdir('Videos')
+                                for video in all_videos:
+                                    try:
+                                        os.unlink('Videos/{}'.format(video))
+                                    except:
+                                        pass
                                 all_photos = os.listdir('DCApp')
                                 for photo in all_photos:
                                     try:

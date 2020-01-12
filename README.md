@@ -42,6 +42,8 @@ modules/quickstart.py - Google Drive API
 
 modules/twitter.py - Connection to Twitter API
 
+modules/Cogs.py - Loading/Reloading/Unloading Cogs
+
 ______________________
 PLUGINS/LIBRARIES USED
 ______________________
@@ -77,6 +79,14 @@ blackjack  ----  Start a game of BlackJack [Format: %blackjack (amount)] [Aliase
   joingame  ----   Join a game [Format: %joingame (gameid) (bid)] [Aliases: jg]
   
   stand     ----   Keep Your Cards [Format: %stand]
+________
+Cogs:
+load ---- Command which Loads a Module. Remember to use dot path. e.g: cogs.owner
+
+reload ---- Command which Reloads a Module. Remember to use dot path. e.g: cogs.owner 
+
+unload ---- Command which Unloads a Module. Remember to use dot path. e.g: cogs.owner
+
 ________
 Currency:
 

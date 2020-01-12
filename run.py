@@ -6,6 +6,7 @@ from module import DreamCatcher
 from module import BlackJack
 from module import Miscellaneous
 from module import keys
+from module import Cogs
 from discord.ext import commands
 import discord
 
@@ -33,4 +34,5 @@ Twitter2.setup(client)
 Currency.setup(client)
 DreamCatcher.setup(client)
 BlackJack.setup(client)
+Cogs.setup(client)
 client.run(keys.client_token)

@@ -234,9 +234,9 @@ class BlackJack(commands.Cog):
                     # await ctx.send("sending {}".format(self.task_list))
                     c.execute("DELETE FROM Games WHERE GameID = ?", (game_id,))
                     c.execute("DELETE FROM BlackJack WHERE GameID = ?", (game_id,))
+                    DBconn.commit()
                     self.tasks.remove(self.task_list)
                     self.count = 0
-                    DBconn.commit()
                     self.new_task.stop()
 
             self.task_list = []
@@ -270,12 +270,12 @@ class BlackJack(commands.Cog):
                            delete_after=40)
         if gameid != 0:
             try:
-                rules = "**Each Player gets 2 cards.\nIn order to get blackjack, your final value must equal 21.\nIf Player1 exceeds 21 and Player2 doesn't, Player1 busts and Player2 wins the game.\nYou will have two options.\nThe first option is to %Hit, which means to grab another card.\nThe second option is to %Stay to not pick up anymore cards.\nEach Player will play one at a time so think ahead!\nIf both players bust, Player closest to 21 wins!\nNumber cards are their values.\nAces can be 1 or 11 depending on the scenario.\nJack, Queen, and King are all worth 10. **"
+                rules = "**Each Player gets 2 cards.\nIn order to get blackjack, your final value must equal 21.\nIf Player1 exceeds 21 and Player2 doesn't, Player1 busts and Player2 wins the game.\nYou will have two options.\nThe first option is to %Hit, which means to grab another card.\nThe second option is to %stand to not pick up anymore cards.\nEach Player will play one at a time so think ahead!\nIf both players bust, Player closest to 21 wins!\nNumber cards are their values.\nAces can be 1 or 11 depending on the scenario.\nJack, Queen, and King are all worth 10. **"
                 player_2 = ctx.author.id
                 player2_bid = amount
                 game_id = gameid
-                check = c.execute("SELECT Player1 FROM Games WHERE GameID = ?", (game_id)).fetchone()[0]
-                check2 = c.execute("SELECT Player2 FROM Games WHERE GameID = ?", (game_id)).fetchone()[0]
+                check = c.execute("SELECT Player1 FROM Games WHERE GameID = ?", (game_id,)).fetchone()[0]
+                check2 = c.execute("SELECT Player2 FROM Games WHERE GameID = ?", (game_id,)).fetchone()[0]
                 count_checker = c.execute("SELECT COUNT(*) FROM Games WHERE Player1 = ? OR Player2 = ?",
                                           (player_2, player_2)).fetchone()[0]
                 if count_checker >= 1:
@@ -351,7 +351,7 @@ class BlackJack(commands.Cog):
                                         file_2.append(card_2)
                                         DBconn.commit()
                                     player_1 = \
-                                    c.execute("SELECT Player1 FROM Games WHERE GameID = ?", (game_id)).fetchone()[0]
+                                    c.execute("SELECT Player1 FROM Games WHERE GameID = ?", (game_id,)).fetchone()[0]
                                     await ctx.send("<@{}>'s current score is ||{}||".format(player_1, tot1),
                                                    files=file_1, delete_after=120)
                                     await ctx.send("<@{}>'s current score is ||{}||".format(player_2, tot),
@@ -367,7 +367,8 @@ class BlackJack(commands.Cog):
                                 await ctx.send(
                                     "> **There is an error with the database. Please report to an administrator**",
                                     delete_after=40)
-            except:
+            except Exception as e:
+                print (e)
                 await ctx.send("> **Failed to join. This game does not exist.**", delete_after=40)
 
     @commands.command(aliases=['eg'])
@@ -494,7 +495,7 @@ class BlackJack(commands.Cog):
         except:
             await ctx.send("> **You are not currently playing a game.**", delete_after=40)
 
-    @commands.command()
+    @commands.command(aliases = ['stay'])
     async def stand(self, ctx):
         """Keep Your Cards [Format: %stand]"""
         userid = ctx.author.id

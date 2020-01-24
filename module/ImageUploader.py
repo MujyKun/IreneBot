@@ -104,7 +104,7 @@ class ImageUploader(commands.Cog):
                     # print ("Currently Uploading {}, Number: {}".format(photo,count))
                     quickstart.main(photo)
                 await ctx.send(
-                    "> All Photos have been uploaded to the Google Drive at \n> <https://drive.google.com/drive/folders/1VMG-6m1p_5W-JquWMCA-DZRUnYAFujUd?usp=sharing>")
+                    "> All Photos have been uploaded to the Google Drive at \n> <Insert Google Drive Link Here")
             else:
                 await ctx.send("> Uploading {} to Google Drive".format(filename))
                 quickstart.main(filename)

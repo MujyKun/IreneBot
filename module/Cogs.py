@@ -32,7 +32,6 @@ class Cogs(commands.Cog):
     async def unload_cog(self, ctx, *, cog: str):
         """Command which Unloads a Module.
         Remember to use dot path. e.g: cogs.owner"""
-
         try:
             self.client.unload_extension(cog)
         except Exception as e:

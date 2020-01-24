@@ -1,5 +1,5 @@
 import os
-from discord.ext import commands, tasks
+from discord.ext import commands
 from module import twitter
 
 

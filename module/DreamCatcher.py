@@ -22,13 +22,14 @@ def setup(client1):
 class DreamCatcher(commands.Cog):
     def __init__(self, client):
         self.list = ['\n DC_GAHYEON                ', '\n DC_SIYEON                ', '\n DC_YOOHYEON                ', '\n DC_JIU                ', '\n DC_SUA                ', '\n DREAMCATCHER                ', '\n DC_DAMI                ', '\n DC_HANDONG                ']
-        #1 Means True
+        # 1 Means True
         self.error_status = 1
         self.first_run = 1
         self.number = 0
         self.original_number = 0
         self.tries = 0
         self.post_list = []
+        self.latest_DC = ''
         pass
 
     @commands.command()
@@ -54,11 +55,37 @@ class DreamCatcher(commands.Cog):
                 c.execute("INSERT INTO DreamCatcher VALUES (?)",(channel,))
                 DBconn.commit()
 
-
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def latest(self, ctx):
+        """Grabs the highest resolution possible from MOST RECENT DC Post [Format: %latest]"""
+        my_url = self.latest_DC
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get('{}'.format(my_url)) as r:
+                    url_list = []
+                    if r.status == 200:
+                        page_html = await r.text()
+                        page_soup = soup(page_html, "html.parser")
+                        image_url = (page_soup.findAll("div", {"class": "imgSize width"}))
+                        for image in image_url:
+                            new_image_url = image.img["src"]
+                            DC_Date = new_image_url[41:49]
+                            unique_id = new_image_url[55:87]
+                            file_format = new_image_url[93:]
+                            HD_Link = f'https://file.candlemystar.com/post/{DC_Date}{unique_id}{file_format}'
+                            url_list.append(HD_Link)
+                        await ctx.send(f"> **Here are the Original Photos for <{my_url}>**:")
+                        for link in url_list:
+                            await ctx.send(f"<{link}>")
+                    else:
+                        await ctx.send(f"> **Error {r.status}: Unable to retrieve latest photos.**")
+        except:
+            await ctx.send(f"> **Unable to retrieve latest photos.** ")
 
     @commands.command()
     @commands.is_owner()
-    async def scrape(self, ctx, *, number = 36666):
+    async def scrape(self, ctx, *, number = 37232):
         """Starts Loop Searching For New DC Post [Format: %scrape (post number to start at)]"""
         @tasks.loop(seconds=0, minutes=0, hours=0, reconnect=True)
         async def new_task3(ctx, number):
@@ -95,6 +122,7 @@ class DreamCatcher(commands.Cog):
                             username = (page_soup.find("div",{"class":"card-name"})).text
                             #await ctx.send(username)
                             if username in self.list:
+                                self.latest_DC = my_url
                                 Gahyeon = self.list[0]
                                 Siyeon = self.list[1]
                                 Yoohyeon = self.list[2]

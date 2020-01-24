@@ -380,7 +380,8 @@ class Currency(commands.Cog):
                     rps = ['rock', 'paper', 'scissors']
                     a = randint(0, 2)
                     b = randint(0, 2)
-                    cd = randint(10, 30)
+                    #cd = randint(10, 30)
+                    cd = 2 * amount
                     if amount == 0:
                         cd = 0
                     if choice == '':

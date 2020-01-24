@@ -1,9 +1,11 @@
 from random import *
-from module import BlackJack
 from discord.ext import commands
+import sqlite3
 
 client = 0
-
+path = 'module\currency.db'
+DBconn = sqlite3.connect(path)
+c = DBconn.cursor()
 
 def setup(client1):
     client1.add_cog(Miscellaneous(client1))
@@ -14,13 +16,53 @@ def setup(client1):
 class Miscellaneous(commands.Cog):
     def __init__(self, client):
         pass
+    @commands.command()
+    @commands.is_owner()
+    async def announce(self, ctx,*, new_message):
+        channel_list = []
+        for channel in channel_list:
+            channel = client.get_channel(channel)
+            await channel.send(f"**ANNOUNCEMENT from {ctx.author}**\n> **{new_message}**")
 
     @commands.command()
     @commands.is_owner()
     async def servers(self, ctx):
-        "Extremely sloppy way of showing which servers the bot are in."
-        x = client.guilds
-        await ctx.send(x)
+        """Extremely sloppy way of showing which servers the bot are in."""
+        guilds = client.guilds
+        for guild in guilds:
+            guild_id = guild.id
+            guild_owner = guild.owner_id
+            guild_name = guild.name
+            guild_icon = guild.icon
+            guild_banner = guild.banner
+            guild_channels = guild.text_channels
+            channel_info = ""
+            for channel in guild_channels:
+                channel_info += f"[{channel},{channel.id}]\n"
+
+            await ctx.send(f">>> Guild ID: {guild_id}\nGuild Owner: {guild_owner}\nGuild Name: {guild_name}\nGuild Icon: {guild_icon}\nGuild Banner: {guild_banner}\n **Channels:**\n{channel_info} ")
+
+
+    @commands.command()
+    @commands.is_owner()
+    async def logging(self, ctx, *, keyword='start'):
+        """ [Format: %logging (stop/add)"""
+        if keyword == 'add':
+            counter = c.execute("SELECT COUNT(*) FROM logging WHERE channelid = ?", (ctx.channel.id,)).fetchone()[0]
+            if counter == 0:
+                c.execute("INSERT INTO logging VALUES(?)", (ctx.channel.id,))
+                DBconn.commit()
+                await ctx.send("> **This channel is now being logged.**")
+            if counter == 1:
+                await ctx.send("> **This channel is already being logged.**")
+        if keyword == 'stop':
+            try:
+                c.execute("DELETE FROM logging WHERE channelid = ?", (ctx.channel.id,))
+                DBconn.commit()
+                await ctx.send("> **This channel is no longer being logged**")
+            except:
+                await ctx.send("> **This channel isn't being logged.**")
+            pass
 
     @commands.command(aliases=['8ball', '8'])
     async def _8ball(self, ctx, *, question):

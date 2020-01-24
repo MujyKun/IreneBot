@@ -32,7 +32,6 @@ def store_last_seen_id(last_seen_id, file_name):
 
 def reply_to_tweets():
     print('retrieving and replying to tweets...', flush=True)
-    # DEV NOTE: use 1060651988453654528 for testing.
     last_seen_id = retrieve_last_seen_id(FILE_NAME)
     # NOTE: We need to use tweet_mode='extended' below to show
     # all full tweets (with full_text). Without it, long tweets
@@ -51,12 +50,18 @@ def reply_to_tweets():
                     ' Working!', mention.id)
 
 
+#FILL OUT THE INFORMATION BELOW
+
+Account_ID = 0
+#example: MujyKun
+Twitter_Username = ''
+
 def update_status(context):
     print('Updating Status')
     api.update_status(status=context, )
-    tweet = api.user_timeline(user_id='1119714202615259136', count=1)[0]
+    tweet = api.user_timeline(user_id= f'{Account_ID}', count=1)[0]
     #print (tweet.id)
-    final_url = "https://twitter.com/BotMujy/status/{}".format(tweet.id)
+    final_url = "https://twitter.com/{}/status/{}".format(Twitter_Username,tweet.id)
     f = open("twitterlink.txt","w")
     f.write(final_url)
     f.close
@@ -67,7 +72,7 @@ def delete_status(context):
 
 def recent_tweets(context):
     print ('Grabbing Tweets')
-    tweets = api.user_timeline(user_id='1119714202615259136', count=context)
+    tweets = api.user_timeline(user_id=f'{Account_ID}', count=context)
     f = open('recent_tweets.txt',"w")
     for tweet in tweets:
         f.write("> **Tweet ID:** {} | **Tweet:** {}\n".format(tweet.id, tweet.text,))

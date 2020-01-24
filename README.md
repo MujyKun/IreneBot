@@ -16,6 +16,7 @@ FILES
 		<th>File</th>
 		<th>Purpose</th>
 	</tr>
+	*
 	<tr>
 		<td>run.exe</td>
 		<td>Main Run File - Startup</td>

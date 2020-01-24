@@ -16,13 +16,13 @@ FILES
 		<th>File</th>
 		<th>Purpose</th>
 	</tr>
-	*
 	<tr>
 		<td>run.exe</td>
-		<td>Main Run File - Startup</td>
+		*<td>Main Run File - Startup</td>
 	</tr>
+	*
 	<tr>
-		<td>run.py</td>
+		*<td>run.py</td>
 		<td>Main Program/Bot - Startup</td>
 	</tr>
 	<tr>

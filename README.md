@@ -121,6 +121,10 @@ PLUGINS/LIBRARIES USED
 		<td>Tweepy</td>
 		<td>pip install tweepy</td>
 	</tr>
+	<tr>
+		<td>PyNaCl</td>
+		<td>pip install PyNaCl</td>
+	</tr>
 </table>
 <h2>
 COMMANDS

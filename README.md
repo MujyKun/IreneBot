@@ -1,4 +1,4 @@
-<h1>IreneBot</h1> 
+<a href="https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=384000"><h1>IreneBot</h1> </a>
 <h2>Irene Bot for Discord in Python V1.001</h2>
 
 <p>Upon signing up for the Google Drive API, make sure to put the credentials.json in the main folder.

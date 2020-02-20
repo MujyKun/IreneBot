@@ -12,7 +12,9 @@ def setup(client1):
     global client
     client = client1
 
-
+# This does not work perfectly as it blocks other commands - was not built for async - they added new methods to grabbing files, so this is kinda pointless
+# but it may be helpful in certain cases.
+# does not always grab the right file format? was not tested enough.
 class ImageUploader(commands.Cog):
     final_url = ""
 
@@ -104,7 +106,7 @@ class ImageUploader(commands.Cog):
                     # print ("Currently Uploading {}, Number: {}".format(photo,count))
                     quickstart.main(photo)
                 await ctx.send(
-                    "> All Photos have been uploaded to the Google Drive at \n> <Insert Google Drive Link Here")
+                    "> All Photos have been uploaded to the Google Drive at \n> <https://drive.google.com/drive/folders/1VMG-6m1p_5W-JquWMCA-DZRUnYAFujUd?usp=sharing>")
             else:
                 await ctx.send("> Uploading {} to Google Drive".format(filename))
                 quickstart.main(filename)

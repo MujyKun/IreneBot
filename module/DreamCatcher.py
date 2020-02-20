@@ -9,7 +9,8 @@ import asyncio
 
 client = 0
 path = 'module\currency.db'
-DBconn = sqlite3.connect(path)
+DBconn = sqlite3.connect(path, check_same_thread = False)
+#DBconn = sqlite3.connect(path)
 c = DBconn.cursor()
 
 
@@ -18,11 +19,12 @@ def setup(client1):
     global client
     client = client1
 
-
+# This is an overly complicated way to do this, but is efficient for posting to several servers and avoiding many errors while having several features that can later be changed.
 class DreamCatcher(commands.Cog):
     def __init__(self, client):
         self.list = ['\n DC_GAHYEON                ', '\n DC_SIYEON                ', '\n DC_YOOHYEON                ', '\n DC_JIU                ', '\n DC_SUA                ', '\n DREAMCATCHER                ', '\n DC_DAMI                ', '\n DC_HANDONG                ']
         # 1 Means True
+        self.download_all_number = 0
         self.error_status = 1
         self.first_run = 1
         self.number = 0
@@ -31,6 +33,7 @@ class DreamCatcher(commands.Cog):
         self.post_list = []
         self.latest_DC = ''
         pass
+
 
     @commands.command()
     @commands.has_permissions(administrator=True)
@@ -59,7 +62,7 @@ class DreamCatcher(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def latest(self, ctx):
         """Grabs the highest resolution possible from MOST RECENT DC Post [Format: %latest]"""
-        my_url = self.latest_DC
+        my_url = c.execute("SELECT URL FROM DCUrl").fetchone()[0]
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.get('{}'.format(my_url)) as r:
@@ -85,102 +88,195 @@ class DreamCatcher(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
-    async def scrape(self, ctx, *, number = 37232):
-        """Starts Loop Searching For New DC Post [Format: %scrape (post number to start at)]"""
+    async def download_all(self, ctx, *, number=18144):
+        """Download All DC Photos from DC APP [Format: %download_all]"""
+        self.download_all_number = number
         @tasks.loop(seconds=0, minutes=0, hours=0, reconnect=True)
-        async def new_task3(ctx, number):
-            #print (self.number)
-            if self.first_run == 1:
-                self.first_run = 0
-                self.number = number
-                self.post_list.append(number)
-            if self.error_status == 1:
-                if self.tries >= 2 and self.tries < 25:
-                    self.number += 1
-                if self.tries >= 25:
-                    count_list = (len(self.post_list))
-                    #print (count_list)
-                    #print (self.post_list)
-                    self.number = self.post_list[count_list - 1]
-                    #print (self.number)
-                    self.tries = 0
-            if self.error_status == 0:
-                self.tries = 0
+        async def download_all_task(ctx):
+            self.download_all_number += 1
+            number = self.download_all_number
+            # if number >= latest post
+            if number >= (c.execute("SELECT PostID FROM DCPost").fetchone()[0]):
+                download_all_task.cancel()
+            else:
+                my_url = 'https://dreamcatcher.candlemystar.com/post/{}'.format(number)
+                async with aiohttp.ClientSession() as session:
+                    async with session.get('{}'.format(my_url)) as r:
+                        if r.status == 200:
+                                page_html = await r.text()
+                                page_soup = soup(page_html, "html.parser")
+                                username = (page_soup.find("div", {"class": "card-name"})).text
+                                if username in self.list:
+                                    image_url = (page_soup.findAll("div", {"class": "imgSize width"}))
+                                    for image in image_url:
+                                        new_image_url = image.img["src"]
+                                        DC_Date = new_image_url[41:49]
+                                        unique_id = new_image_url[55:87]
+                                        file_format = new_image_url[93:]
+                                        HD_Link = f'https://file.candlemystar.com/post/{DC_Date}{unique_id}{file_format}'
+                                        async with session.get(HD_Link) as resp:
+                                            fd = await aiofiles.open('DCAppDownloaded/{}'.format(f"{unique_id[:8]}{file_format}"), mode='wb')
+                                            await fd.write(await resp.read())
+                                            await fd.close()
+                                            print(f"Downloaded {unique_id[:8]}{file_format} on {number}")
+                                            number += 1
+                                else:
+                                    print("DOWNLOAD Passing Post from POST #{}".format(number))
+                        elif r.status == 304:
+                            print("> **Access Denied - {}**".format(number))
+                        elif r.status == 404:
+                            print("DOWNLOAD Error 404. {} was not Found.".format(number))
+                            pass
+                        else:
+                            print("DOWNLOAD Other Error")
+        download_all_task.start(ctx)
+
+# The Loop Class for DC APP
+class DCAPP():
+    def __init__(self):
+        self.list = ['\n DC_GAHYEON                ', '\n DC_SIYEON                ', '\n DC_YOOHYEON                ', '\n DC_JIU                ', '\n DC_SUA                ', '\n DREAMCATCHER                ', '\n DC_DAMI                ', '\n DC_HANDONG                ']
+        # 1 Means True
+        self.error_status = 1
+        self.first_run = 1
+        self.number = 0
+        self.original_number = 0
+        self.tries = 0
+        self.post_list = []
+        # self.latest_DC = ''
+        pass
+
+    @tasks.loop(seconds=0, minutes=0, hours=0, reconnect=True)
+    async def new_task4(self):
+        # print (self.number)
+        if self.first_run == 1:
+            number = c.execute("SELECT PostID FROM DCPost").fetchone()[0]
+            self.first_run = 0
+            self.number = number
+            self.post_list.append(number)
+        if self.error_status == 1:
+            if self.tries >= 2 and self.tries < 5:
                 self.number += 1
-                pass
-            #print (self.number)
-            my_url = 'https://dreamcatcher.candlemystar.com/post/{}'.format(self.number)
-            async with aiohttp.ClientSession() as session:
-                async with session.get('{}'.format(my_url)) as r:
-                    if r.status == 200:
-                        self.error_status = 0
-                        if self.number not in self.post_list:
-                            #print("Connection Found")
-                            page_html = await r.text()
-                            #print(await r.text())
-                            page_soup = soup(page_html, "html.parser")
-                            username = (page_soup.find("div",{"class":"card-name"})).text
-                            #await ctx.send(username)
-                            if username in self.list:
-                                self.latest_DC = my_url
-                                Gahyeon = self.list[0]
-                                Siyeon = self.list[1]
-                                Yoohyeon = self.list[2]
-                                JiU = self.list[3]
-                                SuA = self.list[4]
-                                DC = self.list[5]
-                                Dami = self.list[6]
-                                Handong = self.list[7]
-                                image_url = (page_soup.findAll("div", {"class": "imgSize width"}))
-                                another_list = []
-                                for image in image_url:
-                                    new_image_url = image.img["src"]
-                                    file_name = new_image_url[82:]
-                                    async with session.get(new_image_url) as resp:
-                                        fd = await aiofiles.open('DCApp/{}'.format(file_name), mode='wb')
-                                        await fd.write(await resp.read())
-                                        await fd.close()
-                                        another_list.append(file_name)
-                                video_list = (page_soup.findAll("div", {"class": "swiper-slide img-box video-box width"}))
-                                count_numbers = 0
-                                video_name_list = []
-                                bat_name_list = []
-                                for video in video_list:
-                                    count_numbers += 1
-                                    new_video_url = video.source["src"]
-                                    bat_name = "{}DC.bat".format(count_numbers)
-                                    bat_name_list.append(bat_name)
-                                    ab = open("Videos\{}".format(bat_name), "a+")
-                                    video_name = "{}DCVideo.mp4".format(count_numbers)
-                                    info = 'ffmpeg -i "{}" -c:v libx264 -preset slow -crf 22 "Videos/{}"'.format(new_video_url, video_name)
-                                    video_name_list.append(video_name)
-                                    ab.write(info)
-                                    ab.close()
-                                for bat_name in bat_name_list:
-                                    # open bat file
-                                    check_bat = await asyncio.create_subprocess_exec("Videos\\{}".format(bat_name), stderr= asyncio.subprocess.PIPE)
-                                    await check_bat.wait()
-                                a1 = c.execute("SELECT ServerID FROM DreamCatcher").fetchall()
-                                for channel in a1:
-                                    channel = channel[0]
-                                    DC_Videos = []
-                                    try:
-                                        if len(video_name_list) != 0:
-                                            for video_name in video_name_list:
-                                                dc_video = discord.File(fp='Videos/{}'.format(video_name), filename = video_name)
-                                                DC_Videos.append(dc_video)
-                                    except Exception as e:
-                                        print (e)
-                                    DC_Photos = []
-                                    try:
-                                        if len(another_list) != 0:
-                                            for file_name in another_list:
-                                                dc_photo = discord.File(fp='DCApp/{}'.format(file_name),
-                                                                      filename= file_name)
-                                                DC_Photos.append(dc_photo)
-                                    except Exception as e:
-                                        print(e)
-                                    channel = client.get_channel(channel)
+            if self.tries >= 5:
+                count_list = (len(self.post_list))
+                # print (count_list)
+                # print (self.post_list)
+                self.number = self.post_list[count_list - 1]
+                # print (self.number)
+                self.tries = 0
+        if self.error_status == 0:
+            self.tries = 0
+            self.number += 1
+            pass
+        # print (self.number)
+        my_url = 'https://dreamcatcher.candlemystar.com/post/{}'.format(self.number)
+        async with aiohttp.ClientSession() as session:
+            async with session.get('{}'.format(my_url)) as r:
+                if r.status == 200:
+                    c.execute("DELETE FROM DCPost")
+                    c.execute("INSERT INTO DCPost VALUES(?)",(self.number,))
+                    DBconn.commit()
+                    self.error_status = 0
+                    if self.number not in self.post_list:
+                        # print("Connection Found")
+                        page_html = await r.text()
+                        # print(await r.text())
+                        page_soup = soup(page_html, "html.parser")
+                        username = (page_soup.find("div", {"class": "card-name"})).text
+                        # await ctx.send(username)
+                        if username in self.list:
+                            Gahyeon = self.list[0]
+                            Siyeon = self.list[1]
+                            Yoohyeon = self.list[2]
+                            JiU = self.list[3]
+                            SuA = self.list[4]
+                            DC = self.list[5]
+                            Dami = self.list[6]
+                            Handong = self.list[7]
+                            image_url = (page_soup.findAll("div", {"class": "imgSize width"}))
+                            another_list = []
+                            for image in image_url:
+                                new_image_url = image.img["src"]
+                                file_name = new_image_url[82:]
+                                async with session.get(new_image_url) as resp:
+                                    fd = await aiofiles.open('DCApp/{}'.format(file_name), mode='wb')
+                                    await fd.write(await resp.read())
+                                    await fd.close()
+                                    file_size = (os.path.getsize(f'DCApp/{file_name}'))
+                                    if file_size <= 20000:
+                                        keep_going = True
+                                        loop_count = 0
+                                        while keep_going:
+                                            print(f"Stuck in a loop {loop_count}")
+                                            loop_count += 1
+                                            try:
+                                                os.unlink(f'DCApp/{file_name}')
+                                            except Exception as e:
+                                                print(e)
+                                            fd = await aiofiles.open('DCApp/{}'.format(file_name), mode='wb')
+                                            await fd.write(await resp.read())
+                                            await fd.close()
+                                            file_size = (os.path.getsize(f'DCApp/{file_name}'))
+                                            if file_size > 20000:
+                                                keep_going = False
+                                            """
+                                            if loop_count == 5:
+                                                try:
+                                                    # os.unlink(f'DCApp/{file_name}')
+                                                    keep_going = False
+                                                except Exception as e:
+                                                    print(e)
+                                                    keep_going = False
+                                            """
+                                    c.execute("DELETE FROM DCUrl")
+                                    c.execute("INSERT INTO DCUrl VALUES(?)", (my_url,))
+                                    DBconn.commit()
+                                    another_list.append(file_name)
+                            video_list = (page_soup.findAll("div", {"class": "swiper-slide img-box video-box width"}))
+                            count_numbers = 0
+                            video_name_list = []
+                            bat_name_list = []
+                            for video in video_list:
+                                count_numbers += 1
+                                new_video_url = video.source["src"]
+                                bat_name = "{}DC.bat".format(count_numbers)
+                                bat_name_list.append(bat_name)
+                                ab = open("Videos\{}".format(bat_name), "a+")
+                                video_name = "{}DCVideo.mp4".format(count_numbers)
+                                info = 'ffmpeg -i "{}" -c:v libx264 -preset slow -crf 22 "Videos/{}"'.format(new_video_url,
+                                                                                                             video_name)
+                                video_name_list.append(video_name)
+                                ab.write(info)
+                                ab.close()
+                            for bat_name in bat_name_list:
+                                # open bat file
+                                check_bat = await asyncio.create_subprocess_exec("Videos\\{}".format(bat_name),
+                                                                                 stderr=asyncio.subprocess.PIPE)
+                                await check_bat.wait()
+                            a1 = c.execute("SELECT ServerID FROM DreamCatcher").fetchall()
+                            for channel in a1:
+                                channel = channel[0]
+                                DC_Videos = []
+                                try:
+                                    if len(video_name_list) != 0:
+                                        for video_name in video_name_list:
+                                            dc_video = discord.File(fp='Videos/{}'.format(video_name), filename=video_name)
+                                            DC_Videos.append(dc_video)
+                                except Exception as e:
+                                    print (e)
+                                    pass
+                                DC_Photos = []
+                                try:
+                                    if len(another_list) != 0:
+                                        for file_name in another_list:
+                                            dc_photo = discord.File(fp='DCApp/{}'.format(file_name),
+                                                                    filename=file_name)
+                                            DC_Photos.append(dc_photo)
+                                except Exception as e:
+                                    print (e)
+                                    pass
+                                channel = client.get_channel(channel)
+                                # 'NoneType' object has no attribute 'send' -- Channel does not exist (catching error)
+                                try:
                                     if username == Gahyeon:
                                         await channel.send(">>> **New Gahyeon Post\n<{}>**".format(my_url))
                                     if username == Siyeon:
@@ -197,41 +293,47 @@ class DreamCatcher(commands.Cog):
                                         await channel.send(">>> **New Dami Post\n<{}>**".format(my_url))
                                     if username == Handong:
                                         await channel.send(">>> **New Handong Post\n<{}>**".format(my_url))
-                                    try:
-                                        if len(another_list) != 0:
-                                            await channel.send(files=DC_Photos)
-                                        if len(video_name_list) != 0:
-                                            await channel.send(files=DC_Videos)
-                                    except Exception as e:
-                                        print(e)
-                                        pass
-                                all_videos = os.listdir('Videos')
-                                for video in all_videos:
-                                    try:
-                                        os.unlink('Videos/{}'.format(video))
-                                    except:
-                                        pass
-                                all_photos = os.listdir('DCApp')
-                                for photo in all_photos:
-                                    try:
-                                        os.unlink('DCApp/{}'.format(photo))
-                                    except:
-                                        pass
-                            else:
-                                print("Passing Post from POST #{}".format(self.number))
-                                #await ctx.send(">>> **Passing Post from {}, POST #{}**".format(username, self.number))
-                        self.post_list.append(self.number)
+                                except Exception as e:
+                                    print(e)
+                                    pass
+                                try:
+                                    if len(another_list) != 0:
+                                        await channel.send(files=DC_Photos)
+                                    if len(video_name_list) != 0:
+                                        await channel.send(files=DC_Videos)
+                                except Exception as e:
+                                    print (e)
+                                    pass
+                            all_videos = os.listdir('Videos')
+                            for video in all_videos:
+                                try:
+                                    os.unlink('Videos/{}'.format(video))
+                                except Exception as e:
+                                    print(e)
+                                    pass
+                            all_photos = os.listdir('DCApp')
+                            for photo in all_photos:
+                                try:
+                                    os.unlink('DCApp/{}'.format(photo))
+                                except Exception as e:
+                                    print (e)
+                                    pass
+                        else:
+                            print("Passing Post from POST #{}".format(self.number))
+                            # await ctx.send(">>> **Passing Post from {}, POST #{}**".format(username, self.number))
+                    self.post_list.append(self.number)
+
+                elif r.status == 304:
+                    print("> **Access Denied - {}**".format(self.number))
+                elif r.status == 404:
+                    self.tries += 1
+                    print("Error 404. {} was not Found.".format(self.number))
+                    # await ctx.send('> **Error 404. {} was not Found.**'.format(self.number))
+                    self.error_status = 1
+                    pass
+                else:
+                    print(r.status)
 
 
-                    elif r.status == 304:
-                        print("> **Access Denied - {}**".format(self.number))
-                    elif r.status == 404:
-                        self.tries += 1
-                        print("Error 404. {} was not Found.".format(self.number))
-                        #await ctx.send('> **Error 404. {} was not Found.**'.format(self.number))
-                        self.error_status = 1
-                        pass
-                    else:
-                        print("Other Error")
-
-        new_task3.start(ctx, number)
+#b = DCAPP()
+#b.new_task4.start()

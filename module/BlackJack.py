@@ -6,7 +6,7 @@ from random import *
 
 client = 0
 path = 'module\currency.db'
-DBconn = sqlite3.connect(path)
+DBconn = sqlite3.connect(path, check_same_thread = False)
 c = DBconn.cursor()
 
 def setup(client1):
@@ -57,12 +57,12 @@ class BlackJack(commands.Cog):
                         DBconn.commit()
                         game_id = c.execute("SELECT GameID FROM Games WHERE Player1 = ?", (player_1,)).fetchone()[0]
                         await ctx.send(
-                            "> **There are currently 1/2 members signed up for BlackJack. To join the game, please type %joingame {} (bid)**".format(
-                                game_id), delete_after=40)
+                            "> **There are currently 1/2 members signed up for BlackJack. To join the game, please type %joingame {} (bid)**".format(game_id))
                 if count > 1:
                     await ctx.send("> **There is an error with the database. Please report to an administrator**",
                                    delete_after=40)
-        except:
+        except Exception as e:
+            print (e)
             await ctx.send(
                 "> **You are already in a pending/active game. Please type %endgame to end your current game.**",
                 delete_after=40)
@@ -227,17 +227,16 @@ class BlackJack(commands.Cog):
                     DBconn.commit()
                     self.tasks.remove(self.task_list)
                     self.count = 0
-                    self.new_task.stop()
+                    new_task.stop()
                 if self.count == 60:
-                    await ctx.send("> **Game {} has been deleted due to it's 5 minute limit.**".format(game_id),
-                                   delete_after=40)
+                    await ctx.send("> **Game {} has been deleted due to it's 5 minute limit.**".format(game_id))
                     # await ctx.send("sending {}".format(self.task_list))
                     c.execute("DELETE FROM Games WHERE GameID = ?", (game_id,))
                     c.execute("DELETE FROM BlackJack WHERE GameID = ?", (game_id,))
                     DBconn.commit()
                     self.tasks.remove(self.task_list)
                     self.count = 0
-                    self.new_task.stop()
+                    new_task.stop()
 
             self.task_list = []
             self.task_list.append(new_task)

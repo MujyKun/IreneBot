@@ -77,10 +77,3 @@ def recent_tweets(context):
     for tweet in tweets:
         f.write("> **Tweet ID:** {} | **Tweet:** {}\n".format(tweet.id, tweet.text,))
     f.close()
-
-
-"""
-while True:
-    reply_to_tweets()
-    time.sleep(15)
-"""

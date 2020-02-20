@@ -64,6 +64,8 @@ def main(file_name):
 
     #INPUT THE FOLDER ID UNDER the variable JiU AFTER RUNNING FOR THE FIRST TIME - the following code already goes to a certain folder, may need to be altered since folder won't be found
     
+
+
     #YOU CAN COMMENT THIS ALL OUT FOR THE FIRST RUN AND UNCOMMENT THE SECOND PART
     JiU = ''
     folder_id = JiU
@@ -81,6 +83,9 @@ def main(file_name):
     f.write(final_url)
     f.close
     #YOU CAN COMMENT THIS ALL OUT FOR THE FIRST RUN AND UNCOMMENT THE SECOND PART
+
+
+
 
 #Uncomment this for first run
 """

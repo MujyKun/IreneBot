@@ -124,7 +124,7 @@ class Music(commands.Cog):
 
     @commands.command()
     async def yt(self, ctx, *, url):
-        """Play A Song From Youtube[Format: %play (url)]"""
+        """Play A Song From Youtube[Format: %yt (url)]"""
         async with ctx.typing():
             player = await YTDLSource.from_url(url, loop=self.client.loop)
             ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
@@ -169,4 +169,4 @@ class Music(commands.Cog):
         elif ctx.voice_client.is_playing():
             ctx.voice_client.stop()
 
-#Source Code : https://github.com/Rapptz/discord.py/blob/master/examples/basic_voice.py#L107
+# Source Code : https://github.com/Rapptz/discord.py/blob/master/examples/basic_voice.py#L107

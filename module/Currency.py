@@ -1,11 +1,13 @@
 from discord.ext import commands, tasks
+from discord.ext.commands.cooldowns import BucketType
+
 import sqlite3
 from random import *
 
 
 client = 0
 path = 'module\currency.db'
-DBconn = sqlite3.connect(path)
+DBconn = sqlite3.connect(path, check_same_thread = False)
 c = DBconn.cursor()
 
 def setup(client1):
@@ -300,9 +302,55 @@ class Currency(commands.Cog):
         pass
 
     @commands.command()
-    async def rob(self, ctx):
-        """Rob a user [Format: %rob @user]"""
-        await ctx.send("this does nothing for now")
+    @commands.cooldown(1, 3600, BucketType.user)
+    async def rob(self, ctx, *, user = ""):
+        """Rob a user - Max Value = 1000 [Format: %rob @user]"""
+        # ADD A DELAY TO HOW MANY TIMES THEY CAN USE THE COMMAND
+        if user == "":
+            await ctx.send("> **Please @ the user you want to rob**")
+        else:
+            userid = ctx.message.raw_mentions[0]
+        try:
+            user_money = c.execute("SELECT Money FROM Currency WHERE UserID = ?", (userid,)).fetchone()[0]
+            actual_user_money = c.execute("SELECT Money FROM Currency WHERE UserID = ?", (ctx.author.id,)).fetchone()[0]
+        except:
+            await ctx.send(f"> **Either you or <@{userid}> is not registered. Please type %register first.**")
+            ctx.command.reset_cooldown(ctx)
+        if ctx.author.id != userid:
+            if actual_user_money >= 0:
+                if user_money >= 0:
+                        try:
+                            random_number = randint(0, 1)
+                            if random_number == 0:
+                                await ctx.send(f"> **You have failed to rob <@{userid}>**")
+                            if random_number == 1:
+                                if user_money >= 10:
+                                    # One Billion
+                                    if user_money >= 1000:
+                                        random_amount = randint(100, 500)
+                                    elif 500 <= user_money < 1000:
+                                        random_amount = randint(50, 100)
+                                    elif 100 <= user_money < 500:
+                                        random_amount = randint(10, 50)
+                                    elif 10 <= user_money < 100:
+                                        random_amount = randint(5, 10)
+                                    actual_user_money = c.execute("SELECT Money FROM Currency WHERE UserID = ?", (ctx.author.id,)).fetchone()[0]
+                                    actual_user_money = actual_user_money + random_amount
+                                    user_money = user_money - random_amount
+                                    c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (user_money, userid))
+                                    c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (actual_user_money, ctx.author.id))
+                                    DBconn.commit()
+                                    await ctx.send(f"> **You have stolen ${random_amount} from <@{userid}>.**")
+                                elif user_money < 10:
+                                    await ctx.send("> **That user has less than $10!**")
+                                    ctx.command.reset_cooldown(ctx)
+                        except Exception as e:
+                            print(e)
+                            await ctx.send("> **An error has occurred.**")
+                            ctx.command.reset_cooldown(ctx)
+        if ctx.author.id == userid:
+            await ctx.send("> **You can't rob yourself!**")
+            ctx.command.reset_cooldown(ctx)
 
     @commands.command()
     async def give(self, ctx, mentioned_userid="", amount=0):

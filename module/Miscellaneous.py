@@ -6,8 +6,6 @@ import sqlite3
 import aiohttp
 import aiofiles
 import os
-from bs4 import BeautifulSoup as soup
-from datetime import *
 
 
 client = 0
@@ -25,6 +23,44 @@ def setup(client1):
 class Miscellaneous(commands.Cog):
     def __init__(self, client):
         pass
+
+    @commands.command()
+    @commands.has_permissions(ban_members=True)
+    async def ban(self, ctx, user: discord.Member = "@user", *, reason="No Reason"):
+        """Ban A User [Format: %ban @user]"""
+        try:
+            await ctx.guild.ban(user=user, reason=reason, delete_message_days=0)
+            embed = discord.Embed(title="User Banned!", description=f">**<@{user.id}> was banned by <@{ctx.author.id}> for {reason}**!", color=0xff00f6)
+        except Exception as e:
+            embed = discord.Embed(title="Error", description=f"**<@{user.id}> was not able to be banned by <@{ctx.author.id}> successfully. \n {e}**!", color=0xff00f6)
+        await ctx.send(embed=embed)
+
+    @commands.command()
+    @commands.has_permissions(ban_members=True)
+    async def unban(self, ctx, user: discord.User = "@user", *, reason="No Reason"):
+        """Unban A User [Format: %unban @user]"""
+        print (type(user))
+        try:
+            await ctx.guild.unban(user=user, reason=reason)
+            embed = discord.Embed(title="User Unbanned!", description=f"> **<@{user.id}> was unbanned by <@{ctx.author.id}> for {reason}**!", color=0xff00f6)
+        except Exception as e:
+            embed = discord.Embed(title="Error", description=f"**<@{user.id}> could not be unbanned by <@{ctx.author.id}> \n {e}**!", color=0xff00f6)
+        await ctx.send(embed=embed)
+
+    @commands.command()
+    @commands.has_permissions(kick_members=True)
+    async def kick(self, ctx, user: discord.Member = "@user", reason="No Reason"):
+        """Kick A User [Format: %kick @user]"""
+        try:
+            await ctx.guild.kick(user=user, reason=reason)
+            embed = discord.Embed(title="User Kicked!",
+                                  description=f"**<@{user.id}> was kicked by <@{ctx.author.id}> for {reason}**!",
+                                  color=0xff00f6)
+        except Exception as e:
+            embed = discord.Embed(title="Error",
+                                  description=f"**<@{user.id}> could not be kicked by <@{ctx.author.id}> \n {e}**!",
+                                  color=0xff00f6)
+        await ctx.send(embed=embed)
 
     @commands.command(aliases=['temp'])
     @commands.has_permissions(manage_messages=True)
@@ -157,12 +193,11 @@ class Miscellaneous(commands.Cog):
             pass
         pass
 
-
-    # Sends an announcement to certain text channels, can be coded to grab a channel from every server it's connected to.
     @commands.command()
     @commands.is_owner()
     async def announce(self, ctx,*, new_message):
         """Sends a bot message to certain text channels"""
+        # insert specific channel ids here
         channel_list = []
         for channel in channel_list:
             channel = client.get_channel(channel)
@@ -175,6 +210,7 @@ class Miscellaneous(commands.Cog):
         guilds = client.guilds
         for guild in guilds:
             guild_id = guild.id
+            guild_member_count = guild.member_count
             guild_owner = guild.owner_id
             guild_name = guild.name
             guild_icon = guild.icon
@@ -184,7 +220,7 @@ class Miscellaneous(commands.Cog):
             for channel in guild_channels:
                 channel_info += f"[{channel},{channel.id}]\n"
 
-            await ctx.send(f">>> Guild ID: {guild_id}\nGuild Owner: {guild_owner}\nGuild Name: {guild_name}\nGuild Icon: {guild_icon}\nGuild Banner: {guild_banner}\n **Channels:**\n{channel_info} ")
+            await ctx.send(f">>> Guild ID: {guild_id}\nGuild Owner: {guild_owner}\nGuild Name: {guild_name}\nMember Count: {guild_member_count}\nGuild Icon: {guild_icon}\nGuild Banner: {guild_banner}\n **Channels:**\n{channel_info} ")
 
 
     @commands.command()

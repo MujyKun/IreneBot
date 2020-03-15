@@ -1,7 +1,7 @@
 
 # [IreneBot](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=8)
 
-## Irene Bot for Discord in Python V1.002
+## Irene Bot for Discord in Python V1.003
 
 Upon signing up for the Google Drive API, make sure to put the credentials.json in the main folder.  
 [ https://developers.google.com/drive ]  
@@ -15,7 +15,9 @@ Command Prefix is in run.py and is currently set to '%' by default.
 
 Music will not run as an executable (it will not be able to find a module properly). It can run from an IDE just fine.
 
-★ - Requires Permissions  
+♥ - Requires Bot Owner  
+♥♥♥ -- Entire Section Requires Bot Owner  
+★ - Requires Guild Permissions  
 ★★★ - Entire Section Requires Permissions
 ## FILES
 
@@ -281,7 +283,7 @@ Music will not run as an executable (it will not be able to find a module proper
 
 <td>%addcards</td>
 
-<td></td>
+<td>♥</td>
 
 </tr>
 
@@ -349,7 +351,7 @@ Music will not run as an executable (it will not be able to find a module proper
 
 </table>
 
-#### Cogs: ★★★
+#### Cogs: ♥♥♥
 
 <table>
 
@@ -497,7 +499,7 @@ Music will not run as an executable (it will not be able to find a module proper
 
 <td>%rafflereset</td>
 
-<td>★</td>
+<td>♥</td>
 
 </tr>
 
@@ -521,7 +523,7 @@ Music will not run as an executable (it will not be able to find a module proper
 
 <td>%resetall</td>
 
-<td>★</td>
+<td>♥</td>
 
 </tr>
 
@@ -561,11 +563,23 @@ Music will not run as an executable (it will not be able to find a module proper
 
 </tr>
 
+<tr>
+
+<td>daily</td>
+
+<td>Gives 100 Dollars Every 24 Hours</td>
+
+<td>%daily</td>
+
+<td></td>
+
+</tr>
+
 </tbody>
 
 </table>
 
-#### DreamCatcher: ★★★
+#### DreamCatcher: 
 
 <table>
 
@@ -587,11 +601,11 @@ Music will not run as an executable (it will not be able to find a module proper
 
 <td>latest</td>
 
-<td>Grabs the highest resolution possible from MOST RECENT DC Post. Must have uploaded at least 1 post while running in order for it to work.</td>
+<td>Grabs the highest resolution possible from MOST RECENT DC Post.</td>
 
 <td>%latest</td>
 
-<td></td>
+<td>★</td>
 
 </tr>
 
@@ -603,7 +617,7 @@ Music will not run as an executable (it will not be able to find a module proper
 
 <td>To start :%updates | To Stop : %updates stop</td>
 
-<td></td>
+<td>★</td>
 
 </tr>
 
@@ -615,7 +629,55 @@ Music will not run as an executable (it will not be able to find a module proper
 
 <td>%download_all</td>
 
-<td></td>
+<td>♥</td>
+
+</tr>
+
+<tr>
+
+<td>dcstart</td>
+
+<td>Starts DC LOOP</td>
+
+<td>%dcstart</td>
+
+<td>♥</td>
+
+</tr>
+
+<tr>
+
+<td>dcstop</td>
+
+<td>Stops DC LOOP</td>
+
+<td>%dcstop</td>
+
+<td>♥</td>
+
+</tr>
+
+<tr>
+
+<td>createlinks</td>
+
+<td>Create HD links and store them in the database.</td>
+
+<td>%createlinks (post number)</td>
+
+<td>♥</td>
+
+</tr>
+
+<tr>
+
+<td>dcrandom</td>
+
+<td>Pull Random Photo from DC APP</td>
+
+<td>%dcrandom || %%</td>
+
+<td>%</td>
 
 </tr>
 
@@ -623,7 +685,7 @@ Music will not run as an executable (it will not be able to find a module proper
 
 </table>
 
-#### ImageUploader: ★★★
+#### ImageUploader: ♥♥♥
 
 <table>
 
@@ -731,7 +793,7 @@ Music will not run as an executable (it will not be able to find a module proper
 
 <td>%announce (message)</td>
 
-<td></td>
+<td>♥</td>
 
 </tr>
 
@@ -743,7 +805,7 @@ Music will not run as an executable (it will not be able to find a module proper
 
 <td>%clear (amount)</td>
 
-<td>prune</td>
+<td>★ prune</td>
 
 </tr>
 
@@ -755,7 +817,7 @@ Music will not run as an executable (it will not be able to find a module proper
 
 <td>%kill</td>
 
-<td></td>
+<td>♥</td>
 
 </tr>
 
@@ -767,7 +829,7 @@ Music will not run as an executable (it will not be able to find a module proper
 
 <td>%logging (start/stop)</td>
 
-<td></td>
+<td>♥</td>
 
 </tr>
 
@@ -779,7 +841,7 @@ Music will not run as an executable (it will not be able to find a module proper
 
 <td>%ping</td>
 
-<td></td>
+<td>pong</td>
 
 </tr>
 
@@ -791,7 +853,7 @@ Music will not run as an executable (it will not be able to find a module proper
 
 <td>%say (message)</td>
 
-<td></td>
+<td>♥</td>
 
 </tr>
 
@@ -803,7 +865,7 @@ Music will not run as an executable (it will not be able to find a module proper
 
 <td>%servers</td>
 
-<td></td>
+<td>♥</td>
 
 </tr>
 
@@ -815,7 +877,7 @@ Music will not run as an executable (it will not be able to find a module proper
 
 <td>%speak (message)</td>
 
-<td></td>
+<td>♥</td>
 
 </tr>
 
@@ -863,7 +925,7 @@ Music will not run as an executable (it will not be able to find a module proper
 
 <td>%addemoji (url) (emoji_name)</td>
 
-<td></td>
+<td>★</td>
 
 </tr>
 
@@ -886,7 +948,43 @@ Music will not run as an executable (it will not be able to find a module proper
 
 <td>%tempchannel [delay=-1]</td>
 
-<td>temp</td>
+<td>★ temp</td>
+
+</tr>
+
+<tr>
+
+<td>ban</td>
+
+<td>Ban A User</td>
+
+<td>%ban @user</td>
+
+<td>★</td>
+
+</tr>
+
+<tr>
+
+<td>unban</td>
+
+<td>UnBan A User</td>
+
+<td>%unban @user</td>
+
+<td>★</td>
+
+</tr>
+
+<tr>
+
+<td>kick</td>
+
+<td>Kick A User</td>
+
+<td>%kick @user</td>
+
+<td>★</td>
 
 </tr>
 
@@ -1036,7 +1134,7 @@ Music will not run as an executable (it will not be able to find a module proper
 
 </table>
 
-#### Twitter: ★★★
+#### Twitter: ♥♥♥
 
 <table>
 
@@ -1094,7 +1192,7 @@ Music will not run as an executable (it will not be able to find a module proper
 
 </table>
 
-#### Youtube: ★★★
+#### Youtube: ♥♥♥
 
 <table>
 
@@ -1152,9 +1250,9 @@ Music will not run as an executable (it will not be able to find a module proper
 
 <td>startloop</td>
 
-<td>Starts scraping youtube videos</td>
+<td>Starts scraping youtube videos. </td>
 
-<td>%startloop</td>
+<td>%startloop (seconds until it starts looping)</td>
 
 <td></td>
 

@@ -169,4 +169,4 @@ class Music(commands.Cog):
         elif ctx.voice_client.is_playing():
             ctx.voice_client.stop()
 
-# Source Code : https://github.com/Rapptz/discord.py/blob/master/examples/basic_voice.py#L107
+#Source Code : https://github.com/Rapptz/discord.py/blob/master/examples/basic_voice.py#L107

@@ -3,6 +3,7 @@ import sqlite3
 import aiohttp
 from bs4 import BeautifulSoup as soup
 from datetime import *
+import asyncio
 
 client = 0
 path = 'module\currency.db'
@@ -42,7 +43,7 @@ class Youtube(commands.Cog):
             await ctx.send("> **That video has been deleted**")
         except:
             await ctx.send("> **That video is not being tracked.**")
-    # this is the equivalent of the loop, but without actually looping. It only does it once and sends message to a channel.
+
     @commands.command()
     @commands.is_owner()
     async def scrapeyoutube(self, ctx):
@@ -58,7 +59,7 @@ class Youtube(commands.Cog):
                         page_soup = soup(page_html, "html.parser")
                         view_count = (page_soup.find("div", {"class": "watch-view-count"})).text
                         # c.execute("INSERT INTO ViewCount VALUES (?,?)", (id,datetime.now()))
-                        await ctx.send(f"> **Managed to scrape Video Name -- {view_count} -- {datetime.now()}**")
+                        await ctx.send(f"> **Managed to scrape DC SCREAM -- {view_count} -- {datetime.now()}**")
 
     @commands.command()
     @commands.is_owner()
@@ -69,11 +70,13 @@ class Youtube(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
-    async def startloop(self, ctx):
-        """Starts scraping youtube videos [Format: %startloop]"""
+    async def startloop(self, ctx, seconds=0):
+        """Starts scraping youtube videos [Format: %startloop (seconds)]"""
         try:
-            YoutubeLoop().new_task5.start()
-            await ctx.send("> **Loop started.**")
+            if seconds >= 0:
+                await asyncio.sleep(seconds)
+                YoutubeLoop().new_task5.start()
+                await ctx.send("> **Loop started.**")
         except:
             await ctx.send("> **A loop is already running.**")
 
@@ -83,7 +86,7 @@ class YoutubeLoop:
         self.view_count = []
         self.now = []
         pass
-    # loop set to 30 minutes
+
     @tasks.loop(seconds=0, minutes=30, hours=0, reconnect=True)
     async def new_task5(self):
         try:
@@ -105,15 +108,16 @@ class YoutubeLoop:
             print("Updated Video Views Tracker")
         except Exception as e:
             print(e)
-        channel = client.get_channel(679553820648538269)
-        # Below is code I used for sending to a channel (which was why I made self variables)
-        # There were errors with the channel not being found and I needed to get it done asap, so I went this route
+
+        # There was an error with the proper channel not being found
+        # this was just a temporary set up for having 2 videos linked to a channel
         """
+        channel = client.get_channel(insert channel id here)
         for i in range (len(self.view_count)):
             if i % 2 == 0:
                 await channel.send(f">>> ** Video Name - {self.view_count[i]} - {self.now[i]} EST\n**")
             else:
-                await channel.send(f">>> ** Video Name - {self.view_count[i]} - {self.now[i]} EST\n**")
+                await channel.send(f">>> ** Other Video Name - {self.view_count[i]} - {self.now[i]} EST\n**")
+        """
         self.view_count = []
         self.now = []
-        """

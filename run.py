@@ -8,10 +8,15 @@ from module import Miscellaneous
 from module import keys
 from module import Cogs
 from module import Youtube
+from module import Games
 from discord.ext import commands
 import discord
 import sqlite3
 import threading
+import logging
+
+
+logging.basicConfig(level=logging.INFO)
 
 client = commands.Bot(command_prefix='%', case_insensitive = True)
 path = 'module\currency.db'
@@ -20,7 +25,7 @@ c = DBconn.cursor()
 
 
 def IreneBot():
-    #events
+    # events
     @client.event
     async def on_ready():
         await client.change_presence(status=discord.Status.online, activity=discord.Game("%help"))
@@ -31,8 +36,10 @@ def IreneBot():
     # and logging is only meant for the bot owner anyway.
     # DO NOT FORGET THERE ARE 2 WAYS TO LOG
     # THERE IS ALREADY A LOGGING SYSTEM USING %logging
-    logging_channel_id = 669416654278623242
-    logging_channel_id2 = 669753544177483806
+    # logging_channel_id is the main for the logging command
+    logging_channel_id = 0
+    # below is for private logging [can be used for certain text channels that you want logged but not others]
+    logging_channel_id2 = 0
 
     @client.event
     async def on_message(message):
@@ -41,7 +48,7 @@ def IreneBot():
             temp_channels = c.execute("SELECT chanID, delay FROM TempChannels").fetchall()
             # private takes channel IDs that are meant to be logged [Meant to be used for cross-server messages.]
             # this is the 2nd way to log
-            private = [356846361045368844, 456937788705603587, 413508021088419846]
+            private = c.execute("SELECT ChannelID FROM loggingprivate").fetchall()
             # This part was just to organize beforehand in case I wanted to use anything in the future
             message_sender = message.author
             message_content = message.clean_content
@@ -81,13 +88,19 @@ def IreneBot():
                         for channel in channels:
                             channel = channel[0]
                             if channel == message.channel.id:
-                                await logging_channel.send(f">>> **{message_sender}\nMessage: **{message_content}**\nFrom {message_guild} in {message_channel}\nCreated at {message_created}\n<{message_link}>**")
+                                embed_message = f"**{message_sender}\nMessage: **{message_content}**\nFrom {message_guild} in {message_channel}\nCreated at {message_created}\n<{message_link}>**"
+                                embed = discord.Embed(title="Log", description=embed_message, color=0xff00f6)
+                                await logging_channel.send(embed=embed)
             # check the private list to see if it's specifically for a group of text channels.
             if message_channel.id in private:
                 if message_content[0] != '%':
                     if message.author.id != client.user.id:
                         logging_channel = client.get_channel(logging_channel_id2)
-                        await logging_channel.send(f">>> **{message_sender}\nMessage: **{message_content}**\nFrom {message_guild} in {message_channel}\nCreated at {message_created}\n<{message_link}>**")
+                        embed_message = f"**{message_sender}\nMessage: **{message_content}**\nFrom {message_guild} in {message_channel}\nCreated at {message_created}\n<{message_link}>**"
+                        embed = discord.Embed(title="Log", description=embed_message, color=0xff00f6)
+                        await logging_channel.send(embed=embed)
+            if message_content[0] == '%':
+                print(f"COMMAND LOG: {message_sender} || {message_content} ")
         except Exception as e:
             # print(e)
             pass
@@ -99,18 +112,21 @@ def IreneBot():
             pass
         if isinstance(error, commands.errors.CommandInvokeError):
             print(f"Command Invoke Error -- {error}")
-            #await ctx.send(f">>> ** Command Invoke Error -- {error} **")
             pass
         if isinstance(error, commands.errors.CommandOnCooldown):
-            await ctx.send(f"> ** {error} **")
+            embed = discord.Embed(title="Error", description=f"** {error} **", color=0xff00f6)
+            await ctx.send(embed=embed)
             print(f"{error}")
             pass
         if isinstance(error, commands.errors.BadArgument):
-                await ctx.send(f"> ** {error} **")
+                embed = discord.Embed(title="Error", description=f"** {error} **", color=0xff00f6)
+                await ctx.send(embed=embed)
                 print(f"{error}")
+                ctx.command.reset_cooldown(ctx)
                 pass
     # Start Automatic DC Loop
     DreamCatcher.DCAPP().new_task4.start()
+    # Start Automatic Youtube Scrape Loop
     Youtube.YoutubeLoop().new_task5.start()
 
     Miscellaneous.setup(client)
@@ -122,6 +138,7 @@ def IreneBot():
     BlackJack.setup(client)
     Cogs.setup(client)
     Youtube.setup(client)
+    Games.setup(client)
     client.run(keys.client_token)
 
 

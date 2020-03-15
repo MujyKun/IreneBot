@@ -30,42 +30,45 @@ class BlackJack(commands.Cog):
     @commands.command(aliases=['bj'])
     async def blackjack(self, ctx, *, amount=0):
         """Start a game of BlackJack [Format: %blackjack (amount)] [Aliases: bj]"""
-        try:
-            game_type = 'blackjack'
-            player_1 = ctx.author.id
-            counter = \
-            c.execute("SELECT count(*) FROM Games WHERE Player1 = ? or Player2 = ?", (player_1, player_1)).fetchone()[0]
-            if counter == 1:
+        if amount >= 0:
+            try:
+                game_type = 'blackjack'
+                player_1 = ctx.author.id
+                counter = \
+                c.execute("SELECT count(*) FROM Games WHERE Player1 = ? or Player2 = ?", (player_1, player_1)).fetchone()[0]
+                if counter == 1:
+                    embed_message = "**You are already in a pending/active game. Please type %endgame to end your current game.**"
+                    embed = discord.Embed(title="Error", description=embed_message, color=0xff00f6)
+                    await ctx.send(embed=embed, delete_after=40)
+                if counter == 0:
+                    player_2 = 0
+                    player1_bid = amount
+                    player2_bid = 0
+                    count = c.execute("SELECT count(UserID) FROM Currency WHERE USERID = ?", (player_1,)).fetchone()[0]
+                    if count == 0:
+                        await ctx.send("> **You are not currently registered. Please type %register to register.**",
+                                       delete_after=40)
+                    if count == 1:
+                        current_amount = c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_1,)).fetchone()[0]
+                        if amount > current_amount:
+                            await ctx.send("> **You do not have enough money to give!**", delete_after=40)
+                        if amount <= current_amount:
+                            c.execute("INSERT INTO Games VALUES (NULL, ?, ?, ?, ?, 0, 0, ?, 11)",
+                                      (player_1, player_2, player1_bid, player2_bid, game_type))
+                            DBconn.commit()
+                            game_id = c.execute("SELECT GameID FROM Games WHERE Player1 = ?", (player_1,)).fetchone()[0]
+                            await ctx.send(
+                                "> **There are currently 1/2 members signed up for BlackJack. To join the game, please type %joingame {} (bid)**".format(game_id))
+                    if count > 1:
+                        await ctx.send("> **There is an error with the database. Please report to an administrator**",
+                                       delete_after=40)
+            except Exception as e:
+                print (e)
                 await ctx.send(
                     "> **You are already in a pending/active game. Please type %endgame to end your current game.**",
                     delete_after=40)
-            if counter == 0:
-                player_2 = 0
-                player1_bid = amount
-                player2_bid = 0
-                count = c.execute("SELECT count(UserID) FROM Currency WHERE USERID = ?", (player_1,)).fetchone()[0]
-                if count == 0:
-                    await ctx.send("> **You are not currently registered. Please type %register to register.**",
-                                   delete_after=40)
-                if count == 1:
-                    current_amount = c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_1,)).fetchone()[0]
-                    if amount > current_amount:
-                        await ctx.send("> **You do not have enough money to give!**", delete_after=40)
-                    if amount <= current_amount:
-                        c.execute("INSERT INTO Games VALUES (NULL, ?, ?, ?, ?, 0, 0, ?, 11)",
-                                  (player_1, player_2, player1_bid, player2_bid, game_type))
-                        DBconn.commit()
-                        game_id = c.execute("SELECT GameID FROM Games WHERE Player1 = ?", (player_1,)).fetchone()[0]
-                        await ctx.send(
-                            "> **There are currently 1/2 members signed up for BlackJack. To join the game, please type %joingame {} (bid)**".format(game_id))
-                if count > 1:
-                    await ctx.send("> **There is an error with the database. Please report to an administrator**",
-                                   delete_after=40)
-        except Exception as e:
-            print (e)
-            await ctx.send(
-                "> **You are already in a pending/active game. Please type %endgame to end your current game.**",
-                delete_after=40)
+        elif amount < 0:
+            await ctx.send("> **You cannot bet a negative number**")
 
     # background loops
     def _start_tasks(self, ctx, game_id, player_1, player_2):
@@ -105,7 +108,7 @@ class BlackJack(commands.Cog):
                             total_amount = current_val - bid_2
                             c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (total_amount, player_2))
                             await ctx.send(
-                                "> **<@{}> has won {} Dollars with {} points against <@{}> with {} points in BlackJack.**".format(
+                                "> **<@{}> has won {:,} Dollars with {} points against <@{}> with {} points in BlackJack.**".format(
                                     player_1, bid_sum, score_1, player_2, score_2), delete_after=40)
 
                         if result_2 < result_1:
@@ -121,7 +124,7 @@ class BlackJack(commands.Cog):
                             total_amount = current_val - bid_1
                             c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (total_amount, player_1))
                             await ctx.send(
-                                "> **<@{}> has won {} Dollars with {} points against <@{}> with {} points in BlackJack.**".format(
+                                "> **<@{}> has won {:,} Dollars with {} points against <@{}> with {} points in BlackJack.**".format(
                                     player_2, bid_sum, score_2, player_1, score_1), delete_after=40)
                     if score_1 < 21 and score_2 < 21:
                         if score_1 == score_2:
@@ -141,7 +144,7 @@ class BlackJack(commands.Cog):
                             total_amount = current_val - bid_2
                             c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (total_amount, player_2))
                             await ctx.send(
-                                "> **<@{}> has won {} Dollars with {} points against <@{}> with {} points in BlackJack.**".format(
+                                "> **<@{}> has won {:,} Dollars with {} points against <@{}> with {} points in BlackJack.**".format(
                                     player_1, bid_sum, score_1, player_2, score_2), delete_after=40)
                         if score_2 > score_1:
                             # player 2 wins
@@ -156,7 +159,7 @@ class BlackJack(commands.Cog):
                             total_amount = current_val - bid_1
                             c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (total_amount, player_1))
                             await ctx.send(
-                                "> **<@{}> has won {} Dollars with {} points against <@{}> with {} points in BlackJack.**".format(
+                                "> **<@{}> has won {:,} Dollars with {} points against <@{}> with {} points in BlackJack.**".format(
                                     player_2, bid_sum, score_2, player_1, score_1), delete_after=40)
                     if score_1 == 21 or score_2 == 21:
                         if score_1 == score_2:
@@ -177,7 +180,7 @@ class BlackJack(commands.Cog):
                                 total_amount = current_val - bid_2
                                 c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (total_amount, player_2))
                                 await ctx.send(
-                                    "> **<@{}> has won {} Dollars with {} points against <@{}> with {} points in BlackJack.**".format(
+                                    "> **<@{}> has won {:,} Dollars with {} points against <@{}> with {} points in BlackJack.**".format(
                                         player_1, bid_sum, score_1, player_2, score_2), delete_after=40)
                             if score_2 == 21:
                                 # player2 wins
@@ -192,7 +195,7 @@ class BlackJack(commands.Cog):
                                 total_amount = current_val - bid_1
                                 c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (total_amount, player_1))
                                 await ctx.send(
-                                    "> **<@{}> has won {} Dollars with {} points against <@{}> with {} points in BlackJack.**".format(
+                                    "> **<@{}> has won {:,} Dollars with {} points against <@{}> with {} points in BlackJack.**".format(
                                         player_2, bid_sum, score_2, player_1, score_1), delete_after=40)
                     if score_1 < 21 and score_2 > 21:
                         # player1 wins
@@ -207,7 +210,7 @@ class BlackJack(commands.Cog):
                         total_amount = current_val - bid_2
                         c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (total_amount, player_2))
                         await ctx.send(
-                            "> **<@{}> has won {} Dollars with {} points against <@{}> with {} points in BlackJack.**".format(
+                            "> **<@{}> has won {:,} Dollars with {} points against <@{}> with {} points in BlackJack.**".format(
                                 player_1, bid_sum, score_1, player_2, score_2), delete_after=40)
                     if score_1 > 21 and score_2 < 21:
                         # player2 wins
@@ -222,7 +225,7 @@ class BlackJack(commands.Cog):
                         total_amount = current_val - bid_1
                         c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (total_amount, player_1))
                         await ctx.send(
-                            "> **<@{}> has won {} Dollars with {} points against <@{}> with {} points in BlackJack.**".format(
+                            "> **<@{}> has won {:,} Dollars with {} points against <@{}> with {} points in BlackJack.**".format(
                                 player_2, bid_sum, score_2, player_1, score_1), delete_after=40)
                     DBconn.commit()
                     self.tasks.remove(self.task_list)
@@ -264,111 +267,114 @@ class BlackJack(commands.Cog):
     @commands.command(aliases=['jg'])
     async def joingame(self, ctx, gameid=0, amount=0):
         """Join a game [Format: %joingame (gameid) (bid)] [Aliases: jg]"""
-        if gameid == 0:
-            await ctx.send("> **Please include the game id in your command. [Format: %jg (gameid) (bid)]**",
-                           delete_after=40)
-        if gameid != 0:
-            try:
-                rules = "**Each Player gets 2 cards.\nIn order to get blackjack, your final value must equal 21.\nIf Player1 exceeds 21 and Player2 doesn't, Player1 busts and Player2 wins the game.\nYou will have two options.\nThe first option is to %Hit, which means to grab another card.\nThe second option is to %stand to not pick up anymore cards.\nEach Player will play one at a time so think ahead!\nIf both players bust, Player closest to 21 wins!\nNumber cards are their values.\nAces can be 1 or 11 depending on the scenario.\nJack, Queen, and King are all worth 10. **"
-                player_2 = ctx.author.id
-                player2_bid = amount
-                game_id = gameid
-                check = c.execute("SELECT Player1 FROM Games WHERE GameID = ?", (game_id,)).fetchone()[0]
-                check2 = c.execute("SELECT Player2 FROM Games WHERE GameID = ?", (game_id,)).fetchone()[0]
-                count_checker = c.execute("SELECT COUNT(*) FROM Games WHERE Player1 = ? OR Player2 = ?",
-                                          (player_2, player_2)).fetchone()[0]
-                if count_checker >= 1:
-                    await ctx.send(
-                        "> **You are already in a pending/active game. Please type %endgame to end your current game.**",
-                        delete_after=40)
-                if count_checker == 0:
-                    if check2 != 0:
-                        await ctx.send("> **This game has already started.**", delete_after=40)
-                    if check2 == 0:
-                        if check == player_2:
-                            await ctx.send("> **You are already in this game.**", delete_after=40)
-                        if check != player_2:
-                            count = \
-                            c.execute("SELECT count(UserID) FROM Currency WHERE USERID = ?", (player_2,)).fetchone()[0]
-                            if count == 0:
-                                await ctx.send(
-                                    "> **You are not currently registered. Please type %register to register.**",
-                                    delete_after=40)
-                            if count == 1:
-                                current_amount = \
-                                c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_2,)).fetchone()[0]
-                                if amount > current_amount:
-                                    await ctx.send("> **You do not have enough money to give!**", delete_after=40)
-                                if amount <= current_amount:
-                                    c.execute("UPDATE Games SET Player2 = ?, Bid2 = ? WHERE GameID = ?",
-                                              (player_2, player2_bid, game_id))
-                                    DBconn.commit()
-                                    total_1 = c.execute("SELECT Bid1, Bid2 FROM Games Where GameID = ?",
-                                                        (game_id,)).fetchall()
-                                    for a in total_1:
-                                        x = a[0]
-                                        y = a[1]
-                                    total = x + y
+        if amount >= 0:
+            if gameid == 0:
+                await ctx.send("> **Please include the game id in your command. [Format: %jg (gameid) (bid)]**",
+                               delete_after=40)
+            if gameid != 0:
+                try:
+                    rules = "**Each Player gets 2 cards.\nIn order to get blackjack, your final value must equal 21.\nIf Player1 exceeds 21 and Player2 doesn't, Player1 busts and Player2 wins the game.\nYou will have two options.\nThe first option is to %Hit, which means to grab another card.\nThe second option is to %stand to not pick up anymore cards.\nEach Player will play one at a time so think ahead!\nIf both players bust, Player closest to 21 wins!\nNumber cards are their values.\nAces can be 1 or 11 depending on the scenario.\nJack, Queen, and King are all worth 10. **"
+                    player_2 = ctx.author.id
+                    player2_bid = amount
+                    game_id = gameid
+                    check = c.execute("SELECT Player1 FROM Games WHERE GameID = ?", (game_id,)).fetchone()[0]
+                    check2 = c.execute("SELECT Player2 FROM Games WHERE GameID = ?", (game_id,)).fetchone()[0]
+                    count_checker = c.execute("SELECT COUNT(*) FROM Games WHERE Player1 = ? OR Player2 = ?",
+                                              (player_2, player_2)).fetchone()[0]
+                    if count_checker >= 1:
+                        await ctx.send(
+                            "> **You are already in a pending/active game. Please type %endgame to end your current game.**",
+                            delete_after=40)
+                    if count_checker == 0:
+                        if check2 != 0:
+                            await ctx.send("> **This game has already started.**", delete_after=40)
+                        if check2 == 0:
+                            if check == player_2:
+                                await ctx.send("> **You are already in this game.**", delete_after=40)
+                            if check != player_2:
+                                count = \
+                                c.execute("SELECT count(UserID) FROM Currency WHERE USERID = ?", (player_2,)).fetchone()[0]
+                                if count == 0:
                                     await ctx.send(
-                                        "> **Starting BlackJack with a total bid of {} Dollars.**".format(total),
-                                        delete_after=60)
-                                    await ctx.send(">>> {}".format(rules), delete_after=60)
-                                    new_list = []
-                                    file_1 = []
-                                    file_2 = []
-                                    for i in range(0, 4):
-                                        random_card = randint(1, 52)
-                                        while random_card in new_list:
+                                        "> **You are not currently registered. Please type %register to register.**",
+                                        delete_after=40)
+                                if count == 1:
+                                    current_amount = \
+                                    c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_2,)).fetchone()[0]
+                                    if amount > current_amount:
+                                        await ctx.send("> **You do not have enough money to give!**", delete_after=40)
+                                    if amount <= current_amount:
+                                        c.execute("UPDATE Games SET Player2 = ?, Bid2 = ? WHERE GameID = ?",
+                                                  (player_2, player2_bid, game_id))
+                                        DBconn.commit()
+                                        total_1 = c.execute("SELECT Bid1, Bid2 FROM Games Where GameID = ?",
+                                                            (game_id,)).fetchall()
+                                        for a in total_1:
+                                            x = a[0]
+                                            y = a[1]
+                                        total = x + y
+                                        await ctx.send(
+                                            "> **Starting BlackJack with a total bid of {:,} Dollars.**".format(total),
+                                            delete_after=60)
+                                        await ctx.send(">>> {}".format(rules), delete_after=60)
+                                        new_list = []
+                                        file_1 = []
+                                        file_2 = []
+                                        for i in range(0, 4):
                                             random_card = randint(1, 52)
-                                        new_list.append(random_card)
-                                    for i in range(0, 2):
-                                        card_name = c.execute("SELECT * FROM CardValues WHERE CardID = ?",
-                                                              (new_list[i],)).fetchone()[1]
-                                        card_value = c.execute("SELECT * FROM CardValues WHERE CardID = ?",
-                                                               (new_list[i],)).fetchone()[2]
-                                        current_val = \
-                                        c.execute("SELECT Score1 FROM Games WHERE GameID = ?", (game_id,)).fetchone()[0]
-                                        c.execute("INSERT INTO BlackJack VALUES (?, ?, ?)", (game_id, new_list[i], 1))
-                                        tot1 = current_val + card_value
-                                        c.execute("UPDATE Games SET Score1 = ? WHERE GameID = ?", (tot1, game_id))
-                                        card_1 = discord.File(fp='Cards/{}.jpg'.format(new_list[i]),
-                                                              filename='{}.jpg'.format(new_list[i]), spoiler=True)
-                                        file_1.append(card_1)
-                                        DBconn.commit()
-                                    for i in range(2, 4):
-                                        card_name = c.execute("SELECT * FROM CardValues WHERE CardID = ?",
-                                                              (new_list[i],)).fetchone()[1]
-                                        card_value = c.execute("SELECT * FROM CardValues WHERE CardID = ?",
-                                                               (new_list[i],)).fetchone()[2]
-                                        current_val = \
-                                        c.execute("SELECT Score2 FROM Games WHERE GameID = ?", (game_id,)).fetchone()[0]
-                                        c.execute("INSERT INTO BlackJack VALUES (?, ?, ?)", (game_id, new_list[i], 2))
-                                        tot = current_val + card_value
-                                        c.execute("UPDATE Games SET Score2 = ? WHERE GameID = ?", (tot, game_id))
-                                        card_2 = discord.File(fp='Cards/{}.jpg'.format(new_list[i]),
-                                                              filename='{}.jpg'.format(new_list[i]), spoiler=True)
-                                        file_2.append(card_2)
-                                        DBconn.commit()
-                                    player_1 = \
-                                    c.execute("SELECT Player1 FROM Games WHERE GameID = ?", (game_id,)).fetchone()[0]
-                                    await ctx.send("<@{}>'s current score is ||{}||".format(player_1, tot1),
-                                                   files=file_1, delete_after=120)
-                                    await ctx.send("<@{}>'s current score is ||{}||".format(player_2, tot),
-                                                   files=file_2, delete_after=120)
-                                    self.aces = 0
-                                    self.game_list = []
-                                    self.game_list.append(game_id)
-                                    # self._start_tasks()
-                                    self._start_tasks(ctx, game_id, player_1, player_2)
-                                    # self.bgloop.start(ctx, game_id, player_1, player_2)
+                                            while random_card in new_list:
+                                                random_card = randint(1, 52)
+                                            new_list.append(random_card)
+                                        for i in range(0, 2):
+                                            card_name = c.execute("SELECT * FROM CardValues WHERE CardID = ?",
+                                                                  (new_list[i],)).fetchone()[1]
+                                            card_value = c.execute("SELECT * FROM CardValues WHERE CardID = ?",
+                                                                   (new_list[i],)).fetchone()[2]
+                                            current_val = \
+                                            c.execute("SELECT Score1 FROM Games WHERE GameID = ?", (game_id,)).fetchone()[0]
+                                            c.execute("INSERT INTO BlackJack VALUES (?, ?, ?)", (game_id, new_list[i], 1))
+                                            tot1 = current_val + card_value
+                                            c.execute("UPDATE Games SET Score1 = ? WHERE GameID = ?", (tot1, game_id))
+                                            card_1 = discord.File(fp='Cards/{}.jpg'.format(new_list[i]),
+                                                                  filename='{}.jpg'.format(new_list[i]), spoiler=True)
+                                            file_1.append(card_1)
+                                            DBconn.commit()
+                                        for i in range(2, 4):
+                                            card_name = c.execute("SELECT * FROM CardValues WHERE CardID = ?",
+                                                                  (new_list[i],)).fetchone()[1]
+                                            card_value = c.execute("SELECT * FROM CardValues WHERE CardID = ?",
+                                                                   (new_list[i],)).fetchone()[2]
+                                            current_val = \
+                                            c.execute("SELECT Score2 FROM Games WHERE GameID = ?", (game_id,)).fetchone()[0]
+                                            c.execute("INSERT INTO BlackJack VALUES (?, ?, ?)", (game_id, new_list[i], 2))
+                                            tot = current_val + card_value
+                                            c.execute("UPDATE Games SET Score2 = ? WHERE GameID = ?", (tot, game_id))
+                                            card_2 = discord.File(fp='Cards/{}.jpg'.format(new_list[i]),
+                                                                  filename='{}.jpg'.format(new_list[i]), spoiler=True)
+                                            file_2.append(card_2)
+                                            DBconn.commit()
+                                        player_1 = \
+                                        c.execute("SELECT Player1 FROM Games WHERE GameID = ?", (game_id,)).fetchone()[0]
+                                        await ctx.send("<@{}>'s current score is ||{}||".format(player_1, tot1),
+                                                       files=file_1, delete_after=120)
+                                        await ctx.send("<@{}>'s current score is ||{}||".format(player_2, tot),
+                                                       files=file_2, delete_after=120)
+                                        self.aces = 0
+                                        self.game_list = []
+                                        self.game_list.append(game_id)
+                                        # self._start_tasks()
+                                        self._start_tasks(ctx, game_id, player_1, player_2)
+                                        # self.bgloop.start(ctx, game_id, player_1, player_2)
 
-                            if count > 1:
-                                await ctx.send(
-                                    "> **There is an error with the database. Please report to an administrator**",
-                                    delete_after=40)
-            except Exception as e:
-                print (e)
-                await ctx.send("> **Failed to join. This game does not exist.**", delete_after=40)
+                                if count > 1:
+                                    await ctx.send(
+                                        "> **There is an error with the database. Please report to an administrator**",
+                                        delete_after=40)
+                except Exception as e:
+                    print (e)
+                    await ctx.send("> **Failed to join. This game does not exist.**", delete_after=40)
+        elif amount < 0:
+            await ctx.send("> **You cannot bet a negative number**")
 
     @commands.command(aliases=['eg'])
     async def endgame(self, ctx):

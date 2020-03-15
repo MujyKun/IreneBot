@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup as soup
 import aiofiles
 import sqlite3
 import asyncio
+import random
 
 client = 0
 path = 'module\currency.db'
@@ -19,7 +20,7 @@ def setup(client1):
     global client
     client = client1
 
-# This is an overly complicated way to do this, but is efficient for posting to several servers and avoiding many errors while having several features that can later be changed.
+
 class DreamCatcher(commands.Cog):
     def __init__(self, client):
         self.list = ['\n DC_GAHYEON                ', '\n DC_SIYEON                ', '\n DC_YOOHYEON                ', '\n DC_JIU                ', '\n DC_SUA                ', '\n DREAMCATCHER                ', '\n DC_DAMI                ', '\n DC_HANDONG                ']
@@ -32,9 +33,88 @@ class DreamCatcher(commands.Cog):
         self.tries = 0
         self.post_list = []
         self.latest_DC = ''
+        self.create_links_number = 0
         pass
 
 
+    @commands.command()
+    @commands.is_owner()
+    async def createlinks(self, ctx, number=18144):
+        """Create HD links and store them in the database.[Format: %createlinks (post number)]"""
+        self.create_links_number = number
+
+        @tasks.loop(seconds=0, minutes=0, hours=0, reconnect=True)
+        async def paste_all_links(ctx):
+            try:
+                self.create_links_number += 1
+                number = self.create_links_number
+                # if number >= latest post
+                if number >= (c.execute("SELECT PostID FROM DCPost").fetchone()[0]):
+                    paste_all_links.cancel()
+                else:
+                    my_url = 'https://dreamcatcher.candlemystar.com/post/{}'.format(number)
+                    async with aiohttp.ClientSession() as session:
+                        async with session.get('{}'.format(my_url)) as r:
+                            if r.status == 200:
+                                    page_html = await r.text()
+                                    page_soup = soup(page_html, "html.parser")
+                                    username = (page_soup.find("div", {"class": "card-name"})).text
+                                    if username in self.list:
+                                        image_url = (page_soup.findAll("div", {"class": "imgSize width"}))
+                                        for image in image_url:
+                                            new_image_url = image.img["src"]
+                                            DC_Date = new_image_url[41:49]
+                                            unique_id = new_image_url[55:87]
+                                            file_format = new_image_url[93:]
+                                            HD_Link = f'https://file.candlemystar.com/post/{DC_Date}{unique_id}{file_format}'
+                                            c.execute("INSERT INTO DCHDLinks VALUES (NULL,?)", (HD_Link,))
+                                            DBconn.commit()
+                                            print(f"DC Link posted on DB for post {number}")
+                                            number += 1
+                                    else:
+                                        print("LINK Passing Post from POST #{}".format(number))
+                            elif r.status == 304:
+                                print("> **Access Denied - {}**".format(number))
+                            elif r.status == 404:
+                                print("LINK Error 404. {} was not Found.".format(number))
+                                pass
+                            else:
+                                print("LINK Other Error")
+            except:
+                pass
+        paste_all_links.start(ctx)
+
+    @commands.command(aliases=["%"])
+    async def dcrandom(self, ctx):
+        """Pull Random Photo from DC APP[Format: %dcrandom or %%]"""
+        try:
+            amount_of_links = c.execute("SELECT COUNT(*) FROM DCHDLinks").fetchone()[0]
+            if amount_of_links == 0:
+                await ctx.send("> **There are no links saved.**")
+            if amount_of_links != 0:
+                random_choice = random.randint(1,amount_of_links)
+                link = c.execute("SELECT Link FROM DCHDLinks WHERE ID = ?", (random_choice,)).fetchone()[0]
+                await ctx.send(link)
+        except Exception as e:
+            await ctx.send(e)
+
+
+    @commands.command()
+    @commands.is_owner()
+    async def dcstop(self, ctx):
+        """Stops DC Loop [Format: %dcstop]"""
+        DCAPP().new_task4.stop()
+        await ctx.send("> **If there was a loop, it stopped.**")
+
+    @commands.command()
+    @commands.is_owner()
+    async def dcstart(self, ctx):
+        """Starts DC Loop [Format: %dcstart]"""
+        try:
+            DCAPP().new_task4.start()
+            await ctx.send("> **Loop started.**")
+        except:
+            await ctx.send("> **A loop is already running.**")
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def updates(self, ctx,*, solution=""):
@@ -96,6 +176,7 @@ class DreamCatcher(commands.Cog):
             self.download_all_number += 1
             number = self.download_all_number
             # if number >= latest post
+            # last run on 40830
             if number >= (c.execute("SELECT PostID FROM DCPost").fetchone()[0]):
                 download_all_task.cancel()
             else:
@@ -131,7 +212,7 @@ class DreamCatcher(commands.Cog):
                             print("DOWNLOAD Other Error")
         download_all_task.start(ctx)
 
-# The Loop Class for DC APP
+
 class DCAPP():
     def __init__(self):
         self.list = ['\n DC_GAHYEON                ', '\n DC_SIYEON                ', '\n DC_YOOHYEON                ', '\n DC_JIU                ', '\n DC_SUA                ', '\n DREAMCATCHER                ', '\n DC_DAMI                ', '\n DC_HANDONG                ']
@@ -142,12 +223,14 @@ class DCAPP():
         self.original_number = 0
         self.tries = 0
         self.post_list = []
+        self.count_loop = 0
         # self.latest_DC = ''
         pass
 
     @tasks.loop(seconds=0, minutes=0, hours=0, reconnect=True)
     async def new_task4(self):
         # print (self.number)
+        self.count_loop += 1
         if self.first_run == 1:
             number = c.execute("SELECT PostID FROM DCPost").fetchone()[0]
             self.first_run = 0
@@ -173,7 +256,7 @@ class DCAPP():
             async with session.get('{}'.format(my_url)) as r:
                 if r.status == 200:
                     c.execute("DELETE FROM DCPost")
-                    c.execute("INSERT INTO DCPost VALUES(?)",(self.number,))
+                    c.execute("INSERT INTO DCPost VALUES(?)", (self.number,))
                     DBconn.commit()
                     self.error_status = 0
                     if self.number not in self.post_list:
@@ -193,8 +276,30 @@ class DCAPP():
                             Dami = self.list[6]
                             Handong = self.list[7]
                             image_url = (page_soup.findAll("div", {"class": "imgSize width"}))
-                            another_list = []
+                            image_links = []
                             for image in image_url:
+                                new_image_url = image.img["src"]
+                                DC_Date = new_image_url[41:49]
+                                unique_id = new_image_url[55:87]
+                                file_format = new_image_url[93:]
+                                HD_Link = f'https://file.candlemystar.com/post/{DC_Date}{unique_id}{file_format}'
+                                image_links.append(HD_Link)
+                                # automatically put HD links in database
+                                try:
+                                    c.execute("INSERT INTO DCHDLinks VALUES (NULL,?)", (HD_Link,))
+                                    DBconn.commit()
+                                except Exception as e:
+                                    pass
+                                async with session.get(HD_Link) as resp:
+                                    fd = await aiofiles.open(
+                                        'DreamHD/{}'.format(f"{unique_id[:8]}{file_format}"), mode='wb')
+                                    await fd.write(await resp.read())
+                                    await fd.close()
+                            another_list = []
+                            new_count = -1
+                            final_image_list = []
+                            for image in image_url:
+                                new_count += 1
                                 new_image_url = image.img["src"]
                                 file_name = new_image_url[82:]
                                 async with session.get(new_image_url) as resp:
@@ -218,15 +323,14 @@ class DCAPP():
                                             file_size = (os.path.getsize(f'DCApp/{file_name}'))
                                             if file_size > 20000:
                                                 keep_going = False
-                                            """
-                                            if loop_count == 5:
+                                            if loop_count == 30:
                                                 try:
-                                                    # os.unlink(f'DCApp/{file_name}')
+                                                    final_image_list.append(image_links[new_count])
+                                                    os.unlink(f'DCApp/{file_name}')
                                                     keep_going = False
                                                 except Exception as e:
                                                     print(e)
                                                     keep_going = False
-                                            """
                                     c.execute("DELETE FROM DCUrl")
                                     c.execute("INSERT INTO DCUrl VALUES(?)", (my_url,))
                                     DBconn.commit()
@@ -301,6 +405,9 @@ class DCAPP():
                                         await channel.send(files=DC_Photos)
                                     if len(video_name_list) != 0:
                                         await channel.send(files=DC_Videos)
+                                    if len(final_image_list) != 0:
+                                        for link in final_image_list:
+                                            await channel.send(link)
                                 except Exception as e:
                                     print (e)
                                     pass
@@ -327,13 +434,13 @@ class DCAPP():
                     print("> **Access Denied - {}**".format(self.number))
                 elif r.status == 404:
                     self.tries += 1
-                    print("Error 404. {} was not Found.".format(self.number))
-                    # await ctx.send('> **Error 404. {} was not Found.**'.format(self.number))
+                    if self.count_loop % 100 == 0:
+                        print("Error 404. {} was not Found.".format(self.number))
                     self.error_status = 1
                     pass
                 else:
                     print(r.status)
 
 
-#b = DCAPP()
-#b.new_task4.start()
+# b = DCAPP()
+# b.new_task4.start()

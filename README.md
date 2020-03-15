@@ -67,7 +67,7 @@ Music will not run as an executable (it will not be able to find a module proper
 
 <tr>
 
-<td>modules/BlackJack.py</td>
+<td>module/BlackJack.py</td>
 
 <td>A 1v1 game of blackjack</td>
 
@@ -75,7 +75,7 @@ Music will not run as an executable (it will not be able to find a module proper
 
 <tr>
 
-<td>modules/Currency.py</td>
+<td>module/Currency.py</td>
 
 <td>Games that involve an economy</td>
 
@@ -91,7 +91,7 @@ Music will not run as an executable (it will not be able to find a module proper
 
 <tr>
 
-<td>modules/ImageUploader.py</td>
+<td>module/ImageUploader.py</td>
 
 <td>Commands for downloading photos from a text channel and uploading them to google drive.</td>
 
@@ -99,7 +99,7 @@ Music will not run as an executable (it will not be able to find a module proper
 
 <tr>
 
-<td>modules/Miscellaneous.py</td>
+<td>module/Miscellaneous.py</td>
 
 <td>Commands I didn't feel like making a section for</td>
 
@@ -107,7 +107,7 @@ Music will not run as an executable (it will not be able to find a module proper
 
 <tr>
 
-<td>modules/Music.py</td>
+<td>module/Music.py</td>
 
 <td>Commands for Music</td>
 
@@ -115,7 +115,7 @@ Music will not run as an executable (it will not be able to find a module proper
 
 <tr>
 
-<td>modules/Twitter2.py</td>
+<td>module/Twitter2.py</td>
 
 <td>Commands for Twitter</td>
 
@@ -123,7 +123,7 @@ Music will not run as an executable (it will not be able to find a module proper
 
 <tr>
 
-<td>modules/currency.db</td>
+<td>module/currency.db</td>
 
 <td>Database that includes the economy [Also has channel ids].</td>
 
@@ -131,7 +131,7 @@ Music will not run as an executable (it will not be able to find a module proper
 
 <tr>
 
-<td>modules/keys.py</td>
+<td>module/keys.py</td>
 
 <td>All Keys/Tokens should be put here.</td>
 
@@ -139,7 +139,7 @@ Music will not run as an executable (it will not be able to find a module proper
 
 <tr>
 
-<td>modules/quickstart.py</td>
+<td>module/quickstart.py</td>
 
 <td>Google Drive API</td>
 
@@ -147,7 +147,7 @@ Music will not run as an executable (it will not be able to find a module proper
 
 <tr>
 
-<td>modules/twitter.py</td>
+<td>module/twitter.py</td>
 
 <td>Connection to Twitter API</td>
 
@@ -155,9 +155,25 @@ Music will not run as an executable (it will not be able to find a module proper
 
 <tr>
 
-<td>modules/Cogs.py</td>
+<td>module/Cogs.py</td>
 
 <td>Loading/Reloading/Unloading Cogs</td>
+
+</tr>
+
+<tr>
+
+<td>module/Youtube.py</td>
+
+<td>For Youtube Views/ETC</td>
+
+</tr>
+
+<tr>
+
+<td>module/Games.py</td>
+
+<td>For Games Unrelated to Currency.</td>
 
 </tr>
 

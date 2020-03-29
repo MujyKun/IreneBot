@@ -39,9 +39,9 @@ def IreneBot():
     # DO NOT FORGET THERE ARE 2 WAYS TO LOG
     # THERE IS ALREADY A LOGGING SYSTEM USING %logging
     # logging_channel_id is the main for the logging command
-    logging_channel_id = 669416654278623242
+    logging_channel_id = 0
     # below is for private logging [can be used for certain text channels that you want logged but not others]
-    logging_channel_id2 = 669753544177483806
+    logging_channel_id2 = 0
 
     @client.event
     async def on_message(message):

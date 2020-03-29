@@ -6,7 +6,8 @@ import sqlite3
 import aiohttp
 import aiofiles
 import os
-
+import asyncio
+from module import logger as log
 
 client = 0
 path = 'module\currency.db'
@@ -39,7 +40,7 @@ class Miscellaneous(commands.Cog):
     @commands.has_permissions(ban_members=True)
     async def unban(self, ctx, user: discord.User = "@user", *, reason="No Reason"):
         """Unban A User [Format: %unban @user]"""
-        print (type(user))
+        log.console (type(user))
         try:
             await ctx.guild.unban(user=user, reason=reason)
             embed = discord.Embed(title="User Unbanned!", description=f"> **<@{user.id}> was unbanned by <@{ctx.author.id}> for {reason}**!", color=0xff00f6)
@@ -94,7 +95,7 @@ class Miscellaneous(commands.Cog):
                     c.execute("INSERT INTO TempChannels VALUES (?, ?)", (channel_id, delay))
                     DBconn.commit()
         except Exception as e:
-            print(e)
+            log.console(e)
 
     @commands.command()
     @commands.has_permissions(manage_messages=True, manage_emojis=True)
@@ -105,29 +106,38 @@ class Miscellaneous(commands.Cog):
         else:
             file_format = "None"
             await ctx.send(f">>> **Please use a url that ends in ?v=1 or a file format like .png or edit your emoji on \n <https://ezgif.com/resize?url={url}>**")
+            log.console (f"Please use a url that ends in ?v=1 or a file format like .png or edit your emoji on https://ezgif.com/resize?url={url}")
         if len(emoji_name) < 2:
             file_format = "None"
             await ctx.send("> **Please enter an emoji name more than two letters.**")
         if file_format != "None":
-            #await ctx.send(file_format)
+            # await ctx.send(file_format)
             async with aiohttp.ClientSession() as session:
                 async with session.get('{}'.format(url)) as r:
                     if r.status == 200:
-                        #await ctx.send("Connection Successful")
+                        # await ctx.send("Connection Successful")
                         fd = await aiofiles.open('Emoji/{}'.format(f"{emoji_name}{file_format}"), mode='wb')
                         await fd.write(await r.read())
                         await fd.close()
-                        print(f"Downloaded {emoji_name}{file_format}")
+                        log.console(f"Downloaded {emoji_name}{file_format}")
                         full_file_name = emoji_name + file_format
                         file_size = (os.path.getsize(f'Emoji/{full_file_name}'))
                         if file_size > 262144:
-                            await ctx.send(f">>> **File cannot be larger than 256.0 kb. Please resize the emoji here.**\n <https://ezgif.com/resize?url={url}>")
+                            await ctx.send(f">>> **File cannot be larger than 256.0 kb. Please resize the emoji here (for the resize method, use Gifsicle).**\n <https://ezgif.com/resize?url={url}>")
+                            log.console(f"File cannot be larger than 256.0 kb. Please resize the emoji here. https://ezgif.com/resize?url={url}")
                         elif file_size <= 262144:
                             v = await aiofiles.open(f'Emoji/{full_file_name}', mode='rb')
                             # await ctx.guild.create_custom_emoji(name=emoji_name, image=f'Emoji/{full_file_name}')
                             await ctx.guild.create_custom_emoji(name=emoji_name, image=await v.read())
                             await v.close()
-                            await ctx.send(f"> **Added :{emoji_name}:**")
+                            emojis = client.emojis
+                            max_emoji_length = len(emojis)
+                            if emoji_name in str(emojis[max_emoji_length-1]):
+                                await ctx.send(emojis[max_emoji_length-1])
+                            elif emoji_name in str(emojis[0]):
+                                await ctx.send(emojis[0])
+                            else:
+                                await ctx.send(f"> **Added :{emoji_name}:**")
                         all_photos = os.listdir('Emoji')
                         for photo in all_photos:
                             try:
@@ -174,31 +184,33 @@ class Miscellaneous(commands.Cog):
     @commands.command(aliases=['define', 'u'])
     async def urban(self, ctx, term="none", number=1):
         """Search a term through UrbanDictionary. [Format: %urban (term) (definition number)][Aliases: define,u]"""
-        if term == "none":
-            await ctx.send("> **Please enter a word for me to define**")
-        if term != "none":
-            term = term.replace("_", " ")
-            url = "https://mashape-community-urban-dictionary.p.rapidapi.com/define"
-            querystring = {"term": f"{term}"}
-            async with aiohttp.request('GET', url, headers=keys.X_RapidAPI_headers, params=querystring) as r:
-                if r.status == 200:
-                    result = await r.json()
-                    try:
-                        first_result = (result['list'])[number-1]
-                    except:
-                        await ctx.send (f"> **It is not possible to find definition number `{number}` for the word: `{term}`.**")
-                    await ctx.send(f">>> **`Word: {term}`\n`Definition Number: {number}`\n{first_result['definition']}**")
-                else:
-                    await ctx.send("> **The connection to the UrbanDictionary API failed.**")
+        if ctx.channel.is_nsfw():
+            if term == "none":
+                await ctx.send("> **Please enter a word for me to define**")
+            if term != "none":
+                term = term.replace("_", " ")
+                url = "https://mashape-community-urban-dictionary.p.rapidapi.com/define"
+                querystring = {"term": f"{term}"}
+                async with aiohttp.request('GET', url, headers=keys.X_RapidAPI_headers, params=querystring) as r:
+                    if r.status == 200:
+                        result = await r.json()
+                        try:
+                            first_result = (result['list'])[number-1]
+                        except:
+                            await ctx.send (f"> **It is not possible to find definition number `{number}` for the word: `{term}`.**")
+                        await ctx.send(f">>> **`Word: {term}`\n`Definition Number: {number}`\n{first_result['definition']}**")
+                    else:
+                        await ctx.send("> **The connection to the UrbanDictionary API failed.**")
+                pass
             pass
-        pass
+        else:
+            await ctx.send("> **This text channel must be NSFW to use %urban (Guidelines set by top.gg).** ")
 
     @commands.command()
     @commands.is_owner()
     async def announce(self, ctx,*, new_message):
         """Sends a bot message to certain text channels"""
-        # insert specific channel ids here
-        channel_list = []
+        channel_list = [628049276446048256,356846361045368844,413508021088419846,588224699952005123]
         for channel in channel_list:
             channel = client.get_channel(channel)
             await channel.send(f"**ANNOUNCEMENT from {ctx.author}**\n> **{new_message}**")
@@ -277,7 +289,7 @@ class Miscellaneous(commands.Cog):
     @commands.is_owner()
     async def say(self, ctx, *, message):
         """Owner to Bot Message"""
-        await ctx.send(">>> {}".format(message), delete_after=30)
+        await ctx.send(">>> {}".format(message))
 
     @commands.command()
     @commands.is_owner()
@@ -315,7 +327,7 @@ class Miscellaneous(commands.Cog):
                 await ctx.channel.purge(limit=amount, check=clearx, bulk=True)
             elif checker == 1:
                 await ctx.channel.purge(limit=amount, bulk=True)
-            print("Pruned {} messages".format(amount))
+            log.console("Pruned {} messages".format(amount))
         if amount >= 102:
             number = (amount // 100)
             await ctx.send(
@@ -326,5 +338,5 @@ class Miscellaneous(commands.Cog):
                     await ctx.channel.purge(limit=100, check=userid, bulk=True)
                 elif checker == 1:
                     await ctx.channel.purge(limit=100, bulk=True)
-                print("Pruned 100 messages")
+                log.console("Pruned 100 messages")
             await ctx.send("> **{}** messages have been pruned.".format(original))

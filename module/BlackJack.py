@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands, tasks
 import sqlite3
 from random import *
+from module import logger as log
 
 
 client = 0
@@ -49,7 +50,7 @@ class BlackJack(commands.Cog):
                         await ctx.send("> **You are not currently registered. Please type %register to register.**",
                                        delete_after=40)
                     if count == 1:
-                        current_amount = c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_1,)).fetchone()[0]
+                        current_amount = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_1,)).fetchone()[0])
                         if amount > current_amount:
                             await ctx.send("> **You do not have enough money to give!**", delete_after=40)
                         if amount <= current_amount:
@@ -63,7 +64,7 @@ class BlackJack(commands.Cog):
                         await ctx.send("> **There is an error with the database. Please report to an administrator**",
                                        delete_after=40)
             except Exception as e:
-                print (e)
+                log.console (e)
                 await ctx.send(
                     "> **You are already in a pending/active game. Please type %endgame to end your current game.**",
                     delete_after=40)
@@ -78,7 +79,7 @@ class BlackJack(commands.Cog):
             @tasks.loop(seconds=5.0)
             async def new_task():
                 self.count += 1
-                # print (game)
+                # log.console (game)
                 stand = str(c.execute("SELECT Stand FROM Games WHERE GameID = ?", (game_id,)).fetchone()[0])
                 if stand == '22':
                     score_1 = c.execute("SELECT Score1 FROM Games WHERE GameID = ?", (game_id,)).fetchone()[0]
@@ -98,15 +99,13 @@ class BlackJack(commands.Cog):
                         if result_1 < result_2:
                             # player 1 wins
                             # add money
-                            current_val = \
-                            c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_1,)).fetchone()[0]
+                            current_val = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_1,)).fetchone()[0])
                             total_amount = bid_2 + current_val
-                            c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (total_amount, player_1))
+                            c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{total_amount}', player_1))
                             # subtract money
-                            current_val = \
-                            c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_2,)).fetchone()[0]
+                            current_val = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_2,)).fetchone()[0])
                             total_amount = current_val - bid_2
-                            c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (total_amount, player_2))
+                            c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{total_amount}', player_2))
                             await ctx.send(
                                 "> **<@{}> has won {:,} Dollars with {} points against <@{}> with {} points in BlackJack.**".format(
                                     player_1, bid_sum, score_1, player_2, score_2), delete_after=40)
@@ -114,15 +113,13 @@ class BlackJack(commands.Cog):
                         if result_2 < result_1:
                             # player 2 wins
                             # add money
-                            current_val = \
-                            c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_2,)).fetchone()[0]
+                            current_val = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_2,)).fetchone()[0])
                             total_amount = bid_1 + current_val
-                            c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (total_amount, player_2))
+                            c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{total_amount}', player_2))
                             # subtract money
-                            current_val = \
-                            c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_1,)).fetchone()[0]
+                            current_val = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_1,)).fetchone()[0])
                             total_amount = current_val - bid_1
-                            c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (total_amount, player_1))
+                            c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{total_amount}', player_1))
                             await ctx.send(
                                 "> **<@{}> has won {:,} Dollars with {} points against <@{}> with {} points in BlackJack.**".format(
                                     player_2, bid_sum, score_2, player_1, score_1), delete_after=40)
@@ -134,30 +131,26 @@ class BlackJack(commands.Cog):
                         if score_1 > score_2:
                             # player 1 wins
                             # add money
-                            current_val = \
-                            c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_1,)).fetchone()[0]
+                            current_val = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_1,)).fetchone()[0])
                             total_amount = bid_2 + current_val
-                            c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (total_amount, player_1))
+                            c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{total_amount}', player_1))
                             # subtract money
-                            current_val = \
-                            c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_2,)).fetchone()[0]
+                            current_val = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_2,)).fetchone()[0])
                             total_amount = current_val - bid_2
-                            c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (total_amount, player_2))
+                            c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{total_amount}', player_2))
                             await ctx.send(
                                 "> **<@{}> has won {:,} Dollars with {} points against <@{}> with {} points in BlackJack.**".format(
                                     player_1, bid_sum, score_1, player_2, score_2), delete_after=40)
                         if score_2 > score_1:
                             # player 2 wins
                             # add money
-                            current_val = \
-                            c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_2,)).fetchone()[0]
+                            current_val = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_2,)).fetchone()[0])
                             total_amount = bid_1 + current_val
-                            c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (total_amount, player_2))
+                            c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{total_amount}', player_2))
                             # subtract money
-                            current_val = \
-                            c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_1,)).fetchone()[0]
+                            current_val = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_1,)).fetchone()[0])
                             total_amount = current_val - bid_1
-                            c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (total_amount, player_1))
+                            c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{total_amount}', player_1))
                             await ctx.send(
                                 "> **<@{}> has won {:,} Dollars with {} points against <@{}> with {} points in BlackJack.**".format(
                                     player_2, bid_sum, score_2, player_1, score_1), delete_after=40)
@@ -170,60 +163,52 @@ class BlackJack(commands.Cog):
                             if score_1 == 21:
                                 # player1 wins
                                 # add money
-                                current_val = \
-                                c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_1,)).fetchone()[0]
+                                current_val = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_1,)).fetchone()[0])
                                 total_amount = bid_2 + current_val
-                                c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (total_amount, player_1))
+                                c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{total_amount}', player_1))
                                 # subtract money
-                                current_val = \
-                                c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_2,)).fetchone()[0]
+                                current_val = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_2,)).fetchone()[0])
                                 total_amount = current_val - bid_2
-                                c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (total_amount, player_2))
+                                c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{total_amount}', player_2))
                                 await ctx.send(
                                     "> **<@{}> has won {:,} Dollars with {} points against <@{}> with {} points in BlackJack.**".format(
                                         player_1, bid_sum, score_1, player_2, score_2), delete_after=40)
                             if score_2 == 21:
                                 # player2 wins
                                 # add money
-                                current_val = \
-                                c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_2,)).fetchone()[0]
+                                current_val = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_2,)).fetchone()[0])
                                 total_amount = bid_1 + current_val
-                                c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (total_amount, player_2))
+                                c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{total_amount}', player_2))
                                 # subtract money
-                                current_val = \
-                                c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_1,)).fetchone()[0]
+                                current_val = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_1,)).fetchone()[0])
                                 total_amount = current_val - bid_1
-                                c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (total_amount, player_1))
+                                c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{total_amount}', player_1))
                                 await ctx.send(
                                     "> **<@{}> has won {:,} Dollars with {} points against <@{}> with {} points in BlackJack.**".format(
                                         player_2, bid_sum, score_2, player_1, score_1), delete_after=40)
                     if score_1 < 21 and score_2 > 21:
                         # player1 wins
                         # add money
-                        current_val = c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_1,)).fetchone()[
-                            0]
+                        current_val = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_1,)).fetchone()[0])
                         total_amount = bid_2 + current_val
-                        c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (total_amount, player_1))
+                        c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{total_amount}', player_1))
                         # subtract money
-                        current_val = c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_2,)).fetchone()[
-                            0]
+                        current_val = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_2,)).fetchone()[0])
                         total_amount = current_val - bid_2
-                        c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (total_amount, player_2))
+                        c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{total_amount}', player_2))
                         await ctx.send(
                             "> **<@{}> has won {:,} Dollars with {} points against <@{}> with {} points in BlackJack.**".format(
                                 player_1, bid_sum, score_1, player_2, score_2), delete_after=40)
                     if score_1 > 21 and score_2 < 21:
                         # player2 wins
                         # add money
-                        current_val = c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_2,)).fetchone()[
-                            0]
+                        current_val = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_2,)).fetchone()[0])
                         total_amount = bid_1 + current_val
-                        c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (total_amount, player_2))
+                        c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{total_amount}', player_2))
                         # subtract money
-                        current_val = c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_1,)).fetchone()[
-                            0]
+                        current_val = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_1,)).fetchone()[0])
                         total_amount = current_val - bid_1
-                        c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (total_amount, player_1))
+                        c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{total_amount}', player_1))
                         await ctx.send(
                             "> **<@{}> has won {:,} Dollars with {} points against <@{}> with {} points in BlackJack.**".format(
                                 player_2, bid_sum, score_2, player_1, score_1), delete_after=40)
@@ -257,7 +242,7 @@ class BlackJack(commands.Cog):
                 @tasks.loop(seconds = 5)
                 async def new_task():
                     self.count += 1
-                    print (game)
+                    log.console (game)
                     if self.count == 60:
                         new_task.close()
                 self.tasks.append(new_task)
@@ -299,8 +284,7 @@ class BlackJack(commands.Cog):
                                         "> **You are not currently registered. Please type %register to register.**",
                                         delete_after=40)
                                 if count == 1:
-                                    current_amount = \
-                                    c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_2,)).fetchone()[0]
+                                    current_amount = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (player_2,)).fetchone()[0])
                                     if amount > current_amount:
                                         await ctx.send("> **You do not have enough money to give!**", delete_after=40)
                                     if amount <= current_amount:
@@ -371,7 +355,7 @@ class BlackJack(commands.Cog):
                                         "> **There is an error with the database. Please report to an administrator**",
                                         delete_after=40)
                 except Exception as e:
-                    print (e)
+                    log.console (e)
                     await ctx.send("> **Failed to join. This game does not exist.**", delete_after=40)
         elif amount < 0:
             await ctx.send("> **You cannot bet a negative number**")

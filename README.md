@@ -1,7 +1,7 @@
 
 # [IreneBot](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=8)
 
-## Irene Bot for Discord in Python V1.003
+## Irene Bot for Discord in Python V1.004
 
 Upon signing up for the Google Drive API, make sure to put the credentials.json in the main folder.  
 [ https://developers.google.com/drive ]  
@@ -131,6 +131,14 @@ Music will not run as an executable (it will not be able to find a module proper
 
 <tr>
 
+<td>module/groupmembers.db</td>
+
+<td>Contains information on idols aside from DreamCatcher</td>
+
+</tr>
+
+<tr>
+
 <td>module/keys.py</td>
 
 <td>All Keys/Tokens should be put here.</td>
@@ -174,6 +182,40 @@ Music will not run as an executable (it will not be able to find a module proper
 <td>module/Games.py</td>
 
 <td>For Games Unrelated to Currency.</td>
+
+</tr>
+
+</tr>
+
+<tr>
+
+<td>module/GroupMembers.py</td>
+
+<td>Contains other groups aside from DreamCatcher.</td>
+
+</tr>
+
+<tr>
+
+<td>module/logger.py</td>
+
+<td>Logs to console and debugger</td>
+
+</tr>
+
+<tr>
+
+<td>DCAPPDownloaded/</td>
+
+<td>Folder for %download_all</td>
+
+</tr>
+
+<tr>
+
+<td>DreamHD/</td>
+
+<td>All HD photos from DC APP go here as they are posted.</td>
 
 </tr>
 
@@ -470,7 +512,17 @@ Music will not run as an executable (it will not be able to find a module proper
 <td></td>
 
 </tr>
+<tr>
 
+<td>daily</td>
+
+<td>Gives 100 Dollars Every 24 Hours</td>
+
+<td>%daily</td>
+
+<td></td>
+
+</tr>
 <tr>
 
 <td>give</td>
@@ -579,18 +631,6 @@ Music will not run as an executable (it will not be able to find a module proper
 
 </tr>
 
-<tr>
-
-<td>daily</td>
-
-<td>Gives 100 Dollars Every 24 Hours</td>
-
-<td>%daily</td>
-
-<td></td>
-
-</tr>
-
 </tbody>
 
 </table>
@@ -612,43 +652,39 @@ Music will not run as an executable (it will not be able to find a module proper
 <th>Aliases</th>
 
 </tr>
-
 <tr>
 
-<td>latest</td>
+<td>createlinks</td>
 
-<td>Grabs the highest resolution possible from MOST RECENT DC Post.</td>
+<td>Create HD links and store them in the database.</td>
 
-<td>%latest</td>
-
-<td>★</td>
-
-</tr>
-
-<tr>
-
-<td>updates</td>
-
-<td>Send DreamCatcher Updates to your current text channel</td>
-
-<td>To start :%updates | To Stop : %updates stop</td>
-
-<td>★</td>
-
-</tr>
-
-<tr>
-
-<td>download_all</td>
-
-<td>Download All DC Photos from DC APP</td>
-
-<td>%download_all</td>
+<td>%createlinks (post number)</td>
 
 <td>♥</td>
 
 </tr>
+<tr>
 
+<td>dami</td>
+
+<td>Pulls Dami Photo from DCAPP.</td>
+
+<td>%dami</td>
+
+<td></td>
+
+</tr>
+<tr>
+
+<td>dcrandom</td>
+
+<td>Pull Random Photo from DC APP</td>
+
+<td>%dcrandom || %%</td>
+
+<td>%</td>
+
+</tr>
 <tr>
 
 <td>dcstart</td>
@@ -672,14 +708,144 @@ Music will not run as an executable (it will not be able to find a module proper
 <td>♥</td>
 
 </tr>
+<tr>
+
+<td>download_all</td>
+
+<td>Download All DC Photos from DC APP</td>
+
+<td>%download_all</td>
+
+<td>♥</td>
+
+</tr>
+<tr>
+
+<td>dreamcatcher</td>
+
+<td>Pulls DreamCatcher Photo from DCAPP.</td>
+
+<td>%dreamcatcher</td>
+
+<td></td>
+
+</tr>
+<tr>
+
+<td>gahyeon</td>
+
+<td>Pulls Gahyeon Photo from DCAPP.</td>
+
+<td>%gahyeon</td>
+
+<td></td>
+
+</tr>
+<tr>
+
+<td>handong</td>
+
+<td>Pulls Handong Photo from DCAPP.</td>
+
+<td>%handong</td>
+
+<td></td>
+
+</tr>
+<tr>
+
+<td>jiu</td>
+
+<td>Pulls JiU Photo from DCAPP.</td>
+
+<td>%jiu</td>
+
+<td></td>
+
+</tr>
+<tr>
+
+<td>latest</td>
+
+<td>Grabs the highest resolution possible from MOST RECENT DC Post.</td>
+
+<td>%latest</td>
+
+<td>★</td>
+
+</tr>
+<tr>
+
+<td>siyeon</td>
+
+<td>Pulls Siyeon Photo from DCAPP.</td>
+
+<td>%siyeon</td>
+
+<td></td>
+
+</tr>
+<tr>
+
+<td>sua</td>
+
+<td>Pulls SuA Photo from DCAPP.</td>
+
+<td>%sua</td>
+
+<td></td>
+
+</tr>
+<tr>
+
+<td>updates</td>
+
+<td>Send DreamCatcher Updates to your current text channel</td>
+
+<td>To start :%updates | To Stop : %updates stop</td>
+
+<td>★</td>
+
+</tr>
+<tr>
+
+<td>yoohyeon</td>
+
+<td>Pulls Yoohyeon Photo from DCAPP.</td>
+
+<td>%yoohyeon</td>
+
+<td></td>
+
+</tr>
+</tbody>
+
+</table>  
+  
+#### GroupMembers:
+<table>
+
+<tbody>
 
 <tr>
 
-<td>createlinks</td>
+<th>Command</th>
 
-<td>Create HD links and store them in the database.</td>
+<th>Description</th>
 
-<td>%createlinks (post number)</td>
+<th>Format</th>
+
+<th>Aliases</th>
+
+</tr>
+
+<tr>
+
+<td>addalias</td>
+
+<td>Add alias to a member</td>
+
+<td>%addalias <alias> <member></td>
 
 <td>♥</td>
 
@@ -687,19 +853,128 @@ Music will not run as an executable (it will not be able to find a module proper
 
 <tr>
 
-<td>dcrandom</td>
+<td>addmemberurl</td>
 
-<td>Pull Random Photo from DC APP</td>
+<td>Adds URL to GroupMembers database</td>
 
-<td>%dcrandom || %%</td>
+<td>%addmemberurl <link="NULL", member="NULL", group="NULL", group2="NULL", group3="NULL", stage_name="NULL", *, aliases="NULL"></td>
 
-<td>%</td>
+<td>♥</td>
+
+</tr>
+
+<tr>
+
+<td>aliases</td>
+
+<td>Lists the aliases of idols that have one</td>
+
+<td>%aliases</td>
+
+<td></td>
+
+</tr>
+
+<tr>
+
+<td>fullnames</td>
+
+<td>Lists the full names of idols the bot has photos of</td>
+
+<td>%fullnames</td>
+
+<td></td>
+
+</tr>
+
+<tr>
+
+<td>getlinks</td>
+
+<td>Add links of photos to database from linked Archives</td>
+
+<td>%getlinks <link="NULL", member="NULL", group="NULL", group2="NULL", group3="NULL", stage_name="NULL", aliases="NULL"></td>
+
+<td>♥</td>
+
+</tr>
+
+<tr>
+
+<td>groups</td>
+
+<td>Lists the groups of idols the bot has photos of</td>
+
+<td>%groups</td>
+
+<td></td>
+
+</tr>
+
+<tr>
+
+<td>members</td>
+
+<td>Lists the names of idols the bot has photos of</td>
+
+<td>%members</td>
+
+<td></td>
+
+</tr>
+
+<tr>
+
+<td>removealias</td>
+
+<td>Add alias to a member</td>
+
+<td>%addalias <alias> <idol's full name></td>
+
+<td>♥</td>
+
+</tr>
+
+<tr>
+
+<td>scrapelinks</td>
+
+<td>Connection to site + put html to html_page.txt</td>
+
+<td>%scrapelinks <url></td>
+
+<td>♥</td>
+
+</tr>
+
+<tr>
+
+<td>sort</td>
+
+<td>Approve member links with a small sorting game.</td>
+
+<td>%sort -- checks next message <member's name, delete, deleteall, stop></td>
+
+<td>♥</td>
+
+</tr>
+
+<tr>
+
+<td>tenor</td>
+
+<td>Connection to tenor API // Sends Links of gifs to Database. Dashes (-) are spaces.</td>
+
+<td>%tenor <key-word> <amount of gifs></td>
+
+<td>♥</td>
 
 </tr>
 
 </tbody>
 
 </table>
+
 
 #### ImageUploader: ♥♥♥
 
@@ -800,7 +1075,17 @@ Music will not run as an executable (it will not be able to find a module proper
 <td>8ball,8</td>
 
 </tr>
+<tr>
 
+<td>addemoji</td>
+
+<td>Adds an emoji to the server.</td>
+
+<td>%addemoji (url) (emoji_name)</td>
+
+<td>★</td>
+
+</tr>
 <tr>
 
 <td>announce</td>
@@ -812,7 +1097,17 @@ Music will not run as an executable (it will not be able to find a module proper
 <td>♥</td>
 
 </tr>
+<tr>
 
+<td>ban</td>
+
+<td>Ban A User</td>
+
+<td>%ban @user</td>
+
+<td>★</td>
+
+</tr>
 <tr>
 
 <td>clear</td>
@@ -824,7 +1119,28 @@ Music will not run as an executable (it will not be able to find a module proper
 <td>★ prune</td>
 
 </tr>
+<tr>
 
+<td>flip</td>
+
+<td>Flips a Coin</td>
+
+<td>%flip</td>
+
+<td></td>
+
+</tr>
+<tr>
+
+<td>kick</td>
+
+<td>Kick A User</td>
+
+<td>%kick @user</td>
+
+<td>★</td>
+
+</tr>
 <tr>
 
 <td>kill</td>
@@ -848,7 +1164,16 @@ Music will not run as an executable (it will not be able to find a module proper
 <td>♥</td>
 
 </tr>
+<tr>
 
+<td>nword</td>
+
+<td>Checks how many times a user has said the N Word</td>
+
+<td>%nword @user</td>
+
+<td></td>
+</tr>
 <tr>
 
 <td>ping</td>
@@ -860,7 +1185,17 @@ Music will not run as an executable (it will not be able to find a module proper
 <td>pong</td>
 
 </tr>
+<tr>
 
+<td>random</td>
+
+<td>Choose a random number from a range (a,b)</td>
+
+<td>%random a b [Ex: %random 1 100]</td>
+
+<td>r,rand,randint</td>
+
+</tr>
 <tr>
 
 <td>say</td>
@@ -896,66 +1231,6 @@ Music will not run as an executable (it will not be able to find a module proper
 <td>♥</td>
 
 </tr>
-
-<tr>
-
-<td>urban</td>
-
-<td>Search the meaning of a word through Urban Dictionary.</td>
-
-<td>%urban (term) (definition number)</td>
-
-<td>define,u</td>
-
-</tr>
-
-<tr>
-
-<td>flip</td>
-
-<td>Flips a Coin</td>
-
-<td>%flip</td>
-
-<td></td>
-
-</tr>
-
-<tr>
-
-<td>random</td>
-
-<td>Choose a random number from a range (a,b)</td>
-
-<td>%random a b [Ex: %random 1 100]</td>
-
-<td>r,rand,randint</td>
-
-</tr>
-
-<tr>
-
-<td>addemoji</td>
-
-<td>Adds an emoji to the server.</td>
-
-<td>%addemoji (url) (emoji_name)</td>
-
-<td>★</td>
-
-</tr>
-
-<tr>
-
-<td>nword</td>
-
-<td>Checks how many times a user has said the N Word</td>
-
-<td>%nword @user</td>
-
-<td></td>
-</tr>
-
 <tr>
 
 <td>tempchannel</td>
@@ -967,19 +1242,6 @@ Music will not run as an executable (it will not be able to find a module proper
 <td>★ temp</td>
 
 </tr>
-
-<tr>
-
-<td>ban</td>
-
-<td>Ban A User</td>
-
-<td>%ban @user</td>
-
-<td>★</td>
-
-</tr>
-
 <tr>
 
 <td>unban</td>
@@ -991,24 +1253,11 @@ Music will not run as an executable (it will not be able to find a module proper
 <td>★</td>
 
 </tr>
-
-<tr>
-
-<td>kick</td>
-
-<td>Kick A User</td>
-
-<td>%kick @user</td>
-
-<td>★</td>
-
-</tr>
-
 </tbody>
 
 </table>
 
-#### Music:
+#### Music [Currently Disabled]:
 
 <table>
 

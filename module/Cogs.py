@@ -1,4 +1,6 @@
 from discord.ext import commands
+from module import logger as log
+
 
 client = 0
 

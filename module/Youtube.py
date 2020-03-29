@@ -4,6 +4,7 @@ import aiohttp
 from bs4 import BeautifulSoup as soup
 from datetime import *
 import asyncio
+from module import logger as log
 
 client = 0
 path = 'module\currency.db'
@@ -30,7 +31,7 @@ class Youtube(commands.Cog):
                 DBconn.commit()
                 await ctx.send("> **That video is now being traced**")
             except Exception as e:
-                print (e)
+                log.console (e)
                 await ctx.send("> **That video is already being tracked.**")
 
     @commands.command()
@@ -55,7 +56,7 @@ class Youtube(commands.Cog):
                 async with session.get('{}'.format(link[0])) as r:
                     if r.status == 200:
                         page_html = await r.text()
-                        print(page_html)
+                        log.console(page_html)
                         page_soup = soup(page_html, "html.parser")
                         view_count = (page_soup.find("div", {"class": "watch-view-count"})).text
                         # c.execute("INSERT INTO ViewCount VALUES (?,?)", (id,datetime.now()))
@@ -97,7 +98,7 @@ class YoutubeLoop:
                     async with session.get('{}'.format(link[0])) as r:
                         if r.status == 200:
                             page_html = await r.text()
-                            # print(page_html)
+                            # log.console(page_html)
                             page_soup = soup(page_html, "html.parser")
                             view_count = (page_soup.find("div", {"class": "watch-view-count"})).text
                             now = datetime.now()
@@ -105,9 +106,9 @@ class YoutubeLoop:
                             self.view_count.append(view_count)
                             self.now.append(now)
                             DBconn.commit()
-            print("Updated Video Views Tracker")
+            # log.console("Updated Video Views Tracker")
         except Exception as e:
-            print(e)
+            log.console(e)
 
         # There was an error with the proper channel not being found
         # this was just a temporary set up for having 2 videos linked to a channel

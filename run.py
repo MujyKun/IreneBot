@@ -9,19 +9,21 @@ from module import keys
 from module import Cogs
 from module import Youtube
 from module import Games
+from module import GroupMembers
+from module import logger as log
 from discord.ext import commands
 import discord
 import sqlite3
 import threading
-import logging
 
-
-logging.basicConfig(level=logging.INFO)
-
-client = commands.Bot(command_prefix='%', case_insensitive = True)
+client = commands.Bot(command_prefix='%', case_insensitive=True)
 path = 'module\currency.db'
-DBconn = sqlite3.connect(path, check_same_thread = False)
+DBconn = sqlite3.connect(path, check_same_thread=False)
 c = DBconn.cursor()
+
+path1 = 'module/GroupMembers.db'
+DBconn1 = sqlite3.connect(path1, check_same_thread=False)
+c1 = DBconn1.cursor()
 
 
 def IreneBot():
@@ -29,7 +31,7 @@ def IreneBot():
     @client.event
     async def on_ready():
         await client.change_presence(status=discord.Status.online, activity=discord.Game("%help"))
-        print('Irene is online')
+        log.console('Irene is online')
 
     # Change this to the id of a channel you want the logged messages to go to
     # This can easily be changed into a database format; but I put it here because I know exactly where I want it
@@ -37,9 +39,9 @@ def IreneBot():
     # DO NOT FORGET THERE ARE 2 WAYS TO LOG
     # THERE IS ALREADY A LOGGING SYSTEM USING %logging
     # logging_channel_id is the main for the logging command
-    logging_channel_id = 0
+    logging_channel_id = 669416654278623242
     # below is for private logging [can be used for certain text channels that you want logged but not others]
-    logging_channel_id2 = 0
+    logging_channel_id2 = 669753544177483806
 
     @client.event
     async def on_message(message):
@@ -100,9 +102,9 @@ def IreneBot():
                         embed = discord.Embed(title="Log", description=embed_message, color=0xff00f6)
                         await logging_channel.send(embed=embed)
             if message_content[0] == '%':
-                print(f"COMMAND LOG: {message_sender} || {message_content} ")
+                log.console(f"COMMAND LOG: {message_sender} || {message_content} ")
         except Exception as e:
-            # print(e)
+            # log.console(e)
             pass
         await client.process_commands(message)
 
@@ -111,17 +113,17 @@ def IreneBot():
         if isinstance(error, commands.errors.CommandNotFound):
             pass
         if isinstance(error, commands.errors.CommandInvokeError):
-            print(f"Command Invoke Error -- {error}")
+            log.console(f"Command Invoke Error -- {error}")
             pass
         if isinstance(error, commands.errors.CommandOnCooldown):
             embed = discord.Embed(title="Error", description=f"** {error} **", color=0xff00f6)
             await ctx.send(embed=embed)
-            print(f"{error}")
+            log.console(f"{error}")
             pass
         if isinstance(error, commands.errors.BadArgument):
                 embed = discord.Embed(title="Error", description=f"** {error} **", color=0xff00f6)
                 await ctx.send(embed=embed)
-                print(f"{error}")
+                log.console(f"{error}")
                 ctx.command.reset_cooldown(ctx)
                 pass
     # Start Automatic DC Loop
@@ -139,6 +141,16 @@ def IreneBot():
     Cogs.setup(client)
     Youtube.setup(client)
     Games.setup(client)
+    client.add_listener(GroupMembers.on_message2, 'on_message')
+    GroupMembers.setup(client)
+
+    # start logging console and file
+    # For INFO Logging
+    log.info()
+    # For Debugging
+    # log.debug()
+
+    # run bot
     client.run(keys.client_token)
 
 

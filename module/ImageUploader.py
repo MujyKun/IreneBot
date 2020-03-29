@@ -3,6 +3,7 @@ import uuid
 from urllib.request import urlretrieve
 from discord.ext import commands
 from module import quickstart
+from module import logger as log
 
 client = 0
 
@@ -12,9 +13,7 @@ def setup(client1):
     global client
     client = client1
 
-# This does not work perfectly as it blocks other commands - was not built for async - they added new methods to grabbing files, so this is kinda pointless
-# but it may be helpful in certain cases.
-# does not always grab the right file format? was not tested enough.
+
 class ImageUploader(commands.Cog):
     final_url = ""
 
@@ -27,7 +26,7 @@ class ImageUploader(commands.Cog):
         """Downloads Images from Current Text Channel [Format: %steal (amount of messages)][Aliases: log]"""
         if amount == 0:
             amount = None
-        print("Starting to download images to PC")
+        log.console("Starting to download images to PC")
         count = 0
         async for response in ctx.history(limit=amount):
             # await asyncio.sleep(1)
@@ -50,14 +49,14 @@ class ImageUploader(commands.Cog):
                     # await ctx.send("{} has been saved to your PC".format(file_name1))
                     # urlretrieve(url, "local-filename.jpg")
                     count += 1
-                    print("Finished downloading #{}".format(count))
+                    log.console("Finished downloading #{}".format(count))
                 # embed
                 elif len(response.embeds) >= 1:
                     # await ctx.send("> {}".format(response.embeds[0].url))
                     url = "{}".format(response.embeds[0].url)
                     type = response.embeds[0].type
-                    # print (url)
-                    # print (type)
+                    # log.console (url)
+                    # log.console (type)
                     if type == "gifv":
                         keep_going = False
                     elif type == "image":
@@ -72,17 +71,17 @@ class ImageUploader(commands.Cog):
                     elif type == "rich":
                         keep_going = False
                     else:
-                        print("THERE IS A NEW TYPE!")
+                        log.console("THERE IS A NEW TYPE!")
 
                     if keep_going == True:
                         # file_name1 = str(uuid.uuid1()) + ".jpg"
                         # await ctx.send("{} has been saved to your PC".format(file_name1))
                         urlretrieve(url, "Photos/{}".format(file_name1))
                         count += 1
-                        print("Finished downloading #{}".format(count))
-                        # print ("Finished downloading #{} for {}".format(count,file_name1))
+                        log.console("Finished downloading #{}".format(count))
+                        # log.console ("Finished downloading #{} for {}".format(count,file_name1))
                 else:
-                    # print ("Not an attachment or image")
+                    # log.console ("Not an attachment or image")
                     pass
             except:
                 pass
@@ -93,7 +92,7 @@ class ImageUploader(commands.Cog):
     @commands.is_owner()
     async def upload(self, ctx, *, filename=''):
         """Uploads All Images in the Photos Folder to Google Drive [Format: %upload (all/filename)]"""
-        print("Startng to upload photos to Google Drive")
+        log.console("Startng to upload photos to Google Drive")
         try:
             count = 0
             if filename == '':
@@ -102,11 +101,11 @@ class ImageUploader(commands.Cog):
                 all_photos = os.listdir('Photos')
                 for photo in all_photos:
                     count += 1
-                    print("Currently Uploading Number **{}**".format(count))
-                    # print ("Currently Uploading {}, Number: {}".format(photo,count))
+                    log.console("Currently Uploading Number **{}**".format(count))
+                    # log.console ("Currently Uploading {}, Number: {}".format(photo,count))
                     quickstart.main(photo)
                 await ctx.send(
-                    "> All Photos have been uploaded to the Google Drive at \n> <insert link here>")
+                    "> All Photos have been uploaded to the Google Drive at \n> <https://drive.google.com/drive/folders/1VMG-6m1p_5W-JquWMCA-DZRUnYAFujUd?usp=sharing>")
             else:
                 await ctx.send("> Uploading {} to Google Drive".format(filename))
                 quickstart.main(filename)
@@ -137,6 +136,6 @@ class ImageUploader(commands.Cog):
     async def view(self, ctx):
         """Shows amount of Images in the Photos Folder [Format: %view]"""
         all_photos = os.listdir('Photos')
-        print(all_photos)
+        log.console(all_photos)
         await ctx.send("> There are **{}** Photos ready to be uploaded.".format(len(all_photos)))
 

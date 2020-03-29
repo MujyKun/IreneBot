@@ -3,6 +3,7 @@ import os
 from discord.ext import commands
 import youtube_dl
 import asyncio
+from module import logger as log
 
 client = 0
 
@@ -83,7 +84,7 @@ class Music(commands.Cog):
     async def localfiles(self, ctx):
         """Displays all music in the music folder [Format: %localfiles]"""
         all_music = os.listdir('music')
-        print(all_music)
+        log.console(all_music)
         song_list = ""
         for song in all_music:
             song_list += "{}\n".format(song)
@@ -118,7 +119,7 @@ class Music(commands.Cog):
         """Plays a file from the local filesystem"""
         newquery = "music/{}".format(query)
         source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(newquery))
-        ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
+        ctx.voice_client.play(source, after=lambda e: log.console('Player error: %s' % e) if e else None)
         ctx.voice_client.source.volume = 20 / 100
         await ctx.send('> **Now playing:** {}'.format(query))
 
@@ -127,7 +128,7 @@ class Music(commands.Cog):
         """Play A Song From Youtube[Format: %yt (url)]"""
         async with ctx.typing():
             player = await YTDLSource.from_url(url, loop=self.client.loop)
-            ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
+            ctx.voice_client.play(player, after=lambda e: log.console('Player error: %s' % e) if e else None)
             ctx.voice_client.source.volume = 10 / 100
         await ctx.send('> **Now playing: **{}'.format(player.title))
 
@@ -136,7 +137,7 @@ class Music(commands.Cog):
         """Streams from a url (same as yt, but doesn't predownload)"""
         async with ctx.typing():
             player = await YTDLSource.from_url(url, loop=self.client.loop, stream=True)
-            ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
+            ctx.voice_client.play(player, after=lambda e: log.console('Player error: %s' % e) if e else None)
             ctx.voice_client.source.volume = 20 / 100
         await ctx.send('> **Now playing: **{}'.format(player.title))
 

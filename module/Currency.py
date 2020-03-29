@@ -3,6 +3,7 @@ from discord.ext.commands.cooldowns import BucketType
 import discord
 import sqlite3
 from random import *
+from module import logger as log
 
 
 client = 0
@@ -28,11 +29,11 @@ class Currency(commands.Cog):
         """Gives 100 Dollars Every 24 Hours [Format: %daily]"""
         count = c.execute("SELECT COUNT(*) FROM Currency WHERE UserID = ?", (ctx.author.id,)).fetchone()[0]
         if count == 0:
-            c.execute("INSERT INTO Currency VALUES(?, ?)", (ctx.author.id, 200))
+            c.execute("INSERT INTO Currency VALUES(?, ?)", (ctx.author.id, "200"))
         elif count != 0:
-            current_bal = c.execute("SELECT Money FROM Currency WHERE UserID = ? ", (ctx.author.id,)).fetchone()[0]
+            current_bal = int(c.execute("SELECT Money FROM Currency WHERE UserID = ? ", (ctx.author.id,)).fetchone()[0])
             new_bal = 100 + current_bal
-            c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (new_bal, ctx.author.id))
+            c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f"{new_bal}", ctx.author.id))
         DBconn.commit()
         await ctx.send("> **You have been been given $100.**")
 
@@ -56,7 +57,7 @@ class Currency(commands.Cog):
 
     @tasks.loop(seconds=0, minutes=0, hours=24, reconnect=True, count=2)
     async def new_task2(self, ctx):
-        print("Connecting to Background Task For Raffle...")
+        log.console("Connecting to Background Task For Raffle...")
         self.a += 1
         if self.a == 0:
             pass
@@ -71,10 +72,10 @@ class Currency(commands.Cog):
                 count_number = c.execute("SELECT COUNT(*) FROM RaffleData").fetchone()[0]
                 random_number = randint(1, count_number)
                 winner = c.execute("SELECT UserID FROM RaffleData WHERE RaffleID = ?", (random_number,)).fetchone()[0]
-                current_val = c.execute("SELECT Money FROM Currency WHERE UserID = ?", (winner,)).fetchone()[0]
+                current_val = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (winner,)).fetchone()[0])
                 new_total = current_val + balance
                 await ctx.send("> **<@{}> has won {:,} Dollars from the raffle!**".format(winner, balance))
-                c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (new_total, winner))
+                c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f"{new_total}", winner))
                 c.execute("DELETE FROM Raffle")
                 c.execute("DELETE FROM RaffleData")
                 DBconn.commit()
@@ -87,7 +88,7 @@ class Currency(commands.Cog):
 
             if balance != 'balance':
                 try:
-                    current_val = c.execute("SELECT Money FROM Currency WHERE UserID = ?", (userid,)).fetchone()[0]
+                    current_val = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (userid,)).fetchone()[0])
                 except:
                     await ctx.send("> **You are not currently registered. Please type %register to register.**",
                                    delete_after=60)
@@ -104,7 +105,7 @@ class Currency(commands.Cog):
                         if search_count == 0:
                             for b in range(0, amount):
                                 c.execute("INSERT INTO RaffleData VALUES (NULL,?,?)", (userid, 1))
-                            c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (new_val, userid))
+                            c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f"{new_val}", userid))
                             await ctx.send("> **You have added {} Dollars to the raffle.**".format(amount))
                         if search_count >= 1:
                             old_amount = \
@@ -112,7 +113,7 @@ class Currency(commands.Cog):
                             new_amount = old_amount + amount
                             for b in range(0, amount):
                                 c.execute("INSERT INTO RaffleData VALUES (NULL,?,?)", (userid, 1))
-                            c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (new_val, userid))
+                            c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f"{new_val}", userid))
                             await ctx.send(
                                 "> **You have added another {:,} Dollars to the raffle. You currently have {} entries.**".format(
                                     amount, new_amount))
@@ -147,7 +148,7 @@ class Currency(commands.Cog):
         userid = ctx.author.id
         count = c.execute("SELECT COUNT(*) FROM Currency WHERE UserID = ?", (userid,)).fetchone()[0]
         if count == 0:
-            c.execute("INSERT INTO Currency (UserID, Money) VALUES (?, ?)", (userid, 100))
+            c.execute("INSERT INTO Currency (UserID, Money) VALUES (?, ?)", (userid, '100'))
             DBconn.commit()
             await ctx.send("> **You are now registered in the database. You have been given 100 Dollars to start.**")
         elif count == 1:
@@ -161,14 +162,18 @@ class Currency(commands.Cog):
         else:
             userid = user.id
         try:
-            amount = c.execute("SELECT Money FROM Currency WHERE UserID = ?", (userid,)).fetchone()[0]
-            await ctx.send("> **{} currently has {:,} Dollars.**".format(client.get_user(userid), amount))
-        except:
-            c.execute("INSERT INTO Currency (UserID, Money) VALUES (?, ?)", (userid, 100))
-            DBconn.commit()
-            await ctx.send(
-                "> **{} is now registered in the database. They have been given 100 Dollars to start.**".format(
-                    client.get_user(userid)))
+            user = c.execute("SELECT COUNT(*) FROM Currency WHERE UserID = ?", (userid,)).fetchone()[0]
+            if user == 0:
+                c.execute("INSERT INTO Currency (UserID, Money) VALUES (?, ?)", (userid, '100'))
+                await ctx.send(
+                    "> **{} is now registered in the database. They have been given 100 Dollars to start.**".format(
+                        client.get_user(userid)))
+                DBconn.commit()
+            if user == 1:
+                amount = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (userid,)).fetchone()[0])
+                await ctx.send("> **{} currently has {:,} Dollars.**".format(client.get_user(userid), amount))
+        except Exception as e:
+            log.console (e)
 
     @commands.command()
     async def bet(self, ctx, *, balance=1):
@@ -184,9 +189,9 @@ class Currency(commands.Cog):
             if balance > 0:
                 if keep_going == True:
                     try:
-                        amount = c.execute("SELECT Money FROM Currency WHERE UserID = ?", (userid,)).fetchone()[0]
+                        amount = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (userid,)).fetchone()[0])
                     except:
-                        c.execute("INSERT INTO Currency (UserID, Money) VALUES (?, ?)", (userid, 100))
+                        c.execute("INSERT INTO Currency (UserID, Money) VALUES (?, ?)", (userid, '100'))
                         DBconn.commit()
                         await ctx.send(
                             "> **You are now registered in the database. You have been given 100 Dollars to start.**")
@@ -203,7 +208,7 @@ class Currency(commands.Cog):
                                 await ctx.send(
                                     "> **<@{}> Got Super Unlucky! You lost {:,} out of {:,}. Your updated balance is {:,}.**".format(
                                         userid, newbalance, balance, newamount))
-                                c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (newamount, userid))
+                                c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{newamount}', userid))
                                 DBconn.commit()
                             if a > 10:
                                 newbalance = round(balance - (balance / 2))
@@ -211,7 +216,7 @@ class Currency(commands.Cog):
                                 await ctx.send(
                                     "> **<@{}> Lost! You lost {:,} out of {:,}. Your updated balance is {:,}.**".format(
                                         userid, newbalance, balance, newamount))
-                                c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (newamount, userid))
+                                c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{newamount}', userid))
                                 DBconn.commit()
                         if a > 50:
                             if a <= 60:
@@ -220,7 +225,7 @@ class Currency(commands.Cog):
                                 await ctx.send(
                                     "> **<@{}> Won! You bet {:,} and received {:,}. Your updated balance is {:,}.**".format(
                                         userid, balance, newbalance, newamount))
-                                c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (newamount, userid))
+                                c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{newamount}', userid))
                                 DBconn.commit()
                             if a > 60:
                                 if a <= 70:
@@ -229,7 +234,7 @@ class Currency(commands.Cog):
                                     await ctx.send(
                                         "> **<@{}> Won! You bet {:,} and received {:,}. Your updated balance is {:,}.**".format(
                                             userid, balance, newbalance, newamount))
-                                    c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (newamount, userid))
+                                    c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{newamount}', userid))
                                     DBconn.commit()
                                 if a > 70:
                                     if a <= 80:
@@ -238,7 +243,7 @@ class Currency(commands.Cog):
                                         await ctx.send(
                                             "> **<@{}> Won! You bet {:,} and received {:,}. Your updated balance is {:,}.**".format(
                                                 userid, balance, newbalance, newamount))
-                                        c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (newamount, userid))
+                                        c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{newamount}', userid))
                                         DBconn.commit()
                                     if a > 80:
                                         if a <= 90:
@@ -248,7 +253,7 @@ class Currency(commands.Cog):
                                                 "> **<@{}> Won! Your {:,} has been multiplied by 1.5 to {:,}. Your updated balance is {:,}.**".format(
                                                     userid, balance, newbalance, newamount))
                                             c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?",
-                                                      (newamount, userid))
+                                                      (f'{newamount}', userid))
                                             DBconn.commit()
                                         if a > 90:
                                             if a <= 99:
@@ -258,7 +263,7 @@ class Currency(commands.Cog):
                                                     "> **<@{}> Won! Your {:,} has been doubled to {:,}. Your updated balance is {:,}.**".format(
                                                         userid, balance, newbalance, newamount))
                                                 c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?",
-                                                          (newamount, userid))
+                                                          (f'{newamount}', userid))
                                                 DBconn.commit()
                                             if a == 100:
                                                 newbalance = round(balance * 3)
@@ -267,7 +272,7 @@ class Currency(commands.Cog):
                                                     "> **<@{}> Won! Your {:,} has been tripled to {:,}. Your updated balance is {:,}.**".format(
                                                         userid, balance, newbalance, newamount))
                                                 c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?",
-                                                          (newamount, userid))
+                                                          (f'{newamount}', userid))
                                                 DBconn.commit()
         if check_1 >= 1:
             await ctx.send("> **Please type %endgame. You cannot use this command when you're in a game.**")
@@ -279,19 +284,27 @@ class Currency(commands.Cog):
         if counter == 0:
             await ctx.send("> **There are no users to display.**", delete_after=60)
         if counter > 0:
-            amount = c.execute("Select UserID,Money FROM Currency ORDER BY Money DESC").fetchall()
+            amount = c.execute("Select UserID,Money FROM Currency").fetchall()
             list_money = []
-            for a in amount:
+            sort_money = []
+            for sort in amount:
+                new_user = [sort[0], int(sort[1])]
+                sort_money.append(new_user)
+            sort_money.sort(key=lambda x: x[1], reverse=True)
+            for a in sort_money:
                 UserID = a[0]
                 Money = a[1]
                 UserName = client.get_user(UserID)
                 final = "**{} ({}) currently has {:,} Dollars.**\n".format(UserName, UserID, Money)
                 list_money.append(final)
-            final = list_money[0:9]
+            if len(list_money) >= 10:
+                final = list_money[0:10]
+            elif len(list_money) < 10:
+                final = list_money[0:len(list_money)]
             final_list = ''
             for a in final:
                 final_list += a
-            await ctx.send(">>> {}".format(final_list), delete_after=60)
+            await ctx.send(">>> {}".format(final_list))
 
     @commands.command()
     async def beg(self, ctx):
@@ -299,9 +312,9 @@ class Currency(commands.Cog):
         userid = ctx.author.id
         broke_money = randint(1, 9)
         try:
-            amount = c.execute("SELECT Money FROM Currency WHERE UserID = ?", (userid,)).fetchone()[0]
+            amount = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (userid,)).fetchone()[0])
         except:
-            c.execute("INSERT INTO Currency (UserID, Money) VALUES (?, ?)", (userid, 100))
+            c.execute("INSERT INTO Currency (UserID, Money) VALUES (?, ?)", (userid, '100'))
             DBconn.commit()
             await ctx.send("> **You are now registered in the database. You have been given 100 Dollars to start.**")
             amount = 100
@@ -309,7 +322,7 @@ class Currency(commands.Cog):
             await ctx.send("> **The homeless man doesn't want to spare you any money.**")
         elif amount <= 100:
             await ctx.send("> **A homeless man gave you {:,} Dollar(s)**.".format(broke_money))
-            c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (broke_money + amount, userid))
+            c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{broke_money + amount}', userid))
         DBconn.commit()
 
     @commands.command()
@@ -322,54 +335,60 @@ class Currency(commands.Cog):
     async def rob(self, ctx, *, user: discord.Member = ""):
         """Rob a user - Max Value = 1000 [Format: %rob @user]"""
         # ADD A DELAY TO HOW MANY TIMES THEY CAN USE THE COMMAND
+        do_this = True
+        userid = ""
         if user == "":
             await ctx.send("> **Please @ the user you want to rob**")
+            ctx.command.reset_cooldown(ctx)
+            do_this = False
         else:
             userid = user.id
-        try:
-            user_money = c.execute("SELECT Money FROM Currency WHERE UserID = ?", (userid,)).fetchone()[0]
-            actual_user_money = c.execute("SELECT Money FROM Currency WHERE UserID = ?", (ctx.author.id,)).fetchone()[0]
-        except:
-            await ctx.send(f"> **Either you or <@{userid}> is not registered. Please type %register first.**")
-            ctx.command.reset_cooldown(ctx)
-        if ctx.author.id != userid:
-            if actual_user_money >= 0:
-                if user_money >= 0:
-                        try:
-                            random_number = randint(0, 1)
-                            if random_number == 0:
-                                await ctx.send(f"> **You have failed to rob <@{userid}>**")
-                            if random_number == 1:
-                                if user_money >= 10:
-                                    # One Billion
-                                    if user_money >= 1000:
-                                        random_amount = randint(100, 500)
-                                    elif 500 <= user_money < 1000:
-                                        random_amount = randint(50, 100)
-                                    elif 100 <= user_money < 500:
-                                        random_amount = randint(10, 50)
-                                    elif 10 <= user_money < 100:
-                                        random_amount = randint(5, 10)
-                                    try:
-                                        actual_user_money = c.execute("SELECT Money FROM Currency WHERE UserID = ?", (ctx.author.id,)).fetchone()[0]
-                                        actual_user_money = actual_user_money + random_amount
-                                        user_money = user_money - random_amount
-                                        c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (user_money, userid))
-                                        c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (actual_user_money, ctx.author.id))
-                                        DBconn.commit()
-                                        await ctx.send(f"> **You have stolen ${random_amount:,} from <@{userid}>.**")
-                                    except Exception as e:
-                                        await ctx.send (f"> **The Database is locked... -- {e}**")
-                                elif user_money < 10:
-                                    await ctx.send("> **That user has less than $10!**")
-                                    ctx.command.reset_cooldown(ctx)
-                        except Exception as e:
-                            print(e)
-                            await ctx.send("> **An error has occurred.**")
-                            ctx.command.reset_cooldown(ctx)
         if ctx.author.id == userid:
             await ctx.send("> **You can't rob yourself!**")
             ctx.command.reset_cooldown(ctx)
+            do_this = False
+        if do_this:
+            try:
+                user_money = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (userid,)).fetchone()[0])
+                actual_user_money = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (ctx.author.id,)).fetchone()[0])
+            except:
+                await ctx.send(f"> **Either you or <@{userid}> is not registered. Please type %register first.**")
+                ctx.command.reset_cooldown(ctx)
+            if ctx.author.id != userid:
+                if actual_user_money >= 0:
+                    if user_money >= 0:
+                            try:
+                                random_number = randint(0, 1)
+                                if random_number == 0:
+                                    await ctx.send(f"> **You have failed to rob <@{userid}>**")
+                                if random_number == 1:
+                                    if user_money >= 10:
+                                        # One Billion
+                                        if user_money >= 1000:
+                                            random_amount = randint(100, 500)
+                                        elif 500 <= user_money < 1000:
+                                            random_amount = randint(50, 100)
+                                        elif 100 <= user_money < 500:
+                                            random_amount = randint(10, 50)
+                                        elif 10 <= user_money < 100:
+                                            random_amount = randint(5, 10)
+                                        try:
+                                            actual_user_money = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (ctx.author.id,)).fetchone()[0])
+                                            actual_user_money = actual_user_money + random_amount
+                                            user_money = user_money - random_amount
+                                            c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{user_money}', userid))
+                                            c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{actual_user_money}', ctx.author.id))
+                                            DBconn.commit()
+                                            await ctx.send(f"> **You have stolen ${random_amount:,} from <@{userid}>.**")
+                                        except Exception as e:
+                                            await ctx.send (f"> **The Database is locked... -- {e}**")
+                                    elif user_money < 10:
+                                        await ctx.send("> **That user has less than $10!**")
+                                        ctx.command.reset_cooldown(ctx)
+                            except Exception as e:
+                                log.console(e)
+                                await ctx.send("> **An error has occurred.**")
+                                ctx.command.reset_cooldown(ctx)
 
     @commands.command()
     async def give(self, ctx, mentioned_userid="", amount=0):
@@ -385,7 +404,7 @@ class Currency(commands.Cog):
                     await ctx.send("> **You are not currently registered. Please type %register to register.**",
                                    delete_after=60)
                 if count == 1:
-                    current_amount = c.execute("SELECT Money FROM Currency WHERE UserID = ?", (userid,)).fetchone()[0]
+                    current_amount = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (userid,)).fetchone()[0])
                     if amount == 0:
                         await ctx.send("> **Please specify an amount [Format: %give (@user) (amount)]**", delete_after=60)
                     if amount > 0:
@@ -398,12 +417,11 @@ class Currency(commands.Cog):
                                 await ctx.send(
                                     "> **That user is not currently registered. Have them type %register to register.**")
                             if newcount == 1:
-                                mentioned_money = \
-                                c.execute("SELECT Money FROM Currency WHERE USERID = ?", (mentioned_userid,)).fetchone()[0]
+                                mentioned_money = int(c.execute("SELECT Money FROM Currency WHERE USERID = ?", (mentioned_userid,)).fetchone()[0])
                                 newamount = mentioned_money + amount
                                 newamount2 = current_amount - amount
-                                c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (newamount, mentioned_userid))
-                                c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (newamount2, userid))
+                                c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{newamount}', mentioned_userid))
+                                c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{newamount2}', userid))
                                 await ctx.send("> **Your money has been transferred.**")
                                 DBconn.commit()
                             if newcount > 1:
@@ -428,7 +446,7 @@ class Currency(commands.Cog):
                 0]
             if check_1 == 0:
                 try:
-                    current_balance = c.execute("SELECT Money FROM Currency WHERE UserID = ?", (userid,)).fetchone()[0]
+                    current_balance = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (userid,)).fetchone()[0])
                 except:
                     pass
                 count = c.execute("SELECT count(UserID) FROM Currency WHERE USERID = ?", (userid,)).fetchone()[0]
@@ -439,17 +457,16 @@ class Currency(commands.Cog):
                     await ctx.send("> ** You do not have enough money **", delete_after=60)
                 if amount <= current_balance:
                     def Win(win):
-                        c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (win, userid))
+                        c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{win}', userid))
                         DBconn.commit()
 
                     def Loss(loss):
-                        c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (loss, userid))
+                        c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{loss}', userid))
                         DBconn.commit()
 
                     if count == 1:
                         # current_balance called again incase it does not properly update
-                        current_balance = c.execute("SELECT Money FROM Currency WHERE UserID = ?", (userid,)).fetchone()[0]
-                        amount = amount
+                        current_balance = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (userid,)).fetchone()[0])
                         rps = ['rock', 'paper', 'scissors']
                         a = randint(0, 2)
                         b = randint(0, 2)
@@ -504,9 +521,10 @@ class Currency(commands.Cog):
                                                                                                        choice),
                                     delete_after=15)
                                 Loss(current_balance - amount)
-                            if choice == 'scissors':
+                            if choice == 'scissors' or choice == 's':
                                 await ctx.send("> **We Both Chose Scissors and Tied! You get nothing!**")
                         if count > 1:
                             await ctx.send("> **There is an error with the database. Please report to an administrator**")
             if check_1 >= 1:
                 await ctx.send("> **Please type %endgame. You cannot play a game when you're already in one.**")
+        await ctx.message.delete(delay=15)

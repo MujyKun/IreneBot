@@ -14,10 +14,13 @@ oxford_app_key = ''
 
 # urban dictionary
 X_RapidAPI_headers = {
-    'x-rapidapi-host': "mashape-community-urban-dictionary.p.rapidapi.com",
+    'x-rapidapi-host': "",
     'x-rapidapi-key': ""
     }
 
+
+# tenor api key
+tenor_key = ""
 
 # client token ( to run )
 client_token = ""

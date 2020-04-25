@@ -3,6 +3,8 @@
 
 ## Irene Bot for Discord in Python V1.005
 
+## [Discord Support Server](https://discord.gg/bEXm85V)
+
 Commands from this documentation may not be present in the code (The code may be a bit behind with updating).  
 Command Prefix is in run.py and is currently set to '%' by default.
 

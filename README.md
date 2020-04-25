@@ -1,19 +1,10 @@
 
 # [IreneBot](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=8)
 
-## Irene Bot for Discord in Python V1.004
+## Irene Bot for Discord in Python V1.005
 
-Upon signing up for the Google Drive API, make sure to put the credentials.json in the main folder.  
-[ https://developers.google.com/drive ]  
-
-When first getting the bot to work, make sure to use the %upload command to get the Google Drive API to properly work. Or you can just remove it.    
-You will need to sign into your Google Account when it prompts you as a one time authorization.  
-ImageUploader was not coded with aiohttp, so there will be blockage from other commands when these commands are in use.  
-There are instructions left in quickstart.py for first time running. Make sure to follow the comments.  
-
+Commands from this documentation may not be present in the code (The code may be a bit behind with updating).  
 Command Prefix is in run.py and is currently set to '%' by default.
-
-Music will not run as an executable (it will not be able to find a module properly). It can run from an IDE just fine.
 
 ♥ - Requires Bot Owner  
 ♥♥♥ -- Entire Section Requires Bot Owner  
@@ -86,14 +77,6 @@ Music will not run as an executable (it will not be able to find a module proper
 <td>modules/DreamCatcher.py</td>
 
 <td>Send Photos from the DC App to a certain text channel based on a loop.</td>
-
-</tr>
-
-<tr>
-
-<td>module/ImageUploader.py</td>
-
-<td>Commands for downloading photos from a text channel and uploading them to google drive.</td>
 
 </tr>
 
@@ -314,6 +297,56 @@ Music will not run as an executable (it will not be able to find a module proper
 </table>
 
 ## COMMANDS
+
+#### Archive:
+<table>
+
+<tbody>
+
+<tr>
+
+<th>Command</th>
+
+<th>Description</th>
+
+<th>Format</th>
+
+<th>Aliases</th>
+
+</tr>
+
+<tr>
+<td>addchannel</td>
+<td>REQUIRES BOT OWNER PRESENCE TO ADD -- Make the current channel start archiving images to google drive</td>
+<td>%addchannel (drive_folder_id) (name)</td>
+<td>★</td>
+</tr>
+
+<tr>
+<td>addhistory</td>
+<td>Add all of the previous images from a text channel to google drive.</td>
+<td>%addhistory (year) (month) (day)</td>
+<td>★</td>
+</tr>
+
+<tr>
+<td>deletechannel</td>
+<td>Stop the current channel from being archived</td>
+<td>%deletechannel</td>
+<td>★</td>
+</tr>
+
+<tr>
+<td>listchannels</td>
+<td>List the channels in your server that are being archived.</td>
+<td>%listchannels</td>
+<td>★</td>
+</tr>
+
+
+</tbody>
+
+</table>
 
 #### BlackJack:
 
@@ -549,30 +582,6 @@ Music will not run as an executable (it will not be able to find a module proper
 
 <tr>
 
-<td>raffle</td>
-
-<td>Join a Raffle</td>
-
-<td>%raffle to start a raffle; %raffle (amount) to join; %raffle 0 balance to check current amount]</td>
-
-<td></td>
-
-</tr>
-
-<tr>
-
-<td>rafflereset</td>
-
-<td>Resets Raffle without giving people their money back</td>
-
-<td>%rafflereset</td>
-
-<td>♥</td>
-
-</tr>
-
-<tr>
-
 <td>register</td>
 
 <td>Register yourself onto the database.</td>
@@ -602,18 +611,6 @@ Music will not run as an executable (it will not be able to find a module proper
 <td>Rob a user - Max Value = 1000</td>
 
 <td>%rob @user</td>
-
-<td></td>
-
-</tr>
-
-<tr>
-
-<td>roll</td>
-
-<td>No Description Yet</td>
-
-<td>Command does not exist yet.</td>
 
 <td></td>
 
@@ -876,7 +873,49 @@ Music will not run as an executable (it will not be able to find a module proper
 </tr>
 
 <tr>
+<td>automatic</td>
+<td>Add a drive folder to the automatic table.</td>
+<td>%automatic [link=NULL] [member=NULL] [group=NULL] [group2=NULL] [group3=NULL] [stage_name=NULL] [aliases=NULL]</td>
+<td>♥</td>
+</tr>
 
+<tr>
+<td>count</td>
+<td>Shows howmany times an idol has been called.</td>
+<td>%count (name)</td>
+<td></td>
+</tr>
+
+<tr>
+<td>countleaderboard</td>
+<td>Shows leaderboards for how many times an idol has been called.</td>
+<td>%clb</td>
+<td>highestcount, cb, clb] </td>
+</tr>
+<tr>
+
+<tr>
+<td>countmember</td>
+<td>Shows how many images of a certain member there are.</td>
+<td>%countmember (member)</td>
+<td></td>
+</tr>
+
+<tr>
+<td>deletefakes</td>
+<td>Deletes Invalid URLS from DB</td>
+<td>%deletefakes (count=0)</td>
+<td>♥</td>
+</tr>
+
+<tr>
+<td>scandrive</td>
+<td>Scan DriveIDs Table and update other tables.</td>
+<td>%scandrive (name=NULL) (member_id=0)</td>
+<td>♥</td>
+</tr>
+
+<tr>
 <td>fullnames</td>
 
 <td>Lists the full names of idols the bot has photos of</td>
@@ -975,77 +1014,6 @@ Music will not run as an executable (it will not be able to find a module proper
 
 </table>
 
-
-#### ImageUploader: ♥♥♥
-
-<table>
-
-<tbody>
-
-<tr>
-
-<th>Command</th>
-
-<th>Description</th>
-
-<th>Format</th>
-
-<th>Aliases</th>
-
-</tr>
-
-<tr>
-
-<td>deletephotos</td>
-
-<td>Delete All Photos in Photos Folder</td>
-
-<td>%deletephotos</td>
-
-<td></td>
-
-</tr>
-
-<tr>
-
-<td>steal</td>
-
-<td>Downloads Images from Current Text Channel</td>
-
-<td>%steal</td>
-
-<td>log</td>
-
-</tr>
-
-<tr>
-
-<td>upload</td>
-
-<td>Uploads All Images in the Photos Folder to Google Drive</td>
-
-<td>%upload (all/filename)</td>
-
-<td></td>
-
-</tr>
-
-<tr>
-
-<td>view</td>
-
-<td>Shows amount of Images in the Photos Folder</td>
-
-<td>%view</td>
-
-<td></td>
-
-</tr>
-
-</tbody>
-
-</table>
-
 #### Miscellaneous:
 
 <table>
@@ -1077,48 +1045,28 @@ Music will not run as an executable (it will not be able to find a module proper
 </tr>
 <tr>
 
-<td>addemoji</td>
-
-<td>Adds an emoji to the server.</td>
-
-<td>%addemoji (url) (emoji_name)</td>
-
-<td>★</td>
-
-</tr>
-<tr>
-
 <td>announce</td>
 
-<td>Sends a bot message to certain text channels</td>
+<td>Sends a bot message to text channels</td>
 
 <td>%announce (message)</td>
 
 <td>♥</td>
 
 </tr>
+
 <tr>
 
-<td>ban</td>
+<td>clearnword</td>
 
-<td>Ban A User</td>
+<td>Clear A User's Nword Counter</td>
 
-<td>%ban @user</td>
+<td>%clearnword @user</td>
 
-<td>★</td>
-
-</tr>
-<tr>
-
-<td>clear</td>
-
-<td>Prune Messages</td>
-
-<td>%clear (amount)</td>
-
-<td>★ prune</td>
+<td>♥</td>
 
 </tr>
+
 <tr>
 
 <td>flip</td>
@@ -1128,17 +1076,6 @@ Music will not run as an executable (it will not be able to find a module proper
 <td>%flip</td>
 
 <td></td>
-
-</tr>
-<tr>
-
-<td>kick</td>
-
-<td>Kick A User</td>
-
-<td>%kick @user</td>
-
-<td>★</td>
 
 </tr>
 <tr>
@@ -1174,6 +1111,18 @@ Music will not run as an executable (it will not be able to find a module proper
 
 <td></td>
 </tr>
+
+<tr>
+
+<td>nwordleaderboard</td>
+
+<td>Shows leaderboards for how many times the nword has been said.</td>
+
+<td>%nwl</td>
+
+<td>nwl</td>
+</tr>
+
 <tr>
 
 <td>ping</td>
@@ -1231,38 +1180,63 @@ Music will not run as an executable (it will not be able to find a module proper
 <td>♥</td>
 
 </tr>
+
 <tr>
 
-<td>tempchannel</td>
+<td>invite</td>
 
-<td>Makes Current Channel a temporary channel deleting messages after a certain time period. If delay is -1, it will remove the channel.</td>
+<td>Invite Link for Irene</td>
 
-<td>%tempchannel [delay=-1]</td>
+<td>%invite</td>
 
-<td>★ temp</td>
+<td></td>
 
 </tr>
+
 <tr>
 
-<td>unban</td>
+<td>support</td>
 
-<td>UnBan A User</td>
+<td>Support Discord Server for Irene</td>
 
-<td>%unban @user</td>
+<td>%support</td>
 
-<td>★</td>
+<td></td>
 
 </tr>
+
+<tr>
+
+<td>servercount</td>
+
+<td>Shows how many servers Irene is on.</td>
+
+<td>%servercount</td>
+
+<td></td>
+
+</tr>
+
+<tr>
+
+<td>suggest</td>
+
+<td>Suggest a feature for Irene</td>
+
+<td>%suggest (feature)</td>
+
+<td></td>
+
+</tr>
+
 </tbody>
 
 </table>
 
-#### Music [Currently Disabled]:
+#### Moderator:
 
 <table>
-
 <tbody>
-
 <tr>
 
 <th>Command</th>
@@ -1277,123 +1251,80 @@ Music will not run as an executable (it will not be able to find a module proper
 
 <tr>
 
-<td>join</td>
+<td>addemoji</td>
 
-<td>Joins a voice channel</td>
+<td>Adds an emoji to the server.</td>
 
-<td>%join</td>
+<td>%addemoji (url) (emoji_name)</td>
 
-<td></td>
-
-</tr>
-
-<tr>
-
-<td>local</td>
-
-<td>Plays a file from the local filesystem</td>
-
-<td>%local (filename)</td>
-
-<td></td>
+<td>★</td>
 
 </tr>
 
 <tr>
 
-<td>localfiles</td>
+<td>kick</td>
 
-<td>Displays all music in the music folder</td>
+<td>Kick A User</td>
 
-<td>%localfiles</td>
+<td>%kick @user</td>
 
-<td></td>
-
-</tr>
-
-<tr>
-
-<td>pause</td>
-
-<td>Pauses currently playing song</td>
-
-<td>%pause</td>
-
-<td></td>
+<td>★</td>
 
 </tr>
 
 <tr>
 
-<td>play</td>
+<td>unban</td>
 
-<td>Streams from a url (same as yt, but doesn't predownload)</td>
+<td>UnBan A User</td>
 
-<td>%play (link)</td>
+<td>%unban @user</td>
 
-<td></td>
-
-</tr>
-
-<tr>
-
-<td>queue</td>
-
-<td>Shows Current Queue [Broken atm]</td>
-
-<td>%queue</td>
-
-<td></td>
+<td>★</td>
 
 </tr>
 
 <tr>
 
-<td>resume</td>
+<td>ban</td>
 
-<td>Resumes a paused song</td>
+<td>Ban A User</td>
 
-<td>%resume</td>
+<td>%ban @user</td>
 
-<td></td>
-
-</tr>
-
-<tr>
-
-<td>stop</td>
-
-<td>Stops and disconnects the client from voice</td>
-
-<td>%stop</td>
-
-<td></td>
+<td>★</td>
 
 </tr>
 
 <tr>
 
-<td>volume</td>
+<td>clear</td>
 
-<td>Changes the player's volume - play,yt, and local all have preset volumes when they start playing.</td>
+<td>Prune Messages</td>
 
-<td>%volume (amount)</td>
+<td>%clear (amount)</td>
 
-<td></td>
+<td>★ prune</td>
 
 </tr>
 
 <tr>
 
-<td>yt</td>
+<td>tempchannel</td>
 
-<td>Play A Song From Youtube</td>
+<td>Makes Current Channel a temporary channel deleting messages after a certain time period. If delay is -1, it will remove the channel.</td>
 
-<td>%yt (url)</td>
+<td>%tempchannel [delay=-1]</td>
 
-<td></td>
+<td>★ temp</td>
 
 </tr>
+
+
+
+</tr>
+
 
 </tbody>
 

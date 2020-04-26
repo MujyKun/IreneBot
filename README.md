@@ -1209,6 +1209,18 @@ Command Prefix is in run.py and is currently set to '%' by default.
 
 <tr>
 
+<td>report</td>
+
+<td>Report an issue with Irene</td>
+
+<td>%report (issue)</td>
+
+<td></td>
+
+</tr>
+
+<tr>
+
 <td>servercount</td>
 
 <td>Shows how many servers Irene is on.</td>

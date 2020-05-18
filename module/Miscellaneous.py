@@ -2,168 +2,102 @@ import discord
 from random import *
 from discord.ext import commands
 from module import keys
-import sqlite3
-import aiohttp
-import aiofiles
-import os
-import asyncio
 from module import logger as log
-
-client = 0
-path = 'module\currency.db'
-DBconn = sqlite3.connect(path, check_same_thread=False)
-c = DBconn.cursor()
-
-
-def setup(client1):
-    client1.add_cog(Miscellaneous(client1))
-    global client
-    client = client1
+import aiohttp
+from Utility import DBconn, c, fetch_one, fetch_all
 
 
 class Miscellaneous(commands.Cog):
     def __init__(self, client):
+        self.client = client
         pass
 
     @commands.command()
-    @commands.has_permissions(ban_members=True)
-    async def ban(self, ctx, user: discord.Member = "@user", *, reason="No Reason"):
-        """Ban A User [Format: %ban @user]"""
-        try:
-            await ctx.guild.ban(user=user, reason=reason, delete_message_days=0)
-            embed = discord.Embed(title="User Banned!", description=f">**<@{user.id}> was banned by <@{ctx.author.id}> for {reason}**!", color=0xff00f6)
-        except Exception as e:
-            embed = discord.Embed(title="Error", description=f"**<@{user.id}> was not able to be banned by <@{ctx.author.id}> successfully. \n {e}**!", color=0xff00f6)
-        await ctx.send(embed=embed)
+    @commands.is_owner()
+    async def changestatus(self, ctx, *, status):
+        """Change the playing status of Irene."""
+        await self.client.change_presence(status=discord.Status.online, activity=discord.Game(status))
+
 
     @commands.command()
-    @commands.has_permissions(ban_members=True)
-    async def unban(self, ctx, user: discord.User = "@user", *, reason="No Reason"):
-        """Unban A User [Format: %unban @user]"""
-        log.console (type(user))
-        try:
-            await ctx.guild.unban(user=user, reason=reason)
-            embed = discord.Embed(title="User Unbanned!", description=f"> **<@{user.id}> was unbanned by <@{ctx.author.id}> for {reason}**!", color=0xff00f6)
-        except Exception as e:
-            embed = discord.Embed(title="Error", description=f"**<@{user.id}> could not be unbanned by <@{ctx.author.id}> \n {e}**!", color=0xff00f6)
-        await ctx.send(embed=embed)
+    async def report(self, ctx, *, issue):
+        """Report an issue with Irene. Format: [%report (issue)]"""
+        desc = f"**{issue}**"
+        embed = discord.Embed(title="Bug Report", color=0xff00f6)
+        embed.set_author(name="Irene", url='https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                         icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
+        embed.set_footer(text="Thanks for leaving a report.",
+                         icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
+        embed.add_field(name=f"{ctx.author.name} ({ctx.author.id})", value=desc)
+        channel = await self.client.fetch_channel(703833469620453396)
+        msg = await channel.send(embed=embed)
+        await ctx.send("> **Your bug report has been sent.**")
+        await msg.add_reaction("\U0001f44d")  # thumbs up
+        await msg.add_reaction("\U0001f44e")  # thumbs down
 
     @commands.command()
-    @commands.has_permissions(kick_members=True)
-    async def kick(self, ctx, user: discord.Member = "@user", reason="No Reason"):
-        """Kick A User [Format: %kick @user]"""
-        try:
-            await ctx.guild.kick(user=user, reason=reason)
-            embed = discord.Embed(title="User Kicked!",
-                                  description=f"**<@{user.id}> was kicked by <@{ctx.author.id}> for {reason}**!",
-                                  color=0xff00f6)
-        except Exception as e:
-            embed = discord.Embed(title="Error",
-                                  description=f"**<@{user.id}> could not be kicked by <@{ctx.author.id}> \n {e}**!",
-                                  color=0xff00f6)
-        await ctx.send(embed=embed)
-
-    @commands.command(aliases=['temp'])
-    @commands.has_permissions(manage_messages=True)
-    async def tempchannel(self, ctx, delay=-1):
-        """Makes Current Channel a temporary channel deleting messages after a certain time period. If delay is -1, it will remove the channel. [Format: %temp (delay)]"""
-        channel_id = ctx.channel.id
-        try:
-            if delay == -1:
-                    c.execute("DELETE FROM TempChannels WHERE chanID = ?", (channel_id,))
-                    DBconn.commit()
-                    await ctx.send ("> **If this channel was a temporary channel, it has been removed.**")
-            if delay >= 60:
-                new_delay = f"{(delay/60)} minutes"
-            if 0 <= delay < 60:
-                new_delay = f"{delay} seconds"
-            if delay < -1:
-                await ctx.send("> **The delay cannot be negative.**")
-            if delay >= 0:
-                channel_id = ctx.channel.id
-                counter = c.execute("SELECT COUNT(*) FROM TempChannels WHERE chanID = ?", (channel_id,)).fetchone()[0]
-                if counter == 1:
-                    old_delay = c.execute("SELECT delay FROM TempChannels WHERE chanID = ?", (channel_id,)).fetchone()[0]
-                    if old_delay == delay:
-                        await ctx.send(f"> **This channel is already a temp channel that deletes messages every {new_delay}.**")
-                    else:
-                        c.execute("UPDATE TempChannels SET delay = ? WHERE chanID = ?", (delay, channel_id))
-                        DBconn.commit()
-                        await ctx.send(f"> **This channel now deletes messages every {new_delay}.**")
-                if counter == 0:
-                    await ctx.send(f"> **This channel now deletes messages every {new_delay}.**")
-                    c.execute("INSERT INTO TempChannels VALUES (?, ?)", (channel_id, delay))
-                    DBconn.commit()
-        except Exception as e:
-            log.console(e)
-
-    @commands.command()
-    @commands.has_permissions(manage_messages=True, manage_emojis=True)
-    async def addemoji(self, ctx, url, emoji_name):
-        """Adds an emoji to the server. [Format: %addemoji (url) (emoji name)]"""
-        if "?v=1" in url or ".jpg" in url or ".png" in url or ".gif" in url:
-            file_format = url[52:56]
-        else:
-            file_format = "None"
-            await ctx.send(f">>> **Please use a url that ends in ?v=1 or a file format like .png or edit your emoji on \n <https://ezgif.com/resize?url={url}>**")
-            log.console (f"Please use a url that ends in ?v=1 or a file format like .png or edit your emoji on https://ezgif.com/resize?url={url}")
-        if len(emoji_name) < 2:
-            file_format = "None"
-            await ctx.send("> **Please enter an emoji name more than two letters.**")
-        if file_format != "None":
-            # await ctx.send(file_format)
-            async with aiohttp.ClientSession() as session:
-                async with session.get('{}'.format(url)) as r:
-                    if r.status == 200:
-                        # await ctx.send("Connection Successful")
-                        fd = await aiofiles.open('Emoji/{}'.format(f"{emoji_name}{file_format}"), mode='wb')
-                        await fd.write(await r.read())
-                        await fd.close()
-                        log.console(f"Downloaded {emoji_name}{file_format}")
-                        full_file_name = emoji_name + file_format
-                        file_size = (os.path.getsize(f'Emoji/{full_file_name}'))
-                        if file_size > 262144:
-                            await ctx.send(f">>> **File cannot be larger than 256.0 kb. Please resize the emoji here (for the resize method, use Gifsicle).**\n <https://ezgif.com/resize?url={url}>")
-                            log.console(f"File cannot be larger than 256.0 kb. Please resize the emoji here. https://ezgif.com/resize?url={url}")
-                        elif file_size <= 262144:
-                            v = await aiofiles.open(f'Emoji/{full_file_name}', mode='rb')
-                            # await ctx.guild.create_custom_emoji(name=emoji_name, image=f'Emoji/{full_file_name}')
-                            await ctx.guild.create_custom_emoji(name=emoji_name, image=await v.read())
-                            await v.close()
-                            emojis = client.emojis
-                            max_emoji_length = len(emojis)
-                            if emoji_name in str(emojis[max_emoji_length-1]):
-                                await ctx.send(emojis[max_emoji_length-1])
-                            elif emoji_name in str(emojis[0]):
-                                await ctx.send(emojis[0])
-                            else:
-                                await ctx.send(f"> **Added :{emoji_name}:**")
-                        all_photos = os.listdir('Emoji')
-                        for photo in all_photos:
-                            try:
-                                os.unlink('Emoji/{}'.format(photo))
-                            except:
-                                pass
-                    elif r.status == 404:
-                        await ctx.send("> **That URL was not Found.**")
-                    elif r.status == 403:
-                        await ctx.send("> **I do not have access to that site.**")
-                    else:
-                        await ctx.send("> **I was not able to connect to that url**")
-
+    async def suggest(self, ctx, *, suggestion):
+        """Suggest a feature for Irene. Format: [%suggest (suggestion)]"""
+        desc = f"**{suggestion}**"
+        embed = discord.Embed(title="Suggestion", color=0xff00f6)
+        embed.set_author(name="Irene", url='https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                         icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
+        embed.set_footer(text="Thanks for leaving a suggestion.",
+                         icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
+        embed.add_field(name=f"{ctx.author.name} ({ctx.author.id})", value=desc)
+        channel = await self.client.fetch_channel(703549964181307413)
+        msg = await channel.send(embed=embed)
+        await ctx.send("> **Your suggestion has been sent.**")
+        await msg.add_reaction("\U0001f44d")  # thumbs up
+        await msg.add_reaction("\U0001f44e")  # thumbs down
 
     @commands.command()
     async def nword(self, ctx, user: discord.Member = "@user"):
-        """Checks how many times a user has said the N Word [Format: @user]"""
+        """Checks how many times a user has said the N Word [Format: %nword @user]"""
         if user == "@user":
             await ctx.send("> **Please @ a user**")
         if user != "@user":
-            checker = c.execute("SELECT COUNT(*) FROM Counter WHERE UserID = ?", (user.id,)).fetchone()[0]
+            c.execute("SELECT COUNT(*) FROM currency.Counter WHERE UserID = %s", (user.id,))
+            checker = fetch_one()
             if checker > 0:
-                current_count = c.execute("SELECT NWord FROM Counter WHERE UserID = ?", (user.id,)).fetchone()[0]
-                await ctx.send(f"> **<@{user.id}> has said the N-Word {current_count} time(s)!**", delete_after=40)
+                c.execute("SELECT NWord FROM currency.Counter WHERE UserID = %s", (user.id,))
+                current_count = fetch_one()
+                await ctx.send(f"> **<@{user.id}> has said the N-Word {current_count} time(s)!**")
             if checker == 0:
-                await ctx.send(f"> **<@{user.id}> has not said the N-Word a single time!**", delete_after=40)
+                await ctx.send(f"> **<@{user.id}> has not said the N-Word a single time!**")
+
+    @commands.is_owner()
+    @commands.command()
+    async def clearnword(self, ctx, user: discord.Member = "@user"):
+        """Clear A User's Nword Counter [Format: %clearnword @user]"""
+        if user == "@user":
+            await ctx.send("> **Please @ a user**")
+        if user != "@user":
+            c.execute("SELECT COUNT(*) FROM currency.Counter WHERE UserID = %s", (user.id,))
+            checker = fetch_one()
+            if checker > 0:
+                c.execute("DELETE FROM currency.Counter where UserID = %s", (user.id,))
+                await ctx.send("**> Cleared.**")
+                DBconn.commit()
+            if checker == 0:
+                await ctx.send(f"> **<@{user.id}> has not said the N-Word a single time!**")
+
+    @commands.command(aliases=["nwl"])
+    async def nwordleaderboard(self, ctx):
+        """Shows leaderboards for how many times the nword has been said. [Format: %nwl]"""
+        embed = discord.Embed(title=f"NWord Leaderboard", color=0xffb6c1)
+        embed.set_author(name="Irene", url='https://www.youtube.com/watch?v=dQw4w9WgXcQ', icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
+        embed.set_footer(text="Type %nword (user) to view their individual stats.", icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
+        c.execute("SELECT UserID, NWord FROM currency.Counter ORDER BY NWord DESC")
+        all_members = fetch_all()
+        count_loop = 0
+        for mem in all_members:
+            count_loop += 1
+            if count_loop <= 10:
+                user_name = (await self.client.fetch_user(mem[0])).name
+                embed.add_field(name=f"{count_loop}) {user_name} ({mem[0]})", value=mem[1])
+        await ctx.send(embed=embed)
+
 
     @commands.command(aliases=['rand', 'randint', 'r'])
     async def random(self, ctx, a: int, b: int):
@@ -182,9 +116,9 @@ class Miscellaneous(commands.Cog):
         await ctx.send(f"> **You flipped {flip_choice[random_number]}**")
 
     @commands.command(aliases=['define', 'u'])
-    async def urban(self, ctx, term="none", number=1):
+    async def urban(self, ctx, term="none", number=1, override=0):
         """Search a term through UrbanDictionary. [Format: %urban (term) (definition number)][Aliases: define,u]"""
-        if ctx.channel.is_nsfw():
+        if ctx.channel.is_nsfw() or override == 1:
             if term == "none":
                 await ctx.send("> **Please enter a word for me to define**")
             if term != "none":
@@ -207,54 +141,113 @@ class Miscellaneous(commands.Cog):
             await ctx.send("> **This text channel must be NSFW to use %urban (Guidelines set by top.gg).** ")
 
     @commands.command()
+    async def invite(self, ctx):
+        """Invite Link to add Irene to a server."""
+        await ctx.send("> **Invite Link:** https://bit.ly/2Y5dIrd")
+
+    @commands.command()
+    async def support(self, ctx):
+        """Invite Link to Irene's Discord Server"""
+        await ctx.send("> **Support Server:** https://discord.gg/bEXm85V")
+
+    @commands.command()
     @commands.is_owner()
-    async def announce(self, ctx,*, new_message):
+    async def announce(self, ctx, *, new_message):
         """Sends a bot message to certain text channels"""
-        channel_list = [628049276446048256,356846361045368844,413508021088419846,588224699952005123]
-        for channel in channel_list:
-            channel = client.get_channel(channel)
-            await channel.send(f"**ANNOUNCEMENT from {ctx.author}**\n> **{new_message}**")
+        desc = f"{new_message}"
+        embed = discord.Embed(title=f"Announcement from {ctx.author} ({ctx.author.id})", description=desc, color=0xff00f6)
+        embed.set_author(name="Irene", url='https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                         icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
+        embed.set_footer(text="Type %support for an invite to Irene's discord server.",
+                         icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
+        # embed.add_field(name=f"{ctx.author.name} ({ctx.author.id})", value=desc)
+
+        guilds = self.client.guilds
+        for guild in guilds:
+            try:
+                await guild.system_channel.send(embed=embed)
+            except Exception as e:
+                log.console(e)
+                pass
+
+    @commands.command()
+    @commands.is_owner()
+    async def send(self, ctx, channel_id, *, new_message):
+        """Send a message to a text channel."""
+        try:
+            channel = await self.client.fetch_channel(channel_id)
+            await channel.send(new_message)
+            await ctx.send("> **Message Sent.**")
+        except Exception as e:
+            log.console(e)
+            await ctx.send(f"> **ERROR: {e}**")
+
+    @commands.command()
+    async def servercount(self, ctx):
+        """Shows how many servers the bot has [Format: %servercount]"""
+        guilds = self.client.guilds
+        await ctx.send(f"> **I am connecetd to {len(guilds)} servers.**")
+
+    @commands.command()
+    async def serverinfo(self, ctx):
+        """View information about the current guild. [Format: %serverinfo]"""
+        try:
+            guild = ctx.guild
+            embed = discord.Embed(title= f"{guild.name} ({guild.id})", color=0xffb6c1, url=f"{guild.icon_url}")
+            embed.set_author(name="Irene", url='https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                             icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
+            embed.set_footer(text="Thanks for using Irene.",
+                             icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
+            embed.set_thumbnail(url=guild.icon_url)
+            embed.add_field(name="Owner", value=f"{guild.owner} ({guild.owner.id})", inline=True)
+            embed.add_field(name="Region", value=guild.region , inline=True)
+            embed.add_field(name="Users", value=guild.member_count, inline=True)
+            embed.add_field(name="Roles", value=f"{len(guild.roles)}", inline=True)
+            embed.add_field(name="Emojis", value=f"{len(guild.emojis)}", inline=True)
+            embed.add_field(name="Description", value=guild.description, inline=True)
+            embed.add_field(name="Channels", value=f"{len(guild.channels)}", inline=True)
+            embed.add_field(name="AFK Timeout", value=f"{guild.afk_timeout/60} minutes", inline=True)
+            embed.add_field(name="Since", value=guild.created_at, inline=True)
+
+            await ctx.send(embed=embed)
+        except Exception as e:
+            log.console(e)
+            await ctx.send("> **Something went wrong.. Please %report the issue.**")
 
     @commands.command()
     @commands.is_owner()
     async def servers(self, ctx):
-        """Extremely sloppy way of showing which servers the bot are in."""
-        guilds = client.guilds
+        """Displays which servers Irene is in."""
+        guilds = self.client.guilds
+        count = 1
+        embed = discord.Embed(title=f"Servers {len(guilds)}", color=0xffb6c1)
+        embed.set_author(name="Irene", url='https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                         icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
+        embed.set_footer(text="Thanks for using Irene.",
+                         icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
         for guild in guilds:
             guild_id = guild.id
             guild_member_count = guild.member_count
-            guild_owner = guild.owner_id
+            guild_owner = guild.owner
             guild_name = guild.name
             guild_icon = guild.icon
             guild_banner = guild.banner
             guild_channels = guild.text_channels
-            channel_info = ""
-            for channel in guild_channels:
-                channel_info += f"[{channel},{channel.id}]\n"
+            member_count = f"Member Count: {guild_member_count}\n"
+            owner = f"Guild Owner: {guild_owner} ({guild_owner.id})\n"
+            desc = member_count + owner
+            embed.add_field(name=f"{guild_name} ({guild_id})", value=desc, inline=False)
+            if count == 25:
+                count = 0
+                await ctx.send(embed=embed)
+                embed = discord.Embed(title=f"Servers", color=0xffb6c1)
+                embed.set_author(name="Irene", url='https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                                 icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
+                embed.set_footer(text="Thanks for using Irene.",
+                                 icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
+            count += 1
+        await ctx.send(embed=embed)
 
-            await ctx.send(f">>> Guild ID: {guild_id}\nGuild Owner: {guild_owner}\nGuild Name: {guild_name}\nMember Count: {guild_member_count}\nGuild Icon: {guild_icon}\nGuild Banner: {guild_banner}\n **Channels:**\n{channel_info} ")
-
-
-    @commands.command()
-    @commands.is_owner()
-    async def logging(self, ctx, *, keyword='add'):
-        """ [Format: %logging (stop/add)"""
-        if keyword == 'add':
-            counter = c.execute("SELECT COUNT(*) FROM logging WHERE channelid = ?", (ctx.channel.id,)).fetchone()[0]
-            if counter == 0:
-                c.execute("INSERT INTO logging VALUES(?)", (ctx.channel.id,))
-                DBconn.commit()
-                await ctx.send("> **This channel is now being logged.**")
-            if counter == 1:
-                await ctx.send("> **This channel is already being logged.**")
-        if keyword == 'stop':
-            try:
-                c.execute("DELETE FROM logging WHERE channelid = ?", (ctx.channel.id,))
-                DBconn.commit()
-                await ctx.send("> **This channel is no longer being logged**")
-            except:
-                await ctx.send("> **This channel isn't being logged.**")
-            pass
 
     @commands.command(aliases=['8ball', '8'])
     async def _8ball(self, ctx, *, question):
@@ -300,43 +293,11 @@ class Miscellaneous(commands.Cog):
     @commands.command(aliases=['pong'])
     async def ping(self, ctx):
         """Shows Latency to Discord [Format: %ping]"""
-        await ctx.send("> My ping is currently {}ms.".format(int(client.latency * 1000)))
+        await ctx.send("> My ping is currently {}ms.".format(int(self.client.latency * 1000)))
 
     @commands.command()
     @commands.is_owner()
     async def kill(self, ctx):
         """Kills the bot [Format: %kill]"""
         await ctx.send("> **The bot is now offline.**")
-        await client.logout()
-
-    @commands.command(aliases=['prune'])
-    @commands.has_permissions(manage_messages=True)
-    async def clear(self, ctx, amount: int, userid: discord.Member = "abc"):
-        """Prune Messages [Format: %clear (amount)][Aliases: prune]"""
-        amount = int(amount)
-        original = amount
-        def clearx(m):
-            return m.author == userid
-        if userid == "abc":
-            checker = 1
-        else:
-            checker = 0
-        amount = amount + 1
-        if amount <= 101:
-            if checker == 0:
-                await ctx.channel.purge(limit=amount, check=clearx, bulk=True)
-            elif checker == 1:
-                await ctx.channel.purge(limit=amount, bulk=True)
-            log.console("Pruned {} messages".format(amount))
-        if amount >= 102:
-            number = (amount // 100)
-            await ctx.send(
-                "> **{}** messages will be deleted in 5 seconds and will be split in intervals of 100.".format(
-                    original))
-            for i in range(number):
-                if checker == 0:
-                    await ctx.channel.purge(limit=100, check=userid, bulk=True)
-                elif checker == 1:
-                    await ctx.channel.purge(limit=100, bulk=True)
-                log.console("Pruned 100 messages")
-            await ctx.send("> **{}** messages have been pruned.".format(original))
+        await self.client.logout()

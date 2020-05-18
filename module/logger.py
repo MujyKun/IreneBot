@@ -23,3 +23,9 @@ def console(message):
     with open(f"Logs/{datetime.date.today()}-console.log", "a+", encoding='utf-8') as file:
         output = f"{datetime.datetime.now()} -- {message}\n"
         file.write(output)
+
+
+def logfile(message):
+    with open(f"Logs/{datetime.date.today()}-info.log", "a+", encoding='utf-8') as file:
+        output = f"{datetime.datetime.now()} -- {message}\n"
+        file.write(output)

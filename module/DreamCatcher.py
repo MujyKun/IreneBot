@@ -4,27 +4,14 @@ from discord.ext import commands, tasks
 import aiohttp
 from bs4 import BeautifulSoup as soup
 import aiofiles
-import sqlite3
 import asyncio
-import random
 from module import logger as log
-
-
-client = 0
-path = 'module\currency.db'
-DBconn = sqlite3.connect(path, check_same_thread = False)
-#DBconn = sqlite3.connect(path)
-c = DBconn.cursor()
-
-
-def setup(client1):
-    client1.add_cog(DreamCatcher(client1))
-    global client
-    client = client1
+from Utility import DBconn, c, fetch_one, fetch_all
 
 
 class DreamCatcher(commands.Cog):
     def __init__(self, client):
+        self.client = client
         self.list = ['\n DC_GAHYEON                ', '\n DC_SIYEON                ', '\n DC_YOOHYEON                ', '\n DC_JIU                ', '\n DC_SUA                ', '\n DREAMCATCHER                ', '\n DC_DAMI                ', '\n DC_HANDONG                ']
         # 1 Means True
         self.download_all_number = 0
@@ -37,6 +24,44 @@ class DreamCatcher(commands.Cog):
         self.latest_DC = ''
         self.create_links_number = 0
         pass
+
+    @commands.command()
+    @commands.is_owner()
+    async def movelinks(self, ctx):
+        """Add DC LINKS to main link table."""
+        c.execute("SELECT link, member FROM currency.dchdlinks")
+        hd_links = fetch_all()
+        count = 0
+        for link in hd_links:
+            url = link[0]
+            member_name = link[1]
+            member_id = None
+            if member_name == "Gahyeon":
+                member_id = 163
+            elif member_name == "Siyeon":
+                member_id = 159
+            elif member_name == "Yoohyeon":
+                member_id = 161
+            elif member_name == "JIU":
+                member_id = 157
+            elif member_name == "SUA":
+                member_id = 158
+            elif member_name == "Dami":
+                member_id = 162
+            elif member_name == "Handong":
+                member_id = 160
+            else:
+                pass
+
+            try:
+                c.execute("INSERT INTO groupmembers.imagelinks VALUES (%s,%s)", (url, member_id))
+                DBconn.commit()
+                count += 1
+            except Exception as e:
+                log.console(e)
+                pass
+        await ctx.send(f"> **Added {count} links.**")
+
 
 
     @commands.command()
@@ -52,7 +77,8 @@ class DreamCatcher(commands.Cog):
                 self.create_links_number += 1
                 number = self.create_links_number
                 # if number >= latest post
-                if number >= (c.execute("SELECT PostID FROM DCPost").fetchone()[0]):
+                c.execute("SELECT PostID FROM currency.DCPost")
+                if number >= fetch_one():
                     paste_all_links.cancel()
                 else:
                     my_url = 'https://dreamcatcher.candlemystar.com/post/{}'.format(number)
@@ -95,7 +121,11 @@ class DreamCatcher(commands.Cog):
                                             unique_id = new_image_url[55:87]
                                             file_format = new_image_url[93:]
                                             HD_Link = f'https://file.candlemystar.com/post/{DC_Date}{unique_id}{file_format}'
-                                            c.execute("INSERT INTO DCHDLinks VALUES (NULL,?,?,?)", (HD_Link, member_name, number))
+                                            try:
+                                                c.execute("INSERT INTO currency.DCHDLinks VALUES (%s,%s,%s)", (HD_Link, member_name, number))
+                                            except Exception as e:
+                                                log.console(e)
+                                                pass
                                             DBconn.commit()
                                             log.console(f"DC Link posted on DB for post {number}")
                                     else:
@@ -111,85 +141,11 @@ class DreamCatcher(commands.Cog):
                 pass
         paste_all_links.start(ctx)
 
-    async def member_post(self, ctx, member):
-        try:
-            amount_of_links = c.execute("SELECT COUNT(*) FROM DCHDLinks WHERE Member = ?", (member,)).fetchone()[0]
-            if amount_of_links == 0:
-                await ctx.send("> **There are no links saved.**")
-            if amount_of_links != 0:
-                post_list = c.execute("SELECT ID FROM DCHDLinks WHERE Member = ?", (member,)).fetchall()
-                random_choice = random.choice(post_list)
-                link = c.execute("SELECT Link FROM DCHDLinks WHERE ID = ?", random_choice).fetchone()[0]
-                embed = discord.Embed(title=member, color=0xffb6c1)
-                embed.set_image(url=link)
-                await ctx.send(embed=embed)
-        except Exception as e:
-            await ctx.send(e)
-            log.console(e)
-
-    @commands.command()
-    async def jiu(self, ctx):
-        """Pull Random JiU Photo from DC APP[Format: %jiu]"""
-        await self.member_post(ctx, "JIU")
-
-    @commands.command()
-    async def sua(self, ctx):
-        """Pull Random SuA Photo from DC APP[Format: %sua]"""
-        await self.member_post(ctx, "SUA")
-
-    @commands.command()
-    async def siyeon(self, ctx):
-        """Pull Random Siyeon Photo from DC APP[Format: %Siyeon]"""
-        await self.member_post(ctx, "Siyeon")
-
-    @commands.command()
-    async def handong(self, ctx):
-        """Pull Random Handong Photo from DC APP[Format: %handong]"""
-        await self.member_post(ctx, "Handong")
-
-    @commands.command()
-    async def yoohyeon(self, ctx):
-        """Pull Random Yoohyeon Photo from DC APP[Format: %yoohyeon]"""
-        await self.member_post(ctx, "Yoohyeon")
-
-    @commands.command()
-    async def dami(self, ctx):
-        """Pull Random Dami Photo from DC APP[Format: %dami]"""
-        await self.member_post(ctx, "Dami")
-
-    @commands.command()
-    async def gahyeon(self, ctx):
-        """Pull Random Gahyeon Photo from DC APP[Format: %gahyeon]"""
-        await self.member_post(ctx, "Gahyeon")
-
-    @commands.command()
-    async def dreamcatcher(self, ctx):
-        """Pull Random DREAMCATCHER Photo from DC APP[Format: %dreamcatcher]"""
-        await self.member_post(ctx, "DC")
-
-    @commands.command(aliases=["%"])
-    async def dcrandom(self, ctx):
-        """Pull Random Photo from DC APP[Format: %dcrandom or %%]"""
-        try:
-            amount_of_links = c.execute("SELECT COUNT(*) FROM DCHDLinks").fetchone()[0]
-            if amount_of_links == 0:
-                await ctx.send("> **There are no links saved.**")
-            if amount_of_links != 0:
-                random_choice = random.randint(1,amount_of_links)
-                link = c.execute("SELECT Link FROM DCHDLinks WHERE ID = ?", (random_choice,)).fetchone()[0]
-                member = c.execute("SELECT Member FROM DCHDLinks WHERE ID = ?", (random_choice,)).fetchone()[0]
-                embed = discord.Embed(title=member, color=0xffb6c1)
-                embed.set_image(url=link)
-                await ctx.send(embed=embed)
-        except Exception as e:
-            await ctx.send(e)
-            log.console(e)
-
     @commands.command()
     @commands.is_owner()
     async def dcstop(self, ctx):
         """Stops DC Loop [Format: %dcstop]"""
-        DCAPP().new_task4.stop()
+        DCAPP(self.client).new_task4.stop()
         await ctx.send("> **If there was a loop, it stopped.**")
 
     @commands.command()
@@ -197,38 +153,42 @@ class DreamCatcher(commands.Cog):
     async def dcstart(self, ctx):
         """Starts DC Loop [Format: %dcstart]"""
         try:
-            DCAPP().new_task4.start()
+            DCAPP(self.client).new_task4.start()
             await ctx.send("> **Loop started.**")
         except:
             await ctx.send("> **A loop is already running.**")
+
     @commands.command()
-    @commands.has_permissions(administrator=True)
+    @commands.has_guild_permissions(administrator=True)
     async def updates(self, ctx,*, solution=""):
         """Send DC Updates to your current text channel [Format: %updates] | To Stop : [Format: %updates stop]"""
         channel = ctx.channel.id
         if solution == "stop":
-            counter = c.execute("SELECT COUNT(*) From DreamCatcher WHERE ServerID = ?",(channel,)).fetchone()[0]
+            c.execute("SELECT COUNT(*) From currency.DreamCatcher WHERE ServerID = %s",(channel,))
+            counter = fetch_one()
             if counter == 1:
                 await ctx.send ("> **This channel will no longer receive updates.**")
-                c.execute("DELETE FROM DreamCatcher WHERE ServerID = ?",(channel,))
+                c.execute("DELETE FROM currency.DreamCatcher WHERE ServerID = %s",(channel,))
                 DBconn.commit()
             if counter == 0:
                 await ctx.send("> **This channel does not currently receive updates.**")
         if solution != "stop":
-            counter = c.execute("SELECT COUNT(*) From DreamCatcher WHERE ServerID = ?", (channel,)).fetchone()[0]
+            c.execute("SELECT COUNT(*) From currency.DreamCatcher WHERE ServerID = %s", (channel,))
+            counter = fetch_one()
             if counter == 1:
                 await ctx.send ("> **This channel already receives DC Updates**")
             if counter == 0:
-                channel_name = client.get_channel(channel)
+                channel_name = self.client.get_channel(channel)
                 await ctx.send("> **I Will Post All DC Updates In {}**".format(channel_name))
-                c.execute("INSERT INTO DreamCatcher VALUES (?)",(channel,))
+                c.execute("INSERT INTO currency.DreamCatcher VALUES (%s)",(channel,))
                 DBconn.commit()
 
     @commands.command()
-    @commands.has_permissions(administrator=True)
+    @commands.has_guild_permissions(administrator=True)
     async def latest(self, ctx):
         """Grabs the highest resolution possible from MOST RECENT DC Post [Format: %latest]"""
-        my_url = c.execute("SELECT URL FROM DCUrl").fetchone()[0]
+        c.execute("SELECT URL FROM currency.DCUrl")
+        my_url = fetch_one()
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.get('{}'.format(my_url)) as r:
@@ -263,7 +223,8 @@ class DreamCatcher(commands.Cog):
             number = self.download_all_number
             # if number >= latest post
             # last run on 40830
-            if number >= (c.execute("SELECT PostID FROM DCPost").fetchone()[0]):
+            c.execute("SELECT PostID FROM currency.DCPost")
+            if number >= fetch_one():
                 download_all_task.cancel()
             else:
                 my_url = 'https://dreamcatcher.candlemystar.com/post/{}'.format(number)
@@ -300,7 +261,8 @@ class DreamCatcher(commands.Cog):
 
 
 class DCAPP():
-    def __init__(self):
+    def __init__(self, client):
+        self.client = client
         self.list = ['\n DC_GAHYEON                ', '\n DC_SIYEON                ', '\n DC_YOOHYEON                ', '\n DC_JIU                ', '\n DC_SUA                ', '\n DREAMCATCHER                ', '\n DC_DAMI                ', '\n DC_HANDONG                ']
         # 1 Means True
         self.error_status = 1
@@ -310,20 +272,17 @@ class DCAPP():
         self.tries = 0
         self.post_list = []
         self.count_loop = 0
+        self.already_added = 0
         # self.latest_DC = ''
         pass
-
-    async def send_link(self, channel_t, link_t):
-        await asyncio.sleep(120)
-        for link in link_t:
-            await channel_t.send(link)
 
     @tasks.loop(seconds=0, minutes=0, hours=0, reconnect=True)
     async def new_task4(self):
         # log.console (self.number)
         self.count_loop += 1
         if self.first_run == 1:
-            number = c.execute("SELECT PostID FROM DCPost").fetchone()[0]
+            c.execute("SELECT PostID FROM currency.DCPost")
+            number = fetch_one()
             self.first_run = 0
             self.number = number
             self.post_list.append(number)
@@ -346,8 +305,8 @@ class DCAPP():
         async with aiohttp.ClientSession() as session:
             async with session.get('{}'.format(my_url)) as r:
                 if r.status == 200:
-                    c.execute("DELETE FROM DCPost")
-                    c.execute("INSERT INTO DCPost VALUES(?)", (self.number,))
+                    c.execute("DELETE FROM currency.DCPost")
+                    c.execute("INSERT INTO currency.DCPost VALUES(%s)", (self.number,))
                     DBconn.commit()
                     self.error_status = 0
                     if self.number not in self.post_list:
@@ -419,8 +378,8 @@ class DCAPP():
                                                     keep_going = False
                                     elif file_size > 20000:
                                         another_list.append(file_name)
-                                    c.execute("DELETE FROM DCUrl")
-                                    c.execute("INSERT INTO DCUrl VALUES(?)", (my_url,))
+                                    c.execute("DELETE FROM currency.DCUrl")
+                                    c.execute("INSERT INTO currency.DCUrl VALUES(%s)", (my_url,))
                                     DBconn.commit()
                             video_list = (page_soup.findAll("div", {"class": "swiper-slide img-box video-box width"}))
                             count_numbers = 0
@@ -443,7 +402,8 @@ class DCAPP():
                                 check_bat = await asyncio.create_subprocess_exec("Videos\\{}".format(bat_name),
                                                                                  stderr=asyncio.subprocess.PIPE)
                                 await check_bat.wait()
-                            a1 = c.execute("SELECT ServerID FROM DreamCatcher").fetchall()
+                            c.execute("SELECT ServerID FROM currency.DreamCatcher")
+                            a1 = fetch_all()
                             for channel in a1:
                                 channel = channel[0]
                                 DC_Videos = []
@@ -465,37 +425,53 @@ class DCAPP():
                                 except Exception as e:
                                     log.console (e)
                                     pass
-                                channel = client.get_channel(channel)
+                                channel = self.client.get_channel(channel)
                                 # 'NoneType' object has no attribute 'send' -- Channel does not exist (catching error)
                                 try:
-                                    member_name = ""
+                                    member_id = None
+                                    member_name = None
                                     if username == Gahyeon:
                                         member_name = "Gahyeon"
+                                        member_id = 163
                                         await channel.send(">>> **New Gahyeon Post\n<{}>**".format(my_url))
                                     if username == Siyeon:
                                         member_name = "Siyeon"
+                                        member_id = 159
                                         await channel.send(">>> **New Siyeon Post\n<{}>**".format(my_url))
                                     if username == Yoohyeon:
                                         member_name = "Yoohyeon"
+                                        member_id = 161
                                         await channel.send(">>> **New Yoohyeon Post\n<{}>**".format(my_url))
                                     if username == JiU:
                                         member_name = "JIU"
+                                        member_id = 157
                                         await channel.send(">>> **New JiU Post\n<{}>**".format(my_url))
                                     if username == SuA:
                                         member_name = "SUA"
+                                        member_id = 158
                                         await channel.send(">>> **New SuA Post\n<{}>**".format(my_url))
                                     if username == DC:
                                         member_name = "DC"
                                         await channel.send(">>> **New DreamCatcher Post\n<{}>**".format(my_url))
                                     if username == Dami:
                                         member_name = "Dami"
+                                        member_id = 162
                                         await channel.send(">>> **New Dami Post\n<{}>**".format(my_url))
                                     if username == Handong:
                                         member_name = "Handong"
+                                        member_id = 160
                                         await channel.send(">>> **New Handong Post\n<{}>**".format(my_url))
-                                    for link in image_links:
-                                        c.execute("INSERT INTO DCHDLinks VALUES (NULL,?,?,?)", (link, member_name, self.number))
-                                        DBconn.commit()
+                                    if self.already_added == 1:
+                                            for link in image_links:
+                                                try:
+                                                    if member_id is not None:
+                                                        c.execute("INSERT INTO groupmembers.imagelinks VALUES (%s,%s)", (link, member_id))
+                                                    c.execute("INSERT INTO currency.DCHDLinks VALUES (%s,%s,%s)", (link, member_name, self.number))
+                                                    DBconn.commit()
+                                                    self.already_added = 1
+                                                except Exception as e:
+                                                    log.console(e)
+                                                    pass
                                 except Exception as e:
                                     log.console(e)
                                     pass
@@ -507,7 +483,8 @@ class DCAPP():
                                         for video in video_name_list:
                                             await channel.send(file=video)
                                     if len(final_image_list) != 0:
-                                        await self.send_link(channel, final_image_list)
+                                        for link in final_image_list:
+                                            await channel.send(link)
                                 except Exception as e:
                                     log.console (e)
                                     pass
@@ -534,13 +511,9 @@ class DCAPP():
                     log.console("> **Access Denied - {}**".format(self.number))
                 elif r.status == 404:
                     self.tries += 1
-                    if self.count_loop % 100 == 0:
+                    if self.count_loop % 500 == 0:
                         log.console("Error 404. {} was not Found.".format(self.number))
                     self.error_status = 1
                     pass
                 else:
                     log.console(r.status)
-
-
-# b = DCAPP()
-# b.new_task4.start()

@@ -3,16 +3,9 @@ from discord.ext import commands
 from module import twitter
 
 
-client = 0
-
-
-def setup(client1):
-    client1.add_cog(Twitter(client1))
-    global client
-    client = client1
-
 class Twitter(commands.Cog):
     def __init__(self, client):
+        self.client = client
         pass
 
     @commands.command()

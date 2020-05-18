@@ -1,14 +1,4 @@
 from discord.ext import commands
-from module import logger as log
-
-
-client = 0
-
-
-def setup(client1):
-    client1.add_cog(Cogs(client1))
-    global client
-    client = client1
 
 
 class Cogs(commands.Cog):

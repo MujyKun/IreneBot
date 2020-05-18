@@ -1,105 +1,110 @@
 from __future__ import print_function
 import pickle
 import os.path
-import requests
 from googleapiclient.http import MediaFileUpload
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
-
-# If modifying these scopes, delete the file token.pickle.
-SCOPES = ['https://www.googleapis.com/auth/drive']
-link_download = 'https://drive.google.com/open?id='
-link_addon = ''
+from module import logger as log
+from Utility import DBconn, c, fetch_one, fetch_all
 
 
-def main(file_name):
-    """Shows basic usage of the Drive v3 API.
-    Prints the names and ids of the first 10 files the user has access to.
-    """
-    creds = None
-    # The file token.pickle stores the user's access and refresh tokens, and is
-    # created automatically when the authorization flow completes for the first
-    # time.
-    if os.path.exists('token.pickle'):
-        with open('token.pickle', 'rb') as token:
-            creds = pickle.load(token)
-    # If there are no (valid) credentials available, let the user log in.
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                'credentials.json', SCOPES)
-            creds = flow.run_local_server(port=0)
-        # Save the credentials for the next run
-        with open('token.pickle', 'wb') as token:
-            pickle.dump(creds, token)
-
-    drive_service = build('drive', 'v3', credentials=creds)
-
-    # Call the Drive v3 API
-    results = drive_service.files().list(
-        pageSize=10, fields="nextPageToken, files(id, name)").execute()
-    items = results.get('files', [])
-
-    if not items:
-        print('No files found.')
-    else:
+class Drive:
+    def __init__(self):
         pass
-        #print('Files:')
-        #for item in items:
-            #print(u'{0} ({1})'.format(item['name'], item['id']))
 
-    #create a folder
-    #uncomment this for first run
-    """
-    file_metadata1 = {
-        'name': 'JiU',
-        'mimeType': 'application/vnd.google-apps.folder'
-        }
-    file1 = drive_service.files().create(body=file_metadata1,fields='id').execute()
-    print ('Folder ID: %s' %file1.get('id'))
-    """
+    @staticmethod
+    def checker():
+        c.execute("SELECT COUNT(*) FROM archive.ArchivedChannels")
+        check = fetch_one()
+        if check > 0:
+            c.execute("SELECT id, filename, filetype, folderid FROM archive.ArchivedChannels")
+            posts = fetch_all()
+            for post in posts:
+                ID = post[0]
+                FileName = post[1]
+                FileType = post[2]
+                FolderID = post[3]
+                Drive.upload_to_drive(ID, FolderID, FileName, FileType)
 
-    #INPUT THE FOLDER ID UNDER the variable JiU AFTER RUNNING FOR THE FIRST TIME - the following code already goes to a certain folder, may need to be altered since folder won't be found
-    
+    @staticmethod
+    def upload_to_drive(ID, folder_id, file_name, file_type):
+        try:
+            drive_service = Drive.get_drive_connection()
+            file_metadata = {
+                'name': file_name,
+                'parents': [folder_id]
+                }
+            if len(file_type) == 4:
+                file_type = file_type[1:3]
+            # print(file_name)
+                file_location = f'Photos/{file_name}'
+                media = MediaFileUpload(file_location)
+                file = drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+            c.execute("DELETE FROM archive.ArchivedChannels WHERE ID = %s", (ID,))
+            DBconn.commit()
+            # print ('File ID: %s'% file.get('id'))
+            # link_addon = file.get('id')
+        except Exception as e:
+            log.console(e)
 
+    @staticmethod
+    def get_drive_connection():
+        SCOPES = ['https://www.googleapis.com/auth/drive']
+        link_download = 'https://drive.google.com/open?id='
+        link_addon = ''
+        creds = None
+        # The file token.pickle stores the user's access and refresh tokens, and is
+        # created automatically when the authorization flow completes for the first
+        # time.
+        if os.path.exists('token.pickle') or os.path.exists('../token.pickle'):
+            try:
+                with open('token.pickle', 'rb') as token:
+                    creds = pickle.load(token)
+            except:
+                with open('../token.pickle', 'rb') as token:
+                    creds = pickle.load(token)
+        # If there are no (valid) credentials available, let the user log in.
+        if not creds or not creds.valid:
+            if creds and creds.expired and creds.refresh_token:
+                creds.refresh(Request())
+            else:
+                try:
+                    flow = InstalledAppFlow.from_client_secrets_file(
+                        'credentials.json', SCOPES)
+                except:
+                    flow = InstalledAppFlow.from_client_secrets_file(
+                        '../credentials.json', SCOPES)
+                creds = flow.run_local_server(port=0)
+            # Save the credentials for the next run
+            with open('token.pickle', 'wb') as token:
+                pickle.dump(creds, token)
 
-    #YOU CAN COMMENT THIS ALL OUT FOR THE FIRST RUN AND UNCOMMENT THE SECOND PART
-    JiU = ''
-    folder_id = JiU
-    file_metadata = {
-        'name': file_name,
-        'parents' : [folder_id]
-        }
-    file_location = 'Photos/{}'.format(file_name)
-    media = MediaFileUpload(file_location, mimetype='image/jpeg')
-    file = drive_service.files().create(body=file_metadata,media_body=media,fields='id').execute()
-    print ('File ID: %s'% file.get('id'))
-    link_addon = file.get('id')
-    final_url = link_download + link_addon
-    f = open("link.txt","w")
-    f.write(final_url)
-    f.close
-    #YOU CAN COMMENT THIS ALL OUT FOR THE FIRST RUN AND UNCOMMENT THE SECOND PART
+        drive_service = build('drive', 'v3', credentials=creds)
+        return drive_service
 
+    @staticmethod
+    async def get_ids(folder_id):
+        drive_service = Drive.get_drive_connection()
+        'application/vnd.google-apps.shortcut'
+        async def response1(amount):
+            try:
+                response = drive_service.files().list(q=f"'{folder_id}' in parents",
+                                                      spaces='',
+                                                      fields='nextPageToken, files(id, name)',
+                                                      pageSize=amount).execute()
+                return True
+            except:
+                return False
 
-
-
-#Uncomment this for first run
-"""
-    file_metadata = {
-        'name': file_name
-        }
-    file_location = 'Photos/{}'.format(file_name)
-    media = MediaFileUpload(file_location, mimetype='image/jpeg')
-    file = drive_service.files().create(body=file_metadata,media_body=media,fields='id').execute()
-    print ('File ID: %s'% file.get('id'))
-    link_addon = file.get('id')
-    final_url = link_download + link_addon
-    f = open("link.txt","w")
-    f.write(final_url)
-    f.close
-"""
-#Uncomment this for first run
+        keep_going = True
+        print ("blocking")
+        response = drive_service.files().list(q=f"'{folder_id}' in parents",
+                                              spaces='',
+                                              fields='nextPageToken, files(id, name)',
+                                              pageSize=(1000)).execute()
+        print ("done blocking")
+        id_list = []
+        for file in response.get('files', []):
+            id_list.append(file.get('id'))
+        return id_list

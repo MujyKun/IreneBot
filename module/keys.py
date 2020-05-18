@@ -1,3 +1,5 @@
+import psycopg2
+
 # Twitter Keys
 CONSUMER_KEY = ''
 CONSUMER_SECRET = ''
@@ -21,6 +23,15 @@ X_RapidAPI_headers = {
 
 # tenor api key
 tenor_key = ""
+
+
+#top.gg api key
+top_gg_key = ""
+
+
+# postgresql db connection
+DBconn = psycopg2.connect(host="", database="", user="", password="")
+
 
 # client token ( to run )
 client_token = ""

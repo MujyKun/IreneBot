@@ -1,477 +1,317 @@
-from discord.ext import commands, tasks
+from discord.ext import commands
 from discord.ext.commands.cooldowns import BucketType
-import discord
-import sqlite3
 from random import *
+import discord
 from module import logger as log
-
-
-client = 0
-path = 'module\currency.db'
-DBconn = sqlite3.connect(path, check_same_thread = False)
-c = DBconn.cursor()
-
-def setup(client1):
-    client1.add_cog(Currency(client1))
-    global client
-    client = client1
+from Utility import DBconn, c, update_balance, get_level, get_balance, check_in_game, register_user, create_embed, get_xp, get_user_has_money, check_reaction, set_level, get_rob_percentage, get_robbed_amount, shorten_balance, fetch_all, fetch_one
 
 
 class Currency(commands.Cog):
     def __init__(self, client):
-        self.a = -1
+        self.client = client
+        self.counter2 = -1
         self.counter = 0
         pass
 
     @commands.command()
     @commands.cooldown(1, 86400, BucketType.user)
     async def daily(self, ctx):
-        """Gives 100 Dollars Every 24 Hours [Format: %daily]"""
-        count = c.execute("SELECT COUNT(*) FROM Currency WHERE UserID = ?", (ctx.author.id,)).fetchone()[0]
-        if count == 0:
-            c.execute("INSERT INTO Currency VALUES(?, ?)", (ctx.author.id, "200"))
-        elif count != 0:
-            current_bal = int(c.execute("SELECT Money FROM Currency WHERE UserID = ? ", (ctx.author.id,)).fetchone()[0])
-            new_bal = 100 + current_bal
-            c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f"{new_bal}", ctx.author.id))
-        DBconn.commit()
-        await ctx.send("> **You have been been given $100.**")
-
-    @commands.command()
-    @commands.is_owner()
-    async def resetall(self, ctx):
-        """Resets Leaderboard [Format: %resetall] USE WITH CAUTION"""
-        count = c.execute("SELECT COUNT(UserID) FROM Currency").fetchone()[0]
-        c.execute("DELETE FROM Currency")
-        DBconn.commit()
-        await ctx.send("> **{} users have been deleted.**".format(count))
-
-    @commands.command()
-    @commands.is_owner()
-    async def rafflereset(self, ctx):
-        """Resets Raffle without giving people their money back[Format: %rafflereset]"""
-        c.execute("DELETE FROM RaffleData")
-        c.execute("DELETE FROM Raffle")
-        await ctx.send("> **Lottery was reset successfully.**")
-        DBconn.commit()
-
-    @tasks.loop(seconds=0, minutes=0, hours=24, reconnect=True, count=2)
-    async def new_task2(self, ctx):
-        log.console("Connecting to Background Task For Raffle...")
-        self.a += 1
-        if self.a == 0:
-            pass
-        if self.a == 1:
-            temp_list2 = []
-            fake_list3 = []
-            all_balance = c.execute("SELECT SUM(Amount) FROM RaffleData").fetchone()[0]
-            balance = all_balance
-            if balance == 0:
-                await ctx.send("> **There were no winners for the raffle. Raffle closing**")
-            if balance >= 1:
-                count_number = c.execute("SELECT COUNT(*) FROM RaffleData").fetchone()[0]
-                random_number = randint(1, count_number)
-                winner = c.execute("SELECT UserID FROM RaffleData WHERE RaffleID = ?", (random_number,)).fetchone()[0]
-                current_val = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (winner,)).fetchone()[0])
-                new_total = current_val + balance
-                await ctx.send("> **<@{}> has won {:,} Dollars from the raffle!**".format(winner, balance))
-                c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f"{new_total}", winner))
-                c.execute("DELETE FROM Raffle")
-                c.execute("DELETE FROM RaffleData")
-                DBconn.commit()
-
-    @commands.command()
-    async def raffle(self, ctx, amount=0, balance=''):
-        """Join a Raffle [Format: %raffle to start a raffle; %raffle (amount) to join; %raffle 0 balance to check current amount]"""
-        userid = ctx.author.id
-        if amount >= 0 or balance == 'balance':
-
-            if balance != 'balance':
-                try:
-                    current_val = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (userid,)).fetchone()[0])
-                except:
-                    await ctx.send("> **You are not currently registered. Please type %register to register.**",
-                                   delete_after=60)
-                if current_val < amount:
-                    await ctx.send("> **You do not have enough money to join this raffle.**")
-                self.counter = c.execute("SELECT COUNT(*) FROM Raffle").fetchone()[0]
-                if current_val >= amount and amount >= 1:
-                    if self.counter == 0:
-                        await ctx.send("> **Please type %raffle to start a raffle.**")
-                    if self.counter == 1:
-                        new_val = current_val - amount
-                        search_count = \
-                        c.execute("SELECT COUNT(*) FROM RaffleData WHERE UserID = ?", (userid,)).fetchone()[0]
-                        if search_count == 0:
-                            for b in range(0, amount):
-                                c.execute("INSERT INTO RaffleData VALUES (NULL,?,?)", (userid, 1))
-                            c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f"{new_val}", userid))
-                            await ctx.send("> **You have added {} Dollars to the raffle.**".format(amount))
-                        if search_count >= 1:
-                            old_amount = \
-                            c.execute("SELECT SUM(Amount) FROM RaffleData WHERE UserID = ?", (userid,)).fetchone()[0]
-                            new_amount = old_amount + amount
-                            for b in range(0, amount):
-                                c.execute("INSERT INTO RaffleData VALUES (NULL,?,?)", (userid, 1))
-                            c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f"{new_val}", userid))
-                            await ctx.send(
-                                "> **You have added another {:,} Dollars to the raffle. You currently have {} entries.**".format(
-                                    amount, new_amount))
-                if amount == 0:
-                    if self.counter == 1:
-                        await ctx.send("> **A Raffle Already Exists. Use %raffle (amount) to join.**")
-                    if self.counter == 0:
-                        await ctx.send("> **A Raffle has been started. Use %raffle (amount) to join.**")
-                        c.execute("INSERT INTO Raffle VALUES (NULL,?,?,?)", (0, 0, 0))
-                        self.a = -1
-                        self.new_task2.start(ctx)
-            if balance == 'balance':
-                self.counter = c.execute("SELECT COUNT(*) FROM Raffle").fetchone()[0]
-                if self.counter == 1:
-                    try:
-                        all_balance = c.execute("SELECT SUM(Amount) FROM RaffleData").fetchone()[0]
-                        balance = all_balance
-                        c.execute("UPDATE Raffle SET Amount = ? WHERE Finished = ?", (balance, 0))
-                        await ctx.send("> **{:,} Dollars are currently in the raffle**".format(balance))
-                    except:
-                        await ctx.send("> **There are no raffle entries**")
-                if self.counter == 0:
-                    await ctx.send("> **No Raffle Exists. Please type %raffle to start a raffle.**")
-
-        if amount < 0:
-            await ctx.send("> You are not allowed to raffle a negative amount")
-        DBconn.commit()
-
-    @commands.command()
-    async def register(self, ctx):
-        """Register yourself onto the database."""
-        userid = ctx.author.id
-        count = c.execute("SELECT COUNT(*) FROM Currency WHERE UserID = ?", (userid,)).fetchone()[0]
-        if count == 0:
-            c.execute("INSERT INTO Currency (UserID, Money) VALUES (?, ?)", (userid, '100'))
-            DBconn.commit()
-            await ctx.send("> **You are now registered in the database. You have been given 100 Dollars to start.**")
-        elif count == 1:
-            await ctx.send("> **You are already registered in the database.**")
+        """Gives a certain amount of money every 24 hours [Format: %daily]"""
+        try:
+            user_balance = await get_balance(ctx.author.id)
+            user_level = await get_level(ctx.author.id, "daily")
+            daily_amount = int(user_balance * (user_level/200))
+            if daily_amount < 100:
+                daily_amount = 100
+            await update_balance(ctx.author.id, str(user_balance + daily_amount))
+            await ctx.send(f"> **{ctx.author.display_name} has been given ${daily_amount:,}.**")
+        except Exception as e:
+            log.console(e)
 
     @commands.command(aliases=['b', 'bal', '$'])
-    async def balance(self, ctx, *, user: discord.Member = ""):
+    async def balance(self, ctx, *, user: discord.Member = discord.Member):
         """View your balance [Format: %balance (@user)][Aliases: b,bal,$]"""
-        if user == "":
-            userid = ctx.author.id
+        if user == discord.Member:
+            user_id = ctx.author.id
         else:
-            userid = user.id
+            user_id = user.id
         try:
-            user = c.execute("SELECT COUNT(*) FROM Currency WHERE UserID = ?", (userid,)).fetchone()[0]
-            if user == 0:
-                c.execute("INSERT INTO Currency (UserID, Money) VALUES (?, ?)", (userid, '100'))
-                await ctx.send(
-                    "> **{} is now registered in the database. They have been given 100 Dollars to start.**".format(
-                        client.get_user(userid)))
-                DBconn.commit()
-            if user == 1:
-                amount = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (userid,)).fetchone()[0])
-                await ctx.send("> **{} currently has {:,} Dollars.**".format(client.get_user(userid), amount))
+            await register_user(user_id)
+            amount = await get_balance(user_id)
+            await ctx.send("> **{} currently has {:,} Dollars.**".format(self.client.get_user(user_id), amount))
         except Exception as e:
-            log.console (e)
+            log.console(e)
 
     @commands.command()
     async def bet(self, ctx, *, balance=1):
         """Bet your money [Format: %bet (amount)]"""
-        userid = ctx.author.id
-        check_1 = c.execute("SELECT COUNT(*) From Games WHERE Player1 = ? OR Player2 = ?", (userid, userid)).fetchone()[
-            0]
-        if check_1 == 0:
-            keep_going = True
-            if balance == 0:
-                await ctx.send("> **You are not allowed to bet 0.**")
-                keep_going = False
-            if balance > 0:
-                if keep_going == True:
-                    try:
-                        amount = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (userid,)).fetchone()[0])
-                    except:
-                        c.execute("INSERT INTO Currency (UserID, Money) VALUES (?, ?)", (userid, '100'))
-                        DBconn.commit()
-                        await ctx.send(
-                            "> **You are now registered in the database. You have been given 100 Dollars to start.**")
-                        amount = 100
-                    if balance > amount:
-                        await ctx.send(
-                            "> **You don't have enough money to bet {:,}. You have {:,} Dollars.**".format(balance, amount))
-                    if balance <= amount:
-                        a = randint(1, 100)
-                        if a <= 50:
-                            if a <= 10:
-                                newbalance = round(balance)
-                                newamount = round(amount - balance)
-                                await ctx.send(
-                                    "> **<@{}> Got Super Unlucky! You lost {:,} out of {:,}. Your updated balance is {:,}.**".format(
-                                        userid, newbalance, balance, newamount))
-                                c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{newamount}', userid))
-                                DBconn.commit()
-                            if a > 10:
-                                newbalance = round(balance - (balance / 2))
-                                newamount = round(amount - newbalance)
-                                await ctx.send(
-                                    "> **<@{}> Lost! You lost {:,} out of {:,}. Your updated balance is {:,}.**".format(
-                                        userid, newbalance, balance, newamount))
-                                c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{newamount}', userid))
-                                DBconn.commit()
-                        if a > 50:
-                            if a <= 60:
-                                newbalance = round(balance / 5)
-                                newamount = round(amount + newbalance)
-                                await ctx.send(
-                                    "> **<@{}> Won! You bet {:,} and received {:,}. Your updated balance is {:,}.**".format(
-                                        userid, balance, newbalance, newamount))
-                                c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{newamount}', userid))
-                                DBconn.commit()
-                            if a > 60:
-                                if a <= 70:
-                                    newbalance = round(balance / 4)
-                                    newamount = round(amount + newbalance)
-                                    await ctx.send(
-                                        "> **<@{}> Won! You bet {:,} and received {:,}. Your updated balance is {:,}.**".format(
-                                            userid, balance, newbalance, newamount))
-                                    c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{newamount}', userid))
-                                    DBconn.commit()
-                                if a > 70:
-                                    if a <= 80:
-                                        newbalance = round(balance / 2)
-                                        newamount = round(amount + newbalance)
-                                        await ctx.send(
-                                            "> **<@{}> Won! You bet {:,} and received {:,}. Your updated balance is {:,}.**".format(
-                                                userid, balance, newbalance, newamount))
-                                        c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{newamount}', userid))
-                                        DBconn.commit()
-                                    if a > 80:
-                                        if a <= 90:
-                                            newbalance = round(balance * 1.5)
-                                            newamount = round((amount - balance) + newbalance)
-                                            await ctx.send(
-                                                "> **<@{}> Won! Your {:,} has been multiplied by 1.5 to {:,}. Your updated balance is {:,}.**".format(
-                                                    userid, balance, newbalance, newamount))
-                                            c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?",
-                                                      (f'{newamount}', userid))
-                                            DBconn.commit()
-                                        if a > 90:
-                                            if a <= 99:
-                                                newbalance = round(balance * 2)
-                                                newamount = round((amount - balance) + newbalance)
-                                                await ctx.send(
-                                                    "> **<@{}> Won! Your {:,} has been doubled to {:,}. Your updated balance is {:,}.**".format(
-                                                        userid, balance, newbalance, newamount))
-                                                c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?",
-                                                          (f'{newamount}', userid))
-                                                DBconn.commit()
-                                            if a == 100:
-                                                newbalance = round(balance * 3)
-                                                newamount = round((amount - balance) + newbalance)
-                                                await ctx.send(
-                                                    "> **<@{}> Won! Your {:,} has been tripled to {:,}. Your updated balance is {:,}.**".format(
-                                                        userid, balance, newbalance, newamount))
-                                                c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?",
-                                                          (f'{newamount}', userid))
-                                                DBconn.commit()
-        if check_1 >= 1:
-            await ctx.send("> **Please type %endgame. You cannot use this command when you're in a game.**")
+        try:
+            userid = ctx.author.id
+            if await check_in_game(userid):
+                keep_going = True
+                if balance == 0:
+                    await ctx.send("> **You are not allowed to bet 0.**")
+                    keep_going = False
+                if balance > 0:
+                    if keep_going:
+                        await register_user(userid)
+                        amount = await get_balance(userid)
+                        if balance > amount:
+                            await ctx.send(embed=await create_embed(title="Not Enough Money", title_desc=f"**You do not have enough money to bet {balance:,}. You have {amount:,} Dollars.**" ))
+                        if balance <= amount:
+                            a = randint(1, 100)
+                            if a <= 50:
+                                if a <= 10:
+                                    new_balance = round(balance)
+                                    new_amount = round(amount - balance)
+                                    await ctx.send(embed=await create_embed(title="Bet Loss", title_desc= f"**<@{userid}> Got Super Unlucky! You lost {new_balance:,} out of {balance:,}. Your updated balance is {new_amount:,}.**"))
+                                    await update_balance(userid, str(new_amount))
+                                if a > 10:
+                                    new_balance = round(balance - (balance / 2))
+                                    new_amount = round(amount - new_balance)
+                                    await ctx.send(embed=await create_embed(title="Bet Loss", title_desc= f"**<@{userid}> Lost! You lost {new_balance:,} out of {balance:,}. Your updated balance is {new_amount:,}.**"))
+                                    await update_balance(userid, str(new_amount))
+                            if a > 50:
+                                if a <= 60:
+                                    new_balance = round(balance / 5)
+                                    new_amount = round(amount + new_balance)
+                                    await ctx.send(embed= await create_embed(title="Bet Win", title_desc=f"**<@{userid}> Won! You bet {balance:,} and received {new_balance:,}. Your updated balance is {new_amount:,}.**"))
+                                    await update_balance(userid, str(new_amount))
+                                if a > 60:
+                                    if a <= 70:
+                                        new_balance = round(balance / 4)
+                                        new_amount = round(amount + new_balance)
+                                        await ctx.send(embed=await create_embed(title="Bet Win", title_desc=f"**<@{userid}> Won! You bet {balance:,} and received {new_balance:,}. Your updated balance is {new_amount:,}.**"))
+                                        await update_balance(userid, str(new_amount))
+                                    if a > 70:
+                                        if a <= 80:
+                                            new_balance = round(balance / 2)
+                                            new_amount = round(amount + new_balance)
+                                            await ctx.send(embed=await create_embed(title="Bet Win", title_desc=f"**<@{userid}> Won! You bet {balance:,} and received {new_balance:,}. Your updated balance is {new_amount:,}.**"))
+                                            await update_balance(userid, str(new_amount))
+                                        if a > 80:
+                                            if a <= 90:
+                                                new_balance = round(balance * 1.5)
+                                                new_amount = round((amount - balance) + new_balance)
+                                                await ctx.send(embed=await create_embed(title="Bet Win", title_desc=f"**<@{userid}> Won! You bet {balance:,} and received {new_balance:,}. Your updated balance is {new_amount:,}.**"))
+                                                await update_balance(userid, str(new_amount))
+                                            if a > 90:
+                                                if a <= 99:
+                                                    new_balance = round(balance * 2)
+                                                    new_amount = round((amount - balance) + new_balance)
+                                                    await ctx.send(embed=await create_embed(title="Bet Win", title_desc=f"**<@{userid}> Won! You bet {balance:,} and received {new_balance:,}. Your updated balance is {new_amount:,}.**"))
+                                                    await update_balance(userid, str(new_amount))
+                                                if a == 100:
+                                                    new_balance = round(balance * 3)
+                                                    new_amount = round((amount - balance) + new_balance)
+                                                    await ctx.send(embed=await create_embed(title="Bet Win", title_desc=f"**<@{userid}> Won! You bet {balance:,} and received {new_balance:,}. Your updated balance is {new_amount:,}.**"))
+                                                    await update_balance(userid, str(new_amount))
 
-    @commands.command(aliases=['leaderboards'])
+            else:
+                await ctx.send("> **Please type %endgame. You cannot use this command when you're in a game.**")
+        except Exception as e:
+            log.console(e)
+
+    @commands.command(aliases=['leaderboards', 'lb'])
     async def leaderboard(self, ctx):
-        """Shows Top 10 Users [Format: %leaderboard][Aliases: leaderboards]"""
-        counter = c.execute("SELECT count(UserID) FROM Currency").fetchone()[0]
+        """Shows Top 10 Users [Format: %leaderboard][Aliases: leaderboards, lb]"""
+        c.execute("SELECT count(UserID) FROM currency.Currency")
+        counter = fetch_one()
+        embed = discord.Embed(title=f"Currency Leaderboard", color=0xffb6c1)
+        embed.set_author(name="Irene", url='https://www.youtube.com/watch?v=dQw4w9WgXcQ', icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
+        embed.set_footer(text="Type %bal (user) to view their balance.", icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
         if counter == 0:
             await ctx.send("> **There are no users to display.**", delete_after=60)
         if counter > 0:
-            amount = c.execute("Select UserID,Money FROM Currency").fetchall()
-            list_money = []
+            c.execute("Select UserID,Money FROM currency.Currency")
+            amount = fetch_all()
             sort_money = []
             for sort in amount:
                 new_user = [sort[0], int(sort[1])]
                 sort_money.append(new_user)
             sort_money.sort(key=lambda x: x[1], reverse=True)
+            count = 0
             for a in sort_money:
+                count += 1
                 UserID = a[0]
                 Money = a[1]
-                UserName = client.get_user(UserID)
-                final = "**{} ({}) currently has {:,} Dollars.**\n".format(UserName, UserID, Money)
-                list_money.append(final)
-            if len(list_money) >= 10:
-                final = list_money[0:10]
-            elif len(list_money) < 10:
-                final = list_money[0:len(list_money)]
-            final_list = ''
-            for a in final:
-                final_list += a
-            await ctx.send(">>> {}".format(final_list))
+                UserName = self.client.get_user(UserID)
+                if count <= 10:
+                    embed.add_field(name=f"{count}) {UserName} ({UserID})", value=await shorten_balance(str(Money)), inline=True)
+            await ctx.send(embed=embed)
 
     @commands.command()
+    @commands.cooldown(1, 10, BucketType.user)
     async def beg(self, ctx):
         """Beg a homeless man for money [Format: %beg]"""
-        userid = ctx.author.id
-        broke_money = randint(1, 9)
         try:
-            amount = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (userid,)).fetchone()[0])
-        except:
-            c.execute("INSERT INTO Currency (UserID, Money) VALUES (?, ?)", (userid, '100'))
-            DBconn.commit()
-            await ctx.send("> **You are now registered in the database. You have been given 100 Dollars to start.**")
-            amount = 100
-        if amount > 100:
-            await ctx.send("> **The homeless man doesn't want to spare you any money.**")
-        elif amount <= 100:
-            await ctx.send("> **A homeless man gave you {:,} Dollar(s)**.".format(broke_money))
-            c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{broke_money + amount}', userid))
-        DBconn.commit()
+            user_balance = await get_balance(ctx.author.id)
+            user_level = await get_level(ctx.author.id, "daily")
+            daily_amount = int(1/1000*(2 * 350) * (2 ** (user_level - 2)))
+            if daily_amount < 100:
+                if user_balance > 10000:
+                    daily_amount = randint(50, 100)
+                else:
+                    daily_amount = randint(1, 25)
+            await update_balance(ctx.author.id, str(user_balance + daily_amount))
+            await ctx.send(f"> ** A homeless man has given {ctx.author.display_name} {daily_amount:,} dollars.**")
+        except Exception as e:
+            log.console(e)
 
-    @commands.command()
-    async def roll(self, ctx):
-        """No Description Yet"""
-        pass
+    @commands.command(aliases=["levelup"])
+    @commands.cooldown(1, 61, BucketType.user)
+    async def upgrade(self, ctx, command=""):
+        """Upgrade a command to the next level with your money. [Format: %upgrade rob/daily/beg]"""
+        try:
+            user_id = ctx.author.id
+            user_balance = await get_balance(user_id)
+            user_level = await get_level(user_id, command.lower())
+            money_needed_to_level = await get_xp(user_level, command.lower())
+
+            async def not_enough_money():
+                embed = await create_embed(title="Not Enough Money!", title_desc=f"<@{user_id}> does not have **{money_needed_to_level:,}** dollars in order to level up {command}!")
+                await ctx.send(embed=embed)
+                ctx.command.reset_cooldown(ctx)
+
+            async def level_up_process():
+                if await get_user_has_money(user_id):
+                    desc = f"Press the Thumbs Up Reaction within 1 minute to level up.\n<@{ctx.author.id}>, you are currently at level **{user_level}** and need at least **{money_needed_to_level:,}** dollars in order to level up."
+                    embed = await create_embed(title="Level Up", title_desc=desc)
+                    msg = await ctx.send(embed=embed)
+                    reaction = "\U0001f44d"
+                    await msg.add_reaction(reaction)  # thumbs up
+                    if await check_reaction(msg, user_id, reaction, self.client):
+                        await msg.delete()
+                        if user_balance < money_needed_to_level:
+                            await not_enough_money()
+                        else:
+                            await update_balance(user_id, str(user_balance - money_needed_to_level))
+                            await set_level(user_id, user_level + 1, command.lower())
+                            embed = await create_embed(title="You Have Leveled Up!",
+                                                       title_desc=f"<@{ctx.author.id}>, You are now at level {user_level+1}")
+                            await ctx.send(embed=embed)
+                            ctx.command.reset_cooldown(ctx)
+                else:
+                    await ctx.send("> **You are not registered. Please type %register.**")
+            if command.lower() == "rob":
+                await level_up_process()
+            elif command.lower() == "daily":
+                await level_up_process()
+            elif command.lower() == "beg":
+                await level_up_process()
+            else:
+                await ctx.send("> **You are able to upgrade rob, daily, and beg. (ex: %upgrade rob)**")
+                ctx.command.reset_cooldown(ctx)
+        except Exception as e:
+            await ctx.send("> **Please choose to upgrade rob, daily, or beg.**")
+            ctx.command.reset_cooldown(ctx)
+            log.console(e)
 
     @commands.command()
     @commands.cooldown(1, 3600, BucketType.user)
-    async def rob(self, ctx, *, user: discord.Member = ""):
-        """Rob a user - Max Value = 1000 [Format: %rob @user]"""
-        # ADD A DELAY TO HOW MANY TIMES THEY CAN USE THE COMMAND
-        do_this = True
-        userid = ""
-        if user == "":
-            await ctx.send("> **Please @ the user you want to rob**")
-            ctx.command.reset_cooldown(ctx)
-            do_this = False
-        else:
-            userid = user.id
-        if ctx.author.id == userid:
-            await ctx.send("> **You can't rob yourself!**")
-            ctx.command.reset_cooldown(ctx)
-            do_this = False
-        if do_this:
-            try:
-                user_money = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (userid,)).fetchone()[0])
-                actual_user_money = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (ctx.author.id,)).fetchone()[0])
-            except:
-                await ctx.send(f"> **Either you or <@{userid}> is not registered. Please type %register first.**")
+    async def rob(self, ctx, *, user: discord.Member = discord.Member):
+        """Rob a user [Format: %rob @user]"""
+        try:
+            # not actually a percent, this contains the a value of the random integer.
+            level = await get_level(ctx.author.id, "rob")
+            rob_percent_to_win = await get_rob_percentage(level)
+            do_this = True
+            robbed_user_id = user.id
+            if user == discord.Member:
+                await ctx.send("> **Please choose someone to rob!**")
                 ctx.command.reset_cooldown(ctx)
-            if ctx.author.id != userid:
-                if actual_user_money >= 0:
-                    if user_money >= 0:
-                            try:
-                                random_number = randint(0, 1)
-                                if random_number == 0:
-                                    await ctx.send(f"> **You have failed to rob <@{userid}>**")
-                                if random_number == 1:
-                                    if user_money >= 10:
-                                        # One Billion
-                                        if user_money >= 1000:
-                                            random_amount = randint(100, 500)
-                                        elif 500 <= user_money < 1000:
-                                            random_amount = randint(50, 100)
-                                        elif 100 <= user_money < 500:
-                                            random_amount = randint(10, 50)
-                                        elif 10 <= user_money < 100:
-                                            random_amount = randint(5, 10)
+                do_this = False
+            if ctx.author.id == robbed_user_id:
+                await ctx.send("> **You can't rob yourself!**")
+                ctx.command.reset_cooldown(ctx)
+                do_this = False
+            if do_this:
+                try:
+                    await register_user(robbed_user_id)
+                    await register_user(ctx.author.id)
+                    user_money = await get_balance(robbed_user_id)
+                    author_money = await get_balance(ctx.author.id)
+                    if author_money >= 0:
+                        if user_money >= 0:
+                                # b value is out of 20 so each 5% is considered 1
+                                all_possible_values = []
+                                for i in range (rob_percent_to_win, 21):
+                                    if i == rob_percent_to_win:
+                                        for j in range (rob_percent_to_win):
+                                            all_possible_values.append(i)
+                                    else:
+                                        all_possible_values.append(i)
+                                random_number = choice(all_possible_values)
+                                if random_number != rob_percent_to_win:
+                                    await ctx.send(embed=await create_embed(title="Robbed User",
+                                                                            title_desc=f"**<@{ctx.author.id}> has failed to rob <@{robbed_user_id}>.**"))
+                                if random_number == rob_percent_to_win:
+                                    if user_money >= 100:
+                                        random_amount = await get_robbed_amount(author_money, user_money, level)
                                         try:
-                                            actual_user_money = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (ctx.author.id,)).fetchone()[0])
-                                            actual_user_money = actual_user_money + random_amount
-                                            user_money = user_money - random_amount
-                                            c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{user_money}', userid))
-                                            c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{actual_user_money}', ctx.author.id))
-                                            DBconn.commit()
-                                            await ctx.send(f"> **You have stolen ${random_amount:,} from <@{userid}>.**")
+                                            await update_balance(robbed_user_id, str(user_money - random_amount))
+                                            await update_balance(ctx.author.id, str(author_money + random_amount))
+                                            await ctx.send(embed=await create_embed(title="Robbed User",
+                                                                                    title_desc=f"**<@{ctx.author.id}> has stolen ${random_amount:,} from <@{robbed_user_id}>.**"))
                                         except Exception as e:
-                                            await ctx.send (f"> **The Database is locked... -- {e}**")
-                                    elif user_money < 10:
-                                        await ctx.send("> **That user has less than $10!**")
+                                            await ctx.send(f"> **The Database is locked... -- {e}**")
+                                    elif user_money < 100:
+                                        await ctx.send("> **That user has less than $100!**")
                                         ctx.command.reset_cooldown(ctx)
-                            except Exception as e:
-                                log.console(e)
-                                await ctx.send("> **An error has occurred.**")
-                                ctx.command.reset_cooldown(ctx)
+                except Exception as e:
+                    log.console(e)
+                    await ctx.send(f"> **An error occurred. Please %report it.**")
+                    ctx.command.reset_cooldown(ctx)
+        except Exception as e:
+            log.console(e)
 
     @commands.command()
-    async def give(self, ctx, mentioned_userid="", amount=0):
+    async def give(self, ctx, mentioned_user: discord.Member = discord.Member, amount=0):
         """Give a user money [Format: %give (@user) (amount)]"""
-        userid = ctx.author.id
-        check_1 = c.execute("SELECT COUNT(*) From Games WHERE Player1 = ? OR Player2 = ?", (userid, userid)).fetchone()[
-            0]
-        if check_1 == 0:
-            mentioned_userid = ctx.message.raw_mentions[0]
-            if mentioned_userid != userid:
-                count = c.execute("SELECT count(UserID) FROM Currency WHERE USERID = ?", (userid,)).fetchone()[0]
-                if count == 0:
-                    await ctx.send("> **You are not currently registered. Please type %register to register.**",
-                                   delete_after=60)
-                if count == 1:
-                    current_amount = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (userid,)).fetchone()[0])
+        try:
+            userid = ctx.author.id
+            if await check_in_game(userid):
+                await register_user(userid)
+                if mentioned_user.id != userid:
+                    current_amount = await get_balance(userid)
                     if amount == 0:
                         await ctx.send("> **Please specify an amount [Format: %give (@user) (amount)]**", delete_after=60)
                     if amount > 0:
                         if amount > current_amount:
                             await ctx.send("> **You do not have enough money to give!**", delete_after=60)
                         if amount <= current_amount:
-                            newcount = c.execute("SELECT count(UserID) FROM Currency WHERE USERID = ?",
-                                                 (mentioned_userid,)).fetchone()[0]
-                            if newcount == 0:
-                                await ctx.send(
-                                    "> **That user is not currently registered. Have them type %register to register.**")
-                            if newcount == 1:
-                                mentioned_money = int(c.execute("SELECT Money FROM Currency WHERE USERID = ?", (mentioned_userid,)).fetchone()[0])
-                                newamount = mentioned_money + amount
-                                newamount2 = current_amount - amount
-                                c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{newamount}', mentioned_userid))
-                                c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{newamount2}', userid))
-                                await ctx.send("> **Your money has been transferred.**")
-                                DBconn.commit()
-                            if newcount > 1:
-                                await ctx.send(
-                                    "> **There is an error with the database. Please report to an administrator**")
-                if count > 1:
-                    await ctx.send("> **There is an error with the database. Please report to an administrator**")
-            elif mentioned_userid == userid:
-                await ctx.send("> **You can not give money to yourself!**")
+                            mentioned_money = await get_balance(mentioned_user.id)
+                            new_amount = mentioned_money + amount
+                            subtracted_amount = current_amount - amount
+                            await update_balance(mentioned_user.id, str(new_amount))
+                            await update_balance(userid, str(subtracted_amount))
+                            await ctx.send("> **Your money has been transferred.**")
+                elif mentioned_user.id == userid:
+                    await ctx.send("> **You can not give money to yourself!**")
 
-        if check_1 >= 1:
-            await ctx.send("> **Please type %endgame. You cannot use this command when you're in a game.**")
+            else:
+                await ctx.send("> **Please type %endgame. You cannot use this command when you're in a game.**")
+        except Exception as e:
+            log.console(e)
 
     @commands.command(aliases=['rockpaperscissors'])
     async def rps(self, ctx, choice='', amount=0):
         """Play Rock Paper Scissors for Money [Format: %rps (r/p/s)(amount)][Aliases: rockpaperscissors]"""
-        if amount < 0:
-            await ctx.send("> **You can't bet a negative number!**")
-        elif amount >= 0:
-            userid = ctx.author.id
-            check_1 = c.execute("SELECT COUNT(*) From Games WHERE Player1 = ? OR Player2 = ?", (userid, userid)).fetchone()[
-                0]
-            if check_1 == 0:
-                try:
-                    current_balance = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (userid,)).fetchone()[0])
-                except:
-                    pass
-                count = c.execute("SELECT count(UserID) FROM Currency WHERE USERID = ?", (userid,)).fetchone()[0]
-                if count == 0:
-                    await ctx.send("> **You are not currently registered. Please type %register to register.**",
-                                   delete_after=60)
-                if amount > current_balance:
-                    await ctx.send("> ** You do not have enough money **", delete_after=60)
-                if amount <= current_balance:
-                    def Win(win):
-                        c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{win}', userid))
-                        DBconn.commit()
-
-                    def Loss(loss):
-                        c.execute("UPDATE Currency SET Money = ? WHERE UserID = ?", (f'{loss}', userid))
-                        DBconn.commit()
-
-                    if count == 1:
-                        # current_balance called again incase it does not properly update
-                        current_balance = int(c.execute("SELECT Money FROM Currency WHERE UserID = ?", (userid,)).fetchone()[0])
+        try:
+            if amount < 0:
+                await ctx.send("> **You can't bet a negative number!**")
+            elif amount >= 0:
+                userid = ctx.author.id
+                await register_user(userid)
+                if await check_in_game(userid):
+                    current_balance = await get_balance(userid)
+                    if amount > current_balance:
+                        await ctx.send("> ** You do not have enough money **", delete_after=60)
+                    if amount <= current_balance:
                         rps = ['rock', 'paper', 'scissors']
                         a = randint(0, 2)
                         b = randint(0, 2)
-                        #cd = randint(10, 30)
-                        cd = 2 * amount
+                        cd = int(amount // (1/1.5))  # using floor division instead of multiplication
                         if amount == 0:
                             cd = 0
                         if choice == '':
@@ -479,52 +319,35 @@ class Currency(commands.Cog):
                         compchoice = rps[b]
                         if compchoice == 'rock':
                             if choice == 'rock' or choice == 'r':
-                                await ctx.send("> **We Both Chose Rock and Tied! You get nothing!**", delete_after=15)
+                                await ctx.send(embed=await create_embed(title="Rock Paper Scissors", title_desc=f"**We Both Chose {compchoice} and Tied! You get nothing!**"))
                             if choice == 'paper' or choice == 'p':
-                                await ctx.send(
-                                    "> **You Won {:,} Dollars! I chose {} while you chose {}!**".format(cd, compchoice,
-                                                                                                      choice),
-                                    delete_after=15)
-                                Win(current_balance + cd)
+                                await ctx.send(embed=await create_embed(title="Rock Paper Scissors", title_desc=f"**You Won {cd:,} Dollars! I chose {compchoice} while you chose {choice}!**"))
+                                await update_balance(userid, str(current_balance + cd))
                             if choice == 'scissors' or choice == 's':
-                                await ctx.send(
-                                    "> **You Lost {:,} Dollars! I chose {} while you chose {}!**".format(amount, compchoice,
-                                                                                                       choice),
-                                    delete_after=15)
-                                Loss(current_balance - amount)
+                                await ctx.send(embed=await create_embed(title="Rock Paper Scissors",title_desc=f"**You Lost {amount:,} Dollars! I chose {compchoice} while you chose {choice}!**"))
+                                await update_balance(userid, str(current_balance - amount))
                         if compchoice == 'paper':
                             if choice == 'rock' or choice == 'r':
-                                await ctx.send(
-                                    "> **You Lost {:,} Dollars! I chose {} while you chose {}!**".format(amount, compchoice,
-                                                                                                       choice),
-                                    delete_after=15)
-                                Loss(current_balance - amount)
-                            if choice == 'paper':
-                                await ctx.send("> **We Both Chose Paper and Tied! You get nothing!**")
+                                await ctx.send(embed=await create_embed(title="Rock Paper Scissors", title_desc=f"**You Lost {amount:,} Dollars! I chose {compchoice} while you chose {choice}!**"))
+                                await update_balance(userid, str(current_balance - amount))
+                                check_amount = str(current_balance - amount)
+                                await update_balance(userid, check_amount)
+                            if choice == 'paper' or choice == 'p':
+                                await ctx.send(embed=await create_embed(title="Rock Paper Scissors", title_desc=f"**We Both Chose {compchoice} and Tied! You get nothing!**"))
                             if choice == 'scissors' or choice == 's':
-                                await ctx.send(
-                                    "> **You Won {:,} Dollars! I chose {} while you chose {}!**".format(cd, compchoice,
-                                                                                                      choice),
-                                    delete_after=15)
-                                Win(current_balance + cd)
-
+                                await ctx.send(embed=await create_embed(title="Rock Paper Scissors", title_desc=f"**You Won {cd:,} Dollars! I chose {compchoice} while you chose {choice}!**"))
+                                await update_balance(userid, str(current_balance + cd))
                         if compchoice == 'scissors':
                             if choice == 'rock' or choice == 'r':
-                                await ctx.send(
-                                    "> **You Won {:,} Dollars! I chose {} while you chose {}!**".format(cd, compchoice,
-                                                                                                      choice),
-                                    delete_after=15)
-                                Win(current_balance + cd)
+                                await ctx.send(embed=await create_embed(title="Rock Paper Scissors", title_desc=f"**You Won {cd:,} Dollars! I chose {compchoice} while you chose {choice}!**"))
+                                await update_balance(userid, str(current_balance + cd))
                             if choice == 'paper' or choice == 'p':
-                                await ctx.send(
-                                    "> **You Lost {:,} Dollars! I chose {} while you chose {}!**".format(amount, compchoice,
-                                                                                                       choice),
-                                    delete_after=15)
-                                Loss(current_balance - amount)
+                                await ctx.send(embed=await create_embed(title="Rock Paper Scissors", title_desc=f"**You Lost {amount:,} Dollars! I chose {compchoice} while you chose {choice}!**"))
+                                await update_balance(userid, str(current_balance - amount))
                             if choice == 'scissors' or choice == 's':
-                                await ctx.send("> **We Both Chose Scissors and Tied! You get nothing!**")
-                        if count > 1:
-                            await ctx.send("> **There is an error with the database. Please report to an administrator**")
-            if check_1 >= 1:
-                await ctx.send("> **Please type %endgame. You cannot play a game when you're already in one.**")
-        await ctx.message.delete(delay=15)
+                                await ctx.send(embed=await create_embed(title="Rock Paper Scissors", title_desc=f"**We Both Chose {compchoice} and Tied! You get nothing!**"))
+                else:
+                    await ctx.send("> **Please type %endgame. You cannot play a game when you're already in one.**")
+            await ctx.message.delete(delay=15)
+        except Exception as e:
+            log.console(e)

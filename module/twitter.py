@@ -1,12 +1,7 @@
 import tweepy
-# NOTE: I put my keys in the keys.py to separate them
-# from this main file.
-# Please refer to keys_format.py to see the format.
 from module import keys
+from module import logger as log
 
-# NOTE: flush=True is just for running this script
-# with PythonAnywhere's always-on task.
-# More info: https://help.pythonanywhere.com/pages/AlwaysOnTasks/
 print('', flush=True)
 
 auth = tweepy.OAuthHandler(keys.CONSUMER_KEY, keys.CONSUMER_SECRET)
@@ -56,6 +51,7 @@ Account_ID = 0
 #example: MujyKun
 Twitter_Username = ''
 
+
 def update_status(context):
     print('Updating Status')
     api.update_status(status=context, )
@@ -66,9 +62,11 @@ def update_status(context):
     f.write(final_url)
     f.close
 
+
 def delete_status(context):
     print('Deleting Status')
     api.destroy_status(context)
+
 
 def recent_tweets(context):
     print ('Grabbing Tweets')
@@ -77,3 +75,14 @@ def recent_tweets(context):
     for tweet in tweets:
         f.write("> **Tweet ID:** {} | **Tweet:** {}\n".format(tweet.id, tweet.text,))
     f.close()
+
+
+async def get_image(id):
+    try:
+        list_ids = [id]
+        photo_tweets = api.statuses_lookup(id_=list_ids)
+
+        for tweet in photo_tweets:
+            print(tweet.entities)
+    except Exception as e:
+        log.console(e)

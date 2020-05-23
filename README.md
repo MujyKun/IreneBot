@@ -1,12 +1,13 @@
 
 # [IreneBot](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=8)
 
-## Irene Bot for Discord in Python V1.01
+## Irene Bot for Discord in Python V1.01.5
 
 ## [Discord Support Server](https://discord.gg/bEXm85V)
 
 Commands from this documentation may not be present in the code (The code may be a bit behind with updating).  
-Command Prefix is in run.py and is currently set to '%' by default.
+Command Prefix is in modules/keys.py and is currently set to '%' by default. To change a server prefix, look at `%setprefix`.    
+In order to check the prefix of your server, type `%checkprefix`.
 
 In order to pull a photo of an idol, you can type an idol's stage name, full name, alias, their group name, or group alias name after the prefix.    
 examples: `%irene` `%blackpink` `%red velvet`. To find out more, look at the `GroupMembers` category. 
@@ -28,6 +29,7 @@ examples: `%irene` `%blackpink` `%red velvet`. To find out more, look at the `Gr
 | Google Client Library | pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib |
 | Tweepy                | pip install tweepy                                                                       |
 | PostgreSQL Driver     | pip install psycopg2                                                                     |
+| pypapago (translator)    | pip install pypapago                                                                     |
 
 
 ## COMMANDS
@@ -39,7 +41,7 @@ examples: `%irene` `%blackpink` `%red velvet`. To find out more, look at the `Gr
 | addhistory            | Add all of the previous images from a text channel to google drive.                                   | %addhistory (year) (month) (day)     |
 | deletechannel         | Stop the current channel from being archived                                                          | %deletechannel                       |
 | listchannels          | List the channels in your server that are being archived.                                             | %listchannels                        |
-#### BlackJack:
+#### BlackJack: [CURRENTLY DISABLED (RECODING)]
 | Command           | Description                                                                                           | Format                               | Aliases |
 |-------------------|-------------------------------------------------------------------------------------------------------|--------------------------------------|---------|
 | addcards          | Fill The CardValues Table with Cards                                                                  | %addcards                            | ♥       |
@@ -116,9 +118,11 @@ examples: `%irene` `%blackpink` `%red velvet`. To find out more, look at the `Gr
 |------------------|----------------------------------------------------------------|---------------------------------|----------------|
 | _8ball           | Asks the 8ball a question.                                     | %8ball (Question)               | 8ball,8        |
 | announce         | Sends a bot message to text channels                           | %announce (message)             | ♥              |
-| changestatus       | Change the playing status of Irene.                                   | %changestatus (status)               | ♥              |
+| addstatus       | Add a playing status to Irene.                                   | %addstatus (status)               | ♥              |
+| checkprefix       | Check the current prefix using the default prefix.                                   | %checkprefix               | ♥              |
 | clearnword       | Clear A User's Nword Counter                                   | %clearnword @user               | ♥              |
 | flip             | Flips a Coin                                                   | %flip                           |                |
+| getstatuses             | Get all statuses of Irene.                                                   | %getstatuses                           |                |
 | invite           | Invite Link for Irene                                          | %invite                         |                |
 | kill             | Kills the bot                                                  | %kill                           | ♥              |
 | logging          | Start logging this channel/Stop logging this channel           | %logging (start/stop)           | ♥              |
@@ -135,6 +139,7 @@ examples: `%irene` `%blackpink` `%red velvet`. To find out more, look at the `Gr
 | speak            | Owner to Bot TTS                                               | %speak (message)                | ♥              |
 | suggest          | Suggest a feature for Irene                                    | %suggest (feature)              |               |
 | support          | Support Discord Server for Irene                               | %support                        |                |
+| translate          | Translate between languages using Papago                              | %translate English Korean this is a test phrase.                       |                |
 
 
 #### Moderator: ★★★
@@ -144,6 +149,7 @@ examples: `%irene` `%blackpink` `%red velvet`. To find out more, look at the `Gr
 | ban              | Ban A User                                                                                                                           | %ban @user                      |               |
 | clear            | Prune Messages                                                                                                                       | %clear (amount)                 |  prune        |
 | kick             | Kick A User                                                                                                                          | %kick @user                     |               |
+| setprefix      | Set the server prefix. If prefix was forgotten, type this command with the default prefix. | %setprefix $         |          | 
 | tempchannel      | Makes Current Channel a temporary channel deleting messages after a certain time period. If delay is -1, it will remove the channel. | %tempchannel [delay=-1]         | temp         |
 | unban            | UnBan A User                                                                                                                         | %unban @user                    |               |
 #### Twitter: ♥♥♥

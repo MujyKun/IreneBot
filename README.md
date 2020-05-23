@@ -119,7 +119,7 @@ examples: `%irene` `%blackpink` `%red velvet`. To find out more, look at the `Gr
 | _8ball           | Asks the 8ball a question.                                     | %8ball (Question)               | 8ball,8        |
 | announce         | Sends a bot message to text channels                           | %announce (message)             | ♥              |
 | addstatus       | Add a playing status to Irene.                                   | %addstatus (status)               | ♥              |
-| checkprefix       | Check the current prefix using the default prefix.                                   | %checkprefix               | ♥              |
+| checkprefix       | Check the current prefix using the default prefix.                                   | %checkprefix               |               |
 | clearnword       | Clear A User's Nword Counter                                   | %clearnword @user               | ♥              |
 | flip             | Flips a Coin                                                   | %flip                           |                |
 | getstatuses             | Get all statuses of Irene.                                                   | %getstatuses                           |                |

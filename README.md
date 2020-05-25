@@ -41,7 +41,9 @@ examples: `%irene` `%blackpink` `%red velvet`. To find out more, look at the `Gr
 | addhistory            | Add all of the previous images from a text channel to google drive.                                   | %addhistory (year) (month) (day)     |
 | deletechannel         | Stop the current channel from being archived                                                          | %deletechannel                       |
 | listchannels          | List the channels in your server that are being archived.                                             | %listchannels                        |
-#### BlackJack: [CURRENTLY DISABLED (RECODING)]
+
+
+#### BlackJack:
 | Command           | Description                                                                                           | Format                               | Aliases |
 |-------------------|-------------------------------------------------------------------------------------------------------|--------------------------------------|---------|
 | addcards          | Fill The CardValues Table with Cards                                                                  | %addcards                            | ♥       |
@@ -49,6 +51,7 @@ examples: `%irene` `%blackpink` `%red velvet`. To find out more, look at the `Gr
 | endgame           | End your current game                                                                                 | %endgame                             | eg      |
 | hit               | Pick A Card                                                                                           | %hit                                 |         |
 | joingame          | Join a game                                                                                           | %joingame (gameid) (bid)             | jg      |
+| rules          | View the rules of BlackJack.                                                                                           | %rules             |       |
 | stand             | Keep Your Cards                                                                                       | %stand                               |         |
 
 

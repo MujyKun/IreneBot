@@ -3,6 +3,8 @@
 
 ## Irene Bot for Discord in Python V1.01.5
 
+[![Discord Bots](https://top.gg/api/widget/520369375325454371.svg)](https://top.gg/bot/520369375325454371)  
+
 ## [Discord Support Server](https://discord.gg/bEXm85V)
 
 Commands from this documentation may not be present in the code (The code may be a bit behind with updating).  

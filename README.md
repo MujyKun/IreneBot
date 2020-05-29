@@ -1,5 +1,5 @@
 
-# [IreneBot](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=8)
+# [IreneBot](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=1609956823)
 
 ## Irene Bot for Discord in Python V1.01.5
 

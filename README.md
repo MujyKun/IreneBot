@@ -122,6 +122,7 @@ examples: `%irene` `%blackpink` `%red velvet`. To find out more, look at the `Gr
 | _8ball           | Asks the 8ball a question.                                     | %8ball (Question)               | 8ball,8        |
 | announce         | Sends a bot message to text channels                           | %announce (message)             | ♥              |
 | addstatus       | Add a playing status to Irene.                                   | %addstatus (status)               | ♥              |
+| botinfo       | Get information about the bot.                                   | %botinfo               |               |
 | checkprefix       | Check the current prefix using the default prefix.                                   | %checkprefix               |               |
 | clearnword       | Clear A User's Nword Counter                                   | %clearnword @user               | ♥              |
 | flip             | Flips a Coin                                                   | %flip                           |                |
@@ -139,6 +140,7 @@ examples: `%irene` `%blackpink` `%red velvet`. To find out more, look at the `Gr
 | servercount      | Shows how many servers Irene is on.                            | %servercount                    |                |
 | serverinfo      | View information about the current server.                            | %serverinfo                   |                |
 | servers          | Displays which servers Irene is in.  | %servers                        | ♥              |
+| slap          | Slap someone                              | %slap @user                       |                |
 | speak            | Owner to Bot TTS                                               | %speak (message)                | ♥              |
 | suggest          | Suggest a feature for Irene                                    | %suggest (feature)              |               |
 | support          | Support Discord Server for Irene                               | %support                        |                |
@@ -155,6 +157,14 @@ examples: `%irene` `%blackpink` `%red velvet`. To find out more, look at the `Gr
 | setprefix      | Set the server prefix. If prefix was forgotten, type this command with the default prefix. | %setprefix $         |          | 
 | tempchannel      | Makes Current Channel a temporary channel deleting messages after a certain time period. If delay is -1, it will remove the channel. | %tempchannel [delay=-1]         | temp         |
 | unban            | UnBan A User                                                                                                                         | %unban @user                    |               |
+  
+#### Profile:  
+| Command          | Description                                                                                                                          | Format                          | Aliases        |
+|------------------|--------------------------------------------------------------------------------------------------------------------------------------|---------------------------------|----------------|
+| avatar         | Display a user's avatar.                                                                                                         | %avatar @user    |               |
+| profile         | Display a user's profile.                                                                                                         | %profile @user    |               |
+
+
 #### Twitter: ♥♥♥
 | Command          | Description                                                                                                                          | Format                          |
 |------------------|--------------------------------------------------------------------------------------------------------------------------------------|---------------------------------|

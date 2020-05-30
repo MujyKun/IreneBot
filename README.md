@@ -4,6 +4,8 @@
 ## Irene Bot for Discord in Python V1.01.5
 
 [![Discord Bots](https://top.gg/api/widget/520369375325454371.svg)](https://top.gg/bot/520369375325454371)
+[![Discord Boats](https://discord.boats/api/widget/520369375325454371)](https://discord.boats/bot/520369375325454371)  
+
 
 ## [Discord Support Server](https://discord.gg/bEXm85V)
 

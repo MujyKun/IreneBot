@@ -33,6 +33,8 @@ examples: `%irene` `%blackpink` `%red velvet`. To find out more, look at the `Gr
 | Tweepy                | pip install tweepy                                                                       |
 | PostgreSQL Driver     | pip install psycopg2                                                                     |
 | pypapago (translator)    | pip install pypapago                                                                     |
+| dbl (top.gg)   | pip install dbl                                                                    |
+| discordboats [MODIFIED]  | pip install discordboats                                                                     |
 
 
 ## COMMANDS

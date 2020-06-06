@@ -1,7 +1,7 @@
 
 # [IreneBot](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=1609956823)
 
-## Irene Bot for Discord in Python V1.01.5
+## Irene Bot for Discord in Python V1.01.6
 
 [![Discord Bots](https://top.gg/api/widget/520369375325454371.svg)](https://top.gg/bot/520369375325454371)
 [![Discord Boats](https://discord.boats/api/widget/520369375325454371)](https://discord.boats/bot/520369375325454371)  
@@ -86,12 +86,10 @@ examples: `%irene` `%blackpink` `%red velvet`. To find out more, look at the `Gr
 #### DreamCatcher: 
 | Command      | Description                                                     | Format                                        | Aliases |
 |--------------|-----------------------------------------------------------------|-----------------------------------------------|---------|
-| createlinks  | Create HD links and store them in the database.                 | %createlinks (post number)                    | ♥       |
 | dcstart      | Starts DC LOOP                                                  | %dcstart                                      | ♥       |
 | dcstop       | Stops DC LOOP                                                   | %dcstop                                       | ♥       |
 | download_all | Download All DC Photos from DC APP                              | %download_all                                 | ♥       |
 | latest       | Grabs the highest resolution possible from MOST RECENT DC Post. | %latest                                       | ★       |
-| movelinks       | Add DC LINKS to main link table. | %movelinks                                                                | ♥       |
 | updates      | Send DreamCatcher Updates to your current text channel          | To start %updates, To Stop : %updates stop | ★       |
 
   
@@ -102,11 +100,12 @@ examples: `%irene` `%blackpink` `%red velvet`. To find out more, look at the `Gr
 | aliases          | Lists the aliases of idols that have one                                           | %aliases                                                                                                       |                        |
 | count            | Shows howmany times an idol has been called.                                       | %count (name)                                                                                                  |                        |
 | countleaderboard | Shows leaderboards for how many times an idol has been called.                     | %clb                                                                                                           | highestcount, cb, clb |
+| countgroup      | Shows how many images of a certain group there are.                               | %countgroup (group)                                                                                          |                        |
 | countmember      | Shows how many images of a certain member there are.                               | %countmember (member)                                                                                          |                        |
-| fullnames        | Lists the full names of idols the bot has photos of                                | %fullnames                                                                                                     |                        |
+| fullnames        | Lists the full names of idols the bot has photos of                                | %fullnames (page number)                                                                                                    |                        |
 | getlinks         | Add links of photos to database from linked Archives                               | %getlinks                                                                                                      | ♥                      |
 | groups           | Lists the groups of idols the bot has photos of                                    | %groups                                                                                                        |                        |
-| members          | Lists the names of idols the bot has photos of                                     | %members                                                                                                       |                        |
+| members          | Lists the names of idols the bot has photos of                                     | %members (page number)                                                                                                      |                        |
 | randomidol          | Sends a photo of a random idol.                                     | %%                                                                                                       |                   %     |
 | removealias      | Add alias to a member                                                              | %addalias                                                                                                      | ♥                      |
 | scandrive        | Scan DriveIDs Table and update other tables.                                       | %scandrive (name=NULL) (member_id=0)                                                                           | ♥                      |

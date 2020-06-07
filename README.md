@@ -89,7 +89,7 @@ examples: `%irene` `%blackpink` `%red velvet`. To find out more, look at the `Gr
 | dcstart      | Starts DC LOOP                                                  | %dcstart                                      | ♥       |
 | dcstop       | Stops DC LOOP                                                   | %dcstop                                       | ♥       |
 | download_all | Download All DC Photos from DC APP                              | %download_all                                 | ♥       |
-| latest       | Grabs the highest resolution possible from MOST RECENT DC Post. | %latest                                       | ★       |
+| latest       | Grabs the highest resolution possible from MOST RECENT DC Posts. | %latest (member)                                      | ★       |
 | updates      | Send DreamCatcher Updates to your current text channel          | To start %updates, To Stop : %updates stop | ★       |
 
   

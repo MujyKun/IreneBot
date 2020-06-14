@@ -1,7 +1,7 @@
 
 # [IreneBot](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=1609956823)
 
-## Irene Bot for Discord in Python V1.01.6
+## Irene Bot for Discord in Python V1.01.7
 
 [![Discord Bots](https://top.gg/api/widget/520369375325454371.svg)](https://top.gg/bot/520369375325454371)
 [![Discord Boats](https://discord.boats/api/widget/520369375325454371)](https://discord.boats/bot/520369375325454371)  
@@ -14,12 +14,14 @@ Command Prefix is in modules/keys.py and is currently set to '%' by default. To 
 In order to check the prefix of your server, type `%checkprefix`.
 
 In order to pull a photo of an idol, you can type an idol's stage name, full name, alias, their group name, or group alias name after the prefix.    
-examples: `%irene` `%blackpink` `%red velvet`. To find out more, look at the `GroupMembers` category. 
+examples: `%irene` `%blackpink` `%red velvet`. You may also put an idol's stage name, full name, or alias after a group such as `%red velvet irene`. You can use this with many idols to get a random one. `%red velvet irene joy seulgi` This way, you will pull any of the idols as long as they are in that group.  
+To find out more, look at the `GroupMembers` category. 
 
 ♥ - Requires Bot Owner  
 ♥♥♥ -- Entire Section Requires Bot Owner  
 ★ - Requires Guild Permissions  
 ★★★ - Entire Section Requires Permissions
+😇 - Requires Bot Moderator
 
 ## PLUGINS/LIBRARIES USED
 | Plugins/Libraries     | pip install                                                                              |
@@ -96,18 +98,24 @@ examples: `%irene` `%blackpink` `%red velvet`. To find out more, look at the `Gr
 #### GroupMembers:
 | Command          | Description                                                                        | Format                                                                                                         | Aliases                |
 |------------------|------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|------------------------|
-| addalias         | Add alias to a member                                                              | %addalias                                                                                                      | ♥                      |
-| aliases          | Lists the aliases of idols that have one                                           | %aliases                                                                                                       |                        |
+| addalias         | Adds an alias to an idol/group.                                                              | %addalias (alias) (ID of idol/group) ("idol" or "group")                                                                                                      | 😇                      |
+| addgroup         | Adds a group.                                                              | %addgroup (group name)                                                                                                      | 😇                      |
+| addidol         | Adds an idol (Use underscores for spaces).                                                              | %addidol (full name) (stage name) (group id)                                                                                                      | 😇                     |
+| addidoltogroup         | Adds idol to group.                                                              | %addidoltogroup (idol id) (group id)                                                                                                     | 😇                      |
+| aliases          | Lists the aliases of idols that have one.                                           | %aliases                                                                                                       |                        |
 | count            | Shows howmany times an idol has been called.                                       | %count (name)                                                                                                  |                        |
 | countleaderboard | Shows leaderboards for how many times an idol has been called.                     | %clb                                                                                                           | highestcount, cb, clb |
 | countgroup      | Shows how many images of a certain group there are.                               | %countgroup (group)                                                                                          |                        |
 | countmember      | Shows how many images of a certain member there are.                               | %countmember (member)                                                                                          |                        |
-| fullnames        | Lists the full names of idols the bot has photos of                                | %fullnames (page number)                                                                                                    |                        |
+| deletealias         | Remove alias from an idol/group.                                                               | %deletealias (alias) (ID of idol/group) ("idol" or "group")                                                                                                     | 😇, removealias                      |
+| deletegroup         | Deletes a group.                                                              | %deletegroup (group id)                                                                                                    | 😇, removegroup                     |
+| deleteidol         | Deletes an idol.                                                              | %deleteidol (idol id)                                                                                             | 😇, removeidol                      |
+| deleteidolfromgroup         | Deletes idol from group                                                              | %deleteidolfromgroup (idol id) (group id)                                                                                             | 😇, removeidolfromgroup                      |
+| fullnames        | Lists the full names of idols the bot has photos of                                | %fullnames (page number)                                                                                                    |   fullname                     |
 | getlinks         | Add links of photos to database from linked Archives                               | %getlinks                                                                                                      | ♥                      |
 | groups           | Lists the groups of idols the bot has photos of                                    | %groups                                                                                                        |                        |
-| members          | Lists the names of idols the bot has photos of                                     | %members (page number)                                                                                                      |                        |
+| members          | Lists the names of idols the bot has photos of                                     | %members (page number)                                                                                                      |    member                    |
 | randomidol          | Sends a photo of a random idol.                                     | %%                                                                                                       |                   %     |
-| removealias      | Add alias to a member                                                              | %addalias                                                                                                      | ♥                      |
 | scandrive        | Scan DriveIDs Table and update other tables.                                       | %scandrive (name=NULL) (member_id=0)                                                                           | ♥                      |
 | scrapelink      | Connection to site + put html to html_page.txt                                     | %scrapelinks                                                                                                   | ♥                      |
 | sort             | Approve member links with a small sorting game.                                    | %sort -- checks next message                                                                                   | ♥                      |

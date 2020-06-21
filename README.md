@@ -1,7 +1,7 @@
 
 # [IreneBot](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=1609956823)
 
-## Irene Bot for Discord in Python V1.01.7
+## Irene Bot for Discord in Python V1.02.0
 
 [![Discord Bots](https://top.gg/api/widget/520369375325454371.svg)](https://top.gg/bot/520369375325454371)
 [![Discord Boats](https://discord.boats/api/widget/520369375325454371)](https://discord.boats/bot/520369375325454371)  
@@ -20,7 +20,7 @@ To find out more, look at the `GroupMembers` category.
 ♥ - Requires Bot Owner  
 ♥♥♥ -- Entire Section Requires Bot Owner  
 ★ - Requires Guild Permissions  
-★★★ - Entire Section Requires Permissions
+★★★ - Entire Section Requires Permissions  
 😇 - Requires Bot Moderator
 
 ## PLUGINS/LIBRARIES USED
@@ -98,7 +98,7 @@ To find out more, look at the `GroupMembers` category.
 #### GroupMembers:
 | Command          | Description                                                                        | Format                                                                                                         | Aliases                |
 |------------------|------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|------------------------|
-| addalias         | Adds an alias to an idol/group.                                                              | %addalias (alias) (ID of idol/group) ("idol" or "group")                                                                                                      | 😇                      |
+| addalias         | Adds an alias to an idol/group. (Underscores are spaces)                                                              | %addalias (alias) (ID of idol/group) ("idol" or "group")                                                                                                      | 😇                      |
 | addgroup         | Adds a group.                                                              | %addgroup (group name)                                                                                                      | 😇                      |
 | addidol         | Adds an idol (Use underscores for spaces).                                                              | %addidol (full name) (stage name) (group id)                                                                                                      | 😇                     |
 | addidoltogroup         | Adds idol to group.                                                              | %addidoltogroup (idol id) (group id)                                                                                                     | 😇                      |
@@ -106,8 +106,8 @@ To find out more, look at the `GroupMembers` category.
 | count            | Shows howmany times an idol has been called.                                       | %count (name)                                                                                                  |                        |
 | countleaderboard | Shows leaderboards for how many times an idol has been called.                     | %clb                                                                                                           | highestcount, cb, clb |
 | countgroup      | Shows how many images of a certain group there are.                               | %countgroup (group)                                                                                          |                        |
-| countmember      | Shows how many images of a certain member there are.                               | %countmember (member)                                                                                          |                        |
-| deletealias         | Remove alias from an idol/group.                                                               | %deletealias (alias) (ID of idol/group) ("idol" or "group")                                                                                                     | 😇 - removealias                      |
+| countmember      | Shows how many images of a certain member there are.                               | %countmember (member/all)                                                                                          |                        |
+| deletealias         | Remove alias from an idol/group. (Underscores are spaces)                                                               | %deletealias (alias) (ID of idol/group) ("idol" or "group")                                                                                                     | 😇 - removealias                      |
 | deletegroup         | Deletes a group.                                                              | %deletegroup (group id)                                                                                                    | 😇 - removegroup                     |
 | deleteidol         | Deletes an idol.                                                              | %deleteidol (idol id)                                                                                             | 😇 - removeidol                      |
 | deleteidolfromgroup         | Deletes idol from group                                                              | %deleteidolfromgroup (idol id) (group id)                                                                                             | 😇 - removeidolfromgroup                      |
@@ -170,7 +170,20 @@ To find out more, look at the `GroupMembers` category.
 | setprefix      | Set the server prefix. If prefix was forgotten, type this command with the default prefix. | %setprefix $         |          | 
 | tempchannel      | Makes Current Channel a temporary channel deleting messages after a certain time period. If delay is -1, it will remove the channel. | %tempchannel [delay=-1]         | temp         |
 | unban            | UnBan A User                                                                                                                         | %unban @user                    |               |
-  
+ 
+#### Music:  
+| Command          | Description                                                                                                                          | Format                          | Aliases        |
+|------------------|--------------------------------------------------------------------------------------------------------------------------------------|---------------------------------|----------------|
+| join         | Joins a voice channel                              | %join    |               |
+| pause         | Pauses currently playing song                                                                         | %pause    |               |
+| play         | Plays audio to a voice channel.                                               | %play (title/url)    |               |
+| queue         | Shows Current Queue                                              | %queue (page number)    |   list, q            |
+| resume         | Resumes a paused song                                                 | %resume    |      unpause         |
+| shuffle         | Shuffles the playlist.                                                        | %shuffle    |               |
+| skip         | Skips the current song.                                                                      | %skip    |               |
+| stop         | Disconnects from voice channel and resets queue.                                                   | %stop    |  leave             |
+| volume         | Changes the player's volume - Songs default to 10.                                                 | %volume (1-100)    |               |
+ 
 #### Profile:  
 | Command          | Description                                                                                                                          | Format                          | Aliases        |
 |------------------|--------------------------------------------------------------------------------------------------------------------------------------|---------------------------------|----------------|

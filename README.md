@@ -18,10 +18,11 @@ examples: `%irene` `%blackpink` `%red velvet`. You may also put an idol's stage 
 To find out more, look at the `GroupMembers` category. 
 
 ♥ - Requires Bot Owner  
-♥♥♥ -- Entire Section Requires Bot Owner  
 ★ - Requires Guild Permissions  
-★★★ - Entire Section Requires Permissions  
 😇 - Requires Bot Moderator
+♥♥♥ -- Entire Section Requires Bot Owner  
+★★★ - Entire Section Requires Permissions  
+😇😇😇 - Entire Section Requires Bot Moderator
 
 ## PLUGINS/LIBRARIES USED
 | Plugins/Libraries     | pip install                                                                              |
@@ -62,6 +63,21 @@ To find out more, look at the `GroupMembers` category.
 | rules          | View the rules of BlackJack.                                                                                           | %rules             |       |
 | stand             | Keep Your Cards                                                                                       | %stand                               |         |
 
+#### BotMod: 😇😇😇  
+| Command           | Description                                                                                           | Format                               | Aliases |
+|-------------------|-------------------------------------------------------------------------------------------------------|--------------------------------------|---------|
+| addalias         | Adds an alias to an idol/group. (Underscores are spaces)                                                              | %addalias (alias) (ID of idol/group) ("idol" or "group")                                                                                                      | 😇                      |
+| addgroup         | Adds a group.                                                              | %addgroup (group name)                                                                                                      | 😇                      |
+| addidol         | Adds an idol (Use underscores for spaces).                                                              | %addidol (full name) (stage name) (group id)                                                                                                      | 😇                     |
+| addidoltogroup         | Adds idol to group.                                                              | %addidoltogroup (idol id) (group id)                                                                                                     | 😇                      |
+| addstatus       | Add a playing status to Irene.                                   | %addstatus (status)               |               |
+| botban       | Bans a user from Irene.                                   | %botban (user id)               |               |
+| botunban       | UnBans a user from Irene.                                   | %botunban (user id)               |               |
+| deletealias         | Remove alias from an idol/group. (Underscores are spaces)                                                               | %deletealias (alias) (ID of idol/group) ("idol" or "group")                                                                                                     | 😇 - removealias                      |
+| deletegroup         | Deletes a group.                                                              | %deletegroup (group id)                                                                                                    | 😇 - removegroup                     |
+| deleteidol         | Deletes an idol.                                                              | %deleteidol (idol id)                                                                                             | 😇 - removeidol                      |
+| deleteidolfromgroup         | Deletes idol from group                                                              | %deleteidolfromgroup (idol id) (group id)                                                                                             | 😇 - removeidolfromgroup                      |
+| getstatuses             | Get all statuses of Irene.                                                   | %getstatuses                           |                |
 
 #### Cogs: ♥♥♥
 | Command           | Description                                                               | Format                       |
@@ -98,19 +114,11 @@ To find out more, look at the `GroupMembers` category.
 #### GroupMembers:
 | Command          | Description                                                                        | Format                                                                                                         | Aliases                |
 |------------------|------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|------------------------|
-| addalias         | Adds an alias to an idol/group. (Underscores are spaces)                                                              | %addalias (alias) (ID of idol/group) ("idol" or "group")                                                                                                      | 😇                      |
-| addgroup         | Adds a group.                                                              | %addgroup (group name)                                                                                                      | 😇                      |
-| addidol         | Adds an idol (Use underscores for spaces).                                                              | %addidol (full name) (stage name) (group id)                                                                                                      | 😇                     |
-| addidoltogroup         | Adds idol to group.                                                              | %addidoltogroup (idol id) (group id)                                                                                                     | 😇                      |
 | aliases          | Lists the aliases of idols that have one.                                           | %aliases                                                                                                       |                        |
 | count            | Shows howmany times an idol has been called.                                       | %count (name)                                                                                                  |                        |
 | countleaderboard | Shows leaderboards for how many times an idol has been called.                     | %clb                                                                                                           | highestcount, cb, clb |
 | countgroup      | Shows how many images of a certain group there are.                               | %countgroup (group)                                                                                          |                        |
 | countmember      | Shows how many images of a certain member there are.                               | %countmember (member/all)                                                                                          |                        |
-| deletealias         | Remove alias from an idol/group. (Underscores are spaces)                                                               | %deletealias (alias) (ID of idol/group) ("idol" or "group")                                                                                                     | 😇 - removealias                      |
-| deletegroup         | Deletes a group.                                                              | %deletegroup (group id)                                                                                                    | 😇 - removegroup                     |
-| deleteidol         | Deletes an idol.                                                              | %deleteidol (idol id)                                                                                             | 😇 - removeidol                      |
-| deleteidolfromgroup         | Deletes idol from group                                                              | %deleteidolfromgroup (idol id) (group id)                                                                                             | 😇 - removeidolfromgroup                      |
 | fullnames        | Lists the full names of idols the bot has photos of                                | %fullnames (page number)                                                                                                    |   fullname                     |
 | getlinks         | Add links of photos to database from linked Archives                               | %getlinks                                                                                                      | ♥                      |
 | groups           | Lists the groups of idols the bot has photos of                                    | %groups                                                                                                        |                        |
@@ -134,12 +142,10 @@ To find out more, look at the `GroupMembers` category.
 |------------------|----------------------------------------------------------------|---------------------------------|----------------|
 | _8ball           | Asks the 8ball a question.                                     | %8ball (Question)               | 8ball,8        |
 | announce         | Sends a bot message to text channels                           | %announce (message)             | ♥              |
-| addstatus       | Add a playing status to Irene.                                   | %addstatus (status)               | ♥              |
 | botinfo       | Get information about the bot.                                   | %botinfo               |               |
 | checkprefix       | Check the current prefix using the default prefix.                                   | %checkprefix               |               |
 | clearnword       | Clear A User's Nword Counter                                   | %clearnword @user               | ♥              |
 | flip             | Flips a Coin                                                   | %flip                           |                |
-| getstatuses             | Get all statuses of Irene.                                                   | %getstatuses                           |                |
 | invite           | Invite Link for Irene                                          | %invite                         |                |
 | kill             | Kills the bot                                                  | %kill                           | ♥              |
 | logging          | Start logging this channel/Stop logging this channel           | %logging (start/stop)           | ♥              |

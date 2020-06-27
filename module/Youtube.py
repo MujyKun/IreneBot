@@ -8,8 +8,7 @@ from Utility import fetch_all, fetch_one, DBconn, c
 
 
 class Youtube(commands.Cog):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self):
         pass
 
     @commands.command()

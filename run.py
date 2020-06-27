@@ -1,27 +1,22 @@
-from module import Currency, Twitter2, DreamCatcher, BlackJack, Miscellaneous, keys, Cogs, Youtube, Games, GroupMembers, Archive, Moderator, logger as log, Profile, TopGG, Help, Logging
+from module import Currency, Twitter2, DreamCatcher, BlackJack, Miscellaneous, keys, Cogs, Youtube, Games, GroupMembers, Archive, Moderator, logger as log, Profile, BotSites, Help, Logging, status, Music, BotMod
 from discord.ext import commands
-from Utility import get_cooldown_time, fetch_one, fetch_all, DBconn, c, check_embed_exists, check_message_not_empty, get_message_prefix, check_logging_requirements, get_attachments, get_log_channel_id
+from Utility import get_cooldown_time, fetch_one, fetch_all, DBconn, c, check_message_not_empty, get_server_prefix, delete_all_games, check_if_mod, check_nword, check_if_bot_banned
 import discord
 import threading
-
-client = commands.Bot(command_prefix='%', case_insensitive=True)
-first_run = True
+from module.keys import client, bot_support_server_link
 
 
-def IreneBot():
+def irene_bot():
     # events
     @client.event
     async def on_ready():
-        global first_run
-        if first_run:
-            await client.change_presence(status=discord.Status.online, activity=discord.Game("%help"))
         log.console('Irene is online')
-        first_run = False
 
     @client.event
     async def on_guild_join(guild):
         if guild.system_channel is not None:
-            await guild.system_channel.send(f">>> Hello!\nMy prefix for this server is set to `%`.\nIf you have any questions or concerns, you may join the support server (%support).")
+            await guild.system_channel.send(f">>> Hello!\nMy prefix for this server is set to {await get_server_prefix(guild.id)}.\nIf you have any questions or concerns, you may join the support server ({await get_server_prefix(guild.id)}support).")
+            log.console(f"{guild.name} ({guild.id}) has invited Irene.")
 
     @client.event
     async def on_message(message):
@@ -32,6 +27,10 @@ def IreneBot():
             message_sender = message.author
             message_content = message.clean_content
             message_channel = message.channel
+            try:
+                current_server_prefix = await get_server_prefix(message.guild.id)
+            except Exception as e:
+                current_server_prefix = await client.get_prefix(message)
             # check if messages are in a temporary channel
             for temp in temp_channels:
                 chan_id = temp[0]
@@ -42,8 +41,7 @@ def IreneBot():
                 # check if the message belongs to the bot
                 if message_sender.id != client.user.id:
                     if message_content[0] != '%':
-                        # it had to be written somewhere :( and I'm not about to pull it from a table
-                        if 'nigga' in message_content.lower() or 'nigger' in message_content.lower() and ':' not in message_content.lower():
+                        if check_nword(message_content):
                             author_id = message_sender.id
                             # checks how many instances ( should logically only be 0 or 1 )
                             c.execute("SELECT COUNT(*) FROM currency.Counter WHERE UserID = %s::bigint", (author_id,))
@@ -56,36 +54,23 @@ def IreneBot():
                             if checker == 0:
                                 c.execute("INSERT INTO currency.Counter VALUES (%s,%s)", (author_id, 1))
                             DBconn.commit()
-                if get_message_prefix(message) == '%':
-                    log.console(f"CMD LOG: ChannelID = {message_channel.id} - {message_sender} || {message_content} ")
-                await client.process_commands(message)
+                if check_message_not_empty(message):
+                    if len(message_content) >= len(current_server_prefix):
+                        bot_prefix = await client.get_prefix(message)
+                        default_prefix = bot_prefix + 'setprefix'
+                        if message.content[0:len(current_server_prefix)].lower() == current_server_prefix or message.content == default_prefix or message.content == (bot_prefix + 'checkprefix'):
+                            message.content = message.content.replace(current_server_prefix, await client.get_prefix(message))
+                            if not check_if_mod(message.author.id, 1):
+                                log.console(f"CMD LOG: ChannelID = {message_channel.id} - {message_sender} ({message.author.id})|| {message_content} ")
+                            else:
+                                log.console(f"MOD LOG: ChannelID = {message_channel.id} - {message_sender} ({message.author.id})|| {message_content} ")
+                            if not await check_if_bot_banned(message_sender.id):
+                                await client.process_commands(message)
+                            else:
+                                await message_channel.send(f"> **You are banned from using Irene. Join {bot_support_server_link}**")
         except Exception as e:
             log.console(e)
             DBconn.rollback()
-
-    @client.event
-    async def on_message_edit(msg_before, message):
-        try:
-            if await check_logging_requirements(message):
-                logging_channel = await get_log_channel_id(message, client)
-                files = await get_attachments(message)
-                embed_message = f"**{message.author} ({message.author.id})\nOld Message: **{msg_before.content}**\nNew Message: **{message.content}**\nFrom {message.guild} in {message.channel}\nCreated at {message.created_at}\n<{message.jump_url}>**"
-                embed = discord.Embed(title="Message Edited", description=embed_message, color=0x00ff00)
-                await logging_channel.send(embed=embed, files=files)
-        except Exception as e:
-            log.console(f"ON_MESSAGE_EDIT ERROR: {e} Server ID: {message.guild.id} Channel ID: {message.channel.id}")
-
-    @client.event
-    async def on_message_delete(message):
-        try:
-            if await check_logging_requirements(message):
-                logging_channel = await get_log_channel_id(message, client)
-                files = await get_attachments(message)
-                embed_message = f"**{message.author} ({message.author.id})\nMessage: **{message.content}**\nFrom {message.guild} in {message.channel}\nCreated at {message.created_at}**"
-                embed = discord.Embed(title="Message Deleted", description=embed_message, color=0xff0000)
-                await logging_channel.send(embed=embed, files=files)
-        except Exception as e:
-            log.console(f"ON_MESSAGE_DELETE ERROR: {e} Server ID: {message.guild.id} Channel ID: {message.channel.id}")
 
     @client.event
     async def on_command_error(ctx, error):
@@ -111,28 +96,36 @@ def IreneBot():
             log.console(f"{error}")
             pass
 
-
     # Start Automatic DC Loop
-    DreamCatcher.DCAPP(client).new_task4.start()
+    DreamCatcher.DcApp().new_task4.start()
     # Start Automatic Youtube Scrape Loop
     Youtube.YoutubeLoop().new_task5.start()
+    # Start Status Change Loop
+    status.Status().change_bot_status_loop.start()
 
-    client.add_cog(Miscellaneous.Miscellaneous(client))
-    client.add_cog(Twitter2.Twitter(client))
-    client.add_cog(Currency.Currency(client))
-    client.add_cog(DreamCatcher.DreamCatcher(client))
-    client.add_cog(BlackJack.BlackJack(client))
-    client.add_cog(Cogs.Cogs(client))
-    client.add_cog(Youtube.Youtube(client))
-    client.add_cog(Games.Games(client))
-    client.add_cog(GroupMembers.GroupMembers(client))
-    client.add_cog(Archive.Archive(client))
-    client.add_cog(TopGG.TopGG(client))
-    client.add_cog(Moderator.Moderator(client))
-    client.add_cog(Profile.Profile(client))
-    client.add_cog(Help.Help(client))
-    client.add_cog(Logging.Logging(client))
-    # client.add_cog(Help.Help(client))
+    # Start Checking Voice Clients
+    Music.Music().check_voice_clients.start()
+
+    # Delete all active blackjack games
+    delete_all_games()
+
+    client.add_cog(Miscellaneous.Miscellaneous())
+    client.add_cog(Twitter2.Twitter())
+    client.add_cog(Currency.Currency())
+    client.add_cog(DreamCatcher.DreamCatcher())
+    client.add_cog(BlackJack.BlackJack())
+    client.add_cog(Cogs.Cogs())
+    client.add_cog(Youtube.Youtube())
+    client.add_cog(Games.Games())
+    client.add_cog(GroupMembers.GroupMembers())
+    client.add_cog(Archive.Archive())
+    client.add_cog(BotSites.BotSites())
+    client.add_cog(Moderator.Moderator())
+    client.add_cog(Profile.Profile())
+    client.add_cog(Help.Help())
+    client.add_cog(Logging.Logging())
+    client.add_cog(Music.Music())
+    client.add_cog(BotMod.BotMod())
     # start logging console and file
     # For INFO Logging
     log.info()
@@ -143,5 +136,5 @@ def IreneBot():
 
 
 # Threads created in case needed for future
-t1 = threading.Thread(target=IreneBot)
+t1 = threading.Thread(target=irene_bot)
 t1.start()

@@ -1,11 +1,11 @@
 import os
 from discord.ext import commands
 from module import twitter
+from module.keys import client
 
 
 class Twitter(commands.Cog):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self):
         pass
 
     @commands.command()

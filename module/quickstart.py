@@ -11,6 +11,7 @@ from Utility import DBconn, c, fetch_one, fetch_all
 
 class Drive:
     def __init__(self):
+    	"""Note this is the google framework and is not ASYNC. A wrapper can be used that makes it async."""
         pass
 
     @staticmethod
@@ -85,26 +86,36 @@ class Drive:
 
     @staticmethod
     async def get_ids(folder_id):
+        # This function was changed to somewhat support recursion in the case that I figure out how to properly
+        # get back requests with the next page token and not get a invalid parameter error
         drive_service = Drive.get_drive_connection()
-        'application/vnd.google-apps.shortcut'
-        async def response1(amount):
+
+        async def response(page_fields='nextPageToken, files(id, name)', amount=1000, page_token=None):
             try:
-                response = drive_service.files().list(q=f"'{folder_id}' in parents",
-                                                      spaces='',
-                                                      fields='nextPageToken, files(id, name)',
-                                                      pageSize=amount).execute()
-                return True
-            except:
+                if page_token is None:
+                    drive_response = drive_service.files().list(q=f"'{folder_id}' in parents",
+                                                          spaces='',
+                                                          fields=page_fields,
+                                                          pageSize=amount).execute()
+                    return drive_response
+                else:
+                    # This should get requests from next page token
+                    return False
+            except Exception as e:
+                log.console(e)
                 return False
 
-        keep_going = True
-        print ("blocking")
-        response = drive_service.files().list(q=f"'{folder_id}' in parents",
-                                              spaces='',
-                                              fields='nextPageToken, files(id, name)',
-                                              pageSize=(1000)).execute()
-        print ("done blocking")
         id_list = []
-        for file in response.get('files', []):
-            id_list.append(file.get('id'))
+
+        async def next_page(page_token=None):
+            response_msg = await response(page_token)
+            # next_page_token = response_msg.get('nextPageToken')
+            if response_msg:
+                for file in response_msg.get('files', []):
+                    id_list.append(file.get('id'))
+            # if next_page_token is not None:
+                # next_page_start = await next_page(next_page_token)
+            # return False
+
+        await next_page()
         return id_list

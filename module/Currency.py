@@ -3,12 +3,12 @@ from discord.ext.commands.cooldowns import BucketType
 from random import *
 import discord
 from module import logger as log
-from Utility import DBconn, c, update_balance, get_level, get_balance, check_in_game, register_user, create_embed, get_xp, get_user_has_money, check_reaction, set_level, get_rob_percentage, get_robbed_amount, shorten_balance, fetch_all, fetch_one
+from module.keys import client
+from Utility import DBconn, c, update_balance, get_level, get_balance, check_in_game, register_user, create_embed, get_xp, get_user_has_money, check_reaction, set_level, get_rob_percentage, get_robbed_amount, shorten_balance, fetch_all, fetch_one, remove_commas
 
 
 class Currency(commands.Cog):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self):
         self.counter2 = -1
         self.counter = 0
         pass
@@ -38,77 +38,82 @@ class Currency(commands.Cog):
         try:
             await register_user(user_id)
             amount = await get_balance(user_id)
-            await ctx.send("> **{} currently has {:,} Dollars.**".format(self.client.get_user(user_id), amount))
+            await ctx.send("> **{} currently has {:,} Dollars.**".format(client.get_user(user_id), amount))
         except Exception as e:
             log.console(e)
 
     @commands.command()
-    async def bet(self, ctx, *, balance=1):
+    async def bet(self, ctx, *, balance="1"):
         """Bet your money [Format: %bet (amount)]"""
         try:
-            userid = ctx.author.id
-            if await check_in_game(userid):
-                keep_going = True
-                if balance == 0:
-                    await ctx.send("> **You are not allowed to bet 0.**")
-                    keep_going = False
-                if balance > 0:
-                    if keep_going:
-                        await register_user(userid)
-                        amount = await get_balance(userid)
-                        if balance > amount:
-                            await ctx.send(embed=await create_embed(title="Not Enough Money", title_desc=f"**You do not have enough money to bet {balance:,}. You have {amount:,} Dollars.**" ))
-                        if balance <= amount:
-                            a = randint(1, 100)
-                            if a <= 50:
-                                if a <= 10:
-                                    new_balance = round(balance)
-                                    new_amount = round(amount - balance)
-                                    await ctx.send(embed=await create_embed(title="Bet Loss", title_desc= f"**<@{userid}> Got Super Unlucky! You lost {new_balance:,} out of {balance:,}. Your updated balance is {new_amount:,}.**"))
-                                    await update_balance(userid, str(new_amount))
-                                if a > 10:
-                                    new_balance = round(balance - (balance / 2))
-                                    new_amount = round(amount - new_balance)
-                                    await ctx.send(embed=await create_embed(title="Bet Loss", title_desc= f"**<@{userid}> Lost! You lost {new_balance:,} out of {balance:,}. Your updated balance is {new_amount:,}.**"))
-                                    await update_balance(userid, str(new_amount))
-                            if a > 50:
-                                if a <= 60:
-                                    new_balance = round(balance / 5)
-                                    new_amount = round(amount + new_balance)
-                                    await ctx.send(embed= await create_embed(title="Bet Win", title_desc=f"**<@{userid}> Won! You bet {balance:,} and received {new_balance:,}. Your updated balance is {new_amount:,}.**"))
-                                    await update_balance(userid, str(new_amount))
-                                if a > 60:
-                                    if a <= 70:
-                                        new_balance = round(balance / 4)
-                                        new_amount = round(amount + new_balance)
-                                        await ctx.send(embed=await create_embed(title="Bet Win", title_desc=f"**<@{userid}> Won! You bet {balance:,} and received {new_balance:,}. Your updated balance is {new_amount:,}.**"))
+            balance = remove_commas(balance)
+            check = True
+        except Exception as e:
+            await ctx.send(f"> **{balance} is not a proper value.**")
+            check = False
+        try:
+            if check:
+                userid = ctx.author.id
+                if not await check_in_game(userid, ctx):
+                    keep_going = True
+                    if balance == 0:
+                        await ctx.send("> **You are not allowed to bet 0.**")
+                        keep_going = False
+                    if balance > 0:
+                        if keep_going:
+                            await register_user(userid)
+                            amount = await get_balance(userid)
+                            if balance > amount:
+                                await ctx.send(embed=await create_embed(title="Not Enough Money", title_desc=f"**You do not have enough money to bet {balance:,}. You have {amount:,} Dollars.**" ))
+                            if balance <= amount:
+                                a = randint(1, 100)
+                                # The below code can be extremely simplified in one function.
+                                if a <= 50:
+                                    if a <= 10:
+                                        new_balance = round(balance)
+                                        new_amount = round(amount - balance)
+                                        await ctx.send(embed=await create_embed(title="Bet Loss", title_desc= f"**<@{userid}> Got Super Unlucky! You lost {new_balance:,} out of {balance:,}. Your updated balance is {new_amount:,}.**"))
                                         await update_balance(userid, str(new_amount))
-                                    if a > 70:
-                                        if a <= 80:
-                                            new_balance = round(balance / 2)
+                                    if a > 10:
+                                        new_balance = round(balance - (balance / 2))
+                                        new_amount = round(amount - new_balance)
+                                        await ctx.send(embed=await create_embed(title="Bet Loss", title_desc= f"**<@{userid}> Lost! You lost {new_balance:,} out of {balance:,}. Your updated balance is {new_amount:,}.**"))
+                                        await update_balance(userid, str(new_amount))
+                                if a > 50:
+                                    if a <= 60:
+                                        new_balance = round(balance / 5)
+                                        new_amount = round(amount + new_balance)
+                                        await ctx.send(embed= await create_embed(title="Bet Win", title_desc=f"**<@{userid}> Won! You bet {balance:,} and received {new_balance:,}. Your updated balance is {new_amount:,}.**"))
+                                        await update_balance(userid, str(new_amount))
+                                    if a > 60:
+                                        if a <= 70:
+                                            new_balance = round(balance / 4)
                                             new_amount = round(amount + new_balance)
                                             await ctx.send(embed=await create_embed(title="Bet Win", title_desc=f"**<@{userid}> Won! You bet {balance:,} and received {new_balance:,}. Your updated balance is {new_amount:,}.**"))
                                             await update_balance(userid, str(new_amount))
-                                        if a > 80:
-                                            if a <= 90:
-                                                new_balance = round(balance * 1.5)
-                                                new_amount = round((amount - balance) + new_balance)
+                                        if a > 70:
+                                            if a <= 80:
+                                                new_balance = round(balance / 2)
+                                                new_amount = round(amount + new_balance)
                                                 await ctx.send(embed=await create_embed(title="Bet Win", title_desc=f"**<@{userid}> Won! You bet {balance:,} and received {new_balance:,}. Your updated balance is {new_amount:,}.**"))
                                                 await update_balance(userid, str(new_amount))
-                                            if a > 90:
-                                                if a <= 99:
-                                                    new_balance = round(balance * 2)
+                                            if a > 80:
+                                                if a <= 90:
+                                                    new_balance = round(balance * 1.5)
                                                     new_amount = round((amount - balance) + new_balance)
                                                     await ctx.send(embed=await create_embed(title="Bet Win", title_desc=f"**<@{userid}> Won! You bet {balance:,} and received {new_balance:,}. Your updated balance is {new_amount:,}.**"))
                                                     await update_balance(userid, str(new_amount))
-                                                if a == 100:
-                                                    new_balance = round(balance * 3)
-                                                    new_amount = round((amount - balance) + new_balance)
-                                                    await ctx.send(embed=await create_embed(title="Bet Win", title_desc=f"**<@{userid}> Won! You bet {balance:,} and received {new_balance:,}. Your updated balance is {new_amount:,}.**"))
-                                                    await update_balance(userid, str(new_amount))
-
-            else:
-                await ctx.send("> **Please type %endgame. You cannot use this command when you're in a game.**")
+                                                if a > 90:
+                                                    if a <= 99:
+                                                        new_balance = round(balance * 2)
+                                                        new_amount = round((amount - balance) + new_balance)
+                                                        await ctx.send(embed=await create_embed(title="Bet Win", title_desc=f"**<@{userid}> Won! You bet {balance:,} and received {new_balance:,}. Your updated balance is {new_amount:,}.**"))
+                                                        await update_balance(userid, str(new_amount))
+                                                    if a == 100:
+                                                        new_balance = round(balance * 3)
+                                                        new_amount = round((amount - balance) + new_balance)
+                                                        await ctx.send(embed=await create_embed(title="Bet Win", title_desc=f"**<@{userid}> Won! You bet {balance:,} and received {new_balance:,}. Your updated balance is {new_amount:,}.**"))
+                                                        await update_balance(userid, str(new_amount))
         except Exception as e:
             log.console(e)
 
@@ -135,19 +140,19 @@ class Currency(commands.Cog):
                 count += 1
                 UserID = a[0]
                 Money = a[1]
-                UserName = self.client.get_user(UserID)
+                UserName = client.get_user(UserID)
                 if count <= 10:
                     embed.add_field(name=f"{count}) {UserName} ({UserID})", value=await shorten_balance(str(Money)), inline=True)
             await ctx.send(embed=embed)
 
     @commands.command()
-    @commands.cooldown(1, 10, BucketType.user)
+    @commands.cooldown(1, 5, BucketType.user)
     async def beg(self, ctx):
         """Beg a homeless man for money [Format: %beg]"""
         try:
             user_balance = await get_balance(ctx.author.id)
-            user_level = await get_level(ctx.author.id, "daily")
-            daily_amount = int(1/1000*(2 * 350) * (2 ** (user_level - 2)))
+            user_level = await get_level(ctx.author.id, "beg")
+            daily_amount = int(7/10 * (2 ** (user_level - 2)))
             if daily_amount < 100:
                 if user_balance > 10000:
                     daily_amount = randint(50, 100)
@@ -180,7 +185,7 @@ class Currency(commands.Cog):
                     msg = await ctx.send(embed=embed)
                     reaction = "\U0001f44d"
                     await msg.add_reaction(reaction)  # thumbs up
-                    if await check_reaction(msg, user_id, reaction, self.client):
+                    if await check_reaction(msg, user_id, reaction):
                         await msg.delete()
                         if user_balance < money_needed_to_level:
                             await not_enough_money()
@@ -266,88 +271,97 @@ class Currency(commands.Cog):
             log.console(e)
 
     @commands.command()
-    async def give(self, ctx, mentioned_user: discord.Member = discord.Member, amount=0):
+    async def give(self, ctx, mentioned_user: discord.Member = discord.Member, amount="0"):
         """Give a user money [Format: %give (@user) (amount)]"""
         try:
-            userid = ctx.author.id
-            if await check_in_game(userid):
-                await register_user(userid)
-                if mentioned_user.id != userid:
-                    current_amount = await get_balance(userid)
-                    if amount == 0:
-                        await ctx.send("> **Please specify an amount [Format: %give (@user) (amount)]**", delete_after=60)
-                    if amount > 0:
-                        if amount > current_amount:
-                            await ctx.send("> **You do not have enough money to give!**", delete_after=60)
-                        if amount <= current_amount:
-                            mentioned_money = await get_balance(mentioned_user.id)
-                            new_amount = mentioned_money + amount
-                            subtracted_amount = current_amount - amount
-                            await update_balance(mentioned_user.id, str(new_amount))
-                            await update_balance(userid, str(subtracted_amount))
-                            await ctx.send("> **Your money has been transferred.**")
-                elif mentioned_user.id == userid:
-                    await ctx.send("> **You can not give money to yourself!**")
-
-            else:
-                await ctx.send("> **Please type %endgame. You cannot use this command when you're in a game.**")
+            amount = remove_commas(amount)
+            check = True
+        except Exception as e:
+            await ctx.send(f"> **{amount} is not a proper value.**")
+            check = False
+        try:
+            if check:
+                userid = ctx.author.id
+                if not await check_in_game(userid, ctx):
+                    await register_user(userid)
+                    if mentioned_user.id != userid:
+                        current_amount = await get_balance(userid)
+                        if amount == 0:
+                            await ctx.send("> **Please specify an amount [Format: %give (@user) (amount)]**", delete_after=60)
+                        if amount > 0:
+                            if amount > current_amount:
+                                await ctx.send("> **You do not have enough money to give!**", delete_after=60)
+                            if amount <= current_amount:
+                                mentioned_money = await get_balance(mentioned_user.id)
+                                new_amount = mentioned_money + amount
+                                subtracted_amount = current_amount - amount
+                                await update_balance(mentioned_user.id, str(new_amount))
+                                await update_balance(userid, str(subtracted_amount))
+                                await ctx.send("> **Your money has been transferred.**")
+                    elif mentioned_user.id == userid:
+                        await ctx.send("> **You can not give money to yourself!**")
         except Exception as e:
             log.console(e)
 
     @commands.command(aliases=['rockpaperscissors'])
-    async def rps(self, ctx, choice='', amount=0):
+    async def rps(self, ctx, choice='', amount="0"):
         """Play Rock Paper Scissors for Money [Format: %rps (r/p/s)(amount)][Aliases: rockpaperscissors]"""
         try:
-            if amount < 0:
-                await ctx.send("> **You can't bet a negative number!**")
-            elif amount >= 0:
-                userid = ctx.author.id
-                await register_user(userid)
-                if await check_in_game(userid):
-                    current_balance = await get_balance(userid)
-                    if amount > current_balance:
-                        await ctx.send("> ** You do not have enough money **", delete_after=60)
-                    if amount <= current_balance:
-                        rps = ['rock', 'paper', 'scissors']
-                        a = randint(0, 2)
-                        b = randint(0, 2)
-                        cd = int(amount // (1/1.5))  # using floor division instead of multiplication
-                        if amount == 0:
-                            cd = 0
-                        if choice == '':
-                            choice = rps[a]
-                        compchoice = rps[b]
-                        if compchoice == 'rock':
-                            if choice == 'rock' or choice == 'r':
-                                await ctx.send(embed=await create_embed(title="Rock Paper Scissors", title_desc=f"**We Both Chose {compchoice} and Tied! You get nothing!**"))
-                            if choice == 'paper' or choice == 'p':
-                                await ctx.send(embed=await create_embed(title="Rock Paper Scissors", title_desc=f"**You Won {cd:,} Dollars! I chose {compchoice} while you chose {choice}!**"))
-                                await update_balance(userid, str(current_balance + cd))
-                            if choice == 'scissors' or choice == 's':
-                                await ctx.send(embed=await create_embed(title="Rock Paper Scissors",title_desc=f"**You Lost {amount:,} Dollars! I chose {compchoice} while you chose {choice}!**"))
-                                await update_balance(userid, str(current_balance - amount))
-                        if compchoice == 'paper':
-                            if choice == 'rock' or choice == 'r':
-                                await ctx.send(embed=await create_embed(title="Rock Paper Scissors", title_desc=f"**You Lost {amount:,} Dollars! I chose {compchoice} while you chose {choice}!**"))
-                                await update_balance(userid, str(current_balance - amount))
-                                check_amount = str(current_balance - amount)
-                                await update_balance(userid, check_amount)
-                            if choice == 'paper' or choice == 'p':
-                                await ctx.send(embed=await create_embed(title="Rock Paper Scissors", title_desc=f"**We Both Chose {compchoice} and Tied! You get nothing!**"))
-                            if choice == 'scissors' or choice == 's':
-                                await ctx.send(embed=await create_embed(title="Rock Paper Scissors", title_desc=f"**You Won {cd:,} Dollars! I chose {compchoice} while you chose {choice}!**"))
-                                await update_balance(userid, str(current_balance + cd))
-                        if compchoice == 'scissors':
-                            if choice == 'rock' or choice == 'r':
-                                await ctx.send(embed=await create_embed(title="Rock Paper Scissors", title_desc=f"**You Won {cd:,} Dollars! I chose {compchoice} while you chose {choice}!**"))
-                                await update_balance(userid, str(current_balance + cd))
-                            if choice == 'paper' or choice == 'p':
-                                await ctx.send(embed=await create_embed(title="Rock Paper Scissors", title_desc=f"**You Lost {amount:,} Dollars! I chose {compchoice} while you chose {choice}!**"))
-                                await update_balance(userid, str(current_balance - amount))
-                            if choice == 'scissors' or choice == 's':
-                                await ctx.send(embed=await create_embed(title="Rock Paper Scissors", title_desc=f"**We Both Chose {compchoice} and Tied! You get nothing!**"))
-                else:
-                    await ctx.send("> **Please type %endgame. You cannot play a game when you're already in one.**")
-            await ctx.message.delete(delay=15)
+            amount = remove_commas(amount)
+            check = True
+        except Exception as e:
+            await ctx.send(f"> **{amount} is not a proper value.**")
+            check = False
+        try:
+            if check:
+                if amount < 0:
+                    await ctx.send("> **You can't bet a negative number!**")
+                elif amount >= 0:
+                    userid = ctx.author.id
+                    await register_user(userid)
+                    if not await check_in_game(userid, ctx):
+                        current_balance = await get_balance(userid)
+                        if amount > current_balance:
+                            await ctx.send("> ** You do not have enough money **", delete_after=60)
+                        if amount <= current_balance:
+                            rps = ['rock', 'paper', 'scissors']
+                            a = randint(0, 2)
+                            b = randint(0, 2)
+                            cd = int(amount // (1/1.5))  # using floor division instead of multiplication
+                            if amount == 0:
+                                cd = 0
+                            if choice == '':
+                                choice = rps[a]
+                            compchoice = rps[b]
+                            if compchoice == 'rock':
+                                if choice == 'rock' or choice == 'r':
+                                    await ctx.send(embed=await create_embed(title="Rock Paper Scissors", title_desc=f"**We Both Chose {compchoice} and Tied! You get nothing!**"))
+                                if choice == 'paper' or choice == 'p':
+                                    await ctx.send(embed=await create_embed(title="Rock Paper Scissors", title_desc=f"**You Won {cd:,} Dollars! I chose {compchoice} while you chose {choice}!**"))
+                                    await update_balance(userid, str(current_balance + cd))
+                                if choice == 'scissors' or choice == 's':
+                                    await ctx.send(embed=await create_embed(title="Rock Paper Scissors",title_desc=f"**You Lost {amount:,} Dollars! I chose {compchoice} while you chose {choice}!**"))
+                                    await update_balance(userid, str(current_balance - amount))
+                            if compchoice == 'paper':
+                                if choice == 'rock' or choice == 'r':
+                                    await ctx.send(embed=await create_embed(title="Rock Paper Scissors", title_desc=f"**You Lost {amount:,} Dollars! I chose {compchoice} while you chose {choice}!**"))
+                                    await update_balance(userid, str(current_balance - amount))
+                                    check_amount = str(current_balance - amount)
+                                    await update_balance(userid, check_amount)
+                                if choice == 'paper' or choice == 'p':
+                                    await ctx.send(embed=await create_embed(title="Rock Paper Scissors", title_desc=f"**We Both Chose {compchoice} and Tied! You get nothing!**"))
+                                if choice == 'scissors' or choice == 's':
+                                    await ctx.send(embed=await create_embed(title="Rock Paper Scissors", title_desc=f"**You Won {cd:,} Dollars! I chose {compchoice} while you chose {choice}!**"))
+                                    await update_balance(userid, str(current_balance + cd))
+                            if compchoice == 'scissors':
+                                if choice == 'rock' or choice == 'r':
+                                    await ctx.send(embed=await create_embed(title="Rock Paper Scissors", title_desc=f"**You Won {cd:,} Dollars! I chose {compchoice} while you chose {choice}!**"))
+                                    await update_balance(userid, str(current_balance + cd))
+                                if choice == 'paper' or choice == 'p':
+                                    await ctx.send(embed=await create_embed(title="Rock Paper Scissors", title_desc=f"**You Lost {amount:,} Dollars! I chose {compchoice} while you chose {choice}!**"))
+                                    await update_balance(userid, str(current_balance - amount))
+                                if choice == 'scissors' or choice == 's':
+                                    await ctx.send(embed=await create_embed(title="Rock Paper Scissors", title_desc=f"**We Both Chose {compchoice} and Tied! You get nothing!**"))
+                await ctx.message.delete(delay=15)
         except Exception as e:
             log.console(e)

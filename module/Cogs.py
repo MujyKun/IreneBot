@@ -1,9 +1,10 @@
 from discord.ext import commands
+from module.keys import client
 
 
 class Cogs(commands.Cog):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self):
+        pass
 
     # Hidden means it won't show up on the default help.
     @commands.command(name='load', hidden=False)
@@ -13,7 +14,7 @@ class Cogs(commands.Cog):
         Remember to use dot path. e.g: cogs.owner"""
 
         try:
-            self.client.load_extension(cog)
+            client.load_extension(cog)
         except Exception as e:
             await ctx.send(f'**`ERROR:`** {type(e).__name__} - {e}')
         else:
@@ -25,12 +26,11 @@ class Cogs(commands.Cog):
         """Command which Unloads a Module.
         Remember to use dot path. e.g: cogs.owner"""
         try:
-            self.client.unload_extension(cog)
+            client.unload_extension(cog)
         except Exception as e:
             await ctx.send(f'**`ERROR:`** {type(e).__name__} - {e}')
         else:
             await ctx.send('**`SUCCESS`**')
-
 
     @commands.command(name='reload', hidden=False)
     @commands.is_owner()
@@ -39,8 +39,8 @@ class Cogs(commands.Cog):
         Remember to use dot path. e.g: cogs.owner"""
 
         try:
-            self.client.unload_extension(cog)
-            self.client.load_extension(cog)
+            client.unload_extension(cog)
+            client.load_extension(cog)
         except Exception as e:
             await ctx.send(f'**`ERROR:`** {type(e).__name__} - {e}')
         else:

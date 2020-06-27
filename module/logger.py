@@ -1,5 +1,6 @@
 import logging
 import datetime
+from module import keys
 
 
 def debug():

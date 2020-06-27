@@ -4,13 +4,34 @@ import aiohttp
 import aiofiles
 import os
 from module import logger as log
-from Utility import DBconn, c, fetch_one
+from module.keys import client, bot_prefix
+from Utility import DBconn, c, fetch_one, get_server_prefix
 
 
 class Moderator(commands.Cog):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self):
         pass
+
+    @commands.command()
+    @commands.has_guild_permissions(manage_messages=True)
+    async def setprefix(self, ctx, *, prefix=bot_prefix):
+        """Set the server prefix. If prefix was forgotten, type this command with the default prefix.[Format: %setprefix %]"""
+        prefix = prefix.lower()
+        current_server_prefix = await get_server_prefix(ctx.guild.id)
+        if len(prefix) > 8:
+            await ctx.send("> **Your prefix can not be more than 8 characters.**")
+        else:
+            # Default prefix '%' should never be in DB.
+            if current_server_prefix == "%":
+                if prefix != "%":
+                    c.execute("INSERT INTO general.serverprefix VALUES (%s,%s)", (ctx.guild.id, prefix))
+            else:
+                if prefix != "%":
+                    c.execute("UPDATE general.serverprefix SET prefix = %s WHERE serverid = %s", (prefix, ctx.guild.id))
+                else:
+                    c.execute("DELETE FROM general.serverprefix WHERE serverid = %s", (ctx.guild.id,))
+            DBconn.commit()
+            await ctx.send(f"> **This server's prefix has been set to {prefix}.**")
 
     @commands.command(aliases=['prune', 'purge'])
     @commands.has_guild_permissions(manage_messages=True)
@@ -49,17 +70,21 @@ class Moderator(commands.Cog):
     @commands.has_guild_permissions(ban_members=True)
     async def ban(self, ctx, user: discord.Member = discord.Member, *, reason="No Reason"):
         """Ban A User [Format: %ban @user]"""
+        check = True
         if user == discord.Member:
             await ctx.send("> **Please choose a person to ban.**")
         else:
+            if user.id == ctx.author.id:
+                await ctx.send("> **You can not ban yourself!**")
+                check = False
             try:
-                if user.id == ctx.author.id:
-                    await ctx.send("> **You can not ban yourself!**")
-                await ctx.guild.ban(user=user, reason=reason, delete_message_days=0)
-                embed = discord.Embed(title="User Banned!", description=f">**<@{user.id}> was banned by <@{ctx.author.id}> for {reason}**!", color=0xff00f6)
+                if check:
+                    await ctx.guild.ban(user=user, reason=reason, delete_message_days=0)
+                    embed = discord.Embed(title="User Banned!", description=f">**<@{user.id}> was banned by <@{ctx.author.id}> for {reason}**!", color=0xff00f6)
+                    await ctx.send(embed=embed)
             except Exception as e:
                 embed = discord.Embed(title="Error", description=f"**<@{user.id}> was not able to be banned by <@{ctx.author.id}> successfully. \n {e}**!", color=0xff00f6)
-            await ctx.send(embed=embed)
+                await ctx.send(embed=embed)
 
     @commands.command()
     @commands.has_guild_permissions(ban_members=True)
@@ -166,7 +191,7 @@ class Moderator(commands.Cog):
                             # await ctx.guild.create_custom_emoji(name=emoji_name, image=f'Emoji/{full_file_name}')
                             await ctx.guild.create_custom_emoji(name=emoji_name, image=await v.read())
                             await v.close()
-                            emojis = self.client.emojis
+                            emojis = client.emojis
                             max_emoji_length = len(emojis)
                             if emoji_name in str(emojis[max_emoji_length-1]):
                                 await ctx.send(emojis[max_emoji_length-1])

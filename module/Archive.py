@@ -6,15 +6,15 @@ import aiofiles
 import asyncio
 from module import logger as log
 from random import *
+from module.keys import client
 from datetime import datetime
 from Utility import DBconn, c, fetch_one, fetch_all
 
 
 class Archive(commands.Cog):
-    def __init__(self, client):
+    def __init__(self):
         client.add_listener(self.on_message, 'on_message')
-        self.client = client
-        self.bot_owner_id = 0
+        self.bot_owner_id = int  # can also access from module.keys
         pass
 
     async def on_message(self, message, owner=0):
@@ -23,7 +23,7 @@ class Archive(commands.Cog):
                 def check(m):
                     return m.channel == message.channel and m.author.id == self.bot_owner_id
 
-                msg = await self.client.wait_for('message', timeout=60, check=check)
+                msg = await client.wait_for('message', timeout=60, check=check)
                 if msg.content.lower() == "confirm" or msg.content.lower() == "confirmed":
                     return True
             except asyncio.TimeoutError:
@@ -127,7 +127,7 @@ class Archive(commands.Cog):
         for channel in all_channels:
             ID = channel[0]
             ChannelID = channel[1]
-            list_channel = (await self.client.fetch_channel(ChannelID)).name
+            list_channel = (await client.fetch_channel(ChannelID)).name
             GuildID = channel[2]
             DriveID = channel[3]
             Name = channel[4]

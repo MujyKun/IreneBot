@@ -1,20 +1,20 @@
 import discord
 from discord.ext import commands
+from module.keys import client
 from module import logger as log
 from Utility import DBconn, c, fetch_one, fetch_all, check_if_logged, set_logging_status, add_to_logging, get_logging_id, check_logging_requirements, get_attachments, get_log_channel_id
 
 
 class Logging(commands.Cog):
-    def __init__(self, client):
+    def __init__(self):
         client.add_listener(self.on_message_log, 'on_message')
-        self.client = client
 
     async def on_message_log(self, message):
         if await check_logging_requirements(message):
             try:
                 c.execute("SELECT sendall FROM logging.servers WHERE serverid = %s", (message.guild.id,))
                 if fetch_one() == 1:
-                    logging_channel = await get_log_channel_id(message, self.client)
+                    logging_channel = await get_log_channel_id(message)
                     files = await get_attachments(message)
                     embed_message = f"**{message.author} ({message.author.id})\nMessage: **{message.content}**\nFrom {message.guild} in {message.channel}\nCreated at {message.created_at}\n<{message.jump_url}>**"
                     embed = discord.Embed(title="Message Sent", description=embed_message, color=0xffffff)
@@ -86,3 +86,29 @@ class Logging(commands.Cog):
                 await ctx.send(f"> **Only edited and deleted messages will be sent in the logging channel.**")
         else:
             await ctx.send("> **This server is not being logged.**")
+
+
+@client.event
+async def on_message_edit(msg_before, message):
+    try:
+        if await check_logging_requirements(message):
+            logging_channel = await get_log_channel_id(message)
+            files = await get_attachments(message)
+            embed_message = f"**{message.author} ({message.author.id})\nOld Message: **{msg_before.content}**\nNew Message: **{message.content}**\nFrom {message.guild} in {message.channel}\nCreated at {message.created_at}\n<{message.jump_url}>**"
+            embed = discord.Embed(title="Message Edited", description=embed_message, color=0x00ff00)
+            await logging_channel.send(embed=embed, files=files)
+    except Exception as e:
+        log.console(f"ON_MESSAGE_EDIT ERROR: {e} Server ID: {message.guild.id} Channel ID: {message.channel.id}")
+
+
+@client.event
+async def on_message_delete(message):
+    try:
+        if await check_logging_requirements(message):
+            logging_channel = await get_log_channel_id(message)
+            files = await get_attachments(message)
+            embed_message = f"**{message.author} ({message.author.id})\nMessage: **{message.content}**\nFrom {message.guild} in {message.channel}\nCreated at {message.created_at}**"
+            embed = discord.Embed(title="Message Deleted", description=embed_message, color=0xff0000)
+            await logging_channel.send(embed=embed, files=files)
+    except Exception as e:
+        log.console(f"ON_MESSAGE_DELETE ERROR: {e} Server ID: {message.guild.id} Channel ID: {message.channel.id}")

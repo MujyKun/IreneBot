@@ -3,7 +3,7 @@ from discord.ext import commands, tasks
 from module import keys, logger as log
 import asyncio
 import youtube_dl
-from Utility import check_left_or_right_reaction_embed, set_embed_author_and_footer, get_random_color, get_server_prefix_by_context
+from Utility import resources as ex
 import random
 import os
 client = keys.client
@@ -11,19 +11,30 @@ client = keys.client
 
 youtube_dl.utils.bug_reports_message = lambda: ''
 
+# A song does not directly go to the queue if it's in a playlist.
+# instead, it piles up in this process and is all sent to the queue at once.
+files_in_process_of_queue = []
+
 
 def check_live(video_info):
     # return None = video is downloaded
     # return a message = video is ignored
+    def process_video():
+        files_in_process_of_queue.append(ytdl.prepare_filename(video_info))
+        return None
+
     try:
         if video_info['duration'] > 14400:
             return 'too_long'
     except Exception as e:
         pass
-    if not video_info['is_live']:
-        return None
-    else:
-        return 'live_video'
+    try:
+        if not video_info['is_live']:
+            process_video()
+        else:
+            return 'live_video'
+    except Exception as e:
+        process_video()  # this error occurs from is_live not being found.
 
 # https://github.com/ytdl-org/youtube-dl/blob/2391941f283a1107b01f9df76a8b0e521a5abe3b/youtube_dl/YoutubeDL.py#L143
 ytdl_format_options = {
@@ -79,7 +90,7 @@ class Music(commands.Cog):
             all_music = os.listdir("music")
             for song_file_name in all_music:
                 file_location = f"music\\{song_file_name}"
-                if file_location not in keep_files:
+                if file_location not in keep_files and file_location not in files_in_process_of_queue:
                     if file_location != "music":
                         os.remove(file_location)
         except Exception as e:
@@ -137,28 +148,28 @@ class Music(commands.Cog):
                 set_of_songs += song_desc
                 if counter % 10 == 0:
                     embed = discord.Embed(title=f"{ctx.guild.name}'s Music Playlist Page {embed_page_number}",
-                                          description=set_of_songs, color=get_random_color())
-                    embed = await set_embed_author_and_footer(embed, footer_message="Thanks for using Irene.")
+                                          description=set_of_songs, color=ex.get_random_color())
+                    embed = await ex.set_embed_author_and_footer(embed, footer_message="Thanks for using Irene.")
                     set_of_songs = ""
                     embed_list.append(embed)
                     embed_page_number += 1
                 counter += 1
             # if there are not more than 10 songs in queue.
             embed = discord.Embed(title=f"{ctx.guild.name}'s Music Playlist Page {embed_page_number}",
-                                  description=set_of_songs, color=get_random_color())
-            embed = await set_embed_author_and_footer(embed, footer_message="Thanks for using Irene.")
+                                  description=set_of_songs, color=ex.get_random_color())
+            embed = await ex.set_embed_author_and_footer(embed, footer_message="Thanks for using Irene.")
             embed_list.append(embed)
             if page_number > len(embed_list):
                 page_number = 1
             elif page_number <= 0:
                 page_number = 1
             msg = await ctx.send(embed=embed_list[page_number - 1])
-            await check_left_or_right_reaction_embed(msg, embed_list, page_number - 1)
+            await ex.check_left_or_right_reaction_embed(msg, embed_list, page_number - 1)
         except KeyError as e:
             await ctx.send(f"> **There are no songs queued in this server.**")
         except Exception as e:
             log.console(e)
-            await ctx.send(f"> **Something went wrong.. Please {await get_server_prefix_by_context(ctx)}report it.**")
+            await ctx.send(f"> **Something went wrong.. Please {await ex.get_server_prefix_by_context(ctx)}report it.**")
 
     @commands.command()
     async def join(self, ctx):
@@ -349,6 +360,10 @@ class YTDLSource(discord.PCMVolumeTransformer):
                             queued[guild_id].append(video_player_and_channel)
                     else:
                         queued[guild_id] = [video_player_and_channel]
+                    try:
+                        files_in_process_of_queue.remove(file_name)
+                    except Exception as e:
+                        pass
             except Exception as e:
                 pass
         loop = loop or asyncio.get_event_loop()

@@ -8,13 +8,13 @@ from module import logger as log
 from random import *
 from module.keys import client
 from datetime import datetime
-from Utility import DBconn, c, fetch_one, fetch_all
+from Utility import resources as ex
 
 
 class Archive(commands.Cog):
     def __init__(self):
         client.add_listener(self.on_message, 'on_message')
-        self.bot_owner_id = int  # can also access from module.keys
+        self.bot_owner_id = 169401247374376960
         pass
 
     async def on_message(self, message, owner=0):
@@ -32,8 +32,8 @@ class Archive(commands.Cog):
         if owner == 0:
             if not message.author.bot:
                 try:
-                    c.execute("SELECT id, channelid, guildid, driveid, name FROM archive.channellist")
-                    all_channels = fetch_all()
+                    ex.c.execute("SELECT id, channelid, guildid, driveid, name FROM archive.channellist")
+                    all_channels = ex.fetch_all()
                     for channel in all_channels:
                         ID = channel[0]
                         ChannelID = channel[1]
@@ -81,18 +81,18 @@ class Archive(commands.Cog):
             if owner_present == 1:
                 await ctx.send("> **Awaiting confirmation**")
                 if await self.on_message(ctx, 1):
-                    c.execute("SELECT COUNT(*) FROM archive.ChannelList WHERE DriveID = %s", (drive_folder_id,))
-                    checker = fetch_one()
+                    ex.c.execute("SELECT COUNT(*) FROM archive.ChannelList WHERE DriveID = %s", (drive_folder_id,))
+                    checker = ex.fetch_one()
                     if checker == 0:
-                        c.execute("SELECT COUNT(*) FROM archive.ChannelList WHERE ChannelID = %s", (ctx.channel.id,))
-                        count = fetch_one()
+                        ex.c.execute("SELECT COUNT(*) FROM archive.ChannelList WHERE ChannelID = %s", (ctx.channel.id,))
+                        count = ex.fetch_one()
                         if count == 0:
                             url = f"https://drive.google.com/drive/folders/{drive_folder_id}"
                             async with aiohttp.ClientSession() as session:
                                 async with session.get(url) as r:
                                     if r.status == 200:
-                                        c.execute("INSERT INTO archive.ChannelList VALUES(%s,%s,%s,%s)", (ctx.channel.id, ctx.guild.id, drive_folder_id, name))
-                                        DBconn.commit()
+                                        ex.c.execute("INSERT INTO archive.ChannelList VALUES(%s,%s,%s,%s)", (ctx.channel.id, ctx.guild.id, drive_folder_id, name))
+                                        ex.DBconn.commit()
                                         await ctx.send(f"> **This channel is now being archived under {url}**")
                                         pass
                                     elif r.status == 404:
@@ -117,8 +117,8 @@ class Archive(commands.Cog):
     @commands.command()
     async def listchannels(self, ctx):
         """List the channels in your server that are being archived. [Format: %listchannels]"""
-        c.execute("SELECT id, channelid, guildid, driveid, name FROM archive.ChannelList")
-        all_channels = fetch_all()
+        ex.c.execute("SELECT id, channelid, guildid, driveid, name FROM archive.ChannelList")
+        all_channels = ex.fetch_all()
         guild_name = ctx.guild.name
         embed = discord.Embed(title=f"Archived {guild_name} Channels", color=0x87CEEB)
         embed.set_author(name="Irene", url='https://www.youtube.com/watch?v=dQw4w9WgXcQ', icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
@@ -145,13 +145,13 @@ class Archive(commands.Cog):
     async def deletechannel(self, ctx):
         """Stop the current channel from being archived [Format: %deletechannel]"""
         try:
-            c.execute("SELECT COUNT(*) FROM archive.ChannelList WHERE ChannelID = %s", (ctx.channel.id,))
-            count = fetch_one()
+            ex.c.execute("SELECT COUNT(*) FROM archive.ChannelList WHERE ChannelID = %s", (ctx.channel.id,))
+            count = ex.fetch_one()
             if count == 0:
                 await ctx.send("> **This channel is not currently being archived.**")
             else:
-                c.execute("DELETE FROM archive.ChannelList WHERE ChannelID = %s", (ctx.channel.id,))
-                DBconn.commit()
+                ex.c.execute("DELETE FROM archive.ChannelList WHERE ChannelID = %s", (ctx.channel.id,))
+                ex.DBconn.commit()
                 await ctx.send("> **This channel is no longer being archived**")
         except Exception as e:
             log.console(e)
@@ -183,16 +183,16 @@ class Archive(commands.Cog):
                                 'Photos/{}'.format(file_name), mode='wb')
                             await fd.write(await r.read())
                             await fd.close()
-                            c.execute("INSERT INTO archive.ArchivedChannels VALUES(%s,%s,%s,%s)", (file_name, src, drive_id, channel_id))
-                            DBconn.commit()
+                            ex.c.execute("INSERT INTO archive.ArchivedChannels VALUES(%s,%s,%s,%s)", (file_name, src, drive_id, channel_id))
+                            ex.DBconn.commit()
                         # quickstart.Drive.checker()
         except Exception as e:
             log.console(e)
             pass
 
     async def deletephotos(self):
-        c.execute("SELECT FileName from archive.ArchivedChannels")
-        allfiles = fetch_all()
+        ex.c.execute("SELECT FileName from archive.ArchivedChannels")
+        allfiles = ex.fetch_all()
         file_list = []
         for file in allfiles:
             file_list.append(file[0])
@@ -246,8 +246,8 @@ class Archive(commands.Cog):
                 log.console(e)
                 pass
         check = False
-        c.execute("SELECT channelid, guildid, driveid FROM archive.ChannelList")
-        channels = fetch_all()
+        ex.c.execute("SELECT channelid, guildid, driveid FROM archive.ChannelList")
+        channels = ex.fetch_all()
         for channel in channels:
             ChannelID = channel[0]
             GuildID = channel[1]

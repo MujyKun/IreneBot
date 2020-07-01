@@ -5,19 +5,16 @@ from discord.ext.commands.cooldowns import BucketType
 from module import keys
 from module import logger as log
 import aiohttp
-from Utility import DBconn, c, fetch_one, fetch_all, check_left_or_right_reaction_embed,get_language_code, get_server_prefix, get_bot_statuses, get_random_idol_id, get_member, create_embed, get_server_count, get_text_channel_count, get_voice_channel_count, get_servers_logged, get_channels_logged, get_dc_channels, get_ping, get_server_prefix_by_context
+from Utility import resources as ex
 client = keys.client
 
 
 class Miscellaneous(commands.Cog):
-    def __init__(self):
-        pass
-
     @commands.command()
     async def botinfo(self, ctx):
         """Get information about the bot."""
         try:
-            current_server_prefix = await get_server_prefix(ctx.guild.id)
+            current_server_prefix = await ex.get_server_prefix(ctx.guild.id)
         except Exception as e:
             current_server_prefix = await client.get_prefix(ctx.message)
         app = await client.application_info()
@@ -25,13 +22,13 @@ class Miscellaneous(commands.Cog):
         app_name = app.name
         app_owner = app.owner
         app_icon_url = app.icon_url
-        embed = await create_embed(title=f"I am {app_name}! ({app_id})", title_desc="I was made with Python using the discord.py wrapper.")
+        embed = await ex.create_embed(title=f"I am {app_name}! ({app_id})", title_desc="I was made with Python using the discord.py wrapper.")
         embed.set_thumbnail(url=app_icon_url)
-        embed.add_field(name=f"Servers Connected", value=f"{get_server_count()} Servers", inline=True)
-        embed.add_field(name=f"Text/Voice Channels Watched", value=f"{get_text_channel_count()}/{get_voice_channel_count()} Channels", inline=True)
-        embed.add_field(name=f"Servers/Channels Logged", value=f"{len(await get_servers_logged())}/{len(await get_channels_logged())} Logged", inline=True)
-        embed.add_field(name=f"DC Updates Sent to", value=f"{len(get_dc_channels())} Channels", inline=True)
-        embed.add_field(name=f"Ping", value=f"{get_ping()} ms", inline=True)
+        embed.add_field(name=f"Servers Connected", value=f"{ex.get_server_count()} Servers", inline=True)
+        embed.add_field(name=f"Text/Voice Channels Watched", value=f"{ex.get_text_channel_count()}/{ex.get_voice_channel_count()} Channels", inline=True)
+        embed.add_field(name=f"Servers/Channels Logged", value=f"{len(await ex.get_servers_logged())}/{len(await ex.get_channels_logged())} Logged", inline=True)
+        embed.add_field(name=f"DC Updates Sent to", value=f"{len(ex.get_dc_channels())} Channels", inline=True)
+        embed.add_field(name=f"Ping", value=f"{ex.get_ping()} ms", inline=True)
         embed.add_field(name=f"Bot Owner", value=f"{app_owner} ({app_owner.id})", inline=False)
         embed.add_field(name=f"Support Server", value=f"https://discord.gg/bEXm85V", inline=False)
         embed.add_field(name=f"Github", value=f"https://github.com/MujyKun/IreneBot", inline=False)
@@ -46,7 +43,7 @@ class Miscellaneous(commands.Cog):
         """Slap someone [Format: %slap @user]"""
         ctx_name = ctx.author.display_name
         user_name = user.display_name
-        random_idol_stage_name = (await get_member(await get_random_idol_id()))[2]
+        random_idol_stage_name = (await ex.get_member(await ex.get_random_idol_id()))[2]
         harm_phrases = [
             f"Shame on you {user_name}!! You are not allowed to harm yourself.",
             f"Did you really think you could hurt yourself {user_name}?",
@@ -84,7 +81,7 @@ class Miscellaneous(commands.Cog):
     async def checkprefix(self, ctx):
         """Check the current prefix using the default prefix."""
         try:
-            await ctx.send(f"> **Your current server prefix is {await get_server_prefix(ctx.guild.id)}**")
+            await ctx.send(f"> **Your current server prefix is {await ex.get_server_prefix(ctx.guild.id)}**")
         except Exception as e:
             await ctx.send(f"> **Your current prefix is {await client.get_prefix(ctx.message)}")
 
@@ -92,8 +89,8 @@ class Miscellaneous(commands.Cog):
     async def translate(self, ctx, from_language, to_language, *, message):
         """Translate between languages using Papago [Format: %translate English Korean this is a test phrase.]"""
         try:
-            source = await get_language_code(from_language)
-            target = await get_language_code(to_language)
+            source = await ex.get_language_code(from_language)
+            target = await ex.get_language_code(to_language)
             if source is None or target is None:
                 await ctx.send("> **Could not detect source or target language. Available languages are: Korean, English, Japanese, Chinese, Spanish, French, Vietnamese, Thai, Indonesian.**")
             else:
@@ -142,11 +139,11 @@ class Miscellaneous(commands.Cog):
         """Checks how many times a user has said the N Word [Format: %nword @user]"""
         if user == discord.Member:
             user = ctx.author
-        c.execute("SELECT COUNT(*) FROM currency.Counter WHERE UserID = %s", (user.id,))
-        checker = fetch_one()
+        ex.c.execute("SELECT COUNT(*) FROM currency.Counter WHERE UserID = %s", (user.id,))
+        checker = ex.fetch_one()
         if checker > 0:
-            c.execute("SELECT NWord FROM currency.Counter WHERE UserID = %s", (user.id,))
-            current_count = fetch_one()
+            ex.c.execute("SELECT NWord FROM currency.Counter WHERE UserID = %s", (user.id,))
+            current_count = ex.fetch_one()
             await ctx.send(f"> **<@{user.id}> has said the N-Word {current_count} time(s)!**")
         if checker == 0:
             await ctx.send(f"> **<@{user.id}> has not said the N-Word a single time!**")
@@ -158,12 +155,12 @@ class Miscellaneous(commands.Cog):
         if user == "@user":
             await ctx.send("> **Please @ a user**")
         if user != "@user":
-            c.execute("SELECT COUNT(*) FROM currency.Counter WHERE UserID = %s", (user.id,))
-            checker = fetch_one()
+            ex.c.execute("SELECT COUNT(*) FROM currency.Counter WHERE UserID = %s", (user.id,))
+            checker = ex.fetch_one()
             if checker > 0:
-                c.execute("DELETE FROM currency.Counter where UserID = %s", (user.id,))
+                ex.c.execute("DELETE FROM currency.Counter where UserID = %s", (user.id,))
                 await ctx.send("**> Cleared.**")
-                DBconn.commit()
+                ex.DBconn.commit()
             if checker == 0:
                 await ctx.send(f"> **<@{user.id}> has not said the N-Word a single time!**")
 
@@ -173,8 +170,8 @@ class Miscellaneous(commands.Cog):
         embed = discord.Embed(title=f"NWord Leaderboard", color=0xffb6c1)
         embed.set_author(name="Irene", url='https://www.youtube.com/watch?v=dQw4w9WgXcQ', icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
         embed.set_footer(text="Type %nword (user) to view their individual stats.", icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
-        c.execute("SELECT UserID, NWord FROM currency.Counter ORDER BY NWord DESC")
-        all_members = fetch_all()
+        ex.c.execute("SELECT UserID, NWord FROM currency.Counter ORDER BY NWord DESC")
+        all_members = ex.fetch_all()
         count_loop = 0
         for mem in all_members:
             count_loop += 1
@@ -223,7 +220,7 @@ class Miscellaneous(commands.Cog):
                 pass
             pass
         else:
-            server_prefix = await get_server_prefix_by_context(ctx)
+            server_prefix = await ex.get_server_prefix_by_context(ctx)
             await ctx.send(f">>> **This text channel must be NSFW to use {server_prefix}"
                            f"urban (Guidelines set by top.gg).**\nTo override this, You may add a **1** after the "
                            f"definition number.\nExample: {server_prefix}urban hello (definition number) **1**.")
@@ -273,7 +270,7 @@ class Miscellaneous(commands.Cog):
     @commands.command()
     async def servercount(self, ctx):
         """Shows how many servers the bot has [Format: %servercount]"""
-        await ctx.send(f"> **I am connected to {get_server_count()} servers.**")
+        await ctx.send(f"> **I am connected to {ex.get_server_count()} servers.**")
 
     @commands.command()
     async def serverinfo(self, ctx):
@@ -353,7 +350,7 @@ class Miscellaneous(commands.Cog):
         if count != 0:
             embed_list.append(embed)
         msg = await ctx.send(embed=embed_list[0])
-        await check_left_or_right_reaction_embed(msg, embed_list)
+        await ex.check_left_or_right_reaction_embed(msg, embed_list)
 
     @commands.command(aliases=['8ball', '8'])
     async def _8ball(self, ctx, *, question=None):
@@ -420,7 +417,7 @@ class Miscellaneous(commands.Cog):
     @commands.command(aliases=['pong'])
     async def ping(self, ctx):
         """Shows Latency to Discord [Format: %ping]"""
-        await ctx.send(f"> **My ping is currently {get_ping()}ms.**")
+        await ctx.send(f"> **My ping is currently {ex.get_ping()}ms.**")
 
     @commands.command()
     @commands.is_owner()

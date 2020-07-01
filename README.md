@@ -1,7 +1,7 @@
 
 # [IreneBot](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=1609956823)
 
-## Irene Bot for Discord in Python V1.02.0
+## Irene Bot for Discord in Python V1.02.1
 
 [![Discord Bots](https://top.gg/api/widget/520369375325454371.svg)](https://top.gg/bot/520369375325454371)
 [![Discord Boats](https://discord.boats/api/widget/520369375325454371)](https://discord.boats/bot/520369375325454371)  
@@ -10,6 +10,7 @@
 ## [Discord Support Server](https://discord.gg/bEXm85V)
 
 Commands from this documentation may not be present in the code (The code may be a bit behind with updating).  
+If you are interested in hosting on your own, the keys run are in `irene_credentials.json`.  
 Command Prefix is in modules/keys.py and is currently set to '%' by default. To change a server prefix, look at `%setprefix`.    
 In order to check the prefix of your server, type `%checkprefix`.
 

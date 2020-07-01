@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from Utility import get_level, shorten_balance, set_level, get_xp, get_balance, DBconn, c, get_server_prefix_by_context, set_embed_author_and_footer, create_embed
+from Utility import resources as ex
 from module import logger as log
 from module.keys import client, bot_prefix
 
@@ -17,7 +17,7 @@ class Profile(commands.Cog):
                 user = ctx.author
             else:
                 user_id = user.id
-            embed = await create_embed(title=f"{user.display_name}'s Avatar   ({user_id})")
+            embed = await ex.create_embed(title=f"{user.display_name}'s Avatar   ({user_id})")
             embed.set_image(url=user.avatar_url)
             await ctx.send(embed=embed)
         except Exception as e:
@@ -47,11 +47,11 @@ class Profile(commands.Cog):
             if len(roles) > 500:
                 roles = f"{roles[0:498]}...."
 
-            user_level = await get_level(user_id, "profile")
-            shortened_money = await shorten_balance(str(await get_balance(user_id)))
-            rob_beg_daily_level = f"{await get_level(user_id, 'rob')}/{await get_level(user_id, 'beg')}/{await get_level(user_id, 'daily')}"
+            user_level = await ex.get_level(user_id, "profile")
+            shortened_money = await ex.shorten_balance(str(await ex.get_balance(user_id)))
+            rob_beg_daily_level = f"{await ex.get_level(user_id, 'rob')}/{await ex.get_level(user_id, 'beg')}/{await ex.get_level(user_id, 'daily')}"
             embed = discord.Embed(title=f"{user.name} ({user_id})", color=0x90ee90, url=f"{user.avatar_url}")
-            embed = await set_embed_author_and_footer(embed, "Thanks for using Irene!")
+            embed = await ex.set_embed_author_and_footer(embed, "Thanks for using Irene!")
             try:
                 user_activity = user.activity.name
             except Exception as e:
@@ -70,7 +70,7 @@ class Profile(commands.Cog):
             await ctx.send(embed=embed)
 
         except Exception as e:
-            server_prefix = await get_server_prefix_by_context(ctx)
+            server_prefix = await ex.get_server_prefix_by_context(ctx)
             await ctx.send(f"> **There was an error. Please {server_prefix}report it**")
             log.console(e)
 
@@ -78,14 +78,14 @@ class Profile(commands.Cog):
         try:
             xp_per_message = 10
             user_id = msg.author.id
-            current_level = await get_level(user_id, "profile")
-            current_xp = await get_level(user_id, "profilexp")
-            xp_needed_for_level = await get_xp(current_level, "profile")
+            current_level = await ex.get_level(user_id, "profile")
+            current_xp = await ex.get_level(user_id, "profilexp")
+            xp_needed_for_level = await ex.get_xp(current_level, "profile")
 
             if current_xp + xp_per_message < xp_needed_for_level:
-                await set_level(user_id, current_xp + xp_per_message, "profilexp")
+                await ex.set_level(user_id, current_xp + xp_per_message, "profilexp")
             else:
-                await set_level(user_id, 1, "profilexp")
-                await set_level(user_id, current_level+1, "profile")
+                await ex.set_level(user_id, 1, "profilexp")
+                await ex.set_level(user_id, current_level+1, "profile")
         except Exception as e:
             log.console(e)

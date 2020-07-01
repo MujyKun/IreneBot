@@ -7,7 +7,7 @@ import random
 from module import keys
 import json
 from module import quickstart
-from Utility import fetch_one, fetch_all, DBconn, c, get_members_in_group, check_group_and_idol, get_member, get_all_groups, send_names, get_all_images_count, set_embed_with_all_aliases, get_id_where_group_matches_name, get_id_where_member_matches_name, get_random_photo_from_member, check_idol_post_reactions, idol_post, get_all_members, get_group_name, get_server_prefix_by_context, check_message_not_empty, get_random_idol_id, check_if_folder, get_idol_count, get_idol_called, check_left_or_right_reaction_embed, check_if_mod
+from Utility import resources as ex
 client = keys.client
 
 
@@ -17,7 +17,6 @@ class GroupMembers(commands.Cog):
         self.image_already_exists = []
         self.folder_already_checked = []
         self.all_links = []
-        pass
 
     async def on_message2(self, message, from_sorting=0):
         message_sender = message.author
@@ -32,31 +31,37 @@ class GroupMembers(commands.Cog):
 
         if from_sorting == 0:
             try:
-                if check_message_not_empty(message):
+                if ex.check_message_not_empty(message):
                     if message_content[0:len(keys.bot_prefix)] == keys.bot_prefix and message_content != f"{keys.bot_prefix}null":
                         match_name = message_content[1:len(message_content)]
-                        member_ids = await get_id_where_member_matches_name(match_name)
-                        group_ids = await get_id_where_group_matches_name(match_name)
+                        member_ids = await ex.get_id_where_member_matches_name(match_name)
+                        group_ids = await ex.get_id_where_group_matches_name(match_name)
                         photo_msg = None
                         if len(member_ids) != 0:
                             random_member = random.choice(member_ids)
-                            random_link = await get_random_photo_from_member(random_member)
-                            async with message_channel.typing():
-                                photo_msg = await idol_post(message_channel, random_member, random_link)
+                            random_link = await ex.get_random_photo_from_member(random_member)
+                            if not await ex.check_if_bot_banned(message_sender.id):
+                                async with message_channel.typing():
+                                    photo_msg = await ex.idol_post(message_channel, random_member, random_link)
+                                    ex.log_idol_command(message)
                         elif len(group_ids) != 0:
                             group_id = random.choice(group_ids)
-                            random_member = random.choice(await get_members_in_group(await get_group_name(group_id)))
-                            random_link = await get_random_photo_from_member(random_member[0])
-                            async with message_channel.typing():
-                                photo_msg = await idol_post(message_channel, random_member[0], random_link, group_id=group_id)
+                            random_member = random.choice(await ex.get_members_in_group(await ex.get_group_name(group_id)))
+                            random_link = await ex.get_random_photo_from_member(random_member[0])
+                            if not await ex.check_if_bot_banned(message_sender.id):
+                                async with message_channel.typing():
+                                    photo_msg = await ex.idol_post(message_channel, random_member[0], random_link, group_id=group_id)
+                                    ex.log_idol_command(message)
                         else:
-                            member_ids = await check_group_and_idol(match_name)
+                            member_ids = await ex.check_group_and_idol(match_name)
                             if member_ids is not None:
                                 random_member = random.choice(member_ids)
-                                random_link = await get_random_photo_from_member(random_member)
-                                async with message_channel.typing():
-                                    photo_msg = await idol_post(message_channel, random_member, random_link)
-                        await check_idol_post_reactions(photo_msg, message)
+                                random_link = await ex.get_random_photo_from_member(random_member)
+                                if not await ex.check_if_bot_banned(message_sender.id):
+                                    async with message_channel.typing():
+                                        photo_msg = await ex.idol_post(message_channel, random_member, random_link)
+                                        ex.log_idol_command(message)
+                        await ex.check_idol_post_reactions(photo_msg, message)
 
                     else:
                         pass
@@ -66,37 +71,37 @@ class GroupMembers(commands.Cog):
     @commands.command(aliases=['%'])
     async def randomidol(self, ctx):
         """Sends a photo of a random idol. [Format: %%]"""
-        random_idol_id = await get_random_idol_id()
-        random_link = await get_random_photo_from_member(random_idol_id)
-        photo_msg = await idol_post(ctx.channel, random_idol_id, random_link)
-        await check_idol_post_reactions(photo_msg, ctx.message)
+        random_idol_id = await ex.get_random_idol_id()
+        random_link = await ex.get_random_photo_from_member(random_idol_id)
+        photo_msg = await ex.idol_post(ctx.channel, random_idol_id, random_link)
+        await ex.check_idol_post_reactions(photo_msg, ctx.message)
 
     async def get_photos(self, url, member, groups, stage_name, aliases, member_id):
         try:
             if member_id == 0:
                 if aliases != "NULL":
                     aliases = aliases.lower()
-                c.execute("SELECT COUNT(*) FROM groupmembers.Member WHERE FullName = %s", (member,))
-                count = fetch_one()
+                ex.c.execute("SELECT COUNT(*) FROM groupmembers.Member WHERE FullName = %s", (member,))
+                count = ex.fetch_one()
                 if count == 0:
-                    c.execute("INSERT INTO groupmembers.Member VALUES (%s,%s,%s,%s)", (member, stage_name, groups, aliases))
-                    DBconn.commit()
-                    c.execute("SELECT ID FROM groupmembers.Member WHERE FullName = %s", (member,))
-                    id = fetch_one()
-                    c.execute("INSERT INTO groupmembers.ImageLinks VALUES (%s,%s)", (url, id))
+                    ex.c.execute("INSERT INTO groupmembers.Member VALUES (%s,%s,%s,%s)", (member, stage_name, groups, aliases))
+                    ex.DBconn.commit()
+                    ex.c.execute("SELECT ID FROM groupmembers.Member WHERE FullName = %s", (member,))
+                    id = ex.fetch_one()
+                    ex.c.execute("INSERT INTO groupmembers.ImageLinks VALUES (%s,%s)", (url, id))
                 else:
-                    c.execute("SELECT ID FROM groupmembers.Member WHERE FullName = %s", (member,))
-                    id = fetch_one()
-                    c.execute("INSERT INTO groupmembers.ImageLinks VALUES (%s,%s)", (url, id))
+                    ex.c.execute("SELECT ID FROM groupmembers.Member WHERE FullName = %s", (member,))
+                    id = ex.fetch_one()
+                    ex.c.execute("INSERT INTO groupmembers.ImageLinks VALUES (%s,%s)", (url, id))
                 log.console(f"Added {url} for {member}")
             else:
-                c.execute("INSERT INTO groupmembers.ImageLinks VALUES (%s,%s)", (url, member_id))
+                ex.c.execute("INSERT INTO groupmembers.ImageLinks VALUES (%s,%s)", (url, member_id))
                 log.console(f"Added {url} for MemberID: {member_id}")
         except Exception as e:
             # most likely unique constraint failed.
             log.console(f"{e} for {member} ({member_id})")
             pass
-        DBconn.commit()
+        ex.DBconn.commit()
 
     async def get_folders(self, url, member, group, stage_name, aliases, member_id):
         try:
@@ -130,7 +135,7 @@ class GroupMembers(commands.Cog):
                         return False
                     for id in ids:
                         view_url = f"https://drive.google.com/drive/folders/{id}"
-                        if await check_if_folder(view_url):
+                        if await ex.check_if_folder(view_url):
                             await straight_to_folders(id)
                         else:
                             if id not in self.image_already_exists:
@@ -215,19 +220,19 @@ class GroupMembers(commands.Cog):
     @commands.command()
     async def countgroup(self, ctx, *, group_name=""):
         """Shows how many photos of a certain group there are. [Format: %countmember <name>]"""
-        all_groups = await get_all_groups()
+        all_groups = await ex.get_all_groups()
         real_group_name = None
         members = None
         for group_info in all_groups:
             if group_name.lower() == group_info[1].lower():
-                members = await get_members_in_group(group_info[1])
+                members = await ex.get_members_in_group(group_info[1])
                 real_group_name = group_info[1]
             try:
                 aliases = group_info[2]
                 aliases = aliases.split(",")
                 for alias in aliases:
                     if group_name.lower() == alias.lower():
-                        members = await get_members_in_group(group_info[1])
+                        members = await ex.get_members_in_group(group_info[1])
                         real_group_name = group_info[1]
             except:
                 pass
@@ -236,14 +241,14 @@ class GroupMembers(commands.Cog):
         else:
             counter = 0
             for member in members:
-                counter += await get_idol_count(member[0])
+                counter += await ex.get_idol_count(member[0])
             await ctx.send(f"> **There are {counter} images for {real_group_name}.**")
 
     @commands.command()
     async def countmember(self, ctx, *, member=None):
         """Shows how many photos of a certain member there are. [Format: %countmember <name/all>)]"""
         async def amount_of_links(member_id, current_full_name, current_stage_name):
-            counter = await get_idol_count(member_id)
+            counter = await ex.get_idol_count(member_id)
             if counter == 0:
                 await ctx.send(f"> **There are no results for {current_full_name} ({current_stage_name})**")
             else:
@@ -252,10 +257,10 @@ class GroupMembers(commands.Cog):
         if member is None:
             await ctx.send("> **Please specify a member's full name, stage name, or alias.**")
         elif member == "all":
-            await ctx.send(f"> **There are {await get_all_images_count():,} images of idols.**")
+            await ctx.send(f"> **There are {await ex.get_all_images_count():,} images of idols.**")
         else:
             member = member.replace("_", " ")
-            all_members = await get_all_members()
+            all_members = await ex.get_all_members()
             for all_member in all_members:
                 id = all_member[0]
                 full_name = all_member[1]
@@ -276,20 +281,20 @@ class GroupMembers(commands.Cog):
     @commands.command(aliases=['fullname'])
     async def fullnames(self, ctx, page_number: int = 1):
         """Lists the full names of idols the bot has photos of [Format: %fullnames]"""
-        await send_names(ctx, "fullname", page_number)
+        await ex.send_names(ctx, "fullname", page_number)
 
     @commands.command(aliases=['member'])
     async def members(self, ctx, page_number: int = 1):
         """Lists the names of idols the bot has photos of [Format: %members]"""
-        await send_names(ctx, "members", page_number)
+        await ex.send_names(ctx, "members", page_number)
 
     @commands.command()
     async def groups(self, ctx):
         """Lists the groups of idols the bot has photos of [Format: %groups]"""
-        all_groups = await get_all_groups()
+        all_groups = await ex.get_all_groups()
         all_groups_listed = ""
         new_group_list = []
-        is_mod = check_if_mod(ctx)
+        is_mod = ex.check_if_mod(ctx)
         for group in all_groups:
             new_group_list.append(group)
         try:
@@ -311,9 +316,9 @@ class GroupMembers(commands.Cog):
         """Lists the aliases of idols that have one [Format: %aliases (members/groups)]"""
         check = True
         if 'member' in mode.lower():
-            embed_list = await set_embed_with_all_aliases("Idol")
+            embed_list = await ex.set_embed_with_all_aliases("Idol")
         elif 'group' in mode.lower():
-            embed_list = await set_embed_with_all_aliases("Group")
+            embed_list = await ex.set_embed_with_all_aliases("Group")
         else:
             await ctx.send("> **I don't know if you want member or group aliases.**")
             check = False
@@ -323,7 +328,7 @@ class GroupMembers(commands.Cog):
             elif page_number < 1:
                 page_number = 1
             msg = await ctx.send(embed=embed_list[page_number-1])
-            await check_left_or_right_reaction_embed(msg, embed_list, page_number - 1)
+            await ex.check_left_or_right_reaction_embed(msg, embed_list, page_number - 1)
 
     @commands.is_owner()
     @commands.command()
@@ -347,21 +352,21 @@ class GroupMembers(commands.Cog):
         try:
             keep_going = True
             while keep_going:
-                c.execute("SELECT COUNT(*) FROM groupmembers.ScrapedLinks")
-                counter = fetch_one()
+                ex.c.execute("SELECT COUNT(*) FROM groupmembers.ScrapedLinks")
+                counter = ex.fetch_one()
                 if counter == 0:
                     await ctx.send("> **There are no links to sort.**")
                     keep_going = False
-                c.execute("SELECT ID,Link FROM groupmembers.ScrapedLinks")
-                all_links = fetch_all()
+                ex.c.execute("SELECT ID,Link FROM groupmembers.ScrapedLinks")
+                all_links = ex.fetch_all()
                 for data in all_links:
                     data_id = data[0]
                     link = data[1]
                     await ctx.send(f"> {link} **Please respond with the member's ID, delete, or stop**")
                     check_msg = await self.on_message2(ctx.message, 1)
                     if check_msg == 'delete':
-                        c.execute("DELETE FROM groupmembers.ScrapedLinks WHERE ID = %s", (data_id,))
-                        DBconn.commit()
+                        ex.c.execute("DELETE FROM groupmembers.ScrapedLinks WHERE ID = %s", (data_id,))
+                        ex.DBconn.commit()
                         await ctx.send("> **The link has been removed.**")
                     elif check_msg == 'stop':
                         await ctx.send("> **Stopping Sort**")
@@ -369,14 +374,14 @@ class GroupMembers(commands.Cog):
                         break
                     elif check_msg == 'deleteall':
                         await ctx.send("> **Deleted all links**")
-                        c.execute("DELETE FROM groupmembers.ScrapedLinks")
-                        DBconn.commit()
+                        ex.c.execute("DELETE FROM groupmembers.ScrapedLinks")
+                        ex.DBconn.commit()
                         keep_going = False
                         break
                     else:
-                        c.execute("INSERT INTO groupmembers.imagelinks VALUES (%s,%s)", (link, int(check_msg)))
-                        c.execute("DELETE FROM groupmembers.scrapedlinks WHERE ID = %s", (data_id,))
-                        DBconn.commit()
+                        ex.c.execute("INSERT INTO groupmembers.imagelinks VALUES (%s,%s)", (link, int(check_msg)))
+                        ex.c.execute("DELETE FROM groupmembers.scrapedlinks WHERE ID = %s", (data_id,))
+                        ex.DBconn.commit()
         except Exception as e:
             log.console(e)
 
@@ -398,9 +403,9 @@ class GroupMembers(commands.Cog):
                             count += 1
                             # await ctx.send((key['url']))
                             url = key['url']
-                            c.execute("INSERT INTO groupmembers.ScrapedLinks VALUES (%s)", (url,))
+                            ex.c.execute("INSERT INTO groupmembers.ScrapedLinks VALUES (%s)", (url,))
                         await ctx.send(f"> **{count} link(s) for {keyword} were added to the Database.**")
-                        DBconn.commit()
+                        ex.DBconn.commit()
         except Exception as e:
             log.console(e)
 
@@ -409,8 +414,8 @@ class GroupMembers(commands.Cog):
         """Shows howmany times an idol has been called. [Format: %count (idol's name)]"""
         check_if_existed = 0
         try:
-            c.execute("SELECT ID, FullName, StageName, Aliases FROM groupmembers.Member")
-            all_members = fetch_all()
+            ex.c.execute("SELECT ID, FullName, StageName, Aliases FROM groupmembers.Member")
+            all_members = ex.fetch_all()
             final_count = "Unknown"
 
             if name is not None:
@@ -429,14 +434,14 @@ class GroupMembers(commands.Cog):
                         check_if_existed = 1
                         check = 1
                     if check == 1:
-                        c.execute("SELECT COUNT(*) FROM groupmembers.Count WHERE MemberID = %s", (ID,))
-                        counter = fetch_one()
+                        ex.c.execute("SELECT COUNT(*) FROM groupmembers.Count WHERE MemberID = %s", (ID,))
+                        counter = ex.fetch_one()
                         if counter == 0:
                             await ctx.send(f"> **{full_name} ({stage_name}) has not been called by a user yet.**")
                         else:
-                            counter = get_idol_called(ID)
-                            c.execute("SELECT MemberID FROM groupmembers.Count ORDER BY Count DESC")
-                            all_counters = fetch_all()
+                            counter = ex.get_idol_called(ID)
+                            ex.c.execute("SELECT MemberID FROM groupmembers.Count ORDER BY Count DESC")
+                            all_counters = ex.fetch_all()
                             count = 0
                             for rank in all_counters:
                                 count += 1
@@ -447,9 +452,9 @@ class GroupMembers(commands.Cog):
             else:
                 counter = 0
                 for mem in all_members:
-                    count = get_idol_called(mem[0])
+                    count = ex.get_idol_called(mem[0])
                     if count is not None:
-                        counter += get_idol_called(mem[0])
+                        counter += ex.get_idol_called(mem[0])
                 await ctx.send(f"> **All Idols have been called a total of {counter} times.**")
         except Exception as e:
             log.console(e)
@@ -461,17 +466,17 @@ class GroupMembers(commands.Cog):
         """Shows leaderboards for how many times an idol has been called. [Format: %clb]"""
         embed = discord.Embed(title=f"Idol Leaderboard", color=0xffb6c1)
         embed.set_author(name="Irene", url='https://www.youtube.com/watch?v=dQw4w9WgXcQ', icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
-        embed.set_footer(text=f"Type {await get_server_prefix_by_context(ctx)}count (idol name) to view their individual stats.", icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
-        c.execute("SELECT MemberID, Count FROM groupmembers.Count ORDER BY Count DESC")
-        all_members = fetch_all()
+        embed.set_footer(text=f"Type {await ex.get_server_prefix_by_context(ctx)}count (idol name) to view their individual stats.", icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
+        ex.c.execute("SELECT MemberID, Count FROM groupmembers.Count ORDER BY Count DESC")
+        all_members = ex.fetch_all()
         count_loop = 0
         for mem in all_members:
             count_loop += 1
             if count_loop <= 10:
                 MemberID = mem[0]
                 count = mem[1]
-                c.execute("SELECT fullname, stagename FROM groupmembers.Member WHERE ID = %s", (MemberID,))
-                idol = c.fetchone()
+                ex.c.execute("SELECT fullname, stagename FROM groupmembers.Member WHERE ID = %s", (MemberID,))
+                idol = ex.c.fetchone()
                 embed.add_field(name=f"{count_loop}) {idol[0]} ({idol[1]})", value=count)
         await ctx.send(embed=embed)
 
@@ -480,33 +485,33 @@ class GroupMembers(commands.Cog):
     async def scandrive(self, ctx, name="NULL", member_id=0):
         """Scan DriveIDs Table and update other tables."""
         try:
-            c.execute("SELECT id, linkid, name FROM archive.DriveIDs")
-            all_links = fetch_all()
+            ex.c.execute("SELECT id, linkid, name FROM archive.DriveIDs")
+            all_links = ex.fetch_all()
             for pic in all_links:
                 try:
                     ID = pic[0]
                     Link_ID = pic[1]
                     Link_Name = pic[2]
                     new_link = f"https://drive.google.com/uc?export=view&id={Link_ID}"
-                    c.execute("SELECT Name FROM archive.ChannelList")
-                    all_names = fetch_all()
+                    ex.c.execute("SELECT Name FROM archive.ChannelList")
+                    all_names = ex.fetch_all()
                     if name == "NULL" and member_id == 0:
                         for idol_name in all_names:
                             idol_name = idol_name[0]
                             if idol_name == Link_Name and (idol_name != "Group" or idol_name != "MDG Group"):
-                                c.execute("SELECT ID FROM groupmembers.Member WHERE StageName = %s", (idol_name,))
-                                member_id1 = fetch_one()
-                                c.execute("INSERT INTO groupmembers.ImageLinks VALUES(%s,%s)", (new_link, member_id1))
-                                c.execute("DELETE FROM archive.DriveIDs WHERE ID = %s", (ID,))
-                                DBconn.commit()
+                                ex.c.execute("SELECT ID FROM groupmembers.Member WHERE StageName = %s", (idol_name,))
+                                member_id1 = ex.fetch_one()
+                                ex.c.execute("INSERT INTO groupmembers.ImageLinks VALUES(%s,%s)", (new_link, member_id1))
+                                ex.c.execute("DELETE FROM archive.DriveIDs WHERE ID = %s", (ID,))
+                                ex.DBconn.commit()
                     elif Link_Name.lower() == name.lower():
-                        c.execute("DELETE FROM archive.DriveIDs WHERE ID = %s", (ID,))
-                        c.execute("INSERT INTO groupmembers.ImageLinks VALUES(%s,%s)", (new_link, member_id))
-                        DBconn.commit()
+                        ex.c.execute("DELETE FROM archive.DriveIDs WHERE ID = %s", (ID,))
+                        ex.c.execute("INSERT INTO groupmembers.ImageLinks VALUES(%s,%s)", (new_link, member_id))
+                        ex.DBconn.commit()
                 except Exception as e:
                     log.console(e)
-                    DBconn.commit()
+                    ex.DBconn.commit()
             await ctx.send(f"> **Completed Scan**")
         except Exception as e:
             log.console(e)
-            DBconn.commit()
+            ex.DBconn.commit()

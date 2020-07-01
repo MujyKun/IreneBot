@@ -2,7 +2,8 @@ import discord
 from discord.ext import commands, tasks
 from module.keys import client, bot_prefix
 import random
-from Utility import get_bot_statuses, get_server_count, get_channel_count, get_user_count
+from Utility import resources as ex
+
 
 
 class Status:
@@ -14,12 +15,12 @@ class Status:
     async def change_bot_status_loop(self):
         try:
             random_statuses = [
-                f'{get_server_count()} servers.',
-                f'{get_channel_count()} channels.',
+                f'{ex.get_server_count()} servers.',
+                f'{ex.get_channel_count()} channels.',
                 f'{bot_prefix}help',
-                f'{get_user_count()} users.'
+                f'{ex.get_user_count()} users.'
             ]
-            statuses = await get_bot_statuses()
+            statuses = await ex.get_bot_statuses()
             if statuses is not None:
                 final_statuses = []
                 status = (random.choice(statuses))[0]

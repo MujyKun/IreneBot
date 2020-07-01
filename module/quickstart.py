@@ -6,21 +6,21 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from module import logger as log
-from Utility import DBconn, c, fetch_one, fetch_all
+from Utility import resources as ex
+
 
 
 class Drive:
     def __init__(self):
-    	"""Note this is the google framework and is not ASYNC. A wrapper can be used that makes it async."""
         pass
 
     @staticmethod
     def checker():
-        c.execute("SELECT COUNT(*) FROM archive.ArchivedChannels")
-        check = fetch_one()
+        ex.c.execute("SELECT COUNT(*) FROM archive.ArchivedChannels")
+        check = ex.fetch_one()
         if check > 0:
-            c.execute("SELECT id, filename, filetype, folderid FROM archive.ArchivedChannels")
-            posts = fetch_all()
+            ex.c.execute("SELECT id, filename, filetype, folderid FROM archive.ArchivedChannels")
+            posts = ex.fetch_all()
             for post in posts:
                 ID = post[0]
                 FileName = post[1]
@@ -42,8 +42,8 @@ class Drive:
                 file_location = f'Photos/{file_name}'
                 media = MediaFileUpload(file_location)
                 file = drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
-            c.execute("DELETE FROM archive.ArchivedChannels WHERE ID = %s", (ID,))
-            DBconn.commit()
+            ex.c.execute("DELETE FROM archive.ArchivedChannels WHERE ID = %s", (ID,))
+            ex.DBconn.commit()
             # print ('File ID: %s'% file.get('id'))
             # link_addon = file.get('id')
         except Exception as e:

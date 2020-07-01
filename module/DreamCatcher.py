@@ -5,7 +5,7 @@ import aiofiles
 import asyncio
 from module import logger as log
 from module.keys import client
-from Utility import DBconn, c, fetch_one, fetch_all,get_video_and_bat_list, get_dc_channels, get_videos, get_photos, get_embed, send_content, delete_content, get_member_name_and_id, add_post_to_db, send_new_post, open_bat_file, get_image_list, download_dc_photos
+from Utility import resources as ex
 
 
 class DreamCatcher(commands.Cog):
@@ -46,24 +46,24 @@ class DreamCatcher(commands.Cog):
         """Send DC Updates to your current text channel [Format: %updates] | To Stop : [Format: %updates stop]"""
         channel = ctx.channel.id
         if solution == "stop":
-            c.execute("SELECT COUNT(*) From dreamcatcher.DreamCatcher WHERE ServerID = %s",(channel,))
-            counter = fetch_one()
+            ex.c.execute("SELECT COUNT(*) From dreamcatcher.DreamCatcher WHERE ServerID = %s",(channel,))
+            counter = ex.fetch_one()
             if counter == 1:
                 await ctx.send ("> **This channel will no longer receive updates.**")
-                c.execute("DELETE FROM dreamcatcher.DreamCatcher WHERE ServerID = %s",(channel,))
-                DBconn.commit()
+                ex.c.execute("DELETE FROM dreamcatcher.DreamCatcher WHERE ServerID = %s",(channel,))
+                ex.DBconn.commit()
             if counter == 0:
                 await ctx.send("> **This channel does not currently receive updates.**")
         if solution != "stop":
-            c.execute("SELECT COUNT(*) From dreamcatcher.DreamCatcher WHERE ServerID = %s", (channel,))
-            counter = fetch_one()
+            ex.c.execute("SELECT COUNT(*) From dreamcatcher.DreamCatcher WHERE ServerID = %s", (channel,))
+            counter = ex.fetch_one()
             if counter == 1:
                 await ctx.send ("> **This channel already receives DC Updates**")
             if counter == 0:
                 channel_name = client.get_channel(channel)
                 await ctx.send("> **I Will Post All DC Updates In {}**".format(channel_name))
-                c.execute("INSERT INTO dreamcatcher.DreamCatcher VALUES (%s)",(channel,))
-                DBconn.commit()
+                ex.c.execute("INSERT INTO dreamcatcher.DreamCatcher VALUES (%s)",(channel,))
+                ex.DBconn.commit()
 
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
@@ -78,11 +78,11 @@ class DreamCatcher(commands.Cog):
             original_post_number = 0
             hd_photos = ""
             if member is not None:
-                c.execute("SELECT postnumber, link from dreamcatcher.dchdlinks WHERE member = %s ORDER BY postnumber DESC", (member,))
-                all_links = fetch_all()
+                ex.c.execute("SELECT postnumber, link from dreamcatcher.dchdlinks WHERE member = %s ORDER BY postnumber DESC", (member,))
+                all_links = ex.fetch_all()
             else:
-                c.execute("SELECT postnumber, link from dreamcatcher.dchdlinks ORDER BY postnumber DESC")
-                all_links = fetch_all()
+                ex.c.execute("SELECT postnumber, link from dreamcatcher.dchdlinks ORDER BY postnumber DESC")
+                all_links = ex.fetch_all()
             for link in all_links:
                 post_number = link[0]
                 if original_post_number == post_number or original_post_number == 0:
@@ -105,7 +105,7 @@ class DreamCatcher(commands.Cog):
             # if number >= latest post
             # last run on 40830
             c.execute("SELECT PostID FROM dreamcatcher.DCPost")
-            if number >= fetch_one():
+            if number >= ex.fetch_one():
                 download_all_task.cancel()
             else:
                 post_url = 'https://dreamcatcher.candlemystar.com/post/{}'.format(number)
@@ -159,8 +159,8 @@ class DcApp:
         try:
             self.count_loop += 1
             if self.first_run == 1:
-                c.execute("SELECT PostID FROM dreamcatcher.DCPost")
-                number = fetch_one()
+                ex.c.execute("SELECT PostID FROM dreamcatcher.DCPost")
+                number = ex.fetch_one()
                 self.first_run = 0
                 self.number = number
                 self.post_list.append(number)
@@ -179,9 +179,9 @@ class DcApp:
             async with aiohttp.ClientSession() as session:
                 async with session.get('{}'.format(post_url)) as r:
                     if r.status == 200:
-                        c.execute("DELETE FROM dreamcatcher.DCPost")
-                        c.execute("INSERT INTO dreamcatcher.DCPost VALUES(%s)", (self.number,))
-                        DBconn.commit()
+                        ex.c.execute("DELETE FROM dreamcatcher.DCPost")
+                        ex.c.execute("INSERT INTO dreamcatcher.DCPost VALUES(%s)", (self.number,))
+                        ex.DBconn.commit()
                         self.error_status = 0
                         if self.number not in self.post_list:
                             page_html = await r.text()
@@ -193,29 +193,29 @@ class DcApp:
                             status_message = status_message.replace('                    ', '')
                             if username in self.list:
                                 image_url = (page_soup.findAll("div", {"class": "imgSize width"}))
-                                image_links = await download_dc_photos(image_url)
-                                video_list, bat_list = get_video_and_bat_list(page_soup)
+                                image_links = await ex.download_dc_photos(image_url)
+                                video_list, bat_list = ex.get_video_and_bat_list(page_soup)
                                 if bat_list is not None:
-                                    await open_bat_file(bat_list)
+                                    await ex.open_bat_file(bat_list)
                                     # Videos were attempting to being sent but were not found. Needs time to render.
                                     await asyncio.sleep(5)
-                                channels = get_dc_channels()
-                                member_name, member_id = get_member_name_and_id(username, self.list)
-                                dc_photos_embed = await get_embed(image_links, member_name)
-                                add_post_to_db(image_links, member_id, member_name, self.number, post_url)
+                                channels = ex.get_dc_channels()
+                                member_name, member_id = ex.get_member_name_and_id(username, self.list)
+                                dc_photos_embed = await ex.get_embed(image_links, member_name)
+                                ex.add_post_to_db(image_links, member_id, member_name, self.number, post_url)
                                 for channel in channels:
                                     try:
                                         channel_id = channel[0]
                                         channel = client.get_channel(channel_id)
                                         # This part is repeated due to closed file IO error.
-                                        dc_videos = get_videos(video_list)
-                                        await send_new_post(channel_id, channel, member_name, status_message, post_url)
-                                        await send_content(channel, dc_photos_embed, dc_videos)
+                                        dc_videos = ex.get_videos(video_list)
+                                        await ex.send_new_post(channel_id, channel, member_name, status_message, post_url)
+                                        await ex.send_content(channel, dc_photos_embed, dc_videos)
                                     except Exception as e:
                                         # This try except was added due to errors with specific channels resulting
                                         # in an infinite loop
                                         pass
-                                delete_content()
+                                ex.delete_content()
                             else:
                                 log.console(f"Passing Post from POST #{self.number}")
                         self.post_list.append(self.number)

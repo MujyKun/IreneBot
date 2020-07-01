@@ -5,7 +5,7 @@ import aiofiles
 import os
 from module import logger as log
 from module.keys import client, bot_prefix
-from Utility import DBconn, c, fetch_one, get_server_prefix
+from Utility import resources as ex
 
 
 class Moderator(commands.Cog):
@@ -17,20 +17,20 @@ class Moderator(commands.Cog):
     async def setprefix(self, ctx, *, prefix=bot_prefix):
         """Set the server prefix. If prefix was forgotten, type this command with the default prefix.[Format: %setprefix %]"""
         prefix = prefix.lower()
-        current_server_prefix = await get_server_prefix(ctx.guild.id)
+        current_server_prefix = await ex.get_server_prefix(ctx.guild.id)
         if len(prefix) > 8:
             await ctx.send("> **Your prefix can not be more than 8 characters.**")
         else:
             # Default prefix '%' should never be in DB.
             if current_server_prefix == "%":
                 if prefix != "%":
-                    c.execute("INSERT INTO general.serverprefix VALUES (%s,%s)", (ctx.guild.id, prefix))
+                    ex.c.execute("INSERT INTO general.serverprefix VALUES (%s,%s)", (ctx.guild.id, prefix))
             else:
                 if prefix != "%":
-                    c.execute("UPDATE general.serverprefix SET prefix = %s WHERE serverid = %s", (prefix, ctx.guild.id))
+                    ex.c.execute("UPDATE general.serverprefix SET prefix = %s WHERE serverid = %s", (prefix, ctx.guild.id))
                 else:
-                    c.execute("DELETE FROM general.serverprefix WHERE serverid = %s", (ctx.guild.id,))
-            DBconn.commit()
+                    ex.c.execute("DELETE FROM general.serverprefix WHERE serverid = %s", (ctx.guild.id,))
+            ex.DBconn.commit()
             await ctx.send(f"> **This server's prefix has been set to {prefix}.**")
 
     @commands.command(aliases=['prune', 'purge'])
@@ -129,8 +129,8 @@ class Moderator(commands.Cog):
         channel_id = ctx.channel.id
         try:
             if delay == -1:
-                    c.execute("DELETE FROM currency.TempChannels WHERE chanID = %s", (channel_id,))
-                    DBconn.commit()
+                    ex.c.execute("DELETE FROM currency.TempChannels WHERE chanID = %s", (channel_id,))
+                    ex.DBconn.commit()
                     await ctx.send ("> **If this channel was a temporary channel, it has been removed.**")
             if delay >= 60:
                 new_delay = f"{(delay/60)} minutes"
@@ -140,21 +140,21 @@ class Moderator(commands.Cog):
                 await ctx.send("> **The delay cannot be negative.**")
             if delay >= 0:
                 channel_id = ctx.channel.id
-                c.execute("SELECT COUNT(*) FROM currency.TempChannels WHERE chanID = %s", (channel_id,))
-                counter = fetch_one()
+                ex.c.execute("SELECT COUNT(*) FROM currency.TempChannels WHERE chanID = %s", (channel_id,))
+                counter = ex.fetch_one()
                 if counter == 1:
-                    c.execute("SELECT delay FROM currency.TempChannels WHERE chanID = %s", (channel_id,))
-                    old_delay = fetch_one()
+                    ex.c.execute("SELECT delay FROM currency.TempChannels WHERE chanID = %s", (channel_id,))
+                    old_delay = ex.fetch_one()
                     if old_delay == delay:
                         await ctx.send(f"> **This channel is already a temp channel that deletes messages every {new_delay}.**")
                     else:
-                        c.execute("UPDATE currency.TempChannels SET delay = %s WHERE chanID = %s", (delay, channel_id))
-                        DBconn.commit()
+                        ex.c.execute("UPDATE currency.TempChannels SET delay = %s WHERE chanID = %s", (delay, channel_id))
+                        ex.DBconn.commit()
                         await ctx.send(f"> **This channel now deletes messages every {new_delay}.**")
                 if counter == 0:
                     await ctx.send(f"> **This channel now deletes messages every {new_delay}.**")
-                    c.execute("INSERT INTO currency.TempChannels VALUES (%s, %s)", (channel_id, delay))
-                    DBconn.commit()
+                    ex.c.execute("INSERT INTO currency.TempChannels VALUES (%s, %s)", (channel_id, delay))
+                    ex.DBconn.commit()
         except Exception as e:
             log.console(e)
 

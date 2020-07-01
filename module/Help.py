@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from module.keys import client, bot_prefix
-from Utility import get_server_prefix, fetch_one, c
+from Utility import resources as ex
 
 
 class Help(commands.Cog):
@@ -15,7 +15,7 @@ class Help(commands.Cog):
             try:
                 channel = self.get_destination()
                 server_id = channel.guild.id
-                server_prefix = await get_server_prefix(server_id)
+                server_prefix = await ex.get_server_prefix(server_id)
             except Exception as e:
                 server_prefix = await client.get_prefix(self.context.message)
             return server_prefix
@@ -54,10 +54,9 @@ class Help(commands.Cog):
 
         def get_opening_note(self):
             # method is not async // duplicated code for prefix
-            # could create background task in order to counter duplicated code.
             try:
-                c.execute("SELECT prefix FROM general.serverprefix WHERE serverid = %s", (self.context.guild.id,))
-                server_prefix = fetch_one()
+                ex.c.execute("SELECT prefix FROM general.serverprefix WHERE serverid = %s", (self.context.guild.id,))
+                server_prefix = ex.fetch_one()
                 if len(server_prefix) == 0:
                     server_prefix = bot_prefix
             except Exception as e:

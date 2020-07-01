@@ -9,8 +9,6 @@
 
 ## [Discord Support Server](https://discord.gg/bEXm85V)
 
-Commands from this documentation may not be present in the code (The code may be a bit behind with updating).  
-If you are interested in hosting on your own, the keys run are in `irene_credentials.json`.  
 Command Prefix is in modules/keys.py and is currently set to '%' by default. To change a server prefix, look at `%setprefix`.    
 In order to check the prefix of your server, type `%checkprefix`.
 
@@ -24,6 +22,10 @@ To find out more, look at the `GroupMembers` category.
 ♥♥♥ -- Entire Section Requires Bot Owner  
 ★★★ - Entire Section Requires Permissions  
 😇😇😇 - Entire Section Requires Bot Moderator
+
+## SELF HOSTING
+Commands from this documentation may not be present in the code (The code may be a bit behind with updating).  
+If you are interested in hosting on your own, any api keys or information should be in `irene_credentials.json`.  
 
 ## PLUGINS/LIBRARIES USED
 | Plugins/Libraries     | pip install                                                                              |

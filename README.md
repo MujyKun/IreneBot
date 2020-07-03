@@ -73,6 +73,7 @@ If you are interested in hosting on your own, any api keys or information should
 | addgroup         | Adds a group.                                                              | %addgroup (group name)                                                                                                      |                       |
 | addidol         | Adds an idol (Use underscores for spaces).                                                              | %addidol (full name) (stage name) (group id)                                                                                                      |                      |
 | addidoltogroup         | Adds idol to group.                                                              | %addidoltogroup (idol id) (group id)                                                                                                     |                       |
+| addinteraction       | Add a gif/photo to an interaction (ex: slap,kiss,lick,hug)                                   | %addinteraction (interaction) (url)               |               |
 | addstatus       | Add a playing status to Irene.                                   | %addstatus (status)               |               |
 | botban       | Bans a user from Irene.                                   | %botban (user id)               |               |
 | botunban       | UnBans a user from Irene.                                   | %botunban (user id)               |               |

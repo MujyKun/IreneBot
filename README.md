@@ -23,27 +23,6 @@ To find out more, look at the `GroupMembers` category.
 ★★★ - Entire Section Requires Permissions  
 😇😇😇 - Entire Section Requires Bot Moderator
 
-## SELF HOSTING
-Commands from this documentation may not be present in the code (The code may be a bit behind with updating).  
-If you are interested in hosting on your own, any api keys or information should be in `irene_credentials.json`.  
-
-## PLUGINS/LIBRARIES USED
-| Plugins/Libraries     | pip install                                                                              |
-|-----------------------|------------------------------------------------------------------------------------------|
-| Discord               | pip install discord.py                                                                   |
-| aiohttp               | pip install aiohttp                                                                      |
-| asyncio               | pip install asyncio                                                                      |
-| bs4 (BeautifulSoup)   | pip install bs4                                                                          |
-| aiofiles              | pip install aiofiles                                                                     |
-| youtube_dl            | pip install youtube_dl ---- (ffmpeg needed)                                              |
-| Google Client Library | pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib |
-| Tweepy                | pip install tweepy                                                                       |
-| PostgreSQL Driver (async)    | pip install asyncpg                                                                     |
-| pypapago (translator)    | pip install pypapago                                                                     |
-| dbl (top.gg)   | pip install dbl                                                                    |
-| discordboats [MODIFIED]  | pip install discordboats                                                                     |
-
-
 ## COMMANDS
 
 #### Archive: ★★★
@@ -136,8 +115,8 @@ If you are interested in hosting on your own, any api keys or information should
 #### Logging: ★★★  
 | Command      | Description                                                                                          | Format        |
 |--------------|------------------------------------------------------------------------------------------------------|---------------|
-| logadd       | Start logging the current text channel.                                                              | %logadd       |
-| logremove    | Stop logging the current text channel.                                                               | %logremove    |
+| logadd       | Start logging a text channel.                                                              | %logadd #text-channel       |
+| logremove    | Stop logging a text channel.                                                               | %logremove #text-channel    |
 | sendall      | Toggles sending all messages to log channel. If turned off, it only sends edited & deleted messages. | %sendall      |
 | startlogging | Start sending log messages in the current server and channel.                                        | %startlogging |
 | stoplogging  | Stop sending log messages in the current server.                                                     | %stoplogging  |

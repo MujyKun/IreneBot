@@ -6,7 +6,7 @@ import aiofiles
 import asyncio
 from module import logger as log
 from random import *
-from module.keys import client
+from module.keys import client, owner_id
 from datetime import datetime
 from Utility import resources as ex
 
@@ -14,14 +14,12 @@ from Utility import resources as ex
 class Archive(commands.Cog):
     def __init__(self):
         client.add_listener(self.on_message, 'on_message')
-        self.bot_owner_id = 169401247374376960
-        pass
 
     async def on_message(self, message, owner=0):
         if owner == 1:
             try:
                 def check(m):
-                    return m.channel == message.channel and m.author.id == self.bot_owner_id
+                    return m.channel == message.channel and m.author.id == owner_id
 
                 msg = await client.wait_for('message', timeout=60, check=check)
                 if msg.content.lower() == "confirm" or msg.content.lower() == "confirmed":
@@ -32,8 +30,7 @@ class Archive(commands.Cog):
         if owner == 0:
             if not message.author.bot:
                 try:
-                    ex.c.execute("SELECT id, channelid, guildid, driveid, name FROM archive.channellist")
-                    all_channels = ex.fetch_all()
+                    all_channels = await ex.conn.fetch("SELECT id, channelid, guildid, driveid, name FROM archive.channellist")
                     for channel in all_channels:
                         ID = channel[0]
                         ChannelID = channel[1]
@@ -77,24 +74,20 @@ class Archive(commands.Cog):
         """REQUIRES BOT OWNER PRESENCE -- Make the current channel start archiving images to google drive [Format: %addchannel <drive folder id> <optional - name>]"""
         try:
             if owner_present == 0:
-                await ctx.send(f"> **In order to start archiving your channels, you must talk to the bot owner <@{self.bot_owner_id}>**")
+                await ctx.send(f"> **In order to start archiving your channels, you must talk to the bot owner <@{owner_id}>**")
             if owner_present == 1:
                 await ctx.send("> **Awaiting confirmation**")
                 if await self.on_message(ctx, 1):
-                    ex.c.execute("SELECT COUNT(*) FROM archive.ChannelList WHERE DriveID = %s", (drive_folder_id,))
-                    checker = ex.fetch_one()
+                    checker = ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) FROM archive.ChannelList WHERE DriveID = $1", drive_folder_id))
                     if checker == 0:
-                        ex.c.execute("SELECT COUNT(*) FROM archive.ChannelList WHERE ChannelID = %s", (ctx.channel.id,))
-                        count = ex.fetch_one()
+                        count = ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) FROM archive.ChannelList WHERE ChannelID = $1", ctx.channel.id))
                         if count == 0:
                             url = f"https://drive.google.com/drive/folders/{drive_folder_id}"
                             async with aiohttp.ClientSession() as session:
                                 async with session.get(url) as r:
                                     if r.status == 200:
-                                        ex.c.execute("INSERT INTO archive.ChannelList VALUES(%s,%s,%s,%s)", (ctx.channel.id, ctx.guild.id, drive_folder_id, name))
-                                        ex.DBconn.commit()
+                                        await ex.conn.execute("INSERT INTO archive.ChannelList VALUES($1,$2,$3,$4)", ctx.channel.id, ctx.guild.id, drive_folder_id, name)
                                         await ctx.send(f"> **This channel is now being archived under {url}**")
-                                        pass
                                     elif r.status == 404:
                                         await ctx.send(f"> **{url} does not exist.**")
                                     elif r.status == 403:
@@ -117,8 +110,7 @@ class Archive(commands.Cog):
     @commands.command()
     async def listchannels(self, ctx):
         """List the channels in your server that are being archived. [Format: %listchannels]"""
-        ex.c.execute("SELECT id, channelid, guildid, driveid, name FROM archive.ChannelList")
-        all_channels = ex.fetch_all()
+        all_channels = await ex.conn.fetch("SELECT id, channelid, guildid, driveid, name FROM archive.ChannelList")
         guild_name = ctx.guild.name
         embed = discord.Embed(title=f"Archived {guild_name} Channels", color=0x87CEEB)
         embed.set_author(name="Irene", url='https://www.youtube.com/watch?v=dQw4w9WgXcQ', icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
@@ -145,13 +137,11 @@ class Archive(commands.Cog):
     async def deletechannel(self, ctx):
         """Stop the current channel from being archived [Format: %deletechannel]"""
         try:
-            ex.c.execute("SELECT COUNT(*) FROM archive.ChannelList WHERE ChannelID = %s", (ctx.channel.id,))
-            count = ex.fetch_one()
+            count = ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) FROM archive.ChannelList WHERE ChannelID = $1", ctx.channel.id))
             if count == 0:
                 await ctx.send("> **This channel is not currently being archived.**")
             else:
-                ex.c.execute("DELETE FROM archive.ChannelList WHERE ChannelID = %s", (ctx.channel.id,))
-                ex.DBconn.commit()
+                await ex.conn.execute("DELETE FROM archive.ChannelList WHERE ChannelID = $1", ctx.channel.id)
                 await ctx.send("> **This channel is no longer being archived**")
         except Exception as e:
             log.console(e)
@@ -183,18 +173,15 @@ class Archive(commands.Cog):
                                 'Photos/{}'.format(file_name), mode='wb')
                             await fd.write(await r.read())
                             await fd.close()
-                            ex.c.execute("INSERT INTO archive.ArchivedChannels VALUES(%s,%s,%s,%s)", (file_name, src, drive_id, channel_id))
-                            ex.DBconn.commit()
+                            await ex.conn.execute("INSERT INTO archive.ArchivedChannels VALUES($1,$2,$3,$4)", file_name, src, drive_id, channel_id)
                         # quickstart.Drive.checker()
         except Exception as e:
             log.console(e)
-            pass
 
     async def deletephotos(self):
-        ex.c.execute("SELECT FileName from archive.ArchivedChannels")
-        allfiles = ex.fetch_all()
+        all_files = await ex.conn.fetch("SELECT FileName from archive.ArchivedChannels")
         file_list = []
-        for file in allfiles:
+        for file in all_files:
             file_list.append(file[0])
         all_photos = os.listdir('Photos')
         for photo in all_photos:
@@ -246,8 +233,7 @@ class Archive(commands.Cog):
                 log.console(e)
                 pass
         check = False
-        ex.c.execute("SELECT channelid, guildid, driveid FROM archive.ChannelList")
-        channels = ex.fetch_all()
+        channels = await ex.conn.fetch("SELECT channelid, guildid, driveid FROM archive.ChannelList")
         for channel in channels:
             ChannelID = channel[0]
             GuildID = channel[1]

@@ -1,54 +1,20 @@
 from __future__ import print_function
 import pickle
 import os.path
-from googleapiclient.http import MediaFileUpload
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from module import logger as log
-from Utility import resources as ex
-
 
 
 class Drive:
-    def __init__(self):
-        pass
-
-    @staticmethod
-    def checker():
-        ex.c.execute("SELECT COUNT(*) FROM archive.ArchivedChannels")
-        check = ex.fetch_one()
-        if check > 0:
-            ex.c.execute("SELECT id, filename, filetype, folderid FROM archive.ArchivedChannels")
-            posts = ex.fetch_all()
-            for post in posts:
-                ID = post[0]
-                FileName = post[1]
-                FileType = post[2]
-                FolderID = post[3]
-                Drive.upload_to_drive(ID, FolderID, FileName, FileType)
-
-    @staticmethod
-    def upload_to_drive(ID, folder_id, file_name, file_type):
-        try:
-            drive_service = Drive.get_drive_connection()
-            file_metadata = {
-                'name': file_name,
-                'parents': [folder_id]
-                }
-            if len(file_type) == 4:
-                file_type = file_type[1:3]
-            # print(file_name)
-                file_location = f'Photos/{file_name}'
-                media = MediaFileUpload(file_location)
-                file = drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
-            ex.c.execute("DELETE FROM archive.ArchivedChannels WHERE ID = %s", (ID,))
-            ex.DBconn.commit()
-            # print ('File ID: %s'% file.get('id'))
-            # link_addon = file.get('id')
-        except Exception as e:
-            log.console(e)
-
+    """
+    Google Drive API, Any methods for uploading were moved to an external program.
+    WARNING: If deciding to use this directly from a discord bot, this class is not ASYNC and could cause a few
+    seconds of blocking.
+    This is kept here for easier access to uploading images directly from discord instead of connecting to the server.
+    The server has an external program that does the necessary google drive functions for the GroupMembers category.
+    """
     @staticmethod
     def get_drive_connection():
         SCOPES = ['https://www.googleapis.com/auth/drive']

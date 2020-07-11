@@ -1,4 +1,4 @@
-from module.keys import client, bot_support_server_link
+from module.keys import client
 from module import logger as log
 import discord
 from Utility import resources as ex
@@ -41,9 +41,7 @@ class Events(commands.Cog):
     @client.event
     async def on_guild_join(guild):
         if guild.system_channel is not None:
-            await guild.system_channel.send(f""">>> Hello!\nMy prefix for this server is set to
-                    {await ex.get_server_prefix(guild.id)}.\nIf you have any questions or concerns,
-                    you may join the support server ({await ex.get_server_prefix(guild.id)}support).""")
+            await guild.system_channel.send(f">>> Hello!\nMy prefix for this server is set to {await ex.get_server_prefix(guild.id)}.\nIf you have any questions or concerns, you may join the support server ({await ex.get_server_prefix(guild.id)}support).")
             log.console(f"{guild.name} ({guild.id}) has invited Irene.")
 
     @staticmethod
@@ -51,8 +49,7 @@ class Events(commands.Cog):
     async def on_message(message):
         try:
             # fetching temporary channels that have delays for removed messages.
-            ex.c.execute("SELECT chanID, delay FROM currency.TempChannels")
-            temp_channels = ex.fetch_all()
+            temp_channels = await ex.conn.fetch("SELECT chanID, delay FROM currency.TempChannels")
             message_sender = message.author
             message_content = message.clean_content
             message_channel = message.channel
@@ -73,16 +70,13 @@ class Events(commands.Cog):
                         if ex.check_nword(message_content):
                             author_id = message_sender.id
                             # checks how many instances ( should logically only be 0 or 1 )
-                            ex.c.execute("SELECT COUNT(*) FROM currency.Counter WHERE UserID = %s::bigint", (author_id,))
-                            checker = ex.fetch_one()
+                            checker = ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) FROM currency.Counter WHERE UserID = $1::bigint", author_id))
                             if checker > 0:
-                                ex.c.execute("SELECT NWord FROM currency.Counter WHERE UserID = %s::bigint", (author_id,))
-                                current_count = ex.fetch_one()
+                                current_count = ex.first_result(await ex.conn.fetchrow("SELECT NWord FROM currency.Counter WHERE UserID = $1::bigint", author_id))
                                 current_count += 1
-                                ex.c.execute("UPDATE currency.Counter SET NWord = %s WHERE UserID = %s::bigint", (current_count, author_id))
+                                await ex.conn.execute("UPDATE currency.Counter SET NWord = $1 WHERE UserID = $2::bigint", current_count, author_id)
                             if checker == 0:
-                                ex.c.execute("INSERT INTO currency.Counter VALUES (%s,%s)", (author_id, 1))
-                            ex.DBconn.commit()
+                                await ex.conn.execute("INSERT INTO currency.Counter VALUES ($1,$2)", author_id, 1)
                 if ex.check_message_not_empty(message):
                     if len(message_content) >= len(current_server_prefix):
                         bot_prefix = await client.get_prefix(message)
@@ -96,7 +90,6 @@ class Events(commands.Cog):
                                 await client.process_commands(message)
         except Exception as e:
             log.console(e)
-            ex.DBconn.rollback()
 
     @staticmethod
     @client.event
@@ -110,3 +103,22 @@ class Events(commands.Cog):
                 f"MOD LOG: ChannelID = {ctx.channel.id} - {ctx.author} ({ctx.author.id})|| {msg_content} ")
         if await ex.check_if_bot_banned(ctx.author.id):
             ex.send_ban_message(ctx.channel)
+
+    @staticmethod
+    @client.event
+    async def on_command_completion(ctx):
+        await ex.add_command_count()
+
+    @staticmethod
+    @client.event
+    async def on_guild_remove(guild):
+        id = guild.id
+        name = guild.name
+        region = str(guild.region)
+        owner_id = guild.owner.id
+        member_count = guild.member_count
+        try:
+            await ex.conn.execute("INSERT INTO stats.leftguild (id, name, region, ownerid, membercount) VALUES($1, $2, $3, $4, $5)", id, name, region, owner_id, member_count)
+        except Exception as e:
+            log.console(f"{name} ({id})has already kicked Irene before. - {e}")
+

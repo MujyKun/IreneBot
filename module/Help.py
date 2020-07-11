@@ -1,7 +1,9 @@
 import discord
 from discord.ext import commands
-from module.keys import client, bot_prefix
+from module.keys import client, bot_prefix, bot_support_server_link
 from Utility import resources as ex
+import itertools
+import asyncio
 
 
 class Help(commands.Cog):
@@ -39,7 +41,7 @@ class Help(commands.Cog):
 
         async def send_cog_help(self, cog):
             channel = self.get_destination()
-            open_msg = self.get_opening_note()
+            open_msg = await self.get_opening_note()
             cog_name = cog.qualified_name
             entire_msg = f"{open_msg}\n\n**{cog_name} Commands**"
             for command in cog.get_commands():
@@ -52,14 +54,69 @@ class Help(commands.Cog):
             embed = discord.Embed(description=entire_msg)
             await channel.send(embed=embed)
 
-        def get_opening_note(self):
-            # method is not async // duplicated code for prefix
-            try:
-                ex.c.execute("SELECT prefix FROM general.serverprefix WHERE serverid = %s", (self.context.guild.id,))
-                server_prefix = ex.fetch_one()
-                if len(server_prefix) == 0:
-                    server_prefix = bot_prefix
-            except Exception as e:
-                server_prefix = bot_prefix
-            return f"Use ``{server_prefix}help [command]`` for more info on a command.\nYou can also use ``{server_prefix}help [category]`` (CASE-SENSITIVE) for more info on a category.\nTo reset a server prefix, you may type ``{bot_prefix}setprefix``."
+        async def get_opening_note(self):
+            """Was changed to async. Gets the opening message of a help command."""
+            server_prefix = await ex.get_server_prefix_by_context(self.context)
+            return f"Use ``{server_prefix}help [command]`` for more info on a command.\nYou can also use ``{server_prefix}help [category]`` (CASE-SENSITIVE) for more info on a category.\nTo reset a server prefix, you may type ``{bot_prefix}setprefix``.\n\n **Support Server:** {bot_support_server_link}"
 
+        async def send_bot_help(self, mapping):
+            """
+            THIS METHOD WAS COPY PASTED FROM D.PY V1.3.3
+            THE ONLY ALTERED CODE WAS CHANGING get_opening_note to be awaited.
+            get_opening_note was not originally async.
+            """
+
+            ctx = self.context
+            bot = ctx.bot
+
+            if bot.description:
+                self.paginator.add_line(bot.description, empty=True)
+
+            note = await self.get_opening_note()
+            if note:
+                self.paginator.add_line(note, empty=True)
+
+            no_category = '\u200b{0.no_category}'.format(self)
+
+            def get_category(command, *, no_category=no_category):
+                cog = command.cog
+                return cog.qualified_name if cog is not None else no_category
+
+            filtered = await self.filter_commands(bot.commands, sort=True, key=get_category)
+            to_iterate = itertools.groupby(filtered, key=get_category)
+
+            for category, commands in to_iterate:
+                commands = sorted(commands, key=lambda c: c.name) if self.sort_commands else list(commands)
+                self.add_bot_commands_formatting(commands, category)
+
+            note = self.get_ending_note()
+            if note:
+                self.paginator.add_line()
+                self.paginator.add_line(note)
+
+            await self.send_pages()
+
+        async def send_group_help(self, group):
+            """
+            THIS METHOD WAS COPY PASTED FROM D.PY V1.3.3
+            THE ONLY ALTERED CODE WAS CHANGING get_opening_note to be awaited.
+            get_opening_note was not originally async.
+            """
+            self.add_command_formatting(group)
+
+            filtered = await self.filter_commands(group.commands, sort=self.sort_commands)
+            if filtered:
+                note = await self.get_opening_note()
+                if note:
+                    self.paginator.add_line(note, empty=True)
+
+                self.paginator.add_line('**%s**' % self.commands_heading)
+                for command in filtered:
+                    self.add_subcommand_formatting(command)
+
+                note = self.get_ending_note()
+                if note:
+                    self.paginator.add_line()
+                    self.paginator.add_line(note)
+
+            await self.send_pages()

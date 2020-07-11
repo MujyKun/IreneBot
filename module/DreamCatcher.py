@@ -46,24 +46,20 @@ class DreamCatcher(commands.Cog):
         """Send DC Updates to your current text channel [Format: %updates] | To Stop : [Format: %updates stop]"""
         channel = ctx.channel.id
         if solution == "stop":
-            ex.c.execute("SELECT COUNT(*) From dreamcatcher.DreamCatcher WHERE ServerID = %s",(channel,))
-            counter = ex.fetch_one()
+            counter = ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) From dreamcatcher.DreamCatcher WHERE ServerID = $1", channel))
             if counter == 1:
                 await ctx.send ("> **This channel will no longer receive updates.**")
-                ex.c.execute("DELETE FROM dreamcatcher.DreamCatcher WHERE ServerID = %s",(channel,))
-                ex.DBconn.commit()
+                await ex.conn.execute("DELETE FROM dreamcatcher.DreamCatcher WHERE ServerID = $1", channel)
             if counter == 0:
                 await ctx.send("> **This channel does not currently receive updates.**")
         if solution != "stop":
-            ex.c.execute("SELECT COUNT(*) From dreamcatcher.DreamCatcher WHERE ServerID = %s", (channel,))
-            counter = ex.fetch_one()
+            counter = ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) From dreamcatcher.DreamCatcher WHERE ServerID = $1", channel))
             if counter == 1:
                 await ctx.send ("> **This channel already receives DC Updates**")
             if counter == 0:
                 channel_name = client.get_channel(channel)
                 await ctx.send("> **I Will Post All DC Updates In {}**".format(channel_name))
-                ex.c.execute("INSERT INTO dreamcatcher.DreamCatcher VALUES (%s)",(channel,))
-                ex.DBconn.commit()
+                await ex.conn.execute("INSERT INTO dreamcatcher.DreamCatcher VALUES ($1)", channel)
 
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
@@ -78,11 +74,9 @@ class DreamCatcher(commands.Cog):
             original_post_number = 0
             hd_photos = ""
             if member is not None:
-                ex.c.execute("SELECT postnumber, link from dreamcatcher.dchdlinks WHERE member = %s ORDER BY postnumber DESC", (member,))
-                all_links = ex.fetch_all()
+                all_links = await ex.conn.fetch("SELECT postnumber, link from dreamcatcher.dchdlinks WHERE member = $1 ORDER BY postnumber DESC", member)
             else:
-                ex.c.execute("SELECT postnumber, link from dreamcatcher.dchdlinks ORDER BY postnumber DESC")
-                all_links = ex.fetch_all()
+                all_links = await ex.conn.fetch("SELECT postnumber, link from dreamcatcher.dchdlinks ORDER BY postnumber DESC")
             for link in all_links:
                 post_number = link[0]
                 if original_post_number == post_number or original_post_number == 0:
@@ -104,8 +98,8 @@ class DreamCatcher(commands.Cog):
             number = self.download_all_number
             # if number >= latest post
             # last run on 40830
-            c.execute("SELECT PostID FROM dreamcatcher.DCPost")
-            if number >= ex.fetch_one():
+            post_id = ex.first_result(await ex.conn.fetchrow("SELECT PostID FROM dreamcatcher.DCPost"))
+            if number >= post_id:
                 download_all_task.cancel()
             else:
                 post_url = 'https://dreamcatcher.candlemystar.com/post/{}'.format(number)
@@ -157,78 +151,79 @@ class DcApp:
     @tasks.loop(seconds=0, minutes=0, hours=0, reconnect=True)
     async def new_task4(self):
         try:
-            self.count_loop += 1
-            if self.first_run == 1:
-                ex.c.execute("SELECT PostID FROM dreamcatcher.DCPost")
-                number = ex.fetch_one()
-                self.first_run = 0
-                self.number = number
-                self.post_list.append(number)
-            if self.error_status == 1:
-                if 5 > self.tries >= 2:
-                    self.number += 1
-                if self.tries >= 5:
-                    count_list = (len(self.post_list))
-                    self.number = self.post_list[count_list - 1]
+            if ex.client.loop.is_running():
+                if self.first_run == 1:
+                    await asyncio.sleep(10)  # sleeping to stabilize connection to DB
+                self.count_loop += 1
+                if self.first_run == 1:
+                    number = ex.first_result(await ex.conn.fetchrow("SELECT PostID FROM dreamcatcher.DCPost"))
+                    self.first_run = 0
+                    self.number = number
+                    self.post_list.append(number)
+                if self.error_status == 1:
+                    if 5 > self.tries >= 2:
+                        self.number += 1
+                    if self.tries >= 5:
+                        count_list = (len(self.post_list))
+                        self.number = self.post_list[count_list - 1]
+                        self.tries = 0
+                if self.error_status == 0:
                     self.tries = 0
-            if self.error_status == 0:
-                self.tries = 0
-                self.number += 1
-                pass
-            post_url = 'https://dreamcatcher.candlemystar.com/post/{}'.format(self.number)
-            async with aiohttp.ClientSession() as session:
-                async with session.get('{}'.format(post_url)) as r:
-                    if r.status == 200:
-                        ex.c.execute("DELETE FROM dreamcatcher.DCPost")
-                        ex.c.execute("INSERT INTO dreamcatcher.DCPost VALUES(%s)", (self.number,))
-                        ex.DBconn.commit()
-                        self.error_status = 0
-                        if self.number not in self.post_list:
-                            page_html = await r.text()
-                            page_soup = soup(page_html, "html.parser")
-                            username = (page_soup.find("div", {"class": "card-name"})).text
-                            status_message = page_soup.find("div", {"class": "card-text"}).text
-                            # Getting rid of unnecessary space
-                            status_message = status_message.replace('                        ', '')
-                            status_message = status_message.replace('                    ', '')
-                            if username in self.list:
-                                image_url = (page_soup.findAll("div", {"class": "imgSize width"}))
-                                image_links = await ex.download_dc_photos(image_url)
-                                video_list, bat_list = ex.get_video_and_bat_list(page_soup)
-                                if bat_list is not None:
-                                    await ex.open_bat_file(bat_list)
-                                    # Videos were attempting to being sent but were not found. Needs time to render.
-                                    await asyncio.sleep(5)
-                                channels = ex.get_dc_channels()
-                                member_name, member_id = ex.get_member_name_and_id(username, self.list)
-                                dc_photos_embed = await ex.get_embed(image_links, member_name)
-                                ex.add_post_to_db(image_links, member_id, member_name, self.number, post_url)
-                                for channel in channels:
-                                    try:
-                                        channel_id = channel[0]
-                                        channel = client.get_channel(channel_id)
-                                        # This part is repeated due to closed file IO error.
-                                        dc_videos = ex.get_videos(video_list)
-                                        await ex.send_new_post(channel_id, channel, member_name, status_message, post_url)
-                                        await ex.send_content(channel, dc_photos_embed, dc_videos)
-                                    except Exception as e:
-                                        # This try except was added due to errors with specific channels resulting
-                                        # in an infinite loop
-                                        pass
-                                ex.delete_content()
-                            else:
-                                log.console(f"Passing Post from POST #{self.number}")
-                        self.post_list.append(self.number)
+                    self.number += 1
+                    pass
+                post_url = 'https://dreamcatcher.candlemystar.com/post/{}'.format(self.number)
+                async with aiohttp.ClientSession() as session:
+                    async with session.get('{}'.format(post_url)) as r:
+                        if r.status == 200:
+                            await ex.conn.execute("DELETE FROM dreamcatcher.DCPost")
+                            await ex.conn.execute("INSERT INTO dreamcatcher.DCPost VALUES($1)", self.number)
+                            self.error_status = 0
+                            if self.number not in self.post_list:
+                                page_html = await r.text()
+                                page_soup = soup(page_html, "html.parser")
+                                username = (page_soup.find("div", {"class": "card-name"})).text
+                                status_message = page_soup.find("div", {"class": "card-text"}).text
+                                # Getting rid of unnecessary space
+                                status_message = status_message.replace('                        ', '')
+                                status_message = status_message.replace('                    ', '')
+                                if username in self.list:
+                                    image_url = (page_soup.findAll("div", {"class": "imgSize width"}))
+                                    image_links = await ex.download_dc_photos(image_url)
+                                    video_list, bat_list = ex.get_video_and_bat_list(page_soup)
+                                    if bat_list is not None:
+                                        await ex.open_bat_file(bat_list)
+                                        # Videos were attempting to being sent but were not found. Needs time to render.
+                                        await asyncio.sleep(5)
+                                    channels = await ex.get_dc_channels()
+                                    member_name, member_id = ex.get_member_name_and_id(username, self.list)
+                                    dc_photos_embed = await ex.get_embed(image_links, member_name)
+                                    await ex.add_post_to_db(image_links, member_id, member_name, self.number, post_url)
+                                    for channel in channels:
+                                        try:
+                                            channel_id = channel[0]
+                                            channel = client.get_channel(channel_id)
+                                            # This part is repeated due to closed file IO error.
+                                            dc_videos = ex.get_videos(video_list)
+                                            await ex.send_new_post(channel_id, channel, member_name, status_message, post_url)
+                                            await ex.send_content(channel, dc_photos_embed, dc_videos)
+                                        except Exception as e:
+                                            # This try except was added due to errors with specific channels resulting
+                                            # in an infinite loop
+                                            pass
+                                    ex.delete_content()
+                                else:
+                                    log.console(f"Passing Post from POST #{self.number}")
+                            self.post_list.append(self.number)
 
-                    elif r.status == 304:
-                        log.console(f"> **Access Denied - {self.number}**")
-                    elif r.status == 404:
-                        self.tries += 1
-                        if self.count_loop % 500 == 0:
-                            log.console(f"Error 404. {self.number} was not Found.")
-                        self.error_status = 1
-                        pass
-                    else:
-                        log.console(r.status)
+                        elif r.status == 304:
+                            log.console(f"> **Access Denied - {self.number}**")
+                        elif r.status == 404:
+                            self.tries += 1
+                            if self.count_loop % 500 == 0:
+                                log.console(f"Error 404. {self.number} was not Found.")
+                            self.error_status = 1
+                            pass
+                        else:
+                            log.console(r.status)
         except Exception as e:
             log.console(e)

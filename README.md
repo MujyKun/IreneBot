@@ -1,7 +1,7 @@
 
 # [IreneBot](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=1609956823)
 
-## Irene Bot for Discord in Python V1.02.2
+## Irene Bot for Discord in Python V1.02.3
 
 [![Discord Bots](https://top.gg/api/widget/520369375325454371.svg)](https://top.gg/bot/520369375325454371)
 [![Discord Boats](https://discord.boats/api/widget/520369375325454371)](https://discord.boats/bot/520369375325454371)  
@@ -110,8 +110,12 @@ To find out more, look at the `GroupMembers` category.
 | randomidol          | Sends a photo of a random idol.                                     | %%                                                                                                       |                   %     |
 | scandrive        | Scan DriveIDs Table and update other tables.                                       | %scandrive (name=NULL) (member_id=0)                                                                           | ♥                      |
 | scrapelink      | Connection to site + put html to html_page.txt                                     | %scrapelinks                                                                                                   | ♥                      |
+| sendimages      | All idol photo commands from the server will post idol photos in a specific text channel. To undo, type it again.                                     | %sendimages #text-channel                                                                                                   | ★                      |
 | sort             | Approve member links with a small sorting game.                                    | %sort -- checks next message                                                                                   | ♥                      |
+| stopimages             | Stops Irene from posting/recognizing idol photos in a specific text channel. To undo, type it again.                                    | %stopimages #text-channel                                                                                  | ★                     |
 | tenor            | Connection to tenor API // Sends Links of gifs to Database. Dashes (-) are spaces. | %tenor                                                                                                         | ♥                      |
+
+
 #### Logging: ★★★  
 | Command      | Description                                                                                          | Format        |
 |--------------|------------------------------------------------------------------------------------------------------|---------------|

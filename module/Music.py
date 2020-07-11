@@ -66,35 +66,36 @@ queued = {}
 class Music(commands.Cog):
     @tasks.loop(seconds=30, minutes=1, hours=0, reconnect=True)
     async def check_voice_clients(self):
-        try:
-            voice_clients = client.voice_clients
-            for voice_client in voice_clients:
-                if voice_client.is_connected():
-                    if len(voice_client.channel.members) == 1:
-                        if voice_client.is_playing():
-                            try:
-                                songs_queued = queued[voice_client.guild.id]
-                                if len(songs_queued) > 0:
-                                    channel = songs_queued[0][1]
-                                    msg = f"> **There are no users in this voice channel. Resetting queue and leaving.**"
-                                    await channel.send(msg)
-                            except Exception as e:
-                                pass
-                            self.reset_queue_for_guild(voice_client.guild.id)
-                            voice_client.stop()
-                        await voice_client.disconnect()
-            keep_files = []
-            for key in queued:
-                file_name = (queued[key][0][2])
-                keep_files.append(file_name)
-            all_music = os.listdir("music")
-            for song_file_name in all_music:
-                file_location = f"music\\{song_file_name}"
-                if file_location not in keep_files and file_location not in files_in_process_of_queue:
-                    if file_location != "music":
-                        os.remove(file_location)
-        except Exception as e:
-            log.console(e)
+        if ex.client.loop.is_running():
+            try:
+                voice_clients = client.voice_clients
+                for voice_client in voice_clients:
+                    if voice_client.is_connected():
+                        if len(voice_client.channel.members) == 1:
+                            if voice_client.is_playing():
+                                try:
+                                    songs_queued = queued[voice_client.guild.id]
+                                    if len(songs_queued) > 0:
+                                        channel = songs_queued[0][1]
+                                        msg = f"> **There are no users in this voice channel. Resetting queue and leaving.**"
+                                        await channel.send(msg)
+                                except Exception as e:
+                                    pass
+                                self.reset_queue_for_guild(voice_client.guild.id)
+                                voice_client.stop()
+                            await voice_client.disconnect()
+                keep_files = []
+                for key in queued:
+                    file_name = (queued[key][0][2])
+                    keep_files.append(file_name)
+                all_music = os.listdir("music")
+                for song_file_name in all_music:
+                    file_location = f"music\\{song_file_name}"
+                    if file_location not in keep_files and file_location not in files_in_process_of_queue:
+                        if file_location != "music":
+                            os.remove(file_location)
+            except Exception as e:
+                log.console(e)
 
     def check_user_in_vc(self, ctx):
         return ctx.author in ctx.voice_client.channel.members
@@ -141,10 +142,14 @@ class Music(commands.Cog):
                 youtube_channel = player.uploader
                 song_name = player.title
                 song_link = player.url
+                try:
+                    duration = await ex.get_cooldown_time(player.duration)
+                except Exception as e:
+                    duration = "N/A"
                 if counter == 1:
-                    song_desc = f"[{counter}] **NOW PLAYING:** [{youtube_channel} - {song_name}]({song_link})\n\n"
+                    song_desc = f"[{counter}] **NOW PLAYING:** [{youtube_channel} - {song_name}]({song_link}) - {duration}\n\n"
                 else:
-                    song_desc = f"[{counter}] [{youtube_channel} - {song_name}]({song_link}) \n\n"
+                    song_desc = f"[{counter}] [{youtube_channel} - {song_name}]({song_link}) - {duration}\n\n"
                 set_of_songs += song_desc
                 if counter % 10 == 0:
                     embed = discord.Embed(title=f"{ctx.guild.name}'s Music Playlist Page {embed_page_number}",
@@ -192,9 +197,6 @@ class Music(commands.Cog):
             paused = ctx.voice_client.is_paused()
             if not paused:
                 ctx.voice_client.pause()
-                await ctx.send("> **The video player is now paused**")
-            else:
-                await ctx.send("> **The video player is already paused.**")
         else:
             await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
 
@@ -233,27 +235,34 @@ class Music(commands.Cog):
             return None
 
     @commands.command()
-    async def play(self, ctx, *, url):
+    async def play(self, ctx, *, url=None):
         """Plays audio to a voice channel. [Format: %play (title/url)"""
-        try:
-            if self.check_user_in_vc(ctx):
-                async with ctx.typing():
-                    players = await YTDLSource.from_url(url, loop=client.loop, stream=False, guild_id=ctx.guild.id, channel=ctx.channel)
-                    if not ctx.voice_client.is_playing():
-                        ctx.voice_client.play(players[0], after=self.start_next_song)
-                        await ctx.send(f'> **Now playing: {players[0].title}**')
-                    else:
-                        # grabbing the latest player
-                        if len(players) == 1:
-                            await ctx.send(f"> **Added {players[0].title} to the queue.**")
-                        else:
-                            await ctx.send(f"> **Added {len(players)} songs to the queue.**")
+        if url is None:
+            if ctx.voice_client.is_paused:
+                ctx.voice_client.resume()
+                await ctx.send(f"> **The video player is now resumed**")
             else:
-                await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
-        except IndexError:
-            pass
-        except Exception as e:
-            log.console(e)
+                await ctx.send("> The player is not paused. Please enter a title or link to play audio.")
+        else:
+            try:
+                if self.check_user_in_vc(ctx):
+                    async with ctx.typing():
+                        players = await YTDLSource.from_url(url, loop=client.loop, stream=False, guild_id=ctx.guild.id, channel=ctx.channel)
+                        if not ctx.voice_client.is_playing():
+                            ctx.voice_client.play(players[0], after=self.start_next_song)
+                            await ctx.send(f'> **Now playing: {players[0].title}**')
+                        else:
+                            # grabbing the latest player
+                            if len(players) == 1:
+                                await ctx.send(f"> **Added {players[0].title} to the queue.**")
+                            else:
+                                await ctx.send(f"> **Added {len(players)} songs to the queue.**")
+                else:
+                    await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
+            except IndexError:
+                pass
+            except Exception as e:
+                log.console(e)
 
     def start_next_song(self, error):
         if error is None:
@@ -334,6 +343,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         self.title = data.get('title')
         self.uploader = data.get('uploader')
         self.url = data.get('webpage_url')
+        self.duration = data.get('duration')
 
     @classmethod
     async def from_url(cls, url, *, loop=None, stream=False, guild_id=None, channel=None):

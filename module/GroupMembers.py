@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 import aiohttp
 from bs4 import BeautifulSoup as soup
 from module import logger as log
@@ -8,17 +8,19 @@ from module import keys
 import json
 from module import quickstart
 from Utility import resources as ex
+import asyncio
 client = keys.client
 
 
 class GroupMembers(commands.Cog):
     def __init__(self):
-        client.add_listener(self.on_message2, 'on_message')
+        self.first_loop = True
         self.image_already_exists = []
         self.folder_already_checked = []
         self.all_links = []
 
-    async def on_message2(self, message, from_sorting=0):
+    @staticmethod
+    async def on_message2(message, from_sorting=0):
         message_sender = message.author
         message_channel = message.channel
         message_content = message.content
@@ -30,50 +32,96 @@ class GroupMembers(commands.Cog):
             return msg.content.lower()
 
         if from_sorting == 0:
-            try:
-                if ex.check_message_not_empty(message):
-                    if message_content[0:len(keys.bot_prefix)] == keys.bot_prefix and message_content != f"{keys.bot_prefix}null":
-                        match_name = message_content[1:len(message_content)]
-                        member_ids = await ex.get_id_where_member_matches_name(match_name)
-                        group_ids = await ex.get_id_where_group_matches_name(match_name)
-                        photo_msg = None
-                        if len(member_ids) != 0:
-                            random_member = random.choice(member_ids)
-                            random_link = await ex.get_random_photo_from_member(random_member)
-                            if not await ex.check_if_bot_banned(message_sender.id):
-                                async with message_channel.typing():
-                                    photo_msg = await ex.idol_post(message_channel, random_member, random_link)
-                                    ex.log_idol_command(message)
-                        elif len(group_ids) != 0:
-                            group_id = random.choice(group_ids)
-                            random_member = random.choice(await ex.get_members_in_group(await ex.get_group_name(group_id)))
-                            random_link = await ex.get_random_photo_from_member(random_member[0])
-                            if not await ex.check_if_bot_banned(message_sender.id):
-                                async with message_channel.typing():
-                                    photo_msg = await ex.idol_post(message_channel, random_member[0], random_link, group_id=group_id)
-                                    ex.log_idol_command(message)
-                        else:
-                            member_ids = await ex.check_group_and_idol(match_name)
-                            if member_ids is not None:
+            if await ex.check_channel_sending_photos(message_channel.id):
+                if await ex.check_server_sending_photos(message.guild.id):
+                    message_channel = await ex.get_channel_sending_photos(message.guild.id)
+                posted = False
+                try:
+                    if ex.check_message_not_empty(message):
+                        server_prefix = await ex.get_server_prefix_by_context(message)
+                        if message_content[0:len(server_prefix)] == server_prefix and message_content != f"{server_prefix}null":
+                            message_content = message_content[len(server_prefix):len(message_content)]
+                            member_ids = await ex.get_id_where_member_matches_name(message_content)
+                            group_ids = await ex.get_id_where_group_matches_name(message_content)
+                            photo_msg = None
+                            if len(member_ids) != 0:
                                 random_member = random.choice(member_ids)
                                 random_link = await ex.get_random_photo_from_member(random_member)
                                 if not await ex.check_if_bot_banned(message_sender.id):
                                     async with message_channel.typing():
                                         photo_msg = await ex.idol_post(message_channel, random_member, random_link)
-                                        ex.log_idol_command(message)
-                        await ex.check_idol_post_reactions(photo_msg, message)
+                                        posted = True
+                            elif len(group_ids) != 0:
+                                group_id = random.choice(group_ids)
+                                random_member = random.choice(await ex.get_members_in_group(await ex.get_group_name(group_id)))
+                                random_link = await ex.get_random_photo_from_member(random_member[0])
+                                if not await ex.check_if_bot_banned(message_sender.id):
+                                    async with message_channel.typing():
+                                        photo_msg = await ex.idol_post(message_channel, random_member[0], random_link, group_id=group_id)
+                                        posted = True
+                            else:
+                                member_ids = await ex.check_group_and_idol(message_content)
+                                if member_ids is not None:
+                                    random_member = random.choice(member_ids)
+                                    random_link = await ex.get_random_photo_from_member(random_member)
+                                    if not await ex.check_if_bot_banned(message_sender.id):
+                                        async with message_channel.typing():
+                                            photo_msg = await ex.idol_post(message_channel, random_member, random_link)
+                                            posted = True
+                            if posted:
+                                ex.log_idol_command(message)
+                                await ex.add_command_count()
+                            await ex.check_idol_post_reactions(photo_msg, message)
+                        else:
+                            pass
+                except Exception as e:
+                    pass
 
-                    else:
-                        pass
+    @commands.has_guild_permissions(manage_messages=True)
+    @commands.command()
+    async def stopimages(self, ctx, text_channel: discord.TextChannel = None):
+        """Stops Irene from posting/recognizing idol photos in a specific text channel. To undo, type it again.
+        [Format: %stopimages #text-channel]"""
+        if text_channel is None:
+            text_channel = ctx.channel
+        if await ex.check_channel_sending_photos(text_channel.id):
+            try:
+                await ex.conn.execute("INSERT INTO groupmembers.restricted(channelid, serverid, sendhere) VALUES($1, $2, $3)", text_channel.id, ctx.guild.id, 0)
+                await ctx.send(f"> **{text_channel.name} can no longer send idol photos.**")
             except Exception as e:
-                pass
+                await ctx.send(f"> **{text_channel.name} is currently being used with {await ex.get_server_prefix_by_context(ctx)}sendimages and can not be restricted.**")
+        else:
+            await ex.conn.execute("DELETE FROM groupmembers.restricted WHERE channelid = $1 AND sendhere = $2", text_channel.id, 0)
+            await ctx.send(f"> **{text_channel.name} can now send idol photos.**")
+
+    @commands.has_guild_permissions(manage_messages=True)
+    @commands.command()
+    async def sendimages(self, ctx, text_channel: discord.TextChannel = None):
+        """All idol photo commands from the server will post idol photos in a specific text channel. To undo, type it again.
+        [Format: %sendimages #text-channel]"""
+        if text_channel is None:
+            text_channel = ctx.channel
+        if await ex.check_channel_sending_photos(text_channel.id):
+            if await ex.check_server_sending_photos(server_id=ctx.guild.id):
+                old_channel = await ex.get_channel_sending_photos(ctx.guild.id)
+                if old_channel.id == text_channel.id:
+                    await ex.conn.execute("DELETE FROM groupmembers.restricted WHERE channelid = $1 AND serverid = $2 AND sendhere = $3", text_channel.id, ctx.guild.id, 1)
+                    return await ctx.send(f"> **{text_channel.name} will no longer send all idol photo commands.**")
+                else:
+                    await ex.conn.execute("UPDATE groupmembers.restricted SET channelid = $1 WHERE serverid = $2 AND sendhere = $3", text_channel.id, ctx.guild.id, 1)
+            else:
+                await ex.conn.execute("INSERT INTO groupmembers.restricted(channelid, serverid, sendhere) VALUES ($1, $2, $3)", text_channel.id, ctx.guild.id, 1)
+            await ctx.send(f"> **{text_channel.name} will now receive and send all idol photo commands coming from this server.**")
+        else:
+            await ctx.send(f"> **{text_channel.name} is currently restricted from idol photos with {await ex.get_server_prefix_by_context(ctx)}stopimages.**")
 
     @commands.command(aliases=['%'])
     async def randomidol(self, ctx):
         """Sends a photo of a random idol. [Format: %%]"""
-        random_idol_id = await ex.get_random_idol_id()
-        random_link = await ex.get_random_photo_from_member(random_idol_id)
-        photo_msg = await ex.idol_post(ctx.channel, random_idol_id, random_link)
+        async with ctx.typing():
+            random_idol_id = await ex.get_random_idol_id()
+            random_link = await ex.get_random_photo_from_member(random_idol_id)
+            photo_msg = await ex.idol_post(ctx.channel, random_idol_id, random_link)
         await ex.check_idol_post_reactions(photo_msg, ctx.message)
 
     async def get_photos(self, url, member, groups, stage_name, aliases, member_id):
@@ -81,27 +129,22 @@ class GroupMembers(commands.Cog):
             if member_id == 0:
                 if aliases != "NULL":
                     aliases = aliases.lower()
-                ex.c.execute("SELECT COUNT(*) FROM groupmembers.Member WHERE FullName = %s", (member,))
-                count = ex.fetch_one()
+                count = ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) FROM groupmembers.Member WHERE FullName = $1", member))
                 if count == 0:
-                    ex.c.execute("INSERT INTO groupmembers.Member VALUES (%s,%s,%s,%s)", (member, stage_name, groups, aliases))
-                    ex.DBconn.commit()
-                    ex.c.execute("SELECT ID FROM groupmembers.Member WHERE FullName = %s", (member,))
-                    id = ex.fetch_one()
-                    ex.c.execute("INSERT INTO groupmembers.ImageLinks VALUES (%s,%s)", (url, id))
+                    await ex.conn.execute("INSERT INTO groupmembers.Member VALUES ($1,$2,$3,$4)", member, stage_name, groups, aliases)
+                    id = ex.first_result(await ex.conn.fetchrow("SELECT ID FROM groupmembers.Member WHERE FullName = $1", member))
+                    await ex.conn.execute("INSERT INTO groupmembers.ImageLinks VALUES ($1,$2)", url, id)
                 else:
-                    ex.c.execute("SELECT ID FROM groupmembers.Member WHERE FullName = %s", (member,))
-                    id = ex.fetch_one()
-                    ex.c.execute("INSERT INTO groupmembers.ImageLinks VALUES (%s,%s)", (url, id))
+                    id = ex.first_result(await ex.conn.fetchrow("SELECT ID FROM groupmembers.Member WHERE FullName = $1", member))
+                    await ex.conn.execute("INSERT INTO groupmembers.ImageLinks VALUES ($1,$2)", url, id)
                 log.console(f"Added {url} for {member}")
             else:
-                ex.c.execute("INSERT INTO groupmembers.ImageLinks VALUES (%s,%s)", (url, member_id))
+                await ex.conn.execute("INSERT INTO groupmembers.ImageLinks VALUES ($1,$2)", url, member_id)
                 log.console(f"Added {url} for MemberID: {member_id}")
         except Exception as e:
             # most likely unique constraint failed.
             log.console(f"{e} for {member} ({member_id})")
             pass
-        ex.DBconn.commit()
 
     async def get_folders(self, url, member, group, stage_name, aliases, member_id):
         try:
@@ -292,9 +335,12 @@ class GroupMembers(commands.Cog):
     async def groups(self, ctx):
         """Lists the groups of idols the bot has photos of [Format: %groups]"""
         all_groups = await ex.get_all_groups()
-        all_groups_listed = ""
         new_group_list = []
         is_mod = ex.check_if_mod(ctx)
+        page_number = 1
+        embed = discord.Embed(title=f"Idol Group List Page {page_number}", color=0xffb6c1)
+        embed_list = []
+        counter = 1
         for group in all_groups:
             new_group_list.append(group)
         try:
@@ -303,13 +349,21 @@ class GroupMembers(commands.Cog):
             pass
         for group in new_group_list:
             if group[1] != "NULL" or is_mod:
+                group_photo_count = await ex.get_photo_count_of_group(group[0])
                 if is_mod:
-                    desc_msg = f"{group[1]} ({group[0]}) | "
+                    embed.insert_field_at(counter, name=f"{group[1]} ({group[0]})", value=f"{group_photo_count} Photos", inline=True)
                 else:
-                    desc_msg = f"{group[1]} | "
-                all_groups_listed += desc_msg
-        embed = discord.Embed(title="Idol Group List", description=f"{all_groups_listed}", color=0xffb6c1)
-        await ctx.send(embed=embed)
+                    embed.insert_field_at(counter, name=f"{group[1]}", value=f"{group_photo_count} Photos", inline=True)
+                if counter == 25:
+                    counter = 0
+                    embed_list.append(embed)
+                    page_number += 1
+                    embed = discord.Embed(title=f"Idol Group List Page {page_number}", color=0xffb6c1)
+                counter += 1
+        if counter != 0:
+            embed_list.append(embed)
+        msg = await ctx.send(embed=embed_list[0])
+        await ex.check_left_or_right_reaction_embed(msg, embed_list, 0)
 
     @commands.command()
     async def aliases(self, ctx, mode="member", page_number=1):
@@ -352,21 +406,18 @@ class GroupMembers(commands.Cog):
         try:
             keep_going = True
             while keep_going:
-                ex.c.execute("SELECT COUNT(*) FROM groupmembers.ScrapedLinks")
-                counter = ex.fetch_one()
+                counter = ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) FROM groupmembers.ScrapedLinks"))
                 if counter == 0:
                     await ctx.send("> **There are no links to sort.**")
                     keep_going = False
-                ex.c.execute("SELECT ID,Link FROM groupmembers.ScrapedLinks")
-                all_links = ex.fetch_all()
+                all_links = await ex.conn.fetch("SELECT ID,Link FROM groupmembers.ScrapedLinks")
                 for data in all_links:
                     data_id = data[0]
                     link = data[1]
                     await ctx.send(f"> {link} **Please respond with the member's ID, delete, or stop**")
                     check_msg = await self.on_message2(ctx.message, 1)
                     if check_msg == 'delete':
-                        ex.c.execute("DELETE FROM groupmembers.ScrapedLinks WHERE ID = %s", (data_id,))
-                        ex.DBconn.commit()
+                        await ex.conn.execute("DELETE FROM groupmembers.ScrapedLinks WHERE ID = $1", data_id)
                         await ctx.send("> **The link has been removed.**")
                     elif check_msg == 'stop':
                         await ctx.send("> **Stopping Sort**")
@@ -374,14 +425,12 @@ class GroupMembers(commands.Cog):
                         break
                     elif check_msg == 'deleteall':
                         await ctx.send("> **Deleted all links**")
-                        ex.c.execute("DELETE FROM groupmembers.ScrapedLinks")
-                        ex.DBconn.commit()
+                        await ex.conn.execute("DELETE FROM groupmembers.ScrapedLinks")
                         keep_going = False
                         break
                     else:
-                        ex.c.execute("INSERT INTO groupmembers.imagelinks VALUES (%s,%s)", (link, int(check_msg)))
-                        ex.c.execute("DELETE FROM groupmembers.scrapedlinks WHERE ID = %s", (data_id,))
-                        ex.DBconn.commit()
+                        await ex.conn.execute("INSERT INTO groupmembers.imagelinks VALUES ($1,$2)", link, int(check_msg))
+                        await ex.conn.execute("DELETE FROM groupmembers.scrapedlinks WHERE ID = $1", data_id)
         except Exception as e:
             log.console(e)
 
@@ -403,9 +452,8 @@ class GroupMembers(commands.Cog):
                             count += 1
                             # await ctx.send((key['url']))
                             url = key['url']
-                            ex.c.execute("INSERT INTO groupmembers.ScrapedLinks VALUES (%s)", (url,))
+                            await ex.conn.execute("INSERT INTO groupmembers.ScrapedLinks VALUES ($1)", url)
                         await ctx.send(f"> **{count} link(s) for {keyword} were added to the Database.**")
-                        ex.DBconn.commit()
         except Exception as e:
             log.console(e)
 
@@ -414,8 +462,7 @@ class GroupMembers(commands.Cog):
         """Shows howmany times an idol has been called. [Format: %count (idol's name)]"""
         check_if_existed = 0
         try:
-            ex.c.execute("SELECT ID, FullName, StageName, Aliases FROM groupmembers.Member")
-            all_members = ex.fetch_all()
+            all_members = await ex.conn.fetch("SELECT ID, FullName, StageName, Aliases FROM groupmembers.Member")
             final_count = "Unknown"
 
             if name is not None:
@@ -434,14 +481,12 @@ class GroupMembers(commands.Cog):
                         check_if_existed = 1
                         check = 1
                     if check == 1:
-                        ex.c.execute("SELECT COUNT(*) FROM groupmembers.Count WHERE MemberID = %s", (ID,))
-                        counter = ex.fetch_one()
+                        counter = ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) FROM groupmembers.Count WHERE MemberID = $1", ID))
                         if counter == 0:
                             await ctx.send(f"> **{full_name} ({stage_name}) has not been called by a user yet.**")
                         else:
-                            counter = ex.get_idol_called(ID)
-                            ex.c.execute("SELECT MemberID FROM groupmembers.Count ORDER BY Count DESC")
-                            all_counters = ex.fetch_all()
+                            counter = await ex.get_idol_called(ID)
+                            all_counters = await ex.conn.fetch("SELECT MemberID FROM groupmembers.Count ORDER BY Count DESC")
                             count = 0
                             for rank in all_counters:
                                 count += 1
@@ -452,9 +497,9 @@ class GroupMembers(commands.Cog):
             else:
                 counter = 0
                 for mem in all_members:
-                    count = ex.get_idol_called(mem[0])
+                    count = await ex.get_idol_called(mem[0])
                     if count is not None:
-                        counter += ex.get_idol_called(mem[0])
+                        counter += await ex.get_idol_called(mem[0])
                 await ctx.send(f"> **All Idols have been called a total of {counter} times.**")
         except Exception as e:
             log.console(e)
@@ -467,16 +512,14 @@ class GroupMembers(commands.Cog):
         embed = discord.Embed(title=f"Idol Leaderboard", color=0xffb6c1)
         embed.set_author(name="Irene", url='https://www.youtube.com/watch?v=dQw4w9WgXcQ', icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
         embed.set_footer(text=f"Type {await ex.get_server_prefix_by_context(ctx)}count (idol name) to view their individual stats.", icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
-        ex.c.execute("SELECT MemberID, Count FROM groupmembers.Count ORDER BY Count DESC")
-        all_members = ex.fetch_all()
+        all_members = await ex.conn.fetch("SELECT MemberID, Count FROM groupmembers.Count ORDER BY Count DESC")
         count_loop = 0
         for mem in all_members:
             count_loop += 1
             if count_loop <= 10:
                 MemberID = mem[0]
                 count = mem[1]
-                ex.c.execute("SELECT fullname, stagename FROM groupmembers.Member WHERE ID = %s", (MemberID,))
-                idol = ex.c.fetchone()
+                idol = await ex.conn.fetchrow("SELECT fullname, stagename FROM groupmembers.Member WHERE ID = $1", MemberID)
                 embed.add_field(name=f"{count_loop}) {idol[0]} ({idol[1]})", value=count)
         await ctx.send(embed=embed)
 
@@ -485,33 +528,40 @@ class GroupMembers(commands.Cog):
     async def scandrive(self, ctx, name="NULL", member_id=0):
         """Scan DriveIDs Table and update other tables."""
         try:
-            ex.c.execute("SELECT id, linkid, name FROM archive.DriveIDs")
-            all_links = ex.fetch_all()
+            all_links = await ex.conn.fetch("SELECT id, linkid, name FROM archive.DriveIDs")
             for pic in all_links:
                 try:
                     ID = pic[0]
                     Link_ID = pic[1]
                     Link_Name = pic[2]
                     new_link = f"https://drive.google.com/uc?export=view&id={Link_ID}"
-                    ex.c.execute("SELECT Name FROM archive.ChannelList")
-                    all_names = ex.fetch_all()
+                    all_names = await ex.conn.fetch("SELECT Name FROM archive.ChannelList")
                     if name == "NULL" and member_id == 0:
                         for idol_name in all_names:
                             idol_name = idol_name[0]
                             if idol_name == Link_Name and (idol_name != "Group" or idol_name != "MDG Group"):
-                                ex.c.execute("SELECT ID FROM groupmembers.Member WHERE StageName = %s", (idol_name,))
-                                member_id1 = ex.fetch_one()
-                                ex.c.execute("INSERT INTO groupmembers.ImageLinks VALUES(%s,%s)", (new_link, member_id1))
-                                ex.c.execute("DELETE FROM archive.DriveIDs WHERE ID = %s", (ID,))
-                                ex.DBconn.commit()
+                                member_id1 = ex.first_result(await ex.conn.fetchrow("SELECT ID FROM groupmembers.Member WHERE StageName = $1", idol_name))
+                                await ex.conn.execute("INSERT INTO groupmembers.ImageLinks VALUES($1,$2)", new_link, member_id1)
+                                await ex.conn.execute("DELETE FROM archive.DriveIDs WHERE ID = $1", ID)
                     elif Link_Name.lower() == name.lower():
-                        ex.c.execute("DELETE FROM archive.DriveIDs WHERE ID = %s", (ID,))
-                        ex.c.execute("INSERT INTO groupmembers.ImageLinks VALUES(%s,%s)", (new_link, member_id))
-                        ex.DBconn.commit()
+                        await ex.conn.execute("DELETE FROM archive.DriveIDs WHERE ID = $1", ID)
+                        await ex.conn.execute("INSERT INTO groupmembers.ImageLinks VALUES($1,$2)", new_link, member_id)
                 except Exception as e:
                     log.console(e)
-                    ex.DBconn.commit()
             await ctx.send(f"> **Completed Scan**")
         except Exception as e:
             log.console(e)
-            ex.DBconn.commit()
+
+    @tasks.loop(seconds=0, minutes=0, hours=24, reconnect=True)
+    async def update_group_photo_count(self):
+        """Looped every 24 hours to update the group photo count."""
+        async def update_groups():
+            try:
+                await ex.update_photo_count_of_groups()
+            except Exception as e:
+                log.console(e)
+
+        if self.first_loop:
+            await asyncio.sleep(10)
+            await update_groups()
+            self.first_loop = False

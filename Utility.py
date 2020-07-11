@@ -1,5 +1,6 @@
 from module import keys, logger as log
 from bs4 import BeautifulSoup as soup
+from discord.ext import tasks
 import discord
 import random
 import asyncio
@@ -7,71 +8,75 @@ import aiohttp
 import aiofiles
 import os
 import math
+import tweepy
+
 """
 Utility.py
 Resource Center for Irene
-Any potentially useful functions will end up here
+Any potentially useful/repeated functions will end up here
 """
 
 
 class Utility:
     def __init__(self):
         self.client = keys.client
-        self.DBconn, self.c = self.get_db_connection()
-        self.DBconn.autocommit = False
         self.session = aiohttp.ClientSession()
+        self.conn = None
+        auth = tweepy.OAuthHandler(keys.CONSUMER_KEY, keys.CONSUMER_SECRET)
+        auth.set_access_token(keys.ACCESS_KEY, keys.ACCESS_SECRET)
+        self.api = tweepy.API(auth)
 
     ##################
     # ## DATABASE ## #
     ##################
+    @tasks.loop(seconds=0, minutes=0, hours=0, reconnect=True)
+    async def set_db_connection(self):
+        """Looping Until A Stable Connection to DB is formed. This is to confirm Irene starts before the DB connects."""
+        if self.client.loop.is_running():
+            try:
+                self.conn = await self.get_db_connection()
+                # Delete all active blackjack games
+                await self.delete_all_games()
+                # Reset current status for command stats
+                await self.clear_current_session()
+            except Exception as e:
+                log.console(e)
+            self.set_db_connection.stop()
 
     @staticmethod
-    def get_db_connection():
-        """Retrieve Database Connection and Cursor."""
-        return keys.DBconn, keys.DBconn.cursor()
+    async def get_db_connection():
+        """Retrieve Database Connection"""
+        return await keys.connect_to_db()
 
-    def fetch_one(self):
-        """Get the first result from a sql query."""
-        try:
-            results = self.c.fetchone()[0]
-        except Exception as e:
-            results = None
-        return results
-
-    def fetch_all(self):
-        """Get all the results from a sql query."""
-        try:
-            results = self.c.fetchall()
-        except Exception as e:
-            log.console(e)
-            results = []
-            pass
-        return results
+    @staticmethod
+    def first_result(record):
+        """Returns the first item of a record if there is one."""
+        if record is None:
+            return None
+        else:
+            return record[0]
 
     ##################
     # ## CURRENCY ## #
     ##################
     async def register_user(self, user_id):
         """Register a user to the database if they are not already registered."""
-        self.c.execute("SELECT COUNT(*) FROM currency.Currency WHERE UserID = %s", (user_id,))
-        count = self.fetch_one()
+        count = self.first_result(await self.conn.fetchrow("SELECT COUNT(*) FROM currency.Currency WHERE UserID = $1", user_id))
         if count == 0:
-            self.c.execute("INSERT INTO currency.Currency (UserID, Money) VALUES (%s, %s)", (user_id, "100"))
-            self.DBconn.commit()
+            await self.conn.execute("INSERT INTO currency.Currency (UserID, Money) VALUES ($1, $2)", user_id, "100")
             return True
         elif count == 1:
             return False
 
     async def get_user_has_money(self, user_id):
         """Check if a user has money."""
-        self.c.execute("SELECT COUNT(*) FROM currency.Currency WHERE UserID = %s", (user_id,))
-        return not self.fetch_one() == 0
+        return not self.first_result(await self.conn.fetchrow("SELECT COUNT(*) FROM currency.Currency WHERE UserID = $1", user_id)) == 0
 
     async def get_balance(self, user_id):
         """Get current balance of a user."""
         if not (await self.register_user(user_id)):
-            self.c.execute("SELECT money FROM currency.currency WHERE userid = %s", (user_id,))
-            return int(self.fetch_one())
+            money = await self.conn.fetchrow("SELECT money FROM currency.currency WHERE userid = $1", user_id)
+            return int(self.first_result(money))
         else:
             return 100
 
@@ -87,8 +92,7 @@ class Utility:
 
     async def update_balance(self, user_id, new_balance):
         """Update a user's balance."""
-        self.c.execute("UPDATE currency.Currency SET Money = %s::text WHERE UserID = %s", (str(new_balance), user_id))
-        self.DBconn.commit()
+        await self.conn.execute("UPDATE currency.Currency SET Money = $1::text WHERE UserID = $2", str(new_balance), user_id)
 
     @staticmethod
     async def get_robbed_amount(author_money, user_money, level):
@@ -111,6 +115,34 @@ class Utility:
     #######################
     # ## MISCELLANEOUS ## #
     #######################
+    async def interact_with_user(self, ctx, user, interaction, interaction_type):
+        list_of_links = await self.conn.fetch("SELECT url FROM general.interactions WHERE interaction = $1", interaction_type)
+        if ctx.author.id == user.id:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(f"> **{ctx.author.display_name}, you cannot perform this interaction on yourself.**")
+        link = random.choice(list_of_links)
+        embed = discord.Embed(title=f"**{ctx.author.display_name}** {interaction} **{user.display_name}**", color=self.get_random_color())
+        embed.set_image(url=link[0])
+        return await ctx.send(embed=embed)
+
+    async def add_command_count(self):
+        counter = self.first_result(await self.conn.fetchrow("SELECT COUNT(*) FROM stats.commands"))
+        if counter == 1:
+            current_stats = await self.get_command_count()
+            total_used = current_stats[0] + 1
+            current_session = current_stats[1] + 1
+            await self.conn.execute("UPDATE stats.commands SET totalused = $1, currentsession = $2", total_used, current_session)
+        elif counter == 0:
+            await self.conn.execute("INSERT INTO stats.commands(totalused, currentsession) VALUES ($1,$2)", 1, 1)
+        else:
+            log.console("ERROR - stats.commands should not have more than row.")
+
+    async def get_command_count(self):
+        return await self.conn.fetchrow("SELECT totalused, currentsession FROM stats.commands")
+
+    async def clear_current_session(self):
+        await self.conn.execute("UPDATE stats.commands SET currentsession = $1", 0)
+
     def get_all_command_names(self):
         """Retrieves a list with all the client's command names."""
         command_list = []
@@ -134,18 +166,15 @@ class Utility:
 
     async def ban_user_from_bot(self, user_id):
         """Bans a user from using the bot."""
-        self.c.execute("INSERT INTO general.blacklisted(userid) VALUES (%s)", (user_id,))
-        self.DBconn.commit()
+        await self.conn.execute("INSERT INTO general.blacklisted(userid) VALUES ($1)", user_id)
 
     async def unban_user_from_bot(self, user_id):
         """UnBans a user from the bot."""
-        self.c.execute("DELETE FROM general.blacklisted WHERE userid = %s", (user_id,))
-        self.DBconn.commit()
+        await self.conn.execute("DELETE FROM general.blacklisted WHERE userid = $1", user_id)
 
     async def check_if_bot_banned(self, user_id):
         """Check if the user can use the bot."""
-        self.c.execute("SELECT COUNT(*) FROM general.blacklisted WHERE userid = %s", (user_id,))
-        return self.fetch_one() == 1
+        return self.first_result(await self.conn.fetchrow("SELECT COUNT(*) FROM general.blacklisted WHERE userid = $1", user_id)) == 1
 
     @staticmethod
     def check_nword(message_content):
@@ -344,21 +373,19 @@ class Utility:
 
     async def get_server_prefix(self, server_id):
         """Gets the prefix of a server by the server ID."""
-        self.c.execute("SELECT prefix FROM general.serverprefix WHERE serverid = %s", (server_id,))
-        prefix = self.fetch_one()
+        prefix = self.first_result(await self.conn.fetchrow("SELECT prefix FROM general.serverprefix WHERE serverid = $1", server_id))
         if prefix is None:
             return keys.bot_prefix
         else:
             return prefix
 
-    async def get_server_prefix_by_context(self, ctx):
+    async def get_server_prefix_by_context(self, ctx):  # this can also be passed in a message
         """Gets the prefix of a server by the context."""
         try:
             server_id = ctx.guild.id
         except Exception as e:
             return keys.bot_prefix
-        self.c.execute("SELECT prefix FROM general.serverprefix WHERE serverid = %s", (server_id,))
-        prefix = self.fetch_one()
+        prefix = self.first_result(await self.conn.fetchrow("SELECT prefix FROM general.serverprefix WHERE serverid = $1", server_id))
         if prefix is None:
             return keys.bot_prefix
         else:
@@ -366,8 +393,7 @@ class Utility:
 
     async def get_bot_statuses(self):
         """Get the displayed messages for the bot."""
-        self.c.execute("SELECT status FROM general.botstatus")
-        statuses = self.fetch_all()
+        statuses = await self.conn.fetch("SELECT status FROM general.botstatus")
         if len(statuses) == 0:
             return None
         else:
@@ -409,10 +435,10 @@ class Utility:
     ###################
     # ## BLACKJACK ## #
     ###################
+
     async def check_in_game(self, user_id, ctx):  # this is meant for when it is accessed by commands outside of BlackJack.
         """Check if a user is in a game."""
-        self.c.execute("SELECT COUNT(*) From blackjack.games WHERE player1 = %s OR player2 = %s", (user_id, user_id))
-        check = self.fetch_one()
+        check = self.first_result(await self.conn.fetchrow("SELECT COUNT(*) From blackjack.games WHERE player1 = $1 OR player2 = $1", user_id))
         if check == 1:
             await ctx.send(f"> **{ctx.author}, you are already in a pending/active game. Please type {await self.get_server_prefix_by_context(ctx)}endgame.**")
             return True
@@ -421,9 +447,8 @@ class Utility:
 
     async def add_bj_game(self, user_id, bid, ctx, mode):
         """Add the user to a blackjack game."""
-        self.c.execute("INSERT INTO blackjack.games (player1, bid1, channelid) VALUES (%s, %s, %s)", (user_id, bid, ctx.channel.id))
-        self.DBconn.commit()
-        game_id = self.get_game_by_player(user_id)
+        await self.conn.execute("INSERT INTO blackjack.games (player1, bid1, channelid) VALUES ($1, $2, $3)", user_id, str(bid), ctx.channel.id)
+        game_id = await self.get_game_by_player(user_id)
         if mode != "bot":
             await ctx.send(f"> **There are currently 1/2 members signed up for BlackJack. To join the game, please type {await self.get_server_prefix_by_context(ctx)}joingame {game_id} (bid)** ")
 
@@ -439,107 +464,93 @@ class Utility:
             await ctx.send(f"> **{ctx.author}, you can not bet a negative number.**")
         return False
 
-    def get_game_by_player(self, player_id):
+    async def get_game_by_player(self, player_id):
         """Get the current game of a player."""
-        self.c.execute("SELECT gameid FROM blackjack.games WHERE player1 = %s OR player2 = %s", (player_id, player_id))
-        return self.fetch_one()
+        return self.first_result(await self.conn.fetchrow("SELECT gameid FROM blackjack.games WHERE player1 = $1 OR player2 = $1", player_id))
 
-    def get_game(self, game_id):
+    async def get_game(self, game_id):
         """Get the game from its ID"""
-        self.c.execute("SELECT gameid, player1, player2, bid1, bid2, channelid FROM blackjack.games WHERE gameid = %s", (game_id,))
-        return self.c.fetchone()
+        return await self.conn.fetchrow("SELECT gameid, player1, player2, bid1, bid2, channelid FROM blackjack.games WHERE gameid = $1", game_id)
 
-    def add_player_two(self, game_id, user_id, bid):
+    async def add_player_two(self, game_id, user_id, bid):
         """Add a second player to a blackjack game."""
-        self.c.execute("UPDATE blackjack.games SET player2 = %s, bid2 = %s WHERE gameid = %s ", (user_id, bid, game_id))
-        self.DBconn.commit()
+        await self.conn.execute("UPDATE blackjack.games SET player2 = $1, bid2 = $2 WHERE gameid = $3 ", user_id, str(bid), game_id)
 
-    def get_current_cards(self, user_id):
+    async def get_current_cards(self, user_id):
         """Get the current cards of a user."""
-        self.c.execute("SELECT inhand FROM blackjack.currentstatus WHERE userid = %s", (user_id,))
-        in_hand = self.fetch_one()
+        in_hand = self.first_result(await self.conn.fetchrow("SELECT inhand FROM blackjack.currentstatus WHERE userid = $1", user_id))
         if in_hand is None:
             return []
         return in_hand.split(',')
 
-    def check_player_standing(self, user_id):
+    async def check_player_standing(self, user_id):
         """Check if a player is standing."""
-        self.c.execute("SELECT stand FROM blackjack.currentstatus WHERE userid = %s", (user_id,))
-        return self.fetch_one() == 1
+        return self.first_result(await self.conn.fetchrow("SELECT stand FROM blackjack.currentstatus WHERE userid = $1", user_id)) == 1
 
-    def set_player_stand(self, user_id):
+    async def set_player_stand(self, user_id):
         """Set a player to stand."""
-        self.c.execute("UPDATE blackjack.currentstatus SET stand = %s WHERE userid = %s", (1, user_id))
-        self.DBconn.commit()
+        await self.conn.execute("UPDATE blackjack.currentstatus SET stand = $1 WHERE userid = $2", 1, user_id)
 
-    def delete_player_status(self, user_id):
+    async def delete_player_status(self, user_id):
         """Remove a player's status from a game."""
-        self.c.execute("DELETE FROM blackjack.currentstatus WHERE userid = %s", (user_id,))
-        self.DBconn.commit()
+        await self.conn.execute("DELETE FROM blackjack.currentstatus WHERE userid = $1", user_id)
 
-    def add_player_status(self, user_id):
+    async def add_player_status(self, user_id):
         """Add a player's status to a game."""
-        self.delete_player_status(user_id)
-        self.c.execute("INSERT INTO blackjack.currentstatus (userid, stand, total) VALUES (%s, %s, %s)", (user_id, 0, 0))
-        self.DBconn.commit()
+        await self.delete_player_status(user_id)
+        await self.conn.execute("INSERT INTO blackjack.currentstatus (userid, stand, total) VALUES ($1, $2, $2)", user_id, 0)
 
-    def get_player_total(self, user_id):
+    async def get_player_total(self, user_id):
         """Get a player's total score."""
-        self.c.execute("SELECT total FROM blackjack.currentstatus WHERE userid = %s", (user_id,))
-        return self.fetch_one()
+        return self.first_result(await self.conn.fetchrow("SELECT total FROM blackjack.currentstatus WHERE userid = $1", user_id))
 
-    def get_card_value(self, card):
+    async def get_card_value(self, card):
         """Get the value of a card."""
-        self.c.execute("SELECT value FROM blackjack.cards WHERE id = %s", (card,))
-        return self.fetch_one()
+        return self.first_result(await self.conn.fetchrow("SELECT value FROM blackjack.cards WHERE id = $1", card))
 
-    def get_all_cards(self):
+    async def get_all_cards(self):
         """Get all the cards from a deck."""
-        self.c.execute("SELECT id FROM blackjack.cards")
-        card_tuple = self.fetch_all()
+        card_tuple = await self.conn.fetch("SELECT id FROM blackjack.cards")
         all_cards = []
         for card in card_tuple:
             all_cards.append(card[0])
         return all_cards
 
-    def get_available_cards(self, game_id):  # pass in a list of card ids
+    async def get_available_cards(self, game_id):  # pass in a list of card ids
         """Get the cards that are not occupied."""
-        all_cards = self.get_all_cards()
+        all_cards = await self.get_all_cards()
         available_cards = []
-        game = self.get_game(game_id)
-        player1_cards = self.get_current_cards(game[1])
-        player2_cards = self.get_current_cards(game[2])
+        game = await self.get_game(game_id)
+        player1_cards = await self.get_current_cards(game[1])
+        player2_cards = await self.get_current_cards(game[2])
         for card in all_cards:
             if card not in player1_cards and card not in player2_cards:
                 available_cards.append(card)
         return available_cards
 
-    def get_card_name(self, card_id):
+    async def get_card_name(self, card_id):
         """Get the name of a card."""
-        self.c.execute("SELECT name FROM blackjack.cards WHERE id = %s", (card_id,))
-        return self.fetch_one()
+        return self.first_result(await self.conn.fetchrow("SELECT name FROM blackjack.cards WHERE id = $1", card_id))
 
-    def check_if_ace(self, card_id, user_id):
+    async def check_if_ace(self, card_id, user_id):
         """Check if the card is an ace and is not used."""
         aces = ["1", "14", "27", "40"]
-        aces_used = self.get_aces_used(user_id)
+        aces_used = await self.get_aces_used(user_id)
         if card_id in aces and card_id not in aces_used:
             aces_used.append(card_id)
-            self.set_aces_used(aces_used, user_id)
+            await self.set_aces_used(aces_used, user_id)
             return True
         return False
 
-    def set_aces_used(self, card_list, user_id):
+    async def set_aces_used(self, card_list, user_id):
         """Mark an ace as used."""
         separator = ','
         cards = separator.join(card_list)
-        self.c.execute("UPDATE blackjack.currentstatus SET acesused = %s WHERE userid = %s", (cards, user_id))
-        self.DBconn.commit()
+        await self.conn.execute("UPDATE blackjack.currentstatus SET acesused = $1 WHERE userid = $2", cards, user_id)
 
-    def get_aces_used(self, user_id):
+    async def get_aces_used(self, user_id):
         """Get the aces that were changed from 11 to 1."""
-        self.c.execute("SELECT acesused FROM blackjack.currentstatus WHERE userid = %s", (user_id,))
-        aces_used = self.fetch_one()
+        aces_used = self.first_result(await self.conn.fetchrow("SELECT acesused FROM blackjack.currentstatus WHERE userid = $1", user_id))
         if aces_used is None:
             return []
         return aces_used.split(',')
@@ -554,38 +565,37 @@ class Utility:
         check = 0
 
         separator = ','
-        current_cards = self.get_current_cards(user_id)
-        game_id = self.get_game_by_player(user_id)
-        game = self.get_game(game_id)
+        current_cards = await self.get_current_cards(user_id)
+        game_id = await self.get_game_by_player(user_id)
+        game = await self.get_game(game_id)
         channel = await self.client.fetch_channel(game[5])
-        stand = self.check_player_standing(user_id)
-        player1_score = self.get_player_total(game[1])
-        player2_score = self.get_player_total(game[2])
-        player1_cards = self.get_current_cards(game[1])
+        stand = await self.check_player_standing(user_id)
+        player1_score = await self.get_player_total(game[1])
+        player2_score = await self.get_player_total(game[2])
+        player1_cards = await self.get_current_cards(game[1])
         if not stand:
-            available_cards = self.get_available_cards(game_id)
+            available_cards = await self.get_available_cards(game_id)
             random_card = random.choice(available_cards)
             current_cards.append(str(random_card))
             cards = separator.join(current_cards)
-            current_total = self.get_player_total(user_id)
-            random_card_value = self.get_card_value(random_card)
+            current_total = await self.get_player_total(user_id)
+            random_card_value = await self.get_card_value(random_card)
             if current_total + random_card_value > 21:
                 for card in current_cards:  # this includes the random card
-                    if self.check_if_ace(card, user_id) and check != 1:
+                    if await self.check_if_ace(card, user_id) and check != 1:
                         check = 1
                         current_total = (current_total + random_card_value) - 10
                 if check == 0:  # if there was no ace
                     current_total = current_total + random_card_value
             else:
                 current_total = current_total + random_card_value
-            self.c.execute("UPDATE blackjack.currentstatus SET inhand = %s, total = %s WHERE userid = %s", (cards, current_total, user_id))
-            self.DBconn.commit()
+            await self.conn.execute("UPDATE blackjack.currentstatus SET inhand = $1, total = $2 WHERE userid = $3", cards, current_total, user_id)
             if current_total > 21:
                 if user_id == game[2] and self.check_if_bot(game[2]):
                     if player1_score > 21 and current_total >= 16:
                         end_game = True
-                        self.set_player_stand(game[1])
-                        self.set_player_stand(game[2])
+                        await self.set_player_stand(game[1])
+                        await self.set_player_stand(game[2])
                     elif player1_score > 21 and current_total < 16:
                         await self.add_card(game[2])
                     elif player1_score < 22 and current_total > 21:
@@ -596,14 +606,14 @@ class Utility:
                     if player2_score < 16:
                         await self.add_card(game[2])
                     else:
-                        self.set_player_stand(user_id)
-                        self.set_player_stand(game[2])
+                        await self.set_player_stand(user_id)
+                        await self.set_player_stand(game[2])
                         end_game = True
             else:
                 if user_id == game[2] and self.check_if_bot(game[2]):
                     if current_total < 16143478541328187392 and len(player1_cards) > 2:
                         await self.add_card(game[2])
-                    if self.check_player_standing(game[1]) and current_total >= 16:
+                    if await self.check_player_standing(game[1]) and current_total >= 16:
                         end_game = True
             if not self.check_if_bot(user_id):
                 if self.check_if_bot(game[2]):
@@ -612,7 +622,7 @@ class Utility:
                     await self.send_cards_to_channel(channel, user_id, random_card)
         else:
             await channel.send(f"> **You already stood.**")
-            if self.check_game_over(game_id):
+            if await self.check_game_over(game_id):
                 await self.finish_game(game_id, channel)
         if end_game:
             await self.finish_game(game_id, channel)
@@ -623,10 +633,10 @@ class Utility:
             card_file = discord.File(fp=f'Cards/{card}.jpg', filename=f'{card}.jpg', spoiler=False)
         else:
             card_file = discord.File(fp=f'Cards/{card}.jpg', filename=f'{card}.jpg', spoiler=True)
-        total_score = str(self.get_player_total(user_id))
+        total_score = str(await self.get_player_total(user_id))
         if len(total_score) == 1:
             total_score = '0' + total_score  # this is to prevent being able to detect the number of digits by the spoiler
-        card_name = self.get_card_name(card)
+        card_name = await self.get_card_name(card)
         if bot_mode:
             await channel.send(f"<@{user_id}> pulled {card_name}. Their current score is {total_score}", file=card_file)
         else:
@@ -634,8 +644,8 @@ class Utility:
 
     async def compare_channels(self, user_id, channel):
         """Check if the channel is the correct channel."""
-        game_id = self.get_game_by_player(user_id)
-        game = self.get_game(game_id)
+        game_id = await self.get_game_by_player(user_id)
+        game = await self.get_game(game_id)
         if game[5] == channel.id:
             return True
         else:
@@ -644,22 +654,22 @@ class Utility:
 
     async def start_game(self, game_id):
         """Start out the game of blackjack."""
-        game = self.get_game(game_id)
+        game = await self.get_game(game_id)
         player1 = game[1]
         player2 = game[2]
-        self.add_player_status(player1)
-        self.add_player_status(player2)
+        await self.add_player_status(player1)
+        await self.add_player_status(player2)
         # Add Two Cards to both players [ Not in a loop because the messages should be in order on discord ]
         await self.add_card(player1)
         await self.add_card(player1)
         await self.add_card(player2)
         await self.add_card(player2)
 
-    def check_game_over(self, game_id):
+    async def check_game_over(self, game_id):
         """Check if the blackjack game is over."""
-        game = self.get_game(game_id)
-        player1_stand = self.check_player_standing(game[1])
-        player2_stand = self.check_player_standing(game[2])
+        game = await self.get_game(game_id)
+        player1_stand = await self.check_player_standing(game[1])
+        player2_stand = await self.check_player_standing(game[2])
         if player1_stand and player2_stand:
             return True
         else:
@@ -710,72 +720,81 @@ class Utility:
 
     async def finish_game(self, game_id, channel):
         """Finish off a blackjack game and terminate it."""
-        game = self.get_game(game_id)
-        player1_score = self.get_player_total(game[1])
-        player2_score = self.get_player_total(game[2])
+        game = await self.get_game(game_id)
+        print(2.0)
+        player1_score = await self.get_player_total(game[1])
+        print(2.1)
+        player2_score = await self.get_player_total(game[2])
+        print(2.2)
         if player2_score < 12 and self.check_if_bot(game[2]):
             await self.add_card(game[2])
         else:
             winner = self.determine_winner(player1_score, player2_score)
+            print(2.3)
             player1_current_bal = await self.get_balance(game[1])
+            print(2.1240)
             player2_current_bal = await self.get_balance(game[2])
+            print(2.999)
             if winner == 'player1':
                 await self.update_balance(game[1], player1_current_bal + int(game[4]))
+                print(3.0)
                 if not self.check_if_bot(game[2]):
+                    print(3.1)
                     await self.update_balance(game[2], player2_current_bal - int(game[4]))
                 await self.announce_winner(channel, game[1], game[2], player1_score, player2_score, game[4])
+                print(2.4)
             elif winner == 'player2':
                 if not self.check_if_bot(game[2]):
+                    print(3.2)
                     await self.update_balance(game[2], player2_current_bal + int(game[3]))
+                print(3.3)
                 await self.update_balance(game[1], player1_current_bal - int(game[3]))
+                print(3.4)
                 await self.announce_winner(channel, game[2], game[1], player2_score, player1_score, game[3])
             elif winner == 'tie':
+                print(2.5)
                 await self.announce_tie(channel, game[1], game[2], player1_score)
-            self.delete_game(game_id)
+            await self.delete_game(game_id)
 
-    def delete_game(self, game_id):
+    async def delete_game(self, game_id):
         """Delete a blackjack game."""
-        game = self.get_game(game_id)
-        self.c.execute("DELETE FROM blackjack.games WHERE gameid = %s", (game_id,))
-        self.c.execute("DELETE FROM blackjack.currentstatus WHERE userid = %s", (game[1],))
-        self.c.execute("DELETE FROM blackjack.currentstatus WHERE userid = %s", (game[2],))
+        game = await self.get_game(game_id)
+        await self.conn.execute("DELETE FROM blackjack.games WHERE gameid = $1", game_id)
+        await self.conn.execute("DELETE FROM blackjack.currentstatus WHERE userid = $1", game[1])
+        await self.conn.execute("DELETE FROM blackjack.currentstatus WHERE userid = $1", game[2])
         log.console(f"Game {game_id} deleted.")
 
-    def delete_all_games(self):
+    async def delete_all_games(self):
         """Delete all blackjack games."""
-        self.c.execute("SELECT gameid FROM blackjack.games")
-        all_games = self.fetch_all()
+        all_games = await self.conn.fetch("SELECT gameid FROM blackjack.games")
         for games in all_games:
             game_id = games[0]
-            self.delete_game(game_id)
+            await self.delete_game(game_id)
     ################
     # ## LEVELS ## #
     ################
 
     async def get_level(self, user_id, command):
         """Get the level of a command (rob/beg/daily)."""
-        self.c.execute(f"SELECT COUNT(*) FROM currency.Levels WHERE UserID = %s AND {command} > %s", (user_id, 1))
-        if self.fetch_one() == 0:
+        count = self.first_result(await self.conn.fetchrow(f"SELECT COUNT(*) FROM currency.Levels WHERE UserID = $1 AND {command} > $2", user_id, 1))
+        if count == 0:
             level = 1
         else:
-            self.c.execute(f"SELECT {command} FROM currency.Levels WHERE UserID = %s", (user_id,))
-            level = self.fetch_one()
+            level = self.first_result(await self.conn.fetchrow(f"SELECT {command} FROM currency.Levels WHERE UserID = $1", user_id))
         return int(level)
 
     async def set_level(self, user_id, level, command):
         """Set the level of a user for a specific command."""
-        def update_level():
+        async def update_level():
             """Updates a user's level."""
-            self.c.execute(f"UPDATE currency.Levels SET {command} = %s WHERE UserID = %s", (level, user_id))
-            self.DBconn.commit()
+            await self.conn.execute(f"UPDATE currency.Levels SET {command} = $1 WHERE UserID = $2", level, user_id)
 
-        self.c.execute(f"SELECT COUNT(*) FROM currency.Levels WHERE UserID = %s", (user_id,))
-        if self.fetch_one() == 0:
-            self.c.execute("INSERT INTO currency.Levels VALUES(%s, NULL, NULL, NULL, NULL, 1)", (user_id,))
-            self.DBconn.commit()
-            update_level()
+        count = self.first_result(await self.conn.fetchrow(f"SELECT COUNT(*) FROM currency.Levels WHERE UserID = $1", user_id))
+        if count == 0:
+            await self.conn.execute("INSERT INTO currency.Levels VALUES($1, NULL, NULL, NULL, NULL, 1)", user_id)
+            await update_level()
         else:
-            update_level()
+            await update_level()
 
     @staticmethod
     async def get_xp(level, command):
@@ -795,6 +814,42 @@ class Utility:
     #######################
     # ## GROUP MEMBERS ## #
     #######################
+    async def check_channel_sending_photos(self, channel_id):
+        """Checks a text channel ID to see if it is restricted from having idol photos sent."""
+        counter = self.first_result(await self.conn.fetchrow("SELECT COUNT(*) FROM groupmembers.restricted WHERE channelid = $1 AND sendhere = $2", channel_id, 0))
+        return counter == 0  # returns False if they are restricted.
+
+    async def check_server_sending_photos(self, server_id):
+        """Checks a server to see if it has a specific channel to send idol photos to"""
+        counter = self.first_result(await self.conn.fetchrow("SELECT COUNT(*) FROM groupmembers.restricted WHERE serverid = $1 AND sendhere = $2", server_id, 1))
+        return counter == 1  # returns True if they are supposed to send it to a specific channel.
+
+    async def get_channel_sending_photos(self, server_id):
+        """Returns a text channel from a server that requires idol photos to be sent to a specific text channel."""
+        channel_id = self.first_result(await self.conn.fetchrow("SELECT channelid FROM groupmembers.restricted WHERE serverid = $1 AND sendhere = $2", server_id, 1))
+        return await self.client.fetch_channel(channel_id)
+
+    async def update_photo_count_of_groups(self):
+        """Updates the photo count for all groups."""
+        try:
+            groups = await self.get_all_groups()
+            for group in groups:
+                counter = 0
+                members = await self.get_members_in_group(group[1])
+                for member in members:
+                    counter += await self.get_idol_count(member[0])
+                count = self.first_result(await self.conn.fetchrow("SELECT COUNT(*) FROM groupmembers.groupphotocount WHERE groupid = $1", group[0]))
+                if count == 0:
+                    await self.conn.execute("INSERT INTO groupmembers.groupphotocount(groupid, imagecount) VALUES ($1, $2)", group[0], counter)
+                else:
+                    await self.conn.execute("UPDATE groupmembers.groupphotocount SET imagecount = $1 WHERE groupid = $2", counter, group[0])
+        except Exception as e:
+            log.console(e)
+
+    async def get_photo_count_of_group(self, group_id):
+        """Gets the total amount of photos that a group has."""
+        return self.first_result(await self.conn.fetchrow("SELECT imagecount FROM groupmembers.groupphotocount WHERE groupid = $1", group_id))
+
     @staticmethod
     def log_idol_command(message):
         """Log an idol photo that was called."""
@@ -803,14 +858,11 @@ class Utility:
 
     async def get_all_images_count(self):
         """Get the amount of images the bot has."""
-        self.c.execute("SELECT COUNT(*) FROM groupmembers.imagelinks")
-        return self.fetch_one()
+        return self.first_result(await self.conn.fetchrow("SELECT COUNT(*) FROM groupmembers.imagelinks"))
 
-    def get_idol_called(self, member_id):
+    async def get_idol_called(self, member_id):
         """Get the amount of times an idol has been called."""
-        self.c.execute("SELECT Count FROM groupmembers.Count WHERE MemberID = %s", (member_id,))
-        counter = self.fetch_one()
-        return counter
+        return self.first_result(await self.conn.fetchrow("SELECT Count FROM groupmembers.Count WHERE MemberID = $1", member_id))
 
     @staticmethod
     async def check_if_folder(url):
@@ -823,9 +875,7 @@ class Utility:
 
     async def get_idol_count(self, member_id):
         """Get the amount of photos for an idol."""
-        self.c.execute("SELECT COUNT(*) FROM groupmembers.ImageLinks WHERE MemberID = %s", (member_id,))
-        count = self.fetch_one()
-        return count
+        return self.first_result(await self.conn.fetchrow("SELECT COUNT(*) FROM groupmembers.ImageLinks WHERE MemberID = $1", member_id))
 
     async def get_random_idol_id(self):
         """Get a random idol."""
@@ -834,18 +884,15 @@ class Utility:
 
     async def get_all_members(self):
         """Get all idols."""
-        self.c.execute("SELECT id, fullname, stagename, ingroups, aliases FROM groupmembers.Member")
-        return self.fetch_all()
+        return await self.conn.fetch("SELECT id, fullname, stagename, ingroups, aliases FROM groupmembers.Member")
 
     async def get_all_groups(self):
         """Get all groups."""
-        self.c.execute("SELECT groupid, groupname, aliases FROM groupmembers.groups ORDER BY groupname")
-        return self.fetch_all()
+        return await self.conn.fetch("SELECT groupid, groupname, aliases FROM groupmembers.groups ORDER BY groupname")
 
     async def get_members_in_group(self, group_name):
         """Get the members in a specific group."""
-        self.c.execute(f"SELECT groupid FROM groupmembers.groups WHERE groupname = %s", (group_name,))
-        group_id = self.fetch_one()
+        group_id = self.first_result(await self.conn.fetchrow(f"SELECT groupid FROM groupmembers.groups WHERE groupname = $1", group_name))
         all_members = await self.get_all_members()
         members_in_group = []
         for member in all_members:
@@ -857,13 +904,11 @@ class Utility:
 
     async def get_member(self, member_id):
         """Get an idol based on their ID."""
-        self.c.execute("SELECT id, fullname, stagename, ingroups, aliases FROM groupmembers.member WHERE id = %s", (member_id,))
-        return self.c.fetchone()
+        return await self.conn.fetchrow("SELECT id, fullname, stagename, ingroups, aliases FROM groupmembers.member WHERE id = $1", member_id)
 
     async def get_group_name(self, group_id):
         """Get a group's name based on their ID."""
-        self.c.execute("SELECT groupname FROM groupmembers.groups WHERE groupid = %s", (group_id,))
-        return self.fetch_one()
+        return self.first_result(await self.conn.fetchrow("SELECT groupname FROM groupmembers.groups WHERE groupid = $1", group_id))
 
     async def get_group_id_from_member(self, member_id):
         """Get a group ID based on a member's ID."""
@@ -1003,8 +1048,7 @@ class Utility:
                                 link = message1.embeds[0].url
                             except:
                                 link = message1.content
-                            self.c.execute("INSERT INTO groupmembers.DeadLinkFromUser VALUES(%s,%s)", (link, user.id))
-                            self.DBconn.commit()
+                            await self.conn.execute("INSERT INTO groupmembers.DeadLinkFromUser VALUES($1,$2)", link, user.id)
                             await message1.delete()
 
                     except Exception as e:
@@ -1092,21 +1136,18 @@ class Utility:
 
     async def get_random_photo_from_member(self, member_id):
         """Get a random photo from an idol."""
-        self.c.execute("SELECT link FROM groupmembers.imagelinks WHERE memberid = %s", (member_id,))
-        return (random.choice(self.fetch_all()))[0]
+        choices = await self.conn.fetch("SELECT link FROM groupmembers.imagelinks WHERE memberid = $1", member_id)
+        return (random.choice(choices))[0]
 
     async def update_member_count(self, member_id):
         """Update the amount of times an idol has been called."""
-        self.c.execute("SELECT COUNT(*) FROM groupmembers.Count WHERE MemberID = %s", (member_id,))
-        count = self.fetch_one()
+        count = self.first_result(await self.conn.fetchrow("SELECT COUNT(*) FROM groupmembers.Count WHERE MemberID = $1", member_id))
         if count == 0:
-            self.c.execute("INSERT INTO groupmembers.Count VALUES(%s, %s)", (member_id, 1))
+            await self.conn.execute("INSERT INTO groupmembers.Count VALUES($1, $2)", member_id, 1)
         else:
-            self.c.execute("SELECT Count FROM groupmembers.Count WHERE MemberID = %s", (member_id,))
-            count = self.fetch_one()
+            count = self.first_result(await self.conn.fetchrow("SELECT Count FROM groupmembers.Count WHERE MemberID = $1", member_id))
             count += 1
-            self.c.execute("UPDATE groupmembers.Count SET Count = %s WHERE MemberID = %s", (count, member_id))
-        self.DBconn.commit()
+            await self.conn.execute("UPDATE groupmembers.Count SET Count = $1 WHERE MemberID = $2", count, member_id)
 
     @staticmethod
     def remove_custom_characters(file_name):
@@ -1149,9 +1190,8 @@ class Utility:
                         return msg
                     elif resp.status == 404 or resp.status == 403:
                         log.console(f"REMOVING FROM IDOL {member_id} - {photo_link}")
-                        self.c.execute("DELETE FROM groupmembers.imagelinks WHERE link = %s", (photo_link,))
-                        self.c.execute("INSERT INTO groupmembers.deleted(link, memberid) VALUES (%s,%s)", (photo_link, 0))
-                        self.DBconn.commit()
+                        await self.conn.execute("DELETE FROM groupmembers.imagelinks WHERE link = $1", photo_link)
+                        await self.conn.execute("INSERT INTO groupmembers.deleted(link, memberid) VALUES ($1,$2)", photo_link, 0)
                         # send a new post
                         random_link = await self.get_random_photo_from_member(member_id)
                         await self.idol_post(channel, member_id, random_link, group_id)
@@ -1222,24 +1262,21 @@ class Utility:
 
     async def get_servers_logged(self):
         """Get the servers that are being logged."""
-        self.c.execute("SELECT serverid FROM logging.servers")
-        server_ids = self.fetch_all()
+        server_ids = await self.conn.fetch("SELECT serverid FROM logging.servers")
         servers_logged = []
         for server in server_ids:
-            if await self.check_if_logged(server_id = server):
+            if await self.check_if_logged(server_id=server[0]):
                 servers_logged.append(server)
         return servers_logged
 
     async def get_channels_logged(self):
         """Get all the channels that are being logged."""
-        self.c.execute("SELECT channelid, server FROM logging.channels")
-        channel_ids = self.fetch_all()
+        channel_ids = await self.conn.fetch("SELECT channelid, server FROM logging.channels")
         channels_logged = []
         for channel in channel_ids:
             channel_id = channel[0]
             channel_guild = channel[1]  # not the server id, just the row id
-            self.c.execute("SELECT serverid FROM logging.servers WHERE id = %s", (channel_guild,))
-            channel_guild = self.fetch_one()
+            channel_guild = self.first_result(await self.conn.fetchrow("SELECT serverid FROM logging.servers WHERE id = $1", channel_guild))
             if await self.check_if_logged(server_id=channel_guild):
                 # No need to check if channel is logged because the list already confirms it is logged.
                 channels_logged.append(channel_id)
@@ -1247,29 +1284,28 @@ class Utility:
 
     async def add_to_logging(self, server_id, channel_id):  # return true if status is on
         """Add a channel to be logged."""
-        self.c.execute("SELECT COUNT(*) FROM logging.servers WHERE serverid = %s", (server_id,))
-        if self.fetch_one() == 0:
-            self.c.execute("INSERT INTO logging.servers (serverid, channelid, status, sendall) VALUES (%s, %s, %s, %s)", (server_id, channel_id, 1, 1))
-            self.DBconn.commit()
+        count = self.first_result(await self.conn.fetchrow("SELECT COUNT(*) FROM logging.servers WHERE serverid = $1", server_id))
+        if count == 0:
+            await self.conn.execute("INSERT INTO logging.servers (serverid, channelid, status, sendall) VALUES ($1, $2, $3, $4)", server_id, channel_id, 1, 1)
         else:
             await self.set_logging_status(server_id, 1)
-            self.c.execute("SELECT channelid FROM logging.servers WHERE serverid = %s", (server_id,))
-            if self.fetch_one() != channel_id:
-                self.c.execute("UPDATE logging.servers SET channelid = %s WHERE serverid = %s", (channel_id, server_id))
+            current_channel_id = self.first_result(await self.conn.fetchrow("SELECT channelid FROM logging.servers WHERE serverid = $1", server_id))
+            if current_channel_id != channel_id:
+                await self.conn.execute("UPDATE logging.servers SET channelid = $1 WHERE serverid = $2", channel_id, server_id)
         return True
 
     async def check_if_logged(self, server_id=None, channel_id=None):  # only one parameter should be passed in
         """Check if a server or channel is being logged."""
         if channel_id is not None:
-            self.c.execute("SELECT COUNT(*) FROM logging.channels WHERE channelid = %s", (channel_id,))
-            if self.fetch_one() == 1:
+            count = self.first_result(await self.conn.fetchrow("SELECT COUNT(*) FROM logging.channels WHERE channelid = $1", channel_id))
+            if count == 1:
                 return True
             else:
                 return False
         elif server_id is not None:
             try:
-                self.c.execute("SELECT status FROM logging.servers WHERE serverid = %s", (server_id,))
-                if self.fetch_one() == 1:
+                status = self.first_result(await self.conn.fetchrow("SELECT status FROM logging.servers WHERE serverid = $1", server_id))
+                if status == 1:
                     return True
                 else:
                     return False
@@ -1278,13 +1314,11 @@ class Utility:
 
     async def set_logging_status(self, server_id, status):  # status can only be 0 or 1
         """Set a server's logging status."""
-        self.c.execute("UPDATE logging.servers SET status = %s WHERE serverid = %s", (status, server_id))
-        self.DBconn.commit()
+        await self.conn.execute("UPDATE logging.servers SET status = $1 WHERE serverid = $2", status, server_id)
 
     async def get_logging_id(self, server_id):
         """Get the ID in the table of a server."""
-        self.c.execute("SELECT id FROM logging.servers WHERE serverid = %s", (server_id,))
-        return self.fetch_one()
+        return self.first_result(await self.conn.fetchrow("SELECT id FROM logging.servers WHERE serverid = $1", server_id))
 
     async def check_logging_requirements(self, message):
         """Check if a message meets all the logging requirements."""
@@ -1309,16 +1343,15 @@ class Utility:
 
     async def get_log_channel_id(self, message):
         """Get the channel where logs are made on a server."""
-        self.c.execute("SELECT channelid FROM logging.servers WHERE serverid = %s", (message.guild.id,))
-        return self.client.get_channel(self.fetch_one())
+        channel_id = self.first_result(await self.conn.fetchrow("SELECT channelid FROM logging.servers WHERE serverid = $1", message.guild.id))
+        return self.client.get_channel(channel_id)
 
     ######################
     # ## DREAMCATCHER ## #
     ######################
-    def get_dc_channels(self):
+    async def get_dc_channels(self):
         """Get all the servers that receive DC APP Updates."""
-        self.c.execute("SELECT serverid FROM dreamcatcher.dreamcatcher")
-        return self.fetch_all()
+        return await self.conn.fetch("SELECT serverid FROM dreamcatcher.dreamcatcher")
 
     def get_video_and_bat_list(self, page_soup):
         """Get a list of all the .bat and video files."""
@@ -1446,17 +1479,16 @@ class Utility:
             member_id = 160
         return member_name, member_id
 
-    def add_post_to_db(self, image_links, member_id, member_name, post_number, post_url):
+    async def add_post_to_db(self, image_links, member_id, member_name, post_number, post_url):
         """Add a post's information to the database."""
         if image_links is not None:
             for link in image_links:
                 try:
                     if member_id is not None:
-                        self.c.execute("INSERT INTO groupmembers.imagelinks VALUES (%s,%s)", (link, member_id))
-                    self.c.execute("INSERT INTO dreamcatcher.DCHDLinks VALUES (%s,%s,%s)", (link, member_name.lower(), post_number))
-                    self.c.execute("UPDATE dreamcatcher.DCUrl SET url = %s WHERE member = %s", (post_url, "latest"))
-                    self.c.execute("UPDATE dreamcatcher.DCUrl SET url = %s WHERE member = %s", (post_url, member_name.lower()))
-                    self.DBconn.commit()
+                        await self.conn.execute("INSERT INTO groupmembers.imagelinks VALUES ($1,$2)", link, member_id)
+                    await self.conn.execute("INSERT INTO dreamcatcher.DCHDLinks VALUES ($1,$2,$3)", link, member_name.lower(), post_number)
+                    await self.conn.execute("UPDATE dreamcatcher.DCUrl SET url = $1 WHERE member = $2", post_url, "latest")
+                    await self.conn.execute("UPDATE dreamcatcher.DCUrl SET url = $1 WHERE member = $2", post_url, member_name.lower())
                 except Exception as e:
                     log.console(e)
                     pass
@@ -1467,8 +1499,7 @@ class Utility:
             await channel.send(f">>> **New {member_name} Post\n<{post_url}>\nStatus Message: {status_message}**")
         except AttributeError:
             try:
-                self.c.execute("DELETE from dreamcatcher.dreamcatcher WHERE serverid = %s", (channel_id,))
-                self.DBconn.commit()
+                await self.conn.execute("DELETE from dreamcatcher.dreamcatcher WHERE serverid = $1", channel_id)
             except Exception as e:
                 log.console(e)
         except Exception as e:
@@ -1546,6 +1577,24 @@ class Utility:
                 await fd.close()
             """
         return image_links
+
+    #################
+    # ## TWITTER ## #
+    #################
+    async def update_status(self, context):
+        self.api.update_status(status=context)
+        tweet = self.api.user_timeline(user_id=f'{keys.twitter_account_id}', count=1)[0]
+        return f"https://twitter.com/{keys.twitter_username}/status/{tweet.id}"
+
+    async def delete_status(self, context):
+        self.api.destroy_status(context)
+
+    async def recent_tweets(self, context):
+        tweets = self.api.user_timeline(user_id=f'{keys.twitter_account_id}', count=context)
+        final_tweet = ""
+        for tweet in tweets:
+            final_tweet += f"> **Tweet ID:** {tweet.id} | **Tweet:** {tweet.text}\n"
+        return final_tweet
 
 
 resources = Utility()

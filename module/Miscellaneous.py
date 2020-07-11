@@ -22,58 +22,93 @@ class Miscellaneous(commands.Cog):
         app_name = app.name
         app_owner = app.owner
         app_icon_url = app.icon_url
+        bot_uptime = await ex.get_cooldown_time((keys.datetime.now() - keys.startup_time).total_seconds())
+        commands_used = await ex.get_command_count()
+        total_commands = commands_used[0]
+        current_session_commands = commands_used[1]
+        bot_server_links = """https://top.gg/bot/520369375325454371
+        https://discord.bots.gg/bots/520369375325454371
+        https://bots.ondiscord.xyz/bots/520369375325454371
+        https://discord.boats/bot/520369375325454371
+        """
         embed = await ex.create_embed(title=f"I am {app_name}! ({app_id})", title_desc="I was made with Python using the discord.py wrapper.")
         embed.set_thumbnail(url=app_icon_url)
         embed.add_field(name=f"Servers Connected", value=f"{ex.get_server_count()} Servers", inline=True)
         embed.add_field(name=f"Text/Voice Channels Watched", value=f"{ex.get_text_channel_count()}/{ex.get_voice_channel_count()} Channels", inline=True)
         embed.add_field(name=f"Servers/Channels Logged", value=f"{len(await ex.get_servers_logged())}/{len(await ex.get_channels_logged())} Logged", inline=True)
-        embed.add_field(name=f"DC Updates Sent to", value=f"{len(ex.get_dc_channels())} Channels", inline=True)
+        embed.add_field(name=f"DC Updates Sent to", value=f"{len(await ex.get_dc_channels())} Channels", inline=True)
+        embed.add_field(name=f"Bot Uptime", value=bot_uptime, inline=True)
+        embed.add_field(name=f"Total Commands Used", value=f"{total_commands} Commands", inline=True)
+        embed.add_field(name=f"This Session", value=f"{current_session_commands} Commands" , inline=True)
         embed.add_field(name=f"Ping", value=f"{ex.get_ping()} ms", inline=True)
-        embed.add_field(name=f"Bot Owner", value=f"{app_owner} ({app_owner.id})", inline=False)
+        embed.add_field(name=f"Bot Owner", value=f"<@{app_owner.id}>", inline=False)
         embed.add_field(name=f"Support Server", value=f"https://discord.gg/bEXm85V", inline=False)
         embed.add_field(name=f"Github", value=f"https://github.com/MujyKun/IreneBot", inline=False)
         embed.add_field(name=f"Discord Invite", value=keys.bot_invite_link, inline=False)
-        embed.add_field(name=f"Top.gg", value=f"https://top.gg/bot/520369375325454371", inline=False)
+        embed.add_field(name=f"Bot Server Links", value=bot_server_links, inline=False)
         embed.add_field(name=f"Suggest", value=f"Suggest a feature using `{current_server_prefix}suggest`.", inline=False)
         await ctx.send(embed=embed)
 
     @commands.command()
-    @commands.cooldown(1, 300, BucketType.user)
+    @commands.cooldown(1, 60, BucketType.user)
+    async def lick(self, ctx, user: discord.Member = discord.Member):
+        """Lick someone [Format: %lick @user]"""
+        await ex.interact_with_user(ctx, user, "licked", "lick")
+
+    @commands.command()
+    @commands.cooldown(1, 60, BucketType.user)
+    async def hug(self, ctx, user: discord.Member = discord.Member):
+        """Hug someone [Format: %hug @user]"""
+        await ex.interact_with_user(ctx, user, "hugged", "hug")
+
+    @commands.command()
+    @commands.cooldown(1, 60, BucketType.user)
+    async def kiss(self, ctx, user: discord.Member = discord.Member):
+        """Kiss someone [Format: %kiss @user]"""
+        await ex.interact_with_user(ctx, user, "kissed", "kiss")
+
+    @commands.command()
+    @commands.cooldown(1, 60, BucketType.user)
     async def slap(self, ctx, user: discord.Member = discord.Member):
         """Slap someone [Format: %slap @user]"""
-        ctx_name = ctx.author.display_name
-        user_name = user.display_name
-        random_idol_stage_name = (await ex.get_member(await ex.get_random_idol_id()))[2]
-        harm_phrases = [
-            f"Shame on you {user_name}!! You are not allowed to harm yourself.",
-            f"Did you really think you could hurt yourself {user_name}?",
-            f"{random_idol_stage_name} advises you not to hurt yourself {user_name}.",
-            f"Uh.... I wouldn't do that if I were you {user_name}.",
-            f"{random_idol_stage_name} slapped you instead {user_name}.",
-        ]
-        slap_phrases = [
-            f"> {ctx_name} has slapped {user_name} right across the face.",
-            f"> {ctx_name} slapped {user_name}'s forehead.",
-            f"> {ctx_name} slapped {user_name} on the back of the head.",
-            f"> {ctx_name} slapped {user_name} with the help of {random_idol_stage_name}.",
-            f"> {ctx_name} slapped {user_name} with {random_idol_stage_name} holding them down.",
-            f"> {ctx_name} and {random_idol_stage_name} brutally slap {user_name}.",
-            f"> {user_name} was knocked unconscious from a powerful slap by {ctx_name}.",
-            f"> {ctx_name} slapped {user_name} on the thigh.",
-            f"> {ctx_name} gave {user_name} a high five to the face.",
-        ]
-        try:
-            if user.id == ctx.author.id:
-                await ctx.send(f"> **{choice(harm_phrases)}**")
-                ctx.command.reset_cooldown(ctx)
-            elif user == discord.Member:
-                await ctx.send("> **Please choose someone to slap.**")
-                ctx.command.reset_cooldown(ctx)
-            else:
-                await ctx.send(f"**{choice(slap_phrases)}**")
+        # There are two types of slap: in an embed with a url, or with text. 50% chance to get either.
+        type_of_slap = randint(0, 1)
+        if type_of_slap == 0:
+            await ex.interact_with_user(ctx, user, "slapped", "slap")
+        if type_of_slap == 1:
+            ctx_name = ctx.author.display_name
+            user_name = user.display_name
+            random_idol_stage_name = (await ex.get_member(await ex.get_random_idol_id()))[2]
+            harm_phrases = [
+                f"Shame on you {user_name}!! You are not allowed to harm yourself.",
+                f"Did you really think you could hurt yourself {user_name}?",
+                f"{random_idol_stage_name} advises you not to hurt yourself {user_name}.",
+                f"Uh.... I wouldn't do that if I were you {user_name}.",
+                f"{random_idol_stage_name} slapped you instead {user_name}.",
+            ]
+            slap_phrases = [
+                f"> {ctx_name} has slapped {user_name} right across the face.",
+                f"> {ctx_name} slapped {user_name}'s forehead.",
+                f"> {ctx_name} slapped {user_name} on the back of the head.",
+                f"> {ctx_name} slapped {user_name} with the help of {random_idol_stage_name}.",
+                f"> {ctx_name} slapped {user_name} with {random_idol_stage_name} holding them down.",
+                f"> {ctx_name} and {random_idol_stage_name} brutally slap {user_name}.",
+                f"> {user_name} was knocked unconscious from a powerful slap by {ctx_name}.",
+                f"> {ctx_name} slapped {user_name} on the thigh.",
+                f"> {ctx_name} gave {user_name} a high five to the face.",
+            ]
+            try:
+                if user.id == ctx.author.id:
+                    await ctx.send(f"> **{choice(harm_phrases)}**")
+                    ctx.command.reset_cooldown(ctx)
+                elif user == discord.Member:
+                    await ctx.send("> **Please choose someone to slap.**")
+                    ctx.command.reset_cooldown(ctx)
+                else:
+                    await ctx.send(f"**{choice(slap_phrases)}**")
 
-        except Exception as e:
-            log.console(e)
+            except Exception as e:
+                log.console(e)
 
 
 
@@ -139,11 +174,9 @@ class Miscellaneous(commands.Cog):
         """Checks how many times a user has said the N Word [Format: %nword @user]"""
         if user == discord.Member:
             user = ctx.author
-        ex.c.execute("SELECT COUNT(*) FROM currency.Counter WHERE UserID = %s", (user.id,))
-        checker = ex.fetch_one()
+        checker = ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) FROM currency.Counter WHERE UserID = $1", user.id))
         if checker > 0:
-            ex.c.execute("SELECT NWord FROM currency.Counter WHERE UserID = %s", (user.id,))
-            current_count = ex.fetch_one()
+            current_count = ex.first_result(await ex.conn.fetchrow("SELECT NWord FROM currency.Counter WHERE UserID = $1", user.id))
             await ctx.send(f"> **<@{user.id}> has said the N-Word {current_count} time(s)!**")
         if checker == 0:
             await ctx.send(f"> **<@{user.id}> has not said the N-Word a single time!**")
@@ -155,12 +188,10 @@ class Miscellaneous(commands.Cog):
         if user == "@user":
             await ctx.send("> **Please @ a user**")
         if user != "@user":
-            ex.c.execute("SELECT COUNT(*) FROM currency.Counter WHERE UserID = %s", (user.id,))
-            checker = ex.fetch_one()
+            checker = ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) FROM currency.Counter WHERE UserID = $1", user.id))
             if checker > 0:
-                ex.c.execute("DELETE FROM currency.Counter where UserID = %s", (user.id,))
+                await ex.conn.execute("DELETE FROM currency.Counter where UserID = $1", user.id)
                 await ctx.send("**> Cleared.**")
-                ex.DBconn.commit()
             if checker == 0:
                 await ctx.send(f"> **<@{user.id}> has not said the N-Word a single time!**")
 
@@ -170,8 +201,7 @@ class Miscellaneous(commands.Cog):
         embed = discord.Embed(title=f"NWord Leaderboard", color=0xffb6c1)
         embed.set_author(name="Irene", url='https://www.youtube.com/watch?v=dQw4w9WgXcQ', icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
         embed.set_footer(text="Type %nword (user) to view their individual stats.", icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
-        ex.c.execute("SELECT UserID, NWord FROM currency.Counter ORDER BY NWord DESC")
-        all_members = ex.fetch_all()
+        all_members = await ex.conn.fetch("SELECT UserID, NWord FROM currency.Counter ORDER BY NWord DESC")
         count_loop = 0
         for mem in all_members:
             count_loop += 1
@@ -216,6 +246,7 @@ class Miscellaneous(commands.Cog):
                             await ctx.send (f"> **It is not possible to find definition number `{number}` for the word: `{term}`.**")
                         await ctx.send(f">>> **`Word: {term}`\n`Definition Number: {number}`\n{first_result['definition']}**")
                     else:
+                        log.console(r.status)
                         await ctx.send("> **The connection to the UrbanDictionary API failed.**")
                 pass
             pass

@@ -11,7 +11,6 @@ class Currency(commands.Cog):
     def __init__(self):
         self.counter2 = -1
         self.counter = 0
-        pass
 
     @commands.command()
     @commands.cooldown(1, 86400, BucketType.user)
@@ -119,16 +118,14 @@ class Currency(commands.Cog):
     @commands.command(aliases=['leaderboards', 'lb'])
     async def leaderboard(self, ctx):
         """Shows Top 10 Users [Format: %leaderboard][Aliases: leaderboards, lb]"""
-        ex.c.execute("SELECT count(UserID) FROM currency.Currency")
-        counter = ex.fetch_one()
+        counter = ex.first_result(await ex.conn.fetchrow("SELECT count(UserID) FROM currency.Currency"))
         embed = discord.Embed(title=f"Currency Leaderboard", color=0xffb6c1)
         embed.set_author(name="Irene", url='https://www.youtube.com/watch?v=dQw4w9WgXcQ', icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
         embed.set_footer(text="Type %bal (user) to view their balance.", icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
         if counter == 0:
             await ctx.send("> **There are no users to display.**", delete_after=60)
         if counter > 0:
-            ex.c.execute("Select UserID,Money FROM currency.Currency")
-            amount = ex.fetch_all()
+            amount = await ex.conn.fetch("Select UserID,Money FROM currency.Currency")
             sort_money = []
             for sort in amount:
                 new_user = [sort[0], int(sort[1])]

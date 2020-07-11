@@ -1,73 +1,85 @@
-import psycopg2
+import asyncpg
 from pypapago import Translator
 from discord.ext import commands
 import dbl
 import discordboats
-import json
+from datetime import datetime
+import os
+from dotenv import load_dotenv
 
 
-def get_keys():
-    with open('irene_credentials.json', 'r') as data:
-        return json.load(data)
-
-
-keys = get_keys()
-
+load_dotenv()  # Adds .env to memory
+# DISCORD
 # client token ( to run )
-client_token = keys['discord']['liveBotToken']
-test_client_token = keys['discord']['testBotToken']
-bot_id = keys['discord']['botId']
-owner_id = keys['discord']['ownerId']
+client_token = os.getenv("LIVE_BOT_TOKEN")
+test_client_token = os.getenv("TEST_BOT_TOKEN")
+
+bot_id = int(os.getenv("BOT_ID"))
+owner_id = int(os.getenv("OWNER_ID"))
+mods_list_split = (os.getenv("MODS_LIST")).split(',')
 mods_list = []
-for mod in keys['discord']['modsList']:
-    mods_list.append(mod['modId'])
-bot_invite_link = keys['discord']['bot_invite_link']
-bot_support_server_link = keys['discord']['bot_support_server_link']
-bot_prefix = keys['discord']['bot_prefix']
+for mod in mods_list_split:
+    mods_list.append(int(mod))
+bot_invite_link = os.getenv("BOT_INVITE_LINK")
+bot_support_server_link = os.getenv("SUPPORT_SERVER_LINK")
+bot_prefix = os.getenv("BOT_PREFIX")
+
 client = commands.Bot(command_prefix=bot_prefix, case_insensitive=True, owner_id=owner_id)
 
-# Twitter Keys
-CONSUMER_KEY = keys['twitter']['consumerKey']
-CONSUMER_SECRET = keys['twitter']['consumerSecret']
-ACCESS_KEY = keys['twitter']['accessKey']
-ACCESS_SECRET = keys['twitter']['accessSecret']
 
-# spotify
-spotify_client_id = keys['spotify']['clientId']
-spotify_client_secret = keys['spotify']['clientSecret']
+# Twitter Keys - https://developer.twitter.com/en/docs/basics/getting-started
+twitter_account_id = os.getenv("TWITTER_ACCOUNT_ID")
+twitter_username = os.getenv("TWITTER_USERNAME")
+CONSUMER_KEY = os.getenv("TWITTER_CONSUMER_KEY")
+CONSUMER_SECRET = os.getenv("TWITTER_CONSUMER_SECRET")
+ACCESS_KEY = os.getenv("TWITTER_ACCESS_KEY")
+ACCESS_SECRET = os.getenv("TWITTER_ACCESS_SECRET")
 
-# oxford dictionary
-oxford_app_id = keys['oxford']['appId']
-oxford_app_key = keys['oxford']['appKey']
+# spotify - https://developer.spotify.com/
+spotify_client_id = os.getenv("SPOTIFY_CLIENT_ID")
+spotify_client_secret = os.getenv("SPOTIFY_CLIENT_SECRET")
 
-# urban dictionary
+# oxford dictionary - https://developer.oxforddictionaries.com/
+oxford_app_id = os.getenv("OXFORD_APP_ID")
+oxford_app_key = os.getenv("OXFORD_APP_KEY")
+
+# urban dictionary - https://rapidapi.com/community/api/urban-dictionary/
 X_RapidAPI_headers = {
-    'x-rapidapi-host': keys['urban']['host'],
-    'x-rapidapi-key': keys['urban']['key']
+    'x-rapidapi-host': os.getenv("URBAN_HOST"),
+    'x-rapidapi-key': os.getenv("URBAN_KEY")
     }
 
 
-# tenor api key
-tenor_key = keys['tenor']['key']
+# tenor api - https://tenor.com/gifapi/documentation
+tenor_key = os.getenv("TENOR_KEY")
 
 
-# top.gg api
-top_gg_key = keys['top_gg']['key']
+# top.gg api - https://top.gg/api/docs
+top_gg_key = os.getenv("TOP_GG_KEY")
 top_gg = dbl.DBLClient(client, top_gg_key, autopost=True)
 
 
-# discord.boats api
-
-
-discord_boats_key = keys['discord_boats']['key']
+# discord.boats api - https://docs.discord.boats/
+discord_boats_key = os.getenv("DISCORD_BOATS_KEY")
 discord_boats = discordboats.Client(discord_boats_key, loop=client.loop)
 
 # postgres db connection
-postgres_options = keys['postgres']
-DBconn = psycopg2.connect(**postgres_options)
+postgres_options = {
+    "host": os.getenv("POSTGRES_HOST"),
+    "database": os.getenv("POSTGRES_DATABASE"),
+    "user": os.getenv("POSTGRES_USER"),
+    "password": os.getenv("POSTGRES_PASSWORD")
+    }
 
 
-# papago translation keys - not needed
-papago_client_id = keys['papago']['clientId']
-papago_client_secret = keys['papago']['clientSecret']
+async def connect_to_db():
+    """Create a pool to the postgres database using asyncpg"""
+    return await asyncpg.create_pool(**postgres_options, command_timeout=60)
+
+# papago translation keys - not needed - https://developers.naver.com/docs/papago/
+papago_client_id = os.getenv("PAPAGO_CLIENT_ID")
+papago_client_secret = os.getenv("PAPAGO_CLIENT_SECRET")
 translator = Translator()
+
+# startup time
+startup_time = datetime.now()

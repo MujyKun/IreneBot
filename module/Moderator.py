@@ -24,13 +24,12 @@ class Moderator(commands.Cog):
             # Default prefix '%' should never be in DB.
             if current_server_prefix == "%":
                 if prefix != "%":
-                    ex.c.execute("INSERT INTO general.serverprefix VALUES (%s,%s)", (ctx.guild.id, prefix))
+                    await ex.conn.execute("INSERT INTO general.serverprefix VALUES ($1,$2)", ctx.guild.id, prefix)
             else:
                 if prefix != "%":
-                    ex.c.execute("UPDATE general.serverprefix SET prefix = %s WHERE serverid = %s", (prefix, ctx.guild.id))
+                    await ex.conn.execute("UPDATE general.serverprefix SET prefix = $1 WHERE serverid = $2", prefix, ctx.guild.id)
                 else:
-                    ex.c.execute("DELETE FROM general.serverprefix WHERE serverid = %s", (ctx.guild.id,))
-            ex.DBconn.commit()
+                    await ex.conn.execute("DELETE FROM general.serverprefix WHERE serverid = $1", ctx.guild.id)
             await ctx.send(f"> **This server's prefix has been set to {prefix}.**")
 
     @commands.command(aliases=['prune', 'purge'])
@@ -129,8 +128,7 @@ class Moderator(commands.Cog):
         channel_id = ctx.channel.id
         try:
             if delay == -1:
-                    ex.c.execute("DELETE FROM currency.TempChannels WHERE chanID = %s", (channel_id,))
-                    ex.DBconn.commit()
+                    await ex.conn.execute("DELETE FROM currency.TempChannels WHERE chanID = $1", channel_id)
                     await ctx.send ("> **If this channel was a temporary channel, it has been removed.**")
             if delay >= 60:
                 new_delay = f"{(delay/60)} minutes"
@@ -140,21 +138,17 @@ class Moderator(commands.Cog):
                 await ctx.send("> **The delay cannot be negative.**")
             if delay >= 0:
                 channel_id = ctx.channel.id
-                ex.c.execute("SELECT COUNT(*) FROM currency.TempChannels WHERE chanID = %s", (channel_id,))
-                counter = ex.fetch_one()
+                counter = ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) FROM currency.TempChannels WHERE chanID = $1", channel_id))
                 if counter == 1:
-                    ex.c.execute("SELECT delay FROM currency.TempChannels WHERE chanID = %s", (channel_id,))
-                    old_delay = ex.fetch_one()
+                    old_delay = ex.first_result(await ex.conn.fetchrow("SELECT delay FROM currency.TempChannels WHERE chanID = $1", channel_id))
                     if old_delay == delay:
                         await ctx.send(f"> **This channel is already a temp channel that deletes messages every {new_delay}.**")
                     else:
-                        ex.c.execute("UPDATE currency.TempChannels SET delay = %s WHERE chanID = %s", (delay, channel_id))
-                        ex.DBconn.commit()
+                        await ex.conn.execute("UPDATE currency.TempChannels SET delay = $1 WHERE chanID = $2", delay, channel_id)
                         await ctx.send(f"> **This channel now deletes messages every {new_delay}.**")
                 if counter == 0:
                     await ctx.send(f"> **This channel now deletes messages every {new_delay}.**")
-                    ex.c.execute("INSERT INTO currency.TempChannels VALUES (%s, %s)", (channel_id, delay))
-                    ex.DBconn.commit()
+                    await ex.conn.execute("INSERT INTO currency.TempChannels VALUES ($1, $2)", channel_id, delay)
         except Exception as e:
             log.console(e)
 

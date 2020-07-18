@@ -3,7 +3,7 @@ from discord.ext.commands.cooldowns import BucketType
 from random import *
 import discord
 from module import logger as log
-from module.keys import client
+from module.keys import client, bot_website
 from Utility import resources as ex
 
 
@@ -120,7 +120,7 @@ class Currency(commands.Cog):
         """Shows Top 10 Users [Format: %leaderboard][Aliases: leaderboards, lb]"""
         counter = ex.first_result(await ex.conn.fetchrow("SELECT count(UserID) FROM currency.Currency"))
         embed = discord.Embed(title=f"Currency Leaderboard", color=0xffb6c1)
-        embed.set_author(name="Irene", url='https://www.youtube.com/watch?v=dQw4w9WgXcQ', icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
+        embed.set_author(name="Irene", url=bot_website, icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
         embed.set_footer(text="Type %bal (user) to view their balance.", icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
         if counter == 0:
             await ctx.send("> **There are no users to display.**", delete_after=60)
@@ -168,7 +168,6 @@ class Currency(commands.Cog):
             user_balance = await ex.get_balance(user_id)
             user_level = await ex.get_level(user_id, command.lower())
             money_needed_to_level = await ex.get_xp(user_level, command.lower())
-
             async def not_enough_money():
                 embed = await ex.create_embed(title="Not Enough Money!", title_desc=f"<@{user_id}> does not have **{money_needed_to_level:,}** dollars in order to level up {command}!")
                 await ctx.send(embed=embed)

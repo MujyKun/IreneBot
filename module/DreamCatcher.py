@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup as soup
 import aiofiles
 import asyncio
 from module import logger as log
-from module.keys import client
+from module.keys import client, dc_app_test_channel_id
 from Utility import resources as ex
 
 
@@ -103,35 +103,34 @@ class DreamCatcher(commands.Cog):
                 download_all_task.cancel()
             else:
                 post_url = 'https://dreamcatcher.candlemystar.com/post/{}'.format(number)
-                async with aiohttp.ClientSession() as session:
-                    async with session.get('{}'.format(post_url)) as r:
-                        if r.status == 200:
-                                page_html = await r.text()
-                                page_soup = soup(page_html, "html.parser")
-                                username = (page_soup.find("div", {"class": "card-name"})).text
-                                if username in self.list:
-                                    image_url = (page_soup.findAll("div", {"class": "imgSize width"}))
-                                    for image in image_url:
-                                        new_image_url = image.img["src"]
-                                        DC_Date = new_image_url[41:49]
-                                        unique_id = new_image_url[55:87]
-                                        file_format = new_image_url[93:]
-                                        HD_Link = f'https://file.candlemystar.com/post/{DC_Date}{unique_id}{file_format}'
-                                        async with session.get(HD_Link) as resp:
-                                            fd = await aiofiles.open('DCAppDownloaded/{}'.format(f"{unique_id[:8]}{file_format}"), mode='wb')
-                                            await fd.write(await resp.read())
-                                            await fd.close()
-                                            log.console(f"Downloaded {unique_id[:8]}{file_format} on {number}")
-                                            number += 1
-                                else:
-                                    log.console("DOWNLOAD Passing Post from POST #{}".format(number))
-                        elif r.status == 304:
-                            log.console("> **Access Denied - {}**".format(number))
-                        elif r.status == 404:
-                            log.console("DOWNLOAD Error 404. {} was not Found.".format(number))
-                            pass
-                        else:
-                            log.console("DOWNLOAD Other Error")
+                async with ex.session.get('{}'.format(post_url)) as r:
+                    if r.status == 200:
+                            page_html = await r.text()
+                            page_soup = soup(page_html, "html.parser")
+                            username = (page_soup.find("div", {"class": "card-name"})).text
+                            if username in self.list:
+                                image_url = (page_soup.findAll("div", {"class": "imgSize width"}))
+                                for image in image_url:
+                                    new_image_url = image.img["src"]
+                                    DC_Date = new_image_url[41:49]
+                                    unique_id = new_image_url[55:87]
+                                    file_format = new_image_url[93:]
+                                    HD_Link = f'https://file.candlemystar.com/post/{DC_Date}{unique_id}{file_format}'
+                                    async with ex.session.get(HD_Link) as resp:
+                                        fd = await aiofiles.open('DCAppDownloaded/{}'.format(f"{unique_id[:8]}{file_format}"), mode='wb')
+                                        await fd.write(await resp.read())
+                                        await fd.close()
+                                        log.console(f"Downloaded {unique_id[:8]}{file_format} on {number}")
+                                        number += 1
+                            else:
+                                log.console("DOWNLOAD Passing Post from POST #{}".format(number))
+                    elif r.status == 304:
+                        log.console("> **Access Denied - {}**".format(number))
+                    elif r.status == 404:
+                        log.console("DOWNLOAD Error 404. {} was not Found.".format(number))
+                        pass
+                    else:
+                        log.console("DOWNLOAD Other Error")
         download_all_task.start(ctx)
 
 
@@ -147,6 +146,68 @@ class DcApp:
         self.post_list = []
         self.count_loop = 0
         self.already_added = 0
+
+    async def check_dc_post(self, dc_number, test=False):
+        post_url = 'https://dreamcatcher.candlemystar.com/post/{}'.format(dc_number)
+        async with ex.session.get('{}'.format(post_url)) as r:
+            if r.status == 200:
+                await ex.conn.execute("DELETE FROM dreamcatcher.DCPost")
+                await ex.conn.execute("INSERT INTO dreamcatcher.DCPost VALUES($1)", dc_number)
+                self.error_status = 0
+                if dc_number not in self.post_list:
+                    page_html = await r.text()
+                    page_soup = soup(page_html, "html.parser")
+                    username = (page_soup.find("div", {"class": "card-name"})).text
+                    status_message = page_soup.find("div", {"class": "card-text"}).text
+                    # Getting rid of unnecessary spaces in the status message
+                    status_message = status_message.replace('                        ', '')
+                    status_message = status_message.replace('                    ', '')
+                    if username in self.list:
+                        image_url = (page_soup.findAll("div", {"class": "imgSize width"}))
+                        image_links = await ex.download_dc_photos(image_url)
+                        video_list, bat_list = await ex.get_video_and_bat_list(page_soup)
+                        """
+                        This is no longer necessary as it does it straight from the terminal now.
+                        
+                        if bat_list is not None:
+                            await ex.open_bat_file(bat_list)
+                            # Videos were attempting to being sent but were not found. Needs time to render.
+                            await asyncio.sleep(5)
+                        """
+                        channels = await ex.get_dc_channels()
+                        if test:
+                            channels = [[dc_app_test_channel_id]]
+                        member_name, member_id = ex.get_member_name_and_id(username, self.list)
+                        dc_photos_embed = await ex.get_embed(image_links, member_name)
+                        await ex.add_post_to_db(image_links, member_id, member_name, dc_number, post_url)
+                        for channel in channels:
+                            try:
+                                channel_id = channel[0]
+                                channel = client.get_channel(channel_id)
+                                # This part is repeated due to closed file IO error.
+                                dc_videos = ex.get_videos(video_list)
+                                await ex.send_new_post(channel_id, channel, member_name, status_message,
+                                                       post_url)
+                                await ex.send_content(channel, dc_photos_embed, dc_videos)
+                            except Exception as e:
+                                # This try except was added due to errors with specific channels resulting
+                                # in an infinite loop
+                                pass
+                        ex.delete_content()
+                    else:
+                        log.console(f"Passing Post from POST #{dc_number}")
+                self.post_list.append(dc_number)
+
+            elif r.status == 304:
+                log.console(f"> **Access Denied - {dc_number}**")
+            elif r.status == 404:
+                self.tries += 1
+                if self.count_loop % 500 == 0:
+                    log.console(f"Error 404. {dc_number} was not Found.")
+                self.error_status = 1
+                pass
+            else:
+                log.console(r.status)
 
     @tasks.loop(seconds=0, minutes=0, hours=0, reconnect=True)
     async def new_task4(self):
@@ -171,59 +232,6 @@ class DcApp:
                     self.tries = 0
                     self.number += 1
                     pass
-                post_url = 'https://dreamcatcher.candlemystar.com/post/{}'.format(self.number)
-                async with aiohttp.ClientSession() as session:
-                    async with session.get('{}'.format(post_url)) as r:
-                        if r.status == 200:
-                            await ex.conn.execute("DELETE FROM dreamcatcher.DCPost")
-                            await ex.conn.execute("INSERT INTO dreamcatcher.DCPost VALUES($1)", self.number)
-                            self.error_status = 0
-                            if self.number not in self.post_list:
-                                page_html = await r.text()
-                                page_soup = soup(page_html, "html.parser")
-                                username = (page_soup.find("div", {"class": "card-name"})).text
-                                status_message = page_soup.find("div", {"class": "card-text"}).text
-                                # Getting rid of unnecessary space
-                                status_message = status_message.replace('                        ', '')
-                                status_message = status_message.replace('                    ', '')
-                                if username in self.list:
-                                    image_url = (page_soup.findAll("div", {"class": "imgSize width"}))
-                                    image_links = await ex.download_dc_photos(image_url)
-                                    video_list, bat_list = ex.get_video_and_bat_list(page_soup)
-                                    if bat_list is not None:
-                                        await ex.open_bat_file(bat_list)
-                                        # Videos were attempting to being sent but were not found. Needs time to render.
-                                        await asyncio.sleep(5)
-                                    channels = await ex.get_dc_channels()
-                                    member_name, member_id = ex.get_member_name_and_id(username, self.list)
-                                    dc_photos_embed = await ex.get_embed(image_links, member_name)
-                                    await ex.add_post_to_db(image_links, member_id, member_name, self.number, post_url)
-                                    for channel in channels:
-                                        try:
-                                            channel_id = channel[0]
-                                            channel = client.get_channel(channel_id)
-                                            # This part is repeated due to closed file IO error.
-                                            dc_videos = ex.get_videos(video_list)
-                                            await ex.send_new_post(channel_id, channel, member_name, status_message, post_url)
-                                            await ex.send_content(channel, dc_photos_embed, dc_videos)
-                                        except Exception as e:
-                                            # This try except was added due to errors with specific channels resulting
-                                            # in an infinite loop
-                                            pass
-                                    ex.delete_content()
-                                else:
-                                    log.console(f"Passing Post from POST #{self.number}")
-                            self.post_list.append(self.number)
-
-                        elif r.status == 304:
-                            log.console(f"> **Access Denied - {self.number}**")
-                        elif r.status == 404:
-                            self.tries += 1
-                            if self.count_loop % 500 == 0:
-                                log.console(f"Error 404. {self.number} was not Found.")
-                            self.error_status = 1
-                            pass
-                        else:
-                            log.console(r.status)
+                await self.check_dc_post(self.number)
         except Exception as e:
             log.console(e)

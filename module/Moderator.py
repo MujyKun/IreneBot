@@ -35,35 +35,34 @@ class Moderator(commands.Cog):
     @commands.command(aliases=['prune', 'purge'])
     @commands.has_guild_permissions(manage_messages=True)
     async def clear(self, ctx, amount: int, user: discord.Member = discord.Member):
-        """Prune Messages [Format: %clear (amount)][Aliases: prune]"""
-        amount = int(amount)
-        original = amount
+        """Prune Messages (Max 1000) [Format: %clear (amount)][Aliases: prune]"""
+        amount = int(amount) + 1
 
-        def clearx(m):
+        def clear_x(m):
             return m.author == user
         if user == discord.Member:
             checker = 1
         else:
             checker = 0
-        amount = amount + 1
         if amount <= 101:
             if checker == 0:
-                await ctx.channel.purge(limit=amount, check=clearx, bulk=True)
+                await ctx.channel.purge(limit=amount, check=clear_x, bulk=True)
             elif checker == 1:
                 await ctx.channel.purge(limit=amount, bulk=True)
-            log.console("Pruned {} messages".format(amount))
+            log.console(f"Pruned {amount} messages from {ctx.channel.id}")
         if amount >= 102:
+            if amount > 1000:
+                amount = 1000
             number = (amount // 100)
             await ctx.send(
-                "> **{}** messages will be deleted in 5 seconds and will be split in intervals of 100.".format(
-                    original))
+                f"> **{amount}** messages will be deleted in 5 seconds and will be split in intervals of 100.")
             for i in range(number):
                 if checker == 0:
-                    await ctx.channel.purge(limit=100, check=clearx, bulk=True)
+                    await ctx.channel.purge(limit=100, check=clear_x, bulk=True)
                 elif checker == 1:
                     await ctx.channel.purge(limit=100, bulk=True)
-                log.console("Pruned 100 messages")
-            await ctx.send("> **{}** messages have been pruned.".format(original))
+                log.console(f"Pruned 100 messages from {ctx.channel.id}")
+            await ctx.send(f"> **{amount}** messages have been pruned from {ctx.channel.id}.")
 
     @commands.command()
     @commands.has_guild_permissions(ban_members=True)
@@ -79,7 +78,7 @@ class Moderator(commands.Cog):
             try:
                 if check:
                     await ctx.guild.ban(user=user, reason=reason, delete_message_days=0)
-                    embed = discord.Embed(title="User Banned!", description=f">**<@{user.id}> was banned by <@{ctx.author.id}> for {reason}**!", color=0xff00f6)
+                    embed = discord.Embed(title="User Banned!", description=f"> **<@{user.id}> was banned by <@{ctx.author.id}> for {reason}**!", color=0xff00f6)
                     await ctx.send(embed=embed)
             except Exception as e:
                 embed = discord.Embed(title="Error", description=f"**<@{user.id}> was not able to be banned by <@{ctx.author.id}> successfully. \n {e}**!", color=0xff00f6)
@@ -167,41 +166,40 @@ class Moderator(commands.Cog):
             await ctx.send("> **Please enter an emoji name more than two letters.**")
         if file_format != "None":
             # await ctx.send(file_format)
-            async with aiohttp.ClientSession() as session:
-                async with session.get('{}'.format(url)) as r:
-                    if r.status == 200:
-                        # await ctx.send("Connection Successful")
-                        fd = await aiofiles.open('Emoji/{}'.format(f"{emoji_name}{file_format}"), mode='wb')
-                        await fd.write(await r.read())
-                        await fd.close()
-                        log.console(f"Downloaded {emoji_name}{file_format}")
-                        full_file_name = emoji_name + file_format
-                        file_size = (os.path.getsize(f'Emoji/{full_file_name}'))
-                        if file_size > 262144:
-                            await ctx.send(f">>> **File cannot be larger than 256.0 kb. Please resize the emoji here (for the resize method, use Gifsicle).**\n <https://ezgif.com/resize?url={url}>")
-                            log.console(f"File cannot be larger than 256.0 kb. Please resize the emoji here. https://ezgif.com/resize?url={url}")
-                        elif file_size <= 262144:
-                            v = await aiofiles.open(f'Emoji/{full_file_name}', mode='rb')
-                            # await ctx.guild.create_custom_emoji(name=emoji_name, image=f'Emoji/{full_file_name}')
-                            await ctx.guild.create_custom_emoji(name=emoji_name, image=await v.read())
-                            await v.close()
-                            emojis = client.emojis
-                            max_emoji_length = len(emojis)
-                            if emoji_name in str(emojis[max_emoji_length-1]):
-                                await ctx.send(emojis[max_emoji_length-1])
-                            elif emoji_name in str(emojis[0]):
-                                await ctx.send(emojis[0])
-                            else:
-                                await ctx.send(f"> **Added :{emoji_name}:**")
-                        all_photos = os.listdir('Emoji')
-                        for photo in all_photos:
-                            try:
-                                os.unlink('Emoji/{}'.format(photo))
-                            except:
-                                pass
-                    elif r.status == 404:
-                        await ctx.send("> **That URL was not Found.**")
-                    elif r.status == 403:
-                        await ctx.send("> **I do not have access to that site.**")
-                    else:
-                        await ctx.send("> **I was not able to connect to that url**")
+            async with ex.session.get('{}'.format(url)) as r:
+                if r.status == 200:
+                    # await ctx.send("Connection Successful")
+                    fd = await aiofiles.open('Emoji/{}'.format(f"{emoji_name}{file_format}"), mode='wb')
+                    await fd.write(await r.read())
+                    await fd.close()
+                    log.console(f"Downloaded {emoji_name}{file_format}")
+                    full_file_name = emoji_name + file_format
+                    file_size = (os.path.getsize(f'Emoji/{full_file_name}'))
+                    if file_size > 262144:
+                        await ctx.send(f">>> **File cannot be larger than 256.0 kb. Please resize the emoji here (for the resize method, use Gifsicle).**\n <https://ezgif.com/resize?url={url}>")
+                        log.console(f"File cannot be larger than 256.0 kb. Please resize the emoji here. https://ezgif.com/resize?url={url}")
+                    elif file_size <= 262144:
+                        v = await aiofiles.open(f'Emoji/{full_file_name}', mode='rb')
+                        # await ctx.guild.create_custom_emoji(name=emoji_name, image=f'Emoji/{full_file_name}')
+                        await ctx.guild.create_custom_emoji(name=emoji_name, image=await v.read())
+                        await v.close()
+                        emojis = client.emojis
+                        max_emoji_length = len(emojis)
+                        if emoji_name in str(emojis[max_emoji_length-1]):
+                            await ctx.send(emojis[max_emoji_length-1])
+                        elif emoji_name in str(emojis[0]):
+                            await ctx.send(emojis[0])
+                        else:
+                            await ctx.send(f"> **Added :{emoji_name}:**")
+                    all_photos = os.listdir('Emoji')
+                    for photo in all_photos:
+                        try:
+                            os.unlink('Emoji/{}'.format(photo))
+                        except:
+                            pass
+                elif r.status == 404:
+                    await ctx.send("> **That URL was not Found.**")
+                elif r.status == 403:
+                    await ctx.send("> **I do not have access to that site.**")
+                else:
+                    await ctx.send("> **I was not able to connect to that url**")

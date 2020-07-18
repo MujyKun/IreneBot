@@ -90,7 +90,7 @@ class Music(commands.Cog):
                     keep_files.append(file_name)
                 all_music = os.listdir("music")
                 for song_file_name in all_music:
-                    file_location = f"music\\{song_file_name}"
+                    file_location = f"music/{song_file_name}"
                     if file_location not in keep_files and file_location not in files_in_process_of_queue:
                         if file_location != "music":
                             os.remove(file_location)
@@ -105,7 +105,13 @@ class Music(commands.Cog):
             if queued[guild_id]:
                 for song in queued[guild_id]:
                     player = song[0]
+                    file_name = song[2]
                     player.cleanup()
+                    try:
+                        os.remove(file_name)
+                    except Exception as e:
+                        pass
+
                 queued.pop(guild_id, None)
         except Exception as e:
             pass
@@ -230,6 +236,10 @@ class Music(commands.Cog):
             pass
         try:
             (queued[client_guild_id][0][0]).cleanup()
+            try:
+                os.remove(queued[client_guild_id][0][2])
+            except Exception as e:
+                pass
             return queued[client_guild_id].pop(0)
         except KeyError:
             return None

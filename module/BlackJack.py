@@ -79,7 +79,7 @@ class BlackJack(commands.Cog):
         countx = -1
         for card in cards:
             countx += 1
-            await ex.conn.execute("INSERT INTO blackjack.cards (name, value) VALUES ($1, $2)", card, cardvalues[countx])
+            await ex.conn.execute("INSERT INTO blackjack.cards (id, name, value) VALUES ($3, $1, $2)", card, cardvalues[countx], countx+1)
         await ctx.send("> **All cards have been added into the table.**", delete_after=40)
 
     @commands.command()
@@ -106,7 +106,6 @@ class BlackJack(commands.Cog):
             check = False
             user_id = ctx.author.id
             game_id = await ex.get_game_by_player(user_id)
-            print(1.0)
             if game_id is None:
                 await ctx.send(f"> **{ctx.author}, you are not in a game.**")
             else:

@@ -9,6 +9,8 @@ import aiofiles
 import os
 import math
 import tweepy
+import filetype
+
 
 """
 Utility.py
@@ -21,14 +23,17 @@ class Utility:
     def __init__(self):
         self.client = keys.client
         self.session = aiohttp.ClientSession()
+        self.session = keys.client_session
         self.conn = None
         auth = tweepy.OAuthHandler(keys.CONSUMER_KEY, keys.CONSUMER_SECRET)
         auth.set_access_token(keys.ACCESS_KEY, keys.ACCESS_SECRET)
         self.api = tweepy.API(auth)
 
+
     ##################
     # ## DATABASE ## #
     ##################
+
     @tasks.loop(seconds=0, minutes=0, hours=0, reconnect=True)
     async def set_db_connection(self):
         """Looping Until A Stable Connection to DB is formed. This is to confirm Irene starts before the DB connects."""
@@ -228,7 +233,7 @@ class Utility:
             embed = discord.Embed(title=title, color=color)
         else:
             embed = discord.Embed(title=title, color=color, description=title_desc)
-        embed.set_author(name="Irene", url='https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        embed.set_author(name="Irene", url=keys.bot_website,
                          icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
         embed.set_footer(text=footer_desc, icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
         return embed
@@ -250,18 +255,23 @@ class Utility:
         """Turn command cooldown of seconds into hours, minutes, and seconds."""
         time = round(time)
         time_returned = ""
+        if time % 86400 != time:
+            days = int(time//86400)
+            if days != 0:
+                time = time-(days*86400)
+                time_returned += f"{days}d "
         if time % 3600 != time:
             hours = int(time//3600)
             if hours != 0:
-                time_returned += f"{int(time//3600)}h "
+                time_returned += f"{hours}h "
         if time % 3600 != 0:
             minutes = int((time % 3600) // 60)
             if minutes != 0:
-                time_returned += f"{int((time% 3600) // 60)}m "
+                time_returned += f"{minutes}m "
         if (time % 3600) % 60 < 60:
             seconds = (time % 3600) % 60
             if seconds != 0:
-                time_returned += f"{int((time% 3600) % 60)}s"
+                time_returned += f"{seconds}s"
         return time_returned
 
     @staticmethod
@@ -331,7 +341,7 @@ class Utility:
     @staticmethod
     async def set_embed_author_and_footer(embed, footer_message):
         """Sets the author and footer of an embed."""
-        embed.set_author(name="Irene", url='https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        embed.set_author(name="Irene", url=keys.bot_website,
                          icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
         embed.set_footer(text=footer_message,
                          icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
@@ -721,38 +731,25 @@ class Utility:
     async def finish_game(self, game_id, channel):
         """Finish off a blackjack game and terminate it."""
         game = await self.get_game(game_id)
-        print(2.0)
         player1_score = await self.get_player_total(game[1])
-        print(2.1)
         player2_score = await self.get_player_total(game[2])
-        print(2.2)
         if player2_score < 12 and self.check_if_bot(game[2]):
             await self.add_card(game[2])
         else:
             winner = self.determine_winner(player1_score, player2_score)
-            print(2.3)
             player1_current_bal = await self.get_balance(game[1])
-            print(2.1240)
             player2_current_bal = await self.get_balance(game[2])
-            print(2.999)
             if winner == 'player1':
                 await self.update_balance(game[1], player1_current_bal + int(game[4]))
-                print(3.0)
                 if not self.check_if_bot(game[2]):
-                    print(3.1)
                     await self.update_balance(game[2], player2_current_bal - int(game[4]))
                 await self.announce_winner(channel, game[1], game[2], player1_score, player2_score, game[4])
-                print(2.4)
             elif winner == 'player2':
                 if not self.check_if_bot(game[2]):
-                    print(3.2)
                     await self.update_balance(game[2], player2_current_bal + int(game[3]))
-                print(3.3)
                 await self.update_balance(game[1], player1_current_bal - int(game[3]))
-                print(3.4)
                 await self.announce_winner(channel, game[2], game[1], player2_score, player1_score, game[3])
             elif winner == 'tie':
-                print(2.5)
                 await self.announce_tie(channel, game[1], game[2], player1_score)
             await self.delete_game(game_id)
 
@@ -867,11 +864,10 @@ class Utility:
     @staticmethod
     async def check_if_folder(url):
         """Check if a url is a folder."""
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url) as r:
-                if r.status == 200:
-                    return True
-                return False
+        async with keys.client_session.get(url) as r:
+            if r.status == 200:
+                return True
+            return False
 
     async def get_idol_count(self, member_id):
         """Get the amount of photos for an idol."""
@@ -1158,45 +1154,68 @@ class Utility:
                 file_name = file_name.replace(character, "z")
         return file_name
 
+    @staticmethod
+    def get_file_type(file_location):
+        try:
+            kind = filetype.guess(file_location)
+            if kind is None:
+                return None
+            return f".{kind.extension}"
+        except Exception as e:
+            return None
+
     async def send_google_drive_embed(self, photo_link, embed, channel, drive_id, member_id, group_id):
         """Does the processing for google drive photos/videos."""
         try:
-            post_url = f"https://drive.google.com/file/d/{drive_id}/view?usp=sharing"
-            async with self.session.get(post_url) as r:
-                async with self.session.get(photo_link) as resp:
-                    if resp.status == 200:
-                        page_html = await r.text()
-                        page_soup = soup(page_html, "html.parser")
-                        title_loc = (page_soup.find("title"))
-                        title_end = (str(title_loc.next).find(" - Google Drive"))
-                        file_name = (title_loc.next[0:title_end])
-                        file_name = self.remove_custom_characters(file_name)  # Important to have photo not outisde of embed.
-                        file_location = f'temp/{file_name}'
-                        fd = await aiofiles.open(file_location, mode='wb')
-                        await fd.write(await resp.read())
-                        await fd.close()
-                        file_size = os.path.getsize(file_location)  # bytes (conversion binary)
-                        if file_size < 8388608:  # 8 MB
-                            photo = discord.File(file_location, file_name)
-                            embed.set_image(url=f"attachment://{file_name}")
-                            if not self.check_photo_animated(file_name):
-                                msg = await channel.send(file=photo, embed=embed)
-                            else:
-                                msg = await channel.send(file=photo)
-                        else:
-                            embed.set_image(url=photo_link)
-                            msg = await channel.send(embed=embed)
-                        os.unlink(file_location)
-                        return msg
-                    elif resp.status == 404 or resp.status == 403:
-                        log.console(f"REMOVING FROM IDOL {member_id} - {photo_link}")
-                        await self.conn.execute("DELETE FROM groupmembers.imagelinks WHERE link = $1", photo_link)
-                        await self.conn.execute("INSERT INTO groupmembers.deleted(link, memberid) VALUES ($1,$2)", photo_link, 0)
-                        # send a new post
+            # post_url = f"https://drive.google.com/file/d/{drive_id}/view?usp=sharing"
+            # async with self.session.get(post_url) as r:  commented out due to google blocking network on host.
+            async with self.session.get(photo_link) as resp:
+                if resp.status == 200:
+                    """
+                    page_html = await r.text()
+                    page_soup = soup(page_html, "html.parser")
+                    google has blocked the host network, this section will not work.
+                    
+                    title_loc = (page_soup.find("title"))
+                    title_end = (str(title_loc.next).find(" - Google Drive"))
+                    file_name = (title_loc.next[0:title_end])
+                    file_name = self.remove_custom_characters(file_name)  # Important to have photo not outisde of embed.
+                    """
+                    file_name = str(random.randint(1, 999999999999999999))
+                    file_location = f'temp/{file_name}'
+                    fd = await aiofiles.open(file_location, mode='wb')
+                    await fd.write(await resp.read())
+                    await fd.close()
+                    file_type = self.get_file_type(file_location)
+                    if file_type is None:
                         random_link = await self.get_random_photo_from_member(member_id)
                         await self.idol_post(channel, member_id, random_link, group_id)
+                        return None
+                    os.rename(file_location, file_location + file_type)
+                    file_name = file_name + file_type
+                    file_location = f'temp/{file_name}'
+                    file_size = os.path.getsize(file_location)  # bytes (conversion binary)
+                    if file_size < 8388608:  # 8 MB
+                        photo = discord.File(file_location, file_name)
+                        embed.set_image(url=f"attachment://{file_name}")
+                        if not self.check_photo_animated(file_name):
+                            msg = await channel.send(file=photo, embed=embed)
+                        else:
+                            msg = await channel.send(file=photo)
                     else:
-                        log.console(f"ERROR {resp.status} Member ID: {member_id}- {photo_link}")
+                        embed.set_image(url=photo_link)
+                        msg = await channel.send(embed=embed)
+                    os.unlink(file_location)
+                    return msg
+                elif resp.status == 404 or resp.status == 403:
+                    log.console(f"REMOVING FROM IDOL {member_id} - {photo_link}")
+                    await self.conn.execute("DELETE FROM groupmembers.imagelinks WHERE link = $1", photo_link)
+                    await self.conn.execute("INSERT INTO groupmembers.deleted(link, memberid) VALUES ($1,$2)", photo_link, 0)
+                    # send a new post
+                    random_link = await self.get_random_photo_from_member(member_id)
+                    await self.idol_post(channel, member_id, random_link, group_id)
+                else:
+                    log.console(f"ERROR {resp.status} Member ID: {member_id}- {photo_link}")
         except Exception as e:
             log.console(e)
 
@@ -1353,26 +1372,30 @@ class Utility:
         """Get all the servers that receive DC APP Updates."""
         return await self.conn.fetch("SELECT serverid FROM dreamcatcher.dreamcatcher")
 
-    def get_video_and_bat_list(self, page_soup):
+    async def get_video_and_bat_list(self, page_soup):
         """Get a list of all the .bat and video files."""
-        video_list = (page_soup.findAll("div", {"class": "swiper-slide img-box video-box width"}))
-        if len(video_list) == 0:
-            video_list = (page_soup.findAll("div", {"class": "swiper-slide img-box video-box height"}))
-        count_numbers = 0
-        video_name_list = []
-        bat_name_list = []
-        for video in video_list:
-            count_numbers += 1
-            new_video_url = video.source["src"]
-            bat_name = "{}DC.bat".format(count_numbers)
-            bat_name_list.append(bat_name)
-            ab = open("Videos\{}".format(bat_name), "a+")
-            video_name = "{}DCVideo.mp4".format(count_numbers)
-            info = 'ffmpeg -i "{}" -c:v libx264 -preset slow -crf 22 "Videos/{}"'.format(new_video_url,
-                                                                                         video_name)
-            video_name_list.append(video_name)
-            ab.write(info)
-            ab.close()
+        try:
+            video_list = (page_soup.findAll("div", {"class": "swiper-slide img-box video-box width"}))
+            if len(video_list) == 0:
+                video_list = (page_soup.findAll("div", {"class": "swiper-slide img-box video-box height"}))
+            count_numbers = 0
+            video_name_list = []
+            bat_name_list = []
+            for video in video_list:
+                count_numbers += 1
+                new_video_url = video.source["src"]
+                bat_name = "{}DC.bat".format(count_numbers)
+                bat_name_list.append(bat_name)
+                ab = open("Videos\{}".format(bat_name), "a+")
+                video_name = "{}DCVideo.mp4".format(count_numbers)
+                info = 'ffmpeg -i "{}" -c:v libx264 -preset slow -crf 22 "Videos/{}"'.format(new_video_url,
+                                                                                             video_name)
+                os.system(info)
+                video_name_list.append(video_name)
+                ab.write(info)
+                ab.close()
+        except Exception as e:
+            log.console(e)
         return self.get_none_if_list_is_empty(video_name_list), self.get_none_if_list_is_empty(bat_name_list)
 
     @staticmethod
@@ -1510,7 +1533,7 @@ class Utility:
         """Open a bat file to process the video with ffmpeg."""
         for bat_name in bat_list:
             # open bat file
-            check_bat = await asyncio.create_subprocess_exec("Videos\\{}".format(bat_name),
+            check_bat = await asyncio.create_subprocess_exec("Videos/{}".format(bat_name),
                                                              stderr=asyncio.subprocess.PIPE)
             await check_bat.wait()
 

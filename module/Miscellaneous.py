@@ -31,6 +31,9 @@ class Miscellaneous(commands.Cog):
         https://bots.ondiscord.xyz/bots/520369375325454371
         https://discord.boats/bot/520369375325454371
         """
+        mods = ""
+        for bot_mod in keys.mods_list:
+            mods += f"<@{bot_mod}> | "
         embed = await ex.create_embed(title=f"I am {app_name}! ({app_id})", title_desc="I was made with Python using the discord.py wrapper.")
         embed.set_thumbnail(url=app_icon_url)
         embed.add_field(name=f"Servers Connected", value=f"{ex.get_server_count()} Servers", inline=True)
@@ -39,10 +42,14 @@ class Miscellaneous(commands.Cog):
         embed.add_field(name=f"DC Updates Sent to", value=f"{len(await ex.get_dc_channels())} Channels", inline=True)
         embed.add_field(name=f"Bot Uptime", value=bot_uptime, inline=True)
         embed.add_field(name=f"Total Commands Used", value=f"{total_commands} Commands", inline=True)
-        embed.add_field(name=f"This Session", value=f"{current_session_commands} Commands" , inline=True)
+        embed.add_field(name=f"This Session", value=f"{current_session_commands} Commands", inline=True)
+        embed.add_field(name=f"Playing Music", value=f"{len(client.voice_clients)} Voice Clients", inline=True)
         embed.add_field(name=f"Ping", value=f"{ex.get_ping()} ms", inline=True)
         embed.add_field(name=f"Bot Owner", value=f"<@{app_owner.id}>", inline=False)
+        if len(mods) != 0:
+            embed.add_field(name=f"Bot Mods", value=mods, inline=True)
         embed.add_field(name=f"Support Server", value=f"https://discord.gg/bEXm85V", inline=False)
+        embed.add_field(name=f"Website", value=keys.bot_website, inline=False)
         embed.add_field(name=f"Github", value=f"https://github.com/MujyKun/IreneBot", inline=False)
         embed.add_field(name=f"Discord Invite", value=keys.bot_invite_link, inline=False)
         embed.add_field(name=f"Bot Server Links", value=bot_server_links, inline=False)
@@ -111,7 +118,6 @@ class Miscellaneous(commands.Cog):
                 log.console(e)
 
 
-
     @commands.command()
     async def checkprefix(self, ctx):
         """Check the current prefix using the default prefix."""
@@ -142,32 +148,41 @@ class Miscellaneous(commands.Cog):
         """Report an issue with Irene. Format: [%report (issue)]"""
         desc = f"**{issue}**"
         embed = discord.Embed(title="Bug Report", color=0xff00f6)
-        embed.set_author(name="Irene", url='https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        embed.set_author(name="Irene", url=keys.bot_website,
                          icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
         embed.set_footer(text="Thanks for leaving a report.",
                          icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
         embed.add_field(name=f"{ctx.author.name} ({ctx.author.id})", value=desc)
-        channel = await client.fetch_channel(703833469620453396)
-        msg = await channel.send(embed=embed)
-        await ctx.send("> **Your bug report has been sent.**")
-        await msg.add_reaction("\U0001f44d")  # thumbs up
-        await msg.add_reaction("\U0001f44e")  # thumbs down
+        try:
+            channel = await client.fetch_channel(keys.report_channel_id)  # 403 error on testing
+            msg = await channel.send(embed=embed)
+            await ctx.send("> **Your bug report has been sent.**")
+            await msg.add_reaction("\U0001f44d")  # thumbs up
+            await msg.add_reaction("\U0001f44e")  # thumbs down
+        except Exception as e:
+            # Error would occur on test bot if the client does not have access to a certain channel id
+            # this try-except will also be useful if a server removed the bot.
+            await ctx.send("Could not fetch channel to report to.")
 
     @commands.command()
     async def suggest(self, ctx, *, suggestion):
         """Suggest a feature for Irene. Format: [%suggest (suggestion)]"""
         desc = f"**{suggestion}**"
         embed = discord.Embed(title="Suggestion", color=0xff00f6)
-        embed.set_author(name="Irene", url='https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        embed.set_author(name="Irene", url=keys.bot_website,
                          icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
         embed.set_footer(text="Thanks for leaving a suggestion.",
                          icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
         embed.add_field(name=f"{ctx.author.name} ({ctx.author.id})", value=desc)
-        channel = await client.fetch_channel(703549964181307413)
-        msg = await channel.send(embed=embed)
-        await ctx.send("> **Your suggestion has been sent.**")
-        await msg.add_reaction("\U0001f44d")  # thumbs up
-        await msg.add_reaction("\U0001f44e")  # thumbs down
+        try:
+            channel = await client.fetch_channel(keys.suggest_channel_id)  # 403 error on testing
+            msg = await channel.send(embed=embed)
+            await ctx.send("> **Your suggestion has been sent.**")
+            await msg.add_reaction("\U0001f44d")  # thumbs up
+            await msg.add_reaction("\U0001f44e")  # thumbs down
+        except Exception as e:
+            log.console(e)
+            await ctx.send("Could not fetch channel to suggest to.")
 
     @commands.command()
     async def nword(self, ctx, user: discord.Member = discord.Member):
@@ -199,7 +214,7 @@ class Miscellaneous(commands.Cog):
     async def nwordleaderboard(self, ctx):
         """Shows leaderboards for how many times the nword has been said. [Format: %nwl]"""
         embed = discord.Embed(title=f"NWord Leaderboard", color=0xffb6c1)
-        embed.set_author(name="Irene", url='https://www.youtube.com/watch?v=dQw4w9WgXcQ', icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
+        embed.set_author(name="Irene", url=keys.bot_website, icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
         embed.set_footer(text="Type %nword (user) to view their individual stats.", icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
         all_members = await ex.conn.fetch("SELECT UserID, NWord FROM currency.Counter ORDER BY NWord DESC")
         count_loop = 0
@@ -272,7 +287,7 @@ class Miscellaneous(commands.Cog):
         """Sends a bot message to certain text channels"""
         desc = f"{new_message}"
         embed = discord.Embed(title=f"Announcement from {ctx.author} ({ctx.author.id})", description=desc, color=0xff00f6)
-        embed.set_author(name="Irene", url='https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        embed.set_author(name="Irene", url=keys.bot_website,
                          icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
         embed.set_footer(text="Type %support for an invite to Irene's discord server.",
                          icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
@@ -291,7 +306,7 @@ class Miscellaneous(commands.Cog):
     async def send(self, ctx, channel_id, *, new_message):
         """Send a message to a text channel."""
         try:
-            channel = await client.fetch_channel(channel_id)
+            channel = await client.fetch_channel(channel_id)  # 403 forbidden on tests.
             await channel.send(new_message)
             await ctx.send("> **Message Sent.**")
         except Exception as e:
@@ -309,7 +324,7 @@ class Miscellaneous(commands.Cog):
         try:
             guild = ctx.guild
             embed = discord.Embed(title= f"{guild.name} ({guild.id})", color=0xffb6c1, url=f"{guild.icon_url}")
-            embed.set_author(name="Irene", url='https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+            embed.set_author(name="Irene", url=keys.bot_website,
                              icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
             embed.set_footer(text="Thanks for using Irene.",
                              icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
@@ -337,7 +352,7 @@ class Miscellaneous(commands.Cog):
         count = 1
         page_number = 1
         embed = discord.Embed(title=f"{len(guilds)} Servers - Page {page_number}", color=0xffb6c1)
-        embed.set_author(name="Irene", url='https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        embed.set_author(name="Irene", url=keys.bot_website,
                          icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
         embed.set_footer(text="Thanks for using Irene.",
                          icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
@@ -371,7 +386,7 @@ class Miscellaneous(commands.Cog):
                             embed_list.append(embed)
                             page_number += 1
                             embed = discord.Embed(title=f"{len(guilds)} Servers - Page {page_number}", color=0xffb6c1)
-                            embed.set_author(name="Irene", url='https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                            embed.set_author(name="Irene", url=keys.bot_website,
                                              icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
                             embed.set_footer(text="Thanks for using Irene.",
                                              icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
@@ -450,9 +465,3 @@ class Miscellaneous(commands.Cog):
         """Shows Latency to Discord [Format: %ping]"""
         await ctx.send(f"> **My ping is currently {ex.get_ping()}ms.**")
 
-    @commands.command()
-    @commands.is_owner()
-    async def kill(self, ctx):
-        """Kills the bot [Format: %kill]"""
-        await ctx.send("> **The bot is now offline.**")
-        await client.logout()

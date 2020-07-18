@@ -74,6 +74,7 @@ class Irene:
         ex.client.add_cog(module.Music.Music())
         ex.client.add_cog(module.BotMod.BotMod())
         ex.client.add_cog(module.events.Events())
+        ex.client.add_cog(module.Testing.Testing())
 
 
 if __name__ == '__main__':

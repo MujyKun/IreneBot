@@ -7,6 +7,13 @@ from Utility import resources as ex
 class BotMod(commands.Cog):
     @commands.command()
     @commands.check(ex.check_if_mod)
+    async def kill(self, ctx):
+        """Kills the bot [Format: %kill]"""
+        await ctx.send("> **The bot is now offline.**")
+        await ex.client.logout()
+
+    @commands.command()
+    @commands.check(ex.check_if_mod)
     async def addinteraction(self, ctx, interaction_type, *, links):
         """Add a gif/photo to an interaction (ex: slap,kiss,lick,hug) [Format: %addinteraction (interaction) (url,url)"""
         links = links.split(',')

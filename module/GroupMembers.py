@@ -33,8 +33,11 @@ class GroupMembers(commands.Cog):
 
         if from_sorting == 0:
             if await ex.check_channel_sending_photos(message_channel.id):
-                if await ex.check_server_sending_photos(message.guild.id):
-                    message_channel = await ex.get_channel_sending_photos(message.guild.id)
+                try:
+                    if await ex.check_server_sending_photos(message.guild.id):
+                        message_channel = await ex.get_channel_sending_photos(message.guild.id)
+                except Exception as e:
+                    pass  # error is guild not found, likely being accessed from DMs
                 posted = False
                 try:
                     if ex.check_message_not_empty(message):
@@ -188,57 +191,55 @@ class GroupMembers(commands.Cog):
                     return True
                 except Exception as e:
                     log.console(f"{e} /3")
-
-            async with aiohttp.ClientSession() as session:
-                async with session.get(url) as r:
-                    if r.status == 200:
-                        page_html = await r.text()
-                        page_soup = soup(page_html, "html.parser")
-                        # log.console(page_soup)
-                        image_id_src = (page_soup.findAll("script"))
-                        string_src = str(image_id_src[21]).split("x22")
-                        for id in string_src:
-                            if (len(id) == 34 or len(id) == 29) and (id[0:33] != url_id and id[0:28] != url_id):
-                                check = True
-                                if len(id) == 34:
-                                    # viewable_url = f"https://drive.google.com/uc?export=view&id={id[0:33]}"
-                                    viewable_url = f"https://drive.google.com/drive/folders/{id[0:33]}"
-                                    new_id = id[0:33]
-                                elif len(id) == 29:
-                                    # viewable_url = f"https://drive.google.com/uc?export=view&id={id[0:28]}"
-                                    viewable_url = f"https://drive.google.com/drive/folders/{id[0:28]}"
-                                    new_id = id[0:28]
+            async with ex.session.get(url) as r:
+                if r.status == 200:
+                    page_html = await r.text()
+                    page_soup = soup(page_html, "html.parser")
+                    # log.console(page_soup)
+                    image_id_src = (page_soup.findAll("script"))
+                    string_src = str(image_id_src[21]).split("x22")
+                    for id in string_src:
+                        if (len(id) == 34 or len(id) == 29) and (id[0:33] != url_id and id[0:28] != url_id):
+                            check = True
+                            if len(id) == 34:
+                                # viewable_url = f"https://drive.google.com/uc?export=view&id={id[0:33]}"
+                                viewable_url = f"https://drive.google.com/drive/folders/{id[0:33]}"
+                                new_id = id[0:33]
+                            elif len(id) == 29:
+                                # viewable_url = f"https://drive.google.com/uc?export=view&id={id[0:28]}"
+                                viewable_url = f"https://drive.google.com/drive/folders/{id[0:28]}"
+                                new_id = id[0:28]
+                            else:
+                                new_id = None
+                            async with ex.session.get(viewable_url) as w:
+                                if w.status == 200:
+                                    if new_id not in self.folder_already_checked:
+                                        self.folder_already_checked.append(new_id)
+                                        if not await straight_to_folders(new_id):
+                                            pass
+                                elif w.status == 404:
+                                    # this part is in the case there is only one folder with many photos
+                                    # and no other folders are present.
+                                    if url_id not in self.folder_already_checked:
+                                        self.folder_already_checked.append(url_id)
+                                        if not await straight_to_folders(url_id):
+                                            pass
+                                    # it's fine if the url doesn't exist
+                                    # when it's actually called, it will be auto deleted.
+                                    if not await straight_to_images(url_id, new_id):
+                                        pass
+                                elif w.status == 403:
+                                    if not await straight_to_images(url_id):
+                                        pass
                                 else:
-                                    new_id = None
-                                async with session.get(viewable_url) as w:
-                                    if w.status == 200:
-                                        if new_id not in self.folder_already_checked:
-                                            self.folder_already_checked.append(new_id)
-                                            if not await straight_to_folders(new_id):
-                                                pass
-                                    elif w.status == 404:
-                                        # this part is in the case there is only one folder with many photos
-                                        # and no other folders are present.
-                                        if url_id not in self.folder_already_checked:
-                                            self.folder_already_checked.append(url_id)
-                                            if not await straight_to_folders(url_id):
-                                                pass
-                                        # it's fine if the url doesn't exist
-                                        # when it's actually called, it will be auto deleted.
-                                        if not await straight_to_images(url_id, new_id):
-                                            pass
-                                    elif w.status == 403:
-                                        if not await straight_to_images(url_id):
-                                            pass
-                                    else:
-                                        log.console(f"GroupMembers.py -> get_folders2: {w.status} {viewable_url} /2")
-                    elif r.status == 404:
-                        view_url = f"https://drive.google.com/uc?export=view&id={url_id}"
-                        await self.get_photos(view_url, member, group, stage_name, aliases, member_id)
-                        # if not await straight_to_images(url_id):
-                        # return check
-                    else:
-                        log.console(f"GroupMembers.py -> get_folders1: {r.status} {url} /1")
+                                    log.console(f"GroupMembers.py -> get_folders2: {w.status} {viewable_url} /2")
+                elif r.status == 404:
+                    view_url = f"https://drive.google.com/uc?export=view&id={url_id}"
+                    await self.get_photos(view_url, member, group, stage_name, aliases, member_id)
+                    # if not await straight_to_images(url_id):
+                    # return check
+                else:
+                    log.console(f"GroupMembers.py -> get_folders1: {r.status} {url} /1")
         except Exception as e:
             log.console(e)
         return check
@@ -368,35 +369,38 @@ class GroupMembers(commands.Cog):
     @commands.command()
     async def aliases(self, ctx, mode="member", page_number=1):
         """Lists the aliases of idols that have one [Format: %aliases (members/groups)]"""
-        check = True
-        if 'member' in mode.lower():
-            embed_list = await ex.set_embed_with_all_aliases("Idol")
-        elif 'group' in mode.lower():
-            embed_list = await ex.set_embed_with_all_aliases("Group")
-        else:
-            await ctx.send("> **I don't know if you want member or group aliases.**")
-            check = False
-        if check:
-            if page_number > len(embed_list):
-                page_number = 1
-            elif page_number < 1:
-                page_number = 1
-            msg = await ctx.send(embed=embed_list[page_number-1])
-            await ex.check_left_or_right_reaction_embed(msg, embed_list, page_number - 1)
+        try:
+            check = True
+            if 'member' in mode.lower():
+                embed_list = await ex.set_embed_with_all_aliases("Idol")
+            elif 'group' in mode.lower():
+                embed_list = await ex.set_embed_with_all_aliases("Group")
+            else:
+                await ctx.send("> **I don't know if you want member or group aliases.**")
+                check = False
+            if check:
+                if page_number > len(embed_list):
+                    page_number = 1
+                elif page_number < 1:
+                    page_number = 1
+                msg = await ctx.send(embed=embed_list[page_number-1])
+                await ex.check_left_or_right_reaction_embed(msg, embed_list, page_number - 1)
+        except Exception as e:
+            log.console(e)
+            await ctx.send(f"> **Error - {e}**")
 
     @commands.is_owner()
     @commands.command()
     async def scrapelink(self, ctx, url):
         """Connection to site + put html to html_page.txt"""
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url) as r:
-                if r.status == 200:
-                    page_html = await r.text()
-                    page_soup = soup(page_html, "html.parser")
-                    page_soup = page_soup.encode("utf-8")
-                    log.console(page_soup)
-                    with open('html_page.txt', 'w+') as f:
-                        f.write(str(page_soup))
+        async with ex.session.get(url) as r:
+            if r.status == 200:
+                page_html = await r.text()
+                page_soup = soup(page_html, "html.parser")
+                page_soup = page_soup.encode("utf-8")
+                log.console(page_soup)
+                with open('html_page.txt', 'w+') as f:
+                    f.write(str(page_soup))
         await ctx.send("> **Complete**")
 
     @commands.is_owner()
@@ -442,18 +446,17 @@ class GroupMembers(commands.Cog):
         # https://tenor.com/developer/dashboard
         try:
             url = f'https://api.tenor.com/v1/search?q={keyword}&key={keys.tenor_key}&limit={limit}'
-            async with aiohttp.ClientSession() as session:
-                async with session.get(url) as r:
-                    if r.status == 200:
-                        content = await r.content.read()
-                        gifs = json.loads(content)
-                        count = 0
-                        for key in gifs['results']:
-                            count += 1
-                            # await ctx.send((key['url']))
-                            url = key['url']
-                            await ex.conn.execute("INSERT INTO groupmembers.ScrapedLinks VALUES ($1)", url)
-                        await ctx.send(f"> **{count} link(s) for {keyword} were added to the Database.**")
+            async with ex.session.get(url) as r:
+                if r.status == 200:
+                    content = await r.content.read()
+                    gifs = json.loads(content)
+                    count = 0
+                    for key in gifs['results']:
+                        count += 1
+                        # await ctx.send((key['url']))
+                        url = key['url']
+                        await ex.conn.execute("INSERT INTO groupmembers.ScrapedLinks VALUES ($1)", url)
+                    await ctx.send(f"> **{count} link(s) for {keyword} were added to the Database.**")
         except Exception as e:
             log.console(e)
 
@@ -510,7 +513,7 @@ class GroupMembers(commands.Cog):
     async def countleaderboard(self, ctx):
         """Shows leaderboards for how many times an idol has been called. [Format: %clb]"""
         embed = discord.Embed(title=f"Idol Leaderboard", color=0xffb6c1)
-        embed.set_author(name="Irene", url='https://www.youtube.com/watch?v=dQw4w9WgXcQ', icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
+        embed.set_author(name="Irene", url=keys.bot_website, icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
         embed.set_footer(text=f"Type {await ex.get_server_prefix_by_context(ctx)}count (idol name) to view their individual stats.", icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
         all_members = await ex.conn.fetch("SELECT MemberID, Count FROM groupmembers.Count ORDER BY Count DESC")
         count_loop = 0

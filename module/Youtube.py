@@ -40,15 +40,14 @@ class Youtube(commands.Cog):
         links = await ex.conn.fetch("SELECT link FROM currency.links")
         for link in links:
             id = ex.first_result(await ex.conn.fetchrow("SELECT LinkID FROM currency.links WHERE Link = $1", link))
-            async with aiohttp.ClientSession() as session:
-                async with session.get('{}'.format(link[0])) as r:
-                    if r.status == 200:
-                        page_html = await r.text()
-                        log.console(page_html)
-                        page_soup = soup(page_html, "html.parser")
-                        view_count = (page_soup.find("div", {"class": "watch-view-count"})).text
-                        # await ex.conn.execute("INSERT INTO currency.ViewCount VALUES ($1,$1)", id,datetime.now())
-                        await ctx.send(f"> **Managed to scrape DC SCREAM -- {view_count} -- {datetime.now()}**")
+            async with ex.session.get('{}'.format(link[0])) as r:
+                if r.status == 200:
+                    page_html = await r.text()
+                    log.console(page_html)
+                    page_soup = soup(page_html, "html.parser")
+                    view_count = (page_soup.find("div", {"class": "watch-view-count"})).text
+                    # await ex.conn.execute("INSERT INTO currency.ViewCount VALUES ($1,$1)", id,datetime.now())
+                    await ctx.send(f"> **Managed to scrape DC SCREAM -- {view_count} -- {datetime.now()}**")
 
     @commands.command()
     @commands.is_owner()
@@ -93,17 +92,16 @@ class YoutubeLoop:
                 try:
                     for link in links:
                         link_id = ex.first_result(await ex.conn.fetchrow("SELECT LinkID FROM currency.links WHERE Link = $1", link))
-                        async with aiohttp.ClientSession() as session:
-                            async with session.get('{}'.format(link[0])) as r:
-                                if r.status == 200:
-                                    page_html = await r.text()
-                                    # log.console(page_html)
-                                    page_soup = soup(page_html, "html.parser")
-                                    view_count = (page_soup.find("div", {"class": "watch-view-count"})).text
-                                    now = datetime.now()
-                                    await ex.conn.execute("INSERT INTO currency.ViewCount VALUES ($1,$2,$3)", link_id, view_count, now)
-                                    self.view_count.append(view_count)
-                                    self.now.append(now)
+                        async with ex.session.get('{}'.format(link[0])) as r:
+                            if r.status == 200:
+                                page_html = await r.text()
+                                # log.console(page_html)
+                                page_soup = soup(page_html, "html.parser")
+                                view_count = (page_soup.find("div", {"class": "watch-view-count"})).text
+                                now = datetime.now()
+                                await ex.conn.execute("INSERT INTO currency.ViewCount VALUES ($1,$2,$3)", link_id, view_count, now)
+                                self.view_count.append(view_count)
+                                self.now.append(now)
                     # log.console("Updated Video Views Tracker")
                 except Exception as e:
                     log.console(e)

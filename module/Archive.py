@@ -6,7 +6,7 @@ import aiofiles
 import asyncio
 from module import logger as log
 from random import *
-from module.keys import client, owner_id
+from module.keys import client, owner_id, bot_website
 from datetime import datetime
 from Utility import resources as ex
 
@@ -83,17 +83,16 @@ class Archive(commands.Cog):
                         count = ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) FROM archive.ChannelList WHERE ChannelID = $1", ctx.channel.id))
                         if count == 0:
                             url = f"https://drive.google.com/drive/folders/{drive_folder_id}"
-                            async with aiohttp.ClientSession() as session:
-                                async with session.get(url) as r:
-                                    if r.status == 200:
-                                        await ex.conn.execute("INSERT INTO archive.ChannelList VALUES($1,$2,$3,$4)", ctx.channel.id, ctx.guild.id, drive_folder_id, name)
-                                        await ctx.send(f"> **This channel is now being archived under {url}**")
-                                    elif r.status == 404:
-                                        await ctx.send(f"> **{url} does not exist.**")
-                                    elif r.status == 403:
-                                        await ctx.send(f"> **I do not have access to {url}.**")
-                                    else:
-                                        await ctx.send(f"> **Something went wrong with {url}")
+                            async with ex.session.get(url) as r:
+                                if r.status == 200:
+                                    await ex.conn.execute("INSERT INTO archive.ChannelList VALUES($1,$2,$3,$4)", ctx.channel.id, ctx.guild.id, drive_folder_id, name)
+                                    await ctx.send(f"> **This channel is now being archived under {url}**")
+                                elif r.status == 404:
+                                    await ctx.send(f"> **{url} does not exist.**")
+                                elif r.status == 403:
+                                    await ctx.send(f"> **I do not have access to {url}.**")
+                                else:
+                                    await ctx.send(f"> **Something went wrong with {url}")
                         else:
                             await ctx.send("> **This channel is already being archived**")
                     else:
@@ -113,19 +112,24 @@ class Archive(commands.Cog):
         all_channels = await ex.conn.fetch("SELECT id, channelid, guildid, driveid, name FROM archive.ChannelList")
         guild_name = ctx.guild.name
         embed = discord.Embed(title=f"Archived {guild_name} Channels", color=0x87CEEB)
-        embed.set_author(name="Irene", url='https://www.youtube.com/watch?v=dQw4w9WgXcQ', icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
+        embed.set_author(name="Irene", url=bot_website, icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
         embed.set_footer(text="Thanks for using Irene.", icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
         check = False
         for channel in all_channels:
-            ID = channel[0]
-            ChannelID = channel[1]
-            list_channel = (await client.fetch_channel(ChannelID)).name
-            GuildID = channel[2]
-            DriveID = channel[3]
-            Name = channel[4]
-            if ctx.guild.id == GuildID:
-                check = True
-                embed.insert_field_at(0, name=list_channel, value=f"https://drive.google.com/drive/folders/{DriveID} | {Name}", inline=False)
+            try:
+                ID = channel[0]
+                ChannelID = channel[1]
+                list_channel = (client.get_channel(ChannelID)).name
+                GuildID = channel[2]
+                DriveID = channel[3]
+                Name = channel[4]
+                if ctx.guild.id == GuildID:
+                    check = True
+                    embed.insert_field_at(0, name=list_channel, value=f"https://drive.google.com/drive/folders/{DriveID} | {Name}", inline=False)
+                    pass
+            except Exception as e:
+                # Error would occur on test bot if the client does not have access to a certain channel id
+                # this try-except will also be useful if a server removed the bot.
                 pass
         if check:
             await ctx.send(embed=embed)
@@ -149,36 +153,36 @@ class Archive(commands.Cog):
 
     async def download_url(self, url, drive_id, channel_id):
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(url) as r:
-                    check = False
-                    if r.status == 200:
-                        unique_id = randint(0, 1000000000000)
-                        unique_id2 = randint(0, 1000)
-                        unique_id3 = randint(0, 500)
-                        src = url[len(url)-4:len(url)]
-                        checkerx = url.find(":large")
-                        if checkerx != -1:
-                            src = url[len(url)-10:len(url)-6]
-                            url = f"{url[0:checkerx-1]}:orig"
+            async with ex.session.get(url) as r:
+                check = False
+                if r.status == 200:
+                    unique_id = randint(0, 1000000000000)
+                    unique_id2 = randint(0, 1000)
+                    unique_id3 = randint(0, 500)
+                    src = url[len(url)-4:len(url)]
+                    checkerx = url.find(":large")
+                    if checkerx != -1:
+                        src = url[len(url)-10:len(url)-6]
+                        url = f"{url[0:checkerx-1]}:orig"
 
-                        src2 = url.find('?format=')
-                        if src2 != -1:
-                            check = True
-                            src = f".{url[src2+8:src2+11]}"
-                            url = f"{url[0:src2-1]}{src}:orig"
-                        if src == ".jpg" or src == ".gif" or src == '.png' or check:
-                            file_name = f"1_{unique_id}_{unique_id2}_{unique_id3}{src}"
-                            fd = await aiofiles.open(
-                                'Photos/{}'.format(file_name), mode='wb')
-                            await fd.write(await r.read())
-                            await fd.close()
-                            await ex.conn.execute("INSERT INTO archive.ArchivedChannels VALUES($1,$2,$3,$4)", file_name, src, drive_id, channel_id)
-                        # quickstart.Drive.checker()
+                    src2 = url.find('?format=')
+                    if src2 != -1:
+                        check = True
+                        src = f".{url[src2+8:src2+11]}"
+                        url = f"{url[0:src2-1]}{src}:orig"
+                    if src == ".jpg" or src == ".gif" or src == '.png' or check:
+                        file_name = f"1_{unique_id}_{unique_id2}_{unique_id3}{src}"
+                        fd = await aiofiles.open(
+                            'Photos/{}'.format(file_name), mode='wb')
+                        await fd.write(await r.read())
+                        await fd.close()
+                        await ex.conn.execute("INSERT INTO archive.ArchivedChannels VALUES($1,$2,$3,$4)", file_name, src, drive_id, channel_id)
+                    # quickstart.Drive.checker()
         except Exception as e:
             log.console(e)
 
     async def deletephotos(self):
+        """Delete photos that are not needed."""
         all_files = await ex.conn.fetch("SELECT FileName from archive.ArchivedChannels")
         file_list = []
         for file in all_files:

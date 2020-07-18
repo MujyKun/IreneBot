@@ -88,4 +88,5 @@ class Profile(commands.Cog):
                 await ex.set_level(user_id, 1, "profilexp")
                 await ex.set_level(user_id, current_level+1, "profile")
         except Exception as e:
-            log.console(e)
+            pass
+            # log.console(e)

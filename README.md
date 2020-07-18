@@ -1,7 +1,6 @@
+# [IreneBot V1.02.4](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=1609956823)
 
-# [IreneBot](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=1609956823)
 
-## Irene Bot for Discord in Python V1.02.3
 
 [![Discord Bots](https://top.gg/api/widget/520369375325454371.svg)](https://top.gg/bot/520369375325454371)
 [![Discord Boats](https://discord.boats/api/widget/520369375325454371)](https://discord.boats/bot/520369375325454371)  
@@ -9,7 +8,7 @@
 
 ## [Discord Support Server](https://discord.gg/bEXm85V)
 
-Command Prefix is currently set to '%' by default. To change a server prefix, look at `%setprefix`.    
+Command Prefix is currently set to `%` by default. To change a server prefix, look at `%setprefix`.    
 In order to check the prefix of your server, type `%checkprefix`.
 
 In order to pull a photo of an idol, you can type an idol's stage name, full name, alias, their group name, or group alias name after the prefix.    
@@ -20,7 +19,7 @@ To find out more, look at the `GroupMembers` category.
 ★ - Requires Guild Permissions  
 😇 - Requires Bot Moderator
 ♥♥♥ -- Entire Section Requires Bot Owner  
-★★★ - Entire Section Requires Permissions  
+★★★ - Entire Section Requires Guild Permissions  
 😇😇😇 - Entire Section Requires Bot Moderator
 
 ## COMMANDS
@@ -62,6 +61,7 @@ To find out more, look at the `GroupMembers` category.
 | deleteidolfromgroup         | Deletes idol from group                                                              | %deleteidolfromgroup (idol id) (group id)                                                                                             | removeidolfromgroup                      |
 | deleteinteraction       | Delete a url from an interaction                                   | %deleteinteraction (url,url)               |               |
 | getstatuses             | Get all statuses of Irene.                                                   | %getstatuses                           |                |
+| kill             | Kills the bot                                                  | %kill                           |               |
 
 #### Cogs: ♥♥♥
 | Command           | Description                                                               | Format                       |
@@ -136,7 +136,6 @@ To find out more, look at the `GroupMembers` category.
 | flip             | Flips a Coin                                                   | %flip                           |                |
 | hug          | Hug someone                              | %hug @user                       |                |
 | invite           | Invite Link for Irene                                          | %invite                         |                |
-| kill             | Kills the bot                                                  | %kill                           | ♥              |
 | kiss          | Kiss someone                              | %kiss @user                       |                |
 | lick          | Lick someone                              | %lick @user                       |                |
 | logging          | Start logging this channel/Stop logging this channel           | %logging (start/stop)           | ♥              |
@@ -162,7 +161,7 @@ To find out more, look at the `GroupMembers` category.
 |------------------|--------------------------------------------------------------------------------------------------------------------------------------|---------------------------------|----------------|
 | addemoji         | Adds an emoji to the server.                                                                                                         | %addemoji (url) (emoji_name)    |               |
 | ban              | Ban A User                                                                                                                           | %ban @user                      |               |
-| clear            | Prune Messages                                                                                                                       | %clear (amount)                 |  prune        |
+| clear            | Prune Messages (LIMIT 1000)                                                                                                                      | %clear (amount)                 |  prune        |
 | kick             | Kick A User                                                                                                                          | %kick @user                     |               |
 | setprefix      | Set the server prefix. If prefix was forgotten, type this command with the default prefix. | %setprefix $         |          | 
 | tempchannel      | Makes Current Channel a temporary channel deleting messages after a certain time period. If delay is -1, it will remove the channel. | %tempchannel [delay=-1]         | temp         |
@@ -187,6 +186,10 @@ To find out more, look at the `GroupMembers` category.
 | avatar         | Display a user's avatar.                                                                                                         | %avatar @user    |               |
 | profile         | Display a user's profile.                                                                                                         | %profile @user    |               |
 
+#### Testing ♥♥♥
+| Command          | Description                                                                                                                          | Format                          |
+|------------------|--------------------------------------------------------------------------------------------------------------------------------------|---------------------------------|
+| testcommands      | Tests all commands (Use this while in a voice channel)                                                                                                            | %testcommands               |
 
 #### Twitter: ♥♥♥
 | Command          | Description                                                                                                                          | Format                          |

@@ -6,6 +6,7 @@ import discordboats
 from datetime import datetime
 import os
 from dotenv import load_dotenv
+import aiohttp
 
 
 load_dotenv()  # Adds .env to memory
@@ -23,7 +24,18 @@ for mod in mods_list_split:
 bot_invite_link = os.getenv("BOT_INVITE_LINK")
 bot_support_server_link = os.getenv("SUPPORT_SERVER_LINK")
 bot_prefix = os.getenv("BOT_PREFIX")
-
+bot_website = os.getenv("BOT_WEBSITE")
+if len(bot_website) == 0:
+    bot_website = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+dc_app_test_channel_id = os.getenv("DC_APP_TEST_CHANNEL_ID")
+if len(dc_app_test_channel_id) != 0:
+    dc_app_test_channel_id = int(dc_app_test_channel_id)
+report_channel_id = os.getenv("REPORT_CHANNEL_ID")
+if len(report_channel_id) != 0:
+    report_channel_id = int(report_channel_id)
+suggest_channel_id = os.getenv("SUGGEST_CHANNEL_ID")
+if len(suggest_channel_id) != 0:
+    suggest_channel_id = int(suggest_channel_id)
 client = commands.Bot(command_prefix=bot_prefix, case_insensitive=True, owner_id=owner_id)
 
 
@@ -83,3 +95,6 @@ translator = Translator()
 
 # startup time
 startup_time = datetime.now()
+
+# Aiohttp Client Session
+client_session = aiohttp.ClientSession()

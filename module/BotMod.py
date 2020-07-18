@@ -1,10 +1,18 @@
 import discord
 from discord.ext import commands
 from module import logger as log
+import module
 from Utility import resources as ex
 
 
 class BotMod(commands.Cog):
+    @commands.command()
+    @commands.check(ex.check_if_mod)
+    async def repost(self, ctx, post_number):
+        """Reposts a certain post from the DC APP to all channels. [Format: %repost post_number]"""
+        await module.DreamCatcher.DcApp().check_dc_post(post_number, repost=True, test=False)
+        await ctx.send(f"> **Requested a repost from the server.**")
+
     @commands.command()
     @commands.check(ex.check_if_mod)
     async def kill(self, ctx):

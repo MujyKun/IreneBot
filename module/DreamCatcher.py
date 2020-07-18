@@ -147,13 +147,16 @@ class DcApp:
         self.count_loop = 0
         self.already_added = 0
 
-    async def check_dc_post(self, dc_number, test=False):
+    async def check_dc_post(self, dc_number, test=False, repost=False):
         post_url = 'https://dreamcatcher.candlemystar.com/post/{}'.format(dc_number)
         async with ex.session.get('{}'.format(post_url)) as r:
             if r.status == 200:
-                await ex.conn.execute("DELETE FROM dreamcatcher.DCPost")
-                await ex.conn.execute("INSERT INTO dreamcatcher.DCPost VALUES($1)", dc_number)
-                self.error_status = 0
+                if not repost:
+                    try:
+                        await ex.conn.execute("INSERT INTO dreamcatcher.DCPost VALUES($1)", dc_number)
+                    except Exception as e:
+                        await ex.conn.execute("UPDATE dreamcatcher.DCPost SET postid = $1", dc_number)
+                    self.error_status = 0
                 if dc_number not in self.post_list:
                     page_html = await r.text()
                     page_soup = soup(page_html, "html.parser")
@@ -179,7 +182,8 @@ class DcApp:
                             channels = [[dc_app_test_channel_id]]
                         member_name, member_id = ex.get_member_name_and_id(username, self.list)
                         dc_photos_embed = await ex.get_embed(image_links, member_name)
-                        await ex.add_post_to_db(image_links, member_id, member_name, dc_number, post_url)
+                        if not repost:
+                            await ex.add_post_to_db(image_links, member_id, member_name, dc_number, post_url)
                         for channel in channels:
                             try:
                                 channel_id = channel[0]
@@ -189,6 +193,8 @@ class DcApp:
                                 await ex.send_new_post(channel_id, channel, member_name, status_message,
                                                        post_url)
                                 await ex.send_content(channel, dc_photos_embed, dc_videos)
+                                if repost:
+                                    await channel.send(f"> **Requested a repost from the server.**")
                             except Exception as e:
                                 # This try except was added due to errors with specific channels resulting
                                 # in an infinite loop

@@ -9,7 +9,8 @@ class Events(commands.Cog):
     @staticmethod
     @client.event
     async def on_ready():
-        log.console('Irene is online')
+        app = await client.application_info()
+        log.console(f'{app.name} is online')
 
     @staticmethod
     @client.event

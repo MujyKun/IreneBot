@@ -13,28 +13,41 @@ youtube_dl.utils.bug_reports_message = lambda: ''
 
 # A song does not directly go to the queue if it's in a playlist.
 # instead, it piles up in this process and is all sent to the queue at once.
-files_in_process_of_queue = []
 
 
-def check_live(video_info):
+def get_video_title(video):
+    if check_if_player(video):
+        return video.title
+    else:
+        return video.get('title')
+
+
+def check_if_player(player):
+    return isinstance(player, YTDLSource)
+
+
+async def download_video(video):
+    loop = asyncio.get_event_loop()
+    data = await loop.run_in_executor(None, lambda: ytdl.extract_info(video.get('webpage_url'), download=True))
+    file_name = ytdl.prepare_filename(video)
+    return YTDLSource(discord.FFmpegPCMAudio(file_name, **ffmpeg_options), data=data)
+
+
+def check_live(video):
     # return None = video is downloaded
     # return a message = video is ignored
-    def process_video():
-        files_in_process_of_queue.append(ytdl.prepare_filename(video_info))
-        return None
-
     try:
-        if video_info['duration'] > 14400:
+        if video['duration'] > 14400:
             return 'too_long'
     except Exception as e:
         pass
     try:
-        if not video_info['is_live']:
-            process_video()
+        if not video['is_live']:
+            return None
         else:
             return 'live_video'
     except Exception as e:
-        process_video()  # this error occurs from is_live not being found.
+        return None  # this error occurs from is_live not being found.
 
 # https://github.com/ytdl-org/youtube-dl/blob/2391941f283a1107b01f9df76a8b0e521a5abe3b/youtube_dl/YoutubeDL.py#L143
 ytdl_format_options = {
@@ -91,14 +104,20 @@ class Music(commands.Cog):
                 all_music = os.listdir("music")
                 for song_file_name in all_music:
                     file_location = f"music/{song_file_name}"
-                    if file_location not in keep_files and file_location not in files_in_process_of_queue:
+                    if file_location not in keep_files:
                         if file_location != "music":
-                            os.remove(file_location)
+                            try:
+                                os.remove(file_location)
+                            except Exception as e:
+                                pass
             except Exception as e:
                 log.console(e)
 
     def check_user_in_vc(self, ctx):
-        return ctx.author in ctx.voice_client.channel.members
+        try:
+            return ctx.author in ctx.voice_client.channel.members
+        except AttributeError:
+            return False  # NoneType object has no attribute channel
 
     def reset_queue_for_guild(self, guild_id):
         try:
@@ -106,7 +125,8 @@ class Music(commands.Cog):
                 for song in queued[guild_id]:
                     player = song[0]
                     file_name = song[2]
-                    player.cleanup()
+                    if check_if_player(player):
+                        player.cleanup()
                     try:
                         os.remove(file_name)
                     except Exception as e:
@@ -144,12 +164,20 @@ class Music(commands.Cog):
             counter = 1
             set_of_songs = ""
             for song in current_songs:
-                player = song[0]
-                youtube_channel = player.uploader
-                song_name = player.title
-                song_link = player.url
+                if check_if_player(song[0]):
+                    player = song[0]
+                    youtube_channel = player.uploader
+                    song_name = player.title
+                    song_link = player.url
+                    duration = player.duration
+                else:
+                    video = song[0]
+                    youtube_channel = video.get('uploader')
+                    song_name = video.get('title')
+                    song_link = video.get('webpage_url')
+                    duration = video.get('duration')
                 try:
-                    duration = await ex.get_cooldown_time(player.duration)
+                    duration = await ex.get_cooldown_time(duration)
                 except Exception as e:
                     duration = "N/A"
                 if counter == 1:
@@ -203,6 +231,8 @@ class Music(commands.Cog):
             paused = ctx.voice_client.is_paused()
             if not paused:
                 ctx.voice_client.pause()
+                await ctx.send("> **The player is now paused.**")
+
         else:
             await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
 
@@ -213,20 +243,70 @@ class Music(commands.Cog):
             paused = ctx.voice_client.is_paused()
             if paused:
                 ctx.voice_client.resume()
-                await ctx.send(f'> **Now resuming: {((queued[ctx.guild.id])[0][0]).title}**')
+                video = (queued[ctx.guild.id])[0][0]
+                if check_if_player(video):
+                    title = video.title
+                else:
+                    title = video.get('title')
+                await ctx.send(f'> **Now resuming: {title}**')
             else:
                 await ctx.send('> **The video player is not paused**')
         else:
             await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
 
+    @commands.command(aliases=['skipto'])
+    async def move(self, ctx, song_number: int):
+        """Makes a song the next song to play without skipping the current song. [Format: %move (song number)] """
+        try:
+            if self.check_user_in_vc(ctx):
+                song_number = song_number - 1  # account for starting from 0
+                if song_number == 0:
+                    await ctx.send(f"> **You can not move the song currently playing.**")
+                else:
+                    try:
+                        title = get_video_title(queued[ctx.guild.id][song_number][0])
+                        # inserts song information at index 1 and removes the old position.
+                        queued[ctx.guild.id].insert(1, queued[ctx.guild.id].pop(song_number))
+                        await ctx.send(f"> **{title} will now be the next song to play.**")
+                    except Exception as e:
+                        await ctx.send(f"> **That song number was not found. Could not move it.**")
+            else:
+                await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
+        except Exception as e:
+            pass
+
+
+    @commands.command()
+    async def remove(self, ctx, song_number:int):
+        """Remove a song the queue. [Format: %remove (song number)] """
+        try:
+            if self.check_user_in_vc(ctx):
+                song_number = song_number - 1  # account for starting from 0
+                try:
+                    title = get_video_title(queued[ctx.guild.id][song_number][0])
+                    queued[ctx.guild.id].pop(song_number)
+                    await ctx.send(f"> **Removed {title} from the queue.**")
+                except Exception as e:
+                    await ctx.send(f"> **That song number was not found. Could not remove it.**")
+            else:
+                await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
+        except Exception as e:
+            pass
+
+
     @commands.command()
     async def skip(self, ctx):
         """Skips the current song. [Format: %skip]"""
-        if self.check_user_in_vc(ctx):
-            ctx.voice_client.stop()  # Will call error to remove the song.
-            await ctx.send(f"> **Skipped.**")
-        else:
-            await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
+        try:
+            if self.check_user_in_vc(ctx):
+                ctx.voice_client.stop()  # Will call error to remove the song.
+                player = queued[ctx.guild.id][0][0]
+                title = get_video_title(player)
+                await ctx.send(f"> **Skipped {title}**")
+            else:
+                await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
+        except Exception as e:
+            pass
 
     def remove_song_in_queue(self, client_guild_id):
         try:
@@ -235,7 +315,10 @@ class Music(commands.Cog):
         except KeyError:
             pass
         try:
-            (queued[client_guild_id][0][0]).cleanup()
+            try:
+                (queued[client_guild_id][0][0]).cleanup()
+            except Exception as e:
+                pass
             try:
                 os.remove(queued[client_guild_id][0][2])
             except Exception as e:
@@ -257,16 +340,35 @@ class Music(commands.Cog):
             try:
                 if self.check_user_in_vc(ctx):
                     async with ctx.typing():
-                        players = await YTDLSource.from_url(url, loop=client.loop, stream=False, guild_id=ctx.guild.id, channel=ctx.channel)
+                        msg = await ctx.send(f"> **Gathering information about the video/playlist, this may take a few minutes if it is a long playlist.**")
+                        videos, first_video_live = await YTDLSource.from_url(url, loop=client.loop, stream=False, guild_id=ctx.guild.id, channel=ctx.channel)
                         if not ctx.voice_client.is_playing():
-                            ctx.voice_client.play(players[0], after=self.start_next_song)
-                            await ctx.send(f'> **Now playing: {players[0].title}**')
+                            if not first_video_live:
+                                player = await download_video(videos[0])
+                                video_title = videos[0].get('title')
+                            else:
+                                player = videos[0]
+                                video_title = player.title
+                            try:
+                                ctx.voice_client.play(player, after=self.start_next_song)
+                                # THIS IS VERY IMPORTANT
+                                # This makes the front of the queue always a player.
+                                # This is useful so that no code is changed for going to the next song (music rework)
+                                queued[ctx.guild.id][0][0] = player
+                            except Exception as e:  # Already Playing Audio
+                                return await ctx.send(f"> **Added {video_title} to the queue.**")
+                            await ctx.send(f'> **Now playing: {video_title}**')
                         else:
                             # grabbing the latest player
-                            if len(players) == 1:
-                                await ctx.send(f"> **Added {players[0].title} to the queue.**")
+                            if len(videos) == 1:
+                                if not first_video_live:
+                                    title = videos[0].get('title')
+                                else:
+                                    title = videos[0].title
+                                await ctx.send(f"> **Added {title} to the queue.**")
                             else:
-                                await ctx.send(f"> **Added {len(players)} songs to the queue.**")
+                                await ctx.send(f"> **Added {len(videos)} songs to the queue.**")
+                        await msg.delete()
                 else:
                     await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
             except IndexError:
@@ -284,7 +386,19 @@ class Music(commands.Cog):
                     try:
                         player = queued[client_guild_id][0][0]
                         channel = queued[client_guild_id][0][1]
-                        voice_client.play(player, after=self.start_next_song)
+                        live = queued[client_guild_id][0][3]
+                        try:
+                            if not live:  # we know it's video information and not a player because it is not live.
+                                download_a_video = download_video(player)
+                                player = asyncio.run_coroutine_threadsafe(download_a_video, client.loop)
+                                try:
+                                    player = player.result()
+                                    queued[client_guild_id][0][0] = player  # making front of queue a player
+                                except Exception as e:
+                                    log.console(e)
+                            voice_client.play(player, after=self.start_next_song)
+                        except Exception as e:
+                            log.console(e)
                         send_channel_song = channel.send(f'> **Now playing: **{player.title}')
                         # used because async function cannot be used.
                         # https://discordpy.readthedocs.io/en/latest/faq.html#how-do-i-pass-a-coroutine-to-the-player-s-after-function
@@ -357,40 +471,45 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
     @classmethod
     async def from_url(cls, url, *, loop=None, stream=False, guild_id=None, channel=None):
-        players = []
+        videos = []
 
         async def add_video(video):
             try:
+                live = False
                 status = check_live(video)
                 if status == 'too_long':
                     await channel.send(f"> **A video will not be added because it is over 4 hours long.**")
                 else:
                     if status == 'live_video':
+                        live = True
                         loop = asyncio.get_event_loop()
                         data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=False))
                         file_name = video['url']
-                        player = cls(discord.FFmpegPCMAudio(file_name, **ffmpeg_options), data=data)
+                        video = cls(discord.FFmpegPCMAudio(file_name, **ffmpeg_options), data=data)
                     else:
                         file_name = video['url'] if stream else ytdl.prepare_filename(video)
-                        player = cls(discord.FFmpegPCMAudio(file_name, **ffmpeg_options), data=video)
-                    players.append(player)
-                    video_player_and_channel = [player, channel, file_name]
+                    videos.append(video)
+                    video_and_channel = [video, channel, file_name, live]
                     if guild_id in queued:
                         if queued[guild_id] is not None:
-                            queued[guild_id].append(video_player_and_channel)
+                            queued[guild_id].append(video_and_channel)
                     else:
-                        queued[guild_id] = [video_player_and_channel]
-                    try:
-                        files_in_process_of_queue.remove(file_name)
-                    except Exception as e:
-                        pass
+                        queued[guild_id] = [video_and_channel]
+                return live
             except Exception as e:
-                pass
+                return False
+
         loop = loop or asyncio.get_event_loop()
-        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
+        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=False))
+        first_video_live = False
         if 'entries' in data:  # several videos
+            counter = 0
             for video_entry in data['entries']:
-                await add_video(video_entry)
+                if counter == 0:
+                    first_video_live = await add_video(video_entry)
+                else:
+                    await add_video(video_entry)
+                counter += 1
         else:
-            await add_video(data)  # only 1 video
-        return players  # return added players
+            first_video_live = await add_video(data)  # only 1 video
+        return videos, first_video_live  # return added players

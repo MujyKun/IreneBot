@@ -153,9 +153,17 @@ class DcApp:
             if r.status == 200:
                 if not repost:
                     try:
-                        await ex.conn.execute("INSERT INTO dreamcatcher.DCPost VALUES($1)", dc_number)
+                        # There should only be one row in dreamcatcher.dcpost
+                        post_exists = ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) FROM dreamcatcher.DCPost"))
+                        if post_exists == 0:
+                            await ex.conn.execute("INSERT INTO dreamcatcher.DCPost VALUES($1)", dc_number)
+                        elif post_exists == 1:
+                            await ex.conn.execute("UPDATE dreamcatcher.DCPost SET postid = $1", dc_number)
+                        else:
+                            await ex.conn.execute("DELETE FROM dreamcatcher.DCPost")  # just in case
+                            await ex.conn.execute("INSERT INTO dreamcatcher.DCPost VALUES($1)", dc_number)
                     except Exception as e:
-                        await ex.conn.execute("UPDATE dreamcatcher.DCPost SET postid = $1", dc_number)
+                            pass
                     self.error_status = 0
                 if dc_number not in self.post_list:
                     page_html = await r.text()

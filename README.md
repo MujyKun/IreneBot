@@ -176,7 +176,7 @@ To find out more, look at the `GroupMembers` category.
 | pause         | Pauses currently playing song                                                                         | %pause    |               |
 | play         | Plays audio to a voice channel.                                               | %play (title/url)    |               |
 | queue         | Shows Current Queue                                              | %queue (page number)    |   list, q            |
-| remove         | Remove a song the queue.                                                 | %remove (song number)    |            |
+| remove         | Remove a song from the queue.                                                 | %remove (song number)    |            |
 | resume         | Resumes a paused song                                                 | %resume    |      unpause         |
 | shuffle         | Shuffles the playlist.                                                        | %shuffle    |               |
 | skip         | Skips the current song.                                                                      | %skip    |               |

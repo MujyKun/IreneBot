@@ -1,4 +1,4 @@
-# [IreneBot V1.02.4](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=1609956823)
+# [IreneBot V1.02.5](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=1609956823)
 
 
 
@@ -62,6 +62,7 @@ To find out more, look at the `GroupMembers` category.
 | deleteinteraction       | Delete a url from an interaction                                   | %deleteinteraction (url,url)               |               |
 | getstatuses             | Get all statuses of Irene.                                                   | %getstatuses                           |                |
 | kill             | Kills the bot                                                  | %kill                           |               |
+| repost             | Reposts a certain post from the DC APP to all channels.                                                  | %repost (post_number)                           |               |
 
 #### Cogs: ♥♥♥
 | Command           | Description                                                               | Format                       |
@@ -171,9 +172,11 @@ To find out more, look at the `GroupMembers` category.
 | Command          | Description                                                                                                                          | Format                          | Aliases        |
 |------------------|--------------------------------------------------------------------------------------------------------------------------------------|---------------------------------|----------------|
 | join         | Joins a voice channel                              | %join    |               |
+| move         | Makes a song the next song to play without skipping the current song.                              | %move (song number)    | skipto              |
 | pause         | Pauses currently playing song                                                                         | %pause    |               |
 | play         | Plays audio to a voice channel.                                               | %play (title/url)    |               |
 | queue         | Shows Current Queue                                              | %queue (page number)    |   list, q            |
+| remove         | Remove a song the queue.                                                 | %remove (song number)    |            |
 | resume         | Resumes a paused song                                                 | %resume    |      unpause         |
 | shuffle         | Shuffles the playlist.                                                        | %shuffle    |               |
 | skip         | Skips the current song.                                                                      | %skip    |               |

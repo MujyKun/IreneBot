@@ -6,10 +6,8 @@ from Utility import resources as ex
 
 
 class Logging(commands.Cog):
-    def __init__(self):
-        client.add_listener(self.on_message_log, 'on_message')
-
-    async def on_message_log(self, message):
+    @staticmethod
+    async def on_message_log(message):
         if await ex.check_logging_requirements(message):
             try:
                 send_all_messages = ex.first_result(await ex.conn.fetchrow("SELECT sendall FROM logging.servers WHERE serverid = $1", message.guild.id))

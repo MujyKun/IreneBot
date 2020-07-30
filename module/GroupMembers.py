@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands, tasks
-import aiohttp
 from bs4 import BeautifulSoup as soup
 from module import logger as log
 import random
@@ -24,61 +23,62 @@ class GroupMembers(commands.Cog):
         message_sender = message.author
         message_channel = message.channel
         message_content = message.content
-        if from_sorting == 1:
-            def check(m):
-                return m.channel == message_channel and m.author == message_sender
+        if not message_sender.bot:
+            if from_sorting == 1:
+                def check(m):
+                    return m.channel == message_channel and m.author == message_sender
 
-            msg = await client.wait_for('message', check=check)
-            return msg.content.lower()
+                msg = await client.wait_for('message', check=check)
+                return msg.content.lower()
 
-        if from_sorting == 0:
-            if await ex.check_channel_sending_photos(message_channel.id):
-                try:
-                    if await ex.check_server_sending_photos(message.guild.id):
-                        message_channel = await ex.get_channel_sending_photos(message.guild.id)
-                except Exception as e:
-                    pass  # error is guild not found, likely being accessed from DMs
-                posted = False
-                try:
-                    if ex.check_message_not_empty(message):
-                        server_prefix = await ex.get_server_prefix_by_context(message)
-                        if message_content[0:len(server_prefix)] == server_prefix and message_content != f"{server_prefix}null":
-                            message_content = message_content[len(server_prefix):len(message_content)]
-                            member_ids = await ex.get_id_where_member_matches_name(message_content)
-                            group_ids = await ex.get_id_where_group_matches_name(message_content)
-                            photo_msg = None
-                            if len(member_ids) != 0:
-                                random_member = random.choice(member_ids)
-                                random_link = await ex.get_random_photo_from_member(random_member)
-                                if not await ex.check_if_bot_banned(message_sender.id):
-                                    async with message_channel.typing():
-                                        photo_msg = await ex.idol_post(message_channel, random_member, random_link)
-                                        posted = True
-                            elif len(group_ids) != 0:
-                                group_id = random.choice(group_ids)
-                                random_member = random.choice(await ex.get_members_in_group(await ex.get_group_name(group_id)))
-                                random_link = await ex.get_random_photo_from_member(random_member[0])
-                                if not await ex.check_if_bot_banned(message_sender.id):
-                                    async with message_channel.typing():
-                                        photo_msg = await ex.idol_post(message_channel, random_member[0], random_link, group_id=group_id)
-                                        posted = True
-                            else:
-                                member_ids = await ex.check_group_and_idol(message_content)
-                                if member_ids is not None:
+            if from_sorting == 0:
+                if await ex.check_channel_sending_photos(message_channel.id):
+                    try:
+                        if await ex.check_server_sending_photos(message.guild.id):
+                            message_channel = await ex.get_channel_sending_photos(message.guild.id)
+                    except Exception as e:
+                        pass  # error is guild not found, likely being accessed from DMs
+                    posted = False
+                    try:
+                        if ex.check_message_not_empty(message):
+                            server_prefix = await ex.get_server_prefix_by_context(message)
+                            if message_content[0:len(server_prefix)] == server_prefix and message_content != f"{server_prefix}null":
+                                message_content = message_content[len(server_prefix):len(message_content)]
+                                member_ids = await ex.get_id_where_member_matches_name(message_content)
+                                group_ids = await ex.get_id_where_group_matches_name(message_content)
+                                photo_msg = None
+                                if len(member_ids) != 0:
                                     random_member = random.choice(member_ids)
                                     random_link = await ex.get_random_photo_from_member(random_member)
                                     if not await ex.check_if_bot_banned(message_sender.id):
                                         async with message_channel.typing():
                                             photo_msg = await ex.idol_post(message_channel, random_member, random_link)
                                             posted = True
-                            if posted:
-                                ex.log_idol_command(message)
-                                await ex.add_command_count()
-                            await ex.check_idol_post_reactions(photo_msg, message)
-                        else:
-                            pass
-                except Exception as e:
-                    pass
+                                elif len(group_ids) != 0:
+                                    group_id = random.choice(group_ids)
+                                    random_member = random.choice(await ex.get_members_in_group(await ex.get_group_name(group_id)))
+                                    random_link = await ex.get_random_photo_from_member(random_member[0])
+                                    if not await ex.check_if_bot_banned(message_sender.id):
+                                        async with message_channel.typing():
+                                            photo_msg = await ex.idol_post(message_channel, random_member[0], random_link, group_id=group_id)
+                                            posted = True
+                                else:
+                                    member_ids = await ex.check_group_and_idol(message_content)
+                                    if member_ids is not None:
+                                        random_member = random.choice(member_ids)
+                                        random_link = await ex.get_random_photo_from_member(random_member)
+                                        if not await ex.check_if_bot_banned(message_sender.id):
+                                            async with message_channel.typing():
+                                                photo_msg = await ex.idol_post(message_channel, random_member, random_link)
+                                                posted = True
+                                if posted:
+                                    ex.log_idol_command(message)
+                                    await ex.add_command_count()
+                                await ex.check_idol_post_reactions(photo_msg, message)
+                            else:
+                                pass
+                    except Exception as e:
+                        pass
 
     @commands.has_guild_permissions(manage_messages=True)
     @commands.command()

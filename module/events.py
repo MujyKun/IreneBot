@@ -7,6 +7,12 @@ from discord.ext import commands
 
 class Events(commands.Cog):
     @staticmethod
+    async def error(ctx, error):
+        embed = discord.Embed(title="Error", description=f"** {error} **", color=0xff00f6)
+        await ctx.send(embed=embed)
+        log.console(f"{error}")
+
+    @staticmethod
     @client.event
     async def on_ready():
         app = await client.application_info()
@@ -19,24 +25,16 @@ class Events(commands.Cog):
             pass
         elif isinstance(error, commands.errors.CommandInvokeError):
             log.console(f"Command Invoke Error -- {error}")
-            pass
         elif isinstance(error, commands.errors.CommandOnCooldown):
             embed = discord.Embed(title="Error", description=f"""** You are on cooldown. Try again in 
                     {await ex.get_cooldown_time(error.retry_after)}.**""", color=0xff00f6)
             await ctx.send(embed=embed)
             log.console(f"{error}")
-            pass
         elif isinstance(error, commands.errors.BadArgument):
-            embed = discord.Embed(title="Error", description=f"** {error} **", color=0xff00f6)
-            await ctx.send(embed=embed)
-            log.console(f"{error}")
+            await Events.error(ctx, error)
             ctx.command.reset_cooldown(ctx)
-            pass
-        elif isinstance(error, commands.errors.MissingPermissions):
-            embed = discord.Embed(title="Error", description=f"** {error} **", color=0xff00f6)
-            await ctx.send(embed=embed)
-            log.console(f"{error}")
-            pass
+        elif isinstance(error, commands.errors.MissingPermissions) or isinstance(error, commands.errors.UserInputError):
+            await Events.error(ctx, error)
 
     @staticmethod
     @client.event

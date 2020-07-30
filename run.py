@@ -47,13 +47,15 @@ class Irene:
         # Start Status Change Loop
         module.status.Status().change_bot_status_loop.start()
         # Start Voice Client Loop
-        module.Music.Music().check_voice_clients.start()
+        # module.Music.Music().check_voice_clients.start()
         # Update Group Photo Count
         module.GroupMembers.GroupMembers().update_group_photo_count.start()
 
     @staticmethod
     def add_listeners():
         module.keys.client.add_listener(module.GroupMembers.GroupMembers.on_message2, 'on_message')
+        module.keys.client.add_listener(module.Archive.Archive.on_message, 'on_message')
+        module.keys.client.add_listener(module.Logging.Logging.on_message_log, 'on_message')
 
     @staticmethod
     def add_cogs():
@@ -71,10 +73,11 @@ class Irene:
         ex.client.add_cog(module.Profile.Profile())
         ex.client.add_cog(module.Help.Help())
         ex.client.add_cog(module.Logging.Logging())
-        ex.client.add_cog(module.Music.Music())
+        # ex.client.add_cog(module.Music.Music())
         ex.client.add_cog(module.BotMod.BotMod())
         ex.client.add_cog(module.events.Events())
         ex.client.add_cog(module.Testing.Testing())
+        ex.client.add_cog(module.LastFM.LastFM())
 
 
 if __name__ == '__main__':

@@ -163,6 +163,7 @@ class Music(commands.Cog):
             embed_list = []
             counter = 1
             set_of_songs = ""
+            total_amount_of_time = 0
             for song in current_songs:
                 if check_if_player(song[0]):
                     player = song[0]
@@ -177,6 +178,10 @@ class Music(commands.Cog):
                     song_link = video.get('webpage_url')
                     duration = video.get('duration')
                 try:
+                    try:
+                        total_amount_of_time += duration
+                    except Exception as e:
+                        pass
                     duration = await ex.get_cooldown_time(duration)
                 except Exception as e:
                     duration = "N/A"
@@ -202,6 +207,7 @@ class Music(commands.Cog):
                 page_number = 1
             elif page_number <= 0:
                 page_number = 1
+            await ex.set_embed_author_and_footer(embed_list[page_number -1], footer_message=f"Total time of songs queued: {await ex.get_cooldown_time(total_amount_of_time)}")
             msg = await ctx.send(embed=embed_list[page_number - 1])
             await ex.check_left_or_right_reaction_embed(msg, embed_list, page_number - 1)
         except KeyError as e:
@@ -278,7 +284,7 @@ class Music(commands.Cog):
 
     @commands.command()
     async def remove(self, ctx, song_number:int):
-        """Remove a song the queue. [Format: %remove (song number)] """
+        """Remove a song from the queue. [Format: %remove (song number)] """
         try:
             if self.check_user_in_vc(ctx):
                 song_number = song_number - 1  # account for starting from 0
@@ -357,7 +363,7 @@ class Music(commands.Cog):
                                 queued[ctx.guild.id][0][0] = player
                             except Exception as e:  # Already Playing Audio
                                 return await ctx.send(f"> **Added {video_title} to the queue.**")
-                            await ctx.send(f'> **Now playing: {video_title}**')
+                            await ctx.send(f'> **Now playing: {video_title}**', delete_after=240)  # deletes after 4min
                         else:
                             # grabbing the latest player
                             if len(videos) == 1:
@@ -399,7 +405,7 @@ class Music(commands.Cog):
                             voice_client.play(player, after=self.start_next_song)
                         except Exception as e:
                             log.console(e)
-                        send_channel_song = channel.send(f'> **Now playing: **{player.title}')
+                        send_channel_song = channel.send(f'> **Now playing: **{player.title}', delete_after=240)  # 4min
                         # used because async function cannot be used.
                         # https://discordpy.readthedocs.io/en/latest/faq.html#how-do-i-pass-a-coroutine-to-the-player-s-after-function
                         send_channel = asyncio.run_coroutine_threadsafe(send_channel_song, client.loop)

@@ -1,4 +1,4 @@
-# [IreneBot V1.02.5](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=1609956823)
+# [IreneBot V1.02.6](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=1609956823)
 
 
 
@@ -188,6 +188,18 @@ To find out more, look at the `GroupMembers` category.
 |------------------|--------------------------------------------------------------------------------------------------------------------------------------|---------------------------------|----------------|
 | avatar         | Display a user's avatar.                                                                                                         | %avatar @user    |               |
 | profile         | Display a user's profile.                                                                                                         | %profile @user    |               |
+
+
+#### LastFM:
+| Command          | Description                                                                        | Format                                                                                                         | Aliases                |
+|------------------|------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|------------------------|
+| fm          | Get information about a Last FM account by a discord user or a Last FM username.   | %fm (username or @user)             |                        |
+| recenttracks            | Get the recent tracks of a Last FM Account by a discord user or a Last FM username | %recenttracks (username or @user)         |  rt, recents                      |
+| recent            | Get the last listened track of a Last FM Account by a discord user or a Last FM username        | %recent (username or @user)            |                        |
+| topalbums            | See the top albums of a Last FM Account by a discord user or a Last FM username                                       | %topalbums (username or @user)       |   tal                     |
+| topartists            | See the top artists of a Last FM Account by a discord user or a Last FM username.                                       | %topartists (username or @user)  |  ta                      |
+| toptracks            | See the top tracks of a Last FM Account by a discord user or a Last FM username                                       | %toptracks (username or @user)  | tt                        |
+
 
 #### Testing ♥♥♥
 | Command          | Description                                                                                                                          | Format                          |

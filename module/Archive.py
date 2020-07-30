@@ -12,10 +12,8 @@ from Utility import resources as ex
 
 
 class Archive(commands.Cog):
-    def __init__(self):
-        client.add_listener(self.on_message, 'on_message')
-
-    async def on_message(self, message, owner=0):
+    @staticmethod
+    async def on_message(message, owner=0):
         if owner == 1:
             try:
                 def check(m):
@@ -47,7 +45,7 @@ class Archive(commands.Cog):
                                     if ":large" in url:
                                         pos = url.find(":large")
                                         url = url[0:pos]
-                                    await self.download_url(url, drive_id, message.channel.id)
+                                    await Archive.download_url(ins, url, drive_id, message.channel.id)
                                 # quickstart.Drive.checker()
                             if len(message.embeds) > 0:
                                 for embed in message.embeds:
@@ -61,9 +59,9 @@ class Archive(commands.Cog):
                                         if ":large" in url:
                                             pos = url.find(":large")
                                             url = url[0:pos]
-                                        await self.download_url(url, drive_id, message.channel.id)
+                                        await Archive.download_url(ins, url, drive_id, message.channel.id)
                                     # quickstart.Drive.checker()
-                            await self.deletephotos()
+                            await Archive.deletephotos(ins)
                 except Exception as e:
                     # log.console(e)
                     pass
@@ -250,3 +248,6 @@ class Archive(commands.Cog):
                 await ctx.send("> **Successfully added history of this text channel. They will be uploaded shortly.**")
         if not check:
             await ctx.send("> **This channel is not currently being archived.**")
+
+
+ins = Archive()

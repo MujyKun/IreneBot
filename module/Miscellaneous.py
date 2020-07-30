@@ -4,7 +4,6 @@ from discord.ext import commands
 from discord.ext.commands.cooldowns import BucketType
 from module import keys
 from module import logger as log
-import aiohttp
 from Utility import resources as ex
 client = keys.client
 
@@ -252,7 +251,7 @@ class Miscellaneous(commands.Cog):
                 term = term.replace("_", " ")
                 url = "https://mashape-community-urban-dictionary.p.rapidapi.com/define"
                 querystring = {"term": f"{term}"}
-                async with aiohttp.request('GET', url, headers=keys.X_RapidAPI_headers, params=querystring) as r:
+                async with ex.session.get(url, headers=keys.X_RapidAPI_headers, params=querystring) as r:
                     if r.status == 200:
                         result = await r.json()
                         try:

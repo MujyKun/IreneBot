@@ -1,5 +1,4 @@
 from module import keys, logger as log
-from bs4 import BeautifulSoup as soup
 from discord.ext import tasks
 import discord
 import random
@@ -120,15 +119,25 @@ class Utility:
     #######################
     # ## MISCELLANEOUS ## #
     #######################
-    async def interact_with_user(self, ctx, user, interaction, interaction_type):
-        list_of_links = await self.conn.fetch("SELECT url FROM general.interactions WHERE interaction = $1", interaction_type)
-        if ctx.author.id == user.id:
-            ctx.command.reset_cooldown(ctx)
-            return await ctx.send(f"> **{ctx.author.display_name}, you cannot perform this interaction on yourself.**")
-        link = random.choice(list_of_links)
-        embed = discord.Embed(title=f"**{ctx.author.display_name}** {interaction} **{user.display_name}**", color=self.get_random_color())
-        embed.set_image(url=link[0])
-        return await ctx.send(embed=embed)
+    async def interact_with_user(self, ctx, user, interaction, interaction_type, self_interaction=False):
+        await self.reset_patreon_cooldown(ctx)
+        try:
+            if user == discord.Member:
+                user = ctx.author
+            list_of_links = await self.conn.fetch("SELECT url FROM general.interactions WHERE interaction = $1", interaction_type)
+            if not self_interaction:
+                if ctx.author.id == user.id:
+                    ctx.command.reset_cooldown(ctx)
+                    return await ctx.send(f"> **{ctx.author.display_name}, you cannot perform this interaction on yourself.**")
+            link = random.choice(list_of_links)
+            embed = discord.Embed(title=f"**{ctx.author.display_name}** {interaction} **{user.display_name}**", color=self.get_random_color())
+            if not await self.check_if_patreon(ctx.author.id):
+                embed.set_footer(text=f"Become a {await self.get_server_prefix_by_context(ctx)}patreon to get rid of interaction cooldowns!")
+            embed.set_image(url=link[0])
+            return await ctx.send(embed=embed)
+        except Exception as e:
+            log.console(e)
+            return await ctx.send(f"> **{ctx.author.display_name}, there are no links saved for this interaction yet.**")
 
     async def add_command_count(self):
         counter = self.first_result(await self.conn.fetchrow("SELECT COUNT(*) FROM stats.commands"))
@@ -304,7 +313,7 @@ class Utility:
             pass
         return None
 
-    async def check_left_or_right_reaction_embed(self, msg, embed_lists, original_page_number=0, reaction1="\U00002b05", reaction2="\U000027a1"):
+    async def check_left_or_right_reaction_embed(self, msg, embed_lists, original_page_number=0, reaction1=keys.previous_emoji, reaction2=keys.next_emoji):
         """This method is used for going between pages of embeds."""
         await msg.add_reaction(reaction1)  # left arrow by default
         await msg.add_reaction(reaction2)  # right arrow by default
@@ -1000,12 +1009,12 @@ class Utility:
             embed_list.append(embed)
         return embed_list
 
-    async def check_idol_post_reactions(self, message, user_msg):
+    async def check_idol_post_reactions(self, message, user_msg, idol_id):
         """Check the reactions on an idol post."""
         try:
             if message is not None:
-                reload_image_emoji = "<:ReloadImage:694109526491922463>"
-                dead_link_emoji = "<:DeadLink:695787733460844645>"
+                reload_image_emoji = keys.reload_emoji
+                dead_link_emoji = keys.dead_emoji
                 await message.add_reaction(reload_image_emoji)
                 await message.add_reaction(dead_link_emoji)
                 message = await message.channel.fetch_message(message.id)
@@ -1038,21 +1047,49 @@ class Utility:
                                 if count == 3:
                                     keep_going = False
                             message1 = await channel.send(link)
-                            await self.check_idol_post_reactions(message1, user_msg)
+                            await self.check_idol_post_reactions(message1, user_msg, idol_id)
                         elif str(reaction) == dead_link_emoji:
                             try:
                                 link = message1.embeds[0].url
                             except:
                                 link = message1.content
-                            await self.conn.execute("INSERT INTO groupmembers.DeadLinkFromUser VALUES($1,$2)", link, user.id)
                             await message1.delete()
-
+                            await self.get_dead_links()
+                            try:
+                                channel = self.client.get_channel(keys.dead_image_channel_id)
+                                if channel is not None:
+                                    await self.send_dead_image(channel, link, user, idol_id)
+                            except Exception as e:
+                                pass
                     except Exception as e:
                         log.console(e)
                         pass
                 await reload_image(message)
         except Exception as e:
             pass
+
+    async def get_dead_links(self):
+        return await self.conn.fetch("SELECT deadlink, messageid, idolid FROM groupmembers.deadlinkfromuser")
+
+    async def delete_dead_link(self, link, idol_id):
+        return await self.conn.execute("DELETE FROM groupmembers.deadlinkfromuser WHERE deadlink = $1 AND idolid = $2", link, idol_id)
+
+    async def set_forbidden_link(self, link, idol_id):
+        return await self.conn.execute("INSERT INTO groupmembers.forbiddenlinks(link, idolid) VALUES($1, $2)", link, idol_id)
+
+    async def send_dead_image(self, channel, link, user, idol_id):
+        try:
+            idol = await self.get_member(idol_id)
+            special_message = f"""**Dead Image For {idol[1]} ({idol[2]}) ({idol[0]})
+Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
+            msg = await self.idol_post(channel, idol[0], link, special_message=special_message)
+            await self.conn.execute(
+                "INSERT INTO groupmembers.DeadLinkFromUser(deadlink, userid, messageid, idolid) VALUES($1, $2, $3, $4)",
+                link, user.id, msg.id, idol_id)
+            await msg.add_reaction(keys.check_emoji)
+            await msg.add_reaction(keys.trash_emoji)
+        except Exception as e:
+            log.console(f"Send Dead Image - {e}")
 
     async def get_id_where_member_matches_name(self, name, mode=0):
         """Get member ids if the name matches."""
@@ -1164,7 +1201,7 @@ class Utility:
         except Exception as e:
             return None
 
-    async def send_google_drive_embed(self, photo_link, embed, channel, drive_id, member_id, group_id):
+    async def send_google_drive_embed(self, photo_link, embed, channel, drive_id, member_id, group_id, special_message):
         """Does the processing for google drive photos/videos."""
         try:
             # post_url = f"https://drive.google.com/file/d/{drive_id}/view?usp=sharing"
@@ -1199,12 +1236,23 @@ class Utility:
                         photo = discord.File(file_location, file_name)
                         embed.set_image(url=f"attachment://{file_name}")
                         if not self.check_photo_animated(file_name):
-                            msg = await channel.send(file=photo, embed=embed)
+                            if special_message is None:
+                                msg = await channel.send(file=photo, embed=embed)
+                            else:
+                                msg = await channel.send(special_message, file=photo, embed=embed)
+
                         else:
-                            msg = await channel.send(file=photo)
+                            if special_message is None:
+                                msg = await channel.send(file=photo)
+                            else:
+                                msg = await channel.send(special_message, file=photo)
                     else:
                         embed.set_image(url=photo_link)
-                        msg = await channel.send(embed=embed)
+                        if special_message is None:
+                            msg = await channel.send(embed=embed)
+                        else:
+                            msg = await channel.send(special_message, embed=embed)
+
                     os.unlink(file_location)
                     return msg
                 elif resp.status == 404 or resp.status == 403:
@@ -1252,7 +1300,7 @@ class Utility:
                                   color=self.get_random_color(), url=photo_link)
         return embed
 
-    async def idol_post(self, channel, member_id, photo_link, group_id=None):
+    async def idol_post(self, channel, member_id, photo_link, group_id=None, special_message=None):
         """The main process for posting an idol's photo."""
         try:
             member_info = await self.get_member(member_id)
@@ -1262,15 +1310,21 @@ class Utility:
                 id_loc = photo_link.find("id=") + 3
                 drive_id = photo_link[id_loc:len(photo_link)]
                 embed = await self.get_idol_post_embed(group_id, member_info, photo_link)
-                msg = await self.send_google_drive_embed(photo_link, embed, channel, drive_id, member_id, group_id)
+                msg = await self.send_google_drive_embed(photo_link, embed, channel, drive_id, member_id, group_id, special_message)
                 return msg
             if link_origin == 'tenor':
-                msg = await channel.send(photo_link)
+                if special_message is None:
+                    msg = await channel.send(photo_link)
+                else:
+                    msg = await channel.send(f"{special_message} {photo_link}")
                 return msg
             else:
                 embed = await self.get_idol_post_embed(group_id, member_info, photo_link)
                 embed.set_image(url=photo_link)
-                msg = await channel.send(embed=embed)
+                if special_message is None:
+                    msg = await channel.send(embed=embed)
+                else:
+                    msg = await channel.send(special_message, embed=embed)
                 return msg
         except Exception as e:
             log.console(e)
@@ -1660,5 +1714,47 @@ class Utility:
             log.console(e)
             return e
 
+    #################
+    # ## PATREON ## #
+    #################
+    async def get_patreon_users(self):
+        return await self.conn.fetch("SELECT userid from patreon.users")
+
+    async def check_if_patreon(self, user_id):
+        """Check if the user is a patreon.
+        There are two ways to check if a user ia a patreon.
+        The first way is getting the members in the Patreon Role.
+        The second way is a table to check for permanent patreon users that are directly added by the bot owner.
+        """
+        try:
+            for user in await self.get_patreon_users():
+                if user[0] == user_id:
+                    return True
+            support_guild = self.client.get_guild(int(keys.bot_support_server_id))
+            patreon_role = support_guild.get_role(int(keys.patreon_role_id))
+            role_members = patreon_role.members
+            for member in role_members:
+                if member.id == user_id:
+                    return True
+        except Exception as e:
+            pass
+        return False
+
+    async def add_to_patreon(self, user_id):
+        try:
+            await self.conn.execute("INSERT INTO patreon.users(userid) VALUES($1)", int(user_id))
+        except Exception as e:
+            pass
+
+    async def remove_from_patreon(self, user_id):
+        try:
+            await self.conn.execute("DELETE FROM patreon.users WHERE userid = $1", int(user_id))
+        except Exception as e:
+            pass
+
+    async def reset_patreon_cooldown(self, ctx):
+        """Checks if the user is a patreon and resets their cooldown."""
+        if await self.check_if_patreon(ctx.author.id):
+            ctx.command.reset_cooldown(ctx)
 
 resources = Utility()

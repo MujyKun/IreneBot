@@ -1,1 +1,0 @@
-pyinstaller --onefile --icon=logo.ico run.py

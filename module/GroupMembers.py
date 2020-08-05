@@ -41,6 +41,7 @@ class GroupMembers(commands.Cog):
                     posted = False
                     try:
                         if ex.check_message_not_empty(message):
+                            random_member = False
                             server_prefix = await ex.get_server_prefix_by_context(message)
                             if message_content[0:len(server_prefix)] == server_prefix and message_content != f"{server_prefix}null":
                                 message_content = message_content[len(server_prefix):len(message_content)]
@@ -56,11 +57,11 @@ class GroupMembers(commands.Cog):
                                             posted = True
                                 elif len(group_ids) != 0:
                                     group_id = random.choice(group_ids)
-                                    random_member = random.choice(await ex.get_members_in_group(await ex.get_group_name(group_id)))
-                                    random_link = await ex.get_random_photo_from_member(random_member[0])
+                                    random_member = (random.choice(await ex.get_members_in_group(await ex.get_group_name(group_id))))[0]
+                                    random_link = await ex.get_random_photo_from_member(random_member)
                                     if not await ex.check_if_bot_banned(message_sender.id):
                                         async with message_channel.typing():
-                                            photo_msg = await ex.idol_post(message_channel, random_member[0], random_link, group_id=group_id)
+                                            photo_msg = await ex.idol_post(message_channel, random_member, random_link, group_id=group_id)
                                             posted = True
                                 else:
                                     member_ids = await ex.check_group_and_idol(message_content)
@@ -74,7 +75,7 @@ class GroupMembers(commands.Cog):
                                 if posted:
                                     ex.log_idol_command(message)
                                     await ex.add_command_count()
-                                await ex.check_idol_post_reactions(photo_msg, message)
+                                    await ex.check_idol_post_reactions(photo_msg, message, random_member)
                             else:
                                 pass
                     except Exception as e:
@@ -125,7 +126,7 @@ class GroupMembers(commands.Cog):
             random_idol_id = await ex.get_random_idol_id()
             random_link = await ex.get_random_photo_from_member(random_idol_id)
             photo_msg = await ex.idol_post(ctx.channel, random_idol_id, random_link)
-        await ex.check_idol_post_reactions(photo_msg, ctx.message)
+        await ex.check_idol_post_reactions(photo_msg, ctx.message, random_idol_id)
 
     async def get_photos(self, url, member, groups, stage_name, aliases, member_id):
         try:

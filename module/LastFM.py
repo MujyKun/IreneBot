@@ -14,6 +14,8 @@ class LastFM(commands.Cog):
     @staticmethod
     def get_recent_tracks(response, limit):
         """Get limit amount of tracks"""
+        image_url = False
+        album_name = False
         list_of_tracks = response['recenttracks']['track']
         counter = 0
         tracks_and_titles = []
@@ -23,13 +25,17 @@ class LastFM(commands.Cog):
                 title = f"**#{counter} **"
                 try:
                     date = track['date']['#text']
+                    album_name = track['album']['#text']
+                    image_url = (track['image'][2])['#text']
                 except Exception as e:
                     date = "Currently Playing"
-                description = f"""
-                **[{track['name']} by {track['artist']['#text']}]({track['url']})
-                Listened on {date}.**                
+                main_desc = f"""
+                **[{track['name']} by {track['artist']['#text']}]({track['url']})**
                 """
-                tracks_and_titles.append([title, description])
+                if album_name:
+                    main_desc += f"**Album: {album_name}**\n"
+                main_desc += f"**Listened on {date}.**"
+                tracks_and_titles.append([title, main_desc, image_url])
         return tracks_and_titles
 
     @staticmethod
@@ -148,7 +154,11 @@ class LastFM(commands.Cog):
             user = await self.set_user(ctx, user)
             response = await ex.get_fm_response('user.getRecentTracks', user)
             tracks_and_titles = self.get_recent_tracks(response, limit=1)
-            await ctx.send(embed=await self.create_fm_embed(f"{user}'s **Most Recent Track**", tracks_and_titles, individual=True))
+            embed = await self.create_fm_embed(f"{user}'s **Most Recent Track**", tracks_and_titles, individual=True)
+            image_url = tracks_and_titles[0][2]
+            if image_url:
+                embed.set_thumbnail(url=tracks_and_titles[0][2])
+            await ctx.send(embed=embed)
         except KeyError:
             await events.Events.error(ctx, self.user_not_found)
         except Exception as e:

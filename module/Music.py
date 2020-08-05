@@ -455,7 +455,6 @@ class Music(commands.Cog):
         except Exception as e:
             log.console(e)
 
-    @play.before_invoke
     async def ensure_voice(self, ctx):
         if ctx.voice_client is None:
             if ctx.author.voice:
@@ -463,6 +462,25 @@ class Music(commands.Cog):
             else:
                 await ctx.send("> **You are not connected to a voice channel.**")
                 raise commands.CommandError("Author not connected to a voice channel.")
+
+    @play.before_invoke
+    @volume.before_invoke
+    @stop.before_invoke
+    @skip.before_invoke
+    @remove.before_invoke
+    @move.before_invoke
+    @remove.before_invoke
+    @pause.before_invoke
+    @join.before_invoke
+    @queue.before_invoke
+    @shuffle.before_invoke
+    async def check_patreon(self, ctx):
+        if not await ex.check_if_patreon(ctx.author.id):
+            await ctx.send(f"""**Music is only available to $5 Patreons that support <@{keys.bot_id}>.
+Become a Patron at {keys.patreon_link}.**""")
+            raise commands.CommandError(f"{ctx.author.name} ({ctx.author.id}) is not a Patron.")
+        else:
+            await self.ensure_voice(ctx)
 
 
 class YTDLSource(discord.PCMVolumeTransformer):

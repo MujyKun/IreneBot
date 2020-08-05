@@ -47,7 +47,7 @@ class Irene:
         # Start Status Change Loop
         module.status.Status().change_bot_status_loop.start()
         # Start Voice Client Loop
-        # module.Music.Music().check_voice_clients.start()
+        module.Music.Music().check_voice_clients.start()
         # Update Group Photo Count
         module.GroupMembers.GroupMembers().update_group_photo_count.start()
 
@@ -73,11 +73,12 @@ class Irene:
         ex.client.add_cog(module.Profile.Profile())
         ex.client.add_cog(module.Help.Help())
         ex.client.add_cog(module.Logging.Logging())
-        # ex.client.add_cog(module.Music.Music())
+        ex.client.add_cog(module.Music.Music())
         ex.client.add_cog(module.BotMod.BotMod())
         ex.client.add_cog(module.events.Events())
         ex.client.add_cog(module.Testing.Testing())
         ex.client.add_cog(module.LastFM.LastFM())
+        ex.client.add_cog(module.Interactions.Interactions())
 
 
 if __name__ == '__main__':

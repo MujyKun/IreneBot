@@ -3,7 +3,6 @@ from discord.ext import commands
 from module.keys import client, bot_prefix, bot_support_server_link
 from Utility import resources as ex
 import itertools
-import asyncio
 
 
 class Help(commands.Cog):

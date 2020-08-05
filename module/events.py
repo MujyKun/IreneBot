@@ -1,4 +1,4 @@
-from module.keys import client
+from module.keys import client, trash_emoji, check_emoji, dead_image_channel_id
 from module import logger as log
 import discord
 from Utility import resources as ex
@@ -120,4 +120,48 @@ class Events(commands.Cog):
             await ex.conn.execute("INSERT INTO stats.leftguild (id, name, region, ownerid, membercount) VALUES($1, $2, $3, $4, $5)", id, name, region, owner_id, member_count)
         except Exception as e:
             log.console(f"{name} ({id})has already kicked Irene before. - {e}")
+
+    @staticmethod
+    @client.event
+    async def on_raw_reaction_add(payload):
+        """Checks if a bot mod is deleting an idol photo."""
+        try:
+            message_id = payload.message_id
+            user_id = payload.user_id
+            emoji = payload.emoji
+            channel_id = payload.channel_id
+
+            async def get_msg_and_image():
+                """Gets the message ID if it matches with the reaction."""
+                try:
+                    if channel_id == dead_image_channel_id:
+                        channel = await ex.client.fetch_channel(dead_image_channel_id)
+                        msg = await channel.fetch_message(message_id)
+                        for record in await ex.get_dead_links():
+                            image_link = record[0]
+                            msg_id = record[1]
+                            idol_id = record[2]
+                            if message_id == msg_id:
+                                return msg, image_link, idol_id
+                except Exception as e:
+                    log.console(e)
+                return None, None, None
+
+            if ex.check_if_mod(user_id, mode=1):
+                if str(emoji) == trash_emoji:
+                    msg, link, idol_id = await get_msg_and_image()
+                    if link is not None:
+                        await ex.conn.execute("DELETE FROM groupmembers.imagelinks WHERE link = $1 AND memberid = $2",
+                                              link, idol_id)
+                        await ex.delete_dead_link(link, idol_id)
+                        await ex.set_forbidden_link(link, idol_id)
+                        await msg.delete()
+
+                elif str(emoji) == check_emoji:
+                    msg, link, idol_id = await get_msg_and_image()
+                    if link is not None:
+                        await ex.delete_dead_link(link, idol_id)
+                        await msg.delete()
+        except Exception as e:
+            log.console(e)
 

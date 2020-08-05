@@ -8,6 +8,28 @@ from Utility import resources as ex
 class BotMod(commands.Cog):
     @commands.command()
     @commands.check(ex.check_if_mod)
+    async def deletelink(self, ctx, link):
+        """Removes a link from an idol. [Format: %deletelink (link)]"""
+        try:
+            await ex.conn.execute("DELETE FROM groupmembers.imagelinks WHERE link = $1", link)
+            await ctx.send(f"> **Deleted {link} if it existed.**")
+        except Exception as e:
+            log.console(e)
+            await ctx.send(f"> **{e}**")
+
+    @commands.command()
+    @commands.check(ex.check_if_mod)
+    async def moveto(self, ctx, idol_id, link):
+        """Moves a link to another idol. (Cannot be used for adding new links)[Format: %moveto (idol id) (link)]"""
+        try:
+            await ex.conn.execute("UPDATE groupmembers.imagelinks SET memberid = $1 WHERE link = $2", int(idol_id), link)
+            await ctx.send(f"> **Moved {link} to {idol_id} if it existed.")
+        except Exception as e:
+            log.console(e)
+            await ctx.send(f"> **{e}**")
+
+    @commands.command()
+    @commands.check(ex.check_if_mod)
     async def repost(self, ctx, post_number):
         """Reposts a certain post from the DC APP to all channels. [Format: %repost post_number]"""
         await ctx.send(f"> **Reposting...**")
@@ -30,7 +52,10 @@ class BotMod(commands.Cog):
             'slap',
             'kiss',
             'lick',
-            'hug'
+            'hug',
+            'punch',
+            'spit',
+            'pat'
         ]
         try:
             if interaction_type.lower() in interaction_list:

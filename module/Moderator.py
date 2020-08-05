@@ -14,8 +14,18 @@ class Moderator(commands.Cog):
 
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
+    async def say(self, ctx, *, message):
+        """Make Irene say a message.
+        Requires Manage Messages
+        """
+        await ctx.send(">>> {}".format(message))
+
+    @commands.command()
+    @commands.has_guild_permissions(manage_messages=True)
     async def setprefix(self, ctx, *, prefix=bot_prefix):
-        """Set the server prefix. If prefix was forgotten, type this command with the default prefix.[Format: %setprefix %]"""
+        """Set the server prefix. If prefix was forgotten, type this command with the default prefix.[Format: %setprefix %]
+        Requires Manage Messages
+        """
         prefix = prefix.lower()
         current_server_prefix = await ex.get_server_prefix(ctx.guild.id)
         if len(prefix) > 8:
@@ -35,7 +45,9 @@ class Moderator(commands.Cog):
     @commands.command(aliases=['prune', 'purge'])
     @commands.has_guild_permissions(manage_messages=True)
     async def clear(self, ctx, amount: int, user: discord.Member = discord.Member):
-        """Prune Messages (Max 1000) [Format: %clear (amount)][Aliases: prune]"""
+        """Prune Messages (Max 1000) [Format: %clear (amount)][Aliases: prune]
+        Requires Manage Messages
+        """
         amount = int(amount) + 1
 
         def clear_x(m):
@@ -67,7 +79,9 @@ class Moderator(commands.Cog):
     @commands.command()
     @commands.has_guild_permissions(ban_members=True)
     async def ban(self, ctx, user: discord.Member = discord.Member, *, reason="No Reason"):
-        """Ban A User [Format: %ban @user]"""
+        """Ban A User [Format: %ban @user]
+        Requires Ban Members
+        """
         check = True
         if user == discord.Member:
             await ctx.send("> **Please choose a person to ban.**")
@@ -87,7 +101,9 @@ class Moderator(commands.Cog):
     @commands.command()
     @commands.has_guild_permissions(ban_members=True)
     async def unban(self, ctx, user: discord.User = discord.User, *, reason="No Reason"):
-        """Unban A User [Format: %unban @user]"""
+        """Unban A User [Format: %unban @user]
+        Requires Ban Members
+        """
         if user == discord.User:
             await ctx.send("> **Please choose a person to unban.**")
         else:
@@ -103,7 +119,9 @@ class Moderator(commands.Cog):
     @commands.command()
     @commands.has_guild_permissions(kick_members=True)
     async def kick(self, ctx, user: discord.Member = discord.Member, reason="No Reason"):
-        """Kick A User [Format: %kick @user]"""
+        """Kick A User [Format: %kick @user]
+        Requires Kick Members
+        """
         if user == discord.Member:
             await ctx.send("> **Please choose a person to kick.**")
         else:
@@ -123,7 +141,9 @@ class Moderator(commands.Cog):
     @commands.command(aliases=['temp'])
     @commands.has_guild_permissions(manage_messages=True)
     async def tempchannel(self, ctx, delay=-1):
-        """Makes Current Channel a temporary channel deleting messages after a certain time period. If delay is -1, it will remove the channel. [Format: %temp (delay)]"""
+        """Makes Current Channel a temporary channel deleting messages after a certain time period. If delay is -1, it will remove the channel. [Format: %temp (delay)]
+        Requires Manage Messages
+        """
         channel_id = ctx.channel.id
         try:
             if delay == -1:
@@ -154,7 +174,9 @@ class Moderator(commands.Cog):
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True, manage_emojis=True)
     async def addemoji(self, ctx, url, emoji_name):
-        """Adds an emoji to the server. [Format: %addemoji (url) (emoji name)]"""
+        """Adds an emoji to the server. [Format: %addemoji (url) (emoji name)]
+        Requires Manage Messages & Manage Emojis
+        """
         if "?v=1" in url or ".jpg" in url or ".png" in url or ".gif" in url:
             file_format = url[52:56]
         else:

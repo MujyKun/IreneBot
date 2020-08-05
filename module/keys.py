@@ -28,15 +28,36 @@ mods_list = []
 for mod in mods_list_split:
     mods_list.append(int(mod))
 bot_invite_link = os.getenv("BOT_INVITE_LINK")
+bot_support_server_id = os.getenv("SUPPORT_SERVER_ID")
 bot_support_server_link = os.getenv("SUPPORT_SERVER_LINK")
 bot_prefix = os.getenv("BOT_PREFIX")
 bot_website = os.getenv("BOT_WEBSITE") or "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
 dc_app_test_channel_id = make_int(os.getenv("DC_APP_TEST_CHANNEL_ID"))
 report_channel_id = make_int(os.getenv("REPORT_CHANNEL_ID"))
 suggest_channel_id = make_int(os.getenv("SUGGEST_CHANNEL_ID"))
+dead_image_channel_id = make_int(os.getenv("DEAD_IMAGE_CHANNEL_ID"))
 
 
 client = commands.Bot(command_prefix=bot_prefix, case_insensitive=True, owner_id=owner_id)
+
+# Reactions/Emotes
+
+
+def get_emoji(string):
+    if len(string) != 0:
+        if string[0] == "<":
+            return string
+        else:
+            string = chr(int(string, 16))
+    return string
+
+
+trash_emoji = get_emoji(os.getenv("TRASH_EMOJI"))
+check_emoji = get_emoji(os.getenv("CHECK_MARK_EMOJI"))
+reload_emoji = get_emoji(os.getenv("RELOAD_IMAGE_EMOJI"))
+dead_emoji = get_emoji(os.getenv("DEAD_LINK_EMOJI"))
+previous_emoji = get_emoji(os.getenv("PREVIOUS_EMOJI"))
+next_emoji = get_emoji(os.getenv("NEXT_EMOJI"))
 
 
 # Twitter Keys - https://developer.twitter.com/en/docs/basics/getting-started
@@ -101,8 +122,13 @@ last_fm_headers = {
     'user-agent': os.getenv("LAST_USER_AGENT")
 }
 
+# Patreon
+patreon_link = os.getenv("PATREON_LINK")
+patreon_role_id = os.getenv("PATREON_ROLE_ID")
+
 # startup time
 startup_time = datetime.now()
 
 # Aiohttp Client Session
 client_session = aiohttp.ClientSession()
+

@@ -1,7 +1,6 @@
 import discord
 import os
 from discord.ext import commands
-import aiohttp
 import aiofiles
 import asyncio
 from module import logger as log

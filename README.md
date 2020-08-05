@@ -1,6 +1,7 @@
-# [IreneBot V1.02.6](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=1609956823)
+# [IreneBot V1.02.7](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=1609956823)
 
-
+## [Support Irene by becoming a Patron!](https://www.patreon.com/bePatron?u=38971435)  
+**[Become a Patron!](https://www.patreon.com/bePatron?u=38971435)**
 
 [![Discord Bots](https://top.gg/api/widget/520369375325454371.svg)](https://top.gg/bot/520369375325454371)
 [![Discord Boats](https://discord.boats/api/widget/520369375325454371)](https://discord.boats/bot/520369375325454371)  
@@ -60,8 +61,10 @@ To find out more, look at the `GroupMembers` category.
 | deleteidol         | Deletes an idol.                                                              | %deleteidol (idol id)                                                                                             | removeidol                      |
 | deleteidolfromgroup         | Deletes idol from group                                                              | %deleteidolfromgroup (idol id) (group id)                                                                                             | removeidolfromgroup                      |
 | deleteinteraction       | Delete a url from an interaction                                   | %deleteinteraction (url,url)               |               |
+| deletelink       | Removes a link from an idol.                                   | %deletelink (link)               |               |
 | getstatuses             | Get all statuses of Irene.                                                   | %getstatuses                           |                |
 | kill             | Kills the bot                                                  | %kill                           |               |
+| moveto             | Moves a link to another idol. (Cannot be used for adding new links) | %moveto (idol id) (link)                           |               |
 | repost             | Reposts a certain post from the DC APP to all channels.                                                  | %repost (post_number)                           |               |
 
 #### Cogs: ♥♥♥
@@ -116,6 +119,17 @@ To find out more, look at the `GroupMembers` category.
 | stopimages             | Stops Irene from posting/recognizing idol photos in a specific text channel. To undo, type it again.                                    | %stopimages #text-channel                                                                                  | ★                     |
 | tenor            | Connection to tenor API // Sends Links of gifs to Database. Dashes (-) are spaces. | %tenor                                                                                                         | ♥                      |
 
+#### Interactions:
+| Command          | Description                                                    | Format                          | Aliases        |
+|------------------|----------------------------------------------------------------|---------------------------------|----------------|
+| hug          | Hug someone                              | %hug @user                       |                |
+| kiss          | Kiss someone                              | %kiss @user                       |                |
+| lick          | Lick someone                              | %lick @user                       |                |
+| pat          | Pat someone                              | %pat @user                       |                |
+| punch          | Punch someone                              | %punch @user                       |                |
+| slap          | Slap someone                              | %slap @user                       |                |
+| spit          | Spit on someone                              | %spit @user                       |                |
+
 
 #### Logging: ★★★  
 | Command      | Description                                                                                          | Format        |
@@ -130,27 +144,25 @@ To find out more, look at the `GroupMembers` category.
 | Command          | Description                                                    | Format                          | Aliases        |
 |------------------|----------------------------------------------------------------|---------------------------------|----------------|
 | _8ball           | Asks the 8ball a question.                                     | %8ball (Question)               | 8ball,8        |
+| addpatreon         | Adds a patreon.                           | %addpatreon (userid,userid,userid)             | ♥              |
 | announce         | Sends a bot message to text channels                           | %announce (message)             | ♥              |
 | botinfo       | Get information about the bot.                                   | %botinfo               |               |
 | checkprefix       | Check the current prefix using the default prefix.                                   | %checkprefix               |               |
 | clearnword       | Clear A User's Nword Counter                                   | %clearnword @user               | ♥              |
 | flip             | Flips a Coin                                                   | %flip                           |                |
-| hug          | Hug someone                              | %hug @user                       |                |
 | invite           | Invite Link for Irene                                          | %invite                         |                |
-| kiss          | Kiss someone                              | %kiss @user                       |                |
-| lick          | Lick someone                              | %lick @user                       |                |
 | logging          | Start logging this channel/Stop logging this channel           | %logging (start/stop)           | ♥              |
 | nword            | Checks how many times a user has said the N Word               | %nword @user                    |                |
 | nwordleaderboard | Shows leaderboards for how many times the nword has been said. | %nwl                            | nwl            |
+| patreon             | Displays Patreon Information.                                       | %patreon                           |            |
 | ping             | Shows Latency to Discord                                       | %ping                           | pong           |
 | random           | Choose a random number from a range (a,b)                      | %random a b [Ex: %random 1 100] | r,rand,randint |
+| removepatreon         | Removes a patreon.                           | %removepatreon (userid,userid,userid)             | ♥              |
 | report          | Report an issue with Irene.                                    | %report (issue)              |               |
-| say              | Owner to Bot Message                                           | %say (message)                  | ♥              |
 | send              | Send a message to a text channel.                                             | %send (channelid) (message)                  | ♥              |
 | servercount      | Shows how many servers Irene is on.                            | %servercount                    |                |
 | serverinfo      | View information about the current server.                            | %serverinfo                   |                |
 | servers          | Displays which servers Irene is in.  | %servers                        | ♥              |
-| slap          | Slap someone                              | %slap @user                       |                |
 | speak            | Owner to Bot TTS                                               | %speak (message)                | ♥              |
 | suggest          | Suggest a feature for Irene                                    | %suggest (feature)              |               |
 | support          | Support Discord Server for Irene                               | %support                        |                |
@@ -160,13 +172,14 @@ To find out more, look at the `GroupMembers` category.
 #### Moderator: ★★★
 | Command          | Description                                                                                                                          | Format                          | Aliases        |
 |------------------|--------------------------------------------------------------------------------------------------------------------------------------|---------------------------------|----------------|
-| addemoji         | Adds an emoji to the server.                                                                                                         | %addemoji (url) (emoji_name)    |               |
-| ban              | Ban A User                                                                                                                           | %ban @user                      |               |
-| clear            | Prune Messages (LIMIT 1000)                                                                                                                      | %clear (amount)                 |  prune        |
-| kick             | Kick A User                                                                                                                          | %kick @user                     |               |
-| setprefix      | Set the server prefix. If prefix was forgotten, type this command with the default prefix. | %setprefix $         |          | 
-| tempchannel      | Makes Current Channel a temporary channel deleting messages after a certain time period. If delay is -1, it will remove the channel. | %tempchannel [delay=-1]         | temp         |
-| unban            | UnBan A User                                                                                                                         | %unban @user                    |               |
+| addemoji         | Adds an emoji to the server. (Manage Messages & Emojis)                                                                                                        | %addemoji (url) (emoji_name)    |               |
+| ban              | Ban A User (Ban Members)                                                                                                                           | %ban @user                      |               |
+| clear            | Prune Messages (LIMIT 1000) (Manage Messages)                                                                                                                      | %clear (amount)                 |  prune        |
+| kick             | Kick A User. (Kick Members)                                                                                                                          | %kick @user                     |               |
+| say              | Make Irene say a message. (Manage Messages)                                          | %say (message)                  |               |
+| setprefix      | Set the server prefix. If prefix was forgotten, type this command with the default prefix. (Manage Messages) | %setprefix $         |          | 
+| tempchannel      | Makes Current Channel a temporary channel deleting messages after a certain time period. If delay is -1, it will remove the channel. (Manage Messages)| %tempchannel [delay=-1]         | temp         |
+| unban            | UnBan A User (Ban Members)                                                                                                                      | %unban @user                    |               |
  
 #### Music:  
 | Command          | Description                                                                                                                          | Format                          | Aliases        |

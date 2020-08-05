@@ -1,7 +1,6 @@
 import discord
 from random import *
 from discord.ext import commands
-from discord.ext.commands.cooldowns import BucketType
 from module import keys
 from module import logger as log
 from Utility import resources as ex
@@ -9,6 +8,29 @@ client = keys.client
 
 
 class Miscellaneous(commands.Cog):
+    @commands.command()
+    async def patreon(self, ctx):
+        """Displays Patreon Information. [Format: %patreon]"""
+        await ctx.send(f"**Please support <@{keys.bot_id}>'s development at {keys.patreon_link}.**")
+
+    @commands.command()
+    @commands.is_owner()
+    async def addpatreon(self, ctx, *, users):
+        """Adds a patreon. [Format: %addpatreon (userid,userid,userid)]"""
+        users = users.split(",")
+        for user in users:
+            await ex.add_to_patreon(user)
+        await ctx.send(f">>> **Added {users} to Patreon.**")
+
+    @commands.command()
+    @commands.is_owner()
+    async def removepatreon(self, ctx, *, users):
+        """Removes a patreon. [Format: %removepatreon (userid,userid,userid)]"""
+        users = users.split(",")
+        for user in users:
+            await ex.remove_from_patreon(user)
+        await ctx.send(f">>> **Removed {users} from Patreon.**")
+
     @commands.command()
     async def botinfo(self, ctx):
         """Get information about the bot."""
@@ -21,14 +43,16 @@ class Miscellaneous(commands.Cog):
         app_name = app.name
         app_owner = app.owner
         app_icon_url = app.icon_url
+        patreon_url = keys.patreon_link
         bot_uptime = await ex.get_cooldown_time((keys.datetime.now() - keys.startup_time).total_seconds())
         commands_used = await ex.get_command_count()
         total_commands = commands_used[0]
         current_session_commands = commands_used[1]
-        bot_server_links = """https://top.gg/bot/520369375325454371
-        https://discord.bots.gg/bots/520369375325454371
-        https://bots.ondiscord.xyz/bots/520369375325454371
-        https://discord.boats/bot/520369375325454371
+        bot_server_links = """
+[Top.gg](https://top.gg/bot/520369375325454371)
+[Discord Bots](https://discord.bots.gg/bots/520369375325454371)
+[Bots on Discord](https://bots.ondiscord.xyz/bots/520369375325454371)
+[Discord Boats](https://discord.boats/bot/520369375325454371)
         """
         mods = ""
         for bot_mod in keys.mods_list:
@@ -47,75 +71,15 @@ class Miscellaneous(commands.Cog):
         embed.add_field(name=f"Bot Owner", value=f"<@{app_owner.id}>", inline=False)
         if len(mods) != 0:
             embed.add_field(name=f"Bot Mods", value=mods, inline=True)
-        embed.add_field(name=f"Support Server", value=f"https://discord.gg/bEXm85V", inline=False)
+        embed.add_field(name=f"Support Server", value=f"[Invite to Server]({keys.bot_support_server_link})", inline=False)
         embed.add_field(name=f"Website", value=keys.bot_website, inline=False)
         embed.add_field(name=f"Github", value=f"https://github.com/MujyKun/IreneBot", inline=False)
         embed.add_field(name=f"Discord Invite", value=keys.bot_invite_link, inline=False)
         embed.add_field(name=f"Bot Server Links", value=bot_server_links, inline=False)
         embed.add_field(name=f"Suggest", value=f"Suggest a feature using `{current_server_prefix}suggest`.", inline=False)
+        if len(patreon_url) != 0:
+            embed.add_field(name=f"Patreon", value=f"[Please Support <@{keys.bot_id}> here.]({patreon_url})", inline=False)
         await ctx.send(embed=embed)
-
-    @commands.command()
-    @commands.cooldown(1, 60, BucketType.user)
-    async def lick(self, ctx, user: discord.Member = discord.Member):
-        """Lick someone [Format: %lick @user]"""
-        await ex.interact_with_user(ctx, user, "licked", "lick")
-
-    @commands.command()
-    @commands.cooldown(1, 60, BucketType.user)
-    async def hug(self, ctx, user: discord.Member = discord.Member):
-        """Hug someone [Format: %hug @user]"""
-        await ex.interact_with_user(ctx, user, "hugged", "hug")
-
-    @commands.command()
-    @commands.cooldown(1, 60, BucketType.user)
-    async def kiss(self, ctx, user: discord.Member = discord.Member):
-        """Kiss someone [Format: %kiss @user]"""
-        await ex.interact_with_user(ctx, user, "kissed", "kiss")
-
-    @commands.command()
-    @commands.cooldown(1, 60, BucketType.user)
-    async def slap(self, ctx, user: discord.Member = discord.Member):
-        """Slap someone [Format: %slap @user]"""
-        # There are two types of slap: in an embed with a url, or with text. 50% chance to get either.
-        type_of_slap = randint(0, 1)
-        if type_of_slap == 0:
-            await ex.interact_with_user(ctx, user, "slapped", "slap")
-        if type_of_slap == 1:
-            ctx_name = ctx.author.display_name
-            user_name = user.display_name
-            random_idol_stage_name = (await ex.get_member(await ex.get_random_idol_id()))[2]
-            harm_phrases = [
-                f"Shame on you {user_name}!! You are not allowed to harm yourself.",
-                f"Did you really think you could hurt yourself {user_name}?",
-                f"{random_idol_stage_name} advises you not to hurt yourself {user_name}.",
-                f"Uh.... I wouldn't do that if I were you {user_name}.",
-                f"{random_idol_stage_name} slapped you instead {user_name}.",
-            ]
-            slap_phrases = [
-                f"> {ctx_name} has slapped {user_name} right across the face.",
-                f"> {ctx_name} slapped {user_name}'s forehead.",
-                f"> {ctx_name} slapped {user_name} on the back of the head.",
-                f"> {ctx_name} slapped {user_name} with the help of {random_idol_stage_name}.",
-                f"> {ctx_name} slapped {user_name} with {random_idol_stage_name} holding them down.",
-                f"> {ctx_name} and {random_idol_stage_name} brutally slap {user_name}.",
-                f"> {user_name} was knocked unconscious from a powerful slap by {ctx_name}.",
-                f"> {ctx_name} slapped {user_name} on the thigh.",
-                f"> {ctx_name} gave {user_name} a high five to the face.",
-            ]
-            try:
-                if user.id == ctx.author.id:
-                    await ctx.send(f"> **{choice(harm_phrases)}**")
-                    ctx.command.reset_cooldown(ctx)
-                elif user == discord.Member:
-                    await ctx.send("> **Please choose someone to slap.**")
-                    ctx.command.reset_cooldown(ctx)
-                else:
-                    await ctx.send(f"**{choice(slap_phrases)}**")
-
-            except Exception as e:
-                log.console(e)
-
 
     @commands.command()
     async def checkprefix(self, ctx):
@@ -136,6 +100,8 @@ class Miscellaneous(commands.Cog):
             else:
                 trans = keys.translator
                 result = trans.translate(message, source=source, target=target, verbose=True)
+                if result['code'] == "00001":
+                    return await ctx.send("> **The Papago service cannot be used due to a temporary error. Please try again later.**")
                 msg = f"Original ({result['srcLangType']}): {message} \nTranslated ({result['tarLangType']}): {result['translatedText']} "
                 await ctx.send(msg)
         except Exception as e:
@@ -449,12 +415,6 @@ class Miscellaneous(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
-    async def say(self, ctx, *, message):
-        """Owner to Bot Message"""
-        await ctx.send(">>> {}".format(message))
-
-    @commands.command()
-    @commands.is_owner()
     async def speak(self, ctx, *, message):
         """Owner to Bot TTS"""
         await ctx.send(">>> {}".format(message), tts=True, delete_after=5)
@@ -463,4 +423,3 @@ class Miscellaneous(commands.Cog):
     async def ping(self, ctx):
         """Shows Latency to Discord [Format: %ping]"""
         await ctx.send(f"> **My ping is currently {ex.get_ping()}ms.**")
-

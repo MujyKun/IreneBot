@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands
-import aiohttp
 import aiofiles
 import os
 from module import logger as log
@@ -11,6 +10,79 @@ from Utility import resources as ex
 class Moderator(commands.Cog):
     def __init__(self):
         pass
+
+    async def get_mute_role(self, ctx):
+        mute_roles = await ex.conn.fetch("SELECT roleid FROM general.muteroles")
+        for role in mute_roles:
+            role_id = role[0]
+            role = ctx.guild.get_role(role_id)
+            if role is not None:
+                return role
+        return None
+
+    async def check_if_muted(self, user_id, role):
+        users = role.members
+        for user in users:
+            if user.id == user_id:
+                return True
+        return False
+
+    @commands.command()
+    @commands.has_guild_permissions(manage_messages=True, manage_roles=True)
+    async def mute(self, ctx, user: discord.Member = None, *, reason=None):
+        """Mutes a user.
+        Format: [%mute @user (reason)]"""
+        try:
+            if user is None:
+                return await ctx.send(f"> **<@{ctx.author.id}>, Please specify a user to mute.**")
+            if user.id == ctx.author.id:
+                return await ctx.send(f"> **<@{ctx.author.id}>, You cannot mute yourself.**")
+            mute_role = await self.get_mute_role(ctx)
+            guild_channels = ctx.guild.text_channels
+            if mute_role is None:
+                mute_role = await ctx.guild.create_role(reason="Creating Mute Role", name="Muted")
+                await ex.conn.execute("INSERT INTO general.muteroles(roleid) VALUES($1)", mute_role.id)
+                for channel in guild_channels:
+                    try:
+                        await channel.set_permissions(mute_role, send_messages=False)
+                    except Exception as e:
+                        pass
+            muted = await self.check_if_muted(user.id, mute_role)
+            if muted:
+                return await ctx.send(f"**<@{user.id}> is already muted.**")
+            else:
+                await user.add_roles(mute_role, reason=f"Muting User - Requested by {ctx.author.display_name} ({user.id}) - Reason: {reason}.")
+                return await ctx.send(f"> **Muted <@{user.id}>. Reason: {reason}**")
+        except discord.Forbidden as e:
+            log.console(e)
+            await ctx.send(f"**I am missing the permissions to mute {user.display_name}. {e}**")
+        except Exception as e:
+            log.console(e)
+            await ctx.send(f"Mute - {e}")
+
+    @commands.command()
+    @commands.has_guild_permissions(manage_messages=True, manage_roles=True)
+    async def unmute(self, ctx, user: discord.Member = None):
+        """Unmute a user that is already muted.
+        Format: [%unmute @user (reason)]"""
+        try:
+            if user is None:
+                return await ctx.send(f"> **<@{ctx.author.id}>, Please specify a user to unmute.**")
+            if user.id == ctx.author.id:
+                return await ctx.send(f"> **<@{ctx.author.id}>, You cannot unmute yourself.**")
+            mute_role = await self.get_mute_role(ctx)
+            muted = await self.check_if_muted(user.id, mute_role)
+            if mute_role is None:
+                return await ctx.send(">**This user was not muted by me as the mute role could not be found. In order for me to create a custom mute role, I need to mute someone first.**")
+            if muted:
+                await user.remove_roles(mute_role,
+                                     reason=f"UnMuting User - Requested by {ctx.author.display_name} ({user.id})")
+                return await ctx.send(f"> **<@{user.id}> has been unmuted.**")
+            else:
+                return await ctx.send(f"> **<@{user.id}> is not muted.**")
+        except Exception as e:
+            log.console(e)
+            return await ctx.send(f"> **I am missing permissions to unmute {user.display_name}. {e}**")
 
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)

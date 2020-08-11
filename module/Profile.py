@@ -46,14 +46,13 @@ class Profile(commands.Cog):
                 count += 1
             if len(roles) > 500:
                 roles = f"{roles[0:498]}...."
-
             user_level = await ex.get_level(user_id, "profile")
             shortened_money = await ex.shorten_balance(str(await ex.get_balance(user_id)))
             rob_beg_daily_level = f"{await ex.get_level(user_id, 'rob')}/{await ex.get_level(user_id, 'beg')}/{await ex.get_level(user_id, 'daily')}"
             if await ex.check_if_patreon(user_id):
                 embed = discord.Embed(title=f"{user.name} ({user_id})", color=0x90ee90, url=f"{user.avatar_url}", description=f"**{user.name} is supporting Irene on Patreon!**")
             else:
-                embed = discord.Embed(title=f"{user.name} ({user_id})", color=0x90ee90, url=f"{user.avatar_url}", )
+                embed = discord.Embed(title=f"{user.name} ({user_id})", color=0x90ee90, url=f"{user.avatar_url}")
             embed = await ex.set_embed_author_and_footer(embed, "Thanks for using Irene!")
             try:
                 user_activity = user.activity.name

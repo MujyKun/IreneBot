@@ -11,8 +11,38 @@ client = keys.client
 class Interactions(commands.Cog):
     @commands.command()
     @commands.cooldown(1, 60, BucketType.user)
+    async def stepon(self, ctx, user: discord.Member = discord.Member):
+        """Step on someone [Format: %stepon @user]"""
+        await ex.interact_with_user(ctx, user, "stepped on", "stepon")
+
+    @commands.command()
+    @commands.cooldown(1, 60, BucketType.user)
+    async def stab(self, ctx, user: discord.Member = discord.Member):
+        """Stab someone [Format: %stab @user]"""
+        await ex.interact_with_user(ctx, user, "stabbed", "stab")
+
+    @commands.command()
+    @commands.cooldown(1, 60, BucketType.user)
+    async def choke(self, ctx, user: discord.Member = discord.Member):
+        """Choke someone [Format: %choke @user]"""
+        await ex.interact_with_user(ctx, user, "choked", "choke")
+
+    @commands.command()
+    @commands.cooldown(1, 60, BucketType.user)
+    async def pullhair(self, ctx, user: discord.Member = discord.Member):
+        """Pull the hair of someone [Format: %pullhair @user]"""
+        await ex.interact_with_user(ctx, user, "is pulling the hair of", "pullhair")
+
+    @commands.command()
+    @commands.cooldown(1, 60, BucketType.user)
+    async def cuddle(self, ctx, user: discord.Member = discord.Member):
+        """Cuddle someone [Format: %cuddle @user]"""
+        await ex.interact_with_user(ctx, user, "is cuddling with", "cuddle")
+
+    @commands.command()
+    @commands.cooldown(1, 60, BucketType.user)
     async def pat(self, ctx, user: discord.Member = discord.Member):
-        """Pat someone [Format: %punch @user]"""
+        """Pat someone [Format: %pat @user]"""
         await ex.interact_with_user(ctx, user, "patted", "pat")
 
     @commands.command()
@@ -54,6 +84,7 @@ class Interactions(commands.Cog):
         if type_of_slap == 0:
             await ex.interact_with_user(ctx, user, "slapped", "slap")
         if type_of_slap == 1:
+            await ex.reset_patreon_cooldown(ctx)
             ctx_name = ctx.author.display_name
             user_name = user.display_name
             random_idol_stage_name = (await ex.get_member(await ex.get_random_idol_id()))[2]

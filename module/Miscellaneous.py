@@ -8,6 +8,85 @@ client = keys.client
 
 
 class Miscellaneous(commands.Cog):
+    @staticmethod
+    async def on_message_notifications(message):
+        try:
+            message_sender = message.author
+            message_guild_id = message.guild.id
+            message_content = message.content
+            notifications = await ex.conn.fetch("SELECT guildid,userid,phrase FROM general.notifications")
+            if not message_sender.bot:
+                for notification in notifications:
+                    guild_id = notification[0]
+                    user_id = notification[1]
+                    phrase = notification[2]
+                    if phrase in message_content.lower() and guild_id == message_guild_id and message_sender.id != user_id:
+                        user = await client.fetch_user(user_id)
+                        dm_channel = user.dm_channel
+                        if dm_channel is None:
+                            await user.create_dm()
+                            dm_channel = user.dm_channel
+                        start_loc = (message_content.lower()).find(phrase)
+                        end_loc = start_loc + len(phrase)
+                        new_message_content = f"{message_content[0:start_loc]}`{message_content[start_loc:end_loc]}`{message_content[end_loc:len(message_content)]}"
+                        title_desc = f"""
+    Phrase: {phrase}
+    Message Author: {message_sender}
+    
+    **Message:** {new_message_content}
+    [Click to go to the Message]({message.jump_url})
+    """
+                        embed = await ex.create_embed(title="Phrase Found", color=ex.get_random_color(), title_desc=title_desc)
+                        await dm_channel.send(embed=embed)
+        except Exception as e:
+            pass
+
+    @commands.command()
+    async def addnoti(self, ctx, *, phrase):
+        """Receive a DM whenever a phrase or word is said in the current server. [Format: %addnoti (phrase/word)]"""
+        try:
+            check_exists = ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) FROM general.notifications WHERE guildid = $1 AND userid = $2 AND phrase = $3", ctx.guild.id, ctx.author.id, phrase.lower()))
+            # will return 0 or 1
+            if check_exists:
+                raise Exception
+            await ex.conn.execute("INSERT INTO general.notifications(guildid,userid,phrase) VALUES($1, $2, $3)", ctx.guild.id, ctx.author.id, phrase.lower())
+            await ctx.send(f"> **{ctx.author.display_name}, I added `{phrase}` to your notifications.**")
+        except Exception as e:
+            log.console(e)
+            await ctx.send(f"> **{ctx.author.display_name}, You are already receiving notifications for `{phrase}`**")
+        pass
+
+    @commands.command(aliases=["deletenoti"])
+    async def removenoti(self, ctx, *, phrase):
+        """Remove a phrase/word when it said in the current server. [Format: %removenoti (phrase/word)]"""
+        try:
+            await ex.conn.execute("DELETE FROM general.notifications WHERE guildid=$1 AND userid=$2 AND phrase=$3", ctx.guild.id, ctx.author.id, phrase.lower())
+            await ctx.send(f"> **{ctx.author.display_name}, if you were receiving notifications for that phrase, it has been removed.**")
+        except Exception as e:
+            log.console(e)
+            await ctx.send(f"> **Something Went Wrong, please {await ex.get_server_prefix_by_context(ctx)}report it.**")
+
+    @commands.command()
+    async def listnoti(self, ctx):
+        """list all your notification phrases that exist in the current server. [Format: %listnoti]"""
+        try:
+            phrases = await ex.conn.fetch("SELECT phrase FROM general.notifications WHERE guildid = $1 AND userid = $2", ctx.guild.id, ctx.author.id)
+            if len(phrases) == 0:
+                return await ctx.send(f"> **{ctx.author.display_name}, You do not have any notification phrases on this server.**")
+            final_list = ""
+            counter = 1
+            for phrase in phrases:
+                if counter != len(phrases):
+                    final_list += f"**{phrase[0]}**,"
+                else:
+                    final_list += f"**{phrase[0]}**"
+                counter += 1
+            await ctx.send(final_list)
+        except Exception as e:
+            log.console(e)
+            await ctx.send(f"> **Something Went Wrong, please {await ex.get_server_prefix_by_context(ctx)}report it.**")
+
+
     @commands.command()
     async def patreon(self, ctx):
         """Displays Patreon Information. [Format: %patreon]"""

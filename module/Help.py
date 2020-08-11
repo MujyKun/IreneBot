@@ -12,46 +12,55 @@ class Help(commands.Cog):
         client.help_command.cog = self
 
     class SubHelp(commands.MinimalHelpCommand):
-        async def check_server_prefix(self):
-            try:
-                channel = self.get_destination()
-                server_id = channel.guild.id
-                server_prefix = await ex.get_server_prefix(server_id)
-            except Exception as e:
-                server_prefix = await client.get_prefix(self.context.message)
-            return server_prefix
+        async def get_server_prefix(self):
+            return await ex.get_server_prefix_by_context(self.context)
 
         async def send_pages(self):
             channel = self.get_destination()
-            server_prefix = await self.check_server_prefix()
+            server_prefix = await self.get_server_prefix()
             for page in self.paginator.pages:
                 embed = discord.Embed(title=f"Server Prefix is {server_prefix}", description=page)
                 await channel.send(embed=embed)
 
         async def send_command_help(self, command):
+            """%help (specific command)"""
             channel = self.get_destination()
             cmd_format = self.get_command_signature(command)
             # change the default prefix to the server prefix
-            cmd_prefix = await self.check_server_prefix()
+            cmd_prefix = await self.get_server_prefix()
             cmd_format = cmd_prefix + cmd_format[1:len(cmd_format)]
             cmd_brief = command.help.replace(await client.get_prefix(self.context.message), cmd_prefix)
             embed = discord.Embed(description=f"{cmd_format}\n\n{cmd_brief}")
             await channel.send(embed=embed)
 
         async def send_cog_help(self, cog):
+            """%help (specific cog)"""
             channel = self.get_destination()
             open_msg = await self.get_opening_note()
             cog_name = cog.qualified_name
-            entire_msg = f"{open_msg}\n\n**{cog_name} Commands**"
+            page_number = 1
+            entire_msg = f"{open_msg}\n\n**{cog_name} Commands - Page {page_number}**"
+            embed_list = []
+            embed_empty = False
             for command in cog.get_commands():
                 if command.hidden is False:
+                    embed_empty = False
                     cmd_name = command.name
-                    cmd_prefix = await self.check_server_prefix()
+                    cmd_prefix = await self.get_server_prefix()
                     cmd_desc = command.short_doc.replace(await client.get_prefix(self.context.message), cmd_prefix)
                     cmd_msg = f"\n{cmd_prefix}{cmd_name} - {cmd_desc}"
                     entire_msg += cmd_msg
-            embed = discord.Embed(description=entire_msg)
-            await channel.send(embed=embed)
+                    if len(entire_msg) >= 1500:
+                        embed_list.append(discord.Embed(description=entire_msg))
+                        page_number += 1
+                        entire_msg = f"{open_msg}\n\n**{cog_name} Commands - Page {page_number}**"
+                        embed_empty = True
+
+            if not embed_empty:
+                embed_list.append(discord.Embed(description=entire_msg))
+            msg = await channel.send(embed=embed_list[0])
+            if len(embed_list) > 1:
+                await ex.check_left_or_right_reaction_embed(msg, embed_list)
 
         async def get_opening_note(self):
             """Was changed to async. Gets the opening message of a help command."""

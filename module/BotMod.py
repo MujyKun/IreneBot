@@ -55,7 +55,12 @@ class BotMod(commands.Cog):
             'hug',
             'punch',
             'spit',
-            'pat'
+            'pat',
+            'cuddle',
+            'pullhair',
+            'choke',
+            'stepon',
+            'stab'
         ]
         try:
             if interaction_type.lower() in interaction_list:

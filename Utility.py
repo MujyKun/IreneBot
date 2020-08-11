@@ -3,7 +3,6 @@ from discord.ext import tasks
 import discord
 import random
 import asyncio
-import aiohttp
 import aiofiles
 import os
 import math
@@ -21,7 +20,6 @@ Any potentially useful/repeated functions will end up here
 class Utility:
     def __init__(self):
         self.client = keys.client
-        self.session = aiohttp.ClientSession()
         self.session = keys.client_session
         self.conn = None
         auth = tweepy.OAuthHandler(keys.CONSUMER_KEY, keys.CONSUMER_SECRET)
@@ -32,7 +30,6 @@ class Utility:
     ##################
     # ## DATABASE ## #
     ##################
-
     @tasks.loop(seconds=0, minutes=0, hours=0, reconnect=True)
     async def set_db_connection(self):
         """Looping Until A Stable Connection to DB is formed. This is to confirm Irene starts before the DB connects."""
@@ -46,6 +43,13 @@ class Utility:
             except Exception as e:
                 log.console(e)
             self.set_db_connection.stop()
+
+    @tasks.loop(seconds=0, minutes=1, reconnect=True)
+    async def show_irene_alive(self):
+        """Looped every minute to send a connection to localhost:5123 to show Irene is working well."""
+        source_link = "http://127.0.0.1:5123"
+        async with self.session.get(source_link) as resp:
+            pass
 
     @staticmethod
     async def get_db_connection():
@@ -88,7 +92,11 @@ class Utility:
     async def shorten_balance(money):  # money must be passed in as a string.
         """Shorten an amount of money to it's value places."""
         place_names = ['', 'Thousand', 'Million', 'Billion', 'Trillion', 'Quadrillion', 'Quintillion', 'Sextillion', 'Septillion', 'Octillion', 'Nonillion', 'Decillion', 'Undecillion', 'Duodecillion', 'Tredecillion', 'Quatturodecillion', 'Quindecillion', 'Sexdecillion', 'Septendecillion', 'Octodecillion', 'Novemdecillion', 'Vigintillion', 'Centillion']
-        place_values = int(math.log10(int(money)) // 3)
+        try:
+            place_values = int(math.log10(int(money)) // 3)
+        except Exception as e:
+            # This will have a math domain error when the amount of balance is 0.
+            return "0"
         try:
             return f"{int(money) // (10 ** (3 * place_values))} {place_names[place_values]}"
         except Exception as e:
@@ -1718,21 +1726,35 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
     # ## PATREON ## #
     #################
     async def get_patreon_users(self):
+        """Get the permanent patron users"""
         return await self.conn.fetch("SELECT userid from patreon.users")
 
-    async def check_if_patreon(self, user_id):
+    async def check_forced_patreon_users(self, user_id):
+        """These are patreon users that were manually added by the bot owner"""
+        for user in await self.get_patreon_users():
+            if user[0] == user_id:
+                return True
+        return False
+
+    async def get_patreon_role_members(self, super=False):
+        """Get the members in the patreon roles."""
+        support_guild = self.client.get_guild(int(keys.bot_support_server_id))
+        if not super:
+            patreon_role = support_guild.get_role(int(keys.patreon_role_id))
+        else:
+            patreon_role = support_guild.get_role(int(keys.patreon_super_role_id))
+        return patreon_role.members
+
+    async def check_if_patreon(self, user_id, super=False):
         """Check if the user is a patreon.
         There are two ways to check if a user ia a patreon.
-        The first way is getting the members in the Patreon Role.
+        The first way is getting the members in the Patreon/Super Patreon Role.
         The second way is a table to check for permanent patreon users that are directly added by the bot owner.
         """
         try:
-            for user in await self.get_patreon_users():
-                if user[0] == user_id:
-                    return True
-            support_guild = self.client.get_guild(int(keys.bot_support_server_id))
-            patreon_role = support_guild.get_role(int(keys.patreon_role_id))
-            role_members = patreon_role.members
+            if await self.check_forced_patreon_users(user_id):
+                return True
+            role_members = await self.get_patreon_role_members(super=super)
             for member in role_members:
                 if member.id == user_id:
                     return True
@@ -1741,12 +1763,14 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
         return False
 
     async def add_to_patreon(self, user_id):
+        """Add user as a permanent patron."""
         try:
             await self.conn.execute("INSERT INTO patreon.users(userid) VALUES($1)", int(user_id))
         except Exception as e:
             pass
 
     async def remove_from_patreon(self, user_id):
+        """Remove user from being a permanent patron."""
         try:
             await self.conn.execute("DELETE FROM patreon.users WHERE userid = $1", int(user_id))
         except Exception as e:
@@ -1754,7 +1778,9 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
 
     async def reset_patreon_cooldown(self, ctx):
         """Checks if the user is a patreon and resets their cooldown."""
+        # Super Patrons also have the normal Patron role.
         if await self.check_if_patreon(ctx.author.id):
             ctx.command.reset_cooldown(ctx)
+
 
 resources = Utility()

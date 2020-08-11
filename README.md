@@ -1,4 +1,4 @@
-# [IreneBot V1.02.7](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=1609956823)
+# [IreneBot V1.02.9](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=1609956823)
 
 ## [Support Irene by becoming a Patron!](https://www.patreon.com/bePatron?u=38971435)  
 **[Become a Patron!](https://www.patreon.com/bePatron?u=38971435)**
@@ -122,13 +122,18 @@ To find out more, look at the `GroupMembers` category.
 #### Interactions:
 | Command          | Description                                                    | Format                          | Aliases        |
 |------------------|----------------------------------------------------------------|---------------------------------|----------------|
+| choke         | Choke someone                              | %choke @user                       |                |
+| cuddle         | Cuddle someone                              | %cuddle @user                       |                |
 | hug          | Hug someone                              | %hug @user                       |                |
 | kiss          | Kiss someone                              | %kiss @user                       |                |
 | lick          | Lick someone                              | %lick @user                       |                |
 | pat          | Pat someone                              | %pat @user                       |                |
 | punch          | Punch someone                              | %punch @user                       |                |
+| pullhair         | Pull the hair of someone                              | %pullhair @user                       |                |
 | slap          | Slap someone                              | %slap @user                       |                |
 | spit          | Spit on someone                              | %spit @user                       |                |
+| stab          | Stab someone                              | %stab @user                       |                |
+| stepon          | Step on someone                              | %stepon @user                       |                |
 
 
 #### Logging: ★★★  
@@ -144,6 +149,7 @@ To find out more, look at the `GroupMembers` category.
 | Command          | Description                                                    | Format                          | Aliases        |
 |------------------|----------------------------------------------------------------|---------------------------------|----------------|
 | _8ball           | Asks the 8ball a question.                                     | %8ball (Question)               | 8ball,8        |
+| addnoti         | Receive a DM whenever a phrase or word is said in the current server. | %addnoti (phrase/word)    |               |
 | addpatreon         | Adds a patreon.                           | %addpatreon (userid,userid,userid)             | ♥              |
 | announce         | Sends a bot message to text channels                           | %announce (message)             | ♥              |
 | botinfo       | Get information about the bot.                                   | %botinfo               |               |
@@ -151,12 +157,14 @@ To find out more, look at the `GroupMembers` category.
 | clearnword       | Clear A User's Nword Counter                                   | %clearnword @user               | ♥              |
 | flip             | Flips a Coin                                                   | %flip                           |                |
 | invite           | Invite Link for Irene                                          | %invite                         |                |
+| listnoti          | list all your notification phrases that exist in the current server.| %listnoti     |               |
 | logging          | Start logging this channel/Stop logging this channel           | %logging (start/stop)           | ♥              |
 | nword            | Checks how many times a user has said the N Word               | %nword @user                    |                |
 | nwordleaderboard | Shows leaderboards for how many times the nword has been said. | %nwl                            | nwl            |
 | patreon             | Displays Patreon Information.                                       | %patreon                           |            |
 | ping             | Shows Latency to Discord                                       | %ping                           | pong           |
 | random           | Choose a random number from a range (a,b)                      | %random a b [Ex: %random 1 100] | r,rand,randint |
+| removenoti         | Remove a phrase/word when it said in the current server.| %removenoti (phrase/word)             | deletenoti              |
 | removepatreon         | Removes a patreon.                           | %removepatreon (userid,userid,userid)             | ♥              |
 | report          | Report an issue with Irene.                                    | %report (issue)              |               |
 | send              | Send a message to a text channel.                                             | %send (channelid) (message)                  | ♥              |
@@ -176,10 +184,12 @@ To find out more, look at the `GroupMembers` category.
 | ban              | Ban A User (Ban Members)                                                                                                                           | %ban @user                      |               |
 | clear            | Prune Messages (LIMIT 1000) (Manage Messages)                                                                                                                      | %clear (amount)                 |  prune        |
 | kick             | Kick A User. (Kick Members)                                                                                                                          | %kick @user                     |               |
+| mute             | Mute A User. (Manage Messages & Manage Roles)                                                                                                                          | %mute @user (reason)                     |               |
 | say              | Make Irene say a message. (Manage Messages)                                          | %say (message)                  |               |
 | setprefix      | Set the server prefix. If prefix was forgotten, type this command with the default prefix. (Manage Messages) | %setprefix $         |          | 
 | tempchannel      | Makes Current Channel a temporary channel deleting messages after a certain time period. If delay is -1, it will remove the channel. (Manage Messages)| %tempchannel [delay=-1]         | temp         |
 | unban            | UnBan A User (Ban Members)                                                                                                                      | %unban @user                    |               |
+| unmute            | UnMute A User (Manage Messages & Manage Roles)                                                                                                                      | %unmute @user (reason)                    |               |
  
 #### Music:  
 | Command          | Description                                                                                                                          | Format                          | Aliases        |
@@ -212,6 +222,13 @@ To find out more, look at the `GroupMembers` category.
 | topalbums            | See the top albums of a Last FM Account by a discord user or a Last FM username                                       | %topalbums (username or @user)       |   tal                     |
 | topartists            | See the top artists of a Last FM Account by a discord user or a Last FM username.                                       | %topartists (username or @user)  |  ta                      |
 | toptracks            | See the top tracks of a Last FM Account by a discord user or a Last FM username                                       | %toptracks (username or @user)  | tt                        |
+
+
+#### Wolfram: 
+
+| Command          | Description                                                                                                                          | Format                                       |
+|------------------|--------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------|
+| w           | Send a request to Wolfram.                                                                                                            | %wolfram (query)                               |
 
 
 #### Testing ♥♥♥

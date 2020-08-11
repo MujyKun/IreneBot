@@ -1,6 +1,4 @@
 from discord.ext import commands, tasks
-import aiohttp
-from bs4 import BeautifulSoup as soup
 from datetime import *
 import asyncio
 from module import logger as log
@@ -17,37 +15,27 @@ class Youtube(commands.Cog):
         """Add url to youtube videos [Format: %addurl (link)]"""
         if 'youtube.com' in link or 'youtu.be' in link:
             try:
-                await ex.conn.execute("INSERT INTO currency.Links VALUES($1)", link)
-                await ctx.send("> **That video is now being traced**")
+                await ex.conn.execute("INSERT INTO youtube.links(link, channelid) VALUES($1, $2)", link, ctx.channel.id)
+                await ctx.send(f"> **<{link}> is now being tracked.**")
             except Exception as e:
-                log.console (e)
-                await ctx.send("> **That video is already being tracked.**")
+                log.console(e)
+                await ctx.send(f"> **<{link}> is already being tracked.**")
 
     @commands.command()
     @commands.is_owner()
     async def removeurl(self, ctx, link):
         """Remove url from youtube videos [Format: %removeurl (link)]"""
         try:
-            await ex.conn.execute("DELETE FROM currency.Links WHERE Link = $1", link)
-            await ctx.send("> **That video has been deleted**")
+            await ex.conn.execute("DELETE FROM youtube.links WHERE link = $1", link)
+            await ctx.send(f"> **<{link}> has been deleted**")
         except:
-            await ctx.send("> **That video is not being tracked.**")
+            await ctx.send(f"> **<{link}> is not being tracked.**")
 
     @commands.command()
     @commands.is_owner()
     async def scrapeyoutube(self, ctx):
-        """Scrape Youtube Video"""
-        links = await ex.conn.fetch("SELECT link FROM currency.links")
-        for link in links:
-            id = ex.first_result(await ex.conn.fetchrow("SELECT LinkID FROM currency.links WHERE Link = $1", link))
-            async with ex.session.get('{}'.format(link[0])) as r:
-                if r.status == 200:
-                    page_html = await r.text()
-                    log.console(page_html)
-                    page_soup = soup(page_html, "html.parser")
-                    view_count = (page_soup.find("div", {"class": "watch-view-count"})).text
-                    # await ex.conn.execute("INSERT INTO currency.ViewCount VALUES ($1,$1)", id,datetime.now())
-                    await ctx.send(f"> **Managed to scrape DC SCREAM -- {view_count} -- {datetime.now()}**")
+        """Scrape View Count From Youtube Video"""
+        await YoutubeLoop.scrape_videos()
 
     @commands.command()
     @commands.is_owner()
@@ -59,7 +47,7 @@ class Youtube(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def startloop(self, ctx, seconds=0):
-        """Starts scraping youtube videos [Format: %startloop (seconds)]"""
+        """Starts scraping youtube videos [Format: %startloop (seconds to start)]"""
         try:
             if seconds >= 0:
                 await asyncio.sleep(seconds)
@@ -72,38 +60,50 @@ class Youtube(commands.Cog):
 class YoutubeLoop:
     def __init__(self):
         self.first_loop = True
-        self.view_count = []
-        self.now = []
-        pass
+
+    @staticmethod
+    async def send_channel(channel_id, data):
+        try:
+            channel = ex.client.get_channel(channel_id)
+            await channel.send(data)
+        except Exception as e:
+            log.console(f"{e} - Failed to send data to {channel_id}")
+
+    @staticmethod
+    async def scrape_videos(check=True):
+        try:
+            links = await ex.conn.fetch("SELECT link, channelid FROM youtube.links")
+            check = True
+        except Exception as e:
+            pass
+        if check:
+            try:
+                for link in links:
+                    link_id = ex.first_result(
+                        await ex.conn.fetchrow("SELECT id FROM youtube.links WHERE link = $1", link[0]))
+                    async with ex.session.get(link[0]) as r:
+                        if r.status == 200:
+                            page_html = await r.text()
+                            start_pos = page_html.find("viewCount") + 14
+                            end_loc = start_pos
+                            while page_html[end_loc] != '\\':
+                                end_loc += 1
+                            view_count = f"{int(page_html[start_pos:end_loc]):,} views"
+                            current_date = datetime.now()
+                            await ex.conn.execute("INSERT INTO youtube.views(linkid, views, date) VALUES ($1,$2,$3)",
+                                                  link_id, view_count, str(current_date))
+                            await YoutubeLoop.send_channel(link[1],
+                                                    f"> **UPDATE FOR <{link[0]}>: {view_count} -- {current_date}**")
+                log.console("Updated Video Views Tracker")
+            except Exception as e:
+                log.console(e)
 
     @tasks.loop(seconds=0, minutes=30, hours=0, reconnect=True)
     async def new_task5(self):
         if ex.client.loop.is_running():
             if self.first_loop:
-                await asyncio.sleep(10) # sleeping to stabilize connection to DB
+                await asyncio.sleep(10)  # sleeping to stabilize connection to DB
                 self.first_loop = False
-            check = True
-            try:
-                links = await ex.conn.fetch("SELECT link FROM currency.links")
-            except Exception as e:
-                check = False
-                pass
-            if check:
-                try:
-                    for link in links:
-                        link_id = ex.first_result(await ex.conn.fetchrow("SELECT LinkID FROM currency.links WHERE Link = $1", link))
-                        async with ex.session.get('{}'.format(link[0])) as r:
-                            if r.status == 200:
-                                page_html = await r.text()
-                                # log.console(page_html)
-                                page_soup = soup(page_html, "html.parser")
-                                view_count = (page_soup.find("div", {"class": "watch-view-count"})).text
-                                now = datetime.now()
-                                await ex.conn.execute("INSERT INTO currency.ViewCount VALUES ($1,$2,$3)", link_id, view_count, now)
-                                self.view_count.append(view_count)
-                                self.now.append(now)
-                    # log.console("Updated Video Views Tracker")
-                except Exception as e:
-                    log.console(e)
-            self.view_count = []
-            self.now = []
+            check = False
+            await self.scrape_videos(check)
+

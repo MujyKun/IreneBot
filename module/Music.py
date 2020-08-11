@@ -30,6 +30,7 @@ async def download_video(video):
     loop = asyncio.get_event_loop()
     data = await loop.run_in_executor(None, lambda: ytdl.extract_info(video.get('webpage_url'), download=True))
     file_name = ytdl.prepare_filename(video)
+    await asyncio.sleep(1)
     return YTDLSource(discord.FFmpegPCMAudio(file_name, **ffmpeg_options), data=data)
 
 
@@ -165,6 +166,7 @@ class Music(commands.Cog):
             set_of_songs = ""
             total_amount_of_time = 0
             for song in current_songs:
+                author_id = song[4]
                 if check_if_player(song[0]):
                     player = song[0]
                     youtube_channel = player.uploader
@@ -186,9 +188,9 @@ class Music(commands.Cog):
                 except Exception as e:
                     duration = "N/A"
                 if counter == 1:
-                    song_desc = f"[{counter}] **NOW PLAYING:** [{youtube_channel} - {song_name}]({song_link}) - {duration}\n\n"
+                    song_desc = f"[{counter}] **NOW PLAYING:** [{youtube_channel} - {song_name}]({song_link}) - {duration} - Requested by <@{author_id}> \n\n"
                 else:
-                    song_desc = f"[{counter}] [{youtube_channel} - {song_name}]({song_link}) - {duration}\n\n"
+                    song_desc = f"[{counter}] [{youtube_channel} - {song_name}]({song_link}) - {duration} - Requested by <@{author_id}>\n\n"
                 set_of_songs += song_desc
                 if counter % 10 == 0:
                     embed = discord.Embed(title=f"{ctx.guild.name}'s Music Playlist Page {embed_page_number}",
@@ -281,7 +283,6 @@ class Music(commands.Cog):
         except Exception as e:
             pass
 
-
     @commands.command()
     async def remove(self, ctx, song_number:int):
         """Remove a song from the queue. [Format: %remove (song number)] """
@@ -298,7 +299,6 @@ class Music(commands.Cog):
                 await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
         except Exception as e:
             pass
-
 
     @commands.command()
     async def skip(self, ctx):
@@ -347,7 +347,7 @@ class Music(commands.Cog):
                 if self.check_user_in_vc(ctx):
                     async with ctx.typing():
                         msg = await ctx.send(f"> **Gathering information about the video/playlist, this may take a few minutes if it is a long playlist.**")
-                        videos, first_video_live = await YTDLSource.from_url(url, loop=client.loop, stream=False, guild_id=ctx.guild.id, channel=ctx.channel)
+                        videos, first_video_live = await YTDLSource.from_url(url, loop=client.loop, stream=False, guild_id=ctx.guild.id, channel=ctx.channel, author_id=ctx.author.id)
                         if not ctx.voice_client.is_playing():
                             if not first_video_live:
                                 player = await download_video(videos[0])
@@ -475,12 +475,12 @@ class Music(commands.Cog):
     @queue.before_invoke
     @shuffle.before_invoke
     async def check_patreon(self, ctx):
-        if not await ex.check_if_patreon(ctx.author.id):
-            await ctx.send(f"""**Music is only available to $5 Patreons that support <@{keys.bot_id}>.
-Become a Patron at {keys.patreon_link}.**""")
-            raise commands.CommandError(f"{ctx.author.name} ({ctx.author.id}) is not a Patron.")
-        else:
+        if await ex.check_if_patreon(ctx.author.id, super=True) or await ex.check_if_patreon(ctx.guild.owner.id):
             await self.ensure_voice(ctx)
+        else:
+            await ctx.send(f"""**Music is only available to $5 Patreons that support <@{keys.bot_id}>.
+            Become a Patron at {keys.patreon_link}.**""")
+            raise commands.CommandError(f"{ctx.author.name} ({ctx.author.id}) is not a Patron.")
 
 
 class YTDLSource(discord.PCMVolumeTransformer):
@@ -494,7 +494,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         self.duration = data.get('duration')
 
     @classmethod
-    async def from_url(cls, url, *, loop=None, stream=False, guild_id=None, channel=None):
+    async def from_url(cls, url, *, loop=None, stream=False, guild_id=None, channel=None, author_id=None):
         videos = []
 
         async def add_video(video):
@@ -513,7 +513,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
                     else:
                         file_name = video['url'] if stream else ytdl.prepare_filename(video)
                     videos.append(video)
-                    video_and_channel = [video, channel, file_name, live]
+                    video_and_channel = [video, channel, file_name, live, author_id]
                     if guild_id in queued:
                         if queued[guild_id] is not None:
                             queued[guild_id].append(video_and_channel)
@@ -524,6 +524,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
                 return False
 
         loop = loop or asyncio.get_event_loop()
+        await asyncio.sleep(1)
         data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=False))
         first_video_live = False
         if 'entries' in data:  # several videos

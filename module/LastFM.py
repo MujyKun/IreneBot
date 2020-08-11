@@ -8,7 +8,7 @@ client = keys.client
 
 class LastFM(commands.Cog):
     def __init__(self):
-        self.user_not_found = "That user was not found."
+        self.user_not_found = "That user was not found. Refer to `setfm` to link an account."
         self.user_does_not_exist = "That discord user does not have a Last FM account attached. Refer to `setfm`."
 
     @staticmethod
@@ -49,9 +49,14 @@ class LastFM(commands.Cog):
                 embed.description = info[1]
         return embed
 
-    @staticmethod
-    async def set_user(ctx, org_user):
+    async def set_user(self, ctx, org_user, time_period=None):
         """Returns the username that is sent to the LastFM API."""
+        # this condition is set in place to make the parameters reversible
+        if type(time_period) is discord.User:
+            org_user = time_period
+        if time_period is None:
+            if self.set_period(None, org_user) != "overall":
+                org_user = None
         if org_user is None:
             user = await ex.get_fm_username(ctx.author.id)
         elif type(org_user) is str:
@@ -65,9 +70,14 @@ class LastFM(commands.Cog):
         return user
 
     @staticmethod
-    def set_period(time_period):
+    def set_period(user, time_period):
         """Take several inputs of time and return the input that is allowed by Last FM"""
-        weeks = ["7day", "7days", "week"]
+        # this condition is set in place to make the parameters reversible
+        if type(time_period) is discord.User:
+            time_period = user
+        if time_period is None:
+            time_period = user
+        weeks = ["7day", "7days", "week", "weekly"]
         month = ["1month", "4weeks", "4week", "month", "mo"]
         three_months = ["3month", "3months", "3mo"]
         six_months = ["6month", "6months", "6mo"]
@@ -108,7 +118,7 @@ class LastFM(commands.Cog):
 
                 URL: {user_info['url']}                
                 """
-                title = f"[{user}'s LastFM Account Info"
+                title = f"{user}'s LastFM Account Info"
                 embed = await ex.create_embed(title=title, color=ex.get_random_color(), title_desc=title_desc)
                 await ctx.send(embed=embed)
             else:
@@ -166,12 +176,12 @@ class LastFM(commands.Cog):
             await ctx.send(f"> **Something went wrong.. Please {await ex.get_server_prefix_by_context(ctx)}report it.**")
 
     @commands.command(aliases=['ta'])
-    async def topartists(self, ctx, user: typing.Union[discord.User, str] = None, time_period=None):
+    async def topartists(self, ctx, user: typing.Union[discord.User, str] = None, time_period: typing.Union[discord.User, str] = None):
         """See the top artists of a Last FM Account by a discord user or a Last FM username
         [Format: %topartists (username) (time period)]
         Time period options are ``overall | week | month | 3month | 6month | year``. Time period defaults to overall."""
         try:
-            user, time_period = await self.set_user(ctx, user), self.set_period(time_period)
+            user, time_period = await self.set_user(ctx, user, time_period), self.set_period(user, time_period)
             response = await ex.get_fm_response('user.getTopArtists', user, limit=10, time_period=time_period)
             list_of_artists = response['topartists']['artist']
             counter = 0
@@ -189,13 +199,13 @@ class LastFM(commands.Cog):
             await ctx.send(f"> **Something went wrong.. Please {await ex.get_server_prefix_by_context(ctx)}report it.**")
 
     @commands.command(aliases=['tt'])
-    async def toptracks(self, ctx, user: typing.Union[discord.User, str] = None, time_period=None):
+    async def toptracks(self, ctx, user: typing.Union[discord.User, str] = None, time_period: typing.Union[discord.User, str] = None):
         """See the top tracks of a Last FM Account by a discord user or a Last FM username
         [Format: %toptracks (username) (time period)]
         Time period options are ``overall | week | month | 3month | 6month | year``.
         Time period defaults to overall."""
         try:
-            user, time_period = await self.set_user(ctx, user), self.set_period(time_period)
+            user, time_period = await self.set_user(ctx, user, time_period), self.set_period(user, time_period)
             response = await ex.get_fm_response('user.getTopTracks', user, limit=10, time_period=time_period)
             list_of_tracks = response['toptracks']['track']
             counter = 0
@@ -214,13 +224,13 @@ class LastFM(commands.Cog):
                 f"> **Something went wrong.. Please {await ex.get_server_prefix_by_context(ctx)}report it.**")
 
     @commands.command(aliases=["tal"])
-    async def topalbums(self, ctx, user: typing.Union[discord.User, str] = None, time_period=None):
+    async def topalbums(self, ctx, user: typing.Union[discord.User, str] = None, time_period: typing.Union[discord.User, str] = None):
         """See the top albums of a Last FM Account by a discord user or a Last FM username
         [Format: %topalbums (username) (time period)]
         Time period options are ``overall | week | month | 3month | 6month | year``.
         Time period defaults to overall."""
         try:
-            user, time_period = await self.set_user(ctx, user), self.set_period(time_period)
+            user, time_period = await self.set_user(ctx, user, time_period), self.set_period(user, time_period)
             response = await ex.get_fm_response('user.getTopAlbums', user, limit=10, time_period=time_period)
             list_of_albums = response['topalbums']['album']
             counter = 0
@@ -230,7 +240,7 @@ class LastFM(commands.Cog):
                 title = f"**#{counter} ({album['playcount']} plays)**"
                 artist_name = f"**[{album['name']} by {album['artist']['name']}]({album['url']})**"
                 tracks_and_titles.append([title, artist_name])
-            await ctx.send(embed=await self.create_fm_embed(f"{user} **Top Tracks ({time_period})**", tracks_and_titles))
+            await ctx.send(embed=await self.create_fm_embed(f"{user} **Top Albums ({time_period})**", tracks_and_titles))
         except KeyError:
             await events.Events.error(ctx, self.user_not_found)
         except Exception as e:

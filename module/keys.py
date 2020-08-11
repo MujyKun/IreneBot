@@ -125,10 +125,14 @@ last_fm_headers = {
 # Patreon
 patreon_link = os.getenv("PATREON_LINK")
 patreon_role_id = os.getenv("PATREON_ROLE_ID")
+patreon_super_role_id = os.getenv("PATREON_SUPER_ROLE_ID")
 
 # startup time
 startup_time = datetime.now()
 
 # Aiohttp Client Session
 client_session = aiohttp.ClientSession()
+
+# Wolfram
+wolfram_app_id = os.getenv("WOLFRAM_APP_ID")
 

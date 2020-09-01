@@ -1,4 +1,4 @@
-# [IreneBot V1.02.9](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=1609956823)
+# [IreneBot V1.03.0](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=1609956823)
 
 ## [Support Irene by becoming a Patron!](https://www.patreon.com/bePatron?u=38971435)  
 **[Become a Patron!](https://www.patreon.com/bePatron?u=38971435)**
@@ -18,7 +18,7 @@ To find out more, look at the `GroupMembers` category.
 
 ♥ - Requires Bot Owner  
 ★ - Requires Guild Permissions  
-😇 - Requires Bot Moderator
+😇 - Requires Bot Moderator  
 ♥♥♥ -- Entire Section Requires Bot Owner  
 ★★★ - Entire Section Requires Guild Permissions  
 😇😇😇 - Entire Section Requires Bot Moderator
@@ -56,6 +56,8 @@ To find out more, look at the `GroupMembers` category.
 | addstatus       | Add a playing status to Irene.                                   | %addstatus (status)               |               |
 | botban       | Bans a user from Irene.                                   | %botban (user id)               |               |
 | botunban       | UnBans a user from Irene.                                   | %botunban (user id)               |               |
+| closedm       | Closes a DM either by the User ID or by the current channel.                                   | %closedm <user id>               |               |
+| createdm       | Create a DM with a user with the bot as a middle man. One user per mod channel.                                   | %createdm (user id)               |               |
 | deletealias         | Remove alias from an idol/group. (Underscores are spaces)                                                               | %deletealias (alias) (ID of idol/group) ("idol" or "group")                                                                                                     |  removealias                      |
 | deletegroup         | Deletes a group.                                                              | %deletegroup (group id)                                                                                                    | removegroup                     |
 | deleteidol         | Deletes an idol.                                                              | %deleteidol (idol id)                                                                                             | removeidol                      |
@@ -92,6 +94,7 @@ To find out more, look at the `GroupMembers` category.
 #### DreamCatcher: 
 | Command      | Description                                                     | Format                                        | Aliases |
 |--------------|-----------------------------------------------------------------|-----------------------------------------------|---------|
+| dcnotify    | Mention a role when there is a new DC post. | %notify @role                                      | ★       |
 | dcstart      | Starts DC LOOP                                                  | %dcstart                                      | ♥       |
 | dcstop       | Stops DC LOOP                                                   | %dcstop                                       | ♥       |
 | download_all | Download All DC Photos from DC APP                              | %download_all                                 | ♥       |
@@ -180,12 +183,14 @@ To find out more, look at the `GroupMembers` category.
 #### Moderator: ★★★
 | Command          | Description                                                                                                                          | Format                          | Aliases        |
 |------------------|--------------------------------------------------------------------------------------------------------------------------------------|---------------------------------|----------------|
-| addemoji         | Adds an emoji to the server. (Manage Messages & Emojis)                                                                                                        | %addemoji (url) (emoji_name)    |               |
+| addemoji         | Adds an emoji to the server. Several emojis can be added if split with a comma. Emoji Name is optional. (Manage Messages & Emojis)                                                                                                        | %addemoji (emoji,emoji,emoji,url) (emoji_name)    |               |
 | ban              | Ban A User (Ban Members)                                                                                                                           | %ban @user                      |               |
 | clear            | Prune Messages (LIMIT 1000) (Manage Messages)                                                                                                                      | %clear (amount)                 |  prune        |
+| disableinteraction            | Disable an interaction on your server. Redo to enable again (Manage Messages)                                                                                                                      | %deleteinteraction (interaction)                 |  |
 | kick             | Kick A User. (Kick Members)                                                                                                                          | %kick @user                     |               |
 | mute             | Mute A User. (Manage Messages & Manage Roles)                                                                                                                          | %mute @user (reason)                     |               |
-| say              | Make Irene say a message. (Manage Messages)                                          | %say (message)                  |               |
+| say              | Make Irene say a message. (Manage Messages)                                          | %say #[text-channel] (message)                  |               |
+| sayembed              | Make Irene say an embed message. (Manage Messages)                                          | %sayembed (json formatted message from https://embedbuilder.nadekobot.me/)                  |               |
 | setprefix      | Set the server prefix. If prefix was forgotten, type this command with the default prefix. (Manage Messages) | %setprefix $         |          | 
 | tempchannel      | Makes Current Channel a temporary channel deleting messages after a certain time period. If delay is -1, it will remove the channel. (Manage Messages)| %tempchannel [delay=-1]         | temp         |
 | unban            | UnBan A User (Ban Members)                                                                                                                      | %unban @user                    |               |
@@ -250,7 +255,7 @@ To find out more, look at the `GroupMembers` category.
 |------------------|--------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------|
 | addurl           | Add url to youtube videos                                                                                                            | %addurl (link)                               |
 | removeurl        | Remove url from youtube videos                                                                                                       | %removeurl (link)                            |
-| scrapeyoutube    | Scrape Youtube Videos in DB                                                                                                          | %scrapeyoutube                               |
+| scrapeyoutube    | Scrape the views from the Youtube Videos in the DB                                                                                                          | %scrapeyoutube                               |
 | startloop        | Starts scraping youtube videos.                                                                                                      | %startloop (seconds until it starts looping) |
 | stoploop         | Stops scraping youtube videos                                                                                                        | %stoploop                                    |
 

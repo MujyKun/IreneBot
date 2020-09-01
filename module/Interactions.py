@@ -10,72 +10,84 @@ client = keys.client
 
 class Interactions(commands.Cog):
     @commands.command()
+    @commands.check(ex.check_interaction_enabled)
     @commands.cooldown(1, 60, BucketType.user)
     async def stepon(self, ctx, user: discord.Member = discord.Member):
         """Step on someone [Format: %stepon @user]"""
         await ex.interact_with_user(ctx, user, "stepped on", "stepon")
 
     @commands.command()
+    @commands.check(ex.check_interaction_enabled)
     @commands.cooldown(1, 60, BucketType.user)
     async def stab(self, ctx, user: discord.Member = discord.Member):
         """Stab someone [Format: %stab @user]"""
         await ex.interact_with_user(ctx, user, "stabbed", "stab")
 
     @commands.command()
+    @commands.check(ex.check_interaction_enabled)
     @commands.cooldown(1, 60, BucketType.user)
     async def choke(self, ctx, user: discord.Member = discord.Member):
         """Choke someone [Format: %choke @user]"""
         await ex.interact_with_user(ctx, user, "choked", "choke")
 
     @commands.command()
+    @commands.check(ex.check_interaction_enabled)
     @commands.cooldown(1, 60, BucketType.user)
     async def pullhair(self, ctx, user: discord.Member = discord.Member):
         """Pull the hair of someone [Format: %pullhair @user]"""
         await ex.interact_with_user(ctx, user, "is pulling the hair of", "pullhair")
 
     @commands.command()
+    @commands.check(ex.check_interaction_enabled)
     @commands.cooldown(1, 60, BucketType.user)
     async def cuddle(self, ctx, user: discord.Member = discord.Member):
         """Cuddle someone [Format: %cuddle @user]"""
         await ex.interact_with_user(ctx, user, "is cuddling with", "cuddle")
 
     @commands.command()
+    @commands.check(ex.check_interaction_enabled)
     @commands.cooldown(1, 60, BucketType.user)
     async def pat(self, ctx, user: discord.Member = discord.Member):
         """Pat someone [Format: %pat @user]"""
         await ex.interact_with_user(ctx, user, "patted", "pat")
 
     @commands.command()
+    @commands.check(ex.check_interaction_enabled)
     @commands.cooldown(1, 60, BucketType.user)
     async def punch(self, ctx, user: discord.Member = discord.Member):
         """Punch someone [Format: %punch @user]"""
         await ex.interact_with_user(ctx, user, "punched", "punch")
 
     @commands.command()
+    @commands.check(ex.check_interaction_enabled)
     @commands.cooldown(1, 60, BucketType.user)
     async def spit(self, ctx, user: discord.Member = discord.Member):
         """Spit on someone [Format: %spit @user]"""
         await ex.interact_with_user(ctx, user, "spit on", "spit")
 
     @commands.command()
+    @commands.check(ex.check_interaction_enabled)
     @commands.cooldown(1, 60, BucketType.user)
     async def lick(self, ctx, user: discord.Member = discord.Member):
         """Lick someone [Format: %lick @user]"""
         await ex.interact_with_user(ctx, user, "licked", "lick")
 
     @commands.command()
+    @commands.check(ex.check_interaction_enabled)
     @commands.cooldown(1, 60, BucketType.user)
     async def hug(self, ctx, user: discord.Member = discord.Member):
         """Hug someone [Format: %hug @user]"""
         await ex.interact_with_user(ctx, user, "hugged", "hug")
 
     @commands.command()
+    @commands.check(ex.check_interaction_enabled)
     @commands.cooldown(1, 60, BucketType.user)
     async def kiss(self, ctx, user: discord.Member = discord.Member):
         """Kiss someone [Format: %kiss @user]"""
         await ex.interact_with_user(ctx, user, "kissed", "kiss")
 
     @commands.command()
+    @commands.check(ex.check_interaction_enabled)
     @commands.cooldown(1, 60, BucketType.user)
     async def slap(self, ctx, user: discord.Member = discord.Member):
         """Slap someone [Format: %slap @user]"""

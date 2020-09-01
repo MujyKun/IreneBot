@@ -1,11 +1,31 @@
 import discord
 from discord.ext import commands
-from module import logger as log
+from module import logger as log, keys
 import module
 from Utility import resources as ex
 
 
 class BotMod(commands.Cog):
+    @staticmethod
+    async def mod_on_message(message):
+        message_sender = message.author
+        message_channel = message.channel
+        message_content = message.content
+        if message_sender.id != keys.bot_id:
+            if 'closedm' not in message_content and 'createdm' not in message_content:
+                dm_channel = await ex.get_dm_channel(message_sender.id)
+                if dm_channel is not None:
+                    mod_mail = await ex.conn.fetch("SELECT userid, channelid FROM general.modmail")
+                    for mail in mod_mail:
+                        user_id = mail[0]
+                        channel_id = mail[1]
+                        mod_channel = await ex.client.fetch_channel(channel_id)
+                        if user_id == message_sender.id and message_channel == dm_channel:
+                            await mod_channel.send(f">>> FROM: {message_sender.display_name} ({message_sender.id}) - {message_content}")
+                        if mod_channel == message_channel:
+                            dm_channel = await ex.get_dm_channel(user_id)
+                            await dm_channel.send(f">>> FROM: {message_sender.display_name} ({message_sender.id}) - {message_content}")
+
     @commands.command()
     @commands.check(ex.check_if_mod)
     async def deletelink(self, ctx, link):
@@ -48,22 +68,8 @@ class BotMod(commands.Cog):
     async def addinteraction(self, ctx, interaction_type, *, links):
         """Add a gif/photo to an interaction (ex: slap,kiss,lick,hug) [Format: %addinteraction (interaction) (url,url)"""
         links = links.split(',')
-        interaction_list = [
-            'slap',
-            'kiss',
-            'lick',
-            'hug',
-            'punch',
-            'spit',
-            'pat',
-            'cuddle',
-            'pullhair',
-            'choke',
-            'stepon',
-            'stab'
-        ]
         try:
-            if interaction_type.lower() in interaction_list:
+            if interaction_type.lower() in keys.interaction_list:
                 for url in links:
                     url = url.replace(' ', '')
                     url = url.replace('\n', '')
@@ -292,3 +298,43 @@ class BotMod(commands.Cog):
         except Exception as e:
             await ctx.send(f"Something went wrong - {e}")
             log.console(e)
+
+    @commands.command()
+    @commands.check(ex.check_if_mod)
+    async def createdm(self, ctx, user: discord.User):
+        """Create a DM with a user with the bot as a middle man. One user per mod channel.
+        [Format: %createdm (user id)]"""
+        try:
+            dm_channel = await ex.get_dm_channel(user=user)
+            if dm_channel is not None:
+                await ex.conn.execute("INSERT INTO general.modmail(userid, channelid) VALUES ($1, $2)", user.id, ctx.channel.id)
+                await dm_channel.send(f"> {ctx.author.display_name} ({ctx.author.id}) has created a DM with you. All messages sent here will be sent to them.")
+                await ctx.send(f"> A DM has been created with {user.id}. All messages you type in this channel will be sent to the user.")
+            else:
+                await ctx.send("> I was not able to create a DM with that user.")
+        except Exception as e:
+            await ctx.send(f"ERROR - {e}")
+            log.console(e)
+
+    @commands.command()
+    @commands.check(ex.check_if_mod)
+    async def closedm(self, ctx, user: discord.User = None):
+        """Closes a DM either by the User ID or by the current channel.
+        [Format: %closedm <user id>] """
+        try:
+            if user is not None:
+                user_id = user.id
+            else:
+                user_id = ex.first_result(await ex.conn.fetchrow("SELECT userid FROM general.modmail WHERE channelid = $1", ctx.channel.id))
+            dm_channel = await ex.get_dm_channel(user_id)
+            if dm_channel is None:
+                return await ctx.send("> **There are no DMs set up in this channel.**")
+            await ex.conn.execute("DELETE FROM general.modmail WHERE userid = $1 and channelid = $2", user_id, ctx.channel.id)
+            await ctx.send(f"> The DM has been deleted successfully.")
+            await dm_channel.send(f"> {ctx.author.display_name} ({ctx.author.id}) has closed the DM with you. Your messages will no longer be sent to them.")
+        except Exception as e:
+            await ctx.send(f"ERROR - {e}")
+            log.console(e)
+
+
+

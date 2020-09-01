@@ -87,28 +87,26 @@ class Logging(commands.Cog):
         else:
             await ctx.send("> **This server is not being logged.**")
 
+    @staticmethod
+    async def logging_on_message_edit(msg_before, message):
+        try:
+            if await ex.check_logging_requirements(message):
+                logging_channel = await ex.get_log_channel_id(message)
+                files = await ex.get_attachments(message)
+                embed_message = f"**{message.author} ({message.author.id})\nOld Message: **{msg_before.content}**\nNew Message: **{message.content}**\nFrom {message.guild} in {message.channel}\nCreated at {message.created_at}\n<{message.jump_url}>**"
+                embed = discord.Embed(title="Message Edited", description=embed_message, color=0x00ff00)
+                await logging_channel.send(embed=embed, files=files)
+        except Exception as e:
+            log.console(f"ON_MESSAGE_EDIT ERROR: {e} Server ID: {message.guild.id} Channel ID: {message.channel.id}")
 
-@client.event
-async def on_message_edit(msg_before, message):
-    try:
-        if await ex.check_logging_requirements(message):
-            logging_channel = await ex.get_log_channel_id(message)
-            files = await ex.get_attachments(message)
-            embed_message = f"**{message.author} ({message.author.id})\nOld Message: **{msg_before.content}**\nNew Message: **{message.content}**\nFrom {message.guild} in {message.channel}\nCreated at {message.created_at}\n<{message.jump_url}>**"
-            embed = discord.Embed(title="Message Edited", description=embed_message, color=0x00ff00)
-            await logging_channel.send(embed=embed, files=files)
-    except Exception as e:
-        log.console(f"ON_MESSAGE_EDIT ERROR: {e} Server ID: {message.guild.id} Channel ID: {message.channel.id}")
-
-
-@client.event
-async def on_message_delete(message):
-    try:
-        if await ex.check_logging_requirements(message):
-            logging_channel = await ex.get_log_channel_id(message)
-            files = await ex.get_attachments(message)
-            embed_message = f"**{message.author} ({message.author.id})\nMessage: **{message.content}**\nFrom {message.guild} in {message.channel}\nCreated at {message.created_at}**"
-            embed = discord.Embed(title="Message Deleted", description=embed_message, color=0xff0000)
-            await logging_channel.send(embed=embed, files=files)
-    except Exception as e:
-        log.console(f"ON_MESSAGE_DELETE ERROR: {e} Server ID: {message.guild.id} Channel ID: {message.channel.id}")
+    @staticmethod
+    async def logging_on_message_delete(message):
+        try:
+            if await ex.check_logging_requirements(message):
+                logging_channel = await ex.get_log_channel_id(message)
+                files = await ex.get_attachments(message)
+                embed_message = f"**{message.author} ({message.author.id})\nMessage: **{message.content}**\nFrom {message.guild} in {message.channel}\nCreated at {message.created_at}**"
+                embed = discord.Embed(title="Message Deleted", description=embed_message, color=0xff0000)
+                await logging_channel.send(embed=embed, files=files)
+        except Exception as e:
+            log.console(f"ON_MESSAGE_DELETE ERROR: {e} Server ID: {message.guild.id} Channel ID: {message.channel.id}")

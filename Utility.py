@@ -8,6 +8,7 @@ import os
 import math
 import tweepy
 import filetype
+import json
 
 
 """
@@ -19,6 +20,7 @@ Any potentially useful/repeated functions will end up here
 
 class Utility:
     def __init__(self):
+        self.test_bot = None  # this is changed in run.py
         self.client = keys.client
         self.session = keys.client_session
         self.conn = None
@@ -127,6 +129,78 @@ class Utility:
     #######################
     # ## MISCELLANEOUS ## #
     #######################
+    async def get_dm_channel(self, user_id=None, user=None):
+        try:
+            if user_id is not None:
+                # user = await self.client.fetch_user(user_id)
+                user = self.client.get_user(user_id)
+            dm_channel = user.dm_channel
+            if dm_channel is None:
+                await user.create_dm()
+                dm_channel = user.dm_channel
+            return dm_channel
+        except discord.errors.HTTPException as e:
+            # log.console(e)
+            return None
+        except Exception as e:
+            # log.console(e)
+            return None
+
+    async def get_temp_channels(self):
+        return await self.conn.fetch("SELECT chanID, delay FROM currency.TempChannels")
+
+    async def check_if_temp_channel(self, channel_id):
+        for channel in await self.get_temp_channels():
+            chan_id = channel[0]
+            if channel_id == chan_id:
+                return True
+        return False
+
+    async def get_disabled_server_interactions(self, server_id):
+        """Get a server's disabled interactions."""
+        interactions = await self.conn.fetchrow("SELECT interactions FROM general.disabledinteractions WHERE serverid = $1", server_id)
+        return self.first_result(interactions)
+
+    @staticmethod
+    async def check_interaction_enabled(ctx=None, server_id=None, interaction=None):
+        """Check if the interaction is disabled in the current server, RETURNS False when it is disabled."""
+        if server_id is None and interaction is None:
+            server_id = ctx.guild.id
+            interaction = ctx.command.name
+        interactions = await resources.get_disabled_server_interactions(server_id)
+        if interactions is None:
+            return True
+        interaction_list = interactions.split(',')
+        if interaction in interaction_list:
+            # normally we would alert the user that the command is disabled, but discord.py uses this function.
+            return False
+        return True
+
+    async def disable_interaction(self, server_id, interaction):
+        """Disable an interaction (to a specific server)"""
+        interaction = interaction.lower()
+        interactions = await self.get_disabled_server_interactions(server_id)
+        if interactions is None:
+            await self.conn.execute("INSERT INTO general.disabledinteractions(serverid, interactions) VALUES ($1, $2)", server_id, interaction)
+        else:
+            interactions = interactions.split(',')
+            interactions.append(interaction)
+            interactions = ','.join(interactions)
+            await self.conn.execute("UPDATE general.disabledinteractions SET interactions = $1 WHERE serverid = $2)", interactions, server_id)
+
+    async def enable_interaction(self, server_id, interaction):
+        """Reenable an interaction that was disabled by a server"""
+        interactions = await self.get_disabled_server_interactions(server_id)
+        if interactions is None:
+            return
+        else:
+            interactions = interactions.split(',')
+            interactions.remove(interaction)
+            interactions = ','.join(interactions)
+            if len(interactions) == 0:
+                return await self.conn.execute("DELETE FROM general.disabledinteractions WHERE serverid = $1", server_id)
+            await self.conn.execute("UPDATE general.disabledinteractions SET interactions = $1 WHERE serverid = $2)", interactions, server_id)
+
     async def interact_with_user(self, ctx, user, interaction, interaction_type, self_interaction=False):
         await self.reset_patreon_cooldown(ctx)
         try:
@@ -346,9 +420,15 @@ class Utility:
                     if c_page < 0:
                         c_page = len(embed_lists) - 1  # going to the end of the list
                     await msg.edit(embed=embed_lists[c_page])
-                await msg.clear_reactions()
-                await msg.add_reaction(reaction1)
-                await msg.add_reaction(reaction2)
+
+                # await msg.clear_reactions()
+                # await msg.add_reaction(reaction1)
+                # await msg.add_reaction(reaction2)
+                # only remove user's reaction instead of all reactions
+                try:
+                    await reaction.remove(user)
+                except Exception as e:
+                    pass
                 await change_page(c_page)
             except Exception as e:
                 log.console(f"check_left_or_right_reaction_embed - {e}")
@@ -363,6 +443,25 @@ class Utility:
         embed.set_footer(text=footer_message,
                          icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
         return embed
+
+    async def translate(self, text, src_lang, target_lang):
+        try:
+            data = {
+                'text': text,
+                'src_lang': await self.get_language_code(src_lang),
+                'target_lang': await self.get_language_code(target_lang)
+            }
+            end_point = f"http://127.0.0.1:{keys.api_port}/translate"
+            if self.test_bot:
+                end_point = f"https://api.irenebot.com/translate"
+            async with self.session.post(end_point, data=data) as r:
+                if r.status == 200:
+                    return json.loads(await r.text())
+                else:
+                    return None
+        except Exception as e:
+            log.console(e)
+            return None
 
     @staticmethod
     async def get_language_code(language):
@@ -1029,14 +1128,14 @@ class Utility:
 
                 def image_check(user_reaction, reaction_user):
                     """check the user that reacted to it and which emoji it was."""
-                    user_check = (reaction_user == user_msg.author) or (reaction_user.id == keys.owner_id)
+                    user_check = (reaction_user == user_msg.author) or (reaction_user.id == keys.owner_id) or reaction_user.id in keys.mods_list
                     return user_check and (str(user_reaction.emoji) == dead_link_emoji or str(user_reaction.emoji) ==
                                            reload_image_emoji) and user_reaction.message.id == message.id
 
                 async def reload_image(message1):
                     """Wait for a user to react, and reload the image if it's the reload emoji."""
                     try:
-                        reaction, user = await self.client.wait_for('reaction_add', check=image_check)
+                        reaction, user = await self.client.wait_for('reaction_add', check=image_check, timeout=60)
                         if str(reaction) == reload_image_emoji:
                             channel = message1.channel
                             try:
@@ -1045,15 +1144,6 @@ class Utility:
                                 link = message1.content
                             await message1.delete()
                             # message1 = await channel.send(embed=embed)
-                            count = 0
-                            keep_going = True
-                            while keep_going:
-                                message1 = await channel.send(link)
-                                await message1.delete()
-                                count += 1
-                                # how many times to resend the message.
-                                if count == 3:
-                                    keep_going = False
                             message1 = await channel.send(link)
                             await self.check_idol_post_reactions(message1, user_msg, idol_id)
                         elif str(reaction) == dead_link_emoji:
@@ -1069,6 +1159,8 @@ class Utility:
                                     await self.send_dead_image(channel, link, user, idol_id)
                             except Exception as e:
                                 pass
+                    except asyncio.TimeoutError:
+                        await message1.clear_reactions()
                     except Exception as e:
                         log.console(e)
                         pass
@@ -1430,9 +1522,17 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
     ######################
     # ## DREAMCATCHER ## #
     ######################
+    async def get_dc_channel_role(self, channel_id):
+        """Get the role id that notifies the users on a new dc app post."""
+        return self.first_result(await self.conn.fetchrow("SELECT roleid from dreamcatcher.dreamcatcher WHERE channelid = $1", channel_id))
+
+    async def get_dc_channel_exists(self, channel_id):
+        """Returns 1 if the dc channel is being notified, otherwise returns 0."""
+        return self.first_result(await self.conn.fetchrow("SELECT COUNT(*) From dreamcatcher.dreamCatcher WHERE channelid = $1", channel_id))
+
     async def get_dc_channels(self):
         """Get all the servers that receive DC APP Updates."""
-        return await self.conn.fetch("SELECT serverid FROM dreamcatcher.dreamcatcher")
+        return await self.conn.fetch("SELECT channelid, roleid FROM dreamcatcher.dreamcatcher")
 
     async def get_video_and_bat_list(self, page_soup):
         """Get a list of all the .bat and video files."""
@@ -1578,13 +1678,23 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
                     log.console(e)
                     pass
 
-    async def send_new_post(self, channel_id, channel, member_name, status_message, post_url):
+    async def send_new_post(self, channel_id, role_id, channel, member_name, status_message, post_url):
         """Send the status information to a channel."""
         try:
-            await channel.send(f">>> **New {member_name} Post\n<{post_url}>\nStatus Message: {status_message}**")
+            if role_id is None:
+                role_mention = ""
+            else:
+                role_mention = f"<@&{role_id}>, "
+            translated_message = await self.translate(status_message, 'ko', 'en')
+            if translated_message is not None:
+                translated_message = translated_message['text']
+                await channel.send(
+                    f">>> **{role_mention}New {member_name} Post\n<{post_url}>\nStatus Message: {status_message}\nTranslated (KR to EN): {translated_message}**")
+            else:
+                await channel.send(f">>> **{role_mention}New {member_name} Post\n<{post_url}>\nStatus Message: {status_message}**")
         except AttributeError:
             try:
-                await self.conn.execute("DELETE from dreamcatcher.dreamcatcher WHERE serverid = $1", channel_id)
+                await self.conn.execute("DELETE from dreamcatcher.dreamcatcher WHERE channelid = $1", channel_id)
             except Exception as e:
                 log.console(e)
         except Exception as e:

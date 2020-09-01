@@ -3,52 +3,14 @@ from module import logger as log
 import discord
 from Utility import resources as ex
 from discord.ext import commands
-
+import datetime
 
 class Events(commands.Cog):
     @staticmethod
-    async def error(ctx, error):
-        embed = discord.Embed(title="Error", description=f"** {error} **", color=0xff00f6)
-        await ctx.send(embed=embed)
-        log.console(f"{error}")
-
-    @staticmethod
-    @client.event
-    async def on_ready():
-        app = await client.application_info()
-        log.console(f'{app.name} is online')
-
-    @staticmethod
-    @client.event
-    async def on_command_error(ctx, error):
-        if isinstance(error, commands.errors.CommandNotFound):
-            pass
-        elif isinstance(error, commands.errors.CommandInvokeError):
-            log.console(f"Command Invoke Error -- {error}")
-        elif isinstance(error, commands.errors.CommandOnCooldown):
-            embed = discord.Embed(title="Error", description=f"""** You are on cooldown. Try again in 
-                    {await ex.get_cooldown_time(error.retry_after)}.**""", color=0xff00f6)
-            await ctx.send(embed=embed)
-            log.console(f"{error}")
-        elif isinstance(error, commands.errors.BadArgument):
-            await Events.error(ctx, error)
-            ctx.command.reset_cooldown(ctx)
-        elif isinstance(error, commands.errors.MissingPermissions) or isinstance(error, commands.errors.UserInputError):
-            await Events.error(ctx, error)
-
-    @staticmethod
-    @client.event
-    async def on_guild_join(guild):
-        if guild.system_channel is not None:
-            await guild.system_channel.send(f">>> Hello!\nMy prefix for this server is set to {await ex.get_server_prefix(guild.id)}.\nIf you have any questions or concerns, you may join the support server ({await ex.get_server_prefix(guild.id)}support).")
-            log.console(f"{guild.name} ({guild.id}) has invited Irene.")
-
-    @staticmethod
-    @client.event
-    async def on_message(message):
+    async def process_on_message(message):
         try:
             # fetching temporary channels that have delays for removed messages.
-            temp_channels = await ex.conn.fetch("SELECT chanID, delay FROM currency.TempChannels")
+            temp_channels = await ex.get_temp_channels()
             message_sender = message.author
             message_content = message.clean_content
             message_channel = message.channel
@@ -89,6 +51,60 @@ class Events(commands.Cog):
                                 await client.process_commands(message)
         except Exception as e:
             log.console(e)
+
+    @staticmethod
+    async def error(ctx, error):
+        embed = discord.Embed(title="Error", description=f"** {error} **", color=0xff00f6)
+        await ctx.send(embed=embed)
+        log.console(f"{error}")
+
+    @staticmethod
+    @client.event
+    async def on_ready():
+        app = await client.application_info()
+        log.console(f'{app.name} is online')
+
+    @staticmethod
+    @client.event
+    async def on_command_error(ctx, error):
+        if isinstance(error, commands.errors.CommandNotFound):
+            pass
+        elif isinstance(error, commands.errors.CommandInvokeError):
+            log.console(f"Command Invoke Error -- {error}")
+        elif isinstance(error, commands.errors.CommandOnCooldown):
+            embed = discord.Embed(title="Error", description=f"""** You are on cooldown. Try again in 
+                    {await ex.get_cooldown_time(error.retry_after)}.**""", color=0xff00f6)
+            await ctx.send(embed=embed)
+            log.console(f"{error}")
+        elif isinstance(error, commands.errors.BadArgument):
+            await Events.error(ctx, error)
+            ctx.command.reset_cooldown(ctx)
+        elif isinstance(error, commands.errors.MissingPermissions) or isinstance(error, commands.errors.UserInputError):
+            await Events.error(ctx, error)
+
+    @staticmethod
+    @client.event
+    async def on_guild_join(guild):
+        if guild.system_channel is not None:
+            await guild.system_channel.send(f">>> Hello!\nMy prefix for this server is set to {await ex.get_server_prefix(guild.id)}.\nIf you have any questions or concerns, you may join the support server ({await ex.get_server_prefix(guild.id)}support).")
+            log.console(f"{guild.name} ({guild.id}) has invited Irene.")
+
+    @staticmethod
+    @client.event
+    async def on_message(message):
+        await Events.process_on_message(message)
+
+    @staticmethod
+    @client.event
+    async def on_message_edit(msg_before, message):
+        msg_created_at = msg_before.created_at
+        msg_edited_at = message.edited_at
+        if msg_edited_at is not None:
+            difference = msg_edited_at - msg_created_at  # datetime.timedelta
+            # the message has to be edited at least 60 seconds within it's creation.
+            if difference.total_seconds() > 60:
+                return
+        await Events.process_on_message(message)
 
     @staticmethod
     @client.event

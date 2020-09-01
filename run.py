@@ -5,12 +5,12 @@ from Utility import resources as ex
 class Irene:
     def __init__(self):
         # Set to True if running a test bot.
-        self.test_bot = False
+        ex.test_bot = False
 
     def run(self):
         """Start the bot."""
         ex.set_db_connection.start()  # all active blackjack games are also deleted and current session stats refreshed.
-        if self.test_bot:
+        if ex.test_bot:
             self.run_test_bot()
         else:
             self.run_live_bot()
@@ -60,10 +60,14 @@ class Irene:
         module.keys.client.add_listener(module.GroupMembers.GroupMembers.on_message2, 'on_message')
         module.keys.client.add_listener(module.Archive.Archive.on_message, 'on_message')
         module.keys.client.add_listener(module.Logging.Logging.on_message_log, 'on_message')
+        module.keys.client.add_listener(module.Logging.Logging.logging_on_message_edit, 'on_message_edit')
+        module.keys.client.add_listener(module.Logging.Logging.logging_on_message_delete, 'on_message_delete')
         module.keys.client.add_listener(module.Miscellaneous.Miscellaneous.on_message_notifications, 'on_message')
+        module.keys.client.add_listener(module.BotMod.BotMod.mod_on_message, 'on_message')
 
     @staticmethod
     def add_cogs():
+        # Note that this can be heavily simplified by iterating over every cog but is like this for testing purposes.
         ex.client.add_cog(module.Miscellaneous.Miscellaneous())
         ex.client.add_cog(module.Twitter.Twitter())
         ex.client.add_cog(module.Currency.Currency())

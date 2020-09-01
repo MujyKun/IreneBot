@@ -2,6 +2,7 @@ from discord.ext import commands, tasks
 import aiohttp
 from bs4 import BeautifulSoup as soup
 import aiofiles
+import discord
 import asyncio
 from module import logger as log
 from module.keys import client, dc_app_test_channel_id
@@ -21,45 +22,65 @@ class DreamCatcher(commands.Cog):
         self.post_list = []
         self.latest_DC = ''
         self.create_links_number = 0
-        pass
+        self.current_dc_loop_instance = None
 
     @commands.command()
     @commands.is_owner()
     async def dcstop(self, ctx):
         """Stops DC Loop [Format: %dcstop]"""
-        DcApp().new_task4.stop()
-        await ctx.send("> **If there was a loop, it stopped.**")
+        if self.current_dc_loop_instance is not None:
+            self.current_dc_loop_instance.new_task4.stop()
+            self.current_dc_loop_instance = None
+            return await ctx.send("> **The loop was stopped.**")
+        return await ctx.send("> **Could not detect another loop.**")
 
     @commands.command()
     @commands.is_owner()
     async def dcstart(self, ctx):
-        """Starts DC Loop [Format: %dcstart]"""
+        """Starts another instance of the DC Loop [Format: %dcstart]"""
         try:
-            DcApp().new_task4.start()
+            self.current_dc_loop_instance = DcApp()
+            self.current_dc_loop_instance.new_task4.start()
             await ctx.send("> **Loop started.**")
         except:
             await ctx.send("> **A loop is already running.**")
 
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
+    async def dcnotify(self, ctx, role: discord.Role = None):
+        """Mention a role when there is a new DC post.
+        [Format: %notify @role]"""
+        channel_id = ctx.channel.id
+        counter = await ex.get_dc_channel_exists(channel_id)
+        server_prefix = await ex.get_server_prefix_by_context(ctx)
+        if counter == 0:
+            return await ctx.send(f"> {ctx.author.display_name}, This channel does not currently receive DCAPP Updates. Turn it on with {server_prefix}updates.")
+        if role is None:
+            await ex.conn.execute("UPDATE dreamcatcher.dreamcatcher SET roleid = NULL WHERE channelid = $1", channel_id)
+            return await ctx.send(f"> **{ctx.author.display_name}, no roles will be notified on a new DCAPP post. In order to notify a role, use {server_prefix}dcnotify @role.**")
+        if counter == 1:
+            await ex.conn.execute("UPDATE dreamcatcher.dreamcatcher SET roleid = $1 WHERE channelid = $2", role.id, channel_id)
+            return await ctx.send(f"> **{role} will now be pinged for the DCAPP updates.**")
+
+    @commands.command()
+    @commands.has_guild_permissions(manage_messages=True)
     async def updates(self, ctx, *, solution=""):
         """Send DC Updates to your current text channel [Format: %updates] | To Stop : [Format: %updates stop]"""
-        channel = ctx.channel.id
+        channel_id = ctx.channel.id
+        counter = await ex.get_dc_channel_exists(channel_id)
         if solution == "stop":
-            counter = ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) From dreamcatcher.DreamCatcher WHERE ServerID = $1", channel))
             if counter == 1:
                 await ctx.send ("> **This channel will no longer receive updates.**")
-                await ex.conn.execute("DELETE FROM dreamcatcher.DreamCatcher WHERE ServerID = $1", channel)
+                await ex.conn.execute("DELETE FROM dreamcatcher.DreamCatcher WHERE channelid = $1", channel_id)
             if counter == 0:
                 await ctx.send("> **This channel does not currently receive updates.**")
         if solution != "stop":
-            counter = ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) From dreamcatcher.DreamCatcher WHERE ServerID = $1", channel))
             if counter == 1:
-                await ctx.send ("> **This channel already receives DC Updates**")
+                await ctx.send("> **This channel already receives DC Updates**")
             if counter == 0:
-                channel_name = client.get_channel(channel)
+                channel_name = client.get_channel(channel_id)
                 await ctx.send("> **I Will Post All DC Updates In {}**".format(channel_name))
-                await ex.conn.execute("INSERT INTO dreamcatcher.DreamCatcher VALUES ($1)", channel)
+                await ex.conn.execute("INSERT INTO dreamcatcher.DreamCatcher(channelid) VALUES ($1)", channel_id)
 
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
@@ -195,10 +216,11 @@ class DcApp:
                         for channel in channels:
                             try:
                                 channel_id = channel[0]
+                                role_id = channel[1]
                                 channel = client.get_channel(channel_id)
                                 # This part is repeated due to closed file IO error.
                                 dc_videos = ex.get_videos(video_list)
-                                await ex.send_new_post(channel_id, channel, member_name, status_message,
+                                await ex.send_new_post(channel_id, role_id, channel, member_name, status_message,
                                                        post_url)
                                 await ex.send_content(channel, dc_photos_embed, dc_videos)
                                 if repost:

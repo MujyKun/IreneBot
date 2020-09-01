@@ -42,7 +42,9 @@ class Help(commands.Cog):
             entire_msg = f"{open_msg}\n\n**{cog_name} Commands - Page {page_number}**"
             embed_list = []
             embed_empty = False
-            for command in cog.get_commands():
+            # filter the commands to check if the commands can be used by the user.
+            cog_commands = await self.filter_commands(cog.get_commands())
+            for command in cog_commands:
                 if command.hidden is False:
                     embed_empty = False
                     cmd_name = command.name

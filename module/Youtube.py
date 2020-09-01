@@ -7,7 +7,7 @@ from Utility import resources as ex
 
 class Youtube(commands.Cog):
     def __init__(self):
-        pass
+        self.current_yt_loop_instance = None
 
     @commands.command()
     @commands.is_owner()
@@ -34,24 +34,31 @@ class Youtube(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def scrapeyoutube(self, ctx):
-        """Scrape View Count From Youtube Video"""
+        """Scrape view count from the youtube videos in the DB."""
         await YoutubeLoop.scrape_videos()
+        await ctx.send("> Scraped.")
 
     @commands.command()
     @commands.is_owner()
     async def stoploop(self, ctx):
         """Stops scraping youtube videos [Format: %stoploop]"""
-        YoutubeLoop().new_task5.stop()
-        await ctx.send("> **If there was a loop, it stopped.**")
+        if self.current_yt_loop_instance is not None:
+            self.current_yt_loop_instance.new_task5.stop()
+            self.current_yt_loop_instance = None
+            return await ctx.send("> **The loop was stopped.**")
+        return await ctx.send("> **There is no new loop currently running.**")
 
     @commands.command()
     @commands.is_owner()
     async def startloop(self, ctx, seconds=0):
-        """Starts scraping youtube videos [Format: %startloop (seconds to start)]"""
+        """Starts scraping youtube videos with a new instance[Format: %startloop (seconds to start)]"""
         try:
             if seconds >= 0:
+                self.current_yt_loop_instance = YoutubeLoop()
+                if seconds > 0:
+                    await ctx.send(f"> Starting loop in {seconds} seconds.")
                 await asyncio.sleep(seconds)
-                YoutubeLoop().new_task5.start()
+                self.current_yt_loop_instance.new_task5.start()
                 await ctx.send("> **Loop started.**")
         except:
             await ctx.send("> **A loop is already running.**")

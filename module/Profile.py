@@ -40,7 +40,7 @@ class Profile(commands.Cog):
             roles = ""
             for role in roles_list:
                 if count != 0 and count != (len(roles_list) - 1):
-                    roles += f"{role.name},"
+                    roles += f"{role.name}, "
                 if count == (len(roles_list)-1):
                     roles += role.name
                 count += 1

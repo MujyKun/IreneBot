@@ -1,15 +1,39 @@
 import discord
 from discord.ext import commands
-import aiofiles
-import os
 from module import logger as log
-from module.keys import client, bot_prefix
+from module.keys import client, bot_prefix, interaction_list
 from Utility import resources as ex
+import os
+import aiofiles
+import typing
+import json
 
 
 class Moderator(commands.Cog):
     def __init__(self):
         pass
+
+    @commands.command()
+    @commands.has_guild_permissions(manage_messages=True)
+    async def disableinteraction(self, ctx, interaction=None):
+        """Disable an interaction on your server. Redo to enable again [Format: %disableinteraction (interaction)]"""
+        interaction_msg = f"> **The available interactions are {', '.join(interaction_list)}.**"
+        if interaction is None:
+            return await ctx.send(interaction_msg)
+        interaction = interaction.lower()
+        if interaction in interaction_list:
+            server_id = ctx.guild.id
+            if not await ex.check_interaction_enabled(server_id=server_id, interaction=interaction):
+                # enable it
+                await ex.enable_interaction(server_id, interaction)
+                await ctx.send(f"> **{interaction} has been enabled in this server.**")
+            else:
+                # disable it
+                await ex.disable_interaction(server_id, interaction)
+                await ctx.send(f"> **{interaction} has been disabled in this server.**")
+
+        else:
+            return await ctx.send(f"> **That is not an interaction.**\n{interaction_msg}")
 
     async def get_mute_role(self, ctx):
         mute_roles = await ex.conn.fetch("SELECT roleid FROM general.muteroles")
@@ -84,13 +108,87 @@ class Moderator(commands.Cog):
             log.console(e)
             return await ctx.send(f"> **I am missing permissions to unmute {user.display_name}. {e}**")
 
+
+
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
-    async def say(self, ctx, *, message):
+    async def say(self, ctx, text_channel: typing.Union[discord.TextChannel, str] = None, *, message=None):
         """Make Irene say a message.
         Requires Manage Messages
+        [Format: %say #text-channel message]
         """
-        await ctx.send(">>> {}".format(message))
+        if text_channel is None:
+            return await ctx.send(f"> **{ctx.author.display_name}, Please specify a message to send.**")
+        if type(text_channel) == str:
+            if message is not None:
+                message = f"{text_channel} {message}"
+            else:
+                message = text_channel
+            text_channel = ctx
+        await text_channel.send(message)
+
+    @commands.command()
+    @commands.has_guild_permissions(manage_messages=True)
+    async def sayembed(self, ctx, *, embed_format=None):
+        """Make Irene say an embed message.
+        Requires Manage Messages. Follows Format from https://embedbuilder.nadekobot.me/
+        [Format: %say #text-channel message]
+        """
+        embed_creator_url = "https://embedbuilder.nadekobot.me/"
+        try:
+            if embed_format is None:
+                return await ctx.send(f"> **This command follows the format from {embed_creator_url}**")
+            else:
+                author_name = None
+                author_icon_url = None
+                embed_footer_text = None
+                embed_footer_url = None
+                embed_format = json.loads(embed_format)
+                embed_image = embed_format.get('image')
+                embed_footer = embed_format.get('footer')
+                embed_thumbnail = embed_format.get('thumbnail')
+                embed_author = embed_format.get('author')
+                if embed_author is not None:
+                    author_name = embed_author.get("name")
+                    author_icon_url = embed_author.get("icon_url")
+                if embed_footer is not None:
+                    embed_footer_text = embed_footer.get('text')
+                    embed_footer_url = embed_footer.get('icon_url')
+                author_url = embed_format.get('url')
+
+                if author_icon_url is not None or author_url is not None:
+                    embed_format.pop('author')
+                if embed_footer_url is not None:
+                    embed_format.pop('footer')
+                if embed_image is not None:
+                    embed_format.pop('image')
+                if embed_thumbnail is not None:
+                    embed_format.pop('thumbnail')
+
+                embed = discord.Embed.from_dict(embed_format)
+
+                if embed_image is not None:
+                    embed.set_image(url=embed_image)
+                if embed_footer_url is not None:
+                    embed.set_footer(text=embed_footer_text, icon_url=embed_footer_url)
+                if embed_thumbnail is not None:
+                    embed.set_thumbnail(url=embed_thumbnail)
+                if author_url is not None and author_icon_url is not None:
+                    embed.set_author(name=author_name, url=author_url, icon_url=author_icon_url)
+                elif author_icon_url is None and author_url is not None:
+                    embed.set_author(name=author_name, url=author_url)
+                elif author_url is None and author_icon_url is not None:
+                    embed.set_author(name=author_name, icon_url=author_icon_url)
+
+                plain_body = embed_format.get('plainText')
+                if plain_body is not None:
+                    return await ctx.send(plain_body, embed=embed)
+                else:
+                    return await ctx.send(embed=embed)
+        except Exception as e:
+            await ctx.send(f"ERROR - {e}.\nFollow the format from {embed_creator_url}")
+            log.console(e)
+
 
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
@@ -243,57 +341,77 @@ class Moderator(commands.Cog):
         except Exception as e:
             log.console(e)
 
+    async def make_emoji(self, ctx, emoji):
+        # a simple emoji converter
+        try:
+            return await commands.PartialEmojiConverter().convert(ctx, emoji)
+        except Exception as e:
+            return str(emoji)
+
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True, manage_emojis=True)
-    async def addemoji(self, ctx, url, emoji_name):
-        """Adds an emoji to the server. [Format: %addemoji (url) (emoji name)]
-        Requires Manage Messages & Manage Emojis
-        """
-        if "?v=1" in url or ".jpg" in url or ".png" in url or ".gif" in url:
-            file_format = url[52:56]
-        else:
-            file_format = "None"
-            await ctx.send(f">>> **Please use a url that ends in ?v=1 or a file format like .png or edit your emoji on \n <https://ezgif.com/resize?url={url}>**")
-            log.console (f"Please use a url that ends in ?v=1 or a file format like .png or edit your emoji on https://ezgif.com/resize?url={url}")
-        if len(emoji_name) < 2:
-            file_format = "None"
-            await ctx.send("> **Please enter an emoji name more than two letters.**")
-        if file_format != "None":
-            # await ctx.send(file_format)
-            async with ex.session.get('{}'.format(url)) as r:
-                if r.status == 200:
-                    # await ctx.send("Connection Successful")
-                    fd = await aiofiles.open('Emoji/{}'.format(f"{emoji_name}{file_format}"), mode='wb')
-                    await fd.write(await r.read())
-                    await fd.close()
-                    log.console(f"Downloaded {emoji_name}{file_format}")
-                    full_file_name = emoji_name + file_format
-                    file_size = (os.path.getsize(f'Emoji/{full_file_name}'))
-                    if file_size > 262144:
-                        await ctx.send(f">>> **File cannot be larger than 256.0 kb. Please resize the emoji here (for the resize method, use Gifsicle).**\n <https://ezgif.com/resize?url={url}>")
-                        log.console(f"File cannot be larger than 256.0 kb. Please resize the emoji here. https://ezgif.com/resize?url={url}")
-                    elif file_size <= 262144:
-                        v = await aiofiles.open(f'Emoji/{full_file_name}', mode='rb')
-                        # await ctx.guild.create_custom_emoji(name=emoji_name, image=f'Emoji/{full_file_name}')
-                        await ctx.guild.create_custom_emoji(name=emoji_name, image=await v.read())
-                        await v.close()
-                        emojis = client.emojis
-                        max_emoji_length = len(emojis)
-                        if emoji_name in str(emojis[max_emoji_length-1]):
-                            await ctx.send(emojis[max_emoji_length-1])
-                        elif emoji_name in str(emojis[0]):
-                            await ctx.send(emojis[0])
-                        else:
-                            await ctx.send(f"> **Added :{emoji_name}:**")
-                    all_photos = os.listdir('Emoji')
-                    for photo in all_photos:
-                        try:
-                            os.unlink('Emoji/{}'.format(photo))
-                        except:
-                            pass
-                elif r.status == 404:
-                    await ctx.send("> **That URL was not Found.**")
-                elif r.status == 403:
-                    await ctx.send("> **I do not have access to that site.**")
+    async def addemoji(self, ctx, url: str, emoji_name=None):
+        """Adds an emoji to the server. Several emojis can be added if split with a comma. Emoji Name is optional.
+        [Format: %addemoji (url/emoji) (emoji name)]
+        Requires Manage Messages & Manage Emojis"""
+        org_emoji_name = emoji_name
+        list_of_emojis = url.split(',')
+        for emoji in list_of_emojis:
+            try:
+                url = await self.make_emoji(ctx, emoji)
+                if type(url) == str:
+                    emoji_name = str(org_emoji_name)
+                if type(url) == discord.partial_emoji.PartialEmoji or type(url) == discord.PartialEmoji:
+                    if org_emoji_name is None or len(list_of_emojis) > 1:
+                        emoji_name = f"{url.name}"
+                    url = f"{url.url}"
+                if "?v=1" in url or ".jpg" in url or ".png" in url or ".gif" in url:
+                    file_format = url[52:56]
                 else:
-                    await ctx.send("> **I was not able to connect to that url**")
+                    file_format = "None"
+                    await ctx.send(f">>> **Please use a url that ends in ?v=1 or a file format like .png or edit your emoji on \n <https://ezgif.com/resize?url={url}>**")
+                    log.console (f"Please use a url that ends in ?v=1 or a file format like .png or edit your emoji on https://ezgif.com/resize?url={url}")
+                if len(emoji_name) < 2:
+                    file_format = "None"
+                    await ctx.send("> **Please enter an emoji name more than two letters.**")
+                if file_format != "None":
+                    # await ctx.send(file_format)
+                    async with ex.session.get('{}'.format(url)) as r:
+                        if r.status == 200:
+                            # await ctx.send("Connection Successful")
+                            fd = await aiofiles.open('Emoji/{}'.format(f"{emoji_name}{file_format}"), mode='wb')
+                            await fd.write(await r.read())
+                            await fd.close()
+                            log.console(f"Downloaded {emoji_name}{file_format}")
+                            full_file_name = emoji_name + file_format
+                            file_size = (os.path.getsize(f'Emoji/{full_file_name}'))
+                            if file_size > 262144:
+                                await ctx.send(f">>> **File cannot be larger than 256.0 kb. Please resize the emoji here (for the resize method, use Gifsicle).**\n <https://ezgif.com/resize?url={url}>")
+                                log.console(f"File cannot be larger than 256.0 kb. Please resize the emoji here. https://ezgif.com/resize?url={url}")
+                            elif file_size <= 262144:
+                                v = await aiofiles.open(f'Emoji/{full_file_name}', mode='rb')
+                                # await ctx.guild.create_custom_emoji(name=emoji_name, image=f'Emoji/{full_file_name}')
+                                await ctx.guild.create_custom_emoji(name=emoji_name, image=await v.read())
+                                await v.close()
+                                emojis = client.emojis
+                                max_emoji_length = len(emojis)
+                                if emoji_name in str(emojis[max_emoji_length-1]):
+                                    await ctx.send(emojis[max_emoji_length-1])
+                                elif emoji_name in str(emojis[0]):
+                                    await ctx.send(emojis[0])
+                                else:
+                                    await ctx.send(f"> **Added :{emoji_name}:**")
+                            all_photos = os.listdir('Emoji')
+                            for photo in all_photos:
+                                try:
+                                    os.unlink('Emoji/{}'.format(photo))
+                                except:
+                                    pass
+                        elif r.status == 404:
+                            await ctx.send("> **That URL was not Found.**")
+                        elif r.status == 403:
+                            await ctx.send("> **I do not have access to that site.**")
+                        else:
+                            await ctx.send("> **I was not able to connect to that url**")
+            except Exception as e:
+                log.console(e)

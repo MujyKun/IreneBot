@@ -36,9 +36,25 @@ dc_app_test_channel_id = make_int(os.getenv("DC_APP_TEST_CHANNEL_ID"))
 report_channel_id = make_int(os.getenv("REPORT_CHANNEL_ID"))
 suggest_channel_id = make_int(os.getenv("SUGGEST_CHANNEL_ID"))
 dead_image_channel_id = make_int(os.getenv("DEAD_IMAGE_CHANNEL_ID"))
+idol_post_send_limit = make_int(os.getenv("IDOL_POST_LIMIT"))
 
+interaction_list = [
+    'slap',
+    'kiss',
+    'lick',
+    'hug',
+    'punch',
+    'spit',
+    'pat',
+    'cuddle',
+    'pullhair',
+    'choke',
+    'stepon',
+    'stab'
+]
 
-client = commands.Bot(command_prefix=bot_prefix, case_insensitive=True, owner_id=owner_id)
+# client = commands.Bot(command_prefix=bot_prefix, case_insensitive=True, owner_id=owner_id)
+client = commands.AutoShardedBot(command_prefix=bot_prefix, case_insensitive=True, owner_id=owner_id)
 
 # Reactions/Emotes
 
@@ -135,4 +151,7 @@ client_session = aiohttp.ClientSession()
 
 # Wolfram
 wolfram_app_id = os.getenv("WOLFRAM_APP_ID")
+
+# API
+api_port = os.getenv("API_PORT")
 

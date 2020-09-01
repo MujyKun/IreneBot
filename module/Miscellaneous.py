@@ -4,6 +4,7 @@ from discord.ext import commands
 from module import keys
 from module import logger as log
 from Utility import resources as ex
+import json
 client = keys.client
 
 
@@ -20,12 +21,9 @@ class Miscellaneous(commands.Cog):
                     guild_id = notification[0]
                     user_id = notification[1]
                     phrase = notification[2]
-                    if phrase in message_content.lower() and guild_id == message_guild_id and message_sender.id != user_id:
-                        user = await client.fetch_user(user_id)
-                        dm_channel = user.dm_channel
-                        if dm_channel is None:
-                            await user.create_dm()
-                            dm_channel = user.dm_channel
+                    message_split = message_content.lower().split(" ")
+                    if phrase in message_split and guild_id == message_guild_id and message_sender.id != user_id:
+                        dm_channel = await ex.get_dm_channel(user_id)
                         start_loc = (message_content.lower()).find(phrase)
                         end_loc = start_loc + len(phrase)
                         new_message_content = f"{message_content[0:start_loc]}`{message_content[start_loc:end_loc]}`{message_content[end_loc:len(message_content)]}"
@@ -172,20 +170,20 @@ class Miscellaneous(commands.Cog):
     async def translate(self, ctx, from_language, to_language, *, message):
         """Translate between languages using Papago [Format: %translate English Korean this is a test phrase.]"""
         try:
-            source = await ex.get_language_code(from_language)
-            target = await ex.get_language_code(to_language)
-            if source is None or target is None:
-                await ctx.send("> **Could not detect source or target language. Available languages are: Korean, English, Japanese, Chinese, Spanish, French, Vietnamese, Thai, Indonesian.**")
+            response = await ex.translate(message, from_language, to_language)
+            if response is not None:
+                code = response['code']
+                if code == 0:
+                    text = response['text']
+                    target_lang = response['source']
+                    msg = f"Original ({target_lang}): {message} \nTranslated ({to_language}): {text} "
+                    return await ctx.send(msg)
+                else:
+                    return await ctx.send("> **Something went wrong and I did not receive a proper response from Papago.**")
             else:
-                trans = keys.translator
-                result = trans.translate(message, source=source, target=target, verbose=True)
-                if result['code'] == "00001":
-                    return await ctx.send("> **The Papago service cannot be used due to a temporary error. Please try again later.**")
-                msg = f"Original ({result['srcLangType']}): {message} \nTranslated ({result['tarLangType']}): {result['translatedText']} "
-                await ctx.send(msg)
+                return await ctx.send(f"**My Papago Translation Service is currently turned off and cannot process requests or you did not enter the right format.**")
         except Exception as e:
             log.console(e)
-            pass
 
     @commands.command()
     async def report(self, ctx, *, issue):
@@ -502,3 +500,5 @@ class Miscellaneous(commands.Cog):
     async def ping(self, ctx):
         """Shows Latency to Discord [Format: %ping]"""
         await ctx.send(f"> **My ping is currently {ex.get_ping()}ms.**")
+
+

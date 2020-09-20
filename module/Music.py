@@ -138,6 +138,35 @@ class Music(commands.Cog):
             pass
 
     @commands.command()
+    async def lyrics(self, ctx, *, song_query):
+        """Get the lyrics of a song (From https://api.ksoft.si)
+        [Format: %lyrics (song)]"""
+        if keys.lyric_client is None:
+            log.console(f"There is no API Key currently set for the Lyrics and the Developer is working on it.")
+            return await ctx.send("> **There is no API Key currently set for the Lyrics and the Developer is working on it.**")
+        try:
+            results = await keys.lyric_client.music.lyrics(song_query)
+        except keys.ksoftapi.NoResults:
+            log.console(f"No lyrics were found for {song_query}.")
+            return await ctx.send(f"> **No lyrics were found for {song_query}.**")
+        except Exception as e:
+            await ctx.send(f"An error has occurred.")
+            log.console(e)
+        else:
+            song = results[0]
+            if len(song.lyrics) >= 1500:
+                first_page = song.lyrics[0:1500]
+                second_page = song.lyrics[1500:len(song.lyrics)]
+                embed = await ex.create_embed(title=f"{song.name} by {song.artist}", color=ex.get_random_color(),
+                                              title_desc=first_page,
+                                              footer_desc="Thanks for using Irene! Lyrics API is from ksoft.si.")
+                embed2 = await ex.create_embed(title=f"{song.name} by {song.artist}", color=ex.get_random_color(), title_desc=second_page, footer_desc="Thanks for using Irene! Lyrics API is from ksoft.si.")
+                msg = await ctx.send(embed=embed)
+                return await ex.check_left_or_right_reaction_embed(msg, [embed, embed2])
+            embed = await ex.create_embed(title=f"{song.name} by {song.artist}", color=ex.get_random_color(), title_desc=song.lyrics, footer_desc="Thanks for using Irene! Lyrics API is from ksoft.si.")
+            await ctx.send(embed=embed)
+
+    @commands.command()
     async def shuffle(self, ctx):
         """Shuffles the playlist."""
         try:

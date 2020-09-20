@@ -57,9 +57,11 @@ class DreamCatcher(commands.Cog):
             return await ctx.send(f"> {ctx.author.display_name}, This channel does not currently receive DCAPP Updates. Turn it on with {server_prefix}updates.")
         if role is None:
             await ex.conn.execute("UPDATE dreamcatcher.dreamcatcher SET roleid = NULL WHERE channelid = $1", channel_id)
+            ex.cache.dc_app_channels[channel_id] = None
             return await ctx.send(f"> **{ctx.author.display_name}, no roles will be notified on a new DCAPP post. In order to notify a role, use {server_prefix}dcnotify @role.**")
         if counter == 1:
             await ex.conn.execute("UPDATE dreamcatcher.dreamcatcher SET roleid = $1 WHERE channelid = $2", role.id, channel_id)
+            ex.cache.dc_app_channels[channel_id] = role.id
             return await ctx.send(f"> **{role} will now be pinged for the DCAPP updates.**")
 
     @commands.command()
@@ -71,6 +73,7 @@ class DreamCatcher(commands.Cog):
         if solution == "stop":
             if counter == 1:
                 await ctx.send ("> **This channel will no longer receive updates.**")
+                ex.cache.dc_app_channels.pop(channel_id, None)
                 await ex.conn.execute("DELETE FROM dreamcatcher.DreamCatcher WHERE channelid = $1", channel_id)
             if counter == 0:
                 await ctx.send("> **This channel does not currently receive updates.**")
@@ -80,16 +83,16 @@ class DreamCatcher(commands.Cog):
             if counter == 0:
                 channel_name = client.get_channel(channel_id)
                 await ctx.send("> **I Will Post All DC Updates In {}**".format(channel_name))
+                ex.cache.dc_app_channels[channel_id] = None
                 await ex.conn.execute("INSERT INTO dreamcatcher.DreamCatcher(channelid) VALUES ($1)", channel_id)
 
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
     async def latest(self, ctx, member=None):
         """Grabs the highest resolution possible from MOST RECENT DC Posts [Format: %latest (member)] [Member Options: jiu, sua, siyeon, handong, yoohyeon, dami, gahyeon, dc]"""
-        member_list = ["jiu", "sua", "siyeon", "handong", "yoohyeon", "dami", "gahyeon", "dc"]
         if member is not None:
             member = member.lower()
-        if member not in member_list and member is not None:
+        if member not in ex.cache.dc_member_list and member is not None:
             await ctx.send("> **That member does not exist. The available member options are jiu, sua, siyeon, handong, yoohyeon, dami, gahyeon, dc**")
         else:
             original_post_number = 0
@@ -108,53 +111,6 @@ class DreamCatcher(commands.Cog):
             original_msg = f"> **Here are the Original Photos for <{base_url}>**:"
             await ctx.send(original_msg + hd_photos)
 
-    @commands.command()
-    @commands.is_owner()
-    async def download_all(self, ctx, *, number=18144):
-        """Download All DC Photos from DC APP [Format: %download_all]"""
-        self.download_all_number = number
-        @tasks.loop(seconds=0, minutes=0, hours=0, reconnect=True)
-        async def download_all_task(ctx):
-            self.download_all_number += 1
-            number = self.download_all_number
-            # if number >= latest post
-            # last run on 40830
-            post_id = ex.first_result(await ex.conn.fetchrow("SELECT PostID FROM dreamcatcher.DCPost"))
-            if number >= post_id:
-                download_all_task.cancel()
-            else:
-                post_url = 'https://dreamcatcher.candlemystar.com/post/{}'.format(number)
-                async with ex.session.get('{}'.format(post_url)) as r:
-                    if r.status == 200:
-                            page_html = await r.text()
-                            page_soup = soup(page_html, "html.parser")
-                            username = (page_soup.find("div", {"class": "card-name"})).text
-                            if username in self.list:
-                                image_url = (page_soup.findAll("div", {"class": "imgSize width"}))
-                                for image in image_url:
-                                    new_image_url = image.img["src"]
-                                    DC_Date = new_image_url[41:49]
-                                    unique_id = new_image_url[55:87]
-                                    file_format = new_image_url[93:]
-                                    HD_Link = f'https://file.candlemystar.com/post/{DC_Date}{unique_id}{file_format}'
-                                    async with ex.session.get(HD_Link) as resp:
-                                        fd = await aiofiles.open('DCAppDownloaded/{}'.format(f"{unique_id[:8]}{file_format}"), mode='wb')
-                                        await fd.write(await resp.read())
-                                        await fd.close()
-                                        log.console(f"Downloaded {unique_id[:8]}{file_format} on {number}")
-                                        number += 1
-                            else:
-                                log.console("DOWNLOAD Passing Post from POST #{}".format(number))
-                    elif r.status == 304:
-                        log.console("> **Access Denied - {}**".format(number))
-                    elif r.status == 404:
-                        log.console("DOWNLOAD Error 404. {} was not Found.".format(number))
-                        pass
-                    else:
-                        log.console("DOWNLOAD Other Error")
-        download_all_task.start(ctx)
-
-
 class DcApp:
     def __init__(self):
         self.list = ['\n DC_GAHYEON                ', '\n DC_SIYEON                ', '\n DC_YOOHYEON                ', '\n DC_JIU                ', '\n DC_SUA                ', '\n DREAMCATCHER                ', '\n DC_DAMI                ', '\n DC_HANDONG                ']
@@ -167,6 +123,7 @@ class DcApp:
         self.post_list = []
         self.count_loop = 0
         self.already_added = 0
+        self.last_updated_number = 0
 
     async def check_dc_post(self, dc_number, test=False, repost=False):
         post_url = 'https://dreamcatcher.candlemystar.com/post/{}'.format(dc_number)
@@ -179,7 +136,9 @@ class DcApp:
                         if post_exists == 0:
                             await ex.conn.execute("INSERT INTO dreamcatcher.DCPost VALUES($1)", dc_number)
                         elif post_exists == 1:
-                            await ex.conn.execute("UPDATE dreamcatcher.DCPost SET postid = $1", dc_number)
+                            if self.last_updated_number != dc_number:
+                                await ex.conn.execute("UPDATE dreamcatcher.DCPost SET postid = $1", dc_number)
+                                self.last_updated_number = dc_number
                         else:
                             await ex.conn.execute("DELETE FROM dreamcatcher.DCPost")  # just in case
                             await ex.conn.execute("INSERT INTO dreamcatcher.DCPost VALUES($1)", dc_number)
@@ -206,17 +165,16 @@ class DcApp:
                             # Videos were attempting to being sent but were not found. Needs time to render.
                             await asyncio.sleep(5)
                         """
-                        channels = await ex.get_dc_channels()
+                        channels = ex.cache.dc_app_channels
                         if test:
-                            channels = [[dc_app_test_channel_id]]
+                            channels = {dc_app_test_channel_id: None}
                         member_name, member_id = ex.get_member_name_and_id(username, self.list)
                         dc_photos_embed = await ex.get_embed(image_links, member_name)
                         if not repost:
                             await ex.add_post_to_db(image_links, member_id, member_name, dc_number, post_url)
-                        for channel in channels:
+                        for channel_id in channels:
                             try:
-                                channel_id = channel[0]
-                                role_id = channel[1]
+                                role_id = channels.get(channel_id)
                                 channel = client.get_channel(channel_id)
                                 # This part is repeated due to closed file IO error.
                                 dc_videos = ex.get_videos(video_list)

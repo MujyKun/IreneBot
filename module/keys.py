@@ -7,6 +7,7 @@ from datetime import datetime
 import os
 from dotenv import load_dotenv
 import aiohttp
+import ksoftapi
 
 
 def make_int(var):
@@ -140,8 +141,8 @@ last_fm_headers = {
 
 # Patreon
 patreon_link = os.getenv("PATREON_LINK")
-patreon_role_id = os.getenv("PATREON_ROLE_ID")
-patreon_super_role_id = os.getenv("PATREON_SUPER_ROLE_ID")
+patreon_role_id = make_int(os.getenv("PATREON_ROLE_ID"))
+patreon_super_role_id = make_int(os.getenv("PATREON_SUPER_ROLE_ID"))
 
 # startup time
 startup_time = datetime.now()
@@ -152,6 +153,13 @@ client_session = aiohttp.ClientSession()
 # Wolfram
 wolfram_app_id = os.getenv("WOLFRAM_APP_ID")
 
+# Song Lyrics Client
+lyrics_api_key = os.getenv("LYRICS_API_KEY")
+if len(lyrics_api_key) != 0:
+    lyric_client = ksoftapi.Client(lyrics_api_key)
+else:
+    lyric_client = None
+
 # API
 api_port = os.getenv("API_PORT")
-
+translate_private_key = os.getenv("PRIVATE_KEY")

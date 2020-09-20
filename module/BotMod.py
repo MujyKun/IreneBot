@@ -15,16 +15,27 @@ class BotMod(commands.Cog):
             if 'closedm' not in message_content and 'createdm' not in message_content:
                 dm_channel = await ex.get_dm_channel(message_sender.id)
                 if dm_channel is not None:
-                    mod_mail = await ex.conn.fetch("SELECT userid, channelid FROM general.modmail")
-                    for mail in mod_mail:
-                        user_id = mail[0]
-                        channel_id = mail[1]
+                    for user_id in ex.cache.mod_mail:
+                        channel_id = ex.cache.mod_mail.get(user_id)
                         mod_channel = await ex.client.fetch_channel(channel_id)
                         if user_id == message_sender.id and message_channel == dm_channel:
                             await mod_channel.send(f">>> FROM: {message_sender.display_name} ({message_sender.id}) - {message_content}")
                         if mod_channel == message_channel:
                             dm_channel = await ex.get_dm_channel(user_id)
                             await dm_channel.send(f">>> FROM: {message_sender.display_name} ({message_sender.id}) - {message_content}")
+
+    @commands.command()
+    @commands.check(ex.check_if_mod)
+    async def botwarn(self, ctx, user: discord.User, *, reason=None):
+        """Warns a user from Irene's DMs [Format: %botwarn (user id) <reason>]"""
+        message = f"""
+**You have been warned by <@{ctx.author.id}>.**
+**Please be aware that you may get banned from the bot if this behavior is repeated numerous times.**
+**Reason:** {reason}
+Have questions? Join the support server at {keys.bot_support_server_link}."""
+        dm_channel = await ex.get_dm_channel(user.id)
+        await dm_channel.send(message)
+        await ctx.send(f"> **Message was sent to <@{user.id}>**")
 
     @commands.command()
     @commands.check(ex.check_if_mod)
@@ -144,89 +155,75 @@ class BotMod(commands.Cog):
     async def addalias(self, ctx, alias, mem_id: int, mode="idol"):
         """Add alias to an idol/group (Underscores are spaces)[Format: %addalias (alias) (ID of idol/group) ("idol" or "group"]"""
         alias = alias.replace("_", " ")
-        check = True
         if mode.lower() == "idol":
             mode = "member"
             param = "id"
+            is_group = False
         elif mode.lower() == "group":
             mode = "groups"
             param = "groupid"
+            is_group = True
         else:
-            await ctx.send("> **Please specify 'idol' or 'group'**.")
-            check = False
-        if check:
-            try:
-                counter = ex.first_result(await ex.conn.fetchrow(f"SELECT COUNT(*) FROM groupmembers.{mode} WHERE {param} = $1", mem_id))
-                if counter == 0:
-                    await ctx.send("> **That ID does not exist.**")
-                else:
-                    current_aliases = ex.first_result(await ex.conn.fetchrow(f"SELECT aliases FROM groupmembers.{mode} WHERE {param} = $1", mem_id))
-                    if current_aliases is None:
-                        new_aliases = alias.lower()
-                    else:
-                        new_aliases = f"{current_aliases},{alias.lower()}"
-                    await ex.conn.execute(f"UPDATE groupmembers.{mode} SET aliases = $1 WHERE {param} = $2", new_aliases, mem_id)
+            return await ctx.send("> **Please specify 'idol' or 'group'**.")
+        try:
+            id_exists = ex.first_result(await ex.conn.fetchrow(f"SELECT COUNT(*) FROM groupmembers.{mode} WHERE {param} = $1", mem_id))
+            if id_exists == 0:
+                return await ctx.send(f"> **That ID ({mem_id}) does not exist.**")
+            else:
+                # check if the alias already exists, if not, add it
+                aliases = await ex.get_aliases(object_id=mem_id, group=is_group)
+                if alias not in aliases:
+                    await ex.conn.execute("INSERT INTO groupmembers.aliases(objectid, alias, isgroup) VALUES ($1, $2, $3)", mem_id, alias.lower(), int(is_group))
                     await ctx.send(f"> **Added Alias: {alias} to {mem_id}**")
-            except Exception as e:
-                await ctx.send(e)
-                log.console(e)
+                else:
+                    return await ctx.send(f"> **{alias} already exists with {mem_id}.**")
+        except Exception as e:
+            await ctx.send(e)
+            log.console(e)
 
     @commands.command(aliases=['removealias'])
     @commands.check(ex.check_if_mod)
     async def deletealias(self, ctx, alias, mem_id: int, mode="idol"):
         """Remove alias from an idol/group (Underscores are spaces)[Format: %deletealias (alias) (ID of idol/group) ("idol" or "group")]"""
         alias = alias.replace("_", " ")
-        check = True
         if mode.lower() == "idol":
             mode = "member"
             param = "id"
+            is_group = False
         elif mode.lower() == "group":
             mode = "groups"
             param = "groupid"
+            is_group = True
         else:
-            await ctx.send("> **Please specify 'idol' or 'group'**.")
-            check = False
-        if check:
-            try:
-                count = ex.first_result(await ex.conn.fetchrow(f"SELECT COUNT(*) FROM groupmembers.{mode} WHERE {param} = $1", mem_id))
-                if count == 0:
-                    await ctx.send("> **That ID does not exist.**")
+            return await ctx.send("> **Please specify 'idol' or 'group'**.")
+        try:
+            id_exists = ex.first_result(await ex.conn.fetchrow(f"SELECT COUNT(*) FROM groupmembers.{mode} WHERE {param} = $1", mem_id))
+            if id_exists == 0:
+                return await ctx.send("> **That ID does not exist.**")
+            else:
+                # check if the alias exists, if it does delete it.
+                aliases = await ex.get_aliases(object_id=mem_id, group=is_group)
+                if alias in aliases:
+                    await ex.conn.execute("DELETE FROM groupmembers.aliases WHERE objectid = $1 AND alias = $2 AND isgroup = $3", mem_id, alias.lower(), int(is_group))
+                    return await ctx.send(f"> **Alias: {alias} was removed from {mem_id}.**")
                 else:
-                    current_aliases = ex.first_result(await ex.conn.fetchrow(f"SELECT Aliases FROM groupmembers.{mode} WHERE {param} = $1", mem_id))
-                    if current_aliases is None:
-                        await ctx.send("> **That alias does not exist.**")
-                    else:
-                        check = current_aliases.find(alias.lower(), 0)
-                        if check == -1:
-                            await ctx.send(f"> **Could not find alias: {alias}**")
-                        else:
-                            alias_list = current_aliases.split(',')
-                            alias_list.remove(alias.lower())
-                            if len(alias_list) == 0:
-                                new_aliases = None
-                            else:
-                                new_aliases = f",".join(alias_list)
-                            if new_aliases is None:
-                                await ex.conn.execute(f"UPDATE groupmembers.{mode} SET aliases = NULL WHERE {param} = $1", mem_id)
-                            else:
-                                await ex.conn.execute(f"UPDATE groupmembers.{mode} SET aliases = $1 WHERE {param} = $2", new_aliases, mem_id)
-                            await ctx.send(f"> **Alias: {alias} was removed from {mem_id}.**")
-            except Exception as e:
-                await ctx.send(e)
-                log.console(e)
+                    return await ctx.send(f"> **Could not find alias: {alias}**")
+        except Exception as e:
+            await ctx.send(e)
+            log.console(e)
 
     @commands.command()
     @commands.check(ex.check_if_mod)
     async def addidoltogroup(self, ctx, idol_id: int, group_id: int):
         """Adds idol to group. [Format: %addidoltogroup (idol id) (group id)"""
         try:
-            in_groups = ex.first_result(await ex.conn.fetchrow("SELECT ingroups from groupmembers.member WHERE id = $1", idol_id))
-            if in_groups is None:
-                await ex.conn.execute("UPDATE groupmembers.member SET ingroups = $1 WHERE id = $2", group_id, idol_id)
+            member_name = (await ex.get_member(idol_id))[1]
+            group_name = await ex.get_group_name(group_id)
+            if await ex.check_member_in_group(idol_id, group_id):
+                return await ctx.send(f'> **{member_name} ({idol_id}) is already in {group_name} ({group_id}).**')
             else:
-                in_groups += f",{group_id}"
-                await ex.conn.execute("UPDATE groupmembers.member SET ingroups = $1 WHERE id = $2", in_groups, idol_id)
-            await ctx.send(f"**Added {(await ex.get_member(idol_id))[1]} to {await ex.get_group_name(group_id)}.**")
+                await ex.add_idol_to_group(idol_id, group_id)
+                await ctx.send(f"**Added {member_name} ({idol_id}) to {group_name} ({group_id}).**")
         except Exception as e:
             await ctx.send(f"Something went wrong - {e}")
             log.console(e)
@@ -236,42 +233,40 @@ class BotMod(commands.Cog):
     async def deleteidolfromgroup(self, ctx, idol_id: int, group_id: int):
         """Deletes idol from group. [Format: %deleteidolfromgroup (idol id) (group id)"""
         try:
-            in_groups = ex.first_result(await ex.conn.fetchrow("SELECT ingroups from groupmembers.member WHERE id = $1", idol_id))
-            in_groups_split = in_groups.split(',')
-            if str(group_id) not in in_groups_split:
-                await ctx.send(f"> **{(await ex.get_member(idol_id))[1]} is not in that group.**")
+            member_name = (await ex.get_member(idol_id))[1]
+            group_name = await ex.get_group_name(group_id)
+            if not await ex.check_member_in_group(idol_id, group_id):
+                await ctx.send(f"> **{member_name} ({idol_id}) is not in {group_name} ({group_id}).**")
             else:
-                in_groups_split.remove(str(group_id))
-                if len(in_groups_split) == 0:
-                    in_groups = "2"  # NULL
-                else:
-                    in_groups = ','.join(in_groups_split)
-                await ex.conn.execute("UPDATE groupmembers.member SET ingroups = $1 WHERE id = $2", in_groups, idol_id)
-                await ctx.send(f"**Removed {(await ex.get_member(idol_id))[1]} from {await ex.get_group_name(group_id)}.**")
+                await ex.remove_idol_from_group(idol_id, group_id)
+                await ctx.send(f"**Removed {member_name} ({idol_id}) from {group_name} ({group_id}).**")
         except Exception as e:
             await ctx.send(f"Something went wrong - {e}")
             log.console(e)
 
     @commands.command()
     @commands.check(ex.check_if_mod)
-    async def addidol(self, ctx, full_name, stage_name, group_id,):
+    async def addidol(self, ctx, full_name, stage_name, group_id: int):
         """Adds an idol (Use underscores for spaces)[Format: %addidol (full name) (stage name) (group id)]"""
         full_name = full_name.replace('_', ' ')
         stage_name = stage_name.replace('_', ' ')
         try:
-            await ex.conn.execute("INSERT INTO groupmembers.member (fullname, stagename, ingroups) VALUES($1, $2, $3)", full_name, stage_name, group_id)
-            await ctx.send(f"{full_name} was added.")
+            group_name = await ex.get_group_name(group_id)
+            await ex.conn.execute("INSERT INTO groupmembers.member (fullname, stagename) VALUES($1, $2)", full_name, stage_name)
+            idol_id = await ex.get_idol_id_by_both_names(full_name, stage_name)
+            await ex.add_idol_to_group(idol_id, group_id)
+            await ctx.send(f"{full_name} was added and is in {group_name} ({group_id}).")
         except Exception as e:
             await ctx.send(f"Something went wrong - {e}")
             log.console(e)
 
     @commands.command(aliases=['removeidol'])
     @commands.check(ex.check_if_mod)
-    async def deleteidol(self, ctx, idol_id):
+    async def deleteidol(self, ctx, idol_id: int):
         """Deletes an idol [Format: %deleteidol (idol id)]"""
         try:
             idol_name = (await ex.get_member(idol_id))[1]
-            await ex.conn.execute("DELETE FROM groupmembers.members WHERE id = $1", idol_id)
+            await ex.conn.execute("DELETE FROM groupmembers.member WHERE id = $1", idol_id)
             await ctx.send(f"{idol_name} ({idol_id}) deleted.")
         except Exception as e:
             await ctx.send(f"Something went wrong - {e}")
@@ -290,7 +285,7 @@ class BotMod(commands.Cog):
 
     @commands.command(aliases=['removegroup'])
     @commands.check(ex.check_if_mod)
-    async def deletegroup(self, ctx, group_id):
+    async def deletegroup(self, ctx, group_id: int):
         """Deletes a group [Format: %deletegroup (group id)]"""
         try:
             await ex.conn.execute("DELETE FROM groupmembers.groups WHERE groupid = $1", group_id)
@@ -307,6 +302,7 @@ class BotMod(commands.Cog):
         try:
             dm_channel = await ex.get_dm_channel(user=user)
             if dm_channel is not None:
+                ex.cache.mod_mail[user.id] = ctx.channel.id
                 await ex.conn.execute("INSERT INTO general.modmail(userid, channelid) VALUES ($1, $2)", user.id, ctx.channel.id)
                 await dm_channel.send(f"> {ctx.author.display_name} ({ctx.author.id}) has created a DM with you. All messages sent here will be sent to them.")
                 await ctx.send(f"> A DM has been created with {user.id}. All messages you type in this channel will be sent to the user.")
@@ -329,6 +325,7 @@ class BotMod(commands.Cog):
             dm_channel = await ex.get_dm_channel(user_id)
             if dm_channel is None:
                 return await ctx.send("> **There are no DMs set up in this channel.**")
+            ex.cache.mod_mail.pop(user_id, None)
             await ex.conn.execute("DELETE FROM general.modmail WHERE userid = $1 and channelid = $2", user_id, ctx.channel.id)
             await ctx.send(f"> The DM has been deleted successfully.")
             await dm_channel.send(f"> {ctx.author.display_name} ({ctx.author.id}) has closed the DM with you. Your messages will no longer be sent to them.")

@@ -9,7 +9,9 @@ class Irene:
 
     def run(self):
         """Start the bot."""
-        ex.set_db_connection.start()  # all active blackjack games are also deleted and current session stats refreshed.
+        # all active blackjack games are also deleted, current session stats refreshed.
+        # cache is reset in the on_ready event.
+        ex.set_db_connection.start()
         if ex.test_bot:
             self.run_test_bot()
         else:
@@ -36,7 +38,7 @@ class Irene:
         # For INFO Logging
         module.log.info()
         # For Debugging
-        # log.debug()
+        # module.log.debug()
 
     @staticmethod
     def start_loops():
@@ -48,8 +50,8 @@ class Irene:
         module.status.Status().change_bot_status_loop.start()
         # Start Voice Client Loop
         module.Music.Music().check_voice_clients.start()
-        # Update Group Photo Count
-        module.GroupMembers.GroupMembers().update_group_photo_count.start()
+        # Update Group Photo Count Cache Every 12 hours
+        ex.update_group_photo_count.start()
         # Send Packets to localhost:5123 to show Irene is alive. This is meant for auto restarting Irene
         # This feature is essential in case of any overload or crashes by external sources.
         # This also avoids having to manually restart Irene.
@@ -89,6 +91,7 @@ class Irene:
         ex.client.add_cog(module.LastFM.LastFM())
         ex.client.add_cog(module.Interactions.Interactions())
         ex.client.add_cog(module.Wolfram.Wolfram())
+        ex.client.add_cog(module.cache.Cache())
 
 
 if __name__ == '__main__':

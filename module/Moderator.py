@@ -3,10 +3,9 @@ from discord.ext import commands
 from module import logger as log
 from module.keys import client, bot_prefix, interaction_list
 from Utility import resources as ex
-import os
-import aiofiles
 import typing
 import json
+import aiohttp
 
 
 class Moderator(commands.Cog):
@@ -205,11 +204,14 @@ class Moderator(commands.Cog):
             if current_server_prefix == "%":
                 if prefix != "%":
                     await ex.conn.execute("INSERT INTO general.serverprefix VALUES ($1,$2)", ctx.guild.id, prefix)
+                    ex.cache.server_prefixes[ctx.guild.id] = prefix
             else:
                 if prefix != "%":
                     await ex.conn.execute("UPDATE general.serverprefix SET prefix = $1 WHERE serverid = $2", prefix, ctx.guild.id)
+                    ex.cache.server_prefixes[ctx.guild.id] = prefix
                 else:
                     await ex.conn.execute("DELETE FROM general.serverprefix WHERE serverid = $1", ctx.guild.id)
+                    ex.cache.server_prefixes.pop(ctx.guild.id, None)
             await ctx.send(f"> **This server's prefix has been set to {prefix}.**")
 
     @commands.command(aliases=['prune', 'purge'])
@@ -356,6 +358,7 @@ class Moderator(commands.Cog):
         Requires Manage Messages & Manage Emojis"""
         org_emoji_name = emoji_name
         list_of_emojis = url.split(',')
+        process_emoji = True
         for emoji in list_of_emojis:
             try:
                 url = await self.make_emoji(ctx, emoji)
@@ -365,53 +368,30 @@ class Moderator(commands.Cog):
                     if org_emoji_name is None or len(list_of_emojis) > 1:
                         emoji_name = f"{url.name}"
                     url = f"{url.url}"
-                if "?v=1" in url or ".jpg" in url or ".png" in url or ".gif" in url:
-                    file_format = url[52:56]
-                else:
-                    file_format = "None"
-                    await ctx.send(f">>> **Please use a url that ends in ?v=1 or a file format like .png or edit your emoji on \n <https://ezgif.com/resize?url={url}>**")
-                    log.console (f"Please use a url that ends in ?v=1 or a file format like .png or edit your emoji on https://ezgif.com/resize?url={url}")
                 if len(emoji_name) < 2:
-                    file_format = "None"
+                    process_emoji = False
                     await ctx.send("> **Please enter an emoji name more than two letters.**")
-                if file_format != "None":
-                    # await ctx.send(file_format)
+                if process_emoji:
                     async with ex.session.get('{}'.format(url)) as r:
                         if r.status == 200:
-                            # await ctx.send("Connection Successful")
-                            fd = await aiofiles.open('Emoji/{}'.format(f"{emoji_name}{file_format}"), mode='wb')
-                            await fd.write(await r.read())
-                            await fd.close()
-                            log.console(f"Downloaded {emoji_name}{file_format}")
-                            full_file_name = emoji_name + file_format
-                            file_size = (os.path.getsize(f'Emoji/{full_file_name}'))
-                            if file_size > 262144:
-                                await ctx.send(f">>> **File cannot be larger than 256.0 kb. Please resize the emoji here (for the resize method, use Gifsicle).**\n <https://ezgif.com/resize?url={url}>")
-                                log.console(f"File cannot be larger than 256.0 kb. Please resize the emoji here. https://ezgif.com/resize?url={url}")
-                            elif file_size <= 262144:
-                                v = await aiofiles.open(f'Emoji/{full_file_name}', mode='rb')
-                                # await ctx.guild.create_custom_emoji(name=emoji_name, image=f'Emoji/{full_file_name}')
-                                await ctx.guild.create_custom_emoji(name=emoji_name, image=await v.read())
-                                await v.close()
-                                emojis = client.emojis
-                                max_emoji_length = len(emojis)
-                                if emoji_name in str(emojis[max_emoji_length-1]):
-                                    await ctx.send(emojis[max_emoji_length-1])
-                                elif emoji_name in str(emojis[0]):
-                                    await ctx.send(emojis[0])
-                                else:
-                                    await ctx.send(f"> **Added :{emoji_name}:**")
-                            all_photos = os.listdir('Emoji')
-                            for photo in all_photos:
-                                try:
-                                    os.unlink('Emoji/{}'.format(photo))
-                                except:
-                                    pass
+                            await ctx.guild.create_custom_emoji(name=emoji_name, image=await r.read())
+                            emojis = client.emojis
+                            max_emoji_length = len(emojis)
+                            if emoji_name in str(emojis[max_emoji_length-1]):
+                                await ctx.send(emojis[max_emoji_length-1])
+                            elif emoji_name in str(emojis[0]):
+                                await ctx.send(emojis[0])
+                            else:
+                                await ctx.send(f"> **Added :{emoji_name}:**")
                         elif r.status == 404:
                             await ctx.send("> **That URL was not Found.**")
                         elif r.status == 403:
                             await ctx.send("> **I do not have access to that site.**")
                         else:
                             await ctx.send("> **I was not able to connect to that url**")
+            except discord.HTTPException as e:
+                await ctx.send(f"> **{e}**")
+            except aiohttp.InvalidURL as e:
+                await ctx.send(f"> **Invalid URL.**")
             except Exception as e:
                 log.console(e)

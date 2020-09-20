@@ -4,7 +4,6 @@ from discord.ext import commands
 from module import keys
 from module import logger as log
 from Utility import resources as ex
-import json
 client = keys.client
 
 
@@ -15,9 +14,8 @@ class Miscellaneous(commands.Cog):
             message_sender = message.author
             message_guild_id = message.guild.id
             message_content = message.content
-            notifications = await ex.conn.fetch("SELECT guildid,userid,phrase FROM general.notifications")
             if not message_sender.bot:
-                for notification in notifications:
+                for notification in ex.cache.user_notifications:
                     guild_id = notification[0]
                     user_id = notification[1]
                     phrase = notification[2]
@@ -48,17 +46,21 @@ class Miscellaneous(commands.Cog):
             if check_exists:
                 raise Exception
             await ex.conn.execute("INSERT INTO general.notifications(guildid,userid,phrase) VALUES($1, $2, $3)", ctx.guild.id, ctx.author.id, phrase.lower())
+            ex.cache.user_notifications.append([ctx.guild_id, ctx.author.id, phrase.lower()])
             await ctx.send(f"> **{ctx.author.display_name}, I added `{phrase}` to your notifications.**")
         except Exception as e:
             log.console(e)
             await ctx.send(f"> **{ctx.author.display_name}, You are already receiving notifications for `{phrase}`**")
-        pass
 
     @commands.command(aliases=["deletenoti"])
     async def removenoti(self, ctx, *, phrase):
         """Remove a phrase/word when it said in the current server. [Format: %removenoti (phrase/word)]"""
         try:
             await ex.conn.execute("DELETE FROM general.notifications WHERE guildid=$1 AND userid=$2 AND phrase=$3", ctx.guild.id, ctx.author.id, phrase.lower())
+            try:
+                ex.cache.user_notifications.remove([ctx.guild_id, ctx.author.id, phrase.lower()])
+            except Exception as e:
+                pass
             await ctx.send(f"> **{ctx.author.display_name}, if you were receiving notifications for that phrase, it has been removed.**")
         except Exception as e:
             log.console(e)
@@ -68,6 +70,7 @@ class Miscellaneous(commands.Cog):
     async def listnoti(self, ctx):
         """list all your notification phrases that exist in the current server. [Format: %listnoti]"""
         try:
+            # use db call instead of cache (would be quicker here)
             phrases = await ex.conn.fetch("SELECT phrase FROM general.notifications WHERE guildid = $1 AND userid = $2", ctx.guild.id, ctx.author.id)
             if len(phrases) == 0:
                 return await ctx.send(f"> **{ctx.author.display_name}, You do not have any notification phrases on this server.**")
@@ -172,6 +175,9 @@ class Miscellaneous(commands.Cog):
         try:
             response = await ex.translate(message, from_language, to_language)
             if response is not None:
+                if len(response) == 0:
+                    return await ctx.send(
+                        "> **The translation came back empty meaning an occur occurred in the process. It may be possible that the bot reached the maximum amount of calls it can make this month.**")
                 code = response['code']
                 if code == 0:
                     text = response['text']
@@ -183,6 +189,7 @@ class Miscellaneous(commands.Cog):
             else:
                 return await ctx.send(f"**My Papago Translation Service is currently turned off and cannot process requests or you did not enter the right format.**")
         except Exception as e:
+            await ctx.send("An error has occurred with the Translation.")
             log.console(e)
 
     @commands.command()

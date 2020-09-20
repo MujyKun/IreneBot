@@ -17,3 +17,4 @@ youtube-dl==2020.6.16.1
 python-dotenv==0.14.0
 filetype==1.0.7
 xmltodict==0.12.0
+ksoftapi==0.2.4a0

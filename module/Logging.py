@@ -10,8 +10,7 @@ class Logging(commands.Cog):
     async def on_message_log(message):
         if await ex.check_logging_requirements(message):
             try:
-                send_all_messages = ex.first_result(await ex.conn.fetchrow("SELECT sendall FROM logging.servers WHERE serverid = $1", message.guild.id))
-                if send_all_messages == 1:
+                if await ex.get_send_all(message.guild.id) == 1:
                     logging_channel = await ex.get_log_channel_id(message)
                     files = await ex.get_attachments(message)
                     embed_message = f"**{message.author} ({message.author.id})\nMessage: **{message.content}**\nFrom {message.guild} in {message.channel}\nCreated at {message.created_at}\n<{message.jump_url}>**"
@@ -42,6 +41,7 @@ class Logging(commands.Cog):
                 if counter == 0:
                     logging_id = await ex.get_logging_id(ctx.guild.id)
                     await ex.conn.execute("INSERT INTO logging.channels (channelid, server) VALUES($1, $2)", text_channel.id, logging_id)
+                    ex.cache.list_of_logged_channels.append(text_channel.id)
                     await ctx.send(f"> **{text_channel.name} is now being logged.**")
                 else:
                     await ctx.send(f"> **{text_channel.name} can not be logged since log messages are sent here.**")
@@ -58,6 +58,7 @@ class Logging(commands.Cog):
             text_channel = ctx.channel
         if await ex.check_if_logged(channel_id=text_channel.id):
             await ex.conn.execute("DELETE FROM logging.channels WHERE channelid = $1", text_channel.id)
+            ex.cache.list_of_logged_channels.remove(text_channel.id)
             await ctx.send(f"> **{text_channel.name} is no longer being logged.**")
         else:
             await ctx.send(f"> **{text_channel.name} is not being logged.**")
@@ -77,12 +78,13 @@ class Logging(commands.Cog):
     async def sendall(self, ctx):
         """Toggles sending all messages to log channel. If turned off, it only sends edited & deleted messages."""
         if await ex.check_if_logged(server_id=ctx.guild.id):
-            send_all_messages = ex.first_result(await ex.conn.fetchrow("SELECT sendall FROM logging.servers WHERE serverid = $1", ctx.guild.id))
-            if send_all_messages == 0:
+            if await ex.get_send_all(ctx.guild.id) == 0:
                 await ex.conn.execute("UPDATE logging.servers SET sendall = $1 WHERE serverid = $2", 1, ctx.guild.id)
+                (ex.cache.logged_channels[ctx.guild.id])['send_all'] = 1
                 await ctx.send(f"> **All messages will now be sent in the logging channel.**")
             else:
                 await ex.conn.execute("UPDATE logging.servers SET sendall = $1 WHERE serverid = $2", 0, ctx.guild.id)
+                (ex.cache.logged_channels[ctx.guild.id])['send_all'] = 0
                 await ctx.send(f"> **Only edited and deleted messages will be sent in the logging channel.**")
         else:
             await ctx.send("> **This server is not being logged.**")

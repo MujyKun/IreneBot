@@ -1,9 +1,10 @@
-from module.keys import client, trash_emoji, check_emoji, dead_image_channel_id
+from module.keys import client, trash_emoji, check_emoji, dead_image_channel_id, patreon_super_role_id, patreon_role_id
 from module import logger as log
 import discord
 from Utility import resources as ex
 from discord.ext import commands
-import datetime
+import time
+
 
 class Events(commands.Cog):
     @staticmethod
@@ -42,7 +43,7 @@ class Events(commands.Cog):
                     if len(message_content) >= len(current_server_prefix):
                         bot_prefix = await client.get_prefix(message)
                         default_prefix = bot_prefix + 'setprefix'
-                        if message.content[0:len(current_server_prefix)].lower() == current_server_prefix or message.content == default_prefix or message.content == (bot_prefix + 'checkprefix'):
+                        if message.content[0:len(current_server_prefix)].lower() == current_server_prefix.lower() or message.content == default_prefix or message.content == (bot_prefix + 'checkprefix'):
                             message.content = message.content.replace(current_server_prefix, await client.get_prefix(message))
                             if await ex.check_if_bot_banned(message_sender.id):
                                 if ex.check_message_is_command(message):
@@ -63,6 +64,12 @@ class Events(commands.Cog):
     async def on_ready():
         app = await client.application_info()
         log.console(f'{app.name} is online')
+        # Create Cache
+        # It is fine to create cache in on_ready because the cache is correlated with the DB
+        # and is constantly updated.
+        past_time = time.time()
+        await ex.create_cache()
+        log.console(f"Cache Created in {await ex.get_cooldown_time(time.time() - past_time)}.")
 
     @staticmethod
     @client.event
@@ -146,6 +153,7 @@ class Events(commands.Cog):
             user_id = payload.user_id
             emoji = payload.emoji
             channel_id = payload.channel_id
+            guild_id = payload.guild_id
 
             async def get_msg_and_image():
                 """Gets the message ID if it matches with the reaction."""
@@ -154,7 +162,7 @@ class Events(commands.Cog):
                         channel = await ex.client.fetch_channel(dead_image_channel_id)
                         msg = await channel.fetch_message(message_id)
                         for record in await ex.get_dead_links():
-                            image_link = record[0]
+                            image_link = await ex.get_google_drive_link(record[0])
                             msg_id = record[1]
                             idol_id = record[2]
                             if message_id == msg_id:
@@ -178,6 +186,35 @@ class Events(commands.Cog):
                     if link is not None:
                         await ex.delete_dead_link(link, idol_id)
                         await msg.delete()
+
         except Exception as e:
             log.console(e)
+
+    @staticmethod
+    @client.event
+    async def on_member_update(member_before, member_after):
+        if not member_before.bot:
+            before_roles = member_before.roles
+            after_roles = member_after.roles
+            added_roles = (list(set(after_roles) - set(before_roles)))
+            removed_roles = (list(set(before_roles) - set(after_roles)))
+            # if the user received the patron or super patron role, update cache
+            if len(added_roles) != 0:
+                for role in added_roles:
+                    if role.id == patreon_super_role_id:
+                        ex.cache.patrons[member_after.id] = True
+                    if role.id == patreon_role_id:
+                        ex.cache.patrons[member_after.id] = False
+            # if the user was removed from patron or super patron role, update cache
+            after_role_ids = [after_role.id for after_role in after_roles]
+            if len(removed_roles) != 0:
+                # only update if there were removed roles
+                if patreon_super_role_id in after_role_ids:
+                    ex.cache.patrons[member_after.id] = True
+                elif patreon_role_id in after_role_ids:
+                    ex.cache.patrons[member_after.id] = False
+                else:
+                    ex.cache.patrons.pop(member_after.id, None)
+
+
 

@@ -1,16 +1,19 @@
 import discord
 from discord.ext import commands, tasks
-from module import logger as log
+from module import logger as log, events
 import random
 from module import keys
 from Utility import resources as ex
 import asyncio
 import time
+import typing
+
 client = keys.client
 patron_message = f"""
-**Non Patrons can only send {keys.idol_post_send_limit} photos a day maximum. 
-Please become a patron for as little as $1 per month in order to send unlimited photos.
-Please support <@{keys.bot_id}>'s development at {keys.patreon_link}.**"""
+As of September 23rd, non-Patrons can only send {keys.idol_post_send_limit} photos a day maximum, as the current host can not reliably handle additional traffic.
+You may become a patron for as little as $1 per month in order to send unlimited photos; every Patron contributes to upgrading and maintaining the host.
+Please support <@{keys.bot_id}>'s development at {keys.patreon_link}.
+Thank You."""
 
 
 def check_reset_limits():
@@ -57,9 +60,14 @@ class GroupMembers(commands.Cog):
                                 await asyncio.sleep(1)
                         if ex.check_message_not_empty(message):
                             random_member = False
-                            server_prefix = await ex.get_server_prefix_by_context(message)
-                            if message_content[0:len(server_prefix)] == server_prefix and message_content != f"{server_prefix}null":
-                                message_content = message_content[len(server_prefix):len(message_content)]
+                            # since this is a listener, the prefix is put back to the default
+                            # (from the original on_message)
+                            # and we do not need to worry about the user's server prefix for idol photos
+                            # we just need to make sure it has the bot's default prefix
+                            # however this means if a user changes the prefix and uses the bot's default prefix
+                            # it will still process idol photos, but not regular commands.
+                            if message_content[0:len(keys.bot_prefix)] == keys.bot_prefix and message_content.lower() != f"{keys.bot_prefix}null":
+                                message_content = message_content[len(keys.bot_prefix):len(message_content)]
                                 member_ids = await ex.get_id_where_member_matches_name(message_content)
                                 group_ids = await ex.get_id_where_group_matches_name(message_content)
                                 photo_msg = None
@@ -68,6 +76,8 @@ class GroupMembers(commands.Cog):
                                     if not await ex.check_if_bot_banned(message_sender.id):
                                         async with message_channel.typing():
                                             if not await check_user_limit(message_sender, message_channel):
+                                                if not await events.Events.check_maintenance(message):
+                                                    return await ex.send_maintenance_message(message_channel)
                                                 photo_msg, api_url = await ex.idol_post(message_channel, random_member, user_id=message_sender.id)
                                                 posted = True
                                 elif len(group_ids) != 0:
@@ -76,6 +86,8 @@ class GroupMembers(commands.Cog):
                                     if not await ex.check_if_bot_banned(message_sender.id):
                                         async with message_channel.typing():
                                             if not await check_user_limit(message_sender, message_channel):
+                                                if not await events.Events.check_maintenance(message):
+                                                    return await ex.send_maintenance_message(message_channel)
                                                 photo_msg, api_url = await ex.idol_post(message_channel, random_member, user_id=message_sender.id)
                                                 posted = True
                                 else:
@@ -85,6 +97,8 @@ class GroupMembers(commands.Cog):
                                         if not await ex.check_if_bot_banned(message_sender.id):
                                             async with message_channel.typing():
                                                 if not await check_user_limit(message_sender, message_channel):
+                                                    if not await events.Events.check_maintenance(message):
+                                                        return await ex.send_maintenance_message(message_channel)
                                                     photo_msg, api_url = await ex.idol_post(message_channel, random_member, user_id=message_sender.id)
                                                     posted = True
                                 if posted:
@@ -93,8 +107,6 @@ class GroupMembers(commands.Cog):
                                     add_user_limit(message_sender)
                                     if api_url is not None:
                                         await ex.check_idol_post_reactions(photo_msg, message, random_member, api_url)
-                            else:
-                                pass
                     except Exception as e:
                         pass
 
@@ -151,8 +163,8 @@ class GroupMembers(commands.Cog):
                 while photo_msg is None:
                     photo_msg, api_url, idol_id = await get_post()
             if api_url is not None:
-                await ex.check_idol_post_reactions(photo_msg, ctx.message, idol_id, api_url)
                 add_user_limit(ctx.author)
+                await ex.check_idol_post_reactions(photo_msg, ctx.message, idol_id, api_url)
 
     @commands.command()
     async def countgroup(self, ctx, *, group_name):
@@ -184,14 +196,14 @@ class GroupMembers(commands.Cog):
             await ctx.send(f"> **There are {photo_count} images for {full_name} ({stage_name}).**")
 
     @commands.command(aliases=['fullname'])
-    async def fullnames(self, ctx, page_number: int = 1):
-        """Lists the full names of idols the bot has photos of [Format: %fullnames]"""
-        await ex.send_names(ctx, "fullname", page_number)
+    async def fullnames(self, ctx, *, page_number_or_group: typing.Union[int, str] = 1):
+        """Lists the full names of idols the bot has photos of [Format: %fullnames (page number/group name)]"""
+        await ex.process_names(ctx, page_number_or_group, "fullname")
 
     @commands.command(aliases=['member'])
-    async def members(self, ctx, page_number: int = 1):
-        """Lists the names of idols the bot has photos of [Format: %members]"""
-        await ex.send_names(ctx, "members", page_number)
+    async def members(self, ctx, *, page_number_or_group: typing.Union[int, str] = 1):
+        """Lists the names of idols the bot has photos of [Format: %members (page number/group name)]"""
+        await ex.process_names(ctx, page_number_or_group, "members")
 
     @commands.command()
     async def groups(self, ctx):

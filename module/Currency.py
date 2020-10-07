@@ -8,6 +8,10 @@ from Utility import resources as ex
 
 
 class Currency(commands.Cog):
+    """
+    Will be rewritten from scratch
+    """
+
     def __init__(self):
         self.counter2 = -1
         self.counter = 0
@@ -168,6 +172,7 @@ class Currency(commands.Cog):
             user_balance = await ex.get_balance(user_id)
             user_level = await ex.get_level(user_id, command.lower())
             money_needed_to_level = await ex.get_xp(user_level, command.lower())
+
             async def not_enough_money():
                 embed = await ex.create_embed(title="Not Enough Money!", title_desc=f"<@{user_id}> does not have **{money_needed_to_level:,}** dollars in order to level up {command}!")
                 await ctx.send(embed=embed)

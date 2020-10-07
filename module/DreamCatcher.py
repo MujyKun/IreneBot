@@ -49,7 +49,7 @@ class DreamCatcher(commands.Cog):
     @commands.has_guild_permissions(manage_messages=True)
     async def dcnotify(self, ctx, role: discord.Role = None):
         """Mention a role when there is a new DC post.
-        [Format: %notify @role]"""
+        [Format: %dcnotify @role]"""
         channel_id = ctx.channel.id
         counter = await ex.get_dc_channel_exists(channel_id)
         server_prefix = await ex.get_server_prefix_by_context(ctx)
@@ -149,10 +149,6 @@ class DcApp:
                     page_html = await r.text()
                     page_soup = soup(page_html, "html.parser")
                     username = (page_soup.find("div", {"class": "card-name"})).text
-                    status_message = page_soup.find("div", {"class": "card-text"}).text
-                    # Getting rid of unnecessary spaces in the status message
-                    status_message = status_message.replace('                        ', '')
-                    status_message = status_message.replace('                    ', '')
                     if username in self.list:
                         image_url = (page_soup.findAll("div", {"class": "imgSize width"}))
                         image_links = await ex.download_dc_photos(image_url)
@@ -172,6 +168,12 @@ class DcApp:
                         dc_photos_embed = await ex.get_embed(image_links, member_name)
                         if not repost:
                             await ex.add_post_to_db(image_links, member_id, member_name, dc_number, post_url)
+                        status_message = page_soup.find("div", {"class": "card-text"}).text
+                        # Getting rid of unnecessary spaces in the status message
+                        status_message = status_message.replace('                        ', '')
+                        status_message = status_message.replace('                    ', '')
+                        # translate before iterating the channels.
+                        translated_message = await ex.translate(status_message, 'ko', 'en')
                         for channel_id in channels:
                             try:
                                 role_id = channels.get(channel_id)
@@ -179,7 +181,7 @@ class DcApp:
                                 # This part is repeated due to closed file IO error.
                                 dc_videos = ex.get_videos(video_list)
                                 await ex.send_new_post(channel_id, role_id, channel, member_name, status_message,
-                                                       post_url)
+                                                       post_url, translated_message)
                                 await ex.send_content(channel, dc_photos_embed, dc_videos)
                                 if repost:
                                     await channel.send(f"> **Requested a repost from the server.**")

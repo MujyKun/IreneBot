@@ -2,6 +2,7 @@ import asyncpg
 from pypapago import Translator
 from discord.ext import commands
 import dbl
+import discord
 import discordboats
 from datetime import datetime
 import os
@@ -22,8 +23,9 @@ load_dotenv()  # Adds .env to memory
 client_token = os.getenv("LIVE_BOT_TOKEN")
 test_client_token = os.getenv("TEST_BOT_TOKEN")
 
-bot_id = int(os.getenv("BOT_ID"))
-owner_id = int(os.getenv("OWNER_ID"))
+bot_name = None  # this is set in the on_ready event
+bot_id = make_int(os.getenv("BOT_ID"))
+owner_id = make_int(os.getenv("OWNER_ID"))
 mods_list_split = (os.getenv("MODS_LIST")).split(',')
 mods_list = []
 for mod in mods_list_split:
@@ -55,7 +57,10 @@ interaction_list = [
 ]
 
 # client = commands.Bot(command_prefix=bot_prefix, case_insensitive=True, owner_id=owner_id)
-client = commands.AutoShardedBot(command_prefix=bot_prefix, case_insensitive=True, owner_id=owner_id)
+intents = discord.Intents.default()
+intents.members = True  # turn on privileged members intent
+intents.presences = True  # turn on presences intent
+client = commands.AutoShardedBot(command_prefix=bot_prefix, case_insensitive=True, owner_id=owner_id, intents=intents)
 
 # Reactions/Emotes
 

@@ -152,3 +152,5 @@ class BlackJack(commands.Cog):
         embed = discord.Embed(title="BlackJack Rules", description=msg)
         embed = await ex.set_embed_author_and_footer(embed, f"{server_prefix}help BlackJack for the available commands.")
         await ctx.send(embed=embed)
+
+

@@ -26,6 +26,13 @@ class BotMod(commands.Cog):
 
     @commands.command()
     @commands.check(ex.check_if_mod)
+    async def maintenance(self, ctx):
+        """Enable/Disable Maintenance Mode. [Format: %maintenance]"""
+        ex.cache.maintenance_mode = not ex.cache.maintenance_mode
+        return await ctx.send(f"> **Maintenance mode is set to {ex.cache.maintenance_mode}.**")
+
+    @commands.command()
+    @commands.check(ex.check_if_mod)
     async def botwarn(self, ctx, user: discord.User, *, reason=None):
         """Warns a user from Irene's DMs [Format: %botwarn (user id) <reason>]"""
         message = f"""
@@ -113,10 +120,9 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
     @commands.check(ex.check_if_mod)
     async def botban(self, ctx, *, user: discord.User):
         """Bans a user from Irene. [Format: %botban (user id)]"""
-        user_id = user.id
-        if not ex.check_if_mod(user_id, 1):
-            await ex.ban_user_from_bot(user_id)
-            await ctx.send(f"> **<@{user_id}> has been banned from using Irene.**")
+        if not ex.check_if_mod(user.id, 1):
+            await ex.ban_user_from_bot(user.id)
+            await ctx.send(f"> **<@{user.id}> has been banned from using Irene.**")
         else:
             await ctx.send(f"> **<@{ctx.author.id}>, you cannot ban a bot mod.**")
 
@@ -127,7 +133,6 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
         user_id = user.id
         await ex.unban_user_from_bot(user_id)
         await ctx.send(f"> **If the user was banned, they are now unbanned.**")
-
 
     @commands.command()
     @commands.check(ex.check_if_mod)

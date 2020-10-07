@@ -1,5 +1,6 @@
 from module import keys, logger as log, cache
 from discord.ext import tasks
+import datetime
 import discord
 import random
 import asyncio
@@ -30,7 +31,6 @@ class Utility:
         auth.set_access_token(keys.ACCESS_KEY, keys.ACCESS_SECRET)
         self.api = tweepy.API(auth)
 
-
     ##################
     # ## DATABASE ## #
     ##################
@@ -42,15 +42,13 @@ class Utility:
                 self.conn = await self.get_db_connection()
                 # Delete all active blackjack games
                 await self.delete_all_games()
-                # Reset current status for command stats
-                await self.clear_current_session()
             except Exception as e:
                 log.console(e)
             self.set_db_connection.stop()
 
     @tasks.loop(seconds=0, minutes=1, reconnect=True)
     async def show_irene_alive(self):
-        """Looped every minute to send a connection to localhost:5123 to show Irene is working well."""
+        """Looped every minute to send a connection to localhost:5123 to show bot is working well."""
         source_link = "http://127.0.0.1:5123"
         async with self.session.get(source_link) as resp:
             pass
@@ -71,17 +69,85 @@ class Utility:
     ###############
     # ## CACHE ## #
     ###############
+    async def process_cache_time(self, method, name):
+        """Process the cache time."""
+        past_time = time.time()
+        result = await method()
+        if result is None or result is True:
+            log.console(f"Cache for {name} Created in {await self.get_cooldown_time(time.time() - past_time)}.")
+        return result
+
     async def create_cache(self):
         """Create the general cache on startup"""
-        await self.update_dc_channels()
-        await self.update_user_notifications()
-        await self.update_patreons()
-        await self.update_mod_mail()
-        await self.update_bot_bans()
-        await self.update_logging_channels()
-        await self.update_server_prefixes()
-        # updating group cache with a loop
-        # await self.update_groups()
+        past_time = time.time()
+        await self.process_cache_time(self.update_dc_channels, "DCAPP Channels")
+        await self.process_cache_time(self.update_user_notifications, "User Notifications")
+        # after intents was pushed in place, d.py cache loaded a lot slower and patrons are not added properly.
+        # therefore it must be looped instead.
+        # await self.process_cache_time(self.update_patreons, "Patrons")
+        await self.process_cache_time(self.update_mod_mail, "ModMail")
+        await self.process_cache_time(self.update_bot_bans, "Bot Bans")
+        await self.process_cache_time(self.update_logging_channels, "Logged Channels")
+        await self.process_cache_time(self.update_server_prefixes, "Server Prefixes")
+        await self.process_cache_time(self.update_welcome_message_cache, "Welcome Messages")
+        await self.process_cache_time(self.update_temp_channels, "Temp Channels")
+        await self.process_cache_time(self.update_n_word_counter, "NWord Counter")
+        await self.process_cache_time(self.update_command_counter, "Command Counter")
+        log.console(f"Cache Completely Created in {await self.get_cooldown_time(time.time() - past_time)}.")
+
+    async def update_command_counter(self):
+        """Updates Cache for command counter and sessions"""
+        self.cache.command_counter = {}
+        session_id = await self.get_session_id()
+        all_commands = await self.conn.fetch("SELECT commandname, count FROM stats.commands WHERE sessionid = $1", session_id)
+        for command in all_commands:
+            self.cache.command_counter[command[0]] = command[1]
+        self.cache.current_session = self.first_result(
+            await self.conn.fetchrow("SELECT session FROM stats.sessions WHERE date = $1", datetime.date.today()))
+
+    async def process_session(self):
+        """Sets the new session id, total used, and time format for distinguishing days."""
+        current_time_format = datetime.date.today()
+        if self.cache.session_id is None:
+            if self.cache.total_used is None:
+                self.cache.total_used = (self.first_result(await self.conn.fetchrow("SELECT totalused FROM stats.sessions ORDER BY totalused DESC"))) or 0
+            try:
+                await self.conn.execute("INSERT INTO stats.sessions(totalused, session, date) VALUES ($1, $2, $3)", self.cache.total_used, 0, current_time_format)
+            except Exception as e:
+                # session for today already exists.
+                pass
+            self.cache.session_id = self.first_result(await self.conn.fetchrow("SELECT sessionid FROM stats.sessions WHERE date = $1", current_time_format))
+            self.cache.session_time_format = current_time_format
+        else:
+            # check that the date is correct, and if not, call get_session_id to get the new session id.
+            if current_time_format != self.cache.session_time_format:
+                self.cache.session_id = self.get_session_id()
+
+    async def get_session_id(self):
+        """Force get the session id, this will also set total used and the session id."""
+        await self.process_session()
+        return self.cache.session_id
+
+    async def update_n_word_counter(self):
+        """Update NWord Cache"""
+        self.cache.n_word_counter = {}
+        user_info = await self.conn.fetch("SELECT userid, nword FROM general.nword")
+        for user in user_info:
+            self.cache.n_word_counter[user[0]] = user[1]
+
+    async def update_temp_channels(self):
+        """Create the cache for temp channels."""
+        self.cache.temp_channels = {}
+        channels = await self.get_temp_channels()
+        for channel in channels:
+            self.cache.temp_channels[channel[0]] = channel[1]
+
+    async def update_welcome_message_cache(self):
+        """Create the cache for welcome messages."""
+        self.cache.welcome_messages = {}
+        info = await self.conn.fetch("SELECT channelid, serverid, message, enabled FROM general.welcome")
+        for server in info:
+            self.cache.welcome_messages[server[1]] = {"channel_id": server[0], "message": server[2], "enabled": server[3]}
 
     async def update_server_prefixes(self):
         """Create the cache for server prefixes."""
@@ -107,6 +173,7 @@ class Utility:
 
     async def update_bot_bans(self):
         """Create the cache for banned users from the bot."""
+        self.cache.bot_banned = []
         banned_users = await self.conn.fetch("SELECT userid FROM general.blacklisted")
         for user in banned_users:
             user_id = user[0]
@@ -114,6 +181,7 @@ class Utility:
 
     async def update_mod_mail(self):
         """Create the cache for existing mod mail"""
+        self.cache.mod_mail = {}
         mod_mail = await self.conn.fetch("SELECT userid, channelid FROM general.modmail")
         for mail in mod_mail:
             user_id = mail[0]
@@ -121,24 +189,27 @@ class Utility:
             self.cache.mod_mail[user_id] = [channel_id]
 
     async def update_patreons(self):
-        """Create the cache for Patrons"""
-        # reset cache of patrons
-        self.cache.patrons = {}
-        permanent_patrons = await self.get_patreon_users()
-        normal_patrons = await self.get_patreon_role_members(super=False)
-        super_patrons = await self.get_patreon_role_members(super=True)
-        for patron in normal_patrons:
-            self.cache.patrons[patron.id] = False
-        # super patrons must go after normal patrons to have a proper boolean set because
-        # super patrons have both roles.
-        for patron in super_patrons:
-            self.cache.patrons[patron.id] = True
-        for patron in permanent_patrons:
-            self.cache.patrons[patron[0]] = True
+        """Create the cache for Patrons."""
+        try:
+            self.cache.patrons = {}
+            permanent_patrons = await self.get_patreon_users()
+            normal_patrons = await self.get_patreon_role_members(super=False)
+            super_patrons = await self.get_patreon_role_members(super=True)
+            for patron in normal_patrons:
+                self.cache.patrons[patron.id] = False
+            # super patrons must go after normal patrons to have a proper boolean set because
+            # super patrons have both roles.
+            for patron in super_patrons:
+                self.cache.patrons[patron.id] = True
+            for patron in permanent_patrons:
+                self.cache.patrons[patron[0]] = True
+            return True
+        except Exception as e:
+            return False
 
     async def update_user_notifications(self):
         """Set the cache for user phrases"""
-        self.cache.user_notifications = []  # reset
+        self.cache.user_notifications = []
         notifications = await self.conn.fetch("SELECT guildid,userid,phrase FROM general.notifications")
         for notification in notifications:
             guild_id = notification[0]
@@ -148,7 +219,7 @@ class Utility:
 
     async def update_dc_channels(self):
         """Set cache for dc channels"""
-        self.cache.user_notifications = {}  # reset
+        self.cache.user_notifications = {}
         channels = await self.get_dc_channels()
         for channel in channels:
             self.cache.dc_app_channels[channel[0]] = channel[1]
@@ -156,7 +227,7 @@ class Utility:
     async def update_groups(self):
         """Set cache for group photo count"""
         past_time = time.time()
-        self.cache.group_photos = {}  # reset
+        self.cache.group_photos = {}
         all_group_counts = await self.conn.fetch("SELECT g.groupid, g.groupname, COUNT(f.link) FROM groupmembers.groups g, groupmembers.member m, groupmembers.idoltogroup l, groupmembers.imagelinks f WHERE m.id = l.idolid AND g.groupid = l.groupid AND f.memberid = m.id GROUP BY g.groupid ORDER BY g.groupname")
         for group in all_group_counts:
             self.cache.group_photos[group[0]] = group[2]
@@ -168,6 +239,14 @@ class Utility:
         while self.conn is None:
             await asyncio.sleep(1)
         await self.update_groups()
+
+    @tasks.loop(seconds=0, minutes=0, hours=0, reconnect=True)
+    async def update_patron_cache(self):
+        """Looped until patron cache is loaded
+        This was added due to intents slowing d.py cache loading rate.
+        """
+        if await self.process_cache_time(self.update_patreons, "Patrons"):
+            self.update_patron_cache.stop()
 
     ##################
     # ## CURRENCY ## #
@@ -233,6 +312,50 @@ class Utility:
     #######################
     # ## MISCELLANEOUS ## #
     #######################
+    async def send_maintenance_message(self, channel):
+        try:
+            await channel.send(
+                f"> **A maintenance is currently in progress. Join the support server for more information. <{keys.bot_support_server_link}>**")
+        except Exception as e:
+            pass
+
+    async def process_commands(self, message):
+        message_sender = message.author
+        message_content = message.clean_content
+        message_channel = message.channel
+        server_prefix = await self.get_server_prefix_by_context(message)
+        if len(message_content) >= len(server_prefix):
+            if message.content[0:len(server_prefix)].lower() == server_prefix.lower() or message.content == (
+                    keys.bot_prefix + 'setprefix') or message.content == (keys.bot_prefix + 'checkprefix'):
+                # only replace the prefix portion back to the default prefix
+                msg_without_prefix = message.content[len(server_prefix):len(message.content)]
+                message.content = keys.bot_prefix + msg_without_prefix
+                # if a user is banned from the bot.
+                if await self.check_if_bot_banned(message_sender.id):
+                    if self.check_message_is_command(message):
+                        await self.send_ban_message(message_channel)
+                else:
+                    await self.client.process_commands(message)
+
+    async def check_for_nword(self, message):
+        """Processes new messages that contains the N word."""
+        message_sender = message.author
+        if not message_sender.bot:
+            message_content = message.clean_content
+            if self.check_message_not_empty(message):
+                # check if the message belongs to the bot
+                    if message_content[0] != '%':
+                        if self.check_nword(message_content):
+                            author_id = message_sender.id
+                            current_amount = self.cache.n_word_counter.get(author_id)
+                            if current_amount is not None:
+                                await self.conn.execute("UPDATE general.nword SET nword = $1 WHERE userid = $2::bigint",
+                                                        current_amount + 1, author_id)
+                                self.cache.n_word_counter[author_id] = current_amount + 1
+                            else:
+                                await self.conn.execute("INSERT INTO general.nword VALUES ($1,$2)", author_id, 1)
+                                self.cache.n_word_counter[author_id] = 1
+
     async def get_dm_channel(self, user_id=None, user=None):
         try:
             if user_id is not None:
@@ -250,15 +373,18 @@ class Utility:
             # log.console(e)
             return None
 
+    async def check_if_temp_channel(self, channel_id):
+        """Check if a channel is a temp channel"""
+        return self.cache.temp_channels.get(channel_id) is not None
+
     async def get_temp_channels(self):
+        """Get all temporary channels in the DB."""
         return await self.conn.fetch("SELECT chanID, delay FROM currency.TempChannels")
 
-    async def check_if_temp_channel(self, channel_id):
-        for channel in await self.get_temp_channels():
-            chan_id = channel[0]
-            if channel_id == chan_id:
-                return True
-        return False
+    async def delete_temp_messages(self, message):
+        """Delete messages that are temp channels"""
+        if await self.check_if_temp_channel(message.channel.id):
+            await message.delete(delay=self.cache.temp_channels.get(message.channel.id))
 
     async def get_disabled_server_interactions(self, server_id):
         """Get a server's disabled interactions."""
@@ -325,34 +451,27 @@ class Utility:
             log.console(e)
             return await ctx.send(f"> **{ctx.author.display_name}, there are no links saved for this interaction yet.**")
 
-    async def add_command_count(self):
-        counter = self.first_result(await self.conn.fetchrow("SELECT COUNT(*) FROM stats.commands"))
-        if counter == 1:
-            current_stats = await self.get_command_count()
-            total_used = current_stats[0] + 1
-            current_session = current_stats[1] + 1
-            await self.conn.execute("UPDATE stats.commands SET totalused = $1, currentsession = $2", total_used, current_session)
-        elif counter == 0:
-            await self.conn.execute("INSERT INTO stats.commands(totalused, currentsession) VALUES ($1,$2)", 1, 1)
+    async def add_command_count(self, command_name):
+        """Add 1 to the specific command count."""
+        session_id = await self.get_session_id()
+        command_count = self.cache.command_counter.get(command_name)
+        if command_count is None:
+            await self.conn.execute("INSERT INTO stats.commands(sessionid, commandname, count) VALUES($1, $2, $3)", session_id, command_name, 1)
+            self.cache.command_counter[command_name] = 1
         else:
-            log.console("ERROR - stats.commands should not have more than row.")
+            await self.conn.execute("UPDATE stats.commands SET count = $1 WHERE commandname = $2 AND sessionid = $3", command_count + 1, command_name, session_id)
+            self.cache.command_counter[command_name] += 1
 
-    async def get_command_count(self):
-        return await self.conn.fetchrow("SELECT totalused, currentsession FROM stats.commands")
-
-    async def clear_current_session(self):
-        await self.conn.execute("UPDATE stats.commands SET currentsession = $1", 0)
-
-    def get_all_command_names(self):
-        """Retrieves a list with all the client's command names."""
-        command_list = []
-        for command in self.client.all_commands:
-            command_list.append(command)
-        return command_list
+    async def add_session_count(self):
+        """Adds one to the current session count for commands used and for the total used."""
+        session_id = await self.get_session_id()
+        self.cache.current_session += 1
+        self.cache.total_used += 1
+        await self.conn.execute("UPDATE stats.sessions SET session = $1, totalused = $2 WHERE sessionid = $3", self.cache.current_session, self.cache.total_used, session_id)
 
     def check_message_is_command(self, message):
         """Check if a message is a command."""
-        for command_name in self.get_all_command_names():
+        for command_name in self.client.all_commands:
             if command_name in message.content:
                 if len(command_name) != 1:
                     return True
@@ -362,7 +481,7 @@ class Utility:
     async def send_ban_message(channel):
         """A message to send for a user that is banned from the bot."""
         await channel.send(
-            f"> **You are banned from using Irene. Join <{keys.bot_support_server_link}>**")
+            f"> **You are banned from using {keys.bot}. Join <{keys.bot_support_server_link}>**")
 
     async def ban_user_from_bot(self, user_id):
         """Bans a user from using the bot."""
@@ -1089,8 +1208,12 @@ class Utility:
 
     async def get_random_idol_id(self):
         """Get a random idol."""
+        photo_count = 0
         member_ids = await self.get_all_members()
-        return (random.choice(member_ids))[0]
+        while photo_count == 0:  # confirm the idol has a photo before sending to API.
+            member_id = random.choice(member_ids)[0]
+            photo_count = await self.get_idol_count(member_id)
+        return member_id
 
     async def get_all_members(self):
         """Get all idols."""
@@ -1134,7 +1257,7 @@ class Utility:
     async def remove_idol_from_group(self, member_id: int, group_id: int):
         return await self.conn.execute("DELETE FROM groupmembers.idoltogroup WHERE idolid = $1 AND groupid = $2", member_id, group_id)
 
-    async def send_names(self, ctx, mode, user_page_number):
+    async def send_names(self, ctx, mode, user_page_number=1, group_ids=None):
         """Send the names of all idols in an embed with many pages."""
         async def check_mode(embed_temp):
             """Check if it is grabbing their full names or stage names."""
@@ -1145,7 +1268,6 @@ class Utility:
             return embed_temp
         is_mod = self.check_if_mod(ctx)
         embed_lists = []
-        all_members = await self.get_all_members()
         all_groups = await self.get_all_groups()
         page_number = 1
         embed = discord.Embed(title=f"Idol List Page {page_number}", color=0xffb6c1)
@@ -1155,38 +1277,41 @@ class Utility:
             group_id = group[0]
             group_name = group[1]
             if group_name != "NULL" or is_mod:
-                member_in_group_ids = await self.get_members_in_group(group_id=group_id)
-                for member_in_group_id in member_in_group_ids:
-                    member = await self.get_member(member_in_group_id)
-                    if mode == "fullname":
-                        member_name = member[1]
-                    else:
-                        member_name = member[2]
+                if group_ids is None or len(group_ids) == 0 or group_id in group_ids:
+                    member_in_group_ids = await self.get_members_in_group(group_id=group_id)
+                    for member_in_group_id in member_in_group_ids:
+                        member = await self.get_member(member_in_group_id)
+                        if mode == "fullname":
+                            member_name = member[1]
+                        else:
+                            member_name = member[2]
+                        if is_mod:
+                            names.append(f"{member_name} ({member[0]}) | ")
+                        else:
+                            names.append(f"{member_name} | ")
+                    final_names = "".join(names)
+                    if len(final_names) == 0:
+                        final_names = "None"
                     if is_mod:
-                        names.append(f"{member_name} ({member[0]}) | ")
+                        embed.insert_field_at(counter, name=f"{group_name} ({group_id})", value=final_names, inline=False)
                     else:
-                        names.append(f"{member_name} | ")
-                final_names = "".join(names)
-                if len(final_names) == 0:
-                    final_names = "None"
-                if is_mod:
-                    embed.insert_field_at(counter, name=f"{group_name} ({group_id})", value=final_names, inline=False)
-                else:
-                    embed.insert_field_at(counter, name=f"{group_name}", value=final_names, inline=False)
-                if counter == 10:
-                    page_number += 1
-                    await check_mode(embed)
-                    embed_lists.append(embed)
-                    embed = discord.Embed(title=f"Idol List Page {page_number}", color=0xffb6c1)
-                    counter = 0
-                counter += 1
+                        embed.insert_field_at(counter, name=f"{group_name}", value=final_names, inline=False)
+                    if counter == 10:
+                        page_number += 1
+                        await check_mode(embed)
+                        embed_lists.append(embed)
+                        embed = discord.Embed(title=f"Idol List Page {page_number}", color=0xffb6c1)
+                        counter = 0
+                    counter += 1
         # if counter did not reach 10, current embed needs to be saved.
         await check_mode(embed)
         embed_lists.append(embed)
         if user_page_number > len(embed_lists) or user_page_number < 1:
             user_page_number = 1
         msg = await ctx.send(embed=embed_lists[user_page_number-1])
-        await self.check_left_or_right_reaction_embed(msg, embed_lists, user_page_number-1)
+        # if embeds list only contains 1 embed, do not paginate.
+        if len(embed_lists) > 1:
+            await self.check_left_or_right_reaction_embed(msg, embed_lists, user_page_number-1)
 
     async def set_embed_with_all_aliases(self, mode):
         """Send the names of all aliases in an embed with many pages."""
@@ -1356,10 +1481,19 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
                 log.console(e)
         # remove any duplicates
         id_list = list(dict.fromkeys(id_list))
+        # print(id_list)
         if mode == 0:
             return id_list
         else:
             return id_list, name
+
+    async def process_names(self, ctx, page_number_or_group, mode):
+        """Structures the input for idol names commands and sends information to transfer the names to the channels."""
+        if type(page_number_or_group) == int:
+            await self.send_names(ctx, mode, page_number_or_group)
+        elif type(page_number_or_group) == str:
+            group_ids, name = await self.get_id_where_group_matches_name(page_number_or_group, mode=1)
+            await self.send_names(ctx, mode, group_ids=group_ids)
 
     async def check_group_and_idol(self, message):
         """Check if a specific idol is being called from a reference to a group. ex: redvelvet irene"""
@@ -1465,13 +1599,21 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
             return msg, api_url
 
         # an image url should exist at this point, and should not equal None.
-        embed = await self.get_idol_post_embed(group_id, member_info, str(api_url), user_id=user_id,
-                                               guild_id=channel.guild.id)
-        embed.set_image(url=api_url)
-        if special_message is None:
-            msg = await channel.send(embed=embed)
-        else:
-            msg = await channel.send(special_message, embed=embed)
+        try:
+            # after host was swapped back to digitalocean,some images were not loading by discord
+            # so a small sleep will be put in place.
+            await asyncio.sleep(0.5)
+            embed = await self.get_idol_post_embed(group_id, member_info, str(api_url), user_id=user_id,
+                                                   guild_id=channel.guild.id)
+            embed.set_image(url=api_url)
+            if special_message is None:
+                msg = await channel.send(embed=embed)
+            else:
+                msg = await channel.send(special_message, embed=embed)
+        except Exception as e:
+            await channel.send(f"> An API issue has occurred. If this is constantly occurring, please join our support server.")
+            log.console(f" {e} - An API issue has occurred. If this is constantly occurring, please join our support server.")
+            return None, None
         return msg, api_url
 
     async def get_idol_post_embed(self, group_id, member_info, photo_link, user_id=None, guild_id=None):
@@ -1495,7 +1637,11 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
         try:
             member_info = await self.get_member(member_id)
             await self.update_member_count(member_id)
-            msg, api_url = await self.get_image_msg(member_id, group_id, channel, member_info, photo_link, user_id=user_id, guild_id=channel.guild.id, api_url=photo_link, special_message=special_message)
+            try:
+                msg, api_url = await self.get_image_msg(member_id, group_id, channel, member_info, photo_link, user_id=user_id, guild_id=channel.guild.id, api_url=photo_link, special_message=special_message)
+            except Exception as e:
+                await channel.send(f"> An error has occurred. If you are in DMs, It is not possible to receive Idol Photos.")
+                return None, None
             return msg, api_url
         except Exception as e:
             log.console(e)
@@ -1517,8 +1663,12 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
         """Add a channel to be logged."""
         if (self.first_result(await self.conn.fetchrow("SELECT COUNT(*) FROM logging.servers WHERE serverid = $1", server_id))) == 0:
             await self.conn.execute("INSERT INTO logging.servers (serverid, channelid, status, sendall) VALUES ($1, $2, $3, $4)", server_id, channel_id, 1, 1)
-            self.cache.list_of_logged_channels.append(channel_id)
-            ((self.cache.logged_channels.get(server_id))['channels']).append(channel_id)
+            server = self.cache.logged_channels.get(server_id)
+            if server is None:
+                self.cache.logged_channels[server_id] = {"send_all": 1, "logging_channel": channel_id, "channels": []}
+            else:
+                self.cache.list_of_logged_channels.append(channel_id)
+                server['channels'].append(channel_id)
         else:
             await self.set_logging_status(server_id, 1)
             current_channel_id = self.first_result(await self.conn.fetchrow("SELECT channelid FROM logging.servers WHERE serverid = $1", server_id))
@@ -1740,14 +1890,13 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
                     log.console(e)
                     pass
 
-    async def send_new_post(self, channel_id, role_id, channel, member_name, status_message, post_url):
+    async def send_new_post(self, channel_id, role_id, channel, member_name, status_message, post_url, translated_message):
         """Send the status information to a channel."""
         try:
             if role_id is None:
                 role_mention = ""
             else:
                 role_mention = f"<@&{role_id}>, "
-            translated_message = await self.translate(status_message, 'ko', 'en')
             if translated_message is not None:
                 if len(translated_message) != 0:
                     translated_message = translated_message['text']
@@ -1904,6 +2053,8 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
     async def get_patreon_role_members(self, super=False):
         """Get the members in the patreon roles."""
         support_guild = self.client.get_guild(int(keys.bot_support_server_id))
+        # if d.py cache has not yet loaded (unlikely, but just incase)
+        # API call will not show role.members
         if not super:
             patreon_role = support_guild.get_role(int(keys.patreon_role_id))
         else:
@@ -1947,6 +2098,34 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
         # Super Patrons also have the normal Patron role.
         if await self.check_if_patreon(ctx.author.id):
             ctx.command.reset_cooldown(ctx)
+
+    ###################
+    # ## MODERATOR ## #
+    ###################
+    async def add_welcome_message_server(self, channel_id, guild_id, message, enabled):
+        """Adds a new welcome message server."""
+        await self.conn.execute(
+            "INSERT INTO general.welcome(channelid, serverid, message, enabled) VALUES($1, $2, $3, $4)", channel_id,
+            guild_id, message, enabled)
+        self.cache.welcome_messages[guild_id] = {"channel_id": channel_id, "message": message, "enabled": enabled}
+
+    async def check_welcome_message_enabled(self, server_id):
+        """Check if a welcome message server is enabled."""
+        return self.cache.welcome_messages[server_id]['enabled'] == 1
+
+    async def update_welcome_message_enabled(self, server_id, enabled):
+        """Update a welcome message server's enabled status"""
+        await self.conn.execute("UPDATE general.welcome SET enabled = $1 WHERE serverid = $2", int(enabled), server_id)
+        self.cache.welcome_messages[server_id]['enabled'] = int(enabled)
+
+    async def update_welcome_message_channel(self, server_id, channel_id):
+        """Update the welcome message channel."""
+        await self.conn.execute("UPDATE general.welcome SET channelid = $1 WHERE serverid = $2", channel_id, server_id)
+        self.cache.welcome_messages[server_id]['channel_id'] = channel_id
+
+    async def update_welcome_message(self, server_id, message):
+        await self.conn.execute("UPDATE general.welcome SET message = $1 WHERE serverid = $2", message, server_id)
+        self.cache.welcome_messages[server_id]['message'] = message
 
 
 resources = Utility()

@@ -1,55 +1,21 @@
-from module.keys import client, trash_emoji, check_emoji, dead_image_channel_id, patreon_super_role_id, patreon_role_id
+from module.keys import client, trash_emoji, check_emoji, dead_image_channel_id, patreon_super_role_id, patreon_role_id, bot_prefix, bot_support_server_link
 from module import logger as log
-import discord
 from Utility import resources as ex
 from discord.ext import commands
-import time
+import discord
+import asyncio
 
 
 class Events(commands.Cog):
     @staticmethod
     async def process_on_message(message):
         try:
-            # fetching temporary channels that have delays for removed messages.
-            temp_channels = await ex.get_temp_channels()
-            message_sender = message.author
-            message_content = message.clean_content
-            message_channel = message.channel
-            try:
-                current_server_prefix = await ex.get_server_prefix(message.guild.id)
-            except Exception as e:
-                current_server_prefix = await client.get_prefix(message)
-            # check if messages are in a temporary channel
-            for temp in temp_channels:
-                chan_id = temp[0]
-                delay = temp[1]
-                if message_channel.id == chan_id:
-                    await message.delete(delay=delay)
-            if ex.check_message_not_empty(message):
-                # check if the message belongs to the bot
-                if message_sender.id != client.user.id:
-                    if message_content[0] != '%':
-                        if ex.check_nword(message_content):
-                            author_id = message_sender.id
-                            # checks how many instances ( should logically only be 0 or 1 )
-                            checker = ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) FROM currency.Counter WHERE UserID = $1::bigint", author_id))
-                            if checker > 0:
-                                current_count = ex.first_result(await ex.conn.fetchrow("SELECT NWord FROM currency.Counter WHERE UserID = $1::bigint", author_id))
-                                current_count += 1
-                                await ex.conn.execute("UPDATE currency.Counter SET NWord = $1 WHERE UserID = $2::bigint", current_count, author_id)
-                            if checker == 0:
-                                await ex.conn.execute("INSERT INTO currency.Counter VALUES ($1,$2)", author_id, 1)
-                if ex.check_message_not_empty(message):
-                    if len(message_content) >= len(current_server_prefix):
-                        bot_prefix = await client.get_prefix(message)
-                        default_prefix = bot_prefix + 'setprefix'
-                        if message.content[0:len(current_server_prefix)].lower() == current_server_prefix.lower() or message.content == default_prefix or message.content == (bot_prefix + 'checkprefix'):
-                            message.content = message.content.replace(current_server_prefix, await client.get_prefix(message))
-                            if await ex.check_if_bot_banned(message_sender.id):
-                                if ex.check_message_is_command(message):
-                                    await ex.send_ban_message(message_channel)
-                            else:
-                                await client.process_commands(message)
+            # delete messages that are in temp channels
+            await ex.delete_temp_messages(message)
+            # check for the n word
+            await ex.check_for_nword(message)
+            # process the commands with their prefixes.
+            await ex.process_commands(message)
         except Exception as e:
             log.console(e)
 
@@ -67,9 +33,7 @@ class Events(commands.Cog):
         # Create Cache
         # It is fine to create cache in on_ready because the cache is correlated with the DB
         # and is constantly updated.
-        past_time = time.time()
         await ex.create_cache()
-        log.console(f"Cache Created in {await ex.get_cooldown_time(time.time() - past_time)}.")
 
     @staticmethod
     @client.event
@@ -92,9 +56,12 @@ class Events(commands.Cog):
     @staticmethod
     @client.event
     async def on_guild_join(guild):
-        if guild.system_channel is not None:
-            await guild.system_channel.send(f">>> Hello!\nMy prefix for this server is set to {await ex.get_server_prefix(guild.id)}.\nIf you have any questions or concerns, you may join the support server ({await ex.get_server_prefix(guild.id)}support).")
-            log.console(f"{guild.name} ({guild.id}) has invited Irene.")
+        try:
+            if guild.system_channel is not None:
+                await guild.system_channel.send(f">>> Hello!\nMy prefix for this server is set to {await ex.get_server_prefix(guild.id)}.\nIf you have any questions or concerns, you may join the support server ({await ex.get_server_prefix(guild.id)}support).")
+        except Exception as e:
+            pass
+        log.console(f"{guild.name} ({guild.id}) has invited Irene.")
 
     @staticmethod
     @client.event
@@ -111,7 +78,7 @@ class Events(commands.Cog):
             # the message has to be edited at least 60 seconds within it's creation.
             if difference.total_seconds() > 60:
                 return
-        await Events.process_on_message(message)
+            await Events.process_on_message(message)
 
     @staticmethod
     @client.event
@@ -129,7 +96,8 @@ class Events(commands.Cog):
     @staticmethod
     @client.event
     async def on_command_completion(ctx):
-        await ex.add_command_count()
+        await ex.add_command_count(ctx.command.name)
+        await ex.add_session_count()
 
     @staticmethod
     @client.event
@@ -215,6 +183,33 @@ class Events(commands.Cog):
                     ex.cache.patrons[member_after.id] = False
                 else:
                     ex.cache.patrons.pop(member_after.id, None)
+
+    @staticmethod
+    @client.event
+    async def on_member_join(member):
+        guild = member.guild
+        server = ex.cache.welcome_messages.get(guild.id)
+        if server is not None:
+            if server.get('enabled'):
+                channel = guild.get_channel(server.get('channel_id'))
+                if channel is not None:
+                    message = server.get("message")
+                    message = message.replace("%user", f"<@{member.id}>")
+                    message = message.replace("%guild_name", guild.name)
+                    await channel.send(message)
+
+    @staticmethod
+    @client.check
+    async def check_maintenance(ctx):
+        """Return true if the user is a mod. If a maintenance is going on, return false for normal users."""
+        try:
+            check = not ex.cache.maintenance_mode or ex.check_if_mod(ctx) or ctx.author.bot
+            if not check:
+                await ex.send_maintenance_message(ctx)
+            return check
+        except Exception as e:
+            log.console(f"{e} - Check Maintenance")
+            return False
 
 
 

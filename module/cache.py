@@ -4,6 +4,23 @@ import time
 
 class Cache(commands.Cog):
     def __init__(self):
+        # maintenance mode
+        self.maintenance_mode = False
+        # current session
+        self.session_id = None
+        # current session commands used
+        self.current_session = 0
+        # total amount of commands used
+        self.total_used = None
+        # time format of current session for comparison
+        self.session_time_format = None
+        """
+        Command Counter
+        {
+        command_name : amount_of_times_used
+        }
+        """
+        self.command_counter = {}
         # Photo Count of groups
         self.group_photos = {}  # { group_id: photo_count }
         # All channels DCAPP updates go to
@@ -43,3 +60,32 @@ class Cache(commands.Cog):
         # just a list of channels that are being logged with no correlation to the servers.
         # this exists to check if a channel is logged much quicker.
         self.list_of_logged_channels = []
+        """
+        Welcome Messages
+        {
+        server_id : {
+            channel_id: channel_id,
+            message: text,
+            enabled: 0 or 1
+            }
+        }
+        """
+        self.welcome_messages = {}
+        """
+        Temp Channels
+        {
+        channel_id : seconds
+        }
+        """
+        self.temp_channels = {}
+        """
+        NWord Counter
+        {
+        user_id : counter
+        }
+        """
+        self.n_word_counter = {}
+
+    def check_maintenance(self):
+        """  """
+        return 0

@@ -20,7 +20,7 @@ class Miscellaneous(commands.Cog):
                     user_id = notification[1]
                     phrase = notification[2]
                     message_split = message_content.lower().split(" ")
-                    if phrase in message_split and guild_id == message_guild_id and message_sender.id != user_id:
+                    if phrase in message_split and guild_id == message_guild_id and message_sender.id != user_id and user_id in [member.id for member in message.channel.members]:
                         dm_channel = await ex.get_dm_channel(user_id)
                         start_loc = (message_content.lower()).find(phrase)
                         end_loc = start_loc + len(phrase)
@@ -46,7 +46,7 @@ class Miscellaneous(commands.Cog):
             if check_exists:
                 raise Exception
             await ex.conn.execute("INSERT INTO general.notifications(guildid,userid,phrase) VALUES($1, $2, $3)", ctx.guild.id, ctx.author.id, phrase.lower())
-            ex.cache.user_notifications.append([ctx.guild_id, ctx.author.id, phrase.lower()])
+            ex.cache.user_notifications.append([ctx.guild.id, ctx.author.id, phrase.lower()])
             await ctx.send(f"> **{ctx.author.display_name}, I added `{phrase}` to your notifications.**")
         except Exception as e:
             log.console(e)
@@ -125,9 +125,6 @@ class Miscellaneous(commands.Cog):
         app_icon_url = app.icon_url
         patreon_url = keys.patreon_link
         bot_uptime = await ex.get_cooldown_time((keys.datetime.now() - keys.startup_time).total_seconds())
-        commands_used = await ex.get_command_count()
-        total_commands = commands_used[0]
-        current_session_commands = commands_used[1]
         bot_server_links = """
 [Top.gg](https://top.gg/bot/520369375325454371)
 [Discord Bots](https://discord.bots.gg/bots/520369375325454371)
@@ -144,11 +141,12 @@ class Miscellaneous(commands.Cog):
         embed.add_field(name=f"Servers/Channels Logged", value=f"{len(await ex.get_servers_logged())}/{len(await ex.get_channels_logged())} Logged", inline=True)
         embed.add_field(name=f"DC Updates Sent to", value=f"{len(await ex.get_dc_channels())} Channels", inline=True)
         embed.add_field(name=f"Bot Uptime", value=bot_uptime, inline=True)
-        embed.add_field(name=f"Total Commands Used", value=f"{total_commands} Commands", inline=True)
-        embed.add_field(name=f"This Session", value=f"{current_session_commands} Commands", inline=True)
+        embed.add_field(name=f"Total Commands Used", value=f"{ex.cache.total_used} Commands", inline=True)
+        embed.add_field(name=f"This Session", value=f"{ex.cache.current_session} Commands", inline=True)
         embed.add_field(name=f"Playing Music", value=f"{len(client.voice_clients)} Voice Clients", inline=True)
         embed.add_field(name=f"Ping", value=f"{ex.get_ping()} ms", inline=True)
-        embed.add_field(name=f"Bot Owner", value=f"<@{app_owner.id}>", inline=False)
+        embed.add_field(name=f"Shards", value=f"{client.shard_count}", inline=True)
+        embed.add_field(name=f"Bot Owner", value=f"<@{app_owner.id}>", inline=True)
         if len(mods) != 0:
             embed.add_field(name=f"Bot Mods", value=mods, inline=True)
         embed.add_field(name=f"Support Server", value=f"[Invite to Server]({keys.bot_support_server_link})", inline=False)
@@ -234,29 +232,29 @@ class Miscellaneous(commands.Cog):
             await ctx.send("Could not fetch channel to suggest to.")
 
     @commands.command()
-    async def nword(self, ctx, user: discord.Member = discord.Member):
+    async def nword(self, ctx, user: discord.Member = None):
         """Checks how many times a user has said the N Word [Format: %nword @user]"""
-        if user == discord.Member:
+        if user is None:
             user = ctx.author
-        checker = ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) FROM currency.Counter WHERE UserID = $1", user.id))
-        if checker > 0:
-            current_count = ex.first_result(await ex.conn.fetchrow("SELECT NWord FROM currency.Counter WHERE UserID = $1", user.id))
-            await ctx.send(f"> **<@{user.id}> has said the N-Word {current_count} time(s)!**")
-        if checker == 0:
-            await ctx.send(f"> **<@{user.id}> has not said the N-Word a single time!**")
+        current_amount = ex.cache.n_word_counter.get(user.id)
+        if current_amount is None:
+            return await ctx.send(f"> **<@{user.id}> has not said the N-Word a single time!**")
+        else:
+            await ctx.send(f"> **<@{user.id}> has said the N-Word {current_amount} time(s)!**")
 
     @commands.is_owner()
     @commands.command()
-    async def clearnword(self, ctx, user: discord.Member = "@user"):
+    async def clearnword(self, ctx, user: discord.Member = None):
         """Clear A User's Nword Counter [Format: %clearnword @user]"""
-        if user == "@user":
+        if user is None:
             await ctx.send("> **Please @ a user**")
-        if user != "@user":
-            checker = ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) FROM currency.Counter WHERE UserID = $1", user.id))
-            if checker > 0:
-                await ex.conn.execute("DELETE FROM currency.Counter where UserID = $1", user.id)
+        else:
+            current_amount = ex.cache.n_word_counter.get(user.id)
+            if current_amount is not None:
+                await ex.conn.execute("DELETE FROM general.nword where userid = $1", user.id)
+                ex.cache.n_word_counter[user.id] = None
                 await ctx.send("**> Cleared.**")
-            if checker == 0:
+            else:
                 await ctx.send(f"> **<@{user.id}> has not said the N-Word a single time!**")
 
     @commands.command(aliases=["nwl"])
@@ -264,16 +262,21 @@ class Miscellaneous(commands.Cog):
         """Shows leaderboards for how many times the nword has been said. [Format: %nwl]"""
         embed = discord.Embed(title=f"NWord Leaderboard", color=0xffb6c1)
         embed.set_author(name="Irene", url=keys.bot_website, icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
-        embed.set_footer(text="Type %nword (user) to view their individual stats.", icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
-        all_members = await ex.conn.fetch("SELECT UserID, NWord FROM currency.Counter ORDER BY NWord DESC")
+        embed.set_footer(text=f"Type {await ex.get_server_prefix_by_context(ctx)}nword (user) to view their individual stats.", icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
+        sorted_n_word = {key: value for key, value in sorted(ex.cache.n_word_counter.items(), key=lambda item: item[1], reverse=True)}
         count_loop = 0
-        for mem in all_members:
-            count_loop += 1
-            if count_loop <= 10:
-                user_name = (await client.fetch_user(mem[0])).name
-                embed.add_field(name=f"{count_loop}) {user_name} ({mem[0]})", value=mem[1])
+        for user_id in sorted_n_word:
+            value = sorted_n_word.get(user_id)
+            if value is not None:
+                count_loop += 1
+                if count_loop <= 10:
+                    try:
+                        user_name = (client.get_user(user_id)).name
+                    except Exception as e:
+                        # if the user is not in discord.py's member cache, then set the user's name to null.
+                        user_name = "NULL"
+                    embed.add_field(name=f"{count_loop}) {user_name} ({user_id})", value=value)
         await ctx.send(embed=embed)
-
 
     @commands.command(aliases=['rand', 'randint', 'r'])
     async def random(self, ctx, a: int, b: int):
@@ -287,17 +290,15 @@ class Miscellaneous(commands.Cog):
     @commands.command(aliases=['coinflip', 'f'])
     async def flip(self, ctx):
         """Flips a coin [Format: %flip][Aliases: coinflip, f]"""
-        flip_choice = ["Heads", "Tails"]
-        random_number = randint(0, 1)
-        await ctx.send(f"> **You flipped {flip_choice[random_number]}**")
+        await ctx.send(f"> **You flipped {choice(['Heads', 'Tails'])}.**")
 
     @commands.command(aliases=['define', 'u'])
-    async def urban(self, ctx, term="none", number=1, override=0):
+    async def urban(self, ctx, term=None, number=1, override=0):
         """Search a term through UrbanDictionary. [Format: %urban (term) (definition number)][Aliases: define,u]"""
         if ctx.channel.is_nsfw() or override == 1:
-            if term == "none":
+            if term is None:
                 await ctx.send("> **Please enter a word for me to define**")
-            if term != "none":
+            else:
                 term = term.replace("_", " ")
                 url = "https://mashape-community-urban-dictionary.p.rapidapi.com/define"
                 querystring = {"term": f"{term}"}

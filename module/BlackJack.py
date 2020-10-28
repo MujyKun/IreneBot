@@ -125,7 +125,7 @@ class BlackJack(commands.Cog):
                             total_score = '0' + total_score  # this is to prevent being able to detect the number of digits by the spoiler
                         if not ex.check_if_bot(game[2]):
                             await ctx.send(f"> **{ctx.author} finalized their deck with ||{total_score}|| points.**")
-                        if ex.check_game_over(game_id):
+                        if await ex.check_game_over(game_id):
                             await ex.finish_game(game_id, ctx.channel)
         except Exception as e:
             log.console(e)

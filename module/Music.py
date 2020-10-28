@@ -362,9 +362,9 @@ class Music(commands.Cog):
         except KeyError:
             return None
 
-    @commands.command()
+    @commands.command(aliases=['p'])
     async def play(self, ctx, *, url=None):
-        """Plays audio to a voice channel. [Format: %play (title/url)"""
+        """Plays audio to a voice channel. [Format: %play (title/url)]"""
         if url is None:
             if ctx.voice_client.is_paused:
                 ctx.voice_client.resume()
@@ -504,11 +504,11 @@ class Music(commands.Cog):
     @queue.before_invoke
     @shuffle.before_invoke
     async def check_patreon(self, ctx):
-        if await ex.check_if_patreon(ctx.author.id, super=True) or await ex.check_if_patreon(ctx.guild.owner.id):
+        if await ex.check_if_patreon(ctx.author.id, super=True) or await ex.check_if_patreon(ctx.guild.owner.id, super=True):
             await self.ensure_voice(ctx)
         else:
             await ctx.send(f"""**Music is only available to $5 Patreons that support <@{keys.bot_id}>.
-            Become a Patron at {keys.patreon_link}.**""")
+Become a Patron at {keys.patreon_link}.**""")
             raise commands.CommandError(f"{ctx.author.name} ({ctx.author.id}) is not a Patron.")
 
 

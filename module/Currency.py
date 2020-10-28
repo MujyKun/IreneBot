@@ -120,10 +120,10 @@ class Currency(commands.Cog):
             log.console(e)
 
     @commands.command(aliases=['leaderboards', 'lb'])
-    async def leaderboard(self, ctx):
-        """Shows Top 10 Users [Format: %leaderboard][Aliases: leaderboards, lb]"""
+    async def leaderboard(self, ctx, mode="server"):
+        """Shows Top 10 Users server/global wide [Format: %leaderboard (global/server)][Aliases: leaderboards, lb]"""
         counter = ex.first_result(await ex.conn.fetchrow("SELECT count(UserID) FROM currency.Currency"))
-        embed = discord.Embed(title=f"Currency Leaderboard", color=0xffb6c1)
+        embed = discord.Embed(title=f"Currency Leaderboard ({mode.lower()})", color=0xffb6c1)
         embed.set_author(name="Irene", url=bot_website, icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
         embed.set_footer(text="Type %bal (user) to view their balance.", icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
         if counter == 0:
@@ -132,8 +132,9 @@ class Currency(commands.Cog):
             amount = await ex.conn.fetch("Select UserID,Money FROM currency.Currency")
             sort_money = []
             for sort in amount:
-                new_user = [sort[0], int(sort[1])]
-                sort_money.append(new_user)
+                if sort[0] in [member.id for member in ctx.guild.members] or mode == "global":
+                    new_user = [sort[0], int(sort[1])]
+                    sort_money.append(new_user)
             sort_money.sort(key=lambda x: x[1], reverse=True)
             count = 0
             for a in sort_money:

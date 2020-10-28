@@ -25,7 +25,7 @@ class Irene:
     def run_test_bot(self):
         # background loops are not started in test bot.
         self.start_up()
-        # self.start_loops()
+        self.start_loops()
         module.log.console("--TEST BOT--")
         ex.client.run(module.keys.test_client_token)
 
@@ -51,7 +51,7 @@ class Irene:
         # Start Voice Client Loop
         module.Music.Music().check_voice_clients.start()
         # Update Group Photo Count Cache Every 12 hours
-        ex.update_group_photo_count.start()
+        ex.update_cache.start()
         # after intents was pushed in place, d.py cache loaded a lot slower and patrons are not added properly.
         # therefore it must be looped instead.
         ex.update_patron_cache.start()
@@ -95,6 +95,7 @@ class Irene:
         ex.client.add_cog(module.Interactions.Interactions())
         ex.client.add_cog(module.Wolfram.Wolfram())
         ex.client.add_cog(module.cache.Cache())
+        ex.client.add_cog(module.GuessingGame.GuessingGame())
 
 
 if __name__ == '__main__':

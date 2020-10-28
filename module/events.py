@@ -30,10 +30,7 @@ class Events(commands.Cog):
     async def on_ready():
         app = await client.application_info()
         log.console(f'{app.name} is online')
-        # Create Cache
-        # It is fine to create cache in on_ready because the cache is correlated with the DB
-        # and is constantly updated.
-        await ex.create_cache()
+        ex.discord_cache_loaded = True
 
     @staticmethod
     @client.event

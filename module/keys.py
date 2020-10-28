@@ -59,7 +59,7 @@ interaction_list = [
 # client = commands.Bot(command_prefix=bot_prefix, case_insensitive=True, owner_id=owner_id)
 intents = discord.Intents.default()
 intents.members = True  # turn on privileged members intent
-intents.presences = True  # turn on presences intent
+# intents.presences = True  # turn on presences intent
 client = commands.AutoShardedBot(command_prefix=bot_prefix, case_insensitive=True, owner_id=owner_id, intents=intents)
 
 # Reactions/Emotes

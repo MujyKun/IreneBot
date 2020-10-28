@@ -4,6 +4,7 @@ from discord.ext import commands
 from module import keys
 from module import logger as log
 from Utility import resources as ex
+import datetime
 client = keys.client
 
 
@@ -21,7 +22,9 @@ class Miscellaneous(commands.Cog):
                     phrase = notification[2]
                     message_split = message_content.lower().split(" ")
                     if phrase in message_split and guild_id == message_guild_id and message_sender.id != user_id and user_id in [member.id for member in message.channel.members]:
+                        log.console(f"message_notifications 1 - {phrase} to {user_id}")
                         dm_channel = await ex.get_dm_channel(user_id)
+                        log.console(f"message_notifications 2 - {phrase} to {user_id}")
                         start_loc = (message_content.lower()).find(phrase)
                         end_loc = start_loc + len(phrase)
                         new_message_content = f"{message_content[0:start_loc]}`{message_content[start_loc:end_loc]}`{message_content[end_loc:len(message_content)]}"
@@ -36,6 +39,19 @@ class Miscellaneous(commands.Cog):
                         await dm_channel.send(embed=embed)
         except Exception as e:
             pass
+
+    @commands.command()
+    async def choose(self, ctx, *, options):
+        """Choose between a selection of options. Underscores are spaces between words. Spaces separate choices.
+        [Format: %choose (option_1 option_2 option_3)]"""
+        options = options.split(' ')
+        random_choice = (choice(options)).replace('_', ' ')
+        return await ctx.send(f"{ctx.author.display_name}, your choice is {random_choice}")
+
+    @commands.command()
+    async def displayemoji(self, ctx, emoji: discord.PartialEmoji):
+        """Display an emoji. [Format: %displayemoji :emoji:]"""
+        return await ctx.send(emoji.url)
 
     @commands.command()
     async def addnoti(self, ctx, *, phrase):
@@ -114,6 +130,15 @@ class Miscellaneous(commands.Cog):
     @commands.command()
     async def botinfo(self, ctx):
         """Get information about the bot."""
+        maintenance_status = api_status = db_status = images_status = ":red_circle:"
+        if await ex.get_api_status():
+            api_status = ":green_circle:"
+        if await ex.get_db_status():
+            db_status = ":green_circle:"
+        if await ex.get_images_status():
+            images_status = ":green_circle:"
+        if ex.cache.maintenance_mode:
+            maintenance_status = ":green_circle:"
         try:
             current_server_prefix = await ex.get_server_prefix(ctx.guild.id)
         except Exception as e:
@@ -134,7 +159,14 @@ class Miscellaneous(commands.Cog):
         mods = ""
         for bot_mod in keys.mods_list:
             mods += f"<@{bot_mod}> | "
-        embed = await ex.create_embed(title=f"I am {app_name}! ({app_id})", title_desc="I was made with Python using the discord.py wrapper.")
+        title_desc = f"""I was made with Python using the discord.py wrapper.
+
+API Status: {api_status} 
+Images Status: {images_status} 
+Database Status: {db_status} 
+Maintenance: {maintenance_status}
+"""
+        embed = await ex.create_embed(title=f"I am {app_name}! ({app_id})", title_desc=title_desc)
         embed.set_thumbnail(url=app_icon_url)
         embed.add_field(name=f"Servers Connected", value=f"{ex.get_server_count()} Servers", inline=True)
         embed.add_field(name=f"Text/Voice Channels Watched", value=f"{ex.get_text_channel_count()}/{ex.get_voice_channel_count()} Channels", inline=True)
@@ -142,7 +174,7 @@ class Miscellaneous(commands.Cog):
         embed.add_field(name=f"DC Updates Sent to", value=f"{len(await ex.get_dc_channels())} Channels", inline=True)
         embed.add_field(name=f"Bot Uptime", value=bot_uptime, inline=True)
         embed.add_field(name=f"Total Commands Used", value=f"{ex.cache.total_used} Commands", inline=True)
-        embed.add_field(name=f"This Session", value=f"{ex.cache.current_session} Commands", inline=True)
+        embed.add_field(name=f"This Session ({ex.cache.session_id} | {datetime.date.today()})", value=f"{ex.cache.current_session} Commands", inline=True)
         embed.add_field(name=f"Playing Music", value=f"{len(client.voice_clients)} Voice Clients", inline=True)
         embed.add_field(name=f"Ping", value=f"{ex.get_ping()} ms", inline=True)
         embed.add_field(name=f"Shards", value=f"{client.shard_count}", inline=True)
@@ -242,6 +274,8 @@ class Miscellaneous(commands.Cog):
         else:
             await ctx.send(f"> **<@{user.id}> has said the N-Word {current_amount} time(s)!**")
 
+
+
     @commands.is_owner()
     @commands.command()
     async def clearnword(self, ctx, user: discord.Member = None):
@@ -282,7 +316,6 @@ class Miscellaneous(commands.Cog):
     async def random(self, ctx, a: int, b: int):
         """Choose a random number from a range (a,b). """
         try:
-            # await ctx.send("> **You need a range of two numbers [Format: %random a b][Ex: %random 1 100]**")
             await ctx.send(f"> **Your random number is {randint(a, b)}.**")
         except Exception as e:
             await ctx.send(f"> **{e}**")
@@ -294,7 +327,7 @@ class Miscellaneous(commands.Cog):
 
     @commands.command(aliases=['define', 'u'])
     async def urban(self, ctx, term=None, number=1, override=0):
-        """Search a term through UrbanDictionary. [Format: %urban (term) (definition number)][Aliases: define,u]"""
+        """Search a term through UrbanDictionary. Underscores are spaces. [Format: %urban (term) (definition number)][Aliases: define,u]"""
         if ctx.channel.is_nsfw() or override == 1:
             if term is None:
                 await ctx.send("> **Please enter a word for me to define**")

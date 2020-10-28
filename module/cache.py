@@ -23,6 +23,8 @@ class Cache(commands.Cog):
         self.command_counter = {}
         # Photo Count of groups
         self.group_photos = {}  # { group_id: photo_count }
+        # Photo Count of idols
+        self.idol_photos = {}  # { idol_id: photo_count }
         # All channels DCAPP updates go to
         self.dc_app_channels = {}  # { channel_id: role_id }
         # All custom server prefixes
@@ -86,6 +88,13 @@ class Cache(commands.Cog):
         """
         self.n_word_counter = {}
 
-    def check_maintenance(self):
-        """  """
-        return 0
+        # list of idol objects
+        self.idols = []
+        # list of group objects
+        self.groups = []
+        # dict of restricted idol photo channels
+        """
+        channelid : [server_id, sendall]
+        """
+        self.restricted_channels = {}
+

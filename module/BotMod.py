@@ -13,16 +13,83 @@ class BotMod(commands.Cog):
         message_content = message.content
         if message_sender.id != keys.bot_id:
             if 'closedm' not in message_content and 'createdm' not in message_content:
-                dm_channel = await ex.get_dm_channel(message_sender.id)
-                if dm_channel is not None:
-                    for user_id in ex.cache.mod_mail:
-                        channel_id = ex.cache.mod_mail.get(user_id)
-                        mod_channel = await ex.client.fetch_channel(channel_id)
-                        if user_id == message_sender.id and message_channel == dm_channel:
-                            await mod_channel.send(f">>> FROM: {message_sender.display_name} ({message_sender.id}) - {message_content}")
-                        if mod_channel == message_channel:
-                            dm_channel = await ex.get_dm_channel(user_id)
-                            await dm_channel.send(f">>> FROM: {message_sender.display_name} ({message_sender.id}) - {message_content}")
+                for user_id in ex.cache.mod_mail:
+                    channel_id = ex.cache.mod_mail.get(user_id)
+                    mod_channel = await ex.client.fetch_channel(channel_id)
+                    if user_id == message_sender.id:
+                        dm_channel = await ex.get_dm_channel(message_sender.id)
+                        if message_channel.id == dm_channel:
+                            await mod_channel.send(
+                                f">>> FROM: {message_sender.display_name} ({message_sender.id}) - {message_content}")
+                    if mod_channel == message_channel:
+                        dm_channel = await ex.get_dm_channel(user_id)
+                        await dm_channel.send(
+                            f">>> FROM: {message_sender.display_name} ({message_sender.id}) - {message_content}")
+
+    @commands.command()
+    @commands.check(ex.check_if_mod)
+    async def mergeidol(self, ctx, original_idol_id: int, duplicate_idol_id: int):
+        """Merge a duplicated idol with it's original idol.
+        CAUTION: All aliases and are moved to the original idol, idol information is left alone
+        If a group ID is not in the original idol, it will be added and then the dupe idol will be deleted along with
+        all of it's connections.
+        [Format: %mergeidol (original idol id) (duplicate idol id)]"""
+        # check groups
+        original_idol = await ex.get_member(original_idol_id)
+        duplicate_idol = await ex.get_member(duplicate_idol_id)
+
+        if not duplicate_idol:
+            return await ctx.send(f"> {duplicate_idol_id} could not find an Idol.")
+        if not original_idol:
+            return await ctx.send(f"> {original_idol} could not find an Idol.")
+        for group_id in duplicate_idol.groups:
+            if group_id not in original_idol.groups:
+                # add groups from dupe to original.
+                await ex.conn.execute("UPDATE groupmembers.idoltogroup SET idolid = $1 WHERE groupid = $2 AND idolid = $3", original_idol.id, group_id, duplicate_idol.id)
+        # delete idol
+        await ex.conn.execute("DELETE FROM groupmembers.member WHERE id = $1", duplicate_idol.id)
+        # recreate cache
+        await ex.create_idol_cache()
+        await ex.create_group_cache()
+        await ctx.send(f"> Merged {duplicate_idol_id} to {original_idol_id}.")
+
+    @commands.command()
+    @commands.check(ex.check_if_mod)
+    async def mergegroup(self, ctx, original_group_id: int, duplicate_group_id: int):
+        """Merge a duplicated group with it's original group.
+        CAUTION: All aliases and are moved to the original group, group information is left alone
+        If an idol ID is not in the original group, it will be added and then this group will be deleted along with
+        all of it's connections.
+        [Format: %mergegroup (original group id) (duplicate group id)]"""
+        original_group = await ex.get_group(original_group_id)
+        duplicate_group = await ex.get_group(duplicate_group_id)
+        if not duplicate_group:
+            return await ctx.send(f"> {duplicate_group_id} could not find a Group.")
+        if not original_group:
+            return await ctx.send(f"> {original_group} could not find a Group.")
+        # move aliases
+        await ex.conn.execute("UPDATE groupmembers.aliases SET objectid = $1 WHERE isgroup = $2 AND objectid = $3", original_group.id, 1, duplicate_group.id)
+        for member_id in duplicate_group.members:
+            if member_id not in original_group.members:
+                # update the member location to the original group
+                await ex.conn.execute("UPDATE groupmembers.idoltogroup SET groupid = $1 WHERE idolid = $2 AND groupid = $3", original_group.id, member_id, duplicate_group.id)
+        # delete group
+        await ex.conn.execute("DELETE FROM groupmembers.groups WHERE groupid = $1", duplicate_group.id)
+        # recreate cache
+        await ex.create_idol_cache()
+        await ex.create_group_cache()
+        await ctx.send(f"> Merged {duplicate_group_id} to {original_group_id}.")
+
+
+
+    @commands.command()
+    @commands.check(ex.check_if_mod)
+    async def killapi(self, ctx):
+        """Restarts the API. [Format: %killapi]"""
+        source_link = "http://127.0.0.1:5123/restartAPI"
+        await ctx.send("> Restarting the API.")
+        async with ex.session.get(source_link) as resp:
+            pass
 
     @commands.command()
     @commands.check(ex.check_if_mod)

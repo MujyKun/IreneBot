@@ -105,6 +105,8 @@ class Moderator(commands.Cog):
                 return await ctx.send(f"> **<@{ctx.author.id}>, Please specify a user to mute.**")
             if user.id == ctx.author.id:
                 return await ctx.send(f"> **<@{ctx.author.id}>, You cannot mute yourself.**")
+            elif user.bot:
+                return await ctx.send(f"> **<@{ctx.author.id}>, You cannot mute a bot.**")
             mute_role = await self.get_mute_role(ctx)
             guild_channels = ctx.guild.text_channels
             if mute_role is None:
@@ -360,25 +362,26 @@ class Moderator(commands.Cog):
     @commands.command(aliases=['temp'])
     @commands.has_guild_permissions(manage_messages=True)
     async def tempchannel(self, ctx, delay=-1):
-        """Makes Current Channel a temporary channel deleting messages after a certain time period. If delay is -1, it will remove the channel. [Format: %temp (delay)]
+        """Makes Current Channel a temporary channel deleting messages after a certain time period (greater than 1 minute). If delay is -1, it will remove the channel. [Format: %temp (delay)]
         Requires Manage Messages
         """
         channel_id = ctx.channel.id
         try:
             if delay == -1:
-                    await ex.conn.execute("DELETE FROM currency.TempChannels WHERE chanID = $1", channel_id)
-                    ex.cache.temp_channels = None
+                    await ex.conn.execute("DELETE FROM general.TempChannels WHERE chanID = $1", channel_id)
+                    ex.cache.temp_channels[channel_id] = None
                     return await ctx.send("> **If this channel was a temporary channel, it has been removed.**")
             elif delay < -1:
                 return await ctx.send("> **The delay cannot be negative.**")
+            elif 0 < delay < 60:
+                return await ctx.send("> **The delay must be greater than 1 minute due to rate-limiting issues.**")
             else:
                 new_delay = await ex.get_cooldown_time(delay)
-                channel_id = ctx.channel.id
                 temp_channel_delay = ex.cache.temp_channels.get(channel_id)
                 if temp_channel_delay is not None:  # this channel is already a temp channel
-                    await ex.conn.execute("UPDATE currency.TempChannels SET delay = $1 WHERE chanID = $2", delay, channel_id)
+                    await ex.conn.execute("UPDATE general.TempChannels SET delay = $1 WHERE chanID = $2", delay, channel_id)
                 else:
-                    await ex.conn.execute("INSERT INTO currency.TempChannels VALUES ($1, $2)", channel_id, delay)
+                    await ex.conn.execute("INSERT INTO general.TempChannels VALUES ($1, $2)", channel_id, delay)
                 await ctx.send(f"> **This channel now deletes messages every {new_delay}.**")
                 ex.cache.temp_channels[channel_id] = delay
         except Exception as e:

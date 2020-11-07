@@ -1,4 +1,4 @@
-# [IreneBot V1.03.4](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=1609956823)
+# [IreneBot V1.03.5](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=1609956823)
 
 ## [Support Irene by becoming a Patron!](https://www.patreon.com/bePatron?u=38971435)  
 **[Become a Patron!](https://www.patreon.com/bePatron?u=38971435)**
@@ -64,15 +64,23 @@ To find out more, look at the `GroupMembers` category.
 | deleteidol         | Deletes an idol.                                                              | %deleteidol (idol id)                                                                                             | removeidol                      |
 | deleteidolfromgroup         | Deletes idol from group                                                              | %deleteidolfromgroup (idol id) (group id)                                                                                             | removeidolfromgroup                      |
 | deleteinteraction       | Delete a url from an interaction                                   | %deleteinteraction (url,url)               |               |
-| deletelink       | Removes a link from an idol.                                   | %deletelink (link)               |               |
 | getstatuses             | Get all statuses of Irene.                                                   | %getstatuses                           |                |
 | kill             | Kills the bot                                                  | %kill                           |               |
 | killapi             | Restarts the API                                                  | %killapi                           |               |
-| maintenance             | Enable/Disable Maintenance Mode. | %maintenance                           |               |
+| maintenance             | Enable/Disable Maintenance Mode. | %maintenance (reason)                          |               |
 | mergeidol | Merges a duplicate Idol with it's original | %mergeidol (original idol id) (duplicate idol id) | |
 | mergegroup | Merges a duplicate Group with it's original | %mergegroup (original group id) (duplicate group id) | |
-| moveto             | Moves a link to another idol. (Cannot be used for adding new links) | %moveto (idol id) (link)                           |               |
+| removestatus             | Remove a status based on it's index. The index can be found using %getstatuses | %removestatus (status index)                           |               |
 | repost             | Reposts a certain post from the DC APP to all channels.                                                  | %repost (post_number)                           |               |
+
+
+#### BiasGame:
+| Command     | Description                          | Format                 | Aliases           |
+|-------------|--------------------------------------|------------------------|-------------------|
+| biasgame | Start a bias game in the current channel. The host of the game can use `stopbg` to stop playing. | %biasgame (male/female/all) (bracket size (4,8,16,32)) | bg |
+| stopbg | Force-end a bias game if you are a moderator or host of the game. This command is meant for any issues or if a game happens to be stuck. | %stopbg | ★/Host |
+| listbg | List a user's bias game leaderboards. | %listbg (user) | |
+
 
 #### Cogs: ♥♥♥
 | Command           | Description                                                               | Format                       |
@@ -95,6 +103,13 @@ To find out more, look at the `GroupMembers` category.
 | rps         | Play Rock Paper Scissors for Money   | %rps (r/p/s)(amount)   | rockpaperscissors |
 | upgrade    | Upgrade a command to the next level with your money. | %upgrade rob/daily/beg              | levelup                  |
 
+#### CustomCommands:  
+| Command          | Description                                                                                                                          | Format                          | Aliases        |
+|------------------|--------------------------------------------------------------------------------------------------------------------------------------|---------------------------------|----------------|
+| createcommand | Create a custom command. | %createcommand (command name) (message) | addcommand, ★ |
+| deletecommand | Delete a custom command.  | %deletecommand (command name) | removecommand, ★ |
+| listcommands | List all the custom commands for the current server. | %listcommands | |
+
 
 #### DreamCatcher: 
 | Command      | Description                                                     | Format                                        | Aliases |
@@ -110,6 +125,7 @@ To find out more, look at the `GroupMembers` category.
 | Command          | Description                                                                        | Format                                                                                                         | Aliases                |
 |------------------|------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|------------------------|
 | aliases          | Lists the aliases of idols or groups that have one. Underscores are spaces and commas are to split idol or group names                                        | %aliases (name of idol or group) [page number] ex: %aliases irene,seulgi,red_velvet                                                                                                       |                        |
+| card | Displays an Idol/Group's profile card. | %card (Idol/Group Name) | |
 | count            | Shows howmany times an idol has been called.                                       | %count (name)                                                                                                  |                        |
 | countleaderboard | Shows leaderboards for how many times an idol has been called.                     | %clb                                                                                                           | highestcount, cb, clb |
 | countgroup      | Shows how many images of a certain group there are.                               | %countgroup (group)                                                                                          |                        |
@@ -126,6 +142,7 @@ To find out more, look at the `GroupMembers` category.
 | Command          | Description                                                                                                                          | Format                          | Aliases        |
 |------------------|--------------------------------------------------------------------------------------------------------------------------------------|---------------------------------|----------------|
 | guessinggame | Start an idol guessing game in the current channel. The host of the game can use `stop` to end the game or `skip` to skip the current round without affecting the round number. | %guessinggame (Male/Female/All) (# of rounds - default 20) (timeout for each round - default 20s) | gg |
+| stopgg | Force-end a guessing game if you are a moderator or host of the game. This command is meant for any issues or if a game happens to be stuck. Must be game host or access to manage messages. | %stopgg | ★/Host|
 
 #### Interactions:
 | Command          | Description                                                    | Format                          | Aliases        |

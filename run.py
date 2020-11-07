@@ -69,6 +69,7 @@ class Irene:
         module.keys.client.add_listener(module.Logging.Logging.logging_on_message_delete, 'on_message_delete')
         module.keys.client.add_listener(module.Miscellaneous.Miscellaneous.on_message_notifications, 'on_message')
         module.keys.client.add_listener(module.BotMod.BotMod.mod_on_message, 'on_message')
+        module.keys.client.add_listener(module.CustomCommands.CustomCommands.process_custom_commands, 'on_message')
 
     @staticmethod
     def add_cogs():
@@ -96,6 +97,8 @@ class Irene:
         ex.client.add_cog(module.Wolfram.Wolfram())
         ex.client.add_cog(module.cache.Cache())
         ex.client.add_cog(module.GuessingGame.GuessingGame())
+        ex.client.add_cog(module.CustomCommands.CustomCommands())
+        ex.client.add_cog(module.BiasGame.BiasGame())
 
 
 if __name__ == '__main__':

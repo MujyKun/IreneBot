@@ -165,6 +165,16 @@ if len(lyrics_api_key) != 0:
 else:
     lyric_client = None
 
+
+# Idol Avatar Location
+idol_avatar_location = os.getenv("IDOL_AVATAR_LOCATION")
+
+# Idol Banner Location
+idol_banner_location = os.getenv("IDOL_BANNER_LOCATION")
+
+# Bias Game Folder Location
+bias_game_location = os.getenv("BIAS_GAME_LOCATION")
+
 # API
 api_port = os.getenv("API_PORT")
 translate_private_key = os.getenv("PRIVATE_KEY")

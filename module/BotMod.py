@@ -93,9 +93,11 @@ class BotMod(commands.Cog):
 
     @commands.command()
     @commands.check(ex.check_if_mod)
-    async def maintenance(self, ctx):
-        """Enable/Disable Maintenance Mode. [Format: %maintenance]"""
+    async def maintenance(self, ctx, *, maintenance_reason=None):
+        """Enable/Disable Maintenance Mode. [Format: %maintenance (reason)]"""
         ex.cache.maintenance_mode = not ex.cache.maintenance_mode
+        ex.cache.maintenance_reason = maintenance_reason
+
         return await ctx.send(f"> **Maintenance mode is set to {ex.cache.maintenance_mode}.**")
 
     @commands.command()
@@ -110,28 +112,6 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
         dm_channel = await ex.get_dm_channel(user.id)
         await dm_channel.send(message)
         await ctx.send(f"> **Message was sent to <@{user.id}>**")
-
-    @commands.command()
-    @commands.check(ex.check_if_mod)
-    async def deletelink(self, ctx, link):
-        """Removes a link from an idol. [Format: %deletelink (link)]"""
-        try:
-            await ex.conn.execute("DELETE FROM groupmembers.imagelinks WHERE link = $1", link)
-            await ctx.send(f"> **Deleted {link} if it existed.**")
-        except Exception as e:
-            log.console(e)
-            await ctx.send(f"> **{e}**")
-
-    @commands.command()
-    @commands.check(ex.check_if_mod)
-    async def moveto(self, ctx, idol_id, link):
-        """Moves a link to another idol. (Cannot be used for adding new links)[Format: %moveto (idol id) (link)]"""
-        try:
-            await ex.conn.execute("UPDATE groupmembers.imagelinks SET memberid = $1 WHERE link = $2", int(idol_id), link)
-            await ctx.send(f"> **Moved {link} to {idol_id} if it existed.")
-        except Exception as e:
-            log.console(e)
-            await ctx.send(f"> **{e}**")
 
     @commands.command()
     @commands.check(ex.check_if_mod)
@@ -206,6 +186,7 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
     async def addstatus(self, ctx, *, status: str):
         """Add a playing status to Irene. [Format: %addstatus (status)]"""
         await ex.conn.execute("INSERT INTO general.botstatus (status) VALUES ($1)", status)
+        ex.cache.bot_statuses.append(status)
         await ctx.send(f"> **{status} was added.**")
 
     @commands.command()
@@ -213,14 +194,29 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
     async def getstatuses(self, ctx):
         """Get all statuses of Irene."""
         final_list = ""
-        statuses = await ex.get_bot_statuses()
-        if statuses is not None:
-            for status in await ex.get_bot_statuses():
-                final_list += f"{status[0]}\n"
+        if ex.cache.bot_statuses:
+            counter = 0
+            for status in ex.cache.bot_statuses:
+                final_list += f"{counter}) {status}\n"
+                counter += 1
         else:
             final_list = "None"
         embed = discord.Embed(title="Statuses", description=final_list)
         await ctx.send(embed=embed)
+
+    @commands.command()
+    @commands.check(ex.check_if_mod)
+    async def removestatus(self, ctx, status_index: int):
+        """Remove a status based on it's index. The index can be found using %getstatuses.
+        [Format: %removestatus (status index)]"""
+        try:
+            status = ex.cache.bot_statuses[status_index]
+            await ex.conn.execute("DELETE FROM general.botstatus WHERE status = $1", status)
+            ex.cache.bot_statuses.pop(status_index)
+            await ctx.send(f"> {status} was removed from the bot statuses.")
+        except Exception as e:
+            log.console(e)
+            await ctx.send(e)
 
     @commands.command()
     @commands.check(ex.check_if_mod)
@@ -404,6 +400,7 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
         except Exception as e:
             await ctx.send(f"ERROR - {e}")
             log.console(e)
+
 
 
 

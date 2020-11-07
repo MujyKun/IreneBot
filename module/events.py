@@ -1,4 +1,4 @@
-from module.keys import client, trash_emoji, check_emoji, dead_image_channel_id, patreon_super_role_id, patreon_role_id, bot_prefix, bot_support_server_link
+from module.keys import client, trash_emoji, check_emoji, dead_image_channel_id, patreon_super_role_id, patreon_role_id, next_emoji, bot_name
 from module import logger as log
 from Utility import resources as ex
 from discord.ext import commands
@@ -29,6 +29,8 @@ class Events(commands.Cog):
     @client.event
     async def on_ready():
         app = await client.application_info()
+        global bot_name
+        bot_name = app.name
         log.console(f'{app.name} is online')
         ex.discord_cache_loaded = True
 
@@ -124,21 +126,22 @@ class Events(commands.Cog):
                 """Gets the message ID if it matches with the reaction."""
                 try:
                     if channel_id == dead_image_channel_id:
-                        channel = await ex.client.fetch_channel(dead_image_channel_id)
+                        channel = ex.cache.dead_image_channel
                         msg = await channel.fetch_message(message_id)
-                        for record in await ex.get_dead_links():
-                            image_link = await ex.get_google_drive_link(record[0])
-                            msg_id = record[1]
-                            idol_id = record[2]
-                            if message_id == msg_id:
-                                return msg, image_link, idol_id
+                        msg_info = ex.cache.dead_image_cache.get(message_id)
+                        if msg_info:
+                            dead_link = msg_info[0]
+                            member_id = msg_info[2]
+                            guessing_game = msg_info[3]
+                            image_link = await ex.get_google_drive_link(dead_link)
+                            return msg, image_link, member_id, guessing_game
                 except Exception as e:
                     log.console(e)
-                return None, None, None
+                return None, None, None, None
 
             if ex.check_if_mod(user_id, mode=1):
                 if str(emoji) == trash_emoji:
-                    msg, link, idol_id = await get_msg_and_image()
+                    msg, link, idol_id, is_guessing_game = await get_msg_and_image()
                     if link is not None:
                         await ex.conn.execute("DELETE FROM groupmembers.imagelinks WHERE link = $1 AND memberid = $2",
                                               link, idol_id)
@@ -147,9 +150,15 @@ class Events(commands.Cog):
                         await msg.delete()
 
                 elif str(emoji) == check_emoji:
-                    msg, link, idol_id = await get_msg_and_image()
+                    msg, link, idol_id, is_guessing_game = await get_msg_and_image()
                     if link is not None:
                         await ex.delete_dead_link(link, idol_id)
+                        await msg.delete()
+
+                elif str(emoji) == '➡':
+                    msg, link, idol_id, is_guessing_game = await get_msg_and_image()
+                    if link is not None:
+                        await ex.set_as_group_photo(link)
                         await msg.delete()
 
         except Exception as e:

@@ -54,6 +54,35 @@ async def request_image_post(message, idol, channel):
     return photo_msg, api_url, posted
 
 
+async def choose_random_member(members=None, groups=None):
+    """Choose a random member object from a member or group list given."""
+    async def check_photo_count(t_member_ids):
+        t_member_id = random.choice(t_member_ids)
+        t_member = await ex.get_member(t_member_id)
+        if not t_member.photo_count:
+            t_member = await check_photo_count(t_member_ids)
+        return t_member
+
+    idol = None
+    new_groups = []
+    if groups:
+        for group in groups:
+            if group.photo_count:
+                new_groups.append(group)
+    if new_groups:
+        member_ids = (random.choice(new_groups)).members
+        idol = await check_photo_count(member_ids)
+
+    new_members = []
+    if members:
+        for member in members:
+            if member.photo_count:
+                new_members.append(member)
+    if new_members:
+        idol = random.choice(new_members)
+    return idol
+
+
 class GroupMembers(commands.Cog):
     @staticmethod
     async def on_message2(message):
@@ -88,26 +117,48 @@ class GroupMembers(commands.Cog):
                         groups = await ex.get_group_where_group_matches_name(message_content)
                         photo_msg = None
                         if members:
-                            random_member = random.choice(members)
-                            photo_msg, api_url, posted = await request_image_post(message, random_member, channel)
+                            random_member = await choose_random_member(members=members)
+                            if random_member:
+                                photo_msg, api_url, posted = await request_image_post(message, random_member, channel)
                         elif groups:
-                            group = random.choice(groups)
-                            random_member = random.choice(group.members)
-                            photo_msg, api_url, posted = await request_image_post(message, random_member, channel)
+                            random_member = await choose_random_member(groups=groups)
+                            if random_member:
+                                photo_msg, api_url, posted = await request_image_post(message, random_member, channel)
                         else:
                             members = await ex.check_group_and_idol(message_content)
                             if members:
-                                random_member = random.choice(members)
-                                photo_msg, api_url, posted = await request_image_post(message, random_member, channel)
+                                random_member = await choose_random_member(members=members)
+                                if random_member:
+                                    photo_msg, api_url, posted = await request_image_post(message, random_member, channel)
                         if posted:
                             ex.log_idol_command(message)
-                            await ex.add_command_count(f"Idol {random_member}")
+                            await ex.add_command_count(f"Idol {random_member.id}")
                             await ex.add_session_count()
                             add_user_limit(message.author)
                             if api_url:
                                 await ex.check_idol_post_reactions(photo_msg, message, random_member, api_url)
             except Exception as e:
                 pass
+
+    @commands.command()
+    async def card(self, ctx, *, name):
+        """Displays an Idol/Group's profile card.
+        [Format: %card (idol/group name)]"""
+        members = await ex.get_idol_where_member_matches_name(name)
+        groups = await ex.get_group_where_group_matches_name(name)
+        embed_list = []
+        for member in members:
+            embed = await ex.set_embed_card_info(member)
+            embed_list.append(embed)
+        for group in groups:
+            embed = await ex.set_embed_card_info(group, group=True)
+            embed_list.append(embed)
+        if embed_list:
+            msg = await ctx.send(embed=embed_list[0])
+            if len(embed_list) > 1:
+                await ex.check_left_or_right_reaction_embed(msg, embed_list)
+        else:
+            return await ctx.send(f"> I could not find any information regarding {name}.")
 
     @commands.has_guild_permissions(manage_messages=True)
     @commands.command()

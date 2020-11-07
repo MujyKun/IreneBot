@@ -1,43 +1,45 @@
 from Utility import resources as ex
 from discord.ext import commands, tasks
-from module import keys
+from module import keys, logger as log
 import asyncio
 
 
 class GuessingGame(commands.Cog):
-    def __init__(self):
-        # all games currently existing
-        self.games = []
-
     @commands.command(aliases=['gg'])
     async def guessinggame(self, ctx, gender="all", rounds=20, timeout=20):
         """Start an idol guessing game in the current channel. The host of the game can use `stop`/`end` to end the game or `skip` to skip the current round without affecting the round number.
         [Format: %guessinggame (Male/Female/All) (# of rounds - default 20) (timeout for each round - default 20s)]"""
-        if await self.check_game_exists(ctx.channel):
-            return await ctx.send("> **A guessing game is currently in progress in this channel.**")
+        if ex.find_game(ctx.channel, ex.cache.guessing_games):
+            server_prefix = await ex.get_server_prefix_by_context(ctx)
+            return await ctx.send(f"> **A guessing game is currently in progress in this channel. If this is a mistake, use `{server_prefix}stopgg`.**")
         if rounds > 60 or timeout > 60:
             return await ctx.send("> **ERROR -> The max rounds is 60 and the max timeout is 60s.**")
         elif rounds < 1 or timeout < 3:
-            return await ctx.send("> **ERROR -> The minimum rounds is 1 and the minimum timeout is 3 seconds.")
+            return await ctx.send("> **ERROR -> The minimum rounds is 1 and the minimum timeout is 3 seconds.**")
         game = Game()
-        self.games.append(game)
-        await game.start_game(ctx.channel, ctx.author.id, max_rounds=rounds, timeout=timeout, gender=gender)
-        self.games.remove(game)
+        ex.cache.guessing_games.append(game)
+        await game.start_game(ctx, max_rounds=rounds, timeout=timeout, gender=gender)
+        if game in ex.cache.guessing_games:
+            ex.cache.guessing_games.remove(game)
 
-    async def check_game_exists(self, channel):
-        for game in self.games:
-            if game.channel == channel:
-                return game
+    @commands.command()
+    async def stopgg(self, ctx):
+        """Force-end a guessing game if you are a moderator or host of the game. This command is meant for any issues or if a game happens to be stuck.
+        [Format: %stopgg]"""
+        await ex.stop_game(ctx, ex.cache.guessing_games)
 
 
 class Game:
     def __init__(self):
-        # user_id : score
+        self.photo_link = None
+        self.host_ctx = None
         self.host = None
+        # user_id : score
         self.players = {}
         self.rounds = 0
         self.channel = None
         self.idol = None
+        self.group_names = None
         self.correct_answers = []
         self.timeout = 0
         self.max_rounds = 0
@@ -45,9 +47,10 @@ class Game:
         self.idol_post_msg = None
         self.gender = None
 
-    async def start_game(self, channel, host, max_rounds=20, timeout=20, gender="all"):
-        self.channel = channel
-        self.host = host
+    async def start_game(self, ctx, max_rounds=20, timeout=20, gender="all"):
+        self.host_ctx = ctx
+        self.channel = ctx.channel
+        self.host = ctx.author.id
         self.max_rounds = max_rounds
         self.timeout = timeout
         if gender.lower() in ['male', 'm', 'female', 'f']:
@@ -67,12 +70,9 @@ class Game:
             msg = await ex.client.wait_for('message', check=check_correct_answer, timeout=self.timeout)
             await msg.add_reaction(keys.check_emoji)
             if msg.content.lower() == 'skip':
-                await msg.channel.send(f'Question skipped. The answer was {self.idol.full_name} ({self.idol.stage_name})', delete_after=15)
+                await self.print_answer(question_skipped=True)
             elif msg.content.lower() in stop_phrases:
-                await msg.channel.send(f"The current game has now ended.")
-                self.force_ended = True
-                self.rounds = self.max_rounds
-                return await self.display_winners()
+                return await self.end_game()
             else:
                 score = self.players.get(msg.author.id)
                 if not score:
@@ -85,7 +85,7 @@ class Game:
             # reveal the answer and make a new question.
             self.rounds += 1
             if not self.force_ended:
-                await self.channel.send(f"The correct answer was {self.idol.full_name} ({self.idol.stage_name})", delete_after=15)
+                await self.print_answer()
             await self.create_new_question()
 
     async def create_new_question(self):
@@ -100,14 +100,14 @@ class Game:
         if self.gender:
             while self.idol.gender != self.gender:
                 self.idol = await ex.get_random_idol()
+        self.group_names = [(await ex.get_group(group_id)).name for group_id in self.idol.groups]
         self.correct_answers = []
         for alias in self.idol.aliases:
             self.correct_answers.append(alias.lower())
         self.correct_answers.append(self.idol.full_name.lower())
         self.correct_answers.append(self.idol.stage_name.lower())
-        print(self.correct_answers)
-        self.idol_post_msg, url = await ex.idol_post(self.channel, self.idol, user_id=self.host, guessing_game=True, scores=self.players)
-        # add reaction here
+        log.console(", ".join(self.correct_answers))
+        self.idol_post_msg, self.photo_link = await ex.idol_post(self.channel, self.idol, user_id=self.host, guessing_game=True, scores=self.players)
         await self.check_message()
 
     async def display_winners(self):
@@ -118,7 +118,22 @@ class Game:
         return await self.channel.send(f">>> Guessing game has finished.\nScores:\n{final_scores}")
 
     async def end_game(self):
+        await self.channel.send(f"The current game has now ended.")
         self.force_ended = True
         self.rounds = self.max_rounds
         await self.display_winners()
+
+    async def print_answer(self, question_skipped=False):
+        skipped = ""
+        if question_skipped:
+            skipped = "Question Skipped. "
+        msg = await self.channel.send(f"{skipped}The correct answer was `{self.idol.full_name} ({self.idol.stage_name})`"
+                                f" from the following group(s): `{', '.join(self.group_names)}`",
+                                delete_after=15)
+        # create_task should not be awaited because this is meant to run in the background to check for reactions.
+        try:
+            asyncio.create_task(ex.check_idol_post_reactions(msg, self.host_ctx.message, self.idol, self.photo_link, guessing_game=True))
+        except Exception as e:
+            log.console(e)
+
 

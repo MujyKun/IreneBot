@@ -77,7 +77,7 @@ app.get('/', (req,res) => {
 		/translate --- Post -> Send in 'text' to translate, 'src_lang', 'target_lang' as a body. Also send in the private API key as 'p_key'.<br>
 		
 		Groupmembers:<br>
-		/photos/:idolID   --- Get redirected to an image of the Idol. Send in private API key as 'p_key' (body). <br>
+		/photos/:idolID   --- Get redirected to an image of the Idol. Send in private API key as 'p_key' and send you DO NOT want group photos(0 or 1) as 'no_group_photos' (body). <br>
 		</h2>
 		`);
 });
@@ -90,13 +90,12 @@ app.post('/photos/:id', async (req, res) =>{
 			// sleep for 1.5 seconds
 			await sleep(1.5);
 		}
-		var fileLink = `${await getrandomimage(req.params.id)}`;
+		var fileLink = `${await getrandomimage(req.params.id, req.body.no_group_photo)}`;
 		if (fileLink == 'undefined'){
 			res.sendStatus(404);
 			return;
 		}
 		currentlyWorking++;
-
 		var fileId = fileLink.replace("https://drive.google.com/uc?export=view&id=", "");
 		var x = await drive_js.drive.files.get(
 			{
@@ -105,7 +104,7 @@ app.post('/photos/:id', async (req, res) =>{
 			})
 		try{
 			var allFiles = fs.readdirSync(folderLocation);
-			if (Object.keys(allFiles).length > 20000){
+			if (Object.keys(allFiles).length > 50000){
 				allFiles.forEach(deletedFile => {
 					fs.unlink(folderLocation + deletedFile, (err) =>{
 						if (err) {
@@ -144,7 +143,7 @@ app.post('/photos/:id', async (req, res) =>{
 			function(err, { data }) {
 			data
 				.on("end", () => {
-					if (file_name.includes('.mp4')){
+					if (file_name.includes('.mp4') || file_name.includes('.webm')){
 						res.send({"final_image_link": final_image_link, "location": folderLocation + file_name, "file_name": file_name, "original_link": fileLink}, 415)
 					}
 					else{
@@ -235,10 +234,18 @@ app.post('/translate', async (req, res) => {
 	res.send(responsex);
 });
 
+app.get('/login', async (req, res) => {
+	let request = (await send_discord_request(req.query.code));
+	console.log(request);
+	res.send(request);
+
+});
+
+
 async function getmembers(){
 	try{
 	 	return  await sql`
-			SELECT * FROM groupmembers.member ORDER BY id
+			SELECT id, fullname, stagename FROM groupmembers.member ORDER BY id
 		`}
 	catch(err) {
 		return none;
@@ -248,7 +255,7 @@ async function getmembers(){
 async function getgroups(){
 	try{
 		return await sql`
-			SELECT * FROM groupmembers.groups
+			SELECT groupid, groupname FROM groupmembers.groups
 		`}
 	catch(err) {
 		return none;
@@ -265,18 +272,21 @@ async function getimages(){
 	}
 }
 
-async function getidolimages(id){
+async function getidolimages(id, no_group_photos=0){
 	try{
-		return await sql`
-			SELECT * FROM groupmembers.imagelinks WHERE memberid = ${id}
-		`}
+	    if (no_group_photos == 0){
+	        return await sql`SELECT * FROM groupmembers.imagelinks WHERE memberid = ${id}`;
+	    }
+	    else{
+		    return await sql`SELECT * FROM groupmembers.imagelinks WHERE memberid = ${id} AND groupphoto = ${0}`;
+		}}
 	catch(err) {
 		return none;
 	}
 }
 
-async function getrandomimage(id){
-	const idolLinks = await getidolimages(id);
+async function getrandomimage(id, no_group_photos){
+	const idolLinks = await getidolimages(id, no_group_photos);
 	var links = idolLinks[Math.floor(Math.random() * idolLinks.length)];
 	try{
 		return links.link;
@@ -289,7 +299,7 @@ async function getrandomimage(id){
 async function getspecificgroup(id){
 	try{
 		return await sql`
-			SELECT * FROM groupmembers.groups WHERE groupid = ${id}
+			SELECT groupid, groupname FROM groupmembers.groups WHERE groupid = ${id}
 		`}
 	catch(err) {
 		return none;
@@ -300,7 +310,7 @@ async function getspecificgroup(id){
 async function getspecificidol(id){
 	try{
 		return await sql`
-		SELECT * FROM groupmembers.member WHERE id = ${id}
+		SELECT id, fullname, stagename FROM groupmembers.member WHERE id = ${id}
 		`}
 	catch(err) {
 		return none;
@@ -379,6 +389,36 @@ async function translate_text(text, source, target){
 	}
 	return translated_text;
 	return (Translator.translate(text, source, target)).text;
+}
+
+async function send_discord_request(code){
+	options = {
+		method: "POST",
+		uri : endpointtoken,
+		json : true,
+		form : {
+			'client_id': clientid,
+			'client_secret': clientsecret,
+			'grant_type': 'authorization_code',
+			'code': code,
+			'redirect_uri': redirectlogin,
+			'scope': scopes
+		},
+		headers : {
+			'Content-Type': 'application/x-www-form-urlencoded'
+		}
+	};
+	rp(options)
+	.then(function (parsedBody) {
+		console.log(parsedBody);
+		return (parsedBody);
+		// POST succeeded...
+	})
+	.catch(function (err) {
+		console.log(err);
+		return (err);
+		// POST failed...
+	});
 }
 
 function sleep(ms) {

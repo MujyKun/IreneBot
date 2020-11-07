@@ -1,5 +1,7 @@
 from module import keys, logger as log, cache
 from discord.ext import tasks
+from PIL import Image
+from concurrent.futures import ThreadPoolExecutor
 import datetime
 import discord
 import random
@@ -28,6 +30,8 @@ class Utility:
         self.discord_cache_loaded = False
         self.cache = cache.Cache()
         self.temp_patrons_loaded = False
+        self.running_loop = None  # current asyncio running loop
+        self.thread_pool = None  # ThreadPoolExecutor for operations that block the event loop.
         auth = tweepy.OAuthHandler(keys.CONSUMER_KEY, keys.CONSUMER_SECRET)
         auth.set_access_token(keys.ACCESS_KEY, keys.ACCESS_SECRET)
         self.api = tweepy.API(auth)
@@ -44,9 +48,14 @@ class Utility:
                 self.conn = await self.get_db_connection()
                 # Delete all active blackjack games
                 await self.delete_all_games()
+                self.running_loop = asyncio.get_running_loop()
+                await self.create_thread_pool()
             except Exception as e:
                 log.console(e)
             self.set_db_connection.stop()
+
+    async def create_thread_pool(self):
+        self.thread_pool = ThreadPoolExecutor()
 
     @tasks.loop(seconds=0, minutes=1, reconnect=True)
     async def show_irene_alive(self):
@@ -100,6 +109,9 @@ class Utility:
         await self.process_cache_time(self.create_idol_cache, "Idol Objects")
         await self.process_cache_time(self.create_group_cache, "Group Objects")
         await self.process_cache_time(self.create_restricted_channel_cache, "Restricted Idol Channels")
+        await self.process_cache_time(self.create_dead_link_cache, "Dead Link Cache")
+        await self.process_cache_time(self.create_bot_status_cache, "Bot Status Cache")
+        await self.process_cache_time(self.create_bot_command_cache, "Custom Command Cache")
         log.console(f"Cache Completely Created in {await self.get_cooldown_time(time.time() - past_time)}.")
 
     async def update_command_counter(self):
@@ -118,13 +130,40 @@ class Utility:
         for restricted_channel in restricted_channels:
             self.cache.restricted_channels[restricted_channel[0]] = [restricted_channel[1], restricted_channel[2]]
 
+    async def create_bot_command_cache(self):
+        """Create custom command cache"""
+        server_commands = await self.conn.fetch("SELECT serverid, commandname, message FROM general.customcommands")
+        self.cache.custom_commands = {}
+        for server_command in server_commands:
+            server_id = server_command[0]
+            command_name = server_command[1]
+            message = server_command[2]
+            cache_info = self.cache.custom_commands.get(server_id)
+            if cache_info:
+                cache_info[command_name] = message
+            else:
+                self.cache.custom_commands[server_id] = {command_name: message}
+
+    async def create_bot_status_cache(self):
+        statuses = await self.conn.fetch("SELECT status FROM general.botstatus")
+        self.cache.bot_statuses = [status[0] for status in statuses] or None
+
+    async def create_dead_link_cache(self):
+        """Creates Dead Link Cache"""
+        self.cache.dead_image_cache = {}
+        self.cache.dead_image_channel = await self.client.fetch_channel(keys.dead_image_channel_id)
+        dead_images = await self.conn.fetch("SELECT deadlink, userid, messageid, idolid, guessinggame FROM groupmembers.deadlinkfromuser")
+        for dead_image in dead_images:
+            self.cache.dead_image_cache[dead_image[2]] = [dead_image[0], dead_image[1], dead_image[3], dead_image[4]]
+
     async def create_idol_cache(self):
         """Create Idol Objects and store them as cache."""
         self.cache.idols = []
         for idol in await self.get_db_all_members():
             idol_obj = Idol(*idol)
             idol_obj.aliases = await self.get_db_aliases(idol_obj.id)
-            idol_obj.groups = await self.get_db_groups_from_member(idol_obj.id)
+            # add all group ids and remove potential duplicates
+            idol_obj.groups = list(dict.fromkeys(await self.get_db_groups_from_member(idol_obj.id)))
             idol_obj.called = await self.get_db_idol_called(idol_obj.id)
             idol_obj.photo_count = self.cache.idol_photos.get(idol_obj.id) or 0
             self.cache.idols.append(idol_obj)
@@ -135,7 +174,8 @@ class Utility:
         for group in await self.get_all_groups():
             group_obj = Group(*group)
             group_obj.aliases = await self.get_db_aliases(group_obj.id, group=True)
-            group_obj.members = await self.get_db_members_in_group(group_id=group_obj.id)
+            # add all idol ids and remove potential duplicates
+            group_obj.members = list(dict.fromkeys(await self.get_db_members_in_group(group_id=group_obj.id)))
             group_obj.photo_count = self.cache.group_photos.get(group_obj.id) or 0
             self.cache.groups.append(group_obj)
 
@@ -401,6 +441,9 @@ class Utility:
     #######################
     # ## MISCELLANEOUS ## #
     #######################
+    async def check_if_moderator(self, ctx):
+        return (ctx.author.permissions_in(ctx.channel)).manage_messages
+
     async def check_for_bot_mentions(self, message):
         """Returns true if the message is only a bot mention and nothing else."""
         return message.content == f"<@!{keys.bot_id}>"
@@ -435,8 +478,11 @@ class Utility:
 
     async def send_maintenance_message(self, channel):
         try:
+            reason = ""
+            if self.cache.maintenance_reason:
+                reason = f"\nREASON: {self.cache.maintenance_reason}"
             await channel.send(
-                f"> **A maintenance is currently in progress. Join the support server for more information. <{keys.bot_support_server_link}>**")
+                f">>> **A maintenance is currently in progress. Join the support server for more information. <{keys.bot_support_server_link}>{reason}**")
         except Exception as e:
             pass
 
@@ -453,16 +499,28 @@ class Utility:
             if len(message_content) >= len(server_prefix):
                 changing_prefix = [keys.bot_prefix + 'setprefix', keys.bot_prefix + 'checkprefix']
                 if message.content[0:len(server_prefix)].lower() == server_prefix.lower() or message.content.lower() in changing_prefix:
+                    msg_without_prefix = message.content[len(server_prefix):len(message.content)]
                     # only replace the prefix portion back to the default prefix if it is not %setprefix or %checkprefix
                     if message.content.lower() not in changing_prefix:
-                        msg_without_prefix = message.content[len(server_prefix):len(message.content)]
+                        # change message.content so all on_message listeners have a bot prefix
                         message.content = keys.bot_prefix + msg_without_prefix
                     # if a user is banned from the bot.
                     if await self.check_if_bot_banned(message_sender.id):
-                        if self.check_message_is_command(message):
+                        try:
+                            guild_id = await self.get_guild_id(message)
+                        except Exception as e:
+                            guild_id = None
+                        if await self.check_message_is_command(message) or await self.check_custom_command_name_exists(guild_id, msg_without_prefix):
                             await self.send_ban_message(message_channel)
                     else:
                         await self.client.process_commands(message)
+
+    async def get_guild_id(self, message):
+        try:
+            guild_id = message.guild.id
+        except Exception as e:
+            guild_id = None
+        return guild_id
 
     async def check_for_nword(self, message):
         """Processes new messages that contains the N word."""
@@ -596,19 +654,22 @@ class Utility:
         self.cache.total_used += 1
         await self.conn.execute("UPDATE stats.sessions SET session = $1, totalused = $2 WHERE sessionid = $3", self.cache.current_session, self.cache.total_used, session_id)
 
-    def check_message_is_command(self, message):
+    async def check_message_is_command(self, message, is_command_name=False):
         """Check if a message is a command."""
-        for command_name in self.client.all_commands:
-            if command_name in message.content:
-                if len(command_name) != 1:
-                    return True
-        return False
+        if not is_command_name:
+            for command_name in self.client.all_commands:
+                if command_name in message.content:
+                    if len(command_name) != 1:
+                        return True
+            return False
+        if is_command_name:
+            return message in self.client.all_commands
 
     @staticmethod
     async def send_ban_message(channel):
         """A message to send for a user that is banned from the bot."""
         await channel.send(
-            f"> **You are banned from using {keys.bot}. Join <{keys.bot_support_server_link}>**")
+            f"> **You are banned from using {keys.bot_name}. Join <{keys.bot_support_server_link}>**")
 
     async def ban_user_from_bot(self, user_id):
         """Bans a user from using the bot."""
@@ -863,14 +924,6 @@ class Utility:
             return keys.bot_prefix
         prefix = self.cache.server_prefixes.get(server_id)
         return prefix or keys.bot_prefix
-
-    async def get_bot_statuses(self):
-        """Get the displayed messages for the bot."""
-        statuses = await self.conn.fetch("SELECT status FROM general.botstatus")
-        if len(statuses) == 0:
-            return None
-        else:
-            return statuses
 
     def get_user_count(self):
         """Get the amount of users that the bot is watching over."""
@@ -1284,6 +1337,108 @@ class Utility:
             if group.id == group_id:
                 return group
 
+    async def set_embed_card_info(self, obj, group=False):
+        """Sets General Information about a Group or Idol."""
+        description = ""
+        if obj.description:
+            description += f"{obj.description}\n\n"
+        if obj.id:
+            description += f"ID: {obj.id}\n"
+        if obj.gender:
+            description += f"Gender: {obj.gender}\n"
+        if group:
+            title = f"{obj.name} [{obj.id}]\n"
+            if obj.name:
+                description += f"Name: {obj.name}\n"
+            if obj.debut_date:
+                description += f"Debut Date: {obj.debut_date}\n"
+            if obj.disband_date:
+                description += f"Disband Date: {obj.disband_date}\n"
+            if obj.fandom:
+                description += f"Fandom Name: {obj.fandom}\n"
+            if obj.company:
+                description += f"Company: {obj.company}\n"
+            if obj.website:
+                description += f"[Official Website]({obj.website})\n"
+        else:
+            title = f"{obj.full_name} ({obj.stage_name}) [{obj.id}]\n"
+            if obj.full_name:
+                description += f"Full Name: {obj.full_name}\n"
+            if obj.stage_name:
+                description += f"Stage Name: {obj.stage_name}\n"
+            if obj.former_full_name:
+                description += f"Former Full Name: {obj.former_full_name}\n"
+            if obj.former_stage_name:
+                description += f"Former Stage Name: {obj.former_stage_name}\n"
+            if obj.birth_date:
+                description += f"Birth Date: {obj.birth_date}\n"
+            if obj.birth_country:
+                description += f"Birth Country: {obj.birth_country}\n"
+            if obj.birth_city:
+                description += f"Birth City: {obj.birth_city}\n"
+            if obj.height:
+                description += f"Height: {obj.height}cm\n"
+            if obj.zodiac:
+                description += f"Zodiac Sign: {obj.zodiac}\n"
+            if obj.blood_type:
+                description += f"Blood Type: {obj.blood_type}\n"
+            if obj.called:
+                description += f"Called: {obj.called} times\n"
+        if obj.aliases:
+            description += f"Aliases: {', '.join(obj.aliases)}\n"
+        if obj.twitter:
+            description += f"[Twitter](https://twitter.com/{obj.twitter})\n"
+        if obj.youtube:
+            description += f"[Youtube](https://www.youtube.com/channel/{obj.youtube})\n"
+        if obj.melon:
+            description += f"[Melon](https://www.melon.com/artist/song.htm?artistId={obj.melon})\n"
+        if obj.instagram:
+            description += f"[Instagram](https://instagram.com/{obj.instagram})\n"
+        if obj.vlive:
+            description += f"[V Live](https://channels.vlive.tv/{obj.vlive})\n"
+        if obj.spotify:
+            description += f"[Spotify](https://open.spotify.com/artist/{obj.spotify})\n"
+        if obj.fancafe:
+            description += f"[FanCafe](https://m.cafe.daum.net/{obj.fancafe})\n"
+        if obj.facebook:
+            description += f"[Facebook](https://www.facebook.com/{obj.facebook})\n"
+        if obj.tiktok:
+            description += f"[TikTok](https://www.tiktok.com/{obj.tiktok})\n"
+        if obj.photo_count:
+            description += f"Photo Count: {obj.photo_count}\n"
+        embed = await self.create_embed(title=title,
+                                      color=self.get_random_color(), title_desc=description)
+        if group:
+            if obj.members:
+                value = f"{' | '.join([(await self.get_member(idol_id)).full_name for idol_id in obj.members])}\n"
+                embed.add_field(name="Members", value=value)
+
+        else:
+            if obj.groups:
+                value = await self.get_group_names_as_string(obj)
+                embed.add_field(name="Groups", value=value)
+        if obj.thumbnail:
+            embed.set_thumbnail(url=obj.thumbnail)
+        if obj.banner:
+            embed.set_image(url=obj.banner)
+        return embed
+
+    async def get_group_names_as_string(self, idol):
+        """Get the group names split by a | ."""
+        # note that this used to be simplified to one line, but in the case there are groups that do not exist,
+        # a proper check and deletion of fake groups are required
+        group_names = []
+        for group_id in idol.groups:
+            group = await self.get_group(group_id)
+            if group:
+                group_names.append(group.name)
+            else:
+                # make sure the cache exists first before deleting.
+                if self.cache.groups:
+                    # delete the group connections if it doesn't exist.
+                    await self.conn.execute("DELETE FROM groupmembers.idoltogroup WHERE groupid = $1", group_id)
+        return f"{' | '.join(group_names)}\n"
+
     async def check_channel_sending_photos(self, channel_id):
         """Checks a text channel ID to see if it is restricted from having idol photos sent."""
         channel = self.cache.restricted_channels.get(channel_id)
@@ -1420,15 +1575,16 @@ class Utility:
                 if not group_ids or group.id in group_ids:
                     for group_member in group.members:
                         member = await self.get_member(group_member)
-                        if member.photo_count != 0 or is_mod:
-                            if mode == "fullname":
-                                member_name = member.full_name
-                            else:
-                                member_name = member.stage_name
-                            if is_mod:
-                                names.append(f"{member_name} ({member.id}) | ")
-                            else:
-                                names.append(f"{member_name} | ")
+                        if member:
+                            if member.photo_count != 0 or is_mod:
+                                if mode == "fullname":
+                                    member_name = member.full_name
+                                else:
+                                    member_name = member.stage_name
+                                if is_mod:
+                                    names.append(f"{member_name} ({member.id}) | ")
+                                else:
+                                    names.append(f"{member_name} | ")
                     final_names = "".join(names)
                     if len(final_names) == 0:
                         final_names = "None"
@@ -1514,55 +1670,61 @@ class Utility:
             embed_list.append(embed)
         return embed_list
 
-    async def check_idol_post_reactions(self, message, user_msg, idol_id, link):
-        """Check the reactions on an idol post."""
+    async def check_idol_post_reactions(self, message, user_msg, idol, link, guessing_game=False):
+        """Check the reactions on an idol post or guessing game."""
         try:
             if message is not None:
                 reload_image_emoji = keys.reload_emoji
                 dead_link_emoji = keys.dead_emoji
-                await message.add_reaction(reload_image_emoji)
+                if not guessing_game:
+                    await message.add_reaction(reload_image_emoji)
                 await message.add_reaction(dead_link_emoji)
                 message = await message.channel.fetch_message(message.id)
 
                 def image_check(user_reaction, reaction_user):
                     """check the user that reacted to it and which emoji it was."""
                     user_check = (reaction_user == user_msg.author) or (reaction_user.id == keys.owner_id) or reaction_user.id in keys.mods_list
-                    return user_check and (str(user_reaction.emoji) == dead_link_emoji or str(user_reaction.emoji) ==
-                                           reload_image_emoji) and user_reaction.message.id == message.id
+                    dead_link_check = str(user_reaction.emoji) == dead_link_emoji
+                    reload_image_check = str(user_reaction.emoji) == reload_image_emoji
+                    guessing_game_check = user_check and dead_link_check and user_reaction.message.id == message.id
+                    idol_post_check = user_check and (dead_link_check or reload_image_check) and user_reaction.message.id == message.id
+                    if guessing_game:
+                        return guessing_game_check
+                    return idol_post_check
 
-                async def reload_image(message1, link):
+                async def reload_image():
                     """Wait for a user to react, and reload the image if it's the reload emoji."""
                     try:
                         reaction, user = await self.client.wait_for('reaction_add', check=image_check, timeout=60)
                         if str(reaction) == reload_image_emoji:
-                            channel = message1.channel
-                            await message1.delete()
+                            channel = message.channel
+                            await message.delete()
                             # message1 = await channel.send(embed=embed)
                             message1 = await channel.send(link)
-                            await self.check_idol_post_reactions(message1, user_msg, idol_id, link)
+                            await self.check_idol_post_reactions(message1, user_msg, idol, link)
                         elif str(reaction) == dead_link_emoji:
-                            try:
-                                link = message1.embeds[0].url
-                            except:
-                                link = message1.content
                             if await self.check_if_patreon(user.id):
-                                await message1.delete()
+                                await message.delete()
                             else:
-                                await message1.clear_reactions()
-                                await message1.edit(content=f"Report images as dead links (2nd reaction) ONLY if the image does not load or it's not a photo of the idol.\nYou can have this message removed by becoming a {await self.get_server_prefix_by_context(message1)}patreon", suppress=True, delete_after=45)
+                                await message.clear_reactions()
+                                server_prefix = await self.get_server_prefix_by_context(message)
+                                warning_msg = f"Report images as dead links (2nd reaction) ONLY if the image does not load or it's not a photo of the idol.\nYou can have this message removed by becoming a {server_prefix}patreon"
+                                if guessing_game:
+                                    warning_msg = f"This image has been reported as a dead image, not a photo of the idol, or a photo with several idols.\nYou can have this message removed by becoming a {server_prefix}patreon"
+                                await message.edit(content=warning_msg, suppress=True, delete_after=45)
                             await self.get_dead_links()
                             try:
-                                channel = self.client.get_channel(keys.dead_image_channel_id)
+                                channel = self.cache.dead_image_channel
                                 if channel is not None:
-                                    await self.send_dead_image(channel, link, user, idol_id)
+                                    await self.send_dead_image(channel, link, user, idol, int(guessing_game))
                             except Exception as e:
                                 pass
                     except asyncio.TimeoutError:
-                        await message1.clear_reactions()
+                        await message.clear_reactions()
                     except Exception as e:
                         log.console(e)
                         pass
-                await reload_image(message, link)
+                await reload_image()
         except Exception as e:
             pass
 
@@ -1575,17 +1737,21 @@ class Utility:
     async def set_forbidden_link(self, link, idol_id):
         return await self.conn.execute("INSERT INTO groupmembers.forbiddenlinks(link, idolid) VALUES($1, $2)", link, idol_id)
 
-    async def send_dead_image(self, channel, link, user, idol_id):
+    async def send_dead_image(self, channel, link, user, idol, is_guessing_game):
         try:
-            idol = await self.get_member(idol_id)
-            special_message = f"""**Dead Image For {idol.full_name} ({idol.stage_name}) ({idol.id})
+            game = ""
+            if is_guessing_game:
+                game = "-- Guessing Game"
+            special_message = f"""**Dead Image For {idol.full_name} ({idol.stage_name}) ({idol.id}) {game}
 Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
-            msg, api_url = await self.idol_post(channel, idol.id, photo_link=link, special_message=special_message)
+            msg, api_url = await self.idol_post(channel, idol, photo_link=link, special_message=special_message)
+            self.cache.dead_image_cache[msg.id] = [str(link), user.id, idol.id, is_guessing_game]
             await self.conn.execute(
-                "INSERT INTO groupmembers.DeadLinkFromUser(deadlink, userid, messageid, idolid) VALUES($1, $2, $3, $4)",
-                link, user.id, msg.id, idol_id)
+                "INSERT INTO groupmembers.deadlinkfromuser(deadlink, userid, messageid, idolid, guessinggame) VALUES($1, $2, $3, $4, $5)",
+                str(link), user.id, msg.id, idol.id, is_guessing_game)
             await msg.add_reaction(keys.check_emoji)
             await msg.add_reaction(keys.trash_emoji)
+            await msg.add_reaction(keys.next_emoji)
         except Exception as e:
             log.console(f"Send Dead Image - {e}")
 
@@ -1595,11 +1761,13 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
         name = name.lower()
         for idol in self.cache.idols:
             if mode == 0:
-                if name == idol.full_name.lower() or name == idol.stage_name.lower():
-                    idol_list.append(idol)
+                if idol.full_name and idol.stage_name:
+                    if name == idol.full_name.lower() or name == idol.stage_name.lower():
+                        idol_list.append(idol)
             else:
-                if idol.stage_name.lower() in name or idol.full_name.lower() in name:
-                    idol_list.append(idol)
+                if idol.full_name and idol.stage_name:
+                    if idol.stage_name.lower() in name or idol.full_name.lower() in name:
+                        idol_list.append(idol)
             for alias in idol.aliases:
                 if mode == 0:
                     if alias == name:
@@ -1625,12 +1793,14 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
             try:
                 aliases = group.aliases
                 if mode == 0:
-                    if name == group.name.lower():
-                        group_list.append(group)
+                    if group.name:
+                        if name == group.name.lower():
+                            group_list.append(group)
                 else:
-                    if group.name.lower() in name:
-                        group_list.append(group)
-                        name = (name.lower()).replace(group.name, "")
+                    if group.name:
+                        if group.name.lower() in name:
+                            group_list.append(group)
+                            name = (name.lower()).replace(group.name, "")
                 for alias in aliases:
                     if mode == 0:
                         if alias == name:
@@ -1677,9 +1847,12 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
             idol.called += 1
             await self.conn.execute("UPDATE groupmembers.Count SET Count = $1 WHERE MemberID = $2", idol.called, idol.id)
 
+    async def set_as_group_photo(self, link):
+        await self.conn.execute("UPDATE groupmembers.imagelinks SET groupphoto = $1 WHERE link = $2", 1, str(link))
+
     async def get_google_drive_link(self, api_url):
         """Get the google drive link based on the api's image url."""
-        return self.first_result(await self.conn.fetchrow("SELECT driveurl FROM groupmembers.apiurl WHERE apiurl = $1", api_url))
+        return self.first_result(await self.conn.fetchrow("SELECT driveurl FROM groupmembers.apiurl WHERE apiurl = $1", str(api_url)))
 
     async def get_image_msg(self, idol, group_id, channel, photo_link, user_id=None, guild_id=None, api_url=None, special_message=None, guessing_game=False, scores=None):
         """Get the image link from the API and return the message containing the image."""
@@ -1705,7 +1878,8 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
             try:
                 find_post = True
                 data = {
-                    'p_key': keys.translate_private_key
+                    'p_key': keys.translate_private_key,
+                    'no_group_photos': int(guessing_game)
                 }
                 end_point = f"http://127.0.0.1:{keys.api_port}/photos/{idol.id}"
                 if self.test_bot:
@@ -2288,6 +2462,143 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
     async def update_welcome_message(self, server_id, message):
         await self.conn.execute("UPDATE general.welcome SET message = $1 WHERE serverid = $2", message, server_id)
         self.cache.welcome_messages[server_id]['message'] = message
+
+    ########################
+    # ## CUSTOM COMMANDS## #
+    ########################
+
+    async def check_custom_command_name_exists(self, server_id, command_name):
+        if server_id:
+            custom_commands = self.cache.custom_commands.get(server_id)
+            if custom_commands:
+                if command_name.lower() in custom_commands:
+                    return True
+        return False
+
+    async def add_custom_command(self, server_id, command_name, message):
+        await self.conn.execute("INSERT INTO general.customcommands(serverid, commandname, message) VALUES ($1, $2, $3)", server_id, command_name, message)
+        custom_commands = self.cache.custom_commands.get(server_id)
+        if custom_commands:
+            custom_commands[command_name] = message
+        else:
+            self.cache.custom_commands[server_id] = {command_name: message}
+
+    async def remove_custom_command(self, server_id, command_name):
+        await self.conn.execute("DELETE FROM general.customcommands WHERE serverid = $1 AND commandname = $2", server_id, command_name)
+        custom_commands = self.cache.custom_commands.get(server_id)
+        try:
+            custom_commands.pop(command_name)
+        except Exception as e:
+            log.console(e)
+
+    async def get_custom_command(self, server_id, command_name):
+        commands = self.cache.custom_commands.get(server_id)
+        return commands.get(command_name)
+    ###################
+    # ## BIAS GAME ## #
+    ###################
+
+    async def create_bias_game_image(self, first_idol_id, second_idol_id):
+        """Uses thread pool to create bias game image to prevent IO blocking."""
+        result = (self.thread_pool.submit(self.merge_images, first_idol_id, second_idol_id)).result()
+        return f"{keys.bias_game_location}{first_idol_id}_{second_idol_id}.png"
+
+    def merge_images(self, first_idol_id, second_idol_id):
+        """Merge Idol Images if the merge doesn't exist already."""
+        file_name = f"{first_idol_id}_{second_idol_id}.png"
+        if not self.check_file_exists(f"{keys.bias_game_location}{file_name}"):
+            # open the images.
+            versus_image = Image.open(f'{keys.bias_game_location}versus.png')
+            first_idol_image = Image.open(f'{keys.idol_avatar_location}{first_idol_id}_IDOL.png')
+            second_idol_image = Image.open(f'{keys.idol_avatar_location}{second_idol_id}_IDOL.png')
+
+            # define the dimensions
+            idol_image_width = 150
+            idol_image_height = 150
+            first_image_area = (0, 0)
+            second_image_area = (versus_image.width - idol_image_width, 0)
+            image_size = (idol_image_width, idol_image_height)
+
+            # resize the idol images
+            first_idol_image = first_idol_image.resize(image_size)
+            second_idol_image = second_idol_image.resize(image_size)
+
+            # add the idol images onto the VS image.
+            versus_image.paste(first_idol_image, first_image_area)
+            versus_image.paste(second_idol_image, second_image_area)
+
+            # save the versus image.
+            versus_image.save(f"{keys.bias_game_location}{file_name}")
+
+    @staticmethod
+    def check_file_exists(file_name):
+        return os.path.isfile(file_name)
+
+    async def create_bias_game_bracket(self, all_games, user_id, bracket_winner):
+        result = (self.thread_pool.submit(self.create_bracket, all_games, user_id, bracket_winner)).result()
+        return f"{keys.bias_game_location}{user_id}.png"
+
+    def create_bracket(self, all_games, user_id, bracket_winner):
+        def get_battle_images(idol_1_id, idol_2_id):
+            return Image.open(f'{keys.idol_avatar_location}{idol_1_id}_IDOL.png'), Image.open(f'{keys.idol_avatar_location}{idol_2_id}_IDOL.png')
+
+        def resize_images(first_img, second_img, first_img_size, second_img_size):
+            return first_img.resize(first_img_size), second_img.resize(second_img_size)
+
+        def paste_image(first_idol_img, second_idol_img, first_img_area, second_img_area):
+            bracket.paste(first_idol_img, first_img_area)
+            bracket.paste(second_idol_img, second_img_area)
+
+        bracket = Image.open(f'{keys.bias_game_location}bracket8.png')
+        count = 1
+        for c_round in all_games:
+            if len(c_round) <= 4:
+                for battle in c_round:
+                    first_idol, second_idol = battle[0], battle[1]
+                    first_idol_info = self.cache.stored_bracket_positions.get(count)
+                    second_idol_info = self.cache.stored_bracket_positions.get(count + 1)
+
+                    # get images
+                    first_idol_image, second_idol_image = get_battle_images(first_idol.id, second_idol.id)
+
+                    # resize images
+                    first_idol_image, second_idol_image = resize_images(first_idol_image, second_idol_image, first_idol_info.get('img_size'), second_idol_info.get('img_size'))
+
+                    # paste image to bracket
+                    paste_image(first_idol_image, second_idol_image, first_idol_info.get('pos'), second_idol_info.get('pos'))
+
+                    count = count + 2
+
+        # add winner
+        idol_info = self.cache.stored_bracket_positions.get(count)
+        idol_image = Image.open(f'{keys.idol_avatar_location}{bracket_winner.id}_IDOL.png')
+        idol_image = idol_image.resize(idol_info.get('img_size'))
+        bracket.paste(idol_image, idol_info.get('pos'))
+        bracket.save(f"{keys.bias_game_location}{user_id}.png")
+
+    #######################
+    # ## GENERAL GAMES ## #
+    #######################
+
+    async def stop_game(self, ctx, games):
+        """Delete an ongoing game."""
+        is_moderator = await self.check_if_moderator(ctx)
+        game = self.find_game(ctx.channel, games)
+        if game:
+            if ctx.author.id == game.host or is_moderator:
+                # these are passed by reference, so can directly remove from them.
+                games.remove(game)
+                return await game.end_game()
+            else:
+                return await ctx.send("> You must be a moderator or the host of the game in order to end the game.")
+        return await ctx.send("> No game is currently in session.")
+
+    @staticmethod
+    def find_game(channel, games):
+        """Return a game from a list of game objects if it exists in the channel."""
+        for game in games:
+            if game.channel == channel:
+                return game
 
 
 class Idol:

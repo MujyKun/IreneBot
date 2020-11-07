@@ -6,6 +6,8 @@ class Cache(commands.Cog):
     def __init__(self):
         # maintenance mode
         self.maintenance_mode = False
+        # maintenance reason
+        self.maintenance_reason = None
         # current session
         self.session_id = None
         # current session commands used
@@ -97,4 +99,41 @@ class Cache(commands.Cog):
         channelid : [server_id, sendall]
         """
         self.restricted_channels = {}
+        """
+        messageid : [dead_link, userid, idolid, is_guessing_game]
+        """
+        self.dead_image_cache = {}
+        # Channel for all dead images to be sent to.
+        self.dead_image_channel = None
+        self.bot_statuses = []
+        """
+        server_id: {command_name:info, command_name:info}  
+        """
+        self.custom_commands = {}
+
+        # Guessing Game Objects
+        self.guessing_games = []
+        # Bias Game Objects
+        self.bias_games = []
+
+        # bracket position for bias game stored due to annoyance when using previous x and y values.
+        # counting starts from left to right, bottom to top
+        self.stored_bracket_positions = {
+            1: {'img_size': (50, 50), 'pos': (30, 515)},
+            2: {'img_size': (50, 50), 'pos': (100, 515)},
+            3: {'img_size': (50, 50), 'pos': (165, 515)},
+            4: {'img_size': (50, 50), 'pos': (230, 515)},
+            5: {'img_size': (50, 50), 'pos': (320, 515)},
+            6: {'img_size': (50, 50), 'pos': (390, 515)},
+            7: {'img_size': (50, 50), 'pos': (455, 515)},
+            8: {'img_size': (50, 50), 'pos': (525, 515)},
+            9: {'img_size': (75, 75), 'pos': (55, 380)},
+            10: {'img_size': (75, 75), 'pos': (185, 380)},
+            11: {'img_size': (75, 75), 'pos': (340, 380)},
+            12: {'img_size': (75, 75), 'pos': (475, 380)},
+            13: {'img_size': (100, 100), 'pos': (110, 225)},
+            14: {'img_size': (100, 100), 'pos': (390, 225)},
+            15: {'img_size': (134, 130), 'pos': (235, 55)}
+        }
+
 

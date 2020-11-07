@@ -17,10 +17,9 @@ class Status:
                     f'{bot_prefix}help',
                     f'{ex.get_user_count()} users.'
                 ]
-                statuses = await ex.get_bot_statuses()
-                if statuses is not None:
+                if ex.cache.bot_statuses:
                     final_statuses = []
-                    status = (random.choice(statuses))[0]
+                    status = random.choice(ex.cache.bot_statuses)
                     final_statuses.append(random.choice(random_statuses))
                     final_statuses.append(status)
                     final_status = random.choice(final_statuses)

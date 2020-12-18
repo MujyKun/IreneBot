@@ -2,21 +2,23 @@ from module import keys, logger as log, cache
 from discord.ext import tasks
 from PIL import Image
 from concurrent.futures import ThreadPoolExecutor
+from datadog import initialize, api
+from Weverse.weverseasync import WeverseAsync
 import datetime
 import discord
 import random
 import asyncio
-import aiofiles
 import os
 import math
 import tweepy
 import json
 import time
-
+import sys
+import aiofiles
 
 """
 Utility.py
-Resource Center for Irene
+Resource Center for Irene -> Essentially serves as a client for Irene.
 Any potentially useful/repeated functions will end up here
 """
 
@@ -36,13 +38,19 @@ class Utility:
         auth.set_access_token(keys.ACCESS_KEY, keys.ACCESS_SECRET)
         self.api = tweepy.API(auth)
         self.loop_count = 0
+        self.recursion_limit = 10000
+        self.api_issues = 0
+        self.weverse_client = WeverseAsync(authorization=keys.weverse_auth_token, web_session=self.session,
+                                           verbose=True, loop=asyncio.get_event_loop())
 
     ##################
     # ## DATABASE ## #
     ##################
     @tasks.loop(seconds=0, minutes=0, hours=0, reconnect=True)
-    async def set_db_connection(self):
-        """Looping Until A Stable Connection to DB is formed. This is to confirm Irene starts before the DB connects."""
+    async def set_start_up_connection(self):
+        """Looping Until A Stable Connection to DB is formed. This is to confirm Irene starts before the DB connects.
+        Also creates thread pool and increases recursion limit.
+        """
         if self.client.loop.is_running():
             try:
                 self.conn = await self.get_db_connection()
@@ -50,9 +58,10 @@ class Utility:
                 await self.delete_all_games()
                 self.running_loop = asyncio.get_running_loop()
                 await self.create_thread_pool()
+                sys.setrecursionlimit(self.recursion_limit)
             except Exception as e:
                 log.console(e)
-            self.set_db_connection.stop()
+            self.set_start_up_connection.stop()
 
     async def create_thread_pool(self):
         self.thread_pool = ThreadPoolExecutor()
@@ -93,7 +102,6 @@ class Utility:
         past_time = time.time()
         await self.process_cache_time(self.update_idols, "Idol Photo Count")
         await self.process_cache_time(self.update_groups, "Group Photo Count")
-        await self.process_cache_time(self.update_dc_channels, "DCAPP Channels")
         await self.process_cache_time(self.update_user_notifications, "User Notifications")
         # after intents was pushed in place, d.py cache loaded a lot slower and patrons are not added properly.
         # therefore it must be looped instead.
@@ -109,10 +117,50 @@ class Utility:
         await self.process_cache_time(self.create_idol_cache, "Idol Objects")
         await self.process_cache_time(self.create_group_cache, "Group Objects")
         await self.process_cache_time(self.create_restricted_channel_cache, "Restricted Idol Channels")
-        await self.process_cache_time(self.create_dead_link_cache, "Dead Link Cache")
-        await self.process_cache_time(self.create_bot_status_cache, "Bot Status Cache")
-        await self.process_cache_time(self.create_bot_command_cache, "Custom Command Cache")
+        await self.process_cache_time(self.create_dead_link_cache, "Dead Links")
+        await self.process_cache_time(self.create_bot_status_cache, "Bot Status")
+        await self.process_cache_time(self.create_bot_command_cache, "Custom Commands")
+        await self.process_cache_time(self.create_weverse_channel_cache, "Weverse Text Channels")
+        await self.process_cache_time(self.create_self_assignable_role_cache, "Self-Assignable Roles")
+        task = asyncio.create_task(self.process_cache_time(self.weverse_client.start, "Weverse"))
         log.console(f"Cache Completely Created in {await self.get_cooldown_time(time.time() - past_time)}.")
+
+    async def create_self_assignable_role_cache(self):
+        """Create cache for self assignable roles"""
+        all_roles = await self.conn.fetch("SELECT roleid, rolename, serverid FROM selfassignroles.roles")
+        all_channels = await self.conn.fetch("SELECT channelid, serverid FROM selfassignroles.channels")
+        for role in all_roles:
+            role_id = role[0]
+            role_name = role[1]
+            server_id = role[2]
+            cache_info = self.cache.assignable_roles.get(server_id)
+            if not cache_info:
+                self.cache.assignable_roles[server_id] = {}
+                cache_info = self.cache.assignable_roles.get(server_id)
+            if not cache_info.get('roles'):
+                cache_info['roles'] = [[role_id, role_name]]
+            else:
+                cache_info['roles'].append([role_id, role_name])
+        for channel in all_channels:
+            channel_id = channel[0]
+            server_id = channel[1]
+            cache_info = self.cache.assignable_roles.get(server_id)
+            if cache_info:
+                cache_info['channel_id'] = channel_id
+            else:
+                self.cache.assignable_roles[server_id] = {'channel_id': channel_id}
+
+    async def create_weverse_channel_cache(self):
+        """Create cache for channels that are following a community on weverse."""
+        all_channels = await self.conn.fetch("SELECT channelid, communityname, roleid, commentsdisabled FROM weverse.channels")
+        for channel in all_channels:
+            channel_id = channel[0]
+            community_name = channel[1]
+            role_id = channel[2]
+            comments_disabled = channel[3]
+            await self.add_weverse_channel_to_cache(channel_id, community_name)
+            await self.add_weverse_role(channel_id, community_name, role_id)
+            await self.change_weverse_comment_status(channel_id, community_name, comments_disabled)
 
     async def update_command_counter(self):
         """Updates Cache for command counter and sessions"""
@@ -160,8 +208,8 @@ class Utility:
         """Create Idol Objects and store them as cache."""
         self.cache.idols = []
         for idol in await self.get_db_all_members():
-            idol_obj = Idol(*idol)
-            idol_obj.aliases = await self.get_db_aliases(idol_obj.id)
+            idol_obj = Idol(**idol)
+            idol_obj.aliases, idol_obj.local_aliases = await self.get_db_aliases(idol_obj.id)
             # add all group ids and remove potential duplicates
             idol_obj.groups = list(dict.fromkeys(await self.get_db_groups_from_member(idol_obj.id)))
             idol_obj.called = await self.get_db_idol_called(idol_obj.id)
@@ -172,8 +220,8 @@ class Utility:
         """Create Group Objects and store them as cache"""
         self.cache.groups = []
         for group in await self.get_all_groups():
-            group_obj = Group(*group)
-            group_obj.aliases = await self.get_db_aliases(group_obj.id, group=True)
+            group_obj = Group(**group)
+            group_obj.aliases, group_obj.local_aliases = await self.get_db_aliases(group_obj.id, group=True)
             # add all idol ids and remove potential duplicates
             group_obj.members = list(dict.fromkeys(await self.get_db_members_in_group(group_id=group_obj.id)))
             group_obj.photo_count = self.cache.group_photos.get(group_obj.id) or 0
@@ -322,13 +370,6 @@ class Utility:
             phrase = notification[2]
             self.cache.user_notifications.append([guild_id, user_id, phrase])
 
-    async def update_dc_channels(self):
-        """Set cache for dc channels"""
-        self.cache.user_notifications = {}
-        channels = await self.get_dc_channels()
-        for channel in channels:
-            self.cache.dc_app_channels[channel[0]] = channel[1]
-
     async def update_groups(self):
         """Set cache for group photo count"""
         self.cache.group_photos = {}
@@ -345,7 +386,7 @@ class Utility:
 
     @tasks.loop(seconds=0, minutes=0, hours=12, reconnect=True)
     async def update_cache(self):
-        """Looped every 12 hours to update the group photo count and cache."""
+        """Looped every 12 hours to update the cache in case of anything faulty."""
         while self.conn is None:
             await asyncio.sleep(1)
         await self.create_cache()
@@ -376,6 +417,55 @@ class Utility:
         if self.loop_count != 0:
             await self.process_cache_time(self.update_patreons, "Patrons")
         self.loop_count += 1
+
+    @tasks.loop(seconds=0, minutes=1, hours=0, reconnect=True)
+    async def send_cache_data_to_data_dog(self):
+        """Sends metric information about cache to data dog every minute."""
+        if self.thread_pool:
+            metric_info = {
+                'total_commands_used': self.cache.total_used,
+                'bias_games': len(self.cache.bias_games),
+                'guessing_games': len(self.cache.guessing_games),
+                'patrons': len(self.cache.patrons),
+                'custom_server_prefixes': len(self.cache.server_prefixes),
+                'session_commands_used': self.cache.current_session,
+                'user_notifications': len(self.cache.user_notifications),
+                'mod_mail': len(self.cache.mod_mail),
+                'banned_from_bot': len(self.cache.bot_banned),
+                'logged_servers': len(self.cache.logged_channels),
+                # server count is based on discord.py guild cache which takes a large amount of time to load fully.
+                # There may be inaccurate data points on a new instance of the bot due to the amount of time it takes.
+                'server_count': len(self.client.guilds),
+                'welcome_messages': len(self.cache.welcome_messages),
+                'temp_channels': len(self.cache.temp_channels),
+                'amount_of_idols': len(self.cache.idols),
+                'amount_of_groups': len(self.cache.groups),
+                'channels_restricted': len(self.cache.restricted_channels),
+                'amount_of_bot_statuses': len(self.cache.bot_statuses),
+                'commands_per_minute': self.cache.commands_per_minute,
+                'amount_of_custom_commands': len(self.cache.custom_commands),
+                'discord_ping': self.get_ping(),
+                'n_words_per_minute': self.cache.n_words_per_minute,
+                'bot_api_idol_calls': self.cache.bot_api_idol_calls,
+                'bot_api_translation_calls': self.cache.bot_api_translation_calls,
+                'messages_received_per_min': self.cache.messages_received_per_minute,
+                'errors_per_minute': self.cache.errors_per_minute,
+                'wolfram_per_minute': self.cache.wolfram_per_minute,
+                'urban_per_minute': self.cache.urban_per_minute,
+            }
+            # set all per minute metrics to 0 since this is a 60 second loop.
+            self.cache.n_words_per_minute = 0
+            self.cache.commands_per_minute = 0
+            self.cache.bot_api_idol_calls = 0
+            self.cache.bot_api_translation_calls = 0
+            self.cache.messages_received_per_minute = 0
+            self.cache.errors_per_minute = 0
+            self.cache.wolfram_per_minute = 0
+            self.cache.urban_per_minute = 0
+            for metric_name in metric_info:
+                metric_value = metric_info.get(metric_name)
+                # add to thread pool to prevent blocking.
+                result = (self.thread_pool.submit(self.send_metric, metric_name, metric_value)).result()
 
     ##################
     # ## CURRENCY ## #
@@ -441,7 +531,30 @@ class Utility:
     #######################
     # ## MISCELLANEOUS ## #
     #######################
+    async def kill_api(self):
+        """restart the api"""
+        source_link = "http://127.0.0.1:5123/restartAPI"
+        async with self.session.get(source_link) as resp:
+            log.console("Restarting API.")
+
+    async def get_number_of_emojis(self, emojis, animated=False):
+        not_animated_emojis = []
+        animated_emojis = []
+        for emoji in emojis:
+            if emoji.animated:
+                animated_emojis.append(emoji)
+            else:
+                not_animated_emojis.append(emoji)
+        return len(animated_emojis) if animated else len(not_animated_emojis)
+
+    @staticmethod
+    async def get_server_id(ctx):
+        """Get the server id by context."""
+        if ctx.guild:
+            return ctx.guild.id  # this line would error with the function as one line since ctx.guild may not exist.
+
     async def check_if_moderator(self, ctx):
+        """Check if a user is a moderator on a server"""
         return (ctx.author.permissions_in(ctx.channel)).manage_messages
 
     async def check_for_bot_mentions(self, message):
@@ -531,6 +644,7 @@ class Utility:
                 # check if the message belongs to the bot
                     if message_content[0] != '%':
                         if self.check_nword(message_content):
+                            self.cache.n_words_per_minute += 1
                             author_id = message_sender.id
                             current_amount = self.cache.n_word_counter.get(author_id)
                             if current_amount is not None:
@@ -580,7 +694,7 @@ class Utility:
     async def check_interaction_enabled(ctx=None, server_id=None, interaction=None):
         """Check if the interaction is disabled in the current server, RETURNS False when it is disabled."""
         if server_id is None and interaction is None:
-            server_id = ctx.guild.id
+            server_id = await Utility.get_server_id(ctx)
             interaction = ctx.command.name
         interactions = await resources.get_disabled_server_interactions(server_id)
         if interactions is None:
@@ -637,7 +751,8 @@ class Utility:
             return await ctx.send(f"> **{ctx.author.display_name}, there are no links saved for this interaction yet.**")
 
     async def add_command_count(self, command_name):
-        """Add 1 to the specific command count."""
+        """Add 1 to the specific command count and to the count of the current minute."""
+        self.cache.commands_per_minute += 1
         session_id = await self.get_session_id()
         command_count = self.cache.command_counter.get(command_name)
         if command_count is None:
@@ -866,6 +981,7 @@ class Utility:
             if self.test_bot:
                 end_point = f"https://api.irenebot.com/translate"
             async with self.session.post(end_point, data=data) as r:
+                self.cache.bot_api_translation_calls += 1
                 if r.status == 200:
                     return json.loads(await r.text())
                 else:
@@ -1327,6 +1443,53 @@ class Utility:
     #######################
     # ## GROUP MEMBERS ## #
     #######################
+    async def get_if_user_voted(self, user_id):
+        time_stamp = self.first_result(await self.conn.fetchrow("SELECT votetimestamp FROM general.lastvoted WHERE userid = $1", user_id))
+        if time_stamp:
+            tz_info = time_stamp.tzinfo
+            current_time = datetime.datetime.now(tz_info)
+            check = current_time - time_stamp
+            if check.seconds <= 43200:
+                return True
+        return False
+
+    @staticmethod
+    def check_idol_object(obj):
+        return type(obj) == Idol
+
+    async def send_vote_message(self, message):
+        server_prefix = await self.get_server_prefix_by_context(message)
+        vote_message = f"""> **To call more idol photos for the next 12 hours, please support Irene by voting or becoming a patron through the links at `{server_prefix}vote` or `{server_prefix}patreon`!**"""
+        return await message.channel.send(vote_message)
+
+    async def set_global_alias(self, obj, alias):
+        """Set an idol/group alias for the bot."""
+        obj.aliases.append(alias)
+        is_group = int(not self.check_idol_object(obj))
+        await self.conn.execute("INSERT INTO groupmembers.aliases(objectid, alias, isgroup) VALUES($1, $2, $3)", obj.id, alias, is_group)
+
+    async def set_local_alias(self, obj, alias, server_id):
+        """Set an idol/group alias for a server"""
+        local_aliases = obj.local_aliases.get(server_id)
+        if local_aliases:
+            local_aliases.append(alias)
+        else:
+            obj.local_aliases[server_id] = [alias]
+        is_group = int(not self.check_idol_object(obj))
+        await self.conn.execute("INSERT INTO groupmembers.aliases(objectid, alias, isgroup, serverid) VALUES($1, $2, $3, $4)", obj.id, alias, is_group, server_id)
+
+    async def remove_global_alias(self, obj, alias):
+        obj.aliases.remove(alias)
+        is_group = int(not self.check_idol_object(obj))
+        await self.conn.execute("DELETE FROM groupmembers.aliases WHERE alias = $1 AND isgroup = $2 AND objectid = $3 AND serverid IS NULL", alias, is_group, obj.id)
+
+    async def remove_local_alias(self, obj, alias, server_id):
+        is_group = int(not self.check_idol_object(obj))
+        local_aliases = obj.local_aliases.get(server_id)
+        if local_aliases:
+            local_aliases.remove(alias)
+        await self.conn.execute("DELETE FROM groupmembers.aliases WHERE alias = $1 AND isgroup = $2 AND serverid = $3 AND objectid = $4", alias, is_group, server_id, obj.id)
+
     async def get_member(self, idol_id):
         for idol in self.cache.idols:
             if idol.id == idol_id:
@@ -1337,7 +1500,7 @@ class Utility:
             if group.id == group_id:
                 return group
 
-    async def set_embed_card_info(self, obj, group=False):
+    async def set_embed_card_info(self, obj, group=False, server_id=None):
         """Sets General Information about a Group or Idol."""
         description = ""
         if obj.description:
@@ -1384,8 +1547,6 @@ class Utility:
                 description += f"Blood Type: {obj.blood_type}\n"
             if obj.called:
                 description += f"Called: {obj.called} times\n"
-        if obj.aliases:
-            description += f"Aliases: {', '.join(obj.aliases)}\n"
         if obj.twitter:
             description += f"[Twitter](https://twitter.com/{obj.twitter})\n"
         if obj.youtube:
@@ -1408,10 +1569,16 @@ class Utility:
             description += f"Photo Count: {obj.photo_count}\n"
         embed = await self.create_embed(title=title,
                                       color=self.get_random_color(), title_desc=description)
+        if obj.tags:
+            embed.add_field(name="Tags", value=', '.join(obj.tags), inline=False)
+        if obj.aliases:
+            embed.add_field(name="Aliases", value=', '.join(obj.aliases), inline=False)
+        if obj.local_aliases.get(server_id):
+            embed.add_field(name="Server Aliases", value=', '.join(obj.local_aliases.get(server_id)), inline=False)
         if group:
             if obj.members:
                 value = f"{' | '.join([(await self.get_member(idol_id)).full_name for idol_id in obj.members])}\n"
-                embed.add_field(name="Members", value=value)
+                embed.add_field(name="Members", value=value, inline=False)
 
         else:
             if obj.groups:
@@ -1510,13 +1677,13 @@ class Utility:
         """Get all idols from the database."""
         return await self.conn.fetch("""SELECT id, fullname, stagename, formerfullname, formerstagename, birthdate,
         birthcountry, birthcity, gender, description, height, twitter, youtube, melon, instagram, vlive, spotify,
-        fancafe, facebook, tiktok, zodiac, thumbnail, banner, bloodtype FROM groupmembers.Member ORDER BY id""")
+        fancafe, facebook, tiktok, zodiac, thumbnail, banner, bloodtype, tags FROM groupmembers.Member ORDER BY id""")
 
     async def get_all_groups(self):
         """Get all groups."""
         return await self.conn.fetch("""SELECT groupid, groupname, debutdate, disbanddate, description, twitter, youtube,
                                      melon, instagram, vlive, spotify, fancafe, facebook, tiktok, fandom, company,
-                                      website, thumbnail, banner, gender FROM groupmembers.groups ORDER BY groupname""")
+                                      website, thumbnail, banner, gender, tags FROM groupmembers.groups ORDER BY groupname""")
 
     async def get_db_members_in_group(self, group_name=None, group_id=None):
         """Get the members in a specific group from database."""
@@ -1535,8 +1702,21 @@ class Utility:
 
     async def get_db_aliases(self, object_id, group=False):
         """Get the aliases of an idol or group from the database."""
-        aliases = await self.conn.fetch("SELECT alias FROM groupmembers.aliases WHERE objectid = $1 AND isgroup = $2", object_id, int(group))
-        return [alias[0] for alias in aliases]
+        aliases = await self.conn.fetch("SELECT alias, serverid FROM groupmembers.aliases WHERE objectid = $1 AND isgroup = $2", object_id, int(group))
+        global_aliases = []
+        local_aliases = {}
+        for alias_info in aliases:
+            alias = alias_info[0]
+            server_id = alias_info[1]
+            if server_id:
+                server_list = local_aliases.get(server_id)
+                if server_list:
+                    server_list.append(alias)
+                else:
+                    local_aliases[server_id] = [alias]
+            else:
+                global_aliases.append(alias)
+        return global_aliases, local_aliases
 
     async def get_db_group_name(self, group_id):
         """Get a group's name based on their ID."""
@@ -1609,16 +1789,19 @@ class Utility:
         if len(embed_lists) > 1:
             await self.check_left_or_right_reaction_embed(msg, embed_lists, user_page_number-1)
 
-    async def set_embed_with_aliases(self, name):
+    async def set_embed_with_aliases(self, name, server_id=None):
         """Create an embed with the aliases of the names of groups or idols sent in"""
-        members = await self.get_idol_where_member_matches_name(name, mode=1)
-        groups, group_names = await self.get_group_where_group_matches_name(name, mode=1)
+        members = await self.get_idol_where_member_matches_name(name, mode=1, server_id=server_id)
+        groups, group_names = await self.get_group_where_group_matches_name(name, mode=1, server_id=server_id)
         embed_list = []
         count = 0
         page_number = 1
         embed = discord.Embed(title=f"{name} Aliases Page {page_number}", description="", color=self.get_random_color())
         for member in members:
             aliases = ', '.join(member.aliases)
+            local_aliases = member.local_aliases.get(server_id)
+            if local_aliases:
+                aliases += ", ".join(local_aliases)
             embed.add_field(name=f"{member.full_name} ({member.stage_name}) [Idol {member.id}]", value=aliases or "None", inline=True)
             count += 1
             if count == 24:
@@ -1641,8 +1824,10 @@ class Utility:
             embed_list.append(embed)
         return embed_list
 
-    async def set_embed_with_all_aliases(self, mode):
+    async def set_embed_with_all_aliases(self, mode, server_id=None):
         """Send the names of all aliases in an embed with many pages."""
+        def create_embed():
+            return discord.Embed(title=f"{mode} Global/Local Aliases Page {page_number}", color=self.get_random_color())
         if mode == "Group":
             all_info = self.cache.groups
             is_group = True
@@ -1652,9 +1837,12 @@ class Utility:
         embed_list = []
         count = 0
         page_number = 1
-        embed = discord.Embed(title=f"{mode} Aliases Page {page_number}", color=self.get_random_color())
+        embed = create_embed()
         for info in all_info:
             aliases = ",".join(info.aliases)
+            local_aliases = info.local_aliases.get(server_id)
+            if local_aliases:
+                aliases += ", ".join(local_aliases)
             if aliases:
                 if not is_group:
                     embed.add_field(name=f"{info.full_name} ({info.stage_name}) [{info.id}]", value=aliases, inline=True)
@@ -1665,7 +1853,7 @@ class Utility:
                 count = 0
                 embed_list.append(embed)
                 page_number += 1
-                embed = discord.Embed(title=f"{mode} Aliases Page {page_number}", color=self.get_random_color())
+                embed = create_embed()
         if count != 0:
             embed_list.append(embed)
         return embed_list
@@ -1755,11 +1943,14 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
         except Exception as e:
             log.console(f"Send Dead Image - {e}")
 
-    async def get_idol_where_member_matches_name(self, name, mode=0):
+    async def get_idol_where_member_matches_name(self, name, mode=0, server_id=None):
         """Get idol object if the name matches an idol"""
         idol_list = []
         name = name.lower()
         for idol in self.cache.idols:
+            local_aliases = None
+            if server_id:
+                local_aliases = idol.local_aliases.get(server_id)
             if mode == 0:
                 if idol.full_name and idol.stage_name:
                     if name == idol.full_name.lower() or name == idol.stage_name.lower():
@@ -1775,6 +1966,11 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
                 else:
                     if alias in name:
                         idol_list.append(idol)
+            if local_aliases:
+                for alias in local_aliases:
+                    if await self.check_to_add_alias_to_list(alias, name, mode):
+                        idol_list.append(idol)
+
         # remove any duplicates
         idols = list(dict.fromkeys(idol_list))
         return idols
@@ -1785,13 +1981,26 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
             if idol.stage_name == stage_name and idol.full_name == full_name:
                 return idol
 
-    async def get_group_where_group_matches_name(self, name, mode=0):
+    async def check_to_add_alias_to_list(self, alias, name, mode=0):
+        """Check whether to add an alias to a list. Compares a name with an existing alias."""
+        if mode == 0:
+            if alias == name:
+                return True
+        else:
+            if alias in name:
+                return True
+        return False
+
+    async def get_group_where_group_matches_name(self, name, mode=0, server_id=None):
         """Get group ids for a specific name."""
         group_list = []
         name = name.lower()
         for group in self.cache.groups:
             try:
                 aliases = group.aliases
+                local_aliases = None
+                if server_id:
+                    local_aliases = group.local_aliases.get(server_id)
                 if mode == 0:
                     if group.name:
                         if name == group.name.lower():
@@ -1802,13 +2011,17 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
                             group_list.append(group)
                             name = (name.lower()).replace(group.name, "")
                 for alias in aliases:
-                    if mode == 0:
-                        if alias == name:
-                            group_list.append(group)
-                    else:
-                        if alias in name:
-                            group_list.append(group)
+                    if await self.check_to_add_alias_to_list(alias, name, mode):
+                        group_list.append(group)
+                        if mode:
                             name = (name.lower()).replace(alias, "")
+                if local_aliases:
+                    for alias in local_aliases:
+                        if await self.check_to_add_alias_to_list(alias, name, mode):
+                            group_list.append(group)
+                            if mode:
+                                name = (name.lower()).replace(alias, "")
+
             except Exception as e:
                 log.console(e)
         # remove any duplicates
@@ -1824,14 +2037,15 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
         if type(page_number_or_group) == int:
             await self.send_names(ctx, mode, page_number_or_group)
         elif type(page_number_or_group) == str:
-            groups, name = await self.get_group_where_group_matches_name(page_number_or_group, mode=1)
+            server_id = await self.get_server_id(ctx)
+            groups, name = await self.get_group_where_group_matches_name(page_number_or_group, mode=1, server_id=server_id)
             await self.send_names(ctx, mode, group_ids=[group.id for group in groups])
 
-    async def check_group_and_idol(self, message):
+    async def check_group_and_idol(self, message_content, server_id=None):
         """returns specific idols being called from a reference to a group ex: redvelvet irene"""
-        groups, new_message = await self.get_group_where_group_matches_name(message, mode=1)
+        groups, new_message = await self.get_group_where_group_matches_name(message_content, mode=1, server_id=server_id)
         member_list = []
-        members = await self.get_idol_where_member_matches_name(new_message, 1)
+        members = await self.get_idol_where_member_matches_name(new_message, mode=1, server_id=server_id)
         for group in groups:
             for member in members:
                 if member.id in group.members:
@@ -1886,6 +2100,7 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
                     end_point = f"https://api.irenebot.com/photos/{idol.id}"
                 while find_post:  # guarantee we get a post sent to the user.
                     async with self.session.post(end_point, data=data) as r:
+                        self.cache.bot_api_idol_calls += 1
                         if r.status == 200 or r.status == 301:
                             api_url = r.url
                             find_post = False
@@ -1922,6 +2137,9 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
             except Exception as e:
                 log.console(e)
 
+        if guessing_game:
+            # sleep for 2 seconds because of bad loading times on discord
+            await asyncio.sleep(2)
         try:
             if file:
                 # send the video and return the message with the api url.
@@ -1939,6 +2157,10 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
                 raise Exception
 
         except Exception as e:
+            self.api_issues += 1
+            if self.api_issues >= 50:
+                await self.kill_api()
+                self.api_issues = 0
             await channel.send(f"> An API issue has occurred. If this is constantly occurring, please join our support server.")
             log.console(f" {e} - An API issue has occurred. If this is constantly occurring, please join our support server.")
             return None, None
@@ -1973,10 +2195,14 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
         guessing_game=False, scores=None):
         """The main process for posting an idol's photo."""
         try:
-            await self.update_member_count(idol)
             try:
                 msg, api_url = await self.get_image_msg(idol, group_id, channel, photo_link, user_id=user_id, guild_id=channel.guild.id, api_url=photo_link, special_message=special_message, guessing_game=guessing_game, scores=scores)
+                if not msg and not api_url:
+                    self.api_issues += 1
+                await self.update_member_count(idol)
             except Exception as e:
+                if guessing_game:
+                    return self.idol_post(channel, idol, photo_link, group_id, special_message, user_id, guessing_game, scores)
                 await channel.send(f"> An error has occurred. If you are in DMs, It is not possible to receive Idol Photos.")
                 return None, None
             return msg, api_url
@@ -2067,259 +2293,6 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
     async def get_log_channel_id(self, message):
         """Get the channel where logs are made on a server."""
         return self.client.get_channel((self.cache.logged_channels.get(message.guild.id))['logging_channel'])
-
-    ######################
-    # ## DREAMCATCHER ## #
-    ######################
-    async def get_dc_channel_role(self, channel_id):
-        """Get the role id that notifies the users on a new dc app post."""
-        return self.first_result(await self.conn.fetchrow("SELECT roleid from dreamcatcher.dreamcatcher WHERE channelid = $1", channel_id))
-
-    async def get_dc_channel_exists(self, channel_id):
-        """Returns 1 if the dc channel is being notified, otherwise returns 0."""
-        return channel_id in self.cache.dc_app_channels
-
-    async def get_dc_channels(self):
-        """Get all the servers that receive DC APP Updates."""
-        return await self.conn.fetch("SELECT channelid, roleid FROM dreamcatcher.dreamcatcher")
-
-    async def get_video_and_bat_list(self, page_soup):
-        """Get a list of all the .bat and video files."""
-        try:
-            video_list = (page_soup.findAll("div", {"class": "swiper-slide img-box video-box width"}))
-            if len(video_list) == 0:
-                video_list = (page_soup.findAll("div", {"class": "swiper-slide img-box video-box height"}))
-            count_numbers = 0
-            video_name_list = []
-            bat_name_list = []
-            for video in video_list:
-                count_numbers += 1
-                new_video_url = video.source["src"]
-                bat_name = "{}DC.bat".format(count_numbers)
-                bat_name_list.append(bat_name)
-                ab = open("Videos\{}".format(bat_name), "a+")
-                video_name = "{}DCVideo.mp4".format(count_numbers)
-                info = 'ffmpeg -i "{}" -c:v libx264 -preset slow -crf 22 "Videos/{}"'.format(new_video_url,
-                                                                                             video_name)
-                os.system(info)
-                video_name_list.append(video_name)
-                ab.write(info)
-                ab.close()
-        except Exception as e:
-            log.console(e)
-        return video_name_list or None, bat_name_list or None
-
-    @staticmethod
-    def get_videos(video_name_list):
-        """Return a list of discord.File that contains videos."""
-        dc_videos = []
-        try:
-            if video_name_list is not None:
-                for video_name in video_name_list:
-                    dc_video = discord.File(fp='Videos/{}'.format(video_name),
-                                            filename=video_name)
-                    dc_videos.append(dc_video)
-            else:
-                return None
-        except Exception as e:
-            log.console(e)
-            pass
-        return dc_videos
-
-    @staticmethod
-    def get_photos(photo_name_list):
-        """Return a list of discord.File that contains photos."""
-        dc_photos = []
-        try:
-            if photo_name_list is not None:
-                for file_name in photo_name_list:
-                    dc_photo = discord.File(fp='DCApp/{}'.format(file_name),
-                                            filename=file_name)
-                    dc_photos.append(dc_photo)
-            else:
-                return None
-        except Exception as e:
-            log.console(e)
-        return dc_photos
-
-    async def get_embed(self, image_links, member_name):
-        """Create the embed for a DC APP post."""
-        embed_list = []
-        for link in image_links:
-            embed = discord.Embed(title=member_name, color=self.get_random_color(), url=link)
-            embed.set_image(url=link)
-            embed = await self.set_embed_author_and_footer(embed, "Thanks for using Irene.")
-            embed_list.append(embed)
-        return embed_list or None
-
-    @staticmethod
-    async def send_content(channel, dc_photos_embeds, dc_videos):
-        """Send the DC APP post to the channels."""
-        try:
-            if dc_photos_embeds is not None:
-                for dc_photo_embed in dc_photos_embeds:
-                    await channel.send(embed=dc_photo_embed)
-            if dc_videos is not None:
-                for video in dc_videos:
-                    await channel.send(file=video)
-        except Exception as e:
-            log.console(e)
-
-    @staticmethod
-    def delete_content():
-        """Delete any videos or photos that were downloaded."""
-        all_videos = os.listdir('Videos')
-        for video in all_videos:
-            try:
-                os.unlink('Videos/{}'.format(video))
-            except Exception as e:
-                log.console(e)
-                pass
-        all_photos = os.listdir('DCApp')
-        for photo in all_photos:
-            try:
-                os.unlink('DCApp/{}'.format(photo))
-            except Exception as e:
-                log.console(e)
-                pass
-
-    @staticmethod
-    def get_member_name_and_id(username, member_list):
-        """return the member name and id of a post."""
-        member_id = None
-        member_name = None
-        if username == member_list[0]:
-            member_name = "Gahyeon"
-            member_id = 163
-        if username == member_list[1]:
-            member_name = "Siyeon"
-            member_id = 159
-        if username == member_list[2]:
-            member_name = "Yoohyeon"
-            member_id = 161
-        if username == member_list[3]:
-            member_name = "JIU"
-            member_id = 157
-        if username == member_list[4]:
-            member_name = "SUA"
-            member_id = 158
-        if username == member_list[5]:
-            member_name = "DC"
-        if username == member_list[6]:
-            member_name = "Dami"
-            member_id = 162
-        if username == member_list[7]:
-            member_name = "Handong"
-            member_id = 160
-        return member_name, member_id
-
-    async def add_post_to_db(self, image_links, member_id, member_name, post_number, post_url):
-        """Add a post's information to the database."""
-        if image_links is not None:
-            for link in image_links:
-                try:
-                    if member_id is not None:
-                        await self.conn.execute("INSERT INTO groupmembers.imagelinks VALUES ($1,$2)", link, member_id)
-                    await self.conn.execute("INSERT INTO dreamcatcher.DCHDLinks VALUES ($1,$2,$3)", link, member_name.lower(), post_number)
-                    await self.conn.execute("UPDATE dreamcatcher.DCUrl SET url = $1 WHERE member = $2", post_url, "latest")
-                    await self.conn.execute("UPDATE dreamcatcher.DCUrl SET url = $1 WHERE member = $2", post_url, member_name.lower())
-                except Exception as e:
-                    log.console(e)
-                    pass
-
-    async def send_new_post(self, channel_id, role_id, channel, member_name, status_message, post_url, translated_message):
-        """Send the status information to a channel."""
-        try:
-            if role_id is None:
-                role_mention = ""
-            else:
-                role_mention = f"<@&{role_id}>, "
-            if translated_message is not None:
-                if len(translated_message) != 0:
-                    translated_message = translated_message['text']
-                    return await channel.send(
-                        f">>> **{role_mention}New {member_name} Post\n<{post_url}>\nStatus Message: {status_message}\nTranslated (KR to EN): {translated_message}**")
-            return await channel.send(f">>> **{role_mention}New {member_name} Post\n<{post_url}>\nStatus Message: {status_message}**")
-        except AttributeError:
-            try:
-                await self.conn.execute("DELETE from dreamcatcher.dreamcatcher WHERE channelid = $1", channel_id)
-            except Exception as e:
-                log.console(e)
-        except Exception as e:
-            await channel.send(f">>> **New {member_name} Post\n<{post_url}>**")
-
-    @staticmethod
-    async def open_bat_file(bat_list):
-        """Open a bat file to process the video with ffmpeg."""
-        for bat_name in bat_list:
-            # open bat file
-            check_bat = await asyncio.create_subprocess_exec("Videos/{}".format(bat_name),
-                                                             stderr=asyncio.subprocess.PIPE)
-            await check_bat.wait()
-
-    async def get_image_list(self, image_url, post_url, image_links):
-        """Downloads Thumbnail Photos//This was before embeds were being used and was very inefficient. || Not Used"""
-        photo_name_list = []
-        new_count = -1
-        final_image_list = []
-        for image in image_url:
-            new_count += 1
-            new_image_url = image.img["src"]
-            file_name = new_image_url[82:]
-            async with self.session.get(new_image_url) as resp:
-                fd = await aiofiles.open('DCApp/{}'.format(file_name), mode='wb')
-                await fd.write(await resp.read())
-                await fd.close()
-                file_size = (os.path.getsize(f'DCApp/{file_name}'))
-                if file_size <= 20000:
-                    keep_going = True
-                    loop_count = 0
-                    while keep_going:
-                        log.console(f"Stuck in a loop {loop_count}")
-                        loop_count += 1
-                        try:
-                            os.unlink(f'DCApp/{file_name}')
-                        except Exception as e:
-                            log.console(e)
-                        fd = await aiofiles.open('DCApp/{}'.format(file_name), mode='wb')
-                        await fd.write(await resp.read())
-                        await fd.close()
-                        file_size = (os.path.getsize(f'DCApp/{file_name}'))
-                        if file_size > 20000:
-                            photo_name_list.append(file_name)
-                            keep_going = False
-                        if loop_count == 30:
-                            try:
-                                final_image_list.append(image_links[new_count])
-                                os.unlink(f'DCApp/{file_name}')
-                                keep_going = False
-                            except Exception as e:
-                                log.console(e)
-                                keep_going = False
-                elif file_size > 20000:
-                    photo_name_list.append(file_name)
-        return photo_name_list or None, final_image_list or None
-
-    @staticmethod
-    async def download_dc_photos(image_url):
-        """Return the list of HD links."""
-        image_links = []
-        for image in image_url:
-            new_image_url = image.img["src"]
-            dc_date = new_image_url[41:49]
-            unique_id = new_image_url[55:87]
-            file_format = new_image_url[93:]
-            hd_link = f'https://file.candlemystar.com/post/{dc_date}{unique_id}{file_format}'
-            image_links.append(hd_link)
-            # do not download hd links so that they are sent to channels quicker.
-            """
-            async with session.get(hd_link) as resp:
-                fd = await aiofiles.open(
-                    'DreamHD/{}'.format(f"{unique_id[:8]}{file_format}"), mode='wb')
-                await fd.write(await resp.read())
-                await fd.close()
-            """
-        return image_links
 
     #################
     # ## TWITTER ## #
@@ -2600,72 +2573,340 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
             if game.channel == channel:
                 return game
 
+    #################
+    # ## DATADOG ## #
+    #################
+    @staticmethod
+    def initialize_data_dog():
+        """Initialize The DataDog Class"""
+        initialize()
+
+    def send_metric(self, metric_name, value):
+        """Send a metric value to DataDog."""
+        # some values at 0 are important such as active games, this was put in place to make sure they are updated at 0.
+        metrics_at_zero = ['bias_games', 'guessing_games', 'commands_per_minute', 'n_words_per_minute',
+                           'bot_api_idol_calls', 'bot_api_translation_calls', 'messages_received_per_min',
+                           'errors_per_minute', 'wolfram_per_minute', 'urban_per_minute']
+        if metric_name in metrics_at_zero and not value:
+            value = 0
+        else:
+            if not value:
+                return
+        if self.test_bot:
+            metric_name = 'test_bot_' + metric_name
+        else:
+            metric_name = 'irene_' + metric_name
+        api.Metric.send(metric=metric_name, points=[(time.time(), value)])
+
+    #################
+    # ## WEVERSE ## #
+    #################
+    async def add_weverse_channel(self, channel_id, community_name):
+        """Add a channel to get updates for a community"""
+        community_name = community_name.lower()
+        await self.conn.execute("INSERT INTO weverse.channels(channelid, communityname) VALUES($1, $2)", channel_id, community_name)
+        await self.add_weverse_channel_to_cache(channel_id, community_name)
+
+    async def add_weverse_channel_to_cache(self, channel_id, community_name):
+        """Add a weverse channel to cache."""
+        community_name = community_name.lower()
+        channels = self.cache.weverse_channels.get(community_name)
+        if channels:
+            channels.append([channel_id, None, False])
+        else:
+            self.cache.weverse_channels[community_name] = [[channel_id, None, False]]
+
+    async def check_weverse_channel(self, channel_id, community_name):
+        """Check if a channel is already getting updates for a community"""
+        channels = self.cache.weverse_channels.get(community_name.lower())
+        if channels:
+            for channel in channels:
+                if channel_id == channel[0]:
+                    return True
+        return False
+
+    async def get_weverse_channels(self, community_name):
+        """Get all of the channel ids for a specific community name"""
+        return self.cache.weverse_channels.get(community_name.lower())
+
+    async def delete_weverse_channel(self, channel_id, community_name):
+        """Delete a community from a channel's updates."""
+        community_name = community_name.lower()
+        await self.conn.execute("DELETE FROM weverse.channels WHERE channelid = $1 AND communityname = $2", channel_id, community_name)
+        channels = await self.get_weverse_channels(community_name)
+        for channel in channels:
+            if channel[0] == channel_id:
+                if channels:
+                    channels.remove(channel)
+                else:
+                    self.cache.weverse_channels.pop(community_name)
+
+    async def add_weverse_role(self, channel_id, community_name, role_id):
+        """Add a weverse role to notify."""
+        await self.conn.execute("UPDATE weverse.channels SET roleid = $1 WHERE channelid = $2 AND communityname = $3", role_id, channel_id, community_name.lower())
+        await self.replace_cache_role_id(channel_id, community_name, role_id)
+
+    async def delete_weverse_role(self, channel_id, community_name):
+        """Remove a weverse role from a server (no longer notifies a role)."""
+        await self.conn.execute("UPDATE weverse.channels SET roleid = NULL WHERE channel_id = $1 AND communityname = $2", channel_id, community_name.lower())
+        await self.replace_cache_role_id(channel_id, community_name, None)
+
+    async def replace_cache_role_id(self, channel_id, community_name, role_id):
+        """Replace the server role that gets notified on Weverse Updates."""
+        channels = self.cache.weverse_channels.get(community_name)
+        for channel in channels:
+            cache_channel_id = channel[0]
+            if cache_channel_id == channel_id:
+                channel[1] = role_id
+
+    async def change_weverse_comment_status(self, channel_id, community_name, comments_disabled, updated=False):
+        """Change a channel's subscription and whether or not they receive updates on comments."""
+        comments_disabled = bool(comments_disabled)
+        community_name = community_name.lower()
+        if updated:
+            await self.conn.execute("UPDATE weverse.channels SET commentsdisabled = $1 WHERE channelid = $2 AND communityname = $3", int(comments_disabled), channel_id, community_name)
+        channels = self.cache.weverse_channels.get(community_name)
+        for channel in channels:
+            cache_channel_id = channel[0]
+            if cache_channel_id == channel_id:
+                channel[2] = comments_disabled
+
+    async def set_comment_embed(self, notification, embed_title):
+        """Set Comment Embed for Weverse."""
+        artist_comments = await self.weverse_client.fetch_artist_comments(notification.community_id, notification.contents_id)
+        if not artist_comments:
+            return
+        comment = artist_comments[0]
+        embed_description = f"**{notification.message}**\n\n" \
+            f"Content: **{comment.body}**\n" \
+            f"Translated Content: **{await self.weverse_client.translate(comment.id, is_comment=True, p_obj=comment, community_id=notification.community_id)}**"
+        embed = await self.create_embed(title=embed_title, title_desc=embed_description)
+        return embed
+
+    async def set_post_embed(self, notification, embed_title):
+        """Set Post Embed for Weverse."""
+        post = self.weverse_client.get_post_by_id(notification.contents_id)
+        if post:
+            # artist = self.weverse_client.get_artist_by_id(notification.artist_id)
+            embed_description = f"**{notification.message}**\n\n" \
+                f"Artist: **{post.artist.name} ({post.artist.list_name[0]})**\n" \
+                f"Content: **{post.body}**\n" \
+                f"Translated Content: **{await self.weverse_client.translate(post.id, is_post=True, p_obj=post, community_id=notification.community_id)}**"
+            embed = await self.create_embed(title=embed_title, title_desc=embed_description)
+            message = "\n".join([await self.download_weverse_post(photo.original_img_url, photo.file_name) for photo in post.photos])
+            return embed, message
+        return None, None
+
+    async def download_weverse_post(self, url, file_name):
+        """Downloads an image url and returns image host url."""
+        async with self.session.get(url) as resp:
+            fd = await aiofiles.open(keys.weverse_image_folder + file_name, mode='wb')
+            await fd.write(await resp.read())
+        return f"https://images.irenebot.com/weverse/{file_name}"
+
+    async def set_media_embed(self, notification, embed_title):
+        """Set Media Embed for Weverse."""
+        media = self.weverse_client.get_media_by_id(notification.contents_id)
+        if media:
+            embed_description = f"**{notification.message}**\n\n" \
+                f"Title: **{media.title}**\n" \
+                f"Content: **{media.body}**\n"
+            embed = await self.create_embed(title=embed_title, title_desc=embed_description)
+            message = media.video_link
+            return embed, message
+        return None, None
+
+    #########################
+    # ## SelfAssignRoles ## #
+    #########################
+    async def add_self_role(self, role_id, role_name, server_id):
+        """Adds a self-assignable role to a server."""
+        role_info = [role_id, role_name]
+        await self.conn.execute("INSERT INTO selfassignroles.roles(roleid, rolename, serverid) VALUES ($1, $2, $3)", role_id, role_name, server_id)
+        roles = await self.get_assignable_server_roles(server_id)
+        if roles:
+            roles.append(role_info)
+        else:
+            cache_info = self.cache.assignable_roles.get(server_id)
+            if not cache_info:
+                self.cache.assignable_roles[server_id] = {}
+                cache_info = self.cache.assignable_roles.get(server_id)
+            cache_info['roles'] = [role_info]
+
+    async def get_self_role(self, message_content, server_id):
+        """Returns a discord.Object that can be used for adding or removing a role to a member."""
+        roles = await self.get_assignable_server_roles(server_id)
+        if roles:
+            for role in roles:
+                role_id = role[0]
+                role_name = role[1]
+                if role_name.lower() == message_content.lower():
+                    return discord.Object(role_id), role_name
+        return None, None
+
+    async def check_self_role_exists(self, role_id, role_name, server_id):
+        """Check if a role exists as a self-assignable role in a server."""
+        cache_info = self.cache.assignable_roles.get(server_id)
+        if cache_info:
+            roles = cache_info.get('roles')
+            if roles:
+                for role in roles:
+                    c_role_id = role[0]
+                    c_role_name = role[1]
+                    if c_role_id == role_id or c_role_name == role_name:
+                        return True
+        return False
+
+    async def remove_self_role(self, role_name, server_id):
+        """Remove a self-assignable role from a server."""
+        await self.conn.execute("DELETE FROM selfassignroles.roles WHERE rolename = $1 AND serverid = $2", role_name, server_id)
+        cache_info = self.cache.assignable_roles.get(server_id)
+        if cache_info:
+            roles = cache_info.get('roles')
+            if roles:
+                for role in roles:
+                    if role[1].lower() == role_name.lower():
+                        roles.remove(role)
+
+    async def modify_channel_role(self, channel_id, server_id):
+        """Add or Change a server's self-assignable role channel."""
+        def update_cache():
+            cache_info = self.cache.assignable_roles.get(server_id)
+            if not cache_info:
+                self.cache.assignable_roles[server_id] = {'channel_id': channel_id}
+            else:
+                cache_info['channel_id'] = channel_id
+
+        amount_of_results = self.first_result(await self.conn.fetchrow("SELECT COUNT(*) FROM selfassignroles.channels WHERE serverid = $1", server_id))
+        if amount_of_results:
+            update_cache()
+            return await self.conn.execute("UPDATE selfassignroles.channels SET channelid = $1 WHERE serverid = $2", channel_id, server_id)
+        await self.conn.execute("INSERT INTO selfassignroles.channels(channelid, serverid) VALUES($1, $2)", channel_id, server_id)
+        update_cache()
+
+    async def get_assignable_server_roles(self, server_id):
+        """Get all the self-assignable roles from a server."""
+        results = self.cache.assignable_roles.get(server_id)
+        if results:
+            return results.get('roles')
+
+    async def check_for_self_assignable_role(self, message):
+        """Main process for processing self-assignable roles."""
+        try:
+            author = message.author
+            server_id = await self.get_server_id(message)
+            if await self.check_self_assignable_channel(server_id, message.channel):
+                if message.content:
+                    prefix = message.content[0]
+                    if len(message.content) > 1:
+                        msg = message.content[1:len(message.content)]
+                    else:
+                        return
+                    role, role_name = await self.get_self_role(msg, server_id)
+                    await self.process_member_roles(message, role, role_name, prefix, author)
+        except Exception as e:
+            log.console(e)
+
+    async def check_self_assignable_channel(self, server_id, channel):
+        """Check if a channel is a self assignable role channel."""
+        if server_id:
+            cache_info = self.cache.assignable_roles.get(server_id)
+            if cache_info:
+                channel_id = cache_info.get('channel_id')
+                if channel_id:
+                    if channel_id == channel.id:
+                        return True
+
+    @staticmethod
+    async def check_member_has_role(member_roles, role_id):
+        """Check if a member has a role"""
+        for role in member_roles:
+            if role.id == role_id:
+                return True
+
+    async def process_member_roles(self, message, role, role_name, prefix, author):
+        """Adds or removes a (Self-Assignable) role from a member"""
+        if role:
+            if prefix == '-':
+                if await self.check_member_has_role(author.roles, role.id):
+                    await author.remove_roles(role, reason="Self-Assignable Role", atomic=True)
+                    return await message.channel.send(f"> {author.display_name}, You no longer have the {role_name} role.", delete_after=10)
+                else:
+                    return await message.channel.send(f"> {author.display_name}, You do not have the {role_name} role.", delete_after=10)
+            elif prefix == '+':
+                if await self.check_member_has_role(author.roles, role.id):
+                    return await message.channel.send(f"> {author.display_name}, You already have the {role_name} role.", delete_after=10)
+                await author.add_roles(role, reason="Self-Assignable Role", atomic=True)
+                return await message.channel.send(f"> {author.display_name}, You have been given the {role_name} role.", delete_after=10)
+            await message.delete()
+
 
 class Idol:
-    def __init__(self, idol_id=None, full_name=None, stage_name=None, former_full_name=None,
-                 former_stage_name=None, birth_date=None, birth_country=None,
-                 birth_city=None, gender=None, description=None, height=None, twitter=None, youtube=None,
-                 melon=None, instagram=None, vlive=None, spotify=None,
-                 fancafe=None, facebook=None, tiktok=None, zodiac=None, thumbnail=None, banner=None, blood_type=None):
-        self.id = idol_id
-        self.full_name = full_name
-        self.stage_name = stage_name
-        self.former_full_name = former_full_name
-        self.former_stage_name = former_stage_name
-        self.birth_date = birth_date
-        self.birth_country = birth_country
-        self.birth_city = birth_city
-        self.gender = gender
-        self.description = description
-        self.height = height
-        self.twitter = twitter
-        self.youtube = youtube
-        self.melon = melon
-        self.instagram = instagram
-        self.vlive = vlive
-        self.spotify = spotify
-        self.fancafe = fancafe
-        self.facebook = facebook
-        self.tiktok = tiktok
+    def __init__(self, **kwargs):
+        self.id = kwargs.get('id')
+        self.full_name = kwargs.get('fullname')
+        self.stage_name = kwargs.get('stagename')
+        self.former_full_name = kwargs.get('formerfullname')
+        self.former_stage_name = kwargs.get('formerstagename')
+        self.birth_date = kwargs.get('birthdate')
+        self.birth_country = kwargs.get('birthcountry')
+        self.birth_city = kwargs.get('birthcity')
+        self.gender = kwargs.get('gender')
+        self.description = kwargs.get('description')
+        self.height = kwargs.get('height')
+        self.twitter = kwargs.get('twitter')
+        self.youtube = kwargs.get('youtube')
+        self.melon = kwargs.get('melon')
+        self.instagram = kwargs.get('instagram')
+        self.vlive = kwargs.get('vlive')
+        self.spotify = kwargs.get('spotify')
+        self.fancafe = kwargs.get('fancafe')
+        self.facebook = kwargs.get('facebook')
+        self.tiktok = kwargs.get('tiktok')
         self.aliases = []
+        self.local_aliases = {}  # server_id: [aliases]
         self.groups = []
-        self.zodiac = zodiac
-        self.thumbnail = thumbnail
-        self.banner = banner
-        self.blood_type = blood_type
+        self.zodiac = kwargs.get('zodiac')
+        self.thumbnail = kwargs.get('thumbnail')
+        self.banner = kwargs.get('banner')
+        self.blood_type = kwargs.get('bloodtype')
         self.photo_count = 0
         # amount of times the idol has been called.
         self.called = 0
+        self.tags = kwargs.get('tags')
+        if self.tags:
+            self.tags = self.tags.split(',')
 
 
 class Group:
-    def __init__(self, group_id=None, group_name=None, debut_date=None, disband_date=None, description=None,
-                 twitter=None, youtube=None, melon=None, instagram=None, vlive=None, spotify=None, fancafe=None,
-                 facebook=None, tiktok=None, fandom=None, company=None, website=None, thumbnail=None, banner=None,
-                 gender=None):
-        self.id = group_id
-        self.name = group_name
-        self.debut_date = debut_date
-        self.disband_date = disband_date
-        self.description = description
-        self.twitter = twitter
-        self.youtube = youtube
-        self.melon = melon
-        self.instagram = instagram
-        self.vlive = vlive
-        self.spotify = spotify
-        self.fancafe = fancafe
-        self.facebook = facebook
-        self.tiktok = tiktok
+    def __init__(self, **kwargs):
+        self.id = kwargs.get('groupid')
+        self.name = kwargs.get('groupname')
+        self.debut_date = kwargs.get('debutdate')
+        self.disband_date = kwargs.get('disbanddate')
+        self.description = kwargs.get('description')
+        self.twitter = kwargs.get('twitter')
+        self.youtube = kwargs.get('youtube')
+        self.melon = kwargs.get('melon')
+        self.instagram = kwargs.get('instagram')
+        self.vlive = kwargs.get('vlive')
+        self.spotify = kwargs.get('spotify')
+        self.fancafe = kwargs.get('fancafe')
+        self.facebook = kwargs.get('facebook')
+        self.tiktok = kwargs.get('tiktok')
         self.aliases = []
+        self.local_aliases = {}  # server_id: [aliases]
         self.members = []
-        self.fandom = fandom
-        self.company = company
-        self.website = website
-        self.thumbnail = thumbnail
-        self.banner = banner
-        self.gender = gender
+        self.fandom = kwargs.get('fandom')
+        self.company = kwargs.get('company')
+        self.website = kwargs.get('website')
+        self.thumbnail = kwargs.get('thumbnail')
+        self.banner = kwargs.get('banner')
+        self.gender = kwargs.get('gender')
         self.photo_count = 0
+        self.tags = kwargs.get('tags')
+        if self.tags:
+            self.tags = self.tags.split(',')
 
 
 resources = Utility()

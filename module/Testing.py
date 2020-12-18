@@ -9,8 +9,6 @@ class Testing(commands.Cog):
         self.blackjack = module.BlackJack.BlackJack()
         self.botmod = module.BotMod.BotMod()
         self.currency = module.Currency.Currency()
-        self.dreamcatcher = module.DreamCatcher.DreamCatcher()
-        self.dcapp = module.DreamCatcher.DcApp()
         self.groupmembers = module.GroupMembers.GroupMembers()
         self.logging = module.Logging.Logging()
         self.misc = module.Miscellaneous.Miscellaneous()
@@ -28,8 +26,6 @@ class Testing(commands.Cog):
         await self.test_blackjack(ctx)
         await self.test_botmod(ctx)
         await self.test_currency(ctx)
-        await self.test_dreamcatcher(ctx)
-        await self.test_dcapp(ctx)
         await self.test_groupmembers(ctx)
         await self.test_logging(ctx)
         await self.test_misc(ctx)
@@ -95,31 +91,6 @@ class Testing(commands.Cog):
         except Exception as e:
             module.log.console(f"TESTING - {e}")
             await ctx.send("Currency Failure")
-
-    async def test_dreamcatcher(self, ctx):
-        """Tests the commands in DreamCatcher"""
-        try:
-            await self.dreamcatcher.dcstop(self.dreamcatcher, ctx)
-            await self.dreamcatcher.dcstart(self.dreamcatcher, ctx)
-            await self.dreamcatcher.dcstop(self.dreamcatcher, ctx)
-            # download_all will not be tested.
-            await self.dreamcatcher.latest(self.dreamcatcher, ctx)
-            await self.dreamcatcher.updates(self.dreamcatcher, ctx)
-            await self.dreamcatcher.updates(self.dreamcatcher, ctx, solution="stop")
-            await ctx.send(f"> **DREAMCATCHER WAS TESTED SUCCESSFULLY**")
-        except Exception as e:
-            module.log.console(f"TESTING - {e}")
-            await ctx.send("DreamCatcher Failure")
-
-    async def test_dcapp(self, ctx):
-        """Tests the commands in DC APP"""
-        try:
-            await self.dcapp.check_dc_post(51593, test=True)  # Class is not a Cog, do not need to pass in self, IMAGE
-            await self.dcapp.check_dc_post(51114, test=True)  # Class is not a Cog, do not need to pass in self, VIDEO
-            await ctx.send(f"> **DCAPP WAS TESTED SUCCESSFULLY**")
-        except Exception as e:
-            module.log.console(f"TESTING - {e}")
-            await ctx.send("DC APP Failure")
 
     async def test_groupmembers(self, ctx):
         """Tests the commands in GroupMembers"""

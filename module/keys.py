@@ -40,6 +40,7 @@ report_channel_id = make_int(os.getenv("REPORT_CHANNEL_ID"))
 suggest_channel_id = make_int(os.getenv("SUGGEST_CHANNEL_ID"))
 dead_image_channel_id = make_int(os.getenv("DEAD_IMAGE_CHANNEL_ID"))
 idol_post_send_limit = make_int(os.getenv("IDOL_POST_LIMIT"))
+idol_no_vote_send_limit = make_int(os.getenv("IDOL_NO_VOTE_LIMIT"))  # amount of votes that can be sent without voting.
 
 interaction_list = [
     'slap',
@@ -174,6 +175,10 @@ idol_banner_location = os.getenv("IDOL_BANNER_LOCATION")
 
 # Bias Game Folder Location
 bias_game_location = os.getenv("BIAS_GAME_LOCATION")
+
+# Weverse
+weverse_auth_token = os.getenv("WEVERSE_AUTH")
+weverse_image_folder = os.getenv("WEVERSE_IMAGE_FOLDER")
 
 # API
 api_port = os.getenv("API_PORT")

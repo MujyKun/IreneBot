@@ -1,30 +1,115 @@
 import discord
 from discord.ext import commands
 from module import logger as log, keys
-import module
 from Utility import resources as ex
+import aiofiles
 
 
 class BotMod(commands.Cog):
     @staticmethod
     async def mod_on_message(message):
-        message_sender = message.author
-        message_channel = message.channel
-        message_content = message.content
-        if message_sender.id != keys.bot_id:
-            if 'closedm' not in message_content and 'createdm' not in message_content:
-                for user_id in ex.cache.mod_mail:
-                    channel_id = ex.cache.mod_mail.get(user_id)
-                    mod_channel = await ex.client.fetch_channel(channel_id)
-                    if user_id == message_sender.id:
-                        dm_channel = await ex.get_dm_channel(message_sender.id)
-                        if message_channel.id == dm_channel:
-                            await mod_channel.send(
+        try:
+            message_sender = message.author
+            message_channel = message.channel
+            message_content = message.content
+            if message_sender.id != keys.bot_id:
+                if 'closedm' not in message_content and 'createdm' not in message_content:
+                    for user_id in ex.cache.mod_mail:
+                        channel_id = ex.cache.mod_mail.get(user_id)
+                        mod_channel = await ex.client.fetch_channel(channel_id)
+                        if user_id == message_sender.id:
+                            dm_channel = await ex.get_dm_channel(message_sender.id)
+                            if message_channel.id == dm_channel:
+                                await mod_channel.send(
+                                    f">>> FROM: {message_sender.display_name} ({message_sender.id}) - {message_content}")
+                        if mod_channel == message_channel:
+                            dm_channel = await ex.get_dm_channel(user_id)
+                            await dm_channel.send(
                                 f">>> FROM: {message_sender.display_name} ({message_sender.id}) - {message_content}")
-                    if mod_channel == message_channel:
-                        dm_channel = await ex.get_dm_channel(user_id)
-                        await dm_channel.send(
-                            f">>> FROM: {message_sender.display_name} ({message_sender.id}) - {message_content}")
+        except Exception as e:
+            log.console(f"{e} - BotMod.mod_on_message")
+
+    @commands.command()
+    @commands.check(ex.check_if_mod)
+    async def weverseauth(self, ctx, token):
+        """Updates Weverse Authentication Token without restarting bot.
+        Only use this in DMs or a private channel for security purposes.
+        [Format %weverseauth <token>]
+        """
+        keys.weverse_auth_token = token
+        ex.weverse_client = ex.WeverseAsync(authorization=keys.weverse_auth_token, web_session=ex.session,
+                                            verbose=True, loop=ex.asyncio.get_event_loop())
+        await ctx.send("> Token and Weverse client has been updated.")
+        await ex.weverse_client.start()
+
+    @commands.command()
+    @commands.check(ex.check_if_mod)
+    async def moveto(self, ctx, idol_id, link):
+        """Moves a link to another idol. (Cannot be used for adding new links)[Format: %moveto (idol id) (link)]"""
+        try:
+            drive_link = ex.first_result(await ex.conn.fetchrow("SELECT driveurl FROM groupmembers.apiurl WHERE apiurl = $1", link))
+            if not drive_link:
+                return await ctx.send(f"> **{link} does not have a connection to a google drive link.**")
+            await ex.conn.execute("UPDATE groupmembers.imagelinks SET memberid = $1 WHERE link = $2", int(idol_id), drive_link)
+            await ctx.send(f"> **Moved {link} to {idol_id} if it existed.**")
+        except Exception as e:
+            log.console(e)
+            await ctx.send(f"> **{e}**")
+
+    @commands.command()
+    @commands.is_owner()
+    async def fixlinks(self, ctx):
+        """Fix thumbnails and banners of idols and groups and put them on the host.
+        NOTE: this is not an official command is just used momentarily for updates. No reason for this code to be
+        simplified and is not a permanent command.
+        """
+        mem_info = await ex.conn.fetch('SELECT id, thumbnail, banner FROM groupmembers.member')
+        grp_info = await ex.conn.fetch('SELECT groupid, thumbnail, banner FROM groupmembers.groups')
+
+        async def download_image(link, file_name):
+            async with ex.session.get(link) as resp:
+                fd = await aiofiles.open(file_name, mode='wb')
+                await fd.write(await resp.read())
+
+        for member in mem_info:
+            mem_id = member[0]
+            mem_thumbnail = member[1]
+            mem_banner = member[2]
+            file_name = f"{mem_id}_IDOL.png"
+            if mem_thumbnail:
+                file_loc = f"{keys.idol_avatar_location}{file_name}"
+                if 'images.irenebot.com' not in mem_thumbnail:
+                    await download_image(mem_thumbnail, file_loc)
+                if ex.check_file_exists(file_loc):
+                    image_url = f"https://images.irenebot.com/avatar/{file_name}"
+                    await ex.conn.execute("UPDATE groupmembers.member SET thumbnail = $1 WHERE id = $2", image_url, mem_id)
+            if mem_banner:
+                file_loc = f"{keys.idol_banner_location}{file_name}"
+                if 'images.irenebot.com' not in mem_banner:
+                    await download_image(mem_banner, file_loc)
+                image_url = f"https://images.irenebot.com/banner/{file_name}"
+                if ex.check_file_exists(file_loc):
+                    await ex.conn.execute("UPDATE groupmembers.member SET banner = $1 WHERE id = $2", image_url, mem_id)
+        for group in grp_info:
+            grp_id = group[0]
+            grp_thumbnail = group[1]
+            grp_banner = group[2]
+            file_name = f"{grp_id}_GROUP.png"
+            if grp_thumbnail:
+                file_loc = f"{keys.idol_avatar_location}{file_name}"
+                if 'images.irenebot.com' not in grp_thumbnail:
+                    await download_image(grp_thumbnail, file_loc)
+                image_url = f"https://images.irenebot.com/avatar/{file_name}"
+                if ex.check_file_exists(file_loc):
+                    await ex.conn.execute("UPDATE groupmembers.groups SET thumbnail = $1 WHERE groupid = $2", image_url, grp_id)
+            if grp_banner:
+                file_loc = f"{keys.idol_banner_location}{file_name}"
+                if 'images.irenebot.com' not in grp_banner:
+                    await download_image(grp_banner, file_loc)
+                image_url = f"https://images.irenebot.com/banner/{file_name}"
+                if ex.check_file_exists(file_loc):
+                    await ex.conn.execute("UPDATE groupmembers.groups SET banner = $1 WHERE groupid = $2", image_url, grp_id)
+        return await ctx.send("> All images have been fixed, merged to image hosting service and have links set up for them.")
 
     @commands.command()
     @commands.check(ex.check_if_mod)
@@ -80,16 +165,17 @@ class BotMod(commands.Cog):
         await ex.create_group_cache()
         await ctx.send(f"> Merged {duplicate_group_id} to {original_group_id}.")
 
-
-
     @commands.command()
     @commands.check(ex.check_if_mod)
     async def killapi(self, ctx):
         """Restarts the API. [Format: %killapi]"""
-        source_link = "http://127.0.0.1:5123/restartAPI"
         await ctx.send("> Restarting the API.")
-        async with ex.session.get(source_link) as resp:
-            pass
+        message = f"Irene is restarting. All games will be stopped."
+        for game in ex.cache.bias_games:
+            await game.channel.send(message)
+        for game in ex.cache.guessing_games:
+            await game.channel.send(message)
+        await ex.kill_api()
 
     @commands.command()
     @commands.check(ex.check_if_mod)
@@ -115,17 +201,20 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
 
     @commands.command()
     @commands.check(ex.check_if_mod)
-    async def repost(self, ctx, post_number):
-        """Reposts a certain post from the DC APP to all channels. [Format: %repost post_number]"""
-        await ctx.send(f"> **Reposting...**")
-        await module.DreamCatcher.DcApp().check_dc_post(post_number, repost=True, test=False)
-        await ctx.send(f"> **Successfully reposted to all channels.**")
-
-    @commands.command()
-    @commands.check(ex.check_if_mod)
     async def kill(self, ctx):
         """Kills the bot [Format: %kill]"""
         await ctx.send("> **The bot is now offline.**")
+        message = "Irene is restarting... All games in this channel will end."
+        for game in ex.cache.bias_games:
+            try:
+                await game.channel.send(message)
+            except Exception as e:
+                pass
+        for game in ex.cache.guessing_games:
+            try:
+                await game.channel.send(message)
+            except Exception as e:
+                pass
         await ex.client.logout()
 
     @commands.command()
@@ -217,68 +306,6 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
         except Exception as e:
             log.console(e)
             await ctx.send(e)
-
-    @commands.command()
-    @commands.check(ex.check_if_mod)
-    async def addalias(self, ctx, alias, mem_id: int, mode="idol"):
-        """Add alias to an idol/group (Underscores are spaces)[Format: %addalias (alias) (ID of idol/group) ("idol" or "group"]"""
-        alias = alias.replace("_", " ")
-        if mode.lower() == "idol":
-            mode = "member"
-            param = "id"
-            is_group = False
-        elif mode.lower() == "group":
-            mode = "groups"
-            param = "groupid"
-            is_group = True
-        else:
-            return await ctx.send("> **Please specify 'idol' or 'group'**.")
-        try:
-            id_exists = ex.first_result(await ex.conn.fetchrow(f"SELECT COUNT(*) FROM groupmembers.{mode} WHERE {param} = $1", mem_id))
-            if id_exists == 0:
-                return await ctx.send(f"> **That ID ({mem_id}) does not exist.**")
-            else:
-                # check if the alias already exists, if not, add it
-                aliases = await ex.get_aliases(object_id=mem_id, group=is_group)
-                if alias not in aliases:
-                    await ex.conn.execute("INSERT INTO groupmembers.aliases(objectid, alias, isgroup) VALUES ($1, $2, $3)", mem_id, alias.lower(), int(is_group))
-                    await ctx.send(f"> **Added Alias: {alias} to {mem_id}**")
-                else:
-                    return await ctx.send(f"> **{alias} already exists with {mem_id}.**")
-        except Exception as e:
-            await ctx.send(e)
-            log.console(e)
-
-    @commands.command(aliases=['removealias'])
-    @commands.check(ex.check_if_mod)
-    async def deletealias(self, ctx, alias, mem_id: int, mode="idol"):
-        """Remove alias from an idol/group (Underscores are spaces)[Format: %deletealias (alias) (ID of idol/group) ("idol" or "group")]"""
-        alias = alias.replace("_", " ")
-        if mode.lower() == "idol":
-            mode = "member"
-            param = "id"
-            is_group = False
-        elif mode.lower() == "group":
-            mode = "groups"
-            param = "groupid"
-            is_group = True
-        else:
-            return await ctx.send("> **Please specify 'idol' or 'group'**.")
-        try:
-            id_exists = ex.first_result(await ex.conn.fetchrow(f"SELECT COUNT(*) FROM groupmembers.{mode} WHERE {param} = $1", mem_id))
-            if id_exists == 0:
-                return await ctx.send("> **That ID does not exist.**")
-            else:
-                # check if the alias exists, if it does delete it.
-                aliases = await ex.get_aliases(object_id=mem_id, group=is_group)
-                if alias in aliases:
-                    await ex.conn.execute("DELETE FROM groupmembers.aliases WHERE objectid = $1 AND alias = $2 AND isgroup = $3", mem_id, alias.lower(), int(is_group))
-                    return await ctx.send(f"> **Alias: {alias} was removed from {mem_id}.**")
-                else:
-                    return await ctx.send(f"> **Could not find alias: {alias}**")
-        except Exception as e:
-            await ctx.send(e)
-            log.console(e)
 
     @commands.command()
     @commands.check(ex.check_if_mod)

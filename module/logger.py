@@ -1,5 +1,8 @@
 import logging
 import datetime
+from concurrent.futures import ThreadPoolExecutor
+
+thread_pool = ThreadPoolExecutor()
 
 
 def debug():
@@ -18,11 +21,16 @@ def info():
     logger.addHandler(handler)
 
 
-def console(message):
+def print_to_console(message):
     print(message)
     with open(f"Logs/{datetime.date.today()}-console.log", "a+", encoding='utf-8') as file:
         output = f"{datetime.datetime.now()} -- {message}\n"
         file.write(output)
+
+
+def console(message):
+    # run in a separate thread to avoid blocking.
+    result = (thread_pool.submit(print_to_console, message)).result()
 
 
 def logfile(message):

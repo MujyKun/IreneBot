@@ -3,8 +3,8 @@ aiofiles==0.4.0
 aiohttp==3.6.2
 asyncio==3.4.3
 asyncpg==0.20.1
-boats.py==0.1
-dblpy==0.3.4
+git+git://github.com/MujyKun/boats.py@master#boats.py
+dblpy==0.4.0
 discord.py==1.5.1
 tweepy==3.8.0
 google-api-python-client==1.7.11
@@ -19,3 +19,5 @@ filetype==1.0.7
 xmltodict==0.12.0
 ksoftapi==0.2.4a0
 Pillow==8.0.1
+datadog==0.39.0
+git+git://github.com/MujyKun/Weverse@main#Weverse

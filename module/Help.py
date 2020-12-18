@@ -75,7 +75,6 @@ class Help(commands.Cog):
             THE ONLY ALTERED CODE WAS CHANGING get_opening_note to be awaited.
             get_opening_note was not originally async.
             """
-
             ctx = self.context
             bot = ctx.bot
 
@@ -85,7 +84,6 @@ class Help(commands.Cog):
             note = await self.get_opening_note()
             if note:
                 self.paginator.add_line(note, empty=True)
-
             no_category = '\u200b{0.no_category}'.format(self)
 
             def get_category(command, *, no_category=no_category):

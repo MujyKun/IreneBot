@@ -41,6 +41,12 @@ class Miscellaneous(commands.Cog):
             pass
 
     @commands.command()
+    async def vote(self, ctx):
+        """Link to Voting for Irene on Top.gg
+        [Format: %vote]"""
+        return await ctx.send(f"> https://top.gg/bot/{keys.bot_id}/vote")
+
+    @commands.command()
     async def choose(self, ctx, *, options):
         """Choose between a selection of options. Underscores are spaces between words. Spaces separate choices.
         [Format: %choose (option_1 option_2 option_3)]"""
@@ -103,8 +109,7 @@ class Miscellaneous(commands.Cog):
             log.console(e)
             await ctx.send(f"> **Something Went Wrong, please {await ex.get_server_prefix_by_context(ctx)}report it.**")
 
-
-    @commands.command()
+    @commands.command(aliases=['patron'])
     async def patreon(self, ctx):
         """Displays Patreon Information. [Format: %patreon]"""
         await ctx.send(f"**Please support <@{keys.bot_id}>'s development at {keys.patreon_link}.**")
@@ -130,7 +135,7 @@ class Miscellaneous(commands.Cog):
     @commands.command()
     async def botinfo(self, ctx):
         """Get information about the bot."""
-        maintenance_status = api_status = db_status = images_status = ":red_circle:"
+        maintenance_status = api_status = db_status = images_status = weverse_status = ":red_circle:"
         if await ex.get_api_status():
             api_status = ":green_circle:"
         if await ex.get_db_status():
@@ -139,6 +144,8 @@ class Miscellaneous(commands.Cog):
             images_status = ":green_circle:"
         if ex.cache.maintenance_mode:
             maintenance_status = ":green_circle:"
+        if await ex.weverse_client.check_token_works():
+            weverse_status = ":green_circle:"
         try:
             current_server_prefix = await ex.get_server_prefix(ctx.guild.id)
         except Exception as e:
@@ -164,22 +171,23 @@ class Miscellaneous(commands.Cog):
 API Status: {api_status} 
 Images Status: {images_status} 
 Database Status: {db_status} 
-Maintenance: {maintenance_status}
+Weverse Status: {weverse_status}
+Maintenance Status: {maintenance_status}
 """
         embed = await ex.create_embed(title=f"I am {app_name}! ({app_id})", title_desc=title_desc)
         embed.set_thumbnail(url=app_icon_url)
         embed.add_field(name=f"Servers Connected", value=f"{ex.get_server_count()} Servers", inline=True)
         embed.add_field(name=f"Text/Voice Channels Watched", value=f"{ex.get_text_channel_count()}/{ex.get_voice_channel_count()} Channels", inline=True)
         embed.add_field(name=f"Servers/Channels Logged", value=f"{len(await ex.get_servers_logged())}/{len(await ex.get_channels_logged())} Logged", inline=True)
-        embed.add_field(name=f"DC Updates Sent to", value=f"{len(await ex.get_dc_channels())} Channels", inline=True)
         embed.add_field(name=f"Bot Uptime", value=bot_uptime, inline=True)
         embed.add_field(name=f"Total Commands Used", value=f"{ex.cache.total_used} Commands", inline=True)
         embed.add_field(name=f"This Session ({ex.cache.session_id} | {datetime.date.today()})", value=f"{ex.cache.current_session} Commands", inline=True)
         embed.add_field(name=f"Playing Music", value=f"{len(client.voice_clients)} Voice Clients", inline=True)
+        embed.add_field(name=f"Playing Guessing/Bias", value=f"{len(ex.cache.guessing_games)}/{len(ex.cache.bias_games)} Games", inline=True)
         embed.add_field(name=f"Ping", value=f"{ex.get_ping()} ms", inline=True)
         embed.add_field(name=f"Shards", value=f"{client.shard_count}", inline=True)
         embed.add_field(name=f"Bot Owner", value=f"<@{app_owner.id}>", inline=True)
-        if len(mods) != 0:
+        if len(mods):
             embed.add_field(name=f"Bot Mods", value=mods, inline=True)
         embed.add_field(name=f"Support Server", value=f"[Invite to Server]({keys.bot_support_server_link})", inline=False)
         embed.add_field(name=f"Website", value=keys.bot_website, inline=False)
@@ -187,7 +195,7 @@ Maintenance: {maintenance_status}
         embed.add_field(name=f"Discord Invite", value=keys.bot_invite_link, inline=False)
         embed.add_field(name=f"Bot Server Links", value=bot_server_links, inline=False)
         embed.add_field(name=f"Suggest", value=f"Suggest a feature using `{current_server_prefix}suggest`.", inline=False)
-        if len(patreon_url) != 0:
+        if len(patreon_url):
             embed.add_field(name=f"Patreon", value=f"[Please Support <@{keys.bot_id}> here.]({patreon_url})", inline=False)
         await ctx.send(embed=embed)
 
@@ -205,7 +213,7 @@ Maintenance: {maintenance_status}
         try:
             response = await ex.translate(message, from_language, to_language)
             if response is not None:
-                if len(response) == 0:
+                if not len(response):
                     return await ctx.send(
                         "> **The translation came back empty meaning an occur occurred in the process. It may be possible that the bot reached the maximum amount of calls it can make this month.**")
                 code = response['code']
@@ -327,7 +335,8 @@ Maintenance: {maintenance_status}
 
     @commands.command(aliases=['define', 'u'])
     async def urban(self, ctx, term=None, number=1, override=0):
-        """Search a term through UrbanDictionary. Underscores are spaces. [Format: %urban (term) (definition number)][Aliases: define,u]"""
+        """Search a term through UrbanDictionary. Underscores are spaces.
+        [Format: %urban (term) (definition number)][Aliases: define,u]"""
         if ctx.channel.is_nsfw() or override == 1:
             if term is None:
                 await ctx.send("> **Please enter a word for me to define**")
@@ -336,6 +345,7 @@ Maintenance: {maintenance_status}
                 url = "https://mashape-community-urban-dictionary.p.rapidapi.com/define"
                 querystring = {"term": f"{term}"}
                 async with ex.session.get(url, headers=keys.X_RapidAPI_headers, params=querystring) as r:
+                    ex.cache.urban_per_minute += 1
                     if r.status == 200:
                         result = await r.json()
                         try:

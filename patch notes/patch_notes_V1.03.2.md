@@ -27,6 +27,8 @@ Irene now sleeps for 1 second if the request was made within 2 seconds of anothe
 
 Lyrics can now have several pages.  
 
+`%botwarn` was added for Bot Mods to warn abusive users.  
+
 
 
 ## **Bug/Issue Fixes:**  

@@ -23,7 +23,6 @@ class Wolfram(commands.Cog):
         except SyntaxError:
             return False
         except:
-            # raise
             return False
 
     @commands.command()
@@ -37,27 +36,34 @@ class Wolfram(commands.Cog):
                     query = urllib.parse.quote(query)
                     query_link = f"http://api.wolframalpha.com/v2/query?input={query}&appid={wolfram_app_id}"
                     async with ex.session.get(query_link) as r:
+                        ex.cache.wolfram_per_minute += 1
                         xml_content = await r.content.read()
-                        dict_content = xmltodict.parse(xml_content)
+                        dict_content = (xmltodict.parse(xml_content)).get('queryresult')
                         results = []
-                        try:
-                            for pod in dict_content['queryresult']['pod']:
-                                """Grabs the elements in each pod looking for the correct answer."""
-                                title = pod['@title'] or None
-                                acceptable_titles = ['results', 'result']
-                                if title.lower() in acceptable_titles:
-                                    try:
-                                        data = ((pod['subpod'])[1])['img']['@alt']
-                                        results.append(data)
-                                    except Exception as e:
-                                        data = (pod['subpod']['img']['@alt'])
-                                        results.append(data)
-                        except Exception:
-                            pass
+                        pods = dict_content.get('pod')
+                        if pods:
+                            # we need to iterate through the pods, so put it in a list if there is only one.
+                            if len(pods) == 1:
+                                pods = [pods]
+                            for pod in pods:
+                                try:
+                                    sub_pods = pod.get('subpod')
+                                    if sub_pods:
+                                        # we need to iterate through the pods, so put it in a list if there is only one.
+                                        if pod.get('@numsubpods') == '1':
+                                            sub_pods = [sub_pods]
+                                        for sub_pod in sub_pods:
+                                            image = sub_pod.get('img')
+                                            sub_pod_result = image.get('@alt')
+                                            if pod.get('@primary'):
+                                                sub_pod_result = f"**{sub_pod_result}**"
+                                            results.append(sub_pod_result)
+                                except Exception as e:
+                                    pass
                         if len(results) == 0:
                             return await ctx.send(f"> **{ctx.author.display_name}, I could not find an answer to that.**")
-                        for data in results:
-                            await ctx.send(data)
+                        await ctx.send("\n".join(results))
+
                 else:
                     return await ctx.send(self.patreon_msg)
             else:

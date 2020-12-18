@@ -10,9 +10,9 @@ class Profile(commands.Cog):
         client.add_listener(self.profile_level, 'on_message')
 
     @commands.command()
-    async def avatar(self, ctx, user: discord.Member = discord.Member):
+    async def avatar(self, ctx, user: discord.Member = None):
         try:
-            if user == discord.Member:
+            if not user:
                 user_id = ctx.author.id
                 user = ctx.author
             else:
@@ -24,18 +24,20 @@ class Profile(commands.Cog):
             log.console(e)
 
     @commands.command()
-    async def profile(self, ctx, user: discord.Member = discord.Member):
+    async def profile(self, ctx, user: discord.Member = None):
         try:
-            if user == discord.Member:
+            if not user:
                 user_id = ctx.author.id
                 user = ctx.author
+                roles_list = []
             else:
                 user_id = user.id
+                roles_list = user.roles
             if user.bot:
                 user_bot = "Yes"
             else:
                 user_bot = "No"
-            roles_list = user.roles
+
             count = 0
             roles = ""
             for role in roles_list:
@@ -61,14 +63,16 @@ class Profile(commands.Cog):
             embed.set_thumbnail(url=user.avatar_url)
             embed.add_field(name="Profile Level", value=user_level, inline=True)
             embed.add_field(name="Money", value=f"${shortened_money}", inline=True)
-            embed.add_field(name="Status", value=f"{user.status}", inline=True)
+            if type(user) == discord.Member:
+                embed.add_field(name="Status", value=f"{user.status}", inline=True)
+                embed.add_field(name="Server Nickname", value=user.nick, inline=True)
+                embed.add_field(name="Server Join Date", value=user.joined_at, inline=True)
+                if roles:
+                    embed.add_field(name="Roles", value=roles, inline=False)
             embed.add_field(name="Rob/Beg/Daily Level", value=rob_beg_daily_level, inline=True)
-            embed.add_field(name="Server Nickname", value=user.nick, inline=True)
-            embed.add_field(name="Server Join Date", value=user.joined_at, inline=True)
             embed.add_field(name="Account Join Date", value=user.created_at, inline=True)
             embed.add_field(name="Bot", value=user_bot, inline=True)
             embed.add_field(name="Activity", value=user_activity, inline=True)
-            embed.add_field(name="Roles", value=roles, inline=False)
             await ctx.send(embed=embed)
 
         except Exception as e:

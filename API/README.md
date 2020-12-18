@@ -1,1 +1,0 @@
-**NOTE: I have no clue what I coded but it works. Once I start working on the web-side of Irene, the code will be improved.**

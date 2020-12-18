@@ -11,6 +11,8 @@ class BiasGame(commands.Cog):
     async def biasgame(self, ctx, gender="all", bracket_size=8):
         """Start a bias game in the current channel. The host of the game can use `stopbg` to stop playing.
         [Format: %biasgame (Male/Female/All) (bracket size (4,8,16,32))]"""
+        if not ctx.guild:
+            return await ctx.send("> You are not allowed to play bias game in DMs.")
         if ex.find_game(ctx.channel, ex.cache.bias_games):
             server_prefix = await ex.get_server_prefix_by_context(ctx)
             return await ctx.send(f"> **A bias game is currently in progress in this channel. Only 1 Bias Game can run in a channel at once. If this is a mistake, use `{server_prefix}stopbg`.**")

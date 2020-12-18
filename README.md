@@ -1,4 +1,4 @@
-# [IreneBot V1.03.5](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=1609956823)
+# [IreneBot V1.03.6](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=1609956823)
 
 ## [Support Irene by becoming a Patron!](https://www.patreon.com/bePatron?u=38971435)  
 **[Become a Patron!](https://www.patreon.com/bePatron?u=38971435)**
@@ -48,7 +48,6 @@ To find out more, look at the `GroupMembers` category.
 #### BotMod: 😇😇😇  
 | Command           | Description                                                                                           | Format                               | Aliases |
 |-------------------|-------------------------------------------------------------------------------------------------------|--------------------------------------|---------|
-| addalias         | Adds an alias to an idol/group. (Underscores are spaces)                                                              | %addalias (alias) (ID of idol/group) ("idol" or "group")                                                                                                      |                       |
 | addgroup         | Adds a group.                                                              | %addgroup (group name)                                                                                                      |                       |
 | addidol         | Adds an idol (Use underscores for spaces).                                                              | %addidol (full name) (stage name) (group id)                                                                                                      |                      |
 | addidoltogroup         | Adds idol to group.                                                              | %addidoltogroup (idol id) (group id)                                                                                                     |                       |
@@ -59,7 +58,6 @@ To find out more, look at the `GroupMembers` category.
 | botwarn   | Warns a user from Irene's DMs                                   | %botwarn (user id) (reason)               |               |
 | closedm       | Closes a DM either by the User ID or by the current channel.                                   | %closedm <user id>               |               |
 | createdm       | Create a DM with a user with the bot as a middle man. One user per mod channel.                                   | %createdm (user id)               |               |
-| deletealias         | Remove alias from an idol/group. (Underscores are spaces)                                                               | %deletealias (alias) (ID of idol/group) ("idol" or "group")                                                                                                     |  removealias                      |
 | deletegroup         | Deletes a group.                                                              | %deletegroup (group id)                                                                                                    | removegroup                     |
 | deleteidol         | Deletes an idol.                                                              | %deleteidol (idol id)                                                                                             | removeidol                      |
 | deleteidolfromgroup         | Deletes idol from group                                                              | %deleteidolfromgroup (idol id) (group id)                                                                                             | removeidolfromgroup                      |
@@ -72,6 +70,7 @@ To find out more, look at the `GroupMembers` category.
 | mergegroup | Merges a duplicate Group with it's original | %mergegroup (original group id) (duplicate group id) | |
 | removestatus             | Remove a status based on it's index. The index can be found using %getstatuses | %removestatus (status index)                           |               |
 | repost             | Reposts a certain post from the DC APP to all channels.                                                  | %repost (post_number)                           |               |
+| weverseauth      | Updates Weverse Authentication Token without restarting bot. Only use this in DMs or a private channel for security purposes. | %weverseauth <token>                           |               |
 
 
 #### BiasGame:
@@ -109,17 +108,6 @@ To find out more, look at the `GroupMembers` category.
 | createcommand | Create a custom command. | %createcommand (command name) (message) | addcommand, ★ |
 | deletecommand | Delete a custom command.  | %deletecommand (command name) | removecommand, ★ |
 | listcommands | List all the custom commands for the current server. | %listcommands | |
-
-
-#### DreamCatcher: 
-| Command      | Description                                                     | Format                                        | Aliases |
-|--------------|-----------------------------------------------------------------|-----------------------------------------------|---------|
-| dcnotify    | Mention a role when there is a new DC post. | %dcnotify @role                                      | ★       |
-| dcstart      | Starts DC LOOP                                                  | %dcstart                                      | ♥       |
-| dcstop       | Stops DC LOOP                                                   | %dcstop                                       | ♥       |
-| latest       | Grabs the highest resolution possible from MOST RECENT DC Posts. | %latest (member)                                      | ★       |
-| updates      | Send DreamCatcher Updates to your current text channel          | To start %updates, To Stop : %updates stop | ★       |
-
   
 #### GroupMembers:
 | Command          | Description                                                                        | Format                                                                                                         | Aliases                |
@@ -186,7 +174,7 @@ To find out more, look at the `GroupMembers` category.
 | listnoti          | list all your notification phrases that exist in the current server.| %listnoti     |               |
 | nword            | Checks how many times a user has said the N Word               | %nword @user                    |                |
 | nwordleaderboard | Shows leaderboards for how many times the nword has been said. | %nwl                            | nwl            |
-| patreon             | Displays Patreon Information.                                       | %patreon                           |            |
+| patreon             | Displays Patreon Information.                                       | %patreon                           |   patron         |
 | ping             | Shows Latency to Discord                                       | %ping                           | pong           |
 | random           | Choose a random number from a range (a,b)                      | %random a b [Ex: %random 1 100] | r,rand,randint |
 | removenoti         | Remove a phrase/word when it said in the current server.| %removenoti (phrase/word)             | deletenoti              |
@@ -200,14 +188,16 @@ To find out more, look at the `GroupMembers` category.
 | suggest          | Suggest a feature for Irene                                    | %suggest (feature)              |               |
 | support          | Support Discord Server for Irene                               | %support                        |                |
 | translate          | Translate between languages using Papago                              | %translate English Korean this is a test phrase.                       |                |
-
+| vote          | Link to Voting for Irene on Top.gg | %vote                       |                |
 
 #### Moderator: ★★★
 | Command          | Description                                                                                                                          | Format                          | Aliases        |
 |------------------|--------------------------------------------------------------------------------------------------------------------------------------|---------------------------------|----------------|
-| addemoji         | Adds an emoji to the server. Several emojis can be added if split with a comma. Emoji Name is optional. (Manage Messages & Emojis)                                                                                                        | %addemoji (emoji,emoji,emoji,url) (emoji_name)    |               |
+| addalias         | Adds an alias to an idol/group. (Underscores are spaces)                                                              | %addalias (alias) (ID of idol/group) ("idol" or "group")                                                                                                      |                       |
+| addemoji         | Adds an emoji to the server. Several emojis can be added if split with a comma. Emoji Name is optional. (Manage Messages & Emojis)                                                                                                        | %addemoji (emoji,emoji,emoji,url) (emoji_name)    |    yoink           |
 | ban              | Ban A User (Ban Members)                                                                                                                           | %ban @user                      |               |
 | clear            | Prune Messages (LIMIT 1000) (Manage Messages)                                                                                                                      | %clear (amount)                 |  prune        |
+| deletealias         | Remove alias from an idol/group. (Underscores are spaces)                                                               | %deletealias (alias) (ID of idol/group) ("idol" or "group")                                                                                                     |  removealias                      |
 | disableinteraction            | Disable an interaction on your server. Redo to enable again (Manage Messages)                                                                                                                      | %deleteinteraction (interaction)                 |  |
 | kick             | Kick A User. (Kick Members)                                                                                                                          | %kick @user                     |               |
 | mute             | Mute A User. (Manage Messages & Manage Roles)                                                                                                                          | %mute @user (reason)                     |               |
@@ -282,6 +272,22 @@ To find out more, look at the `GroupMembers` category.
 | scrapeyoutube    | Scrape the views from the Youtube Videos in the DB                                                                                                          | %scrapeyoutube                               |
 | startloop        | Starts scraping youtube videos.                                                                                                      | %startloop (seconds until it starts looping) |
 | stoploop         | Stops scraping youtube videos                                                                                                        | %stoploop                                    |
+
+
+#### Weverse:
+| Command     | Description                          | Format                 | Aliases           |
+|-------------|--------------------------------------|------------------------|-------------------|
+| updates | Receive Weverse Updates of a specific Weverse community in the current text channel. Use again to disable for a specific community. Available Communities -> [TXT, BTS, GFRIEND, SEVENTEEN, ENHYPEN, NU'EST, CL, P1Harmony, Weeekly, SUNMI, HENRY, Dreamcatcher] | %updates <community name> [role to notify] |  |
+| disablecomments | Disable updates for comments on a community. | %disablecomments <community name> |  |
+
+#### SelfAssignRoles:
+| Command     | Description                          | Format                 | Aliases           |
+|-------------|--------------------------------------|------------------------|-------------------|
+| addrole | Add a role to be self-assignable. | %addrole @role <custom role name> |  |
+| listroles | List all the self-assignable roles in a server. | %listroles |  |
+| removerole | Remove a self-assignable role based on the role name given. | %removerole <custom role name> |  |
+| sendrolemessage | Sends the default role message in the current channel. Is not needed for the roles to work. | %sendrolemessage |  |
+| setrolechannel | Set the channel for self-assignable roles to be used in. | %setrolechannel #text-channel |  |
 
 
 ## GROUPS / IDOLS

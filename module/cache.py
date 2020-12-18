@@ -1,4 +1,4 @@
-from discord.ext import commands, tasks
+from discord.ext import commands
 import time
 
 
@@ -16,6 +16,22 @@ class Cache(commands.Cog):
         self.total_used = None
         # time format of current session for comparison
         self.session_time_format = None
+        # API Calls made directly from the bot for Translations per minute
+        self.bot_api_translation_calls = 0
+        # API Calls made directly from the bot for Idols per minute
+        self.bot_api_idol_calls = 0
+        # N Words per minute
+        self.n_words_per_minute = 0
+        # commands used in the current minute
+        self.commands_per_minute = 0
+        # messages received per minute
+        self.messages_received_per_minute = 0
+        # errors per minute
+        self.errors_per_minute = 0
+        # wolfram calls per minute
+        self.wolfram_per_minute = 0
+        # Urban dictionary calls per minute
+        self.urban_per_minute = 0
         """
         Command Counter
         {
@@ -27,12 +43,8 @@ class Cache(commands.Cog):
         self.group_photos = {}  # { group_id: photo_count }
         # Photo Count of idols
         self.idol_photos = {}  # { idol_id: photo_count }
-        # All channels DCAPP updates go to
-        self.dc_app_channels = {}  # { channel_id: role_id }
         # All custom server prefixes
         self.server_prefixes = {}  # { server_id: server_prefix }
-        # DC members
-        self.dc_member_list = ["jiu", "sua", "siyeon", "handong", "yoohyeon", "dami", "gahyeon", "dc"]  # dc members
         # list of patrons
         self.patrons = {}  # { user_id: is_super_patron ( True or False ) }
         """
@@ -115,6 +127,14 @@ class Cache(commands.Cog):
         self.guessing_games = []
         # Bias Game Objects
         self.bias_games = []
+        # Text channels to send Weverse updates to.
+        self.weverse_channels = {}  # { community_name: [ [channel_id, role_id, comments_disabled] ] }
+
+        self.assignable_roles = {}  #
+        # { server_id:
+        #    {channel_id: channel_id,
+        #    roles: [role_id, role_name]
+        # }}
 
         # bracket position for bias game stored due to annoyance when using previous x and y values.
         # counting starts from left to right, bottom to top

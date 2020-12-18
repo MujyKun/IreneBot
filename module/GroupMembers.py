@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands, tasks
+from discord.ext import commands
 from module import logger as log, events
 import random
 from module import keys
@@ -12,7 +12,7 @@ client = keys.client
 owner_super_patron_benefit = keys.idol_post_send_limit * 2
 patron_message = f"""
 As of September 23rd 2020, non-Patrons can only send {keys.idol_post_send_limit} photos a day maximum, as the current host can not reliably handle additional traffic.
-You may become a patron for as little as $1 per month in order to send unlimited photos; every Patron contributes to upgrading and maintaining the host.
+You may become a patron for as little as $3 per month in order to send unlimited photos; every Patron contributes to upgrading and maintaining the host.
 If the guild owner is a super patron, All guild members (non-patrons) get {owner_super_patron_benefit} photos a day.
 Please support <@{keys.bot_id}>'s development at {keys.patreon_link}.
 Thank You."""
@@ -31,9 +31,13 @@ def add_user_limit(message_sender):
         ex.cache.commands_used[message_sender.id] = [ex.cache.commands_used[message_sender.id][0] + 1, time.time()]
 
 
-async def check_user_limit(message_sender, message_channel):
+async def check_user_limit(message_sender, message_channel, no_vote_limit=False):
+    limit = keys.idol_post_send_limit
+    if no_vote_limit:
+        # amount of votes that can be sent without voting.
+        limit = keys.idol_no_vote_send_limit
     if message_sender.id in ex.cache.commands_used:
-        if not await ex.check_if_patreon(message_sender.id) and ex.cache.commands_used[message_sender.id][0] > keys.idol_post_send_limit:
+        if not await ex.check_if_patreon(message_sender.id) and ex.cache.commands_used[message_sender.id][0] > limit:
             if not await ex.check_if_patreon(message_channel.guild.owner.id, super=True):
                 return await message_channel.send(patron_message)
             else:
@@ -46,6 +50,12 @@ async def request_image_post(message, idol, channel):
     photo_msg, api_url, posted = None, None, False
     if not await ex.check_if_bot_banned(message.author.id):
         async with channel.typing():
+            try:
+                if not await check_user_limit(message.author, message.channel, no_vote_limit=True):
+                    if not await ex.get_if_user_voted(message.author.id) and not await ex.check_if_patreon(message.author.id):
+                        return await ex.send_vote_message(message)
+            except Exception as e:
+                log.console(e)
             if not await check_user_limit(message.author, channel):
                 if not await events.Events.check_maintenance(message):
                     return await ex.send_maintenance_message(channel)
@@ -113,8 +123,9 @@ class GroupMembers(commands.Cog):
                     # it will still process idol photos, but not regular commands.
                     if message.content[0:len(keys.bot_prefix)] == keys.bot_prefix and message.content.lower() != f"{keys.bot_prefix}null":
                         message_content = message.content[len(keys.bot_prefix):len(message.content)]
-                        members = await ex.get_idol_where_member_matches_name(message_content)
-                        groups = await ex.get_group_where_group_matches_name(message_content)
+                        server_id = await ex.get_server_id(message)
+                        members = await ex.get_idol_where_member_matches_name(message_content, server_id=server_id)
+                        groups = await ex.get_group_where_group_matches_name(message_content, server_id=server_id)
                         photo_msg = None
                         if members:
                             random_member = await choose_random_member(members=members)
@@ -125,7 +136,7 @@ class GroupMembers(commands.Cog):
                             if random_member:
                                 photo_msg, api_url, posted = await request_image_post(message, random_member, channel)
                         else:
-                            members = await ex.check_group_and_idol(message_content)
+                            members = await ex.check_group_and_idol(message_content, server_id=server_id)
                             if members:
                                 random_member = await choose_random_member(members=members)
                                 if random_member:
@@ -144,14 +155,15 @@ class GroupMembers(commands.Cog):
     async def card(self, ctx, *, name):
         """Displays an Idol/Group's profile card.
         [Format: %card (idol/group name)]"""
-        members = await ex.get_idol_where_member_matches_name(name)
-        groups = await ex.get_group_where_group_matches_name(name)
+        server_id = await ex.get_server_id(ctx)
+        members = await ex.get_idol_where_member_matches_name(name, server_id=server_id)
+        groups = await ex.get_group_where_group_matches_name(name, server_id=server_id)
         embed_list = []
         for member in members:
-            embed = await ex.set_embed_card_info(member)
+            embed = await ex.set_embed_card_info(member, server_id=server_id)
             embed_list.append(embed)
         for group in groups:
-            embed = await ex.set_embed_card_info(group, group=True)
+            embed = await ex.set_embed_card_info(group, group=True, server_id=server_id)
             embed_list.append(embed)
         if embed_list:
             msg = await ctx.send(embed=embed_list[0])
@@ -189,10 +201,11 @@ class GroupMembers(commands.Cog):
         if await ex.check_channel_sending_photos(text_channel.id):
             if await ex.check_server_sending_photos(server_id=ctx.guild.id):
                 old_channel = await ex.get_channel_sending_photos(ctx.guild.id)
-                if old_channel.id == text_channel.id:
-                    await ex.conn.execute("DELETE FROM groupmembers.restricted WHERE channelid = $1 AND serverid = $2 AND sendhere = $3", text_channel.id, ctx.guild.id, 1)
-                    await ex.delete_restricted_channel_from_cache(text_channel.id, 1)
-                    return await ctx.send(f"> **{text_channel.name} will no longer send all idol photo commands.**")
+                if old_channel:
+                    if old_channel.id == text_channel.id:
+                        await ex.conn.execute("DELETE FROM groupmembers.restricted WHERE channelid = $1 AND serverid = $2 AND sendhere = $3", text_channel.id, ctx.guild.id, 1)
+                        await ex.delete_restricted_channel_from_cache(text_channel.id, 1)
+                        return await ctx.send(f"> **{text_channel.name} will no longer send all idol photo commands.**")
                 else:
                     delete_channel_id = None
                     await ex.conn.execute("UPDATE groupmembers.restricted SET channelid = $1 WHERE serverid = $2 AND sendhere = $3", text_channel.id, ctx.guild.id, 1)
@@ -231,7 +244,8 @@ class GroupMembers(commands.Cog):
     @commands.command()
     async def countgroup(self, ctx, *, group_name):
         """Shows how many photos of a certain group there are. [Format: %countmember <name>]"""
-        groups = await ex.get_group_where_group_matches_name(group_name)
+        server_id = await ex.get_server_id(ctx)
+        groups = await ex.get_group_where_group_matches_name(group_name, server_id=server_id)
         if not groups:
             return await ctx.send(f"> **I could not find a group named {group_name}.**")
         for group in groups:
@@ -242,7 +256,8 @@ class GroupMembers(commands.Cog):
         """Shows how many photos of a certain member there are. [Format: %countmember <name/all>)]"""
         if member_name.lower() == "all":
             return await ctx.send(f"> **There are {await ex.get_all_images_count()} photos stored.**")
-        members = await ex.get_idol_where_member_matches_name(member_name)
+        server_id = await ex.get_server_id(ctx)
+        members = await ex.get_idol_where_member_matches_name(member_name, server_id=server_id)
         if not members:
             return await ctx.send(f"> **I could not find an idol named {member_name}.**")
         for member in members:
@@ -290,14 +305,15 @@ class GroupMembers(commands.Cog):
         try:
             mode = mode.replace("_", " ")
             mode = mode.replace(",", " ")
-            embed_list = await ex.set_embed_with_aliases(mode)
+            server_id = await ex.get_server_id(ctx)
+            embed_list = await ex.set_embed_with_aliases(mode, server_id=server_id)
             if not embed_list:
                 if 'member' in mode.lower():
-                    embed_list = await ex.set_embed_with_all_aliases("Idol")
+                    embed_list = await ex.set_embed_with_all_aliases("Idol", server_id=server_id)
                 elif 'group' in mode.lower():
-                    embed_list = await ex.set_embed_with_all_aliases("Group")
+                    embed_list = await ex.set_embed_with_all_aliases("Group", server_id=server_id)
                 else:
-                    return await ctx.send(f">>> **Please specify whether you want member or group aliases, or enter a name of an idol/group.\n`{await ex.get_server_prefix_by_context(ctx)}help aliases`**")
+                    return await ctx.send(f">>> **No results were found. Please specify whether you want member or group aliases, or enter a name of an idol/group.\n`{await ex.get_server_prefix_by_context(ctx)}help aliases`**")
             if len(embed_list) < page_number or page_number < 1:
                 page_number = 1
             msg = await ctx.send(embed=embed_list[page_number-1])
@@ -316,7 +332,8 @@ class GroupMembers(commands.Cog):
                 for member in ex.cache.idols:
                     idol_called += member.called
                 return await ctx.send(f"> **All Idols have been called a total of {idol_called} times.**")
-            members = await ex.get_idol_where_member_matches_name(name)
+            server_id = await ex.get_server_id(ctx)
+            members = await ex.get_idol_where_member_matches_name(name, server_id=server_id)
             if not members:
                 return await ctx.send(f"> **{name} could not be found.**")
             for member in members:

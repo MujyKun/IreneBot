@@ -9,6 +9,7 @@ class AutoRestart:
         self.saved_time = time.time()
         self.api = None
         self.bot = None
+        self.site = None
         self.bot_running = False
 
     def check_time(self, loop_on):
@@ -29,12 +30,14 @@ class AutoRestart:
     def start_api(self):
         os.system("node API/index.js")
 
+    def start_site(self):
+        os.system("node irenebot-com/index.js")
+
     def restart_api(self):
         if self.api is not None:
             self.api.terminate()
             os.system("fuser -k 5454/tcp")
         while self.api.is_alive():
-            print('sleeping API')
             time.sleep(1.5)
         self.api = Process(target=restart.start_api)
         self.api.start()
@@ -62,11 +65,13 @@ if __name__ == "__main__":
     recording_on = Value('b', True)
     restart.bot = Process(target=restart.check_time, args=(recording_on,))
     restart.api = Process(target=restart.start_api)
+    restart.site = Process(target=restart.start_site)
     restart.api.start()
     restart.bot.start()
+    restart.site.start()
     app.run(debug=True, use_reloader=False, port=5123)
     restart.api.join()
     restart.bot.join()
-
+    restart.site.join()
 
 

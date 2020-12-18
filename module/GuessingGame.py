@@ -1,5 +1,5 @@
 from Utility import resources as ex
-from discord.ext import commands, tasks
+from discord.ext import commands
 from module import keys, logger as log
 import asyncio
 
@@ -9,6 +9,8 @@ class GuessingGame(commands.Cog):
     async def guessinggame(self, ctx, gender="all", rounds=20, timeout=20):
         """Start an idol guessing game in the current channel. The host of the game can use `stop`/`end` to end the game or `skip` to skip the current round without affecting the round number.
         [Format: %guessinggame (Male/Female/All) (# of rounds - default 20) (timeout for each round - default 20s)]"""
+        if not ctx.guild:
+            return await ctx.send("> You are not allowed to play guessing game in DMs.")
         if ex.find_game(ctx.channel, ex.cache.guessing_games):
             server_prefix = await ex.get_server_prefix_by_context(ctx)
             return await ctx.send(f"> **A guessing game is currently in progress in this channel. If this is a mistake, use `{server_prefix}stopgg`.**")
@@ -90,25 +92,40 @@ class Game:
 
     async def create_new_question(self):
         """Create a new question and send it to the channel."""
-        if self.idol_post_msg:
-            await self.idol_post_msg.delete()
-        if self.rounds >= self.max_rounds:
-            if self.force_ended:
-                return
-            return await self.display_winners()
-        self.idol = await ex.get_random_idol()
-        if self.gender:
-            while self.idol.gender != self.gender:
-                self.idol = await ex.get_random_idol()
-        self.group_names = [(await ex.get_group(group_id)).name for group_id in self.idol.groups]
-        self.correct_answers = []
-        for alias in self.idol.aliases:
-            self.correct_answers.append(alias.lower())
-        self.correct_answers.append(self.idol.full_name.lower())
-        self.correct_answers.append(self.idol.stage_name.lower())
-        log.console(", ".join(self.correct_answers))
-        self.idol_post_msg, self.photo_link = await ex.idol_post(self.channel, self.idol, user_id=self.host, guessing_game=True, scores=self.players)
-        await self.check_message()
+        try:
+            if self.idol_post_msg:
+                try:
+                    await self.idol_post_msg.delete()
+                except Exception as e:
+                    # message does not exist.
+                    pass
+            if self.rounds >= self.max_rounds:
+                if self.force_ended:
+                    return
+                return await self.display_winners()
+            self.idol = await ex.get_random_idol()
+            if self.gender:
+                while self.idol.gender != self.gender:
+                    self.idol = await ex.get_random_idol()
+            try:
+                self.group_names = [(await ex.get_group(group_id)).name for group_id in self.idol.groups]
+            except Exception as e:
+                # log.console(f"{e} - Create New Question (guessing game) -1")
+                # if the idol has no group or the group has no name, we'll skip them.
+                # unsure of error, but regenerating a question is the simpler path.
+                return await self.create_new_question()
+            self.correct_answers = []
+            for alias in self.idol.aliases:
+                self.correct_answers.append(alias.lower())
+            self.correct_answers.append(self.idol.full_name.lower())
+            self.correct_answers.append(self.idol.stage_name.lower())
+            log.console(f'{", ".join(self.correct_answers)} - {self.channel.id}')
+            self.idol_post_msg, self.photo_link = await ex.idol_post(self.channel, self.idol, user_id=self.host, guessing_game=True, scores=self.players)
+            await self.check_message()
+        except Exception as e:
+            # commenting out the error because it can spam the console a lot with many games playing
+            # log.console(f"{e} - Create New Question (guessing game) -2")
+            return await self.create_new_question()
 
     async def display_winners(self):
         final_scores = ""
@@ -132,7 +149,7 @@ class Game:
                                 delete_after=15)
         # create_task should not be awaited because this is meant to run in the background to check for reactions.
         try:
-            asyncio.create_task(ex.check_idol_post_reactions(msg, self.host_ctx.message, self.idol, self.photo_link, guessing_game=True))
+            task = asyncio.create_task(ex.check_idol_post_reactions(msg, self.host_ctx.message, self.idol, self.photo_link, guessing_game=True))
         except Exception as e:
             log.console(e)
 

@@ -14,6 +14,64 @@ class Moderator(commands.Cog):
 
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
+    async def addalias(self, ctx, alias, mem_id: int, mode="idol"):
+        """Add alias to an idol/group (Underscores are spaces)
+        [Format: %addalias (alias) (ID of idol/group) ('idol' or 'group']"""
+        alias = alias.replace("_", " ")
+        if mode.lower() in ["idol", "member", "members", "idols"]:
+            obj = await ex.get_member(mem_id)
+            name = f"{obj.full_name} ({obj.stage_name}) [{obj.id}]"
+        elif mode.lower() in ["group", "groups"]:
+            obj = await ex.get_group(mem_id)
+            name = f"{obj.name} [{obj.id}]"
+        else:
+            return await ctx.send("> Please select whether you want to add an idol or group alias.")
+        if not obj:
+            return await ctx.send(f"> {mem_id} is not associated with an idol or group.")
+        if alias in obj.aliases:
+            return await ctx.send(f"> {alias} is already a global alias for {name}.")
+        if ex.check_if_mod(ctx):  # checks if the user is a bot mod.
+            await ex.set_global_alias(obj, alias.lower())
+            return await ctx.send(f"> {alias} has been added as a global alias for {mode} {mem_id}")
+        else:
+            server_aliases = obj.local_aliases.get(ctx.guild.id)
+            if server_aliases:
+                if alias.lower() in server_aliases:
+                    return await ctx.send(f"> {alias} is already a server alias for {name}.")
+            await ex.set_local_alias(obj, alias.lower(), ctx.guild.id)
+            return await ctx.send(f"> {alias} has been added as a server alias for {name}.")
+
+    @commands.command(aliases=['removealias'])
+    @commands.has_guild_permissions(manage_messages=True)
+    async def deletealias(self, ctx, alias, mem_id: int, mode="idol"):
+        """Remove alias from an idol/group (Underscores are spaces)
+        [Format: %deletealias (alias) (ID of idol/group) ('idol' or 'group')]"""
+        alias = alias.replace("_", " ")
+        if mode.lower() in ["idol", "member", "members", "idols"]:
+            obj = await ex.get_member(mem_id)
+            name = f"{obj.full_name} ({obj.stage_name}) [{obj.id}]"
+        elif mode.lower() in ["group", "groups"]:
+            obj = await ex.get_group(mem_id)
+            name = f"{obj.name} [{obj.id}]"
+        else:
+            return await ctx.send("> Please select whether you want to add an idol or group alias.")
+        if not obj:
+            return await ctx.send(f"> {mem_id} is not associated with an idol or group.")
+        if ex.check_if_mod(ctx):  # checks if the user is a bot mod.
+            if alias not in obj.aliases:
+                return await ctx.send(f"> {alias} is not a global alias for {name}.")
+            await ex.remove_global_alias(obj, alias.lower())
+            return await ctx.send(f"> {alias} has been removed from the global aliases for {mode} {mem_id}")
+        else:
+            server_aliases = obj.local_aliases.get(ctx.guild.id)
+            if server_aliases:
+                if alias.lower() not in server_aliases:
+                    return await ctx.send(f"> {alias} is not a server alias for {name}.")
+            await ex.remove_local_alias(obj, alias.lower(), ctx.guild.id)
+            return await ctx.send(f"> {alias} has been removed from the server aliases for {name}.")
+
+    @commands.command()
+    @commands.has_guild_permissions(manage_messages=True)
     async def welcome(self, ctx, *, message=None):
         """Set a welcome message or disable welcome in the current channel.
         Use %user where they should be mentioned.
@@ -395,7 +453,7 @@ class Moderator(commands.Cog):
         except Exception as e:
             return str(emoji)
 
-    @commands.command()
+    @commands.command(aliases=['yoink'])
     @commands.has_guild_permissions(manage_messages=True, manage_emojis=True)
     async def addemoji(self, ctx, url: str, emoji_name=None):
         """Adds an emoji to the server. Several emojis can be added if split with a comma. Emoji Name is optional.
@@ -404,9 +462,7 @@ class Moderator(commands.Cog):
         org_emoji_name = emoji_name
         list_of_emojis = url.split(',')
         process_emoji = True
-        print(list_of_emojis)
         for emoji in list_of_emojis:
-            print('addemoji - confirm 0') 
             try:
                 url = await self.make_emoji(ctx, emoji)
                 if type(url) == str:
@@ -421,7 +477,6 @@ class Moderator(commands.Cog):
                 if process_emoji:
                     async with ex.session.get(url) as r:
                         if r.status == 200:
-                            print('addemoji - confirm 1')
                             await ctx.guild.create_custom_emoji(name=emoji_name, image=await r.read())
                             emojis = client.emojis
                             max_emoji_length = len(emojis)
@@ -438,11 +493,17 @@ class Moderator(commands.Cog):
                         else:
                             await ctx.send("> **I was not able to connect to that url**")
             except discord.HTTPException as e:
-                ezgif = f"https://ezgif.com/optimize?url={url}"
-                await ctx.send(
-                    f">>> **File cannot be larger than 256.0 kb. Please optimize the emoji here.**\n <{ezgif}>")
-                log.console(
-                    f"File cannot be larger than 256.0 kb. Please optimize the emoji here. {ezgif}")
+                if e.code == 30008:
+                    err_msg = f"Could not add emoji due to the maximum number of emojis reached."
+                    log.console(f"{err_msg} Guild ID: {ctx.guild.id}")
+                    return await ctx.send(f"> **{err_msg}**")
+                if e.code == 50035:
+                    ezgif = f"https://ezgif.com/optimize?url={url}"
+                    log.console(
+                        f"File cannot be larger than 256.0 kb. Please optimize the emoji here. {ezgif}")
+                    return await ctx.send(
+                        f">>> **File cannot be larger than 256.0 kb. Please optimize the emoji here.**\n <{ezgif}>")
+
             except aiohttp.InvalidURL as e:
                 await ctx.send(f"> **Invalid URL.**")
             except Exception as e:

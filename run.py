@@ -9,22 +9,25 @@ class Irene:
 
     def run(self):
         """Start the bot."""
-        # all active blackjack games are also deleted, current session stats refreshed.
+        ex.initialize_data_dog()  # initialize the class for DataDog metrics
+        # all active blackjack games are also deleted on db start, current session stats refreshed.
         # cache is reset in the on_ready event.
-        ex.set_db_connection.start()
+        ex.set_start_up_connection.start()
         if ex.test_bot:
             self.run_test_bot()
         else:
             self.run_live_bot()
 
     def run_live_bot(self):
+        """Run Production Ver. of the the bot."""
         self.start_up()
         self.start_loops()
         ex.client.run(module.keys.client_token)
 
     def run_test_bot(self):
-        # background loops are not started in test bot.
+        """Run Test Ver. of the the bot."""
         self.start_up()
+        # background loops are optional with test bot.
         self.start_loops()
         module.log.console("--TEST BOT--")
         ex.client.run(module.keys.test_client_token)
@@ -42,18 +45,21 @@ class Irene:
 
     @staticmethod
     def start_loops():
-        # Start Automatic DC Loop
-        module.DreamCatcher.DcApp().new_task4.start()
+        """Start Loops (Optional)"""
+        # Start checking for Weverse Updates
+        module.Weverse.Weverse().weverse_updates.start()
         # Start Automatic Youtube Scrape Loop
         module.Youtube.YoutubeLoop().new_task5.start()
         # Start Status Change Loop
         module.status.Status().change_bot_status_loop.start()
         # Start Voice Client Loop
         module.Music.Music().check_voice_clients.start()
-        # Update Group Photo Count Cache Every 12 hours
+        # Update Cache Every 12 hours
         ex.update_cache.start()
+        # Start a loop that sends cache information to DataDog.
+        ex.send_cache_data_to_data_dog.start()
         # after intents was pushed in place, d.py cache loaded a lot slower and patrons are not added properly.
-        # therefore it must be looped instead.
+        # therefore patron cache must be looped instead.
         ex.update_patron_cache.start()
         # Send Packets to localhost:5123 to show Irene is alive. This is meant for auto restarting Irene
         # This feature is essential in case of any overload or crashes by external sources.
@@ -62,6 +68,7 @@ class Irene:
 
     @staticmethod
     def add_listeners():
+        """Add Listener Events."""
         module.keys.client.add_listener(module.GroupMembers.GroupMembers.on_message2, 'on_message')
         module.keys.client.add_listener(module.Archive.Archive.on_message, 'on_message')
         module.keys.client.add_listener(module.Logging.Logging.on_message_log, 'on_message')
@@ -73,11 +80,11 @@ class Irene:
 
     @staticmethod
     def add_cogs():
+        """Add the cogs to the bot client."""
         # Note that this can be heavily simplified by iterating over every cog but is like this for testing purposes.
         ex.client.add_cog(module.Miscellaneous.Miscellaneous())
         ex.client.add_cog(module.Twitter.Twitter())
         ex.client.add_cog(module.Currency.Currency())
-        ex.client.add_cog(module.DreamCatcher.DreamCatcher())
         ex.client.add_cog(module.BlackJack.BlackJack())
         ex.client.add_cog(module.Cogs.Cogs())
         ex.client.add_cog(module.Youtube.Youtube())
@@ -99,6 +106,8 @@ class Irene:
         ex.client.add_cog(module.GuessingGame.GuessingGame())
         ex.client.add_cog(module.CustomCommands.CustomCommands())
         ex.client.add_cog(module.BiasGame.BiasGame())
+        ex.client.add_cog(module.Weverse.Weverse())
+        ex.client.add_cog(module.SelfAssignRoles.SelfAssignRoles())
 
 
 if __name__ == '__main__':

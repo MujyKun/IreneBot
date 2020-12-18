@@ -3,19 +3,30 @@ from module import logger as log
 from Utility import resources as ex
 from discord.ext import commands
 import discord
-import asyncio
 
 
 class Events(commands.Cog):
     @staticmethod
+    async def catch_on_message_errors(method, message):
+        """Process Methods individually incase of errors. (This was created for commands in DMs)."""
+        try:
+            await method(message)
+        except Exception as e:
+            log.console(f"{e} - {method.__name__}")
+
+    @staticmethod
     async def process_on_message(message):
         try:
+            # increment message count per minute
+            ex.cache.messages_received_per_minute += 1
             # delete messages that are in temp channels
-            await ex.delete_temp_messages(message)
+            await Events.catch_on_message_errors(ex.delete_temp_messages, message)
             # check for the n word
-            await ex.check_for_nword(message)
+            await Events.catch_on_message_errors(ex.check_for_nword, message)
+            # check for self-assignable roles and process it.
+            await Events.catch_on_message_errors(ex.check_for_self_assignable_role, message)
             # process the commands with their prefixes.
-            await ex.process_commands(message)
+            await Events.catch_on_message_errors(ex.process_commands, message)
         except Exception as e:
             log.console(e)
 
@@ -24,6 +35,8 @@ class Events(commands.Cog):
         embed = discord.Embed(title="Error", description=f"** {error} **", color=0xff00f6)
         await ctx.send(embed=embed)
         log.console(f"{error}")
+        # increment general error count per minute
+        ex.cache.errors_per_minute += 1
 
     @staticmethod
     @client.event
@@ -40,11 +53,10 @@ class Events(commands.Cog):
         if isinstance(error, commands.errors.CommandNotFound):
             pass
         elif isinstance(error, commands.errors.CommandInvokeError):
-            log.console(f"Command Invoke Error -- {error}")
+            log.console(f"Command Invoke Error -- {error} -- {ctx.command.name}")
+            ex.cache.errors_per_minute += 1
         elif isinstance(error, commands.errors.CommandOnCooldown):
-            embed = discord.Embed(title="Error", description=f"""** You are on cooldown. Try again in 
-                    {await ex.get_cooldown_time(error.retry_after)}.**""", color=0xff00f6)
-            await ctx.send(embed=embed)
+            await Events.error(ctx, f"You are on cooldown. Try again in {await ex.get_cooldown_time(error.retry_after)}.")
             log.console(f"{error}")
         elif isinstance(error, commands.errors.BadArgument):
             await Events.error(ctx, error)

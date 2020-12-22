@@ -15,6 +15,8 @@ import json
 import time
 import sys
 import aiofiles
+import re
+import pytz
 
 """
 Utility.py
@@ -199,7 +201,10 @@ class Utility:
     async def create_dead_link_cache(self):
         """Creates Dead Link Cache"""
         self.cache.dead_image_cache = {}
-        self.cache.dead_image_channel = await self.client.fetch_channel(keys.dead_image_channel_id)
+        try:
+            self.cache.dead_image_channel = await self.client.fetch_channel(keys.dead_image_channel_id)
+        except:
+            pass
         dead_images = await self.conn.fetch("SELECT deadlink, userid, messageid, idolid, guessinggame FROM groupmembers.deadlinkfromuser")
         for dead_image in dead_images:
             self.cache.dead_image_cache[dead_image[2]] = [dead_image[0], dead_image[1], dead_image[3], dead_image[4]]
@@ -2091,6 +2096,7 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
         if not api_url:
             try:
                 find_post = True
+
                 data = {
                     'p_key': keys.translate_private_key,
                     'no_group_photos': int(guessing_game)
@@ -2840,6 +2846,122 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
                 return await message.channel.send(f"> {author.display_name}, You have been given the {role_name} role.", delete_after=10)
             await message.delete()
 
+
+    #########################
+    # ## REMINDER ## #
+    #########################
+
+    async def determine_relative_time(self, user_input):
+        """Determine if time is relative time or absolute time
+        relative time: remind me to _____ in 6 days
+        absolute time: remind me to _____ at 6PM"""
+
+        in_index = user_input.rfind(" in ")
+        at_index = user_input.rfind(" at ")
+        if in_index == at_index:
+            return None, None
+        if in_index > at_index:
+            return True, in_index
+        return False, at_index
+
+    async def process_reminder_reason(self, user_input, type_index):
+        """Return the reminder reason that comes before in/at"""
+        return user_input[0:type_index]
+
+    async def process_reminder_time(self, user_input, type_index, is_relative_time):
+        """Return the datetime of the reminder"""
+        remind_time = user_input[type_index + len(" in ") : len(user_input) - 1]
+
+        if is_relative_time:
+            if await self.process_relative_time_input(remind_time) > 2 * 3.154e7: # 2 years in seconds
+                pass # Add raise error
+            return datetime.datetime.now() + datetime.timedelta(seconds = await self.process_relative_time_input(remind_time))
+
+
+    async def process_relative_time_input(self, time_input):
+        """Returns the relative time of the input in seconds"""
+        year_aliases = ["years", "year", "yr", "y"]
+        month_aliases = ["months", "month", "mo"]
+        day_aliases = ["days", "day", "d"]
+        hour_aliases = ["hours", "hour", "hrs", "hr", "h"]
+        minute_aliases = ["minutes", "minute", "mins", "min", "m"]
+        second_aliases = ["seconds", "second", "secs", "sec", "s"]
+        time_units = [[year_aliases, 3.154e7], [month_aliases, 2.628e6], [day_aliases, 8.64e4], [minute_aliases, 60], [second_aliases, 1]]
+
+        remind_time = 0 # in seconds
+
+        time_elements = re.findall(r"[^\W\d_]+|\d+",time_input)
+
+        for item in time_elements:
+            try:
+                int(item)
+            except:
+                for time_unit in time_units:
+                    if item in time_unit[0]:
+                        remind_time += time_unit[1] * int(time_elements[time_elements.index(item) - 1])
+
+        return remind_time
+
+    async def process_absolute_time_input(self, time_input):
+        """Returns the absolute date time of the input"""
+        pass
+
+    async def get_user_timezone(self, user_id):
+        """Returns the user's timezone"""
+        pass
+
+    async def get_time_zone_name(self, timezone, country_code):
+
+        # see if it's already a valid time zone name
+        if timezone in pytz.all_timezones:
+            return timezone
+
+        # if it's a number value, then use the Etc/GMT code
+        try:
+            offset = int(timezone)
+            if offset > 0:
+                offset = '+' + str(offset)
+            else:
+                offset = str(offset)
+            return 'Etc/GMT' + offset
+        except ValueError:
+            pass
+
+        # look up the abbreviation
+        country_tzones = None
+        try:
+            country_tzones = pytz.country_timezones[country_code]
+        except:
+            pass
+
+        set_zones = set()
+        if country_tzones is not None and len(country_tzones) > 0:
+            for name in country_tzones:
+                tzone = pytz.timezone(name)
+                for utcoffset, dstoffset, tzabbrev in getattr(tzone, '_transition_info',
+                                                              [[None, None, datetime.datetime.now(tzone).tzname()]]):
+                    if tzabbrev.upper() == timezone.upper():
+                        set_zones.add(name)
+
+            if len(set_zones) > 0:
+                return min(set_zones, key=len)
+
+            # none matched, at least pick one in the right country
+            return min(country_tzones, key=len)
+
+        # invalid country, just try to match the timezone abbreviation to any time zone
+        for name in pytz.all_timezones:
+            tzone = pytz.timezone(name)
+            for utcoffset, dstoffset, tzabbrev in getattr(tzone, '_transition_info',
+                                                          [[None, None, datetime.datetime.now(tzone).tzname()]]):
+                if tzabbrev.upper() == timezone.upper():
+                    set_zones.add(name)
+
+        return min(set_zones, key=len)
+
+    async def add_reminder_data(self, remind_reason, remind_time):
+        """Add reminder date to cache and db"""
+        pass
 
 class Idol:
     def __init__(self, **kwargs):

@@ -5,7 +5,7 @@ from Utility import resources as ex
 class Irene:
     def __init__(self):
         # Set to True if running a test bot.
-        ex.test_bot = False
+        ex.test_bot = True
 
     def run(self):
         """Start the bot."""
@@ -108,7 +108,7 @@ class Irene:
         ex.client.add_cog(module.BiasGame.BiasGame())
         ex.client.add_cog(module.Weverse.Weverse())
         ex.client.add_cog(module.SelfAssignRoles.SelfAssignRoles())
-
+        ex.client.add_cog(module.Funtimes.FunTimes())
 
 if __name__ == '__main__':
     Irene().run()

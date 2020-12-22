@@ -43,11 +43,16 @@ class Reminder(commands.Cog):
         [Format: %remindme to ______ at 9PM
         or
         %remindme to ____ in 6hrs 30mins]"""
-        is_relative_time, type_index = await ex.determine_time_type(user_input)
+        try:
+            is_relative_time, type_index = await ex.determine_time_type(user_input)
+        except ex.exceptions.TooLarge:
+            return await ctx.send(f"> {ctx.author.display_name}, The time for a reminder can not be greater than 2 years.")
         if is_relative_time is None:
-            # Error
+            return await ctx.send(f"> {ctx.author.display_name}, Please use 'in/at' to specify time.")
         remind_reason = await ex.process_remind_reason(user_input, type_index)
         remind_time = await ex.process_remind_time(user_input, type_index, is_relative_time, ctx.author.id)
+        await ex.add_reminder(remind_reason, remind_time, ctx.author.id)
+        return await ctx.send(f"> {ctx.author.display_name}, I will remind you to {remind_reason} on {remind_time.strftime('%m/%d/%Y, %H:%M:%S')}")
 
 
     @commands.command()

@@ -56,7 +56,7 @@ To find out more, look at the `GroupMembers` category.
 | botban       | Bans a user from Irene.                                   | %botban (user id)               |               |
 | botunban       | UnBans a user from Irene.                                   | %botunban (user id)               |               |
 | botwarn   | Warns a user from Irene's DMs                                   | %botwarn (user id) (reason)               |               |
-| closedm       | Closes a DM either by the User ID or by the current channel.                                   | %closedm <user id>               |               |
+| closedm       | Closes a DM either by the User ID or by the current channel.                                   | %closedm (user id)               |               |
 | createdm       | Create a DM with a user with the bot as a middle man. One user per mod channel.                                   | %createdm (user id)               |               |
 | deletegroup         | Deletes a group.                                                              | %deletegroup (group id)                                                                                                    | removegroup                     |
 | deleteidol         | Deletes an idol.                                                              | %deleteidol (idol id)                                                                                             | removeidol                      |
@@ -70,7 +70,7 @@ To find out more, look at the `GroupMembers` category.
 | mergegroup | Merges a duplicate Group with it's original | %mergegroup (original group id) (duplicate group id) | |
 | removestatus             | Remove a status based on it's index. The index can be found using %getstatuses | %removestatus (status index)                           |               |
 | repost             | Reposts a certain post from the DC APP to all channels.                                                  | %repost (post_number)                           |               |
-| weverseauth      | Updates Weverse Authentication Token without restarting bot. Only use this in DMs or a private channel for security purposes. | %weverseauth <token>                           |               |
+| weverseauth      | Updates Weverse Authentication Token without restarting bot. Only use this in DMs or a private channel for security purposes. | %weverseauth (token)                           |               |
 
 
 #### BiasGame:
@@ -277,14 +277,14 @@ To find out more, look at the `GroupMembers` category.
 #### Weverse:
 | Command     | Description                          | Format                 | Aliases           |
 |-------------|--------------------------------------|------------------------|-------------------|
-| updates | Receive Weverse Updates of a specific Weverse community in the current text channel. Use again to disable for a specific community. Available Communities -> [TXT, BTS, GFRIEND, SEVENTEEN, ENHYPEN, NU'EST, CL, P1Harmony, Weeekly, SUNMI, HENRY, Dreamcatcher] | %updates <community name> [role to notify] |  |
-| disablecomments | Disable updates for comments on a community. | %disablecomments <community name> |  |
+| updates | Receive Weverse Updates of a specific Weverse community in the current text channel. Use again to disable for a specific community. Available Communities -> [TXT, BTS, GFRIEND, SEVENTEEN, ENHYPEN, NU'EST, CL, P1Harmony, Weeekly, SUNMI, HENRY, Dreamcatcher] | %updates (community name) [role to notify] |  |
+| disablecomments | Disable updates for comments on a community. | %disablecomments (community name) |  |
 
 #### SelfAssignRoles:
 | Command     | Description                          | Format                 | Aliases           |
 |-------------|--------------------------------------|------------------------|-------------------|
-| addrole | Add a role to be self-assignable. | %addrole @role <custom role name> |  |
+| addrole | Add a role to be self-assignable. | %addrole (@role) (custom role name) |  |
 | listroles | List all the self-assignable roles in a server. | %listroles |  |
-| removerole | Remove a self-assignable role based on the role name given. | %removerole <custom role name> |  |
+| removerole | Remove a self-assignable role based on the role name given. | %removerole (custom role name) |  |
 | sendrolemessage | Sends the default role message in the current channel. Is not needed for the roles to work. | %sendrolemessage |  |
 | setrolechannel | Set the channel for self-assignable roles to be used in. | %setrolechannel #text-channel |  |

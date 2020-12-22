@@ -1,4 +1,4 @@
-from module import keys, logger as log, cache
+from module import keys, logger as log, cache, exceptions
 from discord.ext import tasks
 from PIL import Image
 from concurrent.futures import ThreadPoolExecutor
@@ -31,7 +31,7 @@ class Utility:
         self.test_bot = None  # this is changed in run.py
         self.client = keys.client
         self.session = keys.client_session
-        self.conn = None
+        self.conn = None  # db connection
         self.discord_cache_loaded = False
         self.cache = cache.Cache()
         self.temp_patrons_loaded = False
@@ -45,6 +45,7 @@ class Utility:
         self.api_issues = 0
         self.weverse_client = WeverseAsync(authorization=keys.weverse_auth_token, web_session=self.session,
                                            verbose=True, loop=asyncio.get_event_loop())
+        self.exceptions = exceptions
 
     ##################
     # ## DATABASE ## #
@@ -130,7 +131,20 @@ class Utility:
         log.console(f"Cache Completely Created in {await self.get_cooldown_time(time.time() - past_time)}.")
 
     async def create_reminder_cache(self):
-        pass
+        """Create cache for reminders"""
+        self.cache.reminders = {}  # reset cache
+        all_reminders = await self.get_all_reminders_from_db()
+        for reminder in all_reminders:
+            user_id = reminder[0]
+            reason = reminder[1]
+            time_stamp = reminder[2]
+            reason_list = [reason, time_stamp]
+            user_reminder = self.cache.reminders.get(user_id)
+            if user_reminder:
+                user_reminder.append(reason_list)
+            else:
+                self.cache.reminders[user_id] = [reason_list]
+
 
     async def create_self_assignable_role_cache(self):
         """Create cache for self assignable roles"""
@@ -2851,10 +2865,10 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
                 return await message.channel.send(f"> {author.display_name}, You have been given the {role_name} role.", delete_after=10)
             await message.delete()
 
-
-    #########################
+    ##################
     # ## REMINDER ## #
-    #########################
+    ##################
+
     @staticmethod
     async def determine_time_type(user_input):
         """Determine if time is relative time or absolute time
@@ -2882,14 +2896,14 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
         remind_time = user_input[type_index + len(" in ") : len(user_input) - 1]
 
         if is_relative_time:
-            if await self.process_relative_time_input(remind_time) > 2 * 3.154e7: # 2 years in seconds
-                pass # Add raise error
+            if await self.process_relative_time_input(remind_time) > 2 * 3.154e7:  # 2 years in seconds
+                raise exceptions.TooLarge
             return datetime.datetime.now() + datetime.timedelta(seconds = await self.process_relative_time_input(remind_time))
 
         return await self.process_absolute_time_input(remind_time, user_id)
 
     @staticmethod
-    async def process_relative_time_input(self, time_input):
+    async def process_relative_time_input(time_input):
         """Returns the relative time of the input in seconds"""
         year_aliases = ["years", "year", "yr", "y"]
         month_aliases = ["months", "month", "mo"]
@@ -2897,9 +2911,9 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
         hour_aliases = ["hours", "hour", "hrs", "hr", "h"]
         minute_aliases = ["minutes", "minute", "mins", "min", "m"]
         second_aliases = ["seconds", "second", "secs", "sec", "s"]
-        time_units = [[year_aliases, 3.154e7], [month_aliases, 2.628e6], [day_aliases, 8.64e4], [minute_aliases, 60], [second_aliases, 1]]
+        time_units = [[year_aliases, 3.154e7], [month_aliases, 2.628e6], [day_aliases, 8.64e4], [hour_aliases, 3600],[minute_aliases, 60], [second_aliases, 1]]
 
-        remind_time = 0 # in seconds
+        remind_time = 0  # in seconds
         time_elements = re.findall(r"[^\W\d_]+|\d+", time_input)
         for item in time_elements:
             try:
@@ -2914,7 +2928,7 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
         """Returns the absolute date time of the input"""
         user_timezone = await self.get_user_timezone(user_id)
         if not user_timezone:
-            pass # Raise error
+            raise discord.ext.commands.Command.error
         cal = parsedatetime.Calendar()
         datetime_obj, _ = cal.parseDT(datetimeString=time_input, tzinfo=pytz.timezone(user_timezone))
         return datetime_obj
@@ -2924,7 +2938,7 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
         pass
 
     @staticmethod
-    async def get_time_zone_name(self, timezone, country_code):
+    async def get_time_zone_name(timezone, country_code):
         """Convert timezone abbreviation and country code to standard timezone name"""
         # see if it's already a valid time zone name
         if timezone in pytz.all_timezones:
@@ -2973,12 +2987,24 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
 
         return min(set_zones, key=len)
 
-    async def add_reminder(self, remind_reason, remind_time):
-        """Add reminder date to cache and db"""
-        pass
+    async def add_reminder(self, remind_reason, remind_time, user_id):
+        """Add reminder date to cache and db."""
+        user_reminders = self.cache.reminders.get(user_id)
+        remind_info = [remind_reason, remind_time]
+        if user_reminders:
+            self.cache.reminders.append(remind_info)
+        else:
+            self.cache.reminders[user_id] = remind_info
+        await self.conn.execute("INSERT INTO reminders.reminders(userid, reason, timestamp) VALUES ($1, $2, $3)", user_id, remind_reason, remind_time)
 
     async def get_reminders(self, user_id):
+        """Get the reminders of a user"""
         return self.cache.reminders.get(user_id)
+
+    async def get_all_reminders_from_db(self):
+        """Get all reminders from the db (all users)"""
+        return await self.conn.fetch("SELECT userid, reason, timestamp FROM reminders.reminders")
+
 
 class Idol:
     def __init__(self, **kwargs):

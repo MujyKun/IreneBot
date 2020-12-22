@@ -108,7 +108,8 @@ class Irene:
         ex.client.add_cog(module.BiasGame.BiasGame())
         ex.client.add_cog(module.Weverse.Weverse())
         ex.client.add_cog(module.SelfAssignRoles.SelfAssignRoles())
-        ex.client.add_cog(module.Funtimes.FunTimes())
+        ex.client.add_cog(module.Reminder.Reminder())
+
 
 if __name__ == '__main__':
     Irene().run()

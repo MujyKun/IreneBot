@@ -51,7 +51,7 @@ async def request_image_post(message, idol, channel):
     if not await ex.check_if_bot_banned(message.author.id):
         async with channel.typing():
             try:
-                if not await check_user_limit(message.author, message.channel, no_vote_limit=True):
+                if await check_user_limit(message.author, message.channel, no_vote_limit=True):
                     if not await ex.get_if_user_voted(message.author.id) and not await ex.check_if_patreon(message.author.id):
                         return await ex.send_vote_message(message)
             except Exception as e:

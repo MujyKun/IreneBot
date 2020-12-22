@@ -38,11 +38,11 @@ async def check_user_limit(message_sender, message_channel, no_vote_limit=False)
         limit = keys.idol_no_vote_send_limit
     if message_sender.id in ex.cache.commands_used:
         if not await ex.check_if_patreon(message_sender.id) and ex.cache.commands_used[message_sender.id][0] > limit:
-            if not await ex.check_if_patreon(message_channel.guild.owner.id, super=True):
+            if not await ex.check_if_patreon(message_channel.guild.owner.id, super=True) and not no_vote_limit:
                 return await message_channel.send(patron_message)
-            else:
-                if ex.cache.commands_used[message_sender.id][0] > owner_super_patron_benefit:
-                    return await message_channel.send(patron_message)
+            if ex.cache.commands_used[message_sender.id][0] > owner_super_patron_benefit and not no_vote_limit:
+                return await message_channel.send(patron_message)
+            return True
     return False
 
 

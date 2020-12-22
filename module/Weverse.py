@@ -66,8 +66,8 @@ class Weverse(commands.Cog):
                 if user_notifications:
                     is_comment = False
                     latest_notification = user_notifications[0]
-                    if latest_notification not in self.notifications_already_posted:
-                        self.notifications_already_posted.append(latest_notification.id)
+                    # first check
+                    if latest_notification.id not in self.notifications_already_posted:
                         community_name = latest_notification.community_name or latest_notification.bold_element
                         if not community_name:
                             return
@@ -86,8 +86,9 @@ class Weverse(commands.Cog):
                             return  # not keeping track of announcements ATM
                         else:
                             return
-                        # check again if it was already posted in the case 2 loops are running concurrently.
-                        if latest_notification not in self.notifications_already_posted:
+                        # second check
+                        if latest_notification.id not in self.notifications_already_posted:
+                            self.notifications_already_posted.append(latest_notification.id)
                             for channel_info in channels:
                                 channel_id = channel_info[0]
                                 role_id = channel_info[1]
@@ -112,6 +113,3 @@ class Weverse(commands.Cog):
                                     except Exception as e:
                                         # no permission to post
                                         return
-
-
-

@@ -136,6 +136,9 @@ class Cache(commands.Cog):
         #    roles: [role_id, role_name]
         # }}
 
+        # Reminder dictionary
+        self.reminders = {}   # { user_id: [ [remind_reason, remind_time] ] }
+
         # bracket position for bias game stored due to annoyance when using previous x and y values.
         # counting starts from left to right, bottom to top
         self.stored_bracket_positions = {

@@ -22,3 +22,5 @@ Pillow==8.0.1
 datadog==0.39.0
 git+git://github.com/MujyKun/Weverse@main#Weverse
 pytz==2020.4
+parsedatetime==2.6
+

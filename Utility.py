@@ -17,6 +17,7 @@ import sys
 import aiofiles
 import re
 import pytz
+import parsedatetime
 
 """
 Utility.py
@@ -124,8 +125,12 @@ class Utility:
         await self.process_cache_time(self.create_bot_command_cache, "Custom Commands")
         await self.process_cache_time(self.create_weverse_channel_cache, "Weverse Text Channels")
         await self.process_cache_time(self.create_self_assignable_role_cache, "Self-Assignable Roles")
+        await self.process_cache_time(self.create_reminder_cache, "Reminders")
         task = asyncio.create_task(self.process_cache_time(self.weverse_client.start, "Weverse"))
         log.console(f"Cache Completely Created in {await self.get_cooldown_time(time.time() - past_time)}.")
+
+    async def create_reminder_cache(self):
+        pass
 
     async def create_self_assignable_role_cache(self):
         """Create cache for self assignable roles"""
@@ -2850,8 +2855,8 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
     #########################
     # ## REMINDER ## #
     #########################
-
-    async def determine_relative_time(self, user_input):
+    @staticmethod
+    async def determine_time_type(user_input):
         """Determine if time is relative time or absolute time
         relative time: remind me to _____ in 6 days
         absolute time: remind me to _____ at 6PM"""
@@ -2864,11 +2869,15 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
             return True, in_index
         return False, at_index
 
-    async def process_reminder_reason(self, user_input, type_index):
+    @staticmethod
+    async def process_remind_reason(user_input, type_index):
         """Return the reminder reason that comes before in/at"""
-        return user_input[0:type_index]
+        user_text = user_input.split()
+        if user_text[0].lower() == "to":
+            return user_input[3: type_index]
+        return user_input[0: type_index]
 
-    async def process_reminder_time(self, user_input, type_index, is_relative_time):
+    async def process_remind_time(self, user_input, type_index, is_relative_time, user_id):
         """Return the datetime of the reminder"""
         remind_time = user_input[type_index + len(" in ") : len(user_input) - 1]
 
@@ -2877,7 +2886,9 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
                 pass # Add raise error
             return datetime.datetime.now() + datetime.timedelta(seconds = await self.process_relative_time_input(remind_time))
 
+        return await self.process_absolute_time_input(remind_time, user_id)
 
+    @staticmethod
     async def process_relative_time_input(self, time_input):
         """Returns the relative time of the input in seconds"""
         year_aliases = ["years", "year", "yr", "y"]
@@ -2889,9 +2900,7 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
         time_units = [[year_aliases, 3.154e7], [month_aliases, 2.628e6], [day_aliases, 8.64e4], [minute_aliases, 60], [second_aliases, 1]]
 
         remind_time = 0 # in seconds
-
-        time_elements = re.findall(r"[^\W\d_]+|\d+",time_input)
-
+        time_elements = re.findall(r"[^\W\d_]+|\d+", time_input)
         for item in time_elements:
             try:
                 int(item)
@@ -2899,19 +2908,24 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
                 for time_unit in time_units:
                     if item in time_unit[0]:
                         remind_time += time_unit[1] * int(time_elements[time_elements.index(item) - 1])
-
         return remind_time
 
-    async def process_absolute_time_input(self, time_input):
+    async def process_absolute_time_input(self, time_input, user_id):
         """Returns the absolute date time of the input"""
-        pass
+        user_timezone = await self.get_user_timezone(user_id)
+        if not user_timezone:
+            pass # Raise error
+        cal = parsedatetime.Calendar()
+        datetime_obj, _ = cal.parseDT(datetimeString=time_input, tzinfo=pytz.timezone(user_timezone))
+        return datetime_obj
 
     async def get_user_timezone(self, user_id):
         """Returns the user's timezone"""
         pass
 
+    @staticmethod
     async def get_time_zone_name(self, timezone, country_code):
-
+        """Convert timezone abbreviation and country code to standard timezone name"""
         # see if it's already a valid time zone name
         if timezone in pytz.all_timezones:
             return timezone
@@ -2959,9 +2973,12 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
 
         return min(set_zones, key=len)
 
-    async def add_reminder_data(self, remind_reason, remind_time):
+    async def add_reminder(self, remind_reason, remind_time):
         """Add reminder date to cache and db"""
         pass
+
+    async def get_reminders(self, user_id):
+        return self.cache.reminders.get(user_id)
 
 class Idol:
     def __init__(self, **kwargs):

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"> </script>
+        <script>  
+            $(function(){ 
+                $("#header").load("header.html");  
+                $("#footer").load("footer.html"); 
+                $("#archive_commands").load("/command-info/archive.html"); 
+                $("#biasgame_commands").load("/command-info/biasgame.html"); 
+                $("#blackjack_commands").load("/command-info/blackjack.html"); 
+                $("#botmod_commands").load("/command-info/botmod.html"); 
+                $("#cogs_commands").load("/command-info/cogs.html"); 
+                $("#currency_commands").load("/command-info/currency.html"); 
+                $("#custom_commands").load("/command-info/customcommands.html"); 
+                $("#groupmembers_commands").load("/command-info/groupmembers.html"); 
+                $("#guessinggame_commands").load("/command-info/guessinggame.html"); 
+                $("#interactions_commands").load("/command-info/interactions.html"); 
+                $("#lastfm_commands").load("/command-info/lastfm.html"); 
+                $("#logging_commands").load("/command-info/logging.html"); 
+                $("#miscellaneous_commands").load("/command-info/miscellaneous.html"); 
+                $("#moderator_commands").load("/command-info/moderator.html"); 
+                $("#music_commands").load("/command-info/music.html"); 
+                $("#profile_commands").load("/command-info/profile.html"); 
+                $("#selfassignroles_commands").load("/command-info/selfassignroles.html"); 
+                $("#testing_commands").load("/command-info/testing.html"); 
+                $("#twitter_commands").load("/command-info/twitter.html"); 
+                $("#weverse_commands").load("/command-info/weverse.html"); 
+                $("#wolfram_commands").load("/command-info/wolfram.html"); 
+                $("#youtube_commands").load("/command-info/youtube.html"); 
+                }); 
+        </script> 
+    </head>
+    <body>
+        <div class="irene">
+            <div id="header"></div>
+
+            <div class ="description">
+                <h5>
+                    Command Prefix is currently set to <strong>%</strong> by default. To change a server prefix, look at <strong>%setprefix</strong>.<br>
+                    In order to check the prefix of your server, type <strong>%checkprefix</strong>.<br><br>
+                    In order to pull a photo of an idol, you can type an idol's stage name, full name, alias, their group name, or group alias name after the prefix.<br>
+                    examples: <strong>%irene</strong>, <strong>%blackpink</strong>, <strong>%red velvet</strong>. You may also put an idol's stage name, full name, or alias after a group such as <strong>%red velvet irene</strong>.<br>
+                    You can use this with many idols to get a random one. <strong>%red velvet irene joy seulgi</strong><br> This way, you will pull any of the idols as long as they are in that group.<br>
+                    To find out more, look at the <strong>GroupMembers</strong> category.<br><br>
+                    ♥ - Requires Bot Owner<br>
+                    ★ - Requires Guild Permissions<br>
+                    😇 - Requires Bot Moderator<br>
+                    ♥♥♥ -- Entire Section Requires Bot Owner<br>
+                    ★★★ - Entire Section Requires Guild Permissions<br>
+                    😇😇😇 - Entire Section Requires Bot Moderator<br><br><br>
+
+                    This is just general command information. Further information can be found with %help (command).<br>
+                </h5>
+            </div>
+            <!-- load every individual module -->
+            <div class ="commands">
+                <div id="groupmembers_commands"></div>
+                <div id="guessinggame_commands"></div>
+                <div id="biasgame_commands"></div>
+                <div id="music_commands"></div>
+                <div id="weverse_commands"></div>
+                <div id="currency_commands"></div>
+                <div id="blackjack_commands"></div>
+                <div id="custom_commands"></div>
+                <div id="logging_commands"></div>
+                <div id="moderator_commands"></div>
+                <div id="selfassignroles_commands"></div>
+                <div id="miscellaneous_commands"></div>
+                <div id="interactions_commands"></div>
+                <div id="lastfm_commands"></div>
+                <div id="wolfram_commands"></div>
+                <div id="profile_commands"></div>
+                <div id="archive_commands"></div>
+                <div id="botmod_commands"></div>
+                <div id="cogs_commands"></div>
+                <div id="testing_commands"></div>
+                <div id="twitter_commands"></div>
+                <div id="youtube_commands"></div>
+            </div>
+
+        </div>
+        <div id="footer"></div>
+    </body>
+</html>

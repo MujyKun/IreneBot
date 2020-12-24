@@ -127,16 +127,23 @@ class Utility:
         await self.process_cache_time(self.create_weverse_channel_cache, "Weverse Text Channels")
         await self.process_cache_time(self.create_self_assignable_role_cache, "Self-Assignable Roles")
         await self.process_cache_time(self.create_reminder_cache, "Reminders")
+        await self.process_cache_time(self.create_timezone_cache, "Timezones")
         if not self.test_bot:
             task = asyncio.create_task(self.process_cache_time(self.weverse_client.start, "Weverse"))
         log.console(f"Cache Completely Created in {await self.get_cooldown_time(time.time() - past_time)}.")
 
+    async def create_timezone_cache(self):
+        self.cache.timezones = {}  # reset cache
+        timezones = await self.get_all_timezones_from_db()
+        for timezone_info in timezones:
+            user_id = timezone_info[0]
+            timezone = timezone_info[1]
+            self.cache.timezones[user_id] = timezone
+
     async def create_reminder_cache(self):
         """Create cache for reminders"""
         self.cache.reminders = {}  # reset cache
-        self.cache.timezones = {}
         all_reminders = await self.get_all_reminders_from_db()
-        timezones = await self.get_all_timezones_from_db()
         for reminder_info in all_reminders:
             user_id = reminder_info[0]
             reason = reminder_info[1]
@@ -147,11 +154,6 @@ class Utility:
                 user_reminder.append(reason_list)
             else:
                 self.cache.reminders[user_id] = [reason_list]
-        for timezone_info in timezones:
-            user_id = timezone_info[0]
-            timezone = timezone_info[1]
-            self.cache.timezones[user_id] = timezone
-
 
     async def create_self_assignable_role_cache(self):
         """Create cache for self assignable roles"""
@@ -2891,21 +2893,21 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
         return False, at_index
 
     @staticmethod
-    async def process_remind_reason(user_input, type_index):
+    async def process_reminder_reason(user_input, type_index):
         """Return the reminder reason that comes before in/at"""
         user_text = user_input.split()
         if user_text[0].lower() == "to":
             return user_input[3: type_index]
         return user_input[0: type_index]
 
-    async def process_remind_time(self, user_input, type_index, is_relative_time, user_id):
+    async def process_reminder_time(self, user_input, type_index, is_relative_time, user_id):
         """Return the datetime of the reminder depending on the time format"""
-        remind_time = user_input[type_index + len(" in ") : len(user_input) - 1]
+        remind_time = user_input[type_index + len(" in "): len(user_input) - 1]
 
         if is_relative_time:
             if await self.process_relative_time_input(remind_time) > 2 * 3.154e7:  # 2 years in seconds
                 raise exceptions.TooLarge
-            return datetime.datetime.now() + datetime.timedelta(seconds = await self.process_relative_time_input(remind_time))
+            return datetime.datetime.now() + datetime.timedelta(seconds=await self.process_relative_time_input(remind_time))
 
         return await self.process_absolute_time_input(remind_time, user_id)
 
@@ -2924,13 +2926,13 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
         time_elements = re.findall(r"[^\W\d_]+|\d+", time_input)
 
         if not any(time_unit[0] in time_elements for time_unit in time_units):
-            #TODO: raise error for the case that the time given is not a valid form
-            pass
+            raise exceptions.ImproperFormat
 
         for time_element in time_elements:
             try:
                 int(time_element)
-            except:
+            except Exception as e:
+                # purposefully creating an error to locate which elements are words vs integers.
                 for time_unit in time_units:
                     if time_element in time_unit[0]:
                         remind_time += time_unit[1] * int(time_elements[time_elements.index(time_element) - 1])
@@ -2940,7 +2942,7 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
         """Returns the absolute date time of the input"""
         user_timezone = await self.get_user_timezone(user_id)
         if not user_timezone:
-            raise discord.ext.commands.Command.error
+            raise exceptions.NoTimeZone
         cal = parsedatetime.Calendar()
         datetime_obj, _ = cal.parseDT(datetimeString=time_input, tzinfo=pytz.timezone(user_timezone))
         return datetime_obj
@@ -2952,24 +2954,23 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
     async def set_user_timezone(self, user_id, timezone):
         """Set user timezone"""
         user_timezone = self.cache.timezones.get(user_id)
+        self.cache.timezones[user_id] = timezone
         if user_timezone:
-            self.cache.timezones[user_id] = timezone
             await self.conn.execute("UPDATE reminders.timezones SET timezone = $1 WHERE userid = $2", timezone, user_id)
         else:
-            self.cache.timezones[user_id] = timezone
             await self.conn.execute("INSERT INTO reminders.timezones(userid, timezone) VALUES ($1, $2)", user_id, timezone)
 
     async def remove_user_timezone(self, user_id):
         """Remove user timezone"""
         try:
-            del self.cache.timezones[user_id]
-            await self.conn.execute("DELETE FROM reminders.timezones WHERE usderid = $1", user_id)
+            self.cache.timezones.pop(user_id)
+            await self.conn.execute("DELETE FROM reminders.timezones WHERE userid = $1", user_id)
         except:
             pass
 
     @staticmethod
     async def get_time_zone_name(timezone, country_code):
-        """Convert timezone abbreviation and country code to standard timezone name"""
+        """Convert timezone abbreviation and country code to standard timezone name - taken from stackoverflow"""
         try:
             timezone = timezone.upper()
             country_code = country_code.upper()
@@ -2999,14 +3000,14 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
             pass
 
         set_zones = set()
-        if country_tzones is not None and len(country_tzones) > 0:
+        if country_tzones and len(country_tzones):
             for name in country_tzones:
                 tzone = pytz.timezone(name)
                 tzabbrev = datetime.datetime.now(tzone).tzname()
                 if tzabbrev.upper() == timezone.upper():
                     set_zones.add(name)
 
-            if len(set_zones) > 0:
+            if len(set_zones):
                 return min(set_zones, key=len)
 
             # none matched, at least pick one in the right country
@@ -3044,6 +3045,7 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
     async def get_all_timezones_from_db(self):
         """Get all timezones from the db (all users)"""
         return await self.conn.fetch("SELECT userid, timezone FROM reminders.timezones")
+
 
 class Idol:
     def __init__(self, **kwargs):

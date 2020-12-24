@@ -2751,6 +2751,31 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
             return embed, message
         return None, None
 
+    async def send_weverse_to_channel(self, channel_info, message_text, embed, is_comment, community_name):
+        channel_id = channel_info[0]
+        role_id = channel_info[1]
+        comments_disabled = channel_info[2]
+        if not (is_comment and comments_disabled):
+            try:
+                channel = self.client.get_channel(channel_id)
+                if not channel:
+                    # fetch channel instead (assuming discord.py cache did not load)
+                    channel = await self.client.fetch_channel(channel_id)
+            except Exception as e:
+                # remove the channel from future updates as it cannot be found.
+                return await self.delete_weverse_channel(channel_id, community_name.lower())
+            try:
+                await channel.send(embed=embed)
+                if message_text:
+                    # Since an embed already exists, any individual content will not load
+                    # as an embed -> Make it it's own message.
+                    if role_id:
+                        message_text = f"<@&{role_id}>\n{message_text}"
+                    await channel.send(message_text)
+            except Exception as e:
+                # no permission to post
+                return
+
     #########################
     # ## SelfAssignRoles ## #
     #########################

@@ -2963,6 +2963,11 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
     async def get_time_zone_name(timezone, country_code):
         """Convert timezone abbreviation and country code to standard timezone name"""
         # see if it's already a valid time zone name
+        try:
+            timezone = timezone.upper()
+            country_code = country_code.upper()
+        except:
+            pass
         if timezone in pytz.all_timezones:
             return timezone
 
@@ -2988,10 +2993,9 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
         if country_tzones is not None and len(country_tzones) > 0:
             for name in country_tzones:
                 tzone = pytz.timezone(name)
-                for utcoffset, dstoffset, tzabbrev in getattr(tzone, '_transition_info',
-                                                              [[None, None, datetime.datetime.now(tzone).tzname()]]):
-                    if tzabbrev.upper() == timezone.upper():
-                        set_zones.add(name)
+                tzabbrev = datetime.datetime.now(tzone).tzname()
+                if tzabbrev.upper() == timezone.upper():
+                    set_zones.add(name)
 
             if len(set_zones) > 0:
                 return min(set_zones, key=len)
@@ -3002,10 +3006,9 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
         # invalid country, just try to match the timezone abbreviation to any time zone
         for name in pytz.all_timezones:
             tzone = pytz.timezone(name)
-            for utcoffset, dstoffset, tzabbrev in getattr(tzone, '_transition_info',
-                                                          [[None, None, datetime.datetime.now(tzone).tzname()]]):
-                if tzabbrev.upper() == timezone.upper():
-                    set_zones.add(name)
+            tzabbrev = datetime.datetime.now(tzone).tzname()
+            if tzabbrev.upper() == timezone.upper():
+                set_zones.add(name)
 
         return min(set_zones, key=len)
 

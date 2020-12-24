@@ -4,6 +4,7 @@ from module import logger as log, events
 import random
 from Utility import resources as ex
 import datetime
+import pytz
 
 class Reminder(commands.Cog):
 
@@ -67,12 +68,14 @@ class Reminder(commands.Cog):
         """Get your current set timezone.
         [Format: %gettimezone]"""
         user_timezone = await ex.get_user_timezone(ctx.author.id)
-        return await ctx.send(f"> {ctx.author.display_name}, your timezone is current set to {user_timezone}")
+        timezone_abbrev = datetime.datetime.now(pytz.timezone(user_timezone)).strftime('%Z%z')
+        return await ctx.send(f"> {ctx.author.display_name}, your timezone is current set to {user_timezone} {timezone_abbrev}")
 
     @commands.command()
-    async def settimezone(self, ctx, timezone_name, country_code):
+    async def settimezone(self, ctx, timezone_name, country_code=None):
         """Set your local timezone with the timezone name and country code.
         [Format: %settimezone (timezone name) (country code)]"""
         user_timezone = await ex.get_time_zone_name(timezone_name, country_code)
+        timezone_abbrev = datetime.datetime.now(pytz.timezone(user_timezone)).strftime('%Z%z')
         await ex.set_user_timezone(ctx.author.id, user_timezone)
-        return await ctx.send(f"> {ctx.author.display_name}, your timezone has been set to {user_timezone}")
+        return await ctx.send(f"> {ctx.author.display_name}, your timezone has been set to {user_timezone} {timezone_abbrev}")

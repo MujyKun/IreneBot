@@ -25,7 +25,7 @@ class Reminder(commands.Cog):
         remind_number = 0
         for remind in remind_list:
             remind_number += 1
-            m_embed.add_field(name=f"{remind[1].strftime('%m/%d/%Y, %H:%M:%S')}", value=f"to {remind[0]}", inline=False)
+            m_embed.add_field(name=f"{remind[2].strftime('%m/%d/%Y, %H:%M:%S')}", value=f"to {remind[1]}", inline=False)
             if remind_number == 25:
                 embed_list.append(m_embed)
                 m_embed = await ex.create_embed(title="Reminders List")

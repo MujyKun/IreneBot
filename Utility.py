@@ -145,10 +145,11 @@ class Utility:
         self.cache.reminders = {}  # reset cache
         all_reminders = await self.get_all_reminders_from_db()
         for reminder_info in all_reminders:
-            user_id = reminder_info[0]
-            reason = reminder_info[1]
-            time_stamp = reminder_info[2]
-            reason_list = [reason, time_stamp]
+            reason_id = reminder_info[0]
+            user_id = reminder_info[1]
+            reason = reminder_info[2]
+            time_stamp = reminder_info[3]
+            reason_list = [reason_id, reason, time_stamp]
             user_reminder = self.cache.reminders.get(user_id)
             if user_reminder:
                 user_reminder.append(reason_list)
@@ -3040,7 +3041,7 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
 
     async def get_all_reminders_from_db(self):
         """Get all reminders from the db (all users)"""
-        return await self.conn.fetch("SELECT userid, reason, timestamp FROM reminders.reminders")
+        return await self.conn.fetch("SELECT id, userid, reason, timestamp FROM reminders.reminders")
 
     async def get_all_timezones_from_db(self):
         """Get all timezones from the db (all users)"""

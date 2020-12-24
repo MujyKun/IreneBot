@@ -121,11 +121,11 @@ class Reminder(commands.Cog):
         if not user_timezone:
             return await ctx.send(f"> {ctx.author.display_name}, that is not a valid timezone.")
 
-        timezone_utc = datetime.datetime.now(pytz.timezone(user_timezone)).strftime('%Z%z')
+        timezone_utc = datetime.datetime.now(pytz.timezone(user_timezone)).strftime('%Z, UTC%z')
         native_time = datetime.datetime.now(pytz.timezone(user_timezone)).strftime('%c')
         await ex.set_user_timezone(ctx.author.id, user_timezone)
         return await ctx.send(f"> {ctx.author.display_name}, your timezone has been set to `{user_timezone} "
-                              f"{timezone_utc}` where it is currently `{native_time}`")
+                              f"{timezone_utc}`, where it is currently `{native_time}`")
 
     @tasks.loop(seconds=5, minutes=0, hours=0, reconnect=True)
     async def reminder_loop(self):

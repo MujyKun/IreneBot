@@ -138,6 +138,7 @@ class Cache(commands.Cog):
 
         # Reminder dictionary
         self.reminders = {}   # { user_id: [ [remind_reason, remind_time] ] }
+        self.timezones = {}   # { user_id: timezone }
 
         # bracket position for bias game stored due to annoyance when using previous x and y values.
         # counting starts from left to right, bottom to top

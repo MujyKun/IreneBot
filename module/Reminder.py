@@ -46,23 +46,33 @@ class Reminder(commands.Cog):
         try:
             is_relative_time, type_index = await ex.determine_time_type(user_input)
         except ex.exceptions.TooLarge:
-            return await ctx.send(f"> {ctx.author.display_name}, The time for a reminder can not be greater than 2 years.")
+            return await ctx.send(f"> {ctx.author.display_name}, the time for a reminder can not be greater than 2 years.")
         if is_relative_time is None:
-            return await ctx.send(f"> {ctx.author.display_name}, Please use 'in/at' to specify time.")
+            return await ctx.send(f"> {ctx.author.display_name}, please use 'in/at' to specify time.")
         remind_reason = await ex.process_remind_reason(user_input, type_index)
         remind_time = await ex.process_remind_time(user_input, type_index, is_relative_time, ctx.author.id)
-        await ex.add_reminder(remind_reason, remind_time, ctx.author.id)
+        await ex.set_reminder(remind_reason, remind_time, ctx.author.id)
         return await ctx.send(f"> {ctx.author.display_name}, I will remind you to {remind_reason} on {remind_time.strftime('%m/%d/%Y, %H:%M:%S')}")
 
+    @commands.command()
+    async def testremind(self, ctx, *, user_input):
+        """Test command that needs to be removed"""
+        is_relative_time, _ = await ex.determine_time_type(user_input)
+        if is_relative_time:
+            return await ctx.send(f"> The time type is relative time.")
+        return await ctx.send(f"> The time type is absolute time.")
 
     @commands.command()
     async def gettimezone(self, ctx):
         """Get your current set timezone.
         [Format: %gettimezone]"""
-        pass
+        user_timezone = await ex.get_user_timezone(ctx.author.id)
+        return await ctx.send(f"> {ctx.author.display_name}, your timezone is current set to {user_timezone}")
 
     @commands.command()
     async def settimezone(self, ctx, timezone_name, country_code):
         """Set your local timezone with the timezone name and country code.
         [Format: %settimezone (timezone name) (country code)]"""
         user_timezone = await ex.get_time_zone_name(timezone_name, country_code)
+        await ex.set_user_timezone(ctx.author.id, user_timezone)
+        return await ctx.send(f"> {ctx.author.display_name}, your timezone has been set to {user_timezone}")

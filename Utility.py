@@ -134,17 +134,23 @@ class Utility:
     async def create_reminder_cache(self):
         """Create cache for reminders"""
         self.cache.reminders = {}  # reset cache
+        self.cache.timezones = {}
         all_reminders = await self.get_all_reminders_from_db()
-        for reminder in all_reminders:
-            user_id = reminder[0]
-            reason = reminder[1]
-            time_stamp = reminder[2]
+        timezones = await self.get_all_timezones_from_db()
+        for reminder_info in all_reminders:
+            user_id = reminder_info[0]
+            reason = reminder_info[1]
+            time_stamp = reminder_info[2]
             reason_list = [reason, time_stamp]
             user_reminder = self.cache.reminders.get(user_id)
             if user_reminder:
                 user_reminder.append(reason_list)
             else:
                 self.cache.reminders[user_id] = [reason_list]
+        for timezone_info in timezones:
+            user_id = timezone_info[0]
+            timezone = timezone_info[1]
+            self.cache.timezones[user_id] = timezone
 
 
     async def create_self_assignable_role_cache(self):
@@ -2893,7 +2899,7 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
         return user_input[0: type_index]
 
     async def process_remind_time(self, user_input, type_index, is_relative_time, user_id):
-        """Return the datetime of the reminder"""
+        """Return the datetime of the reminder depending on the time format"""
         remind_time = user_input[type_index + len(" in ") : len(user_input) - 1]
 
         if is_relative_time:
@@ -2912,17 +2918,22 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
         hour_aliases = ["hours", "hour", "hrs", "hr", "h"]
         minute_aliases = ["minutes", "minute", "mins", "min", "m"]
         second_aliases = ["seconds", "second", "secs", "sec", "s"]
-        time_units = [[year_aliases, 3.154e7], [month_aliases, 2.628e6], [day_aliases, 8.64e4], [hour_aliases, 3600],[minute_aliases, 60], [second_aliases, 1]]
+        time_units = [[year_aliases, 3.154e7], [month_aliases, 2.628e6], [day_aliases, 8.64e4], [hour_aliases, 3600], [minute_aliases, 60], [second_aliases, 1]]
 
         remind_time = 0  # in seconds
         time_elements = re.findall(r"[^\W\d_]+|\d+", time_input)
-        for item in time_elements:
+
+        if not any(time_unit[0] in time_elements for time_unit in time_units):
+            #TODO: raise error for the case that the time given is not a valid form
+            pass
+
+        for time_element in time_elements:
             try:
-                int(item)
+                int(time_element)
             except:
                 for time_unit in time_units:
-                    if item in time_unit[0]:
-                        remind_time += time_unit[1] * int(time_elements[time_elements.index(item) - 1])
+                    if time_element in time_unit[0]:
+                        remind_time += time_unit[1] * int(time_elements[time_elements.index(time_element) - 1])
         return remind_time
 
     async def process_absolute_time_input(self, time_input, user_id):
@@ -2936,7 +2947,17 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
 
     async def get_user_timezone(self, user_id):
         """Returns the user's timezone"""
-        pass
+        return self.cache.timezones.get(user_id)
+
+    async def set_user_timezone(self, user_id, timezone):
+        """Set user timezone"""
+        user_timezone = self.cache.timezones.get(user_id)
+        if user_timezone:
+            self.cache.timezones[user_id] = timezone
+            await self.conn.execute("UPDATE reminders.timezones SET timezone = $1 WHERE userid = $2", timezone, user_id)
+        else:
+            self.cache.timezones[user_id] = timezone
+            await self.conn.execute("INSERT INTO reminders.timezones(userid, timezone) VALUES ($1, $2)", user_id, timezone)
 
     @staticmethod
     async def get_time_zone_name(timezone, country_code):
@@ -2988,12 +3009,12 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
 
         return min(set_zones, key=len)
 
-    async def add_reminder(self, remind_reason, remind_time, user_id):
+    async def set_reminder(self, remind_reason, remind_time, user_id):
         """Add reminder date to cache and db."""
         user_reminders = self.cache.reminders.get(user_id)
         remind_info = [remind_reason, remind_time]
         if user_reminders:
-            self.cache.reminders.append(remind_info)
+            self.cache.reminders[user_id] = user_reminders.append(remind_info)
         else:
             self.cache.reminders[user_id] = remind_info
         await self.conn.execute("INSERT INTO reminders.reminders(userid, reason, timestamp) VALUES ($1, $2, $3)", user_id, remind_reason, remind_time)
@@ -3006,6 +3027,9 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
         """Get all reminders from the db (all users)"""
         return await self.conn.fetch("SELECT userid, reason, timestamp FROM reminders.reminders")
 
+    async def get_all_timezones_from_db(self):
+        """Get all timezones from the db (all users)"""
+        return await self.conn.fetch("SELECT userid, timezone FROM reminders.timezones")
 
 class Idol:
     def __init__(self, **kwargs):

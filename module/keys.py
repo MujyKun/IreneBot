@@ -45,6 +45,7 @@ suggest_channel_id = make_int(os.getenv("SUGGEST_CHANNEL_ID"))
 dead_image_channel_id = make_int(os.getenv("DEAD_IMAGE_CHANNEL_ID"))
 idol_post_send_limit = make_int(os.getenv("IDOL_POST_LIMIT"))
 idol_no_vote_send_limit = make_int(os.getenv("IDOL_NO_VOTE_LIMIT"))  # amount of votes that can be sent without voting.
+reminder_limit = make_int(os.getenv("REMINDER_LIMIT"))
 
 interaction_list = [
     'slap',

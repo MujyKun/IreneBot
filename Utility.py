@@ -3086,7 +3086,6 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
                     current_reminder_id = reminder[0]
                     if current_reminder_id == reminder_id:
                         reminders.remove(reminder)
-            print(reminders)
         except Exception as e:
             log.console(e)
         await self.conn.execute("DELETE FROM reminders.reminders WHERE id = $1", reminder_id)

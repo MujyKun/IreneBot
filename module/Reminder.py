@@ -24,14 +24,17 @@ class Reminder(commands.Cog):
         remind_number = 1
         for remind in remind_list:
             remind_reason = remind[1]
-            remind_time = remind[2].replace(tzinfo=pytz.utc).astimezone(pytz.timezone(user_timezone))
+            if user_timezone:
+                remind_time = remind[2].replace(tzinfo=pytz.utc).astimezone(pytz.timezone(user_timezone))
+            else:
+                remind_time = remind[2]
             m_embed.add_field(name=f"{remind_number}) {remind_reason}",
                               value=f"{remind_time.strftime(time_format)}", inline=False)
             remind_number += 1
             if remind_number == 24:
                 embed_list.append(m_embed)
                 m_embed = await ex.create_embed(title="Reminders List")
-                remind_number = 0
+                remind_number = 1
         if remind_number:
             embed_list.append(m_embed)
         msg = await ctx.send(embed=embed_list[0])
@@ -56,10 +59,10 @@ class Reminder(commands.Cog):
         [Format: %remindme to ______ at 9PM
         or
         %remindme to ____ in 6hrs 30mins]"""
+        server_prefix = await ex.get_server_prefix_by_context(ctx)
         try:
             is_relative_time, type_index = await ex.determine_time_type(user_input)
         except ex.exceptions.ImproperFormat:
-            server_prefix = await ex.get_server_prefix_by_context(ctx)
             return await ctx.send(
                 f"> {ctx.author.display_name}, that is not a proper reminder format. Use `{server_prefix}help remindme`"
                 f" for help with the acceptable format.")

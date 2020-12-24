@@ -456,6 +456,9 @@ class Utility:
     async def send_cache_data_to_data_dog(self):
         """Sends metric information about cache to data dog every minute."""
         if self.thread_pool:
+            active_user_reminders = 0
+            for user_id in self.cache.reminders:
+                active_user_reminders += len(self.cache.reminders.get(user_id))
             metric_info = {
                 'total_commands_used': self.cache.total_used,
                 'bias_games': len(self.cache.bias_games),
@@ -486,7 +489,9 @@ class Utility:
                 'errors_per_minute': self.cache.errors_per_minute,
                 'wolfram_per_minute': self.cache.wolfram_per_minute,
                 'urban_per_minute': self.cache.urban_per_minute,
+                'active_user_reminders': active_user_reminders
             }
+
             # set all per minute metrics to 0 since this is a 60 second loop.
             self.cache.n_words_per_minute = 0
             self.cache.commands_per_minute = 0
@@ -2751,6 +2756,31 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
             return embed, message
         return None, None
 
+    async def send_weverse_to_channel(self, channel_info, message_text, embed, is_comment, community_name):
+        channel_id = channel_info[0]
+        role_id = channel_info[1]
+        comments_disabled = channel_info[2]
+        if not (is_comment and comments_disabled):
+            try:
+                channel = self.client.get_channel(channel_id)
+                if not channel:
+                    # fetch channel instead (assuming discord.py cache did not load)
+                    channel = await self.client.fetch_channel(channel_id)
+            except Exception as e:
+                # remove the channel from future updates as it cannot be found.
+                return await self.delete_weverse_channel(channel_id, community_name.lower())
+            try:
+                await channel.send(embed=embed)
+                if message_text:
+                    # Since an embed already exists, any individual content will not load
+                    # as an embed -> Make it it's own message.
+                    if role_id:
+                        message_text = f"<@&{role_id}>\n{message_text}"
+                    await channel.send(message_text)
+            except Exception as e:
+                # no permission to post
+                return
+
     #########################
     # ## SelfAssignRoles ## #
     #########################
@@ -3042,6 +3072,20 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
     async def get_reminders(self, user_id):
         """Get the reminders of a user"""
         return self.cache.reminders.get(user_id)
+
+    async def remove_user_reminder(self, user_id, reminder_id):
+        """Remove a reminder from the cache and the database."""
+        try:
+            # remove from cache
+            reminders = self.cache.reminders.get(user_id)
+            if reminders:
+                for reminder in reminders:
+                    current_reminder_id = reminder[0]
+                    if current_reminder_id == reminder_id:
+                        reminders.remove(reminder)
+        except Exception as e:
+            log.console(e)
+        await self.conn.execute("DELETE FROM reminders.reminders WHERE id = $1", reminder_id)
 
     async def get_all_reminders_from_db(self):
         """Get all reminders from the db (all users)"""

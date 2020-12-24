@@ -66,8 +66,9 @@ class Reminder(commands.Cog):
         or
         %remindme to ____ in 6hrs 30mins]"""
         reminders = ex.cache.reminders.get(ctx.author.id)
-        if len(reminders) >= reminder_limit:
-            return await ctx.send(f"> {ctx.author.display_name}, You have reached the maximum limit ({reminder_limit}) for reminders you can have.")
+        if reminders:
+            if len(reminders) >= reminder_limit:
+                return await ctx.send(f"> {ctx.author.display_name}, You have reached the maximum limit ({reminder_limit}) for reminders you can have.")
         server_prefix = await ex.get_server_prefix_by_context(ctx)
         try:
             is_relative_time, type_index = await ex.determine_time_type(user_input)

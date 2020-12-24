@@ -127,7 +127,8 @@ class Utility:
         await self.process_cache_time(self.create_weverse_channel_cache, "Weverse Text Channels")
         await self.process_cache_time(self.create_self_assignable_role_cache, "Self-Assignable Roles")
         await self.process_cache_time(self.create_reminder_cache, "Reminders")
-        task = asyncio.create_task(self.process_cache_time(self.weverse_client.start, "Weverse"))
+        if not self.test_bot:
+            task = asyncio.create_task(self.process_cache_time(self.weverse_client.start, "Weverse"))
         log.console(f"Cache Completely Created in {await self.get_cooldown_time(time.time() - past_time)}.")
 
     async def create_reminder_cache(self):

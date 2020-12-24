@@ -44,10 +44,11 @@ class Irene:
         # module.log.debug()
 
     @staticmethod
-    def start_loops():
+    def start_loops(run_weverse=True):
         """Start Loops (Optional)"""
         # Start checking for Weverse Updates
-        module.Weverse.Weverse().weverse_updates.start()
+        if run_weverse:
+            module.Weverse.Weverse().weverse_updates.start()
         # Start Automatic Youtube Scrape Loop
         module.Youtube.YoutubeLoop().new_task5.start()
         # Start Status Change Loop

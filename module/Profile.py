@@ -54,7 +54,10 @@ class Profile(commands.Cog):
             shortened_money = await ex.shorten_balance(str(await ex.get_balance(user_id)))
             rob_beg_daily_level = f"{await ex.get_level(user_id, 'rob')}/{await ex.get_level(user_id, 'beg')}/{await ex.get_level(user_id, 'daily')}"
             user_timezone = await ex.get_user_timezone(user_id)
-            timezone_utc = datetime.datetime.now(pytz.timezone(user_timezone)).strftime('%Z, UTC%z')
+            try:
+                timezone_utc = datetime.datetime.now(pytz.timezone(user_timezone)).strftime('%Z, UTC%z')
+            except:
+                timezone_utc = None
 
             if await ex.check_if_patreon(user_id):
                 embed = discord.Embed(title=f"{user.name} ({user_id})", color=0x90ee90, url=f"{user.avatar_url}", description=f"**{user.name} is supporting Irene on Patreon!**")

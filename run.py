@@ -49,6 +49,8 @@ class Irene:
         # Start checking for Weverse Updates
         if run_weverse:
             module.Weverse.Weverse().weverse_updates.start()
+        # Check for Reminders
+        module.Reminder.Reminder().reminder_loop.start()
         # Start Automatic Youtube Scrape Loop
         module.Youtube.YoutubeLoop().new_task5.start()
         # Start Status Change Loop

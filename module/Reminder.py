@@ -1,7 +1,4 @@
-import discord
-from discord.ext import commands
-from module import logger as log, events
-import random
+from discord.ext import commands, tasks
 from Utility import resources as ex
 import datetime
 import pytz
@@ -39,7 +36,14 @@ class Reminder(commands.Cog):
     async def removereminder(self, ctx, reminder_index):
         """Remove one of your reminders.
         [Format: %removereminder (reminder index)]"""
-        pass
+        reminders = ex.cache.reminders.get(ctx.author.id)
+        if not reminders:
+            return await ctx.send(f"> {ctx.author.display_name}, you have no reminders.")
+        else:
+            reminder = reminders.index(reminder_index+1)
+            if not reminder:
+                return await ctx.send(f"> {ctx.author.display_name}, I could not find index {reminder_index}.")
+            await ex.remove_user_reminder(ctx.author.id, reminder[0])
 
     @commands.command(aliases=["remind"])
     async def remindme(self, ctx, *, user_input):
@@ -98,3 +102,29 @@ class Reminder(commands.Cog):
         await ex.set_user_timezone(ctx.author.id, user_timezone)
         return await ctx.send(f"> {ctx.author.display_name}, your timezone has been set to `{user_timezone} "
                               f"{timezone_utc}` where it is currently `{native_time}`")
+
+    @tasks.loop(seconds=5, minutes=0, hours=0, reconnect=True)
+    async def reminder_loop(self):
+        """Process for checking for reminders and sending them out if they are past overdue."""
+        for user_id in ex.cache.reminders:
+            reminders = ex.cache.reminders.get(user_id)
+            if reminders:
+                for reminder in reminders:
+                    try:
+                        remind_id = reminder[0]
+                        remind_reason = reminder[1]
+                        remind_time = reminder[2]
+                        current_time = datetime.datetime.now()
+                        if current_time >= remind_time:
+                            dm_channel = await ex.get_dm_channel(user_id=user_id)
+                            if dm_channel:
+                                title_desc = f"This is a reminder to **{remind_reason}**."
+                                embed = ex.create_embed(title="Reminder", title_desc=title_desc)
+                                await dm_channel.send(embed=embed)
+                                await ex.remove_user_reminder(user_id, remind_id)
+                    except:
+                        # likely forbidden error -> do not have access to dm user
+                        pass
+
+
+

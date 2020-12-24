@@ -456,6 +456,9 @@ class Utility:
     async def send_cache_data_to_data_dog(self):
         """Sends metric information about cache to data dog every minute."""
         if self.thread_pool:
+            active_user_reminders = 0
+            for user_id in self.cache.reminders:
+                active_user_reminders += len(self.cache.reminders.get(user_id))
             metric_info = {
                 'total_commands_used': self.cache.total_used,
                 'bias_games': len(self.cache.bias_games),
@@ -486,7 +489,9 @@ class Utility:
                 'errors_per_minute': self.cache.errors_per_minute,
                 'wolfram_per_minute': self.cache.wolfram_per_minute,
                 'urban_per_minute': self.cache.urban_per_minute,
+                'active_user_reminders': active_user_reminders
             }
+
             # set all per minute metrics to 0 since this is a 60 second loop.
             self.cache.n_words_per_minute = 0
             self.cache.commands_per_minute = 0
@@ -3063,6 +3068,20 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
     async def get_reminders(self, user_id):
         """Get the reminders of a user"""
         return self.cache.reminders.get(user_id)
+
+    async def remove_user_reminder(self, user_id, reminder_id):
+        """Remove a reminder from the cache and the database."""
+        try:
+            # remove from cache
+            reminders = self.cache.reminders.get(user_id)
+            if reminders:
+                for reminder in reminders:
+                    current_reminder_id = reminder[0]
+                    if current_reminder_id == reminder_id:
+                        reminders.remove(reminder)
+        except Exception as e:
+            log.console(e)
+        await self.conn.execute("DELETE FROM reminders.reminders WHERE id = $1", reminder_id)
 
     async def get_all_reminders_from_db(self):
         """Get all reminders from the db (all users)"""

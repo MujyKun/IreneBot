@@ -3068,9 +3068,9 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
         user_reminders = self.cache.reminders.get(user_id)
         remind_info = [remind_id, remind_reason, remind_time]
         if user_reminders:
-            self.cache.reminders[user_id] = user_reminders.append(remind_info)
+            user_reminders.append(remind_info)
         else:
-            self.cache.reminders[user_id] = remind_info
+            self.cache.reminders[user_id] = [remind_info]
 
     async def get_reminders(self, user_id):
         """Get the reminders of a user"""
@@ -3086,6 +3086,7 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
                     current_reminder_id = reminder[0]
                     if current_reminder_id == reminder_id:
                         reminders.remove(reminder)
+            print(reminders)
         except Exception as e:
             log.console(e)
         await self.conn.execute("DELETE FROM reminders.reminders WHERE id = $1", reminder_id)

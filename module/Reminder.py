@@ -30,7 +30,7 @@ class Reminder(commands.Cog):
                               value=f"{remind_time.strftime(time_format)}", inline=False)
             remind_number += 1
             index_number += 1
-            if remind_number == 25:
+            if remind_number == 11:
                 embed_list.append(m_embed)
                 m_embed = await ex.create_embed(title="Reminders List")
                 remind_number = 1
@@ -40,17 +40,19 @@ class Reminder(commands.Cog):
         await ex.check_left_or_right_reaction_embed(msg, embed_list)
 
     @commands.command(aliases=["removeremind"])
-    async def removereminder(self, ctx, reminder_index):
+    async def removereminder(self, ctx, reminder_index: int):
         """Remove one of your reminders.
         [Format: %removereminder (reminder index)]"""
         reminders = ex.cache.reminders.get(ctx.author.id)
         if not reminders:
             return await ctx.send(f"> {ctx.author.display_name}, you have no reminders.")
         else:
-            reminder = reminders.index(reminder_index+1)
-            if not reminder:
+            try:
+                reminder = reminders[reminder_index-1]
+                await ctx.send(f"> {ctx.author.display_name}, I will not remind you to {reminder[1]} on {reminder[2].strftime('%m/%d/%Y, %H:%M:%S')}.")
+                await ex.remove_user_reminder(ctx.author.id, reminder[0])
+            except Exception as e:
                 return await ctx.send(f"> {ctx.author.display_name}, I could not find index {reminder_index}.")
-            await ex.remove_user_reminder(ctx.author.id, reminder[0])
 
     @commands.command(aliases=["remind"])
     async def remindme(self, ctx, *, user_input):
@@ -127,11 +129,8 @@ class Reminder(commands.Cog):
         for user_id in ex.cache.reminders:
             reminders = ex.cache.reminders.get(user_id)
             if reminders:
-                for reminder in reminders:
+                for remind_id, remind_reason, remind_time in reminders:
                     try:
-                        remind_id = reminder[0]
-                        remind_reason = reminder[1]
-                        remind_time = reminder[2]
                         current_time = datetime.datetime.now()
                         if current_time >= remind_time:
                             dm_channel = await ex.get_dm_channel(user_id=user_id)

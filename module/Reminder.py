@@ -43,14 +43,18 @@ class Reminder(commands.Cog):
     async def removereminder(self, ctx, reminder_index: int):
         """Remove one of your reminders.
         [Format: %removereminder (reminder index)]"""
+        time_format = '%a %x, %I:%M:%S%p %Z'
+        user_timezone = await ex.get_user_timezone(ctx.author.id)
+
         reminders = ex.cache.reminders.get(ctx.author.id)
         if not reminders:
             return await ctx.send(f"> {ctx.author.display_name}, you have no reminders.")
         else:
             try:
-                reminder = reminders[reminder_index-1]
-                await ctx.send(f"> {ctx.author.display_name}, I will not remind you to {reminder[1]} on {reminder[2].strftime('%m/%d/%Y, %H:%M:%S')}.")
-                await ex.remove_user_reminder(ctx.author.id, reminder[0])
+                remind_id, remind_reason, remind_time = reminders[reminder_index-1]
+                remind_time = remind_time.replace(tzinfo=pytz.utc).astimezone(pytz.timezone(user_timezone))
+                await ctx.send(f"> {ctx.author.display_name}, I will not remind you to **{remind_reason}** on `{remind_time.strftime(time_format)}`.")
+                await ex.remove_user_reminder(ctx.author.id, remind_id)
             except Exception as e:
                 return await ctx.send(f"> {ctx.author.display_name}, I could not find index {reminder_index}.")
 
@@ -89,7 +93,7 @@ class Reminder(commands.Cog):
 
         await ex.set_reminder(remind_reason, remind_time, ctx.author.id)
         return await ctx.send(
-            f"> {ctx.author.display_name}, I will remind you to {remind_reason} on {remind_time.strftime('%m/%d/%Y, %H:%M:%S')}")
+            f"> {ctx.author.display_name}, I will remind you to **{remind_reason}** on `{remind_time.strftime('%m/%d/%Y, %H:%M:%S')}`")
 
     @commands.command(aliases=['gettz'])
     async def gettimezone(self, ctx):
@@ -136,7 +140,7 @@ class Reminder(commands.Cog):
                             dm_channel = await ex.get_dm_channel(user_id=user_id)
                             if dm_channel:
                                 title_desc = f"This is a reminder to **{remind_reason}**."
-                                embed = ex.create_embed(title="Reminder", title_desc=title_desc)
+                                embed = await ex.create_embed(title="Reminder", title_desc=title_desc)
                                 await dm_channel.send(embed=embed)
                                 await ex.remove_user_reminder(user_id, remind_id)
                     except:

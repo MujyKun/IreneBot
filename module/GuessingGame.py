@@ -57,7 +57,7 @@ class Game:
         self.timeout = timeout
         if gender.lower() in ['male', 'm', 'female', 'f']:
             self.gender = gender.lower()[0]
-        await self.create_new_question()
+        task = asyncio.create_task(self.process_game())
 
     async def check_message(self):
         stop_phrases = ['stop', 'end']
@@ -82,13 +82,11 @@ class Game:
                 else:
                     self.players[msg.author.id] = score + 1
                 self.rounds += 1
-            await self.create_new_question()
         except asyncio.TimeoutError:
-            # reveal the answer and make a new question.
+            # reveal the answer
             self.rounds += 1
             if not self.force_ended:
                 await self.print_answer()
-            await self.create_new_question()
 
     async def create_new_question(self):
         """Create a new question and send it to the channel."""
@@ -100,20 +98,13 @@ class Game:
                     # message does not exist.
                     pass
             if self.rounds >= self.max_rounds:
-                if self.force_ended:
-                    return
-                return await self.display_winners()
+                if not self.force_ended:
+                    return await self.end_game()
             self.idol = await ex.get_random_idol()
             if self.gender:
                 while self.idol.gender != self.gender:
                     self.idol = await ex.get_random_idol()
-            try:
-                self.group_names = [(await ex.get_group(group_id)).name for group_id in self.idol.groups]
-            except Exception as e:
-                # log.console(f"{e} - Create New Question (guessing game) -1")
-                # if the idol has no group or the group has no name, we'll skip them.
-                # unsure of error, but regenerating a question is the simpler path.
-                return await self.create_new_question()
+            self.group_names = [(await ex.get_group(group_id)).name for group_id in self.idol.groups]
             self.correct_answers = []
             for alias in self.idol.aliases:
                 self.correct_answers.append(alias.lower())
@@ -123,9 +114,7 @@ class Game:
             self.idol_post_msg, self.photo_link = await ex.idol_post(self.channel, self.idol, user_id=self.host, guessing_game=True, scores=self.players)
             await self.check_message()
         except Exception as e:
-            # commenting out the error because it can spam the console a lot with many games playing
-            # log.console(f"{e} - Create New Question (guessing game) -2")
-            return await self.create_new_question()
+            pass
 
     async def display_winners(self):
         final_scores = ""
@@ -139,6 +128,7 @@ class Game:
         self.force_ended = True
         self.rounds = self.max_rounds
         await self.display_winners()
+        return True
 
     async def print_answer(self, question_skipped=False):
         skipped = ""
@@ -153,4 +143,9 @@ class Game:
         except Exception as e:
             log.console(e)
 
+    async def process_game(self):
+        """Ignores errors and continuously makes new questions until the game should end."""
+        while not await self.create_new_question():
+            # the game will only end if the True from end_game() is returned.
+            pass
 

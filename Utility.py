@@ -458,7 +458,9 @@ class Utility:
         if self.thread_pool:
             active_user_reminders = 0
             for user_id in self.cache.reminders:
-                active_user_reminders += len(self.cache.reminders.get(user_id))
+                reminders = self.cache.reminders.get(user_id)
+                if reminders:
+                    active_user_reminders += len(reminders)
             metric_info = {
                 'total_commands_used': self.cache.total_used,
                 'bias_games': len(self.cache.bias_games),
@@ -3061,13 +3063,14 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
 
     async def set_reminder(self, remind_reason, remind_time, user_id):
         """Add reminder date to cache and db."""
+        await self.conn.execute("INSERT INTO reminders.reminders(userid, reason, timestamp) VALUES ($1, $2, $3)", user_id, remind_reason, remind_time)
+        remind_id = self.first_result(await self.conn.fetchrow("SELECT id FROM reminders.reminders WHERE userid=$1 AND reason=$2 AND timestamp=$3 ORDER BY id DESC", user_id, remind_reason, remind_time))
         user_reminders = self.cache.reminders.get(user_id)
-        remind_info = [remind_reason, remind_time]
+        remind_info = [remind_id, remind_reason, remind_time]
         if user_reminders:
             self.cache.reminders[user_id] = user_reminders.append(remind_info)
         else:
             self.cache.reminders[user_id] = remind_info
-        await self.conn.execute("INSERT INTO reminders.reminders(userid, reason, timestamp) VALUES ($1, $2, $3)", user_id, remind_reason, remind_time)
 
     async def get_reminders(self, user_id):
         """Get the reminders of a user"""

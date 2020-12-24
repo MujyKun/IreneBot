@@ -22,16 +22,15 @@ class Reminder(commands.Cog):
         m_embed = await ex.create_embed(title="Reminders List")
         embed_list = []
         remind_number = 1
-        for remind in remind_list:
-            remind_reason = remind[1]
+        index_number = 1
+        for remind_id, remind_reason, remind_time in remind_list:
             if user_timezone:
-                remind_time = remind[2].replace(tzinfo=pytz.utc).astimezone(pytz.timezone(user_timezone))
-            else:
-                remind_time = remind[2]
-            m_embed.add_field(name=f"{remind_number}) {remind_reason}",
+                remind_time = remind_time.replace(tzinfo=pytz.utc).astimezone(pytz.timezone(user_timezone))
+            m_embed.add_field(name=f"{index_number}) {remind_reason}",
                               value=f"{remind_time.strftime(time_format)}", inline=False)
             remind_number += 1
-            if remind_number == 24:
+            index_number += 1
+            if remind_number == 25:
                 embed_list.append(m_embed)
                 m_embed = await ex.create_embed(title="Reminders List")
                 remind_number = 1

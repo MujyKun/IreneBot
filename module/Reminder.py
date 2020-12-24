@@ -15,24 +15,29 @@ class Reminder(commands.Cog):
     async def listreminders(self, ctx):
         """Lists out all of your reminders.
         [Format: %listreminders]"""
+        time_format = '%a %x, %I:%M:%S%p %Z'
         remind_list = await ex.get_reminders(ctx.author.id)
+        user_timezone = await ex.get_user_timezone(ctx.author.id)
 
         if not remind_list:
             return await ctx.send(f"> {ctx.author.display_name}, you have no reminders.")
 
         m_embed = await ex.create_embed(title="Reminders List")
         embed_list = []
-        remind_number = 0
+        remind_number = 1
         for remind in remind_list:
+            remind_reason = remind[1]
+            remind_time = remind[2].replace(tzinfo=pytz.utc).astimezone(pytz.timezone(user_timezone))
+            m_embed.add_field(name=f"{remind_number}) {remind_reason}",
+                              value=f"{remind_time.strftime(time_format)}", inline=False)
             remind_number += 1
-            m_embed.add_field(name=f"{remind[2].strftime('%m/%d/%Y, %H:%M:%S')}", value=f"to {remind[1]}", inline=False)
-            if remind_number == 25:
+            if remind_number == 24:
                 embed_list.append(m_embed)
                 m_embed = await ex.create_embed(title="Reminders List")
                 remind_number = 0
         if remind_number:
             embed_list.append(m_embed)
-        msg = await ctx.send(embed=m_embed[0])
+        msg = await ctx.send(embed=embed_list[0])
         await ex.check_left_or_right_reaction_embed(msg, embed_list)
 
     @commands.command(aliases=["removeremind"])
@@ -49,20 +54,31 @@ class Reminder(commands.Cog):
         %remindme to ____ in 6hrs 30mins]"""
         try:
             is_relative_time, type_index = await ex.determine_time_type(user_input)
-        except ex.exceptions.TooLarge:
+        except ex.exceptions.ImproperFormat:
+            server_prefix = await ex.get_server_prefix_by_context(ctx)
             return await ctx.send(
-                f"> {ctx.author.display_name}, the time for a reminder can not be greater than 2 years.")
+                f"> {ctx.author.display_name}, that is not a proper reminder format. Use `{server_prefix}help remindme`"
+                f" for help with the acceptable format.")
+
         if is_relative_time is None:
-            return await ctx.send(f"> {ctx.author.display_name}, please use 'in/at' to specify time.")
+            return await ctx.send(
+                f"> {ctx.author.display_name}, that is not a proper reminder format. Use `{server_prefix}help remindme`"
+                f" for help with the acceptable format.")
+
         remind_reason = await ex.process_reminder_reason(user_input, type_index)
+
         try:
             remind_time = await ex.process_reminder_time(user_input, type_index, is_relative_time, ctx.author.id)
         except ex.exceptions.ImproperFormat:
             return await ctx.send(f"{ctx.author.display_name}, you did not enter the correct time format.")
+        except ex.exceptions.TooLarge:
+            return await ctx.send(
+                f"> {ctx.author.display_name}, the time for a reminder can not be greater than 2 years.")
         except ex.exceptions.NoTimeZone:
             server_prefix = await ex.get_server_prefix_by_context(ctx)
             return await ctx.send(f"> {ctx.author.display_name}, you do not have a timezone set. Please use "
                                   f"`{server_prefix}{self.set_timezone_format}`")
+
         await ex.set_reminder(remind_reason, remind_time, ctx.author.id)
         return await ctx.send(
             f"> {ctx.author.display_name}, I will remind you to {remind_reason} on {remind_time.strftime('%m/%d/%Y, %H:%M:%S')}")
@@ -79,7 +95,7 @@ class Reminder(commands.Cog):
 
         timezone_abbrev = datetime.datetime.now(pytz.timezone(user_timezone)).strftime('%Z%z')
         return await ctx.send(
-            f"> {ctx.author.display_name}, your timezone is current set to {user_timezone} {timezone_abbrev}")
+            f"> {ctx.author.display_name}, your timezone is currently set to {user_timezone} {timezone_abbrev}")
 
     @commands.command(aliases=['settz'])
     async def settimezone(self, ctx, timezone_name=None, country_code=None):
@@ -89,7 +105,7 @@ class Reminder(commands.Cog):
             await ex.remove_user_timezone(ctx.author.id)
             return await ctx.send(f"> {ctx.author.display_name}, if your timezone was set, it was removed.")
 
-        user_timezone = await ex.get_time_zone_name(timezone_name, country_code)
+        user_timezone = await ex.process_timezone_input(timezone_name, country_code)
         if not user_timezone:
             return await ctx.send(f"> {ctx.author.display_name}, that is not a valid timezone.")
 

@@ -2903,7 +2903,7 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
 
     async def process_reminder_time(self, user_input, type_index, is_relative_time, user_id):
         """Return the datetime of the reminder depending on the time format"""
-        remind_time = user_input[type_index + len(" in "): len(user_input) - 1]
+        remind_time = user_input[type_index + len(" in "): len(user_input)]
 
         if is_relative_time:
             if await self.process_relative_time_input(remind_time) > 2 * 3.154e7:  # 2 years in seconds
@@ -2924,19 +2924,20 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
         time_units = [[year_aliases, 3.154e7], [month_aliases, 2.628e6], [day_aliases, 8.64e4], [hour_aliases, 3600], [minute_aliases, 60], [second_aliases, 1]]
 
         remind_time = 0  # in seconds
-        time_elements = re.findall(r"[^\W\d_]+|\d+", time_input)
+        input_elements = re.findall(r"[^\W\d_]+|\d+", time_input)
 
-        if not any(time_unit[0] in time_elements for time_unit in time_units):
+        all_aliases = [alias for time_unit in time_units for alias in time_unit[0]]
+        if not any(alias in input_elements for alias in all_aliases):
             raise exceptions.ImproperFormat
 
-        for time_element in time_elements:
+        for time_element in input_elements:
             try:
                 int(time_element)
             except Exception as e:
                 # purposefully creating an error to locate which elements are words vs integers.
                 for time_unit in time_units:
                     if time_element in time_unit[0]:
-                        remind_time += time_unit[1] * int(time_elements[time_elements.index(time_element) - 1])
+                        remind_time += time_unit[1] * int(input_elements[input_elements.index(time_element) - 1])
         return remind_time
 
     async def process_absolute_time_input(self, time_input, user_id):
@@ -2945,7 +2946,10 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
         if not user_timezone:
             raise exceptions.NoTimeZone
         cal = parsedatetime.Calendar()
-        datetime_obj, _ = cal.parseDT(datetimeString=time_input, tzinfo=pytz.timezone(user_timezone))
+        try:
+            datetime_obj, _ = cal.parseDT(datetimeString=time_input, tzinfo=pytz.timezone(user_timezone))
+        except:
+            raise exceptions.ImproperFormat
         return datetime_obj
 
     async def get_user_timezone(self, user_id):
@@ -2970,7 +2974,7 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
             pass
 
     @staticmethod
-    async def get_time_zone_name(timezone, country_code):
+    async def process_timezone_input(timezone, country_code):
         """Convert timezone abbreviation and country code to standard timezone name - taken from stackoverflow"""
         try:
             timezone = timezone.upper()

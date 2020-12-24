@@ -12,10 +12,10 @@ import ksoftapi
 
 
 def make_int(var):
-    if len(var) != 0:
-        var = int(var)
-    return var
-
+    try:
+        return int(var)
+    except Exception as e:
+        return None
 
 load_dotenv()  # Adds .env to memory
 # DISCORD
@@ -26,7 +26,11 @@ test_client_token = os.getenv("TEST_BOT_TOKEN")
 bot_name = None  # this is set in the on_ready event
 bot_id = make_int(os.getenv("BOT_ID"))
 owner_id = make_int(os.getenv("OWNER_ID"))
-mods_list_split = (os.getenv("MODS_LIST")).split(',')
+try:
+    mods_list_split = (os.getenv("MODS_LIST")).split(',')
+except Exception as e:
+    mods_list_split = None
+
 mods_list = []
 for mod in mods_list_split:
     mods_list.append(int(mod))

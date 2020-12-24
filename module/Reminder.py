@@ -1,3 +1,4 @@
+from module.keys import reminder_limit
 from discord.ext import commands, tasks
 from Utility import resources as ex
 import datetime
@@ -64,6 +65,9 @@ class Reminder(commands.Cog):
         [Format: %remindme to ______ at 9PM
         or
         %remindme to ____ in 6hrs 30mins]"""
+        reminders = ex.cache.reminders.get(ctx.author.id)
+        if len(reminders) >= reminder_limit:
+            return await ctx.send(f"> {ctx.author.display_name}, You have reached the maximum limit ({reminder_limit}) for reminders you can have.")
         server_prefix = await ex.get_server_prefix_by_context(ctx)
         try:
             is_relative_time, type_index = await ex.determine_time_type(user_input)
@@ -135,7 +139,7 @@ class Reminder(commands.Cog):
             if reminders:
                 for remind_id, remind_reason, remind_time in reminders:
                     try:
-                        current_time = datetime.datetime.now()
+                        current_time = datetime.datetime.now(remind_time.tzinfo)
                         if current_time >= remind_time:
                             dm_channel = await ex.get_dm_channel(user_id=user_id)
                             if dm_channel:
@@ -143,9 +147,8 @@ class Reminder(commands.Cog):
                                 embed = await ex.create_embed(title="Reminder", title_desc=title_desc)
                                 await dm_channel.send(embed=embed)
                                 await ex.remove_user_reminder(user_id, remind_id)
-                    except:
+                    except Exception as e:
                         # likely forbidden error -> do not have access to dm user
                         pass
-
 
 

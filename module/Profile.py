@@ -1,4 +1,6 @@
 import discord
+import datetime
+import pytz
 from discord.ext import commands
 from Utility import resources as ex
 from module import logger as log
@@ -51,6 +53,9 @@ class Profile(commands.Cog):
             user_level = await ex.get_level(user_id, "profile")
             shortened_money = await ex.shorten_balance(str(await ex.get_balance(user_id)))
             rob_beg_daily_level = f"{await ex.get_level(user_id, 'rob')}/{await ex.get_level(user_id, 'beg')}/{await ex.get_level(user_id, 'daily')}"
+            user_timezone = await ex.get_user_timezone(user_id)
+            timezone_utc = datetime.datetime.now(pytz.timezone(user_timezone)).strftime('%Z, UTC%z')
+
             if await ex.check_if_patreon(user_id):
                 embed = discord.Embed(title=f"{user.name} ({user_id})", color=0x90ee90, url=f"{user.avatar_url}", description=f"**{user.name} is supporting Irene on Patreon!**")
             else:
@@ -72,7 +77,10 @@ class Profile(commands.Cog):
             embed.add_field(name="Rob/Beg/Daily Level", value=rob_beg_daily_level, inline=True)
             embed.add_field(name="Account Join Date", value=user.created_at, inline=True)
             embed.add_field(name="Bot", value=user_bot, inline=True)
-            embed.add_field(name="Activity", value=user_activity, inline=True)
+            if user_activity:
+                embed.add_field(name="Activity", value=user_activity, inline=True)
+            if user_timezone:
+                embed.add_field(name="Timezone", value=f"{user_timezone} ({timezone_utc})", inline=True)
             await ctx.send(embed=embed)
 
         except Exception as e:

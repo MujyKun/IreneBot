@@ -2959,15 +2959,24 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
             self.cache.timezones[user_id] = timezone
             await self.conn.execute("INSERT INTO reminders.timezones(userid, timezone) VALUES ($1, $2)", user_id, timezone)
 
+    async def remove_user_timezone(self, user_id):
+        """Remove user timezone"""
+        try:
+            del self.cache.timezones[user_id]
+            await self.conn.execute("DELETE FROM reminders.timezones WHERE usderid = $1", user_id)
+        except:
+            pass
+
     @staticmethod
     async def get_time_zone_name(timezone, country_code):
         """Convert timezone abbreviation and country code to standard timezone name"""
-        # see if it's already a valid time zone name
         try:
             timezone = timezone.upper()
             country_code = country_code.upper()
         except:
             pass
+
+        # see if it's already a valid time zone name
         if timezone in pytz.all_timezones:
             return timezone
 
@@ -3010,6 +3019,8 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
             if tzabbrev.upper() == timezone.upper():
                 set_zones.add(name)
 
+        if not set_zones:
+            return None
         return min(set_zones, key=len)
 
     async def set_reminder(self, remind_reason, remind_time, user_id):

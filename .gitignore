@@ -1,0 +1,8 @@
+.env
+*.log
+__pycache__/
+module/__pycache__/
+module/Funtimes.py
+venv/
+.idea/
+irenebot-com/node_modules/

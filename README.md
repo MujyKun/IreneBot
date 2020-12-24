@@ -288,3 +288,12 @@ To find out more, look at the `GroupMembers` category.
 | removerole | Remove a self-assignable role based on the role name given. | %removerole (custom role name) |  |
 | sendrolemessage | Sends the default role message in the current channel. Is not needed for the roles to work. | %sendrolemessage |  |
 | setrolechannel | Set the channel for self-assignable roles to be used in. | %setrolechannel #text-channel |  |
+
+#### Reminder:
+| Command     | Description                          | Format                 | Aliases           |
+|-------------|--------------------------------------|------------------------|-------------------|
+| gettimezone | Get your current set timezone. | %gettimezone | gettz |
+| listreminders | Lists out all of your reminders. | %listreminders | listreminds, reminders, reminds |
+| remindme | Create a reminder to do a task at a certain time. | %remindme to ______ at 9PM or %remindme to ____ in 6hrs 30mins  | remind |
+| removereminder | Remove one of your reminders. | %removereminder (reminder index) | removeremind |
+| settimezone | Set your local timezone with a timezone abbreviation and country code. | %settimezone (timezone name ex: PST) (country code ex: US) | settz |

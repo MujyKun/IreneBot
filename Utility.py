@@ -3025,8 +3025,7 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
 
         return random.choice(list(possible_timezones))
 
-    @staticmethod
-    async def get_locale_time(m_time, user_timezone=None):
+    async def get_locale_time(self, m_time, user_timezone=None):
         """ Return a string containing locale date format. For now, enforce all weekdays to be en_US format"""
         # Set locale to server locale
         time_format = '%I:%M:%S%p %Z'

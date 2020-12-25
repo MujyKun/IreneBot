@@ -85,9 +85,7 @@ class Reminder(commands.Cog):
             return await ctx.send(
                 f"> {ctx.author.display_name}, that is not a proper reminder format. Use `{server_prefix}help remindme`"
                 f" for help with the acceptable format.")
-
         remind_reason = await ex.process_reminder_reason(user_input, type_index)
-
         try:
             remind_time = await ex.process_reminder_time(user_input, type_index, is_relative_time, ctx.author.id)
         except ex.exceptions.ImproperFormat:
@@ -96,7 +94,6 @@ class Reminder(commands.Cog):
             return await ctx.send(
                 f"> {ctx.author.display_name}, the time for a reminder can not be greater than 2 years.")
         except ex.exceptions.NoTimeZone:
-            server_prefix = await ex.get_server_prefix_by_context(ctx)
             return await ctx.send(f"> {ctx.author.display_name}, you do not have a timezone set. Please use "
                                   f"`{server_prefix}{self.set_timezone_format}`")
 

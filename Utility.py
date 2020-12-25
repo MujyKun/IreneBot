@@ -18,6 +18,7 @@ import aiofiles
 import re
 import pytz
 import parsedatetime
+import locale
 
 """
 Utility.py
@@ -2916,7 +2917,7 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
         """Determine if time is relative time or absolute time
         relative time: remind me to _____ in 6 days
         absolute time: remind me to _____ at 6PM"""
-
+        # TODO: add "on", "tomorrow", and "tonight" as valid imnputs
         in_index = user_input.rfind(" in ")
         at_index = user_input.rfind(" at ")
         if in_index == at_index:
@@ -2928,6 +2929,7 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
     @staticmethod
     async def process_reminder_reason(user_input, type_index):
         """Return the reminder reason that comes before in/at"""
+        # TODO: add case when starting with "me"
         user_text = user_input.split()
         if user_text[0].lower() == "to":
             return user_input[3: type_index]
@@ -3008,60 +3010,59 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
             pass
 
     @staticmethod
-    async def process_timezone_input(timezone, country_code):
-        """Convert timezone abbreviation and country code to standard timezone name - taken from stackoverflow"""
+    async def process_timezone_input(input_timezone, input_country_code=None):
+        """Convert timezone abbreviation and country code to standard timezone name"""
+
         try:
-            timezone = timezone.upper()
-            country_code = country_code.upper()
+            input_timezone = input_timezone.upper()
+            input_country_code = input_country_code.upper()
         except:
             pass
 
-        # see if it's already a valid time zone name
-        if timezone in pytz.all_timezones:
-            return timezone
-
-        # if it's a number value, then use the Etc/GMT code
+        # Filter for all timezones which are equivalent to the user inputted timezone
+        matching_timezones = None
         try:
-            offset = int(timezone)
-            if offset > 0:
-                offset = '+' + str(offset)
-            else:
-                offset = str(offset)
-            return 'Etc/GMT' + offset
-        except ValueError:
-            pass
-
-        # look up the abbreviation
-        country_tzones = None
-        try:
-            country_tzones = pytz.country_timezones[country_code]
+            matching_timezones = set(
+                filter(lambda x: datetime.datetime.now(pytz.timezone(x)).strftime("%Z") == input_timezone,
+                       pytz.common_timezones))
         except:
-            pass
+            return matching_timezones
 
-        set_zones = set()
-        if country_tzones and len(country_tzones):
-            for name in country_tzones:
-                tzone = pytz.timezone(name)
-                tzabbrev = datetime.datetime.now(tzone).tzname()
-                if tzabbrev.upper() == timezone.upper():
-                    set_zones.add(name)
+        # Find the timezones which share both same timezone input and the same country code
+        if input_country_code:
+            try:
+                country_timezones = set(pytz.country_timezones[input_country_code])
+                possible_timezones = matching_timezones.intersection(country_timezones)
+            except:
+                possible_timezones = matching_timezones
+        else:
+            possible_timezones = matching_timezones
 
-            if len(set_zones):
-                return min(set_zones, key=len)
-
-            # none matched, at least pick one in the right country
-            return min(country_tzones, key=len)
-
-        # invalid country, just try to match the timezone abbreviation to any time zone
-        for name in pytz.all_timezones:
-            tzone = pytz.timezone(name)
-            tzabbrev = datetime.datetime.now(tzone).tzname()
-            if tzabbrev.upper() == timezone.upper():
-                set_zones.add(name)
-
-        if not set_zones:
+        if not possible_timezones:
             return None
-        return min(set_zones, key=len)
+
+        return random.choice(list(possible_timezones))
+
+    @staticmethod
+    async def get_locale_time(m_time, user_timezone=None):
+        """ Return a string containing locale date format. For now, enforce all weekdays to be en_US format"""
+        # Set locale to server locale
+        time_format = '%I:%M:%S%p %Z'
+        locale.setlocale(locale.LC_ALL, '')
+
+        if not user_timezone:
+            return m_time.strftime('%a %x %I:%M:%S%p %Z')
+
+        # Use weekday format of server
+        weekday = m_time.strftime('%a')
+
+        locale.setlocale(locale.LC_ALL, self.cache.locale_by_timezone[user_timezone])  # Set to user locale
+        locale_date = m_time.strftime('%x')
+        locale.setlocale(locale.LC_ALL, '')  # Reset locale back to server locale
+
+        local_time = m_time.replace(tzinfo=pytz.utc).astimezone(pytz.timezone(user_timezone))
+        local_time = local_time.strftime(time_format)
+        return f"{weekday} {locale_date} {local_time}"
 
     async def set_reminder(self, remind_reason, remind_time, user_id):
         """Add reminder date to cache and db."""

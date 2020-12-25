@@ -10,11 +10,12 @@ class Reminder(commands.Cog):
     def __init__(self):
         self.set_timezone_format = "settimezone (timezone abbreviation) (country code)"
 
+    # TODO: add remindlater command or reacts to the reminder
+
     @commands.command(aliases=["listreminds", "reminders", "reminds"])
     async def listreminders(self, ctx):
         """Lists out all of your reminders.
         [Format: %listreminders]"""
-        time_format = '%a %x, %I:%M:%S%p %Z'
         remind_list = await ex.get_reminders(ctx.author.id)
         user_timezone = await ex.get_user_timezone(ctx.author.id)
 
@@ -29,7 +30,8 @@ class Reminder(commands.Cog):
             if user_timezone:
                 remind_time = remind_time.replace(tzinfo=pytz.utc).astimezone(pytz.timezone(user_timezone))
             m_embed.add_field(name=f"{index_number}) {remind_reason}",
-                              value=f"{remind_time.strftime(time_format)}", inline=False)
+                              value=f"{await ex.get_locale_time(remind_time,user_timezone)}",
+                              inline=False)
             remind_number += 1
             index_number += 1
             if remind_number == 11:
@@ -45,10 +47,8 @@ class Reminder(commands.Cog):
     async def removereminder(self, ctx, reminder_index: int):
         """Remove one of your reminders.
         [Format: %removereminder (reminder index)]"""
-        time_format = '%a %x, %I:%M:%S%p %Z'
-        user_timezone = await ex.get_user_timezone(ctx.author.id)
-
         reminders = ex.cache.reminders.get(ctx.author.id)
+        user_timezone = await ex.get_user_timezone(ctx.author.id)
         if not reminders:
             return await ctx.send(f"> {ctx.author.display_name}, you have no reminders.")
         else:
@@ -56,7 +56,7 @@ class Reminder(commands.Cog):
                 remind_id, remind_reason, remind_time = reminders[reminder_index-1]
                 remind_time = remind_time.replace(tzinfo=pytz.utc).astimezone(pytz.timezone(user_timezone))
                 await ctx.send(f"> {ctx.author.display_name}, I will not remind you to **{remind_reason}**"
-                               f" on `{remind_time.strftime(time_format)}`.")
+                               f" on `{await ex.get_locale_time(remind_time,user_timezone)}`.")
                 await ex.remove_user_reminder(ctx.author.id, remind_id)
             except Exception as e:
                 return await ctx.send(f"> {ctx.author.display_name}, I could not find index {reminder_index}.")
@@ -68,6 +68,7 @@ class Reminder(commands.Cog):
         or
         %remindme to ____ in 6hrs 30mins]"""
         reminders = ex.cache.reminders.get(ctx.author.id)
+        user_timezone = await ex.get_user_timezone(ctx.author.id)
         if reminders:
             if len(reminders) >= reminder_limit:
                 return await ctx.send(f"> {ctx.author.display_name}, You have reached the maximum limit "
@@ -102,7 +103,7 @@ class Reminder(commands.Cog):
         await ex.set_reminder(remind_reason, remind_time, ctx.author.id)
         return await ctx.send(
             f"> {ctx.author.display_name}, I will remind you to **{remind_reason}** on "
-            f"`{remind_time.strftime('%m/%d/%Y, %H:%M:%S')}`")
+            f"`{await ex.get_locale_time(remind_time,user_timezone)}`")
 
     @commands.command(aliases=['gettz', 'time'])
     async def gettimezone(self, ctx, user: discord.Member = None):

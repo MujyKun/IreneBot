@@ -1,5 +1,6 @@
 from discord.ext import commands
 import time
+import json
 
 
 class Cache(commands.Cog):
@@ -139,6 +140,10 @@ class Cache(commands.Cog):
         # Reminder dictionary
         self.reminders = {}   # { user_id: [ [remind_id, remind_reason, remind_time] ] }
         self.timezones = {}   # { user_id: timezone }
+
+        # Timezone to Locale dictionary
+        with open('locale_by_timezone.json') as json_file:
+            self.locale_by_timezone = json.load(json_file)
 
         # bracket position for bias game stored due to annoyance when using previous x and y values.
         # counting starts from left to right, bottom to top

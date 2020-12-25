@@ -3,6 +3,7 @@ from discord.ext import commands, tasks
 from Utility import resources as ex
 import datetime
 import pytz
+import discord
 
 
 class Reminder(commands.Cog):
@@ -54,7 +55,8 @@ class Reminder(commands.Cog):
             try:
                 remind_id, remind_reason, remind_time = reminders[reminder_index-1]
                 remind_time = remind_time.replace(tzinfo=pytz.utc).astimezone(pytz.timezone(user_timezone))
-                await ctx.send(f"> {ctx.author.display_name}, I will not remind you to **{remind_reason}** on `{remind_time.strftime(time_format)}`.")
+                await ctx.send(f"> {ctx.author.display_name}, I will not remind you to **{remind_reason}**"
+                               f" on `{remind_time.strftime(time_format)}`.")
                 await ex.remove_user_reminder(ctx.author.id, remind_id)
             except Exception as e:
                 return await ctx.send(f"> {ctx.author.display_name}, I could not find index {reminder_index}.")
@@ -68,7 +70,8 @@ class Reminder(commands.Cog):
         reminders = ex.cache.reminders.get(ctx.author.id)
         if reminders:
             if len(reminders) >= reminder_limit:
-                return await ctx.send(f"> {ctx.author.display_name}, You have reached the maximum limit ({reminder_limit}) for reminders you can have.")
+                return await ctx.send(f"> {ctx.author.display_name}, You have reached the maximum limit "
+                                      f"({reminder_limit}) for reminders you can have.")
         server_prefix = await ex.get_server_prefix_by_context(ctx)
         try:
             is_relative_time, type_index = await ex.determine_time_type(user_input)
@@ -98,21 +101,28 @@ class Reminder(commands.Cog):
 
         await ex.set_reminder(remind_reason, remind_time, ctx.author.id)
         return await ctx.send(
-            f"> {ctx.author.display_name}, I will remind you to **{remind_reason}** on `{remind_time.strftime('%m/%d/%Y, %H:%M:%S')}`")
+            f"> {ctx.author.display_name}, I will remind you to **{remind_reason}** on "
+            f"`{remind_time.strftime('%m/%d/%Y, %H:%M:%S')}`")
 
-    @commands.command(aliases=['gettz'])
-    async def gettimezone(self, ctx):
+    @commands.command(aliases=['gettz', 'time'])
+    async def gettimezone(self, ctx, user: discord.Member = None):
         """Get your current set timezone.
         [Format: %gettimezone]"""
-        user_timezone = await ex.get_user_timezone(ctx.author.id)
-        if not user_timezone:
-            server_prefix = await ex.get_server_prefix_by_context(ctx)
-            return await ctx.send(f"> {ctx.author.display_name}, you do not have a timezone set. Please use "
-                                  f"`{server_prefix}{self.set_timezone_format}`")
+        server_prefix = await ex.get_server_prefix_by_context(ctx)
 
+        if not user:
+            user = ctx.author
+        user_timezone = await ex.get_user_timezone(user.id)
+        help_message = f" Please use `{server_prefix}{self.set_timezone_format}`."
+        if not user_timezone:
+            return await ctx.send(f"> {user.display_name}{', you do' if user==ctx.author else ' does'}"
+                                  f" not have a timezone set." + (help_message if user == ctx.author else ""))
+
+        current_time = datetime.datetime.now(pytz.timezone(user_timezone)).strftime('%I:%M:%S %p')
         timezone_abbrev = datetime.datetime.now(pytz.timezone(user_timezone)).strftime('%Z%z')
         return await ctx.send(
-            f"> {ctx.author.display_name}, your timezone is currently set to {user_timezone} {timezone_abbrev}")
+            f"> {user.display_name}{', your' if user==ctx.author else chr(39)+'s'} current time is set to "
+            f"`{current_time}` at the timezone `{user_timezone} {timezone_abbrev}`")
 
     @commands.command(aliases=['settz'])
     async def settimezone(self, ctx, timezone_name=None, country_code=None):

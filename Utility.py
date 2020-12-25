@@ -2949,11 +2949,13 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
         """Returns the relative time of the input in seconds"""
         year_aliases = ["years", "year", "yr", "y"]
         month_aliases = ["months", "month", "mo"]
+        week_aliases = ["weeks", "week", "wk"]
         day_aliases = ["days", "day", "d"]
         hour_aliases = ["hours", "hour", "hrs", "hr", "h"]
         minute_aliases = ["minutes", "minute", "mins", "min", "m"]
         second_aliases = ["seconds", "second", "secs", "sec", "s"]
-        time_units = [[year_aliases, 3.154e7], [month_aliases, 2.628e6], [day_aliases, 8.64e4], [hour_aliases, 3600], [minute_aliases, 60], [second_aliases, 1]]
+        time_units = [[year_aliases, 31536000], [month_aliases, 2592000], [week_aliases, 604800], [day_aliases, 86400],
+                      [hour_aliases, 3600], [minute_aliases, 60], [second_aliases, 1]]
 
         remind_time = 0  # in seconds
         input_elements = re.findall(r"[^\W\d_]+|\d+", time_input)

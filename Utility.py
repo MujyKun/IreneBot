@@ -86,8 +86,8 @@ class Utility:
     @staticmethod
     def first_result(record):
         """Returns the first item of a record if there is one."""
-        if record is None:
-            return None
+        if not record:
+            return
         else:
             return record[0]
 
@@ -98,7 +98,7 @@ class Utility:
         """Process the cache time."""
         past_time = time.time()
         result = await method()
-        if result is None or result is True:
+        if result is None or result:  # expecting False on methods that fail to load, do not simplify None.
             log.console(f"Cache for {name} Created in {await self.get_cooldown_time(time.time() - past_time)}.")
         return result
 
@@ -129,27 +129,21 @@ class Utility:
         await self.process_cache_time(self.create_self_assignable_role_cache, "Self-Assignable Roles")
         await self.process_cache_time(self.create_reminder_cache, "Reminders")
         await self.process_cache_time(self.create_timezone_cache, "Timezones")
-        if not self.test_bot:
+        if not self.test_bot and not self.weverse_client.cache_loaded:
             task = asyncio.create_task(self.process_cache_time(self.weverse_client.start, "Weverse"))
         log.console(f"Cache Completely Created in {await self.get_cooldown_time(time.time() - past_time)}.")
 
     async def create_timezone_cache(self):
         self.cache.timezones = {}  # reset cache
         timezones = await self.get_all_timezones_from_db()
-        for timezone_info in timezones:
-            user_id = timezone_info[0]
-            timezone = timezone_info[1]
+        for user_id, timezone in timezones:
             self.cache.timezones[user_id] = timezone
 
     async def create_reminder_cache(self):
         """Create cache for reminders"""
         self.cache.reminders = {}  # reset cache
         all_reminders = await self.get_all_reminders_from_db()
-        for reminder_info in all_reminders:
-            reason_id = reminder_info[0]
-            user_id = reminder_info[1]
-            reason = reminder_info[2]
-            time_stamp = reminder_info[3]
+        for reason_id, user_id, reason, time_stamp in all_reminders:
             reason_list = [reason_id, reason, time_stamp]
             user_reminder = self.cache.reminders.get(user_id)
             if user_reminder:
@@ -161,10 +155,7 @@ class Utility:
         """Create cache for self assignable roles"""
         all_roles = await self.conn.fetch("SELECT roleid, rolename, serverid FROM selfassignroles.roles")
         all_channels = await self.conn.fetch("SELECT channelid, serverid FROM selfassignroles.channels")
-        for role in all_roles:
-            role_id = role[0]
-            role_name = role[1]
-            server_id = role[2]
+        for role_id, role_name, server_id in all_roles:
             cache_info = self.cache.assignable_roles.get(server_id)
             if not cache_info:
                 self.cache.assignable_roles[server_id] = {}
@@ -173,9 +164,7 @@ class Utility:
                 cache_info['roles'] = [[role_id, role_name]]
             else:
                 cache_info['roles'].append([role_id, role_name])
-        for channel in all_channels:
-            channel_id = channel[0]
-            server_id = channel[1]
+        for channel_id, server_id in all_channels:
             cache_info = self.cache.assignable_roles.get(server_id)
             if cache_info:
                 cache_info['channel_id'] = channel_id
@@ -185,11 +174,7 @@ class Utility:
     async def create_weverse_channel_cache(self):
         """Create cache for channels that are following a community on weverse."""
         all_channels = await self.conn.fetch("SELECT channelid, communityname, roleid, commentsdisabled FROM weverse.channels")
-        for channel in all_channels:
-            channel_id = channel[0]
-            community_name = channel[1]
-            role_id = channel[2]
-            comments_disabled = channel[3]
+        for channel_id, community_name, role_id, comments_disabled in all_channels:
             await self.add_weverse_channel_to_cache(channel_id, community_name)
             await self.add_weverse_role(channel_id, community_name, role_id)
             await self.change_weverse_comment_status(channel_id, community_name, comments_disabled)
@@ -199,25 +184,22 @@ class Utility:
         self.cache.command_counter = {}
         session_id = await self.get_session_id()
         all_commands = await self.conn.fetch("SELECT commandname, count FROM stats.commands WHERE sessionid = $1", session_id)
-        for command in all_commands:
-            self.cache.command_counter[command[0]] = command[1]
+        for command_name, count in all_commands:
+            self.cache.command_counter[command_name] = count
         self.cache.current_session = self.first_result(
             await self.conn.fetchrow("SELECT session FROM stats.sessions WHERE date = $1", datetime.date.today()))
 
     async def create_restricted_channel_cache(self):
         """Create restricted idol channel cache"""
         restricted_channels = await self.conn.fetch("SELECT channelid, serverid, sendhere FROM groupmembers.restricted")
-        for restricted_channel in restricted_channels:
-            self.cache.restricted_channels[restricted_channel[0]] = [restricted_channel[1], restricted_channel[2]]
+        for channel_id, server_id, send_here in restricted_channels:
+            self.cache.restricted_channels[channel_id] = [server_id, send_here]
 
     async def create_bot_command_cache(self):
         """Create custom command cache"""
         server_commands = await self.conn.fetch("SELECT serverid, commandname, message FROM general.customcommands")
         self.cache.custom_commands = {}
-        for server_command in server_commands:
-            server_id = server_command[0]
-            command_name = server_command[1]
-            message = server_command[2]
+        for server_id, command_name, message in server_commands:
             cache_info = self.cache.custom_commands.get(server_id)
             if cache_info:
                 cache_info[command_name] = message
@@ -236,8 +218,8 @@ class Utility:
         except:
             pass
         dead_images = await self.conn.fetch("SELECT deadlink, userid, messageid, idolid, guessinggame FROM groupmembers.deadlinkfromuser")
-        for dead_image in dead_images:
-            self.cache.dead_image_cache[dead_image[2]] = [dead_image[0], dead_image[1], dead_image[3], dead_image[4]]
+        for dead_link, user_id, message_id, idol_id, guessing_game in dead_images:
+            self.cache.dead_image_cache[message_id] = [dead_link, user_id, idol_id, guessing_game]
 
     async def create_idol_cache(self):
         """Create Idol Objects and store them as cache."""
@@ -298,11 +280,11 @@ class Utility:
         """Create the cache for temp channels."""
         self.cache.temp_channels = {}
         channels = await self.get_temp_channels()
-        for channel in channels:
-            removal_time = channel[1]
+        for channel_id, delay in channels:
+            removal_time = delay
             if removal_time < 60:
                 removal_time = 60
-            self.cache.temp_channels[channel[0]] = removal_time
+            self.cache.temp_channels[channel_id] = removal_time
 
     async def update_welcome_message_cache(self):
         """Create the cache for welcome messages."""
@@ -315,21 +297,21 @@ class Utility:
         """Create the cache for server prefixes."""
         self.cache.server_prefixes = {}
         info = await self.conn.fetch("SELECT serverid, prefix FROM general.serverprefix")
-        for server in info:
-            self.cache.server_prefixes[server[0]] = server[1]
+        for server_id, prefix in info:
+            self.cache.server_prefixes[server_id] = prefix
 
     async def update_logging_channels(self):
         """Create the cache for logged servers and channels."""
         self.cache.logged_channels = {}
         self.cache.list_of_logged_channels = []
         logged_servers = await self.conn.fetch("SELECT id, serverid, channelid, sendall FROM logging.servers WHERE status = $1", 1)
-        for logged_server in logged_servers:
-            channels = await self.conn.fetch("SELECT channelid FROM logging.channels WHERE server = $1", logged_server[0])
+        for p_id, server_id, channel_id, send_all in logged_servers:
+            channels = await self.conn.fetch("SELECT channelid FROM logging.channels WHERE server = $1", p_id)
             for channel in channels:
                 self.cache.list_of_logged_channels.append(channel[0])
-            self.cache.logged_channels[logged_server[1]] = {
-                "send_all": logged_server[3],
-                "logging_channel": logged_server[2],
+            self.cache.logged_channels[server_id] = {
+                "send_all": send_all,
+                "logging_channel": channel_id,
                 "channels": [channel[0] for channel in channels]
             }
 
@@ -345,9 +327,7 @@ class Utility:
         """Create the cache for existing mod mail"""
         self.cache.mod_mail = {}
         mod_mail = await self.conn.fetch("SELECT userid, channelid FROM general.modmail")
-        for mail in mod_mail:
-            user_id = mail[0]
-            channel_id = mail[1]
+        for user_id, channel_id in mod_mail:
             self.cache.mod_mail[user_id] = [channel_id]
 
     async def update_patreons(self):
@@ -365,16 +345,16 @@ class Utility:
             # this is an alternative to get patreons instantly and later modifying the cache after the cache loads.
             # remove any patrons from db set cache that should not exist or should be modified.
             cached_patrons = await self.conn.fetch("SELECT userid, super FROM patreon.cache")
-            for patron in cached_patrons:
-                if patron[0] not in normal_patrons:
+            for user_id, super_patron in cached_patrons:
+                if user_id not in normal_patrons:
                     # they are not a patron at all, so remove them from db cache
-                    await self.conn.execute("DELETE FROM patreon.cache WHERE userid = $1", patron[0])
-                elif patron[0] in super_patrons and patron[1] == 0:
+                    await self.conn.execute("DELETE FROM patreon.cache WHERE userid = $1", user_id)
+                elif user_id in super_patrons and not super_patron:
                     # if they are a super patron but their db is cache is a normal patron
-                    await self.conn.execute("UPDATE patreon.cache SET super = $1 WHERE userid = $2", 1, patron[0])
-                elif patron[0] not in super_patrons and patron[1] == 1:
+                    await self.conn.execute("UPDATE patreon.cache SET super = $1 WHERE userid = $2", 1, user_id)
+                elif user_id not in super_patrons and super_patron:
                     # if they are not a super patron, but the db cache says they are.
-                    await self.conn.execute("UPDATE patreon.cache SET super = $1 WHERE userid = $2", 0, patron[0])
+                    await self.conn.execute("UPDATE patreon.cache SET super = $1 WHERE userid = $2", 0, user_id)
             cached_patrons = [patron[0] for patron in cached_patrons]  # list of user ids removing patron status.
 
             # fix db cache and live Irene cache
@@ -399,10 +379,7 @@ class Utility:
         """Set the cache for user phrases"""
         self.cache.user_notifications = []
         notifications = await self.conn.fetch("SELECT guildid,userid,phrase FROM general.notifications")
-        for notification in notifications:
-            guild_id = notification[0]
-            user_id = notification[1]
-            phrase = notification[2]
+        for guild_id, user_id, phrase in notifications:
             self.cache.user_notifications.append([guild_id, user_id, phrase])
 
     async def update_groups(self):
@@ -416,13 +393,13 @@ class Utility:
         """Set cache for idol photo count"""
         self.cache.idol_photos = {}
         all_idol_counts = await self.conn.fetch("SELECT memberid, COUNT(link) FROM groupmembers.imagelinks GROUP BY memberid")
-        for idol in all_idol_counts:
-            self.cache.idol_photos[idol[0]] = idol[1]
+        for idol_id, count in all_idol_counts:
+            self.cache.idol_photos[idol_id] = count
 
     @tasks.loop(seconds=0, minutes=0, hours=12, reconnect=True)
     async def update_cache(self):
         """Looped every 12 hours to update the cache in case of anything faulty."""
-        while self.conn is None:
+        while not self.conn:
             await asyncio.sleep(1)
         await self.create_cache()
 
@@ -432,12 +409,12 @@ class Utility:
         This was added due to intents slowing d.py cache loading rate.
         """
         # create a temporary patron list based on the db cache while waiting for the discord cache to load
-        if self.conn is not None:
+        if self.conn:
             if not self.temp_patrons_loaded:
                 self.cache.patrons = {}
                 cached_patrons = await self.conn.fetch("SELECT userid, super FROM patreon.cache")
-                for patron in cached_patrons:
-                    self.cache.patrons[patron[0]] = bool(patron[1])
+                for user_id, super_patron in cached_patrons:
+                    self.cache.patrons[user_id] = bool(super_patron)
                 self.temp_patrons_loaded = True
             while not self.discord_cache_loaded:
                 await asyncio.sleep(1)
@@ -516,11 +493,9 @@ class Utility:
     async def register_user(self, user_id):
         """Register a user to the database if they are not already registered."""
         count = self.first_result(await self.conn.fetchrow("SELECT COUNT(*) FROM currency.Currency WHERE UserID = $1", user_id))
-        if count == 0:
+        if not count:
             await self.conn.execute("INSERT INTO currency.Currency (UserID, Money) VALUES ($1, $2)", user_id, "100")
             return True
-        elif count == 1:
-            return False
 
     async def get_user_has_money(self, user_id):
         """Check if a user has money."""
@@ -592,8 +567,9 @@ class Utility:
     @staticmethod
     async def get_server_id(ctx):
         """Get the server id by context."""
+        # make sure ctx.guild exists in the case discord.py cache isn't loaded.
         if ctx.guild:
-            return ctx.guild.id  # this line would error with the function as one line since ctx.guild may not exist.
+            return ctx.guild.id
 
     async def check_if_moderator(self, ctx):
         """Check if a user is a moderator on a server"""
@@ -610,7 +586,6 @@ class Utility:
                 return r.status == 200
         except Exception as e:
             pass
-        return False
 
     async def get_db_status(self):
         end_point = f"http://127.0.0.1:{5050}"
@@ -620,7 +595,6 @@ class Utility:
 
         except Exception as e:
             pass
-        return False
 
     async def get_images_status(self):
         end_point = f"http://images.irenebot.com/index.html"
@@ -629,7 +603,6 @@ class Utility:
                 return r.status == 200
         except Exception as e:
             pass
-        return False
 
     async def send_maintenance_message(self, channel):
         try:
@@ -689,7 +662,7 @@ class Utility:
                             self.cache.n_words_per_minute += 1
                             author_id = message_sender.id
                             current_amount = self.cache.n_word_counter.get(author_id)
-                            if current_amount is not None:
+                            if current_amount:
                                 await self.conn.execute("UPDATE general.nword SET nword = $1 WHERE userid = $2::bigint",
                                                         current_amount + 1, author_id)
                                 self.cache.n_word_counter[author_id] = current_amount + 1
@@ -699,11 +672,11 @@ class Utility:
 
     async def get_dm_channel(self, user_id=None, user=None):
         try:
-            if user_id is not None:
+            if user_id:
                 # user = await self.client.fetch_user(user_id)
                 user = self.client.get_user(user_id)
             dm_channel = user.dm_channel
-            if dm_channel is None:
+            if not dm_channel:
                 await user.create_dm()
                 dm_channel = user.dm_channel
             return dm_channel
@@ -716,11 +689,11 @@ class Utility:
 
     async def check_if_temp_channel(self, channel_id):
         """Check if a channel is a temp channel"""
-        return self.cache.temp_channels.get(channel_id) is not None
+        return self.cache.temp_channels.get(channel_id) is not None  # do not change structure
 
     async def get_temp_channels(self):
         """Get all temporary channels in the DB."""
-        return await self.conn.fetch("SELECT chanID, delay FROM general.TempChannels")
+        return await self.conn.fetch("SELECT chanid, delay FROM general.tempchannels")
 
     async def delete_temp_messages(self, message):
         """Delete messages that are temp channels"""
@@ -735,11 +708,11 @@ class Utility:
     @staticmethod
     async def check_interaction_enabled(ctx=None, server_id=None, interaction=None):
         """Check if the interaction is disabled in the current server, RETURNS False when it is disabled."""
-        if server_id is None and interaction is None:
+        if not server_id and not interaction:
             server_id = await Utility.get_server_id(ctx)
             interaction = ctx.command.name
         interactions = await resources.get_disabled_server_interactions(server_id)
-        if interactions is None:
+        if not interactions:
             return True
         interaction_list = interactions.split(',')
         if interaction in interaction_list:
@@ -751,7 +724,7 @@ class Utility:
         """Disable an interaction (to a specific server)"""
         interaction = interaction.lower()
         interactions = await self.get_disabled_server_interactions(server_id)
-        if interactions is None:
+        if not interactions:
             await self.conn.execute("INSERT INTO general.disabledinteractions(serverid, interactions) VALUES ($1, $2)", server_id, interaction)
         else:
             interactions = interactions.split(',')
@@ -762,13 +735,13 @@ class Utility:
     async def enable_interaction(self, server_id, interaction):
         """Reenable an interaction that was disabled by a server"""
         interactions = await self.get_disabled_server_interactions(server_id)
-        if interactions is None:
+        if not interactions:
             return
         else:
             interactions = interactions.split(',')
             interactions.remove(interaction)
             interactions = ','.join(interactions)
-            if len(interactions) == 0:
+            if not interactions:
                 return await self.conn.execute("DELETE FROM general.disabledinteractions WHERE serverid = $1", server_id)
             await self.conn.execute("UPDATE general.disabledinteractions SET interactions = $1 WHERE serverid = $2", interactions, server_id)
 
@@ -797,7 +770,7 @@ class Utility:
         self.cache.commands_per_minute += 1
         session_id = await self.get_session_id()
         command_count = self.cache.command_counter.get(command_name)
-        if command_count is None:
+        if not command_count:
             await self.conn.execute("INSERT INTO stats.commands(sessionid, commandname, count) VALUES($1, $2, $3)", session_id, command_name, 1)
             self.cache.command_counter[command_name] = 1
         else:
@@ -854,7 +827,7 @@ class Utility:
     @staticmethod
     def check_if_mod(ctx, mode=0):  # as mode = 1, ctx is the author id.
         """Check if the user is a bot mod/owner."""
-        if mode == 0:
+        if not mode:
             user_id = ctx.author.id
             return user_id in keys.mods_list or user_id == keys.owner_id
         else:
@@ -871,7 +844,7 @@ class Utility:
         counter = 0
         for value in str(original):
             if counter < index:
-              entire_selection += value
+                entire_selection += value
             counter += 1
         return int(entire_selection)
 
@@ -883,9 +856,9 @@ class Utility:
 
     async def create_embed(self, title="Irene", color=None, title_desc=None, footer_desc="Thanks for using Irene!"):
         """Create a discord Embed."""
-        if color is None:
+        if not color:
             color = self.get_random_color()
-        if title_desc is None:
+        if not title_desc:
             embed = discord.Embed(title=title, color=color)
         else:
             embed = discord.Embed(title=title, color=color, description=title_desc)
@@ -937,7 +910,7 @@ class Utility:
         """Check if a message has embeds."""
         try:
             for embed_check in message.embeds:
-                if len(embed_check) > 0:
+                if embed_check:
                     return True
         except Exception as e:
             pass
@@ -946,8 +919,9 @@ class Utility:
     @staticmethod
     def check_message_not_empty(message):
         """Check if a message has content."""
+        # do not simplify
         try:
-            if len(message.clean_content) >= 1:
+            if message.clean_content:
                 return True
         except Exception as e:
             pass
@@ -1069,7 +1043,7 @@ class Utility:
     async def get_server_prefix(self, server_id):
         """Gets the prefix of a server by the server ID."""
         prefix = self.cache.server_prefixes.get(server_id)
-        if prefix is None:
+        if not prefix:
             return keys.bot_prefix
         else:
             return prefix
@@ -1115,7 +1089,6 @@ class Utility:
             count += len(guild.voice_channels)
         return count
 
-
     ###################
     # ## BLACKJACK ## #
     ###################
@@ -1123,11 +1096,9 @@ class Utility:
     async def check_in_game(self, user_id, ctx):  # this is meant for when it is accessed by commands outside of BlackJack.
         """Check if a user is in a game."""
         check = self.first_result(await self.conn.fetchrow("SELECT COUNT(*) From blackjack.games WHERE player1 = $1 OR player2 = $1", user_id))
-        if check == 1:
+        if check:
             await ctx.send(f"> **{ctx.author}, you are already in a pending/active game. Please type {await self.get_server_prefix_by_context(ctx)}endgame.**")
             return True
-        else:
-            return False
 
     async def add_bj_game(self, user_id, bid, ctx, mode):
         """Add the user to a blackjack game."""
@@ -1448,7 +1419,7 @@ class Utility:
     async def get_level(self, user_id, command):
         """Get the level of a command (rob/beg/daily)."""
         count = self.first_result(await self.conn.fetchrow(f"SELECT COUNT(*) FROM currency.Levels WHERE UserID = $1 AND {command} > $2", user_id, 1))
-        if count == 0:
+        if not count:
             level = 1
         else:
             level = self.first_result(await self.conn.fetchrow(f"SELECT {command} FROM currency.Levels WHERE UserID = $1", user_id))
@@ -1461,7 +1432,7 @@ class Utility:
             await self.conn.execute(f"UPDATE currency.Levels SET {command} = $1 WHERE UserID = $2", level, user_id)
 
         count = self.first_result(await self.conn.fetchrow(f"SELECT COUNT(*) FROM currency.Levels WHERE UserID = $1", user_id))
-        if count == 0:
+        if not count:
             await self.conn.execute("INSERT INTO currency.Levels VALUES($1, NULL, NULL, NULL, NULL, 1)", user_id)
             await update_level()
         else:
@@ -1500,6 +1471,7 @@ class Utility:
         return type(obj) == Idol
 
     async def send_vote_message(self, message):
+        """Send the vote message to a user."""
         server_prefix = await self.get_server_prefix_by_context(message)
         vote_message = f"""> **To call more idol photos for the next 12 hours, please support Irene by voting or becoming a patron through the links at `{server_prefix}vote` or `{server_prefix}patreon`!**"""
         return await message.channel.send(vote_message)
@@ -1521,11 +1493,13 @@ class Utility:
         await self.conn.execute("INSERT INTO groupmembers.aliases(objectid, alias, isgroup, serverid) VALUES($1, $2, $3, $4)", obj.id, alias, is_group, server_id)
 
     async def remove_global_alias(self, obj, alias):
+        """Remove a global idol/group alias """
         obj.aliases.remove(alias)
         is_group = int(not self.check_idol_object(obj))
         await self.conn.execute("DELETE FROM groupmembers.aliases WHERE alias = $1 AND isgroup = $2 AND objectid = $3 AND serverid IS NULL", alias, is_group, obj.id)
 
     async def remove_local_alias(self, obj, alias, server_id):
+        """Remove a server idol/group alias"""
         is_group = int(not self.check_idol_object(obj))
         local_aliases = obj.local_aliases.get(server_id)
         if local_aliases:
@@ -1533,11 +1507,25 @@ class Utility:
         await self.conn.execute("DELETE FROM groupmembers.aliases WHERE alias = $1 AND isgroup = $2 AND serverid = $3 AND objectid = $4", alias, is_group, server_id, obj.id)
 
     async def get_member(self, idol_id):
+        """Get a member by the idol id."""
+        try:
+            idol_id = int(idol_id)
+        except Exception as e:
+            # purposefully create an error if an idol id was not passed in. This is useful to not check for it
+            # in other commands.
+            return
         for idol in self.cache.idols:
             if idol.id == idol_id:
                 return idol
 
     async def get_group(self, group_id):
+        """Get a group by the group id."""
+        try:
+            group_id = int(group_id)
+        except Exception as e:
+            # purposefully create an error if a group id was not passed in. This is useful to not check for it
+            # in other commands.
+            return
         for group in self.cache.groups:
             if group.id == group_id:
                 return group
@@ -1652,7 +1640,7 @@ class Utility:
         """Checks a text channel ID to see if it is restricted from having idol photos sent."""
         channel = self.cache.restricted_channels.get(channel_id)
         if channel:
-            if channel[1] == 0:
+            if not channel[1]:
                 return False  # returns False if they are restricted.
         return True
 
@@ -1702,7 +1690,6 @@ class Utility:
         async with keys.client_session.get(url) as r:
             if r.status == 200:
                 return True
-            return False
 
     async def get_db_idol_count(self, member_id):
         """Get the amount of photos for an idol."""
@@ -1747,9 +1734,7 @@ class Utility:
         aliases = await self.conn.fetch("SELECT alias, serverid FROM groupmembers.aliases WHERE objectid = $1 AND isgroup = $2", object_id, int(group))
         global_aliases = []
         local_aliases = {}
-        for alias_info in aliases:
-            alias = alias_info[0]
-            server_id = alias_info[1]
+        for alias, server_id in aliases:
             if server_id:
                 server_list = local_aliases.get(server_id)
                 if server_list:
@@ -1798,7 +1783,7 @@ class Utility:
                     for group_member in group.members:
                         member = await self.get_member(group_member)
                         if member:
-                            if member.photo_count != 0 or is_mod:
+                            if member.photo_count or is_mod:
                                 if mode == "fullname":
                                     member_name = member.full_name
                                 else:
@@ -1808,7 +1793,7 @@ class Utility:
                                 else:
                                     names.append(f"{member_name} | ")
                     final_names = "".join(names)
-                    if len(final_names) == 0:
+                    if not final_names:
                         final_names = "None"
                     if is_mod:
                         embed.insert_field_at(counter, name=f"{group.name} ({group.id})", value=final_names, inline=False)
@@ -1862,7 +1847,7 @@ class Utility:
                 embed_list.append(embed)
                 embed = discord.Embed(title=f"{name} Aliases Page {page_number}", description="",
                                       color=self.get_random_color())
-        if count != 0:
+        if count:
             embed_list.append(embed)
         return embed_list
 
@@ -1953,7 +1938,6 @@ class Utility:
                         await message.clear_reactions()
                     except Exception as e:
                         log.console(e)
-                        pass
                 await reload_image()
         except Exception as e:
             pass
@@ -1993,7 +1977,7 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
             local_aliases = None
             if server_id:
                 local_aliases = idol.local_aliases.get(server_id)
-            if mode == 0:
+            if not mode:
                 if idol.full_name and idol.stage_name:
                     if name == idol.full_name.lower() or name == idol.stage_name.lower():
                         idol_list.append(idol)
@@ -2002,7 +1986,7 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
                     if idol.stage_name.lower() in name or idol.full_name.lower() in name:
                         idol_list.append(idol)
             for alias in idol.aliases:
-                if mode == 0:
+                if not mode:
                     if alias == name:
                         idol_list.append(idol)
                 else:
@@ -2025,7 +2009,7 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
 
     async def check_to_add_alias_to_list(self, alias, name, mode=0):
         """Check whether to add an alias to a list. Compares a name with an existing alias."""
-        if mode == 0:
+        if not mode:
             if alias == name:
                 return True
         else:
@@ -2043,7 +2027,7 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
                 local_aliases = None
                 if server_id:
                     local_aliases = group.local_aliases.get(server_id)
-                if mode == 0:
+                if not mode:
                     if group.name:
                         if name == group.name.lower():
                             group_list.append(group)
@@ -2069,7 +2053,7 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
         # remove any duplicates
         group_list = list(dict.fromkeys(group_list))
         # print(id_list)
-        if mode == 0:
+        if not mode:
             return group_list
         else:
             return group_list, name
@@ -2284,9 +2268,9 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
 
     async def check_if_logged(self, server_id=None, channel_id=None):  # only one parameter should be passed in
         """Check if a server or channel is being logged."""
-        if channel_id is not None:
+        if channel_id:
             return channel_id in self.cache.list_of_logged_channels
-        elif server_id is not None:
+        elif server_id:
             return server_id in self.cache.logged_channels
 
     async def get_send_all(self, server_id):
@@ -2295,7 +2279,7 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
     async def set_logging_status(self, server_id, status):  # status can only be 0 or 1
         """Set a server's logging status."""
         await self.conn.execute("UPDATE logging.servers SET status = $1 WHERE serverid = $2", status, server_id)
-        if status == 0:
+        if not status:
             self.cache.logged_channels.pop(server_id, None)
         else:
             logged_server = await self.conn.fetchrow("SELECT id, serverid, channelid, sendall FROM logging.servers WHERE serverid = $1", server_id)
@@ -2327,7 +2311,7 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
     async def get_attachments(message):
         """Get the attachments of a message."""
         files = None
-        if len(message.attachments) != 0:
+        if message.attachments:
             files = []
             for attachment in message.attachments:
                 files.append(await attachment.to_file())
@@ -2367,11 +2351,11 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
             'method': method,
             'format': 'json'
         }
-        if user is not None:
+        if user:
             payload['user'] = user
-        if limit is not None:
+        if limit:
             payload['limit'] = limit
-        if time_period is not None:
+        if time_period:
             payload['period'] = time_period
         return payload
 
@@ -2387,7 +2371,7 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
     async def set_fm_username(self, user_id, username):
         """Sets Last FM username to the DB."""
         try:
-            if await self.get_fm_username(user_id) is None:
+            if not await self.get_fm_username(user_id):
                 await self.conn.execute("INSERT INTO lastfm.users(userid, username) VALUES ($1, $2)", user_id, username)
             else:
                 await self.conn.execute("UPDATE lastfm.users SET username = $1 WHERE userid = $2", username, user_id)
@@ -2403,17 +2387,17 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
         """Get the permanent patron users"""
         return await self.conn.fetch("SELECT userid from patreon.users")
 
-    async def get_patreon_role_members(self, super=False):
+    async def get_patreon_role_members(self, super_patron=False):
         """Get the members in the patreon roles."""
         support_guild = self.client.get_guild(int(keys.bot_support_server_id))
         # API call will not show role.members
-        if not super:
+        if not super_patron:
             patreon_role = support_guild.get_role(int(keys.patreon_role_id))
         else:
             patreon_role = support_guild.get_role(int(keys.patreon_super_role_id))
         return patreon_role.members
 
-    async def check_if_patreon(self, user_id, super=False):
+    async def check_if_patreon(self, user_id, super_patron=False):
         """Check if the user is a patreon.
         There are two ways to check if a user ia a patreon.
         The first way is getting the members in the Patreon/Super Patreon Role.
@@ -2421,11 +2405,9 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
         -- After modifying -> We take it straight from cache now.
         """
         if user_id in self.cache.patrons:
-            if super:
-                return self.cache.patrons.get(user_id) == super
+            if super_patron:
+                return self.cache.patrons.get(user_id) == super_patron
             return True
-        else:
-            return False
 
     async def add_to_patreon(self, user_id):
         """Add user as a permanent patron."""

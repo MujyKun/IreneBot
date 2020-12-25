@@ -5,7 +5,7 @@ import aiofiles
 import asyncio
 from module import logger as log
 from random import *
-from module.keys import client, owner_id, bot_website
+from module.keys import owner_id, bot_website
 from datetime import datetime
 from Utility import resources as ex
 
@@ -18,7 +18,7 @@ class Archive(commands.Cog):
                 def check(m):
                     return m.channel == message.channel and m.author.id == owner_id
 
-                msg = await client.wait_for('message', timeout=60, check=check)
+                msg = await ex.client.wait_for('message', timeout=60, check=check)
                 if msg.content.lower() == "confirm" or msg.content.lower() == "confirmed":
                     return True
             except asyncio.TimeoutError:
@@ -28,13 +28,8 @@ class Archive(commands.Cog):
             if not message.author.bot:
                 try:
                     all_channels = await ex.conn.fetch("SELECT id, channelid, guildid, driveid, name FROM archive.channellist")
-                    for channel in all_channels:
-                        ID = channel[0]
-                        ChannelID = channel[1]
-                        GuildID = channel[2]
-                        drive_id = channel[3]
-                        Name = channel[4]
-                        if message.channel.id == ChannelID:
+                    for p_id, channel_id, guild_id, drive_id, name in all_channels:
+                        if message.channel.id == channel_id:
                             if len(message.attachments) > 0:
                                 for file in message.attachments:
                                     url = file.url
@@ -112,17 +107,12 @@ class Archive(commands.Cog):
         embed.set_author(name="Irene", url=bot_website, icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
         embed.set_footer(text="Thanks for using Irene.", icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
         check = False
-        for channel in all_channels:
+        for p_id, channel_id, guild_id, drive_id, name in all_channels:
             try:
-                ID = channel[0]
-                ChannelID = channel[1]
-                list_channel = (client.get_channel(ChannelID)).name
-                GuildID = channel[2]
-                DriveID = channel[3]
-                Name = channel[4]
-                if ctx.guild.id == GuildID:
+                list_channel = (ex.client.get_channel(channel_id)).name
+                if ctx.guild.id == guild_id:
                     check = True
-                    embed.insert_field_at(0, name=list_channel, value=f"https://drive.google.com/drive/folders/{DriveID} | {Name}", inline=False)
+                    embed.insert_field_at(0, name=list_channel, value=f"https://drive.google.com/drive/folders/{drive_id} | {name}", inline=False)
                     pass
             except Exception as e:
                 # Error would occur on test bot if the client does not have access to a certain channel id
@@ -180,10 +170,8 @@ class Archive(commands.Cog):
 
     async def deletephotos(self):
         """Delete photos that are not needed."""
-        all_files = await ex.conn.fetch("SELECT FileName from archive.ArchivedChannels")
-        file_list = []
-        for file in all_files:
-            file_list.append(file[0])
+        all_files = await ex.conn.fetch("SELECT filename from archive.ArchivedChannels")
+        file_list = [file[0] for file in all_files]
         all_photos = os.listdir('Photos')
         for photo in all_photos:
             if photo != "placeholder.txt" and photo not in file_list:
@@ -196,15 +184,15 @@ class Archive(commands.Cog):
     @commands.command()
     async def addhistory(self, ctx, year: int = None, month: int = None, day: int = None):
         """Add all of the previous images from a text channel to google drive."""
-        if (year and month and day) is not None:
+        if year and month and day:
             after = datetime(year, month, day)
         else:
             after = None
 
-        async def history(guild_id, drive_id):
+        async def history():
             try:
                 async for message in ctx.channel.history(limit=None, after=after):
-                    if len(message.attachments) > 0:
+                    if len(message.attachments):
                         for file in message.attachments:
                             url = file.url
                             if "%27%3E" in url:
@@ -215,7 +203,7 @@ class Archive(commands.Cog):
                                 url = url[0:pos - 1]
                             await self.download_url(url, drive_id, ctx.channel.id)
 
-                    if len(message.embeds) > 0:
+                    if len(message.embeds):
                         for embed in message.embeds:
                             if str(embed.url) == "Embed.Empty":
                                 pass
@@ -229,20 +217,15 @@ class Archive(commands.Cog):
                                     url = url[0:pos-1]
                                 await self.download_url(url, drive_id, ctx.channel.id)
 
-                    pass
             except Exception as e:
                 log.console(e)
-                pass
         check = False
         channels = await ex.conn.fetch("SELECT channelid, guildid, driveid FROM archive.ChannelList")
-        for channel in channels:
-            ChannelID = channel[0]
-            GuildID = channel[1]
-            DriveID = channel[2]
-            if ctx.channel.id == ChannelID:
+        for channel_id, guild_id, drive_id in channels:
+            if ctx.channel.id == channel_id:
                 check = True
                 await ctx.send("> **Starting to check history... to prevent bot lag, an external program uploads them every 60 seconds.**")
-                await history(GuildID, DriveID)
+                await history()
                 await self.deletephotos()
                 await ctx.send("> **Successfully added history of this text channel. They will be uploaded shortly.**")
         if not check:

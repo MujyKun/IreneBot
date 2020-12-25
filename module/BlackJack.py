@@ -7,9 +7,6 @@ from Utility import resources as ex
 
 
 class BlackJack(commands.Cog):
-    def __init__(self):
-        pass
-
     @commands.command(aliases=['bj'])
     async def blackjack(self, ctx, amount="0", versus="player"):
         """Start a game of BlackJack [Format: %blackjack (amount)] [Aliases: bj]"""
@@ -67,19 +64,19 @@ class BlackJack(commands.Cog):
     async def addcards(self, ctx):
         """Fill The CardValues Table with Cards [Format: %addcards]"""
         await ex.conn.execute("DELETE FROM blackjack.cards")
-        suitName = ("Hearts", "Diamonds", "Spades", "Clubs")
-        rankName = ("Ace", "Two", "Three", "Four", "Five", "Six", "Seven",
+        suit_names = ("Hearts", "Diamonds", "Spades", "Clubs")
+        rank_names = ("Ace", "Two", "Three", "Four", "Five", "Six", "Seven",
                     "Eight", "Nine", "Ten", "Jack", "Queen", "King")
-        cardvalues = [11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11, 2, 3,
+        card_values = [11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11, 2, 3,
                       4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
         cards = []
-        for suit in suitName[0:4]:
-            for rank in rankName[0:13]:
+        for suit in suit_names[0:4]:
+            for rank in rank_names[0:13]:
                 cards += [("{} of {}".format(rank, suit))]
-        countx = -1
+        count_x = -1
         for card in cards:
-            countx += 1
-            await ex.conn.execute("INSERT INTO blackjack.cards (id, name, value) VALUES ($3, $1, $2)", card, cardvalues[countx], countx+1)
+            count_x += 1
+            await ex.conn.execute("INSERT INTO blackjack.cards (id, name, value) VALUES ($3, $1, $2)", card, card_values[count_x], count_x+1)
         await ctx.send("> **All cards have been added into the table.**", delete_after=40)
 
     @commands.command()
@@ -87,7 +84,7 @@ class BlackJack(commands.Cog):
         """Pick A Card [Format: %hit]"""
         try:
             game_id = await ex.get_game_by_player(ctx.author.id)
-            if game_id is None:
+            if not game_id:
                 await ctx.send(f"> **{ctx.author}, you are not in a game.**")
             else:
                 if await ex.compare_channels(ctx.author.id, ctx.channel):

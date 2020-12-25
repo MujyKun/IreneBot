@@ -43,9 +43,7 @@ class SelfAssignRoles(commands.Cog):
             if not roles:
                 return await ctx.send("> You have no Self-Assignable roles in this server.")
             msg_body = ""
-            for role in roles:
-                role_id = role[0]
-                role_name = role[1]
+            for role_id, role_name in roles:
                 msg_body += f"<@&{role_id}> - {role_name}\n"
             embed_title = f"{ctx.guild}'s Self-Assignable Roles"
             embed = await ex.create_embed(title=embed_title, title_desc=msg_body)

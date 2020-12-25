@@ -5,21 +5,18 @@ from module import keys
 from module import logger as log
 from Utility import resources as ex
 import datetime
-client = keys.client
 
 
 class Miscellaneous(commands.Cog):
     @staticmethod
     async def on_message_notifications(message):
+        # user phrase notifications
         try:
             message_sender = message.author
             message_guild_id = message.guild.id
             message_content = message.content
             if not message_sender.bot:
-                for notification in ex.cache.user_notifications:
-                    guild_id = notification[0]
-                    user_id = notification[1]
-                    phrase = notification[2]
+                for guild_id, user_id, phrase in ex.cache.user_notifications:
                     message_split = message_content.lower().split(" ")
                     if phrase in message_split and guild_id == message_guild_id and message_sender.id != user_id and user_id in [member.id for member in message.channel.members]:
                         log.console(f"message_notifications 1 - {phrase} to {user_id}")
@@ -64,12 +61,13 @@ class Miscellaneous(commands.Cog):
         """Receive a DM whenever a phrase or word is said in the current server. [Format: %addnoti (phrase/word)]"""
         try:
             check_exists = ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) FROM general.notifications WHERE guildid = $1 AND userid = $2 AND phrase = $3", ctx.guild.id, ctx.author.id, phrase.lower()))
-            # will return 0 or 1
             if check_exists:
                 raise Exception
             await ex.conn.execute("INSERT INTO general.notifications(guildid,userid,phrase) VALUES($1, $2, $3)", ctx.guild.id, ctx.author.id, phrase.lower())
             ex.cache.user_notifications.append([ctx.guild.id, ctx.author.id, phrase.lower()])
             await ctx.send(f"> **{ctx.author.display_name}, I added `{phrase}` to your notifications.**")
+        except AttributeError:
+            return await ctx.send(f"> **{ctx.author.display_name}, You are not allowed to use this command in DMs.**")
         except Exception as e:
             log.console(e)
             await ctx.send(f"> **{ctx.author.display_name}, You are already receiving notifications for `{phrase}`**")
@@ -81,9 +79,13 @@ class Miscellaneous(commands.Cog):
             await ex.conn.execute("DELETE FROM general.notifications WHERE guildid=$1 AND userid=$2 AND phrase=$3", ctx.guild.id, ctx.author.id, phrase.lower())
             try:
                 ex.cache.user_notifications.remove([ctx.guild_id, ctx.author.id, phrase.lower()])
+            except AttributeError:
+                return await ctx.send(
+                    f"> **{ctx.author.display_name}, You are not allowed to use this command in DMs.**")
             except Exception as e:
                 pass
             await ctx.send(f"> **{ctx.author.display_name}, if you were receiving notifications for that phrase, it has been removed.**")
+
         except Exception as e:
             log.console(e)
             await ctx.send(f"> **Something Went Wrong, please {await ex.get_server_prefix_by_context(ctx)}report it.**")
@@ -94,7 +96,7 @@ class Miscellaneous(commands.Cog):
         try:
             # use db call instead of cache (would be quicker here)
             phrases = await ex.conn.fetch("SELECT phrase FROM general.notifications WHERE guildid = $1 AND userid = $2", ctx.guild.id, ctx.author.id)
-            if len(phrases) == 0:
+            if not phrases:
                 return await ctx.send(f"> **{ctx.author.display_name}, You do not have any notification phrases on this server.**")
             final_list = ""
             counter = 1
@@ -149,8 +151,8 @@ class Miscellaneous(commands.Cog):
         try:
             current_server_prefix = await ex.get_server_prefix(ctx.guild.id)
         except Exception as e:
-            current_server_prefix = await client.get_prefix(ctx.message)
-        app = await client.application_info()
+            current_server_prefix = await ex.client.get_prefix(ctx.message)
+        app = await ex.client.application_info()
         app_id = app.id
         app_name = app.name
         app_owner = app.owner
@@ -182,12 +184,12 @@ Maintenance Status: {maintenance_status}
         embed.add_field(name=f"Bot Uptime", value=bot_uptime, inline=True)
         embed.add_field(name=f"Total Commands Used", value=f"{ex.cache.total_used} Commands", inline=True)
         embed.add_field(name=f"This Session ({ex.cache.session_id} | {datetime.date.today()})", value=f"{ex.cache.current_session} Commands", inline=True)
-        embed.add_field(name=f"Playing Music", value=f"{len(client.voice_clients)} Voice Clients", inline=True)
+        embed.add_field(name=f"Playing Music", value=f"{len(ex.client.voice_clients)} Voice Clients", inline=True)
         embed.add_field(name=f"Playing Guessing/Bias", value=f"{len(ex.cache.guessing_games)}/{len(ex.cache.bias_games)} Games", inline=True)
         embed.add_field(name=f"Ping", value=f"{ex.get_ping()} ms", inline=True)
-        embed.add_field(name=f"Shards", value=f"{client.shard_count}", inline=True)
+        embed.add_field(name=f"Shards", value=f"{ex.client.shard_count}", inline=True)
         embed.add_field(name=f"Bot Owner", value=f"<@{app_owner.id}>", inline=True)
-        if len(mods):
+        if mods:
             embed.add_field(name=f"Bot Mods", value=mods, inline=True)
         embed.add_field(name=f"Support Server", value=f"[Invite to Server]({keys.bot_support_server_link})", inline=False)
         embed.add_field(name=f"Website", value=keys.bot_website, inline=False)
@@ -195,7 +197,7 @@ Maintenance Status: {maintenance_status}
         embed.add_field(name=f"Discord Invite", value=keys.bot_invite_link, inline=False)
         embed.add_field(name=f"Bot Server Links", value=bot_server_links, inline=False)
         embed.add_field(name=f"Suggest", value=f"Suggest a feature using `{current_server_prefix}suggest`.", inline=False)
-        if len(patreon_url):
+        if patreon_url:
             embed.add_field(name=f"Patreon", value=f"[Please Support <@{keys.bot_id}> here.]({patreon_url})", inline=False)
         await ctx.send(embed=embed)
 
@@ -205,19 +207,16 @@ Maintenance Status: {maintenance_status}
         try:
             await ctx.send(f"> **Your current server prefix is {await ex.get_server_prefix(ctx.guild.id)}**")
         except Exception as e:
-            await ctx.send(f"> **Your current prefix is {await client.get_prefix(ctx.message)}")
+            await ctx.send(f"> **Your current prefix is {await ex.client.get_prefix(ctx.message)}")
 
     @commands.command(aliases=['trans', 't'])
     async def translate(self, ctx, from_language, to_language, *, message):
         """Translate between languages using Papago [Format: %translate English Korean this is a test phrase.]"""
         try:
             response = await ex.translate(message, from_language, to_language)
-            if response is not None:
-                if not len(response):
-                    return await ctx.send(
-                        "> **The translation came back empty meaning an occur occurred in the process. It may be possible that the bot reached the maximum amount of calls it can make this month.**")
+            if response:
                 code = response['code']
-                if code == 0:
+                if code == 0:  # do not shorten (make sure "code" var exists)
                     text = response['text']
                     target_lang = response['source']
                     msg = f"Original ({target_lang}): {message} \nTranslated ({to_language}): {text} "
@@ -225,7 +224,7 @@ Maintenance Status: {maintenance_status}
                 else:
                     return await ctx.send("> **Something went wrong and I did not receive a proper response from Papago.**")
             else:
-                return await ctx.send(f"**My Papago Translation Service is currently turned off and cannot process requests or you did not enter the right format.**")
+                return await ctx.send(f"**My Papago Translation Service is currently turned off and cannot process requests OR you did not enter the right format.**")
         except Exception as e:
             await ctx.send("An error has occurred with the Translation.")
             log.console(e)
@@ -241,7 +240,7 @@ Maintenance Status: {maintenance_status}
                          icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
         embed.add_field(name=f"{ctx.author.name} ({ctx.author.id})", value=desc)
         try:
-            channel = await client.fetch_channel(keys.report_channel_id)  # 403 error on testing
+            channel = await ex.client.fetch_channel(keys.report_channel_id)  # 403 error ( no access ) on testing
             msg = await channel.send(embed=embed)
             await ctx.send("> **Your bug report has been sent.**")
             await msg.add_reaction("\U0001f44d")  # thumbs up
@@ -262,7 +261,7 @@ Maintenance Status: {maintenance_status}
                          icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
         embed.add_field(name=f"{ctx.author.name} ({ctx.author.id})", value=desc)
         try:
-            channel = await client.fetch_channel(keys.suggest_channel_id)  # 403 error on testing
+            channel = await ex.client.fetch_channel(keys.suggest_channel_id)  # 403 error on testing
             msg = await channel.send(embed=embed)
             await ctx.send("> **Your suggestion has been sent.**")
             await msg.add_reaction("\U0001f44d")  # thumbs up
@@ -274,25 +273,23 @@ Maintenance Status: {maintenance_status}
     @commands.command()
     async def nword(self, ctx, user: discord.Member = None):
         """Checks how many times a user has said the N Word [Format: %nword @user]"""
-        if user is None:
+        if not user:
             user = ctx.author
         current_amount = ex.cache.n_word_counter.get(user.id)
-        if current_amount is None:
+        if not current_amount:
             return await ctx.send(f"> **<@{user.id}> has not said the N-Word a single time!**")
         else:
             await ctx.send(f"> **<@{user.id}> has said the N-Word {current_amount} time(s)!**")
-
-
 
     @commands.is_owner()
     @commands.command()
     async def clearnword(self, ctx, user: discord.Member = None):
         """Clear A User's Nword Counter [Format: %clearnword @user]"""
-        if user is None:
+        if not user:
             await ctx.send("> **Please @ a user**")
         else:
             current_amount = ex.cache.n_word_counter.get(user.id)
-            if current_amount is not None:
+            if current_amount:
                 await ex.conn.execute("DELETE FROM general.nword where userid = $1", user.id)
                 ex.cache.n_word_counter[user.id] = None
                 await ctx.send("**> Cleared.**")
@@ -309,11 +306,11 @@ Maintenance Status: {maintenance_status}
         count_loop = 0
         for user_id in sorted_n_word:
             value = sorted_n_word.get(user_id)
-            if value is not None:
+            if value:
                 count_loop += 1
                 if count_loop <= 10:
                     try:
-                        user_name = (client.get_user(user_id)).name
+                        user_name = (ex.client.get_user(user_id)).name
                     except Exception as e:
                         # if the user is not in discord.py's member cache, then set the user's name to null.
                         user_name = "NULL"
@@ -338,7 +335,7 @@ Maintenance Status: {maintenance_status}
         """Search a term through UrbanDictionary. Underscores are spaces.
         [Format: %urban (term) (definition number)][Aliases: define,u]"""
         if ctx.channel.is_nsfw() or override == 1:
-            if term is None:
+            if not term:
                 await ctx.send("> **Please enter a word for me to define**")
             else:
                 term = term.replace("_", " ")
@@ -351,13 +348,11 @@ Maintenance Status: {maintenance_status}
                         try:
                             first_result = (result['list'])[number-1]
                         except:
-                            await ctx.send (f"> **It is not possible to find definition number `{number}` for the word: `{term}`.**")
+                            return await ctx.send (f"> **It is not possible to find definition number `{number}` for the word: `{term}`.**")
                         await ctx.send(f">>> **`Word: {term}`\n`Definition Number: {number}`\n{first_result['definition']}**")
                     else:
                         log.console(r.status)
                         await ctx.send("> **The connection to the UrbanDictionary API failed.**")
-                pass
-            pass
         else:
             server_prefix = await ex.get_server_prefix_by_context(ctx)
             await ctx.send(f">>> **This text channel must be NSFW to use {server_prefix}"
@@ -377,7 +372,8 @@ Maintenance Status: {maintenance_status}
     @commands.command()
     @commands.is_owner()
     async def announce(self, ctx, *, new_message):
-        """Sends a bot message to certain text channels"""
+        """Sends a bot message to system text channels.
+        NOTE: This should not be used if a lot of servers are using the bot."""
         desc = f"{new_message}"
         embed = discord.Embed(title=f"Announcement from {ctx.author} ({ctx.author.id})", description=desc, color=0xff00f6)
         embed.set_author(name="Irene", url=keys.bot_website,
@@ -386,20 +382,19 @@ Maintenance Status: {maintenance_status}
                          icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
         # embed.add_field(name=f"{ctx.author.name} ({ctx.author.id})", value=desc)
 
-        guilds = client.guilds
+        guilds = ex.client.guilds
         for guild in guilds:
             try:
                 await guild.system_channel.send(embed=embed)
             except Exception as e:
                 log.console(e)
-                pass
 
     @commands.command()
     @commands.is_owner()
     async def send(self, ctx, channel_id, *, new_message):
         """Send a message to a text channel."""
         try:
-            channel = await client.fetch_channel(channel_id)  # 403 forbidden on tests.
+            channel = await ex.client.fetch_channel(channel_id)  # 403 forbidden on tests.
             await channel.send(new_message)
             await ctx.send("> **Message Sent.**")
         except Exception as e:
@@ -435,13 +430,13 @@ Maintenance Status: {maintenance_status}
             await ctx.send(embed=embed)
         except Exception as e:
             log.console(e)
-            await ctx.send("> **Something went wrong.. Please %report the issue.**")
+            await ctx.send("> This server has not yet been loaded into my cache (takes about an hour from restart).")
 
     @commands.command()
     @commands.is_owner()
     async def servers(self, ctx):
         """Displays which servers Irene is in."""
-        guilds = client.guilds
+        guilds = ex.client.guilds
         count = 1
         page_number = 1
         embed = discord.Embed(title=f"{len(guilds)} Servers - Page {page_number}", color=0xffb6c1)
@@ -467,9 +462,6 @@ Maintenance Status: {maintenance_status}
                         guild_member_count = guild.member_count
                         guild_owner = guild.owner
                         guild_name = guild.name
-                        guild_icon = guild.icon
-                        guild_banner = guild.banner
-                        guild_channels = guild.text_channels
                         member_count = f"Member Count: {guild_member_count}\n"
                         owner = f"Guild Owner: {guild_owner} ({guild_owner.id})\n"
                         desc = member_count + owner
@@ -486,66 +478,24 @@ Maintenance Status: {maintenance_status}
                         count += 1
         except Exception as e:
             log.console(e)
-        if count != 0:
+        if count:
             embed_list.append(embed)
         msg = await ctx.send(embed=embed_list[0])
         await ex.check_left_or_right_reaction_embed(msg, embed_list)
 
-    @commands.command(aliases=['8ball', '8'])
+    @commands.command(name="8ball", aliases=['8'])
     async def _8ball(self, ctx, *, question=None):
         """Asks the 8ball a question. [Format: %8ball Question]"""
-        if question is not None:
-            responses = [
-                # Positive 13
-                "It is certain.",
-                "It is decidedly so.",
-                "Without a doubt.",
-                "Yes - definitely.",
-                "You may rely on it.",
-                "As I see it, yes.",
-                "Most likely.",
-                "Outlook good.",
-                "Yes.",
-                "Signs point to yes.",
-                ":thumbsup:",
-                "Well, duh",
-                "Of course, that was a stupid question.",
-
-
-                # Neutral 7
-                "Reply hazy, try again.",
-                "Ask again later.",
-                "Better not tell you now.",
-                "Cannot predict now.",
-                "Concentrate and ask again.",
-                "Why the fuck are you asking me you dumb rat.",
-                "You should already know this you 바보.",
-
-                # Negative 10
-                "Don't count on it.",
-                "My reply is no.",
-                "My sources say no.",
-                "Outlook not so good.",
-                "Very doubtful.",
-                ":thumbsdown:",
-                "Are you kidding?",
-                "Don't bet on it.",
-                "Forget about it.",
-                "It's just not meant to be."
-
-
-
-
-]
-            await ctx.send(">>> **Question: {} \nAnswer: {}**".format(question, choice(responses)))
+        if question:
+            await ctx.send(f">>> **Question: {question} \nAnswer: {choice(ex.cache.eight_ball_responses)}**")
         else:
-            await ctx.send("> **Please enter a prompt.**")
+            await ctx.send("> **Please enter an 8ball prompt.**")
 
     @commands.command()
     @commands.is_owner()
     async def speak(self, ctx, *, message):
         """Owner to Bot TTS"""
-        await ctx.send(">>> {}".format(message), tts=True, delete_after=5)
+        await ctx.send(f">>> {message}", tts=True, delete_after=10)
 
     @commands.command(aliases=['pong'])
     async def ping(self, ctx):

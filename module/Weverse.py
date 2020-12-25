@@ -17,7 +17,6 @@ class Weverse(commands.Cog):
         Available Communities ->
         [TXT, BTS, GFRIEND, SEVENTEEN, ENHYPEN, NU'EST, CL, P1Harmony, Weeekly, SUNMI, HENRY, Dreamcatcher]
         [Format: %updates <community name> [role to notify]]
-
         """
         try:
             if not ex.weverse_client.cache_loaded:

@@ -155,10 +155,25 @@ class GroupMembers(commands.Cog):
     @commands.command()
     async def card(self, ctx, *, name):
         """Displays an Idol/Group's profile card.
-        [Format: %card (idol/group name)]"""
+        [Format: %card (idol/group name/id)]"""
         server_id = await ex.get_server_id(ctx)
         members = await ex.get_idol_where_member_matches_name(name, server_id=server_id)
         groups = await ex.get_group_where_group_matches_name(name, server_id=server_id)
+        member_by_id = await ex.get_member(name)
+        group_by_id = await ex.get_group(name)
+
+        if member_by_id:
+            if members:
+                members.append(member_by_id)
+            else:
+                members = [member_by_id]
+
+        if group_by_id:
+            if groups:
+                groups.append(group_by_id)
+            else:
+                groups = [group_by_id]
+
         embed_list = []
         for member in members:
             embed = await ex.set_embed_card_info(member, server_id=server_id)
@@ -197,7 +212,7 @@ class GroupMembers(commands.Cog):
     async def sendimages(self, ctx, text_channel: discord.TextChannel = None):
         """All idol photo commands from the server will post idol photos in a specific text channel. To undo, type it again.
         [Format: %sendimages #text-channel]"""
-        if text_channel is None:
+        if not text_channel:
             text_channel = ctx.channel
         if await ex.check_channel_sending_photos(text_channel.id):
             if await ex.check_server_sending_photos(server_id=ctx.guild.id):
@@ -211,8 +226,8 @@ class GroupMembers(commands.Cog):
                     delete_channel_id = None
                     await ex.conn.execute("UPDATE groupmembers.restricted SET channelid = $1 WHERE serverid = $2 AND sendhere = $3", text_channel.id, ctx.guild.id, 1)
                     for channel_id in ex.cache.restricted_channels:
-                        info = ex.cache.restricted_channels.get(channel_id)
-                        if info[0] == ctx.guild.id and info[1] == 1:
+                        channel_info = ex.cache.restricted_channels.get(channel_id)
+                        if channel_info[0] == ctx.guild.id and channel_info[1] == 1:
                             delete_channel_id = channel_id
                     if delete_channel_id:
                         # this seemingly useless snippet of code is to avoid runtime errors during iteration.
@@ -294,7 +309,7 @@ class GroupMembers(commands.Cog):
                     page_number += 1
                     embed = discord.Embed(title=f"Idol Group List Page {page_number}", color=0xffb6c1)
                 counter += 1
-        if counter != 0:
+        if counter:
             embed_list.append(embed)
         msg = await ctx.send(embed=embed_list[0])
         await ex.check_left_or_right_reaction_embed(msg, embed_list, 0)
@@ -328,7 +343,7 @@ class GroupMembers(commands.Cog):
     async def count(self, ctx, *, name=None):
         """Shows howmany times an idol has been called. [Format: %count (idol's name/all)]"""
         try:
-            if name == 'all' or name is None:
+            if name == 'all' or not name:
                 idol_called = 0
                 for member in ex.cache.idols:
                     idol_called += member.called
@@ -361,11 +376,9 @@ class GroupMembers(commands.Cog):
         embed.set_footer(text=f"Type {await ex.get_server_prefix_by_context(ctx)}count (idol name) to view their individual stats.", icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
         all_members = await ex.conn.fetch("SELECT MemberID, Count FROM groupmembers.Count ORDER BY Count DESC")
         count_loop = 0
-        for mem in all_members:
+        for member_id, count in all_members:
             count_loop += 1
             if count_loop <= 10:
-                member_id = mem[0]
-                count = mem[1]
                 idol = await ex.get_member(member_id)
                 embed.add_field(name=f"{count_loop}) {idol.full_name} ({idol.stage_name})", value=count)
         await ctx.send(embed=embed)
@@ -376,22 +389,19 @@ class GroupMembers(commands.Cog):
         """Scan DriveIDs Table and update other tables."""
         try:
             all_links = await ex.conn.fetch("SELECT id, linkid, name FROM archive.DriveIDs")
-            for pic in all_links:
+            for p_id, link_id, link_name in all_links:
                 try:
-                    ID = pic[0]
-                    Link_ID = pic[1]
-                    Link_Name = pic[2]
-                    new_link = f"https://drive.google.com/uc?export=view&id={Link_ID}"
+                    new_link = f"https://drive.google.com/uc?export=view&id={link_id}"
                     all_names = await ex.conn.fetch("SELECT Name FROM archive.ChannelList")
                     if name == "NULL" and member_id == 0:
                         for idol_name in all_names:
                             idol_name = idol_name[0]
-                            if idol_name == Link_Name and (idol_name != "Group" or idol_name != "MDG Group"):
+                            if idol_name == link_name and (idol_name != "Group" or idol_name != "MDG Group"):
                                 member_id1 = ex.first_result(await ex.conn.fetchrow("SELECT ID FROM groupmembers.Member WHERE StageName = $1", idol_name))
                                 await ex.conn.execute("INSERT INTO groupmembers.uploadimagelinks VALUES($1,$2)", new_link, member_id1)
-                                await ex.conn.execute("DELETE FROM archive.DriveIDs WHERE ID = $1", ID)
-                    elif Link_Name.lower() == name.lower():
-                        await ex.conn.execute("DELETE FROM archive.DriveIDs WHERE ID = $1", ID)
+                                await ex.conn.execute("DELETE FROM archive.DriveIDs WHERE ID = $1", p_id)
+                    elif link_name.lower() == name.lower():
+                        await ex.conn.execute("DELETE FROM archive.DriveIDs WHERE ID = $1", p_id)
                         await ex.conn.execute("INSERT INTO groupmembers.uploadimagelinks VALUES($1,$2)", new_link, member_id)
                 except Exception as e:
                     log.console(e)

@@ -17,6 +17,7 @@ def make_int(var):
     except Exception as e:
         return None
 
+
 load_dotenv()  # Adds .env to memory
 # DISCORD
 # client token ( to run )

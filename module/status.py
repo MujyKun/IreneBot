@@ -1,6 +1,6 @@
 import discord
-from discord.ext import commands, tasks
-from module.keys import client, bot_prefix
+from discord.ext import tasks
+from module.keys import bot_prefix
 import random
 from Utility import resources as ex
 
@@ -26,6 +26,6 @@ class Status:
                 else:
                     final_status = f"{bot_prefix}help"
                 activity = discord.Activity(name=final_status, type=discord.ActivityType.listening)
-                await client.change_presence(status=discord.Status.online, activity=activity)
+                await ex.client.change_presence(status=discord.Status.online, activity=activity)
             except Exception as e:
                 pass

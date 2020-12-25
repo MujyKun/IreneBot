@@ -2909,13 +2909,15 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
         return False, at_index
 
     @staticmethod
-    async def process_reminder_reason(user_input, type_index):
+    async def process_reminder_reason(user_input, cutoff_index):
         """Return the reminder reason that comes before in/at"""
-        # TODO: add case when starting with "me"
-        user_text = user_input.split()
-        if user_text[0].lower() == "to":
-            return user_input[3: type_index]
-        return user_input[0: type_index]
+        user_input = user_input[0: cutoff_index]
+        user_words = user_input.split()
+        if user_words[0].lower() == "me":
+            user_words.pop(0)
+        if user_words[0].lower() == "to":
+            user_words.pop(0)
+        return " ".join(user_words)
 
     async def process_reminder_time(self, user_input, type_index, is_relative_time, user_id):
         """Return the datetime of the reminder depending on the time format"""

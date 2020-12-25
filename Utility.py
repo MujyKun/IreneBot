@@ -3003,14 +3003,28 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
         except:
             pass
 
+        # Format if user inputs number timezones
+        if any(char.isdigit() for char in input_timezone):
+            try:
+                timezone_offset = (re.findall(r"[+-]\d+", input_timezone))[0]
+                UTC_offset = f"-{timezone_offset[1]}" if timezone_offset[0]=="+" else f"+{timezone_offset[1]}"
+                input_timezone = 'Etc/GMT' + UTC_offset
+            except:
+                pass
+
         # Filter for all timezones which are equivalent to the user inputted timezone
         matching_timezones = None
         try:
             matching_timezones = set(
+                filter(lambda x: datetime.datetime.now(pytz.timezone(x)).strftime("%Z") ==
+                                 datetime.datetime.now(pytz.timezone(input_timezone)).strftime("%Z"),
+                       pytz.common_timezones))
+        except pytz.exceptions.UnknownTimeZoneError:
+            matching_timezones = set(
                 filter(lambda x: datetime.datetime.now(pytz.timezone(x)).strftime("%Z") == input_timezone,
                        pytz.common_timezones))
         except:
-            return matching_timezones
+            pass
 
         # Find the timezones which share both same timezone input and the same country code
         if input_country_code:

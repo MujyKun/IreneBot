@@ -117,7 +117,7 @@ class Reminder(commands.Cog):
                                   f" not have a timezone set." + (help_message if user == ctx.author else ""))
 
         current_time = datetime.datetime.now(pytz.timezone(user_timezone)).strftime('%I:%M:%S %p')
-        timezone_abbrev = datetime.datetime.now(pytz.timezone(user_timezone)).strftime('%Z%z')
+        timezone_abbrev = datetime.datetime.now(pytz.timezone(user_timezone)).strftime('UTC%z')
         return await ctx.send(
             f"> {user.display_name}{', your' if user==ctx.author else chr(39)+'s'} current time is set to "
             f"`{current_time}` at the timezone `{user_timezone} {timezone_abbrev}`")
@@ -134,7 +134,7 @@ class Reminder(commands.Cog):
         if not user_timezone:
             return await ctx.send(f"> {ctx.author.display_name}, that is not a valid timezone.")
 
-        timezone_utc = datetime.datetime.now(pytz.timezone(user_timezone)).strftime('%Z, UTC%z')
+        timezone_utc = datetime.datetime.now(pytz.timezone(user_timezone)).strftime('UTC%z')
         native_time = datetime.datetime.now(pytz.timezone(user_timezone)).strftime('%c')
         await ex.set_user_timezone(ctx.author.id, user_timezone)
         return await ctx.send(f"> {ctx.author.display_name}, your timezone has been set to `{user_timezone} "

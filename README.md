@@ -292,7 +292,7 @@ To find out more, look at the `GroupMembers` category.
 #### Reminder:
 | Command     | Description                          | Format                 | Aliases           |
 |-------------|--------------------------------------|------------------------|-------------------|
-| gettimezone | Get your current set timezone. | %gettimezone | gettz |
+| gettimezone | Display a user's current timezone and local time. | %gettimezone @user | gettz, time |
 | listreminders | Lists out all of your reminders. | %listreminders | listreminds, reminders, reminds |
 | remindme | Create a reminder to do a task at a certain time. | %remindme to ______ at 9PM or %remindme to ____ in 6hrs 30mins  | remind |
 | removereminder | Remove one of your reminders. | %removereminder (reminder index) | removeremind |

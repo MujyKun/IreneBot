@@ -2899,7 +2899,8 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
         """Determine if time is relative time or absolute time
         relative time: remind me to _____ in 6 days
         absolute time: remind me to _____ at 6PM"""
-        # TODO: add "on", "tomorrow", and "tonight" as valid imnputs
+        # TODO: add "on", "tomorrow", and "tonight" as valid inputs
+
         in_index = user_input.rfind(" in ")
         at_index = user_input.rfind(" at ")
         if in_index == at_index:
@@ -2968,9 +2969,10 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
         cal = parsedatetime.Calendar()
         try:
             datetime_obj, _ = cal.parseDT(datetimeString=time_input, tzinfo=pytz.timezone(user_timezone))
+            reminder_datetime = datetime_obj.astimezone(pytz.utc)
+            return reminder_datetime
         except:
             raise exceptions.ImproperFormat
-        return datetime_obj
 
     async def get_user_timezone(self, user_id):
         """Returns the user's timezone"""
@@ -3057,7 +3059,7 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
         locale_date = m_time.strftime('%x')
         locale.setlocale(locale.LC_ALL, '')  # Reset locale back to server locale
 
-        local_time = m_time.replace(tzinfo=pytz.utc).astimezone(pytz.timezone(user_timezone))
+        local_time = m_time.astimezone(pytz.timezone(user_timezone))
         local_time = local_time.strftime(time_format)
         return f"{weekday} {locale_date} {local_time}"
 

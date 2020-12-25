@@ -1,5 +1,4 @@
-from module.keys import client, trash_emoji, check_emoji, dead_image_channel_id, patreon_super_role_id, patreon_role_id, next_emoji, bot_name
-from module import logger as log
+from module import logger as log, keys
 from Utility import resources as ex
 from discord.ext import commands
 import discord
@@ -39,16 +38,15 @@ class Events(commands.Cog):
         ex.cache.errors_per_minute += 1
 
     @staticmethod
-    @client.event
+    @ex.client.event
     async def on_ready():
-        app = await client.application_info()
-        global bot_name
-        bot_name = app.name
+        app = await ex.client.application_info()
+        keys.bot_name = app.name
         log.console(f'{app.name} is online')
         ex.discord_cache_loaded = True
 
     @staticmethod
-    @client.event
+    @ex.client.event
     async def on_command_error(ctx, error):
         if isinstance(error, commands.errors.CommandNotFound):
             pass
@@ -65,26 +63,26 @@ class Events(commands.Cog):
             await Events.error(ctx, error)
 
     @staticmethod
-    @client.event
+    @ex.client.event
     async def on_guild_join(guild):
         try:
-            if guild.system_channel is not None:
+            if guild.system_channel:
                 await guild.system_channel.send(f">>> Hello!\nMy prefix for this server is set to {await ex.get_server_prefix(guild.id)}.\nIf you have any questions or concerns, you may join the support server ({await ex.get_server_prefix(guild.id)}support).")
         except Exception as e:
             pass
         log.console(f"{guild.name} ({guild.id}) has invited Irene.")
 
     @staticmethod
-    @client.event
+    @ex.client.event
     async def on_message(message):
         await Events.process_on_message(message)
 
     @staticmethod
-    @client.event
+    @ex.client.event
     async def on_message_edit(msg_before, message):
         msg_created_at = msg_before.created_at
         msg_edited_at = message.edited_at
-        if msg_edited_at is not None:
+        if msg_edited_at:
             difference = msg_edited_at - msg_created_at  # datetime.timedelta
             # the message has to be edited at least 60 seconds within it's creation.
             if difference.total_seconds() > 60:
@@ -92,7 +90,7 @@ class Events(commands.Cog):
             await Events.process_on_message(message)
 
     @staticmethod
-    @client.event
+    @ex.client.event
     async def on_command(ctx):
         msg_content = ctx.message.clean_content
         if not ex.check_if_mod(ctx.author.id, 1):
@@ -105,26 +103,23 @@ class Events(commands.Cog):
             ex.send_ban_message(ctx.channel)
 
     @staticmethod
-    @client.event
+    @ex.client.event
     async def on_command_completion(ctx):
         await ex.add_command_count(ctx.command.name)
         await ex.add_session_count()
 
     @staticmethod
-    @client.event
+    @ex.client.event
     async def on_guild_remove(guild):
-        id = guild.id
-        name = guild.name
-        region = str(guild.region)
-        owner_id = guild.owner.id
-        member_count = guild.member_count
         try:
-            await ex.conn.execute("INSERT INTO stats.leftguild (id, name, region, ownerid, membercount) VALUES($1, $2, $3, $4, $5)", id, name, region, owner_id, member_count)
+            await ex.conn.execute("INSERT INTO stats.leftguild (id, name, region, ownerid, membercount) VALUES($1, "
+                                  "$2, $3, $4, $5)", guild.id, guild.name,
+                                  str(guild.region), guild.owner_id, guild.member_count)
         except Exception as e:
-            log.console(f"{name} ({id})has already kicked Irene before. - {e}")
+            log.console(f"{guild.name} ({guild.id})has already kicked Irene before. - {e}")
 
     @staticmethod
-    @client.event
+    @ex.client.event
     async def on_raw_reaction_add(payload):
         """Checks if a bot mod is deleting an idol photo."""
         try:
@@ -137,7 +132,7 @@ class Events(commands.Cog):
             async def get_msg_and_image():
                 """Gets the message ID if it matches with the reaction."""
                 try:
-                    if channel_id == dead_image_channel_id:
+                    if channel_id == keys.dead_image_channel_id:
                         channel = ex.cache.dead_image_channel
                         msg = await channel.fetch_message(message_id)
                         msg_info = ex.cache.dead_image_cache.get(message_id)
@@ -152,24 +147,24 @@ class Events(commands.Cog):
                 return None, None, None, None
 
             if ex.check_if_mod(user_id, mode=1):
-                if str(emoji) == trash_emoji:
+                if str(emoji) == keys.trash_emoji:
                     msg, link, idol_id, is_guessing_game = await get_msg_and_image()
-                    if link is not None:
+                    if link:
                         await ex.conn.execute("DELETE FROM groupmembers.imagelinks WHERE link = $1 AND memberid = $2",
                                               link, idol_id)
                         await ex.delete_dead_link(link, idol_id)
                         await ex.set_forbidden_link(link, idol_id)
                         await msg.delete()
 
-                elif str(emoji) == check_emoji:
+                elif str(emoji) == keys.check_emoji:
                     msg, link, idol_id, is_guessing_game = await get_msg_and_image()
-                    if link is not None:
+                    if link:
                         await ex.delete_dead_link(link, idol_id)
                         await msg.delete()
 
                 elif str(emoji) == '➡':
                     msg, link, idol_id, is_guessing_game = await get_msg_and_image()
-                    if link is not None:
+                    if link:
                         await ex.set_as_group_photo(link)
                         await msg.delete()
 
@@ -177,7 +172,7 @@ class Events(commands.Cog):
             log.console(e)
 
     @staticmethod
-    @client.event
+    @ex.client.event
     async def on_member_update(member_before, member_after):
         if not member_before.bot:
             before_roles = member_before.roles
@@ -185,39 +180,53 @@ class Events(commands.Cog):
             added_roles = (list(set(after_roles) - set(before_roles)))
             removed_roles = (list(set(before_roles) - set(after_roles)))
             # if the user received the patron or super patron role, update cache
-            if len(added_roles) != 0:
+            if added_roles:
                 for role in added_roles:
-                    if role.id == patreon_super_role_id:
+                    if role.id == keys.patreon_super_role_id:
                         ex.cache.patrons[member_after.id] = True
-                    if role.id == patreon_role_id:
+                    if role.id == keys.patreon_role_id:
                         ex.cache.patrons[member_after.id] = False
             # if the user was removed from patron or super patron role, update cache
             after_role_ids = [after_role.id for after_role in after_roles]
-            if len(removed_roles) != 0:
+            if removed_roles:
                 # only update if there were removed roles
-                if patreon_super_role_id in after_role_ids:
+                if keys.patreon_super_role_id in after_role_ids:
                     ex.cache.patrons[member_after.id] = True
-                elif patreon_role_id in after_role_ids:
+                elif keys.patreon_role_id in after_role_ids:
                     ex.cache.patrons[member_after.id] = False
                 else:
                     ex.cache.patrons.pop(member_after.id, None)
 
     @staticmethod
-    @client.event
+    @ex.client.event
     async def on_member_join(member):
         guild = member.guild
         server = ex.cache.welcome_messages.get(guild.id)
-        if server is not None:
+        if server:
             if server.get('enabled'):
                 channel = guild.get_channel(server.get('channel_id'))
-                if channel is not None:
+                if channel:
                     message = server.get("message")
                     message = message.replace("%user", f"<@{member.id}>")
                     message = message.replace("%guild_name", guild.name)
                     await channel.send(message)
 
     @staticmethod
-    @client.check
+    @ex.client.event
+    async def on_guild_post():
+        """Update the server count on Top.GG and discord boats [Every 30 minutes]"""
+        log.console("Server Count Updated on Top.GG")
+
+        # discord.boats
+        try:
+            if ex.get_server_count():
+                await keys.discord_boats.post_stats(botid=keys.bot_id, server_count=ex.get_server_count())
+                log.console("Server Count Updated on discord.boats")
+        except Exception as e:
+            log.console(f"Server Count Update FAILED on discord.boats - {e}")
+
+    @staticmethod
+    @ex.client.check
     async def check_maintenance(ctx):
         """Return true if the user is a mod. If a maintenance is going on, return false for normal users."""
         try:
@@ -228,6 +237,3 @@ class Events(commands.Cog):
         except Exception as e:
             log.console(f"{e} - Check Maintenance")
             return False
-
-
-

@@ -4,12 +4,11 @@ import pytz
 from discord.ext import commands
 from Utility import resources as ex
 from module import logger as log
-from module.keys import client, bot_prefix
 
 
 class Profile(commands.Cog):
     def __init__(self):
-        client.add_listener(self.profile_level, 'on_message')
+        ex.client.add_listener(self.profile_level, 'on_message')
 
     @commands.command()
     async def avatar(self, ctx, user: discord.Member = None):
@@ -43,7 +42,7 @@ class Profile(commands.Cog):
             count = 0
             roles = ""
             for role in roles_list:
-                if count != 0 and count != (len(roles_list) - 1):
+                if count and count != (len(roles_list) - 1):
                     roles += f"{role.name}, "
                 if count == (len(roles_list)-1):
                     roles += role.name

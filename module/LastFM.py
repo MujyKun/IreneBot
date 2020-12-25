@@ -1,9 +1,8 @@
 import discord
 from discord.ext import commands
-from module import keys, events, logger as log
+from module import events, logger as log
 from Utility import resources as ex
 import typing
-client = keys.client
 
 
 class LastFM(commands.Cog):
@@ -42,11 +41,11 @@ class LastFM(commands.Cog):
     async def create_fm_embed(title, stats_info, inline=False, individual=False):
         """Create and return an embed that matches the format for FM tracks and artists."""
         embed = await ex.create_embed(title=title, color=ex.get_random_color())
-        for info in stats_info:
+        for name, value in stats_info:
             if not individual:
-                embed.add_field(name=info[0], value=info[1], inline=inline)
+                embed.add_field(name=name, value=value, inline=inline)
             else:
-                embed.description = info[1]
+                embed.description = value
         return embed
 
     async def set_user(self, ctx, org_user, time_period=None):
@@ -54,19 +53,19 @@ class LastFM(commands.Cog):
         # this condition is set in place to make the parameters reversible
         if type(time_period) is discord.User:
             org_user = time_period
-        if time_period is None:
+        if not time_period:
             if self.set_period(None, org_user) != "overall":
                 org_user = None
-        if org_user is None:
+        if not org_user:
             user = await ex.get_fm_username(ctx.author.id)
         elif type(org_user) is str:
             return org_user
         elif type(org_user) is discord.User:
             user = await ex.get_fm_username(org_user.id)
-            if user is None:
+            if not user:
                 user = org_user.name
         else:
-            return None
+            return
         return user
 
     @staticmethod
@@ -75,7 +74,7 @@ class LastFM(commands.Cog):
         # this condition is set in place to make the parameters reversible
         if type(time_period) is discord.User:
             time_period = user
-        if time_period is None:
+        if not time_period:
             time_period = user
         weeks = ["7day", "7days", "week", "weekly"]
         month = ["1month", "4weeks", "4week", "month", "mo"]
@@ -134,8 +133,8 @@ class LastFM(commands.Cog):
         """Attach a Last FM username to your Discord Account.
         [Format: %setfm username]."""
         try:
-            response = await ex.set_fm_username(ctx.author.id, username)
-            if response is True:
+            response = await ex.set_fm_username(ctx.author.id, username)  # can be an Exception or True
+            if response:
                 await ctx.send(f"> **{username} (last.fm) is now attached to {ctx.author.display_name}.**")
             else:
                 await events.Events.error(ctx, response)

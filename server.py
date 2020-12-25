@@ -34,7 +34,7 @@ class AutoRestart:
         os.system("node irenebot-com/index.js")
 
     def restart_api(self):
-        if self.api is not None:
+        if self.api:
             self.api.terminate()
             os.system("fuser -k 5454/tcp")
         while self.api.is_alive():

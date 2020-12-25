@@ -6,7 +6,6 @@ import youtube_dl
 from Utility import resources as ex
 import random
 import os
-client = keys.client
 
 
 youtube_dl.utils.bug_reports_message = lambda: ''
@@ -82,14 +81,14 @@ class Music(commands.Cog):
     async def check_voice_clients(self):
         if ex.client.loop.is_running():
             try:
-                voice_clients = client.voice_clients
+                voice_clients = ex.client.voice_clients
                 for voice_client in voice_clients:
                     if voice_client.is_connected():
-                        if len(voice_client.channel.members) == 1:
+                        if voice_client.channel.members:
                             if voice_client.is_playing():
                                 try:
                                     songs_queued = queued[voice_client.guild.id]
-                                    if len(songs_queued) > 0:
+                                    if songs_queued:
                                         channel = songs_queued[0][1]
                                         msg = f"> **There are no users in this voice channel. Resetting queue and leaving.**"
                                         await channel.send(msg)
@@ -141,7 +140,7 @@ class Music(commands.Cog):
     async def lyrics(self, ctx, *, song_query):
         """Get the lyrics of a song (From https://api.ksoft.si)
         [Format: %lyrics (song)]"""
-        if keys.lyric_client is None:
+        if not keys.lyric_client:
             log.console(f"There is no API Key currently set for the Lyrics and the Developer is working on it.")
             return await ctx.send("> **There is no API Key currently set for the Lyrics and the Developer is working on it.**")
         try:
@@ -253,7 +252,7 @@ class Music(commands.Cog):
         try:
             channel = ctx.message.author.voice.channel
             await ctx.send(f"> **{ctx.author}, I joined {channel.name}.**")
-            if ctx.voice_client is not None:
+            if ctx.voice_client:
                 return await ctx.voice_client.move_to(channel)
             await channel.connect()
         except AttributeError:
@@ -297,7 +296,7 @@ class Music(commands.Cog):
         try:
             if self.check_user_in_vc(ctx):
                 song_number = song_number - 1  # account for starting from 0
-                if song_number == 0:
+                if not song_number:
                     await ctx.send(f"> **You can not move the song currently playing.**")
                 else:
                     try:
@@ -345,7 +344,7 @@ class Music(commands.Cog):
 
     def remove_song_in_queue(self, client_guild_id):
         try:
-            if len(queued[client_guild_id]) == 1:
+            if len(queued[client_guild_id]) == 1:  # do not shorten code. Checks if it's exactly 1 song left.
                 return self.reset_queue_for_guild(client_guild_id)
         except KeyError:
             pass
@@ -376,7 +375,7 @@ class Music(commands.Cog):
                 if self.check_user_in_vc(ctx):
                     async with ctx.typing():
                         msg = await ctx.send(f"> **Gathering information about the video/playlist, this may take a few minutes if it is a long playlist.**")
-                        videos, first_video_live = await YTDLSource.from_url(url, loop=client.loop, stream=False, guild_id=ctx.guild.id, channel=ctx.channel, author_id=ctx.author.id)
+                        videos, first_video_live = await YTDLSource.from_url(url, loop=ex.client.loop, stream=False, guild_id=ctx.guild.id, channel=ctx.channel, author_id=ctx.author.id)
                         if not ctx.voice_client.is_playing():
                             if not first_video_live:
                                 player = await download_video(videos[0])
@@ -395,7 +394,7 @@ class Music(commands.Cog):
                             await ctx.send(f'> **Now playing: {video_title}**', delete_after=240)  # deletes after 4min
                         else:
                             # grabbing the latest player
-                            if len(videos) == 1:
+                            if len(videos) == 1:  # do not shorten code
                                 if not first_video_live:
                                     title = videos[0].get('title')
                                 else:
@@ -412,8 +411,8 @@ class Music(commands.Cog):
                 log.console(e)
 
     def start_next_song(self, error):
-        if error is None:
-            all_voice_clients = client.voice_clients
+        if not error:
+            all_voice_clients = ex.client.voice_clients
             for voice_client in all_voice_clients:
                 if not voice_client.is_playing() and not voice_client.is_paused():
                     client_guild_id = voice_client.guild.id
@@ -425,7 +424,7 @@ class Music(commands.Cog):
                         try:
                             if not live:  # we know it's video information and not a player because it is not live.
                                 download_a_video = download_video(player)
-                                player = asyncio.run_coroutine_threadsafe(download_a_video, client.loop)
+                                player = asyncio.run_coroutine_threadsafe(download_a_video, ex.client.loop)
                                 try:
                                     player = player.result()
                                     queued[client_guild_id][0][0] = player  # making front of queue a player
@@ -437,7 +436,7 @@ class Music(commands.Cog):
                         send_channel_song = channel.send(f'> **Now playing: **{player.title}', delete_after=240)  # 4min
                         # used because async function cannot be used.
                         # https://discordpy.readthedocs.io/en/latest/faq.html#how-do-i-pass-a-coroutine-to-the-player-s-after-function
-                        send_channel = asyncio.run_coroutine_threadsafe(send_channel_song, client.loop)
+                        send_channel = asyncio.run_coroutine_threadsafe(send_channel_song, ex.client.loop)
                         try:
                             send_channel.result()
                         except Exception as e:
@@ -456,7 +455,7 @@ class Music(commands.Cog):
                 if volume < 1 or volume > 100:
                     await ctx.send(f"> **{ctx.author}, please choose a volume from 1 to 100.**")
                 else:
-                    if ctx.voice_client is None:
+                    if not ctx.voice_client:
                         return await ctx.send(f"> **{ctx.author}, you are not connected to a voice channel.**")
 
                     ctx.voice_client.source.volume = volume / 100
@@ -485,7 +484,7 @@ class Music(commands.Cog):
             log.console(e)
 
     async def ensure_voice(self, ctx):
-        if ctx.voice_client is None:
+        if not ctx.voice_client:
             if ctx.author.voice:
                 await ctx.author.voice.channel.connect()
             else:
@@ -544,7 +543,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
                     videos.append(video)
                     video_and_channel = [video, channel, file_name, live, author_id]
                     if guild_id in queued:
-                        if queued[guild_id] is not None:
+                        if queued[guild_id]:
                             queued[guild_id].append(video_and_channel)
                     else:
                         queued[guild_id] = [video_and_channel]

@@ -139,6 +139,7 @@ class Cache(commands.Cog):
         # Reminder dictionary
         self.reminders = {}   # { user_id: [ [remind_id, remind_reason, remind_time] ] }
         self.timezones = {}   # { user_id: timezone }
+        self.main_youtube_instance = None  # Youtube Object that exists on start up.
 
         # bracket position for bias game stored due to annoyance when using previous x and y values.
         # counting starts from left to right, bottom to top
@@ -159,5 +160,44 @@ class Cache(commands.Cog):
             14: {'img_size': (100, 100), 'pos': (390, 225)},
             15: {'img_size': (134, 130), 'pos': (235, 55)}
         }
+
+        self.eight_ball_responses = [
+                # Positive 13
+                "It is certain.",
+                "It is decidedly so.",
+                "Without a doubt.",
+                "Yes - definitely.",
+                "You may rely on it.",
+                "As I see it, yes.",
+                "Most likely.",
+                "Outlook good.",
+                "Yes.",
+                "Signs point to yes.",
+                ":thumbsup:",
+                "Well, duh",
+                "Of course, that was a stupid question.",
+
+
+                # Neutral 7
+                "Reply hazy, try again.",
+                "Ask again later.",
+                "Better not tell you now.",
+                "Cannot predict now.",
+                "Concentrate and ask again.",
+                "Why the fuck are you asking me you dumb rat.",
+                "You should already know this you 바보.",
+
+                # Negative 10
+                "Don't count on it.",
+                "My reply is no.",
+                "My sources say no.",
+                "Outlook not so good.",
+                "Very doubtful.",
+                ":thumbsdown:",
+                "Are you kidding?",
+                "Don't bet on it.",
+                "Forget about it.",
+                "It's just not meant to be."]
+
 
 

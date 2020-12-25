@@ -8,6 +8,7 @@ import aiofiles
 class BotMod(commands.Cog):
     @staticmethod
     async def mod_on_message(message):
+        # mod mail
         try:
             message_sender = message.author
             message_channel = message.channel
@@ -66,46 +67,40 @@ class BotMod(commands.Cog):
         mem_info = await ex.conn.fetch('SELECT id, thumbnail, banner FROM groupmembers.member')
         grp_info = await ex.conn.fetch('SELECT groupid, thumbnail, banner FROM groupmembers.groups')
 
-        async def download_image(link, file_name):
+        async def download_image(link):
             async with ex.session.get(link) as resp:
-                fd = await aiofiles.open(file_name, mode='wb')
+                fd = await aiofiles.open(file_loc, mode='wb')
                 await fd.write(await resp.read())
 
-        for member in mem_info:
-            mem_id = member[0]
-            mem_thumbnail = member[1]
-            mem_banner = member[2]
+        for mem_id, mem_thumbnail, mem_banner in mem_info:
             file_name = f"{mem_id}_IDOL.png"
             if mem_thumbnail:
                 file_loc = f"{keys.idol_avatar_location}{file_name}"
                 if 'images.irenebot.com' not in mem_thumbnail:
-                    await download_image(mem_thumbnail, file_loc)
+                    await download_image(mem_thumbnail)
                 if ex.check_file_exists(file_loc):
                     image_url = f"https://images.irenebot.com/avatar/{file_name}"
                     await ex.conn.execute("UPDATE groupmembers.member SET thumbnail = $1 WHERE id = $2", image_url, mem_id)
             if mem_banner:
                 file_loc = f"{keys.idol_banner_location}{file_name}"
                 if 'images.irenebot.com' not in mem_banner:
-                    await download_image(mem_banner, file_loc)
+                    await download_image(mem_banner)
                 image_url = f"https://images.irenebot.com/banner/{file_name}"
                 if ex.check_file_exists(file_loc):
                     await ex.conn.execute("UPDATE groupmembers.member SET banner = $1 WHERE id = $2", image_url, mem_id)
-        for group in grp_info:
-            grp_id = group[0]
-            grp_thumbnail = group[1]
-            grp_banner = group[2]
+        for grp_id, grp_thumbnail, grp_banner in grp_info:
             file_name = f"{grp_id}_GROUP.png"
             if grp_thumbnail:
                 file_loc = f"{keys.idol_avatar_location}{file_name}"
                 if 'images.irenebot.com' not in grp_thumbnail:
-                    await download_image(grp_thumbnail, file_loc)
+                    await download_image(grp_thumbnail)
                 image_url = f"https://images.irenebot.com/avatar/{file_name}"
                 if ex.check_file_exists(file_loc):
                     await ex.conn.execute("UPDATE groupmembers.groups SET thumbnail = $1 WHERE groupid = $2", image_url, grp_id)
             if grp_banner:
                 file_loc = f"{keys.idol_banner_location}{file_name}"
                 if 'images.irenebot.com' not in grp_banner:
-                    await download_image(grp_banner, file_loc)
+                    await download_image(grp_banner)
                 image_url = f"https://images.irenebot.com/banner/{file_name}"
                 if ex.check_file_exists(file_loc):
                     await ex.conn.execute("UPDATE groupmembers.groups SET banner = $1 WHERE groupid = $2", image_url, grp_id)
@@ -196,15 +191,20 @@ class BotMod(commands.Cog):
 **Reason:** {reason}
 Have questions? Join the support server at {keys.bot_support_server_link}."""
         dm_channel = await ex.get_dm_channel(user.id)
-        await dm_channel.send(message)
-        await ctx.send(f"> **Message was sent to <@{user.id}>**")
+        if dm_channel:
+            try:
+                await dm_channel.send(message)
+                return await ctx.send(f"> **Message was sent to <@{user.id}>**")
+            except Exception as e:
+                return await ctx.send(f"> I do not have permission to send a message to <@{user.id}>")
+        return await ctx.send(f"> Could not find <@{user.id}>'s DM channel.")
 
     @commands.command()
     @commands.check(ex.check_if_mod)
     async def kill(self, ctx):
         """Kills the bot [Format: %kill]"""
         await ctx.send("> **The bot is now offline.**")
-        message = "Irene is restarting... All games in this channel will end."
+        message = "Irene is restarting... All games in this channel will force-end."
         for game in ex.cache.bias_games:
             try:
                 await game.channel.send(message)

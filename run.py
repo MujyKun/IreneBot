@@ -52,7 +52,8 @@ class Irene:
         # Check for Reminders
         module.Reminder.Reminder().reminder_loop.start()
         # Start Automatic Youtube Scrape Loop
-        module.Youtube.YoutubeLoop().new_task5.start()
+        ex.cache.main_youtube_instance = module.Youtube.YoutubeLoop()
+        ex.cache.main_youtube_instance.loop_youtube_videos.start()
         # Start Status Change Loop
         module.status.Status().change_bot_status_loop.start()
         # Start Voice Client Loop
@@ -93,7 +94,6 @@ class Irene:
         ex.client.add_cog(module.Youtube.Youtube())
         ex.client.add_cog(module.GroupMembers.GroupMembers())
         ex.client.add_cog(module.Archive.Archive())
-        ex.client.add_cog(module.BotSites.BotSites())
         ex.client.add_cog(module.Moderator.Moderator())
         ex.client.add_cog(module.Profile.Profile())
         ex.client.add_cog(module.Help.Help())
@@ -101,7 +101,6 @@ class Irene:
         ex.client.add_cog(module.Music.Music())
         ex.client.add_cog(module.BotMod.BotMod())
         ex.client.add_cog(module.events.Events())
-        ex.client.add_cog(module.Testing.Testing())
         ex.client.add_cog(module.LastFM.LastFM())
         ex.client.add_cog(module.Interactions.Interactions())
         ex.client.add_cog(module.Wolfram.Wolfram())

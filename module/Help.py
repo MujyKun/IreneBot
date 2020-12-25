@@ -1,15 +1,15 @@
 import discord
 from discord.ext import commands
-from module.keys import client, bot_prefix, bot_support_server_link
+from module.keys import bot_prefix, bot_support_server_link
 from Utility import resources as ex
 import itertools
 
 
 class Help(commands.Cog):
     def __init__(self):
-        self._original_help_command = client.help_command
-        client.help_command = self.SubHelp()
-        client.help_command.cog = self
+        self._original_help_command = ex.client.help_command
+        ex.client.help_command = self.SubHelp()
+        ex.client.help_command.cog = self
 
     class SubHelp(commands.MinimalHelpCommand):
         async def get_server_prefix(self):
@@ -29,7 +29,7 @@ class Help(commands.Cog):
             # change the default prefix to the server prefix
             cmd_prefix = await self.get_server_prefix()
             cmd_format = cmd_prefix + cmd_format[1:len(cmd_format)]
-            cmd_brief = command.help.replace(await client.get_prefix(self.context.message), cmd_prefix)
+            cmd_brief = command.help.replace(await ex.client.get_prefix(self.context.message), cmd_prefix)
             embed = discord.Embed(description=f"{cmd_format}\n\n{cmd_brief}")
             await channel.send(embed=embed)
 
@@ -49,7 +49,7 @@ class Help(commands.Cog):
                     embed_empty = False
                     cmd_name = command.name
                     cmd_prefix = await self.get_server_prefix()
-                    cmd_desc = command.short_doc.replace(await client.get_prefix(self.context.message), cmd_prefix)
+                    cmd_desc = command.short_doc.replace(await ex.client.get_prefix(self.context.message), cmd_prefix)
                     cmd_msg = f"\n{cmd_prefix}{cmd_name} - {cmd_desc}"
                     entire_msg += cmd_msg
                     if len(entire_msg) >= 1500:

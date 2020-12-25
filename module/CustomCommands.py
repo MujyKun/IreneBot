@@ -6,6 +6,7 @@ from Utility import resources as ex
 class CustomCommands(commands.Cog):
     @staticmethod
     async def process_custom_commands(message):
+        # custom server commands
         if message.content and not message.author.bot:
             if not await ex.check_if_bot_banned(message.author.id):
                 guild_id = await ex.get_guild_id(message)

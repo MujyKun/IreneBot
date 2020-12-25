@@ -1,6 +1,6 @@
 import discord
 from Utility import resources as ex
-from discord.ext import commands, tasks
+from discord.ext import commands
 from module import keys, logger as log
 import random
 import asyncio
@@ -19,6 +19,8 @@ class BiasGame(commands.Cog):
         game = Game()
         ex.cache.bias_games.append(game)
         await game.start_game(ctx, bracket_size=bracket_size, gender=gender.lower())
+
+        # remove game once it's complete
         if game in ex.cache.bias_games:
             ex.cache.bias_games.remove(game)
 
@@ -38,9 +40,7 @@ class BiasGame(commands.Cog):
         if user_wins:
             msg_string = f"**Bias Game Leaderboard for {user.display_name}**:\n"
             counter = 1
-            for user_win in user_wins:
-                idol_id = user_win[0]
-                wins = user_win[1]
+            for idol_id, wins in user_wins:
                 member = await ex.get_member(idol_id)
                 msg_string += f"{counter}) {member.full_name} ({member.stage_name}) -> {wins} Win(s).\n"
                 counter += 1
@@ -122,16 +122,14 @@ class Game:
                             self.current_bracket_teams.append([first_idol, idol])
                             first_idol = None
                         else:
-                           first_idol = idol
+                            first_idol = idol
                         self.original_idols_in_game.append(idol)
 
     async def create_new_question(self):
         """Generate a new question for the bias game."""
         self.number_of_idols_left = len(self.current_bracket_teams) * 2
-        for battle in self.current_bracket_teams:
+        for first_idol, second_idol in self.current_bracket_teams:
             if not self.force_ended:
-                first_idol = battle[0]
-                second_idol = battle[1]
                 try:
                     first_idol_group = (await ex.get_group(random.choice(first_idol.groups))).name
                 except Exception as e:

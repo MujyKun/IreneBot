@@ -3,13 +3,15 @@ from discord.ext.commands.cooldowns import BucketType
 from random import *
 import discord
 from module import logger as log
-from module.keys import client, bot_website
+from module.keys import bot_website
 from Utility import resources as ex
 
 
 class Currency(commands.Cog):
     """
     Will be rewritten from scratch
+    -> DO NOT BOTHER REFORMATTING
+    -> literally delete this file and start over. It's just too bad
     """
 
     def __init__(self):
@@ -41,7 +43,7 @@ class Currency(commands.Cog):
         try:
             await ex.register_user(user_id)
             amount = await ex.get_balance(user_id)
-            await ctx.send("> **{} currently has {:,} Dollars.**".format(client.get_user(user_id), amount))
+            await ctx.send("> **{} currently has {:,} Dollars.**".format(ex.client.get_user(user_id), amount))
         except Exception as e:
             log.console(e)
 
@@ -141,7 +143,7 @@ class Currency(commands.Cog):
                 count += 1
                 UserID = a[0]
                 Money = a[1]
-                UserName = client.get_user(UserID)
+                UserName = ex.client.get_user(UserID)
                 if count <= 10:
                     embed.add_field(name=f"{count}) {UserName} ({UserID})", value=await ex.shorten_balance(str(Money)), inline=True)
             await ctx.send(embed=embed)

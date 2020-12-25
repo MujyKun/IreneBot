@@ -43,7 +43,7 @@ class Wolfram(commands.Cog):
                         pods = dict_content.get('pod')
                         if pods:
                             # we need to iterate through the pods, so put it in a list if there is only one.
-                            if len(pods) == 1:
+                            if len(pods) == 1:  # do not shorten, has to be exactly 1
                                 pods = [pods]
                             for pod in pods:
                                 try:
@@ -60,7 +60,7 @@ class Wolfram(commands.Cog):
                                             results.append(sub_pod_result)
                                 except Exception as e:
                                     pass
-                        if len(results) == 0:
+                        if not results:
                             return await ctx.send(f"> **{ctx.author.display_name}, I could not find an answer to that.**")
                         await ctx.send("\n".join(results))
 

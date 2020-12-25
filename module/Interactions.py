@@ -2,10 +2,8 @@ import discord
 from random import *
 from discord.ext import commands
 from discord.ext.commands.cooldowns import BucketType
-from module import keys
 from module import logger as log
 from Utility import resources as ex
-client = keys.client
 
 
 class Interactions(commands.Cog):
@@ -93,9 +91,9 @@ class Interactions(commands.Cog):
         """Slap someone [Format: %slap @user]"""
         # There are two types of slap: in an embed with a url, or with text. 50% chance to get either.
         type_of_slap = randint(0, 1)
-        if type_of_slap == 0:
-            await ex.interact_with_user(ctx, user, "slapped", "slap")
-        if type_of_slap == 1:
+        if not type_of_slap:
+            return await ex.interact_with_user(ctx, user, "slapped", "slap")
+        else:
             await ex.reset_patreon_cooldown(ctx)
             ctx_name = ctx.author.display_name
             user_name = user.display_name

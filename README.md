@@ -113,7 +113,7 @@ To find out more, look at the `GroupMembers` category.
 | Command          | Description                                                                        | Format                                                                                                         | Aliases                |
 |------------------|------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|------------------------|
 | aliases          | Lists the aliases of idols or groups that have one. Underscores are spaces and commas are to split idol or group names                                        | %aliases (name of idol or group) [page number] ex: %aliases irene,seulgi,red_velvet                                                                                                       |                        |
-| card | Displays an Idol/Group's profile card. | %card (Idol/Group Name) | |
+| card | Displays an Idol/Group's profile card. | %card (Idol/Group Name/ID) | |
 | count            | Shows howmany times an idol has been called.                                       | %count (name)                                                                                                  |                        |
 | countleaderboard | Shows leaderboards for how many times an idol has been called.                     | %clb                                                                                                           | highestcount, cb, clb |
 | countgroup      | Shows how many images of a certain group there are.                               | %countgroup (group)                                                                                          |                        |
@@ -161,7 +161,7 @@ To find out more, look at the `GroupMembers` category.
 #### Miscellaneous:
 | Command          | Description                                                    | Format                          | Aliases        |
 |------------------|----------------------------------------------------------------|---------------------------------|----------------|
-| _8ball           | Asks the 8ball a question.                                     | %8ball (Question)               | 8ball,8        |
+| 8ball           | Asks the 8ball a question.                                     | %8ball (Question)               | 8        |
 | addnoti         | Receive a DM whenever a phrase or word is said in the current server. | %addnoti (phrase/word)    |               |
 | addpatreon         | Adds a patreon.                           | %addpatreon (userid,userid,userid)             | ♥              |
 | botinfo       | Get information about the bot.                                   | %botinfo               |               |

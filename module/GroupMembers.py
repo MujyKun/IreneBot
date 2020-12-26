@@ -49,7 +49,7 @@ async def check_user_limit(message_sender, message_channel, no_vote_limit=False)
 
 async def request_image_post(message, idol, channel):
     photo_msg, api_url, posted = None, None, False
-    if not await ex.check_if_bot_banned(message.author.id):
+    if not await ex.u_miscellaneous.check_if_bot_banned(message.author.id):
         async with channel.typing():
             try:
                 if await check_user_limit(message.author, message.channel, no_vote_limit=True):
@@ -59,7 +59,7 @@ async def request_image_post(message, idol, channel):
                 log.console(e)
             if not await check_user_limit(message.author, channel):
                 if not await events.Events.check_maintenance(message):
-                    return await ex.send_maintenance_message(channel)
+                    return await ex.u_miscellaneous.send_maintenance_message(channel)
                 photo_msg, api_url = await ex.idol_post(channel, idol, user_id=message.author.id)
                 posted = True
     return photo_msg, api_url, posted
@@ -99,7 +99,7 @@ class GroupMembers(commands.Cog):
     async def on_message2(message):
         # create modifiable var without altering original
         channel = message.channel
-        if not message.author.bot and await ex.check_channel_sending_photos(channel.id) and not await ex.check_if_temp_channel(channel.id):
+        if not message.author.bot and await ex.check_channel_sending_photos(channel.id) and not await ex.u_miscellaneous.check_if_temp_channel(channel.id):
             try:
                 if await ex.check_server_sending_photos(message.guild.id):
                     channel = await ex.get_channel_sending_photos(message.guild.id)
@@ -114,7 +114,7 @@ class GroupMembers(commands.Cog):
                     if time_difference < 2:
                         # await asyncio.sleep(1)
                         pass
-                if ex.check_message_not_empty(message):
+                if ex.u_miscellaneous.check_message_not_empty(message):
                     random_member = False
                     # since this is a listener, the prefix is put back to the default
                     # (from the original on_message)
@@ -144,8 +144,8 @@ class GroupMembers(commands.Cog):
                                     photo_msg, api_url, posted = await request_image_post(message, random_member, channel)
                         if posted:
                             ex.log_idol_command(message)
-                            await ex.add_command_count(f"Idol {random_member.id}")
-                            await ex.add_session_count()
+                            await ex.u_miscellaneous.add_command_count(f"Idol {random_member.id}")
+                            await ex.u_miscellaneous.add_session_count()
                             add_user_limit(message.author)
                             if api_url:
                                 await ex.check_idol_post_reactions(photo_msg, message, random_member, api_url)
@@ -243,7 +243,7 @@ class GroupMembers(commands.Cog):
     @commands.command(aliases=['%'])
     async def randomidol(self, ctx):
         """Sends a photo of a random idol. [Format: %%]"""
-        if await ex.check_channel_sending_photos(ctx.channel.id) and not await ex.check_if_temp_channel(ctx.channel.id):
+        if await ex.check_channel_sending_photos(ctx.channel.id) and not await ex.u_miscellaneous.check_if_temp_channel(ctx.channel.id):
             channel = ctx.channel
             try:
                 if await ex.check_server_sending_photos(ctx.guild.id):

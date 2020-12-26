@@ -124,11 +124,11 @@ class Moderator(commands.Cog):
             server_id = ctx.guild.id
             if not await ex.check_interaction_enabled(server_id=server_id, interaction=interaction):
                 # enable it
-                await ex.enable_interaction(server_id, interaction)
+                await ex.u_miscellaneous.enable_interaction(server_id, interaction)
                 await ctx.send(f"> **{interaction} has been enabled in this server.**")
             else:
                 # disable it
-                await ex.disable_interaction(server_id, interaction)
+                await ex.u_miscellaneous.disable_interaction(server_id, interaction)
                 await ctx.send(f"> **{interaction} has been disabled in this server.**")
 
         else:
@@ -424,7 +424,7 @@ class Moderator(commands.Cog):
             elif 0 < delay < 60:
                 return await ctx.send("> **The delay must be greater than 1 minute due to rate-limiting issues.**")
             else:
-                new_delay = await ex.get_cooldown_time(delay)
+                new_delay = await ex.u_miscellaneous.get_cooldown_time(delay)
                 temp_channel_delay = ex.cache.temp_channels.get(channel_id)
                 if temp_channel_delay:  # this channel is already a temp channel
                     await ex.conn.execute("UPDATE general.TempChannels SET delay = $1 WHERE chanID = $2", delay, channel_id)

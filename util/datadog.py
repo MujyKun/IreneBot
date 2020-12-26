@@ -1,8 +1,9 @@
-from Utility import Utility
+from Utility import resources as ex
 from datadog import initialize, api
 import time
 
-class DataDog(Utility):
+
+class DataDog:
     @staticmethod
     def initialize_data_dog():
         """Initialize The DataDog Class"""

@@ -1,8 +1,9 @@
-from Utility import Utility
+from Utility import resources as ex
 import aiofiles
 from module.keys import weverse_image_folder
 
-class Weverse(Utility):
+
+class Weverse:
     async def add_weverse_channel(self, channel_id, community_name):
         """Add a channel to get updates for a community"""
         community_name = community_name.lower()

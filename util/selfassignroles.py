@@ -1,8 +1,9 @@
-from Utility import Utility
+from Utility import resources as ex
 from module import logger as log
 import discord
 
-class SelfAssignRoles(Utility):
+
+class SelfAssignRoles:
     #########################
     # ## SelfAssignRoles ## #
     #########################

@@ -1,12 +1,14 @@
-from Utility import Utility
+from Utility import resources as ex
+from module.keys import last_fm_api_key, last_fm_root_url, last_fm_headers
+from module import logger as log
 
 
-class LastFM(Utility):
+class LastFM:
     @staticmethod
     def create_fm_payload(method, user=None, limit=None, time_period=None):
         """Creates the payload to be sent to Last FM"""
         payload = {
-            'api_key': keys.last_fm_api_key,
+            'api_key': last_fm_api_key,
             'method': method,
             'format': 'json'
         }
@@ -20,7 +22,7 @@ class LastFM(Utility):
 
     async def get_fm_response(self, method, user=None, limit=None, time_period=None):
         """Receives the response from Last FM"""
-        async with self.session.get(keys.last_fm_root_url, headers=keys.last_fm_headers, params=self.create_fm_payload(method, user, limit, time_period)) as response:
+        async with self.session.get(last_fm_root_url, headers=last_fm_headers, params=self.create_fm_payload(method, user, limit, time_period)) as response:
             return await response.json()
 
     async def get_fm_username(self, user_id):

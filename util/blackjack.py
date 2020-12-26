@@ -1,10 +1,11 @@
-from Utility import Utility
+from Utility import resources as ex
 from module.keys import bot_id
 from module import logger as log
 import random
 import discord
 
-class BlackJack(Utility):
+
+class BlackJack:
     async def check_in_game(self, user_id, ctx):  # this is meant for when it is accessed by commands outside of BlackJack.
         """Check if a user is in a game."""
         check = self.first_result(await self.conn.fetchrow("SELECT COUNT(*) From blackjack.games WHERE player1 = $1 OR player2 = $1", user_id))
@@ -23,7 +24,7 @@ class BlackJack(Utility):
         """pre requisites for joining a blackjack game."""
         if amount >= 0:
             if not await self.check_in_game(user_id, ctx):
-                if amount > await self.get_balance(user_id):
+                if amount > await self.u_currency.get_balance(user_id):
                     await ctx.send(f"> **{ctx.author}, you can not bet more than your current balance.**")
                 else:
                     return True
@@ -293,17 +294,17 @@ class BlackJack(Utility):
             await self.add_card(game[2])
         else:
             winner = self.determine_winner(player1_score, player2_score)
-            player1_current_bal = await self.get_balance(game[1])
-            player2_current_bal = await self.get_balance(game[2])
+            player1_current_bal = await self.u_currency.get_balance(game[1])
+            player2_current_bal = await self.u_currency.get_balance(game[2])
             if winner == 'player1':
-                await self.update_balance(game[1], player1_current_bal + int(game[4]))
+                await self.u_currency.update_balance(game[1], player1_current_bal + int(game[4]))
                 if not self.check_if_bot(game[2]):
-                    await self.update_balance(game[2], player2_current_bal - int(game[4]))
+                    await self.u_currency.update_balance(game[2], player2_current_bal - int(game[4]))
                 await self.announce_winner(channel, game[1], game[2], player1_score, player2_score, game[4])
             elif winner == 'player2':
                 if not self.check_if_bot(game[2]):
-                    await self.update_balance(game[2], player2_current_bal + int(game[3]))
-                await self.update_balance(game[1], player1_current_bal - int(game[3]))
+                    await self.u_currency.update_balance(game[2], player2_current_bal + int(game[3]))
+                await self.u_currency.update_balance(game[1], player1_current_bal - int(game[3]))
                 await self.announce_winner(channel, game[2], game[1], player2_score, player1_score, game[3])
             elif winner == 'tie':
                 await self.announce_tie(channel, game[1], game[2], player1_score)
@@ -323,3 +324,14 @@ class BlackJack(Utility):
         for games in all_games:
             game_id = games[0]
             await self.delete_game(game_id)
+
+    @staticmethod
+    def get_int_index(original, index):
+        """Retrieves the specific index of an integer. Ex: Calling index 0 for integer 51 will return 5."""
+        entire_selection = ""
+        counter = 0
+        for value in str(original):
+            if counter < index:
+                entire_selection += value
+            counter += 1
+        return int(entire_selection)

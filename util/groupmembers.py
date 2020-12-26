@@ -1,4 +1,4 @@
-from Utility import Utility
+from Utility import resources as ex
 import datetime
 import discord
 from module import logger as log
@@ -9,7 +9,8 @@ import random
 from module.keys import reload_emoji, dead_emoji, owner_id, mods_list, check_emoji,\
     trash_emoji, next_emoji, translate_private_key, api_port
 
-class GroupMembers(Utility):
+
+class GroupMembers:
     async def get_if_user_voted(self, user_id):
         time_stamp = self.first_result(
             await self.conn.fetchrow("SELECT votetimestamp FROM general.lastvoted WHERE userid = $1", user_id))
@@ -470,7 +471,7 @@ class GroupMembers(Utility):
                             message1 = await channel.send(link)
                             await self.check_idol_post_reactions(message1, user_msg, idol, link)
                         elif str(reaction) == dead_link_emoji:
-                            if await self.check_if_patreon(user.id):
+                            if await self.u_patreon.check_if_patreon(user.id):
                                 await message.delete()
                             else:
                                 await message.clear_reactions()
@@ -767,7 +768,7 @@ class GroupMembers(Utility):
 
             # when user_id is None, the post goes to the dead images channel.
             if user_id:
-                if not await self.check_if_patreon(user_id):
+                if not await self.u_patreon.check_if_patreon(user_id):
                     embed.set_footer(text=patron_msg)
         else:
             current_scores = ""

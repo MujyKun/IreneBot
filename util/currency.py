@@ -1,9 +1,9 @@
-from Utility import Utility
+from Utility import resources as ex
 import math
 import random
 
 
-class Currency(Utility):
+class Currency:
     async def register_user(self, user_id):
         """Register a user to the database if they are not already registered."""
         count = self.first_result(await self.conn.fetchrow("SELECT COUNT(*) FROM currency.Currency WHERE UserID = $1", user_id))

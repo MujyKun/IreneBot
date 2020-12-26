@@ -1,4 +1,4 @@
-from Utility import Utility
+from Utility import resources as ex
 from discord.ext import tasks
 from module import logger as log
 from module.keys import dead_image_channel_id
@@ -7,14 +7,14 @@ import asyncio
 import datetime
 
 
-class Cache(Utility):
+class Cache:
 
     async def process_cache_time(self, method, name):
         """Process the cache time."""
         past_time = time.time()
         result = await method()
         if result is None or result:  # expecting False on methods that fail to load, do not simplify None.
-            log.console(f"Cache for {name} Created in {await self.get_cooldown_time(time.time() - past_time)}.")
+            log.console(f"Cache for {name} Created in {await self.u_currency.get_cooldown_time(time.time() - past_time)}.")
         return result
 
     async def create_cache(self):
@@ -46,18 +46,18 @@ class Cache(Utility):
         await self.process_cache_time(self.create_timezone_cache, "Timezones")
         if not self.test_bot and not self.weverse_client.cache_loaded:
             task = asyncio.create_task(self.process_cache_time(self.weverse_client.start, "Weverse"))
-        log.console(f"Cache Completely Created in {await self.get_cooldown_time(time.time() - past_time)}.")
+        log.console(f"Cache Completely Created in {await self.u_currency.get_cooldown_time(time.time() - past_time)}.")
 
     async def create_timezone_cache(self):
         self.cache.timezones = {}  # reset cache
-        timezones = await self.get_all_timezones_from_db()
+        timezones = await self.u_reminder.get_all_timezones_from_db()
         for user_id, timezone in timezones:
             self.cache.timezones[user_id] = timezone
 
     async def create_reminder_cache(self):
         """Create cache for reminders"""
         self.cache.reminders = {}  # reset cache
-        all_reminders = await self.get_all_reminders_from_db()
+        all_reminders = await self.u_reminder.get_all_reminders_from_db()
         for reason_id, user_id, reason, time_stamp in all_reminders:
             reason_list = [reason_id, reason, time_stamp]
             user_reminder = self.cache.reminders.get(user_id)
@@ -90,9 +90,9 @@ class Cache(Utility):
         """Create cache for channels that are following a community on weverse."""
         all_channels = await self.conn.fetch("SELECT channelid, communityname, roleid, commentsdisabled FROM weverse.channels")
         for channel_id, community_name, role_id, comments_disabled in all_channels:
-            await self.add_weverse_channel_to_cache(channel_id, community_name)
-            await self.add_weverse_role(channel_id, community_name, role_id)
-            await self.change_weverse_comment_status(channel_id, community_name, comments_disabled)
+            await self.u_weverse.add_weverse_channel_to_cache(channel_id, community_name)
+            await self.u_weverse.add_weverse_role(channel_id, community_name, role_id)
+            await self.u_weverse.change_weverse_comment_status(channel_id, community_name, comments_disabled)
 
     async def update_command_counter(self):
         """Updates Cache for command counter and sessions"""
@@ -139,23 +139,23 @@ class Cache(Utility):
     async def create_idol_cache(self):
         """Create Idol Objects and store them as cache."""
         self.cache.idols = []
-        for idol in await self.get_db_all_members():
+        for idol in await self.u_group_members.get_db_all_members():
             idol_obj = self.u_group_members.Idol(**idol)
-            idol_obj.aliases, idol_obj.local_aliases = await self.get_db_aliases(idol_obj.id)
+            idol_obj.aliases, idol_obj.local_aliases = await self.u_group_members.get_db_aliases(idol_obj.id)
             # add all group ids and remove potential duplicates
-            idol_obj.groups = list(dict.fromkeys(await self.get_db_groups_from_member(idol_obj.id)))
-            idol_obj.called = await self.get_db_idol_called(idol_obj.id)
+            idol_obj.groups = list(dict.fromkeys(await self.u_group_members.get_db_groups_from_member(idol_obj.id)))
+            idol_obj.called = await self.u_group_members.get_db_idol_called(idol_obj.id)
             idol_obj.photo_count = self.cache.idol_photos.get(idol_obj.id) or 0
             self.cache.idols.append(idol_obj)
 
     async def create_group_cache(self):
         """Create Group Objects and store them as cache"""
         self.cache.groups = []
-        for group in await self.get_all_groups():
+        for group in await self.u_group_members.get_all_groups():
             group_obj = self.u_group_members.Group(**group)
-            group_obj.aliases, group_obj.local_aliases = await self.get_db_aliases(group_obj.id, group=True)
+            group_obj.aliases, group_obj.local_aliases = await self.u_group_members.get_db_aliases(group_obj.id, group=True)
             # add all idol ids and remove potential duplicates
-            group_obj.members = list(dict.fromkeys(await self.get_db_members_in_group(group_id=group_obj.id)))
+            group_obj.members = list(dict.fromkeys(await self.u_group_members.get_db_members_in_group(group_id=group_obj.id)))
             group_obj.photo_count = self.cache.group_photos.get(group_obj.id) or 0
             self.cache.groups.append(group_obj)
 
@@ -194,7 +194,7 @@ class Cache(Utility):
     async def update_temp_channels(self):
         """Create the cache for temp channels."""
         self.cache.temp_channels = {}
-        channels = await self.get_temp_channels()
+        channels = await self.u_miscellaneous.get_temp_channels()
         for channel_id, delay in channels:
             removal_time = delay
             if removal_time < 60:
@@ -249,10 +249,10 @@ class Cache(Utility):
         """Create the cache for Patrons."""
         try:
             self.cache.patrons = {}
-            permanent_patrons = await self.get_patreon_users()
+            permanent_patrons = await self.u_patreon.get_patreon_users()
             # normal patrons contains super patrons as well
-            normal_patrons = [patron.id for patron in await self.get_patreon_role_members(super_patron=False)]
-            super_patrons = [patron.id for patron in await self.get_patreon_role_members(super_patron=True)]
+            normal_patrons = [patron.id for patron in await self.u_patreon.get_patreon_role_members(super_patron=False)]
+            super_patrons = [patron.id for patron in await self.u_patreon.get_patreon_role_members(super_patron=True)]
 
             # the reason for db cache is because of the new discord rate limit
             # where it now takes 20+ minutes for discord cache to fully load, meaning we can only
@@ -399,4 +399,4 @@ class Cache(Utility):
             for metric_name in metric_info:
                 metric_value = metric_info.get(metric_name)
                 # add to thread pool to prevent blocking.
-                result = (self.thread_pool.submit(self.send_metric, metric_name, metric_value)).result()
+                result = (self.thread_pool.submit(self.u_data_dog.send_metric, metric_name, metric_value)).result()

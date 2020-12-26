@@ -1,8 +1,9 @@
-from Utility import Utility
+from Utility import resources as ex
 from module.keys import bias_game_location, idol_avatar_location
 from PIL import Image
 
-class BiasGame(Utility):
+
+class BiasGame:
     async def create_bias_game_image(self, first_idol_id, second_idol_id):
         """Uses thread pool to create bias game image to prevent IO blocking."""
         result = (self.thread_pool.submit(self.merge_images, first_idol_id, second_idol_id)).result()

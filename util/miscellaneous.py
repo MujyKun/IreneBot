@@ -1,12 +1,12 @@
 from module import logger as log
-from Utility import Utility
+from Utility import resources as ex
 from module.keys import bot_prefix, bot_support_server_link, api_port, bot_id, bot_name, translate_private_key
 import discord
 import random
 import json
 
 
-class Miscellaneous(Utility):
+class Miscellaneous:
     async def check_for_nword(self, message):
         """Processes new messages that contains the N word."""
         message_sender = message.author
@@ -71,7 +71,7 @@ class Miscellaneous(Utility):
             await self.conn.execute("UPDATE general.disabledinteractions SET interactions = $1 WHERE serverid = $2", interactions, server_id)
 
     async def interact_with_user(self, ctx, user, interaction, interaction_type, self_interaction=False):
-        await self.reset_patreon_cooldown(ctx)
+        await self.u_patreon.reset_patreon_cooldown(ctx)
         try:
             if user == discord.Member:
                 user = ctx.author
@@ -82,7 +82,7 @@ class Miscellaneous(Utility):
                     return await ctx.send(f"> **{ctx.author.display_name}, you cannot perform this interaction on yourself.**")
             link = random.choice(list_of_links)
             embed = discord.Embed(title=f"**{ctx.author.display_name}** {interaction} **{user.display_name}**", color=self.get_random_color())
-            if not await self.check_if_patreon(ctx.author.id):
+            if not await self.u_patreon.check_if_patreon(ctx.author.id):
                 embed.set_footer(text=f"Become a {await self.get_server_prefix_by_context(ctx)}patreon to get rid of interaction cooldowns!")
             embed.set_image(url=link[0])
             return await ctx.send(embed=embed)
@@ -93,7 +93,7 @@ class Miscellaneous(Utility):
     async def add_command_count(self, command_name):
         """Add 1 to the specific command count and to the count of the current minute."""
         self.cache.commands_per_minute += 1
-        session_id = await self.get_session_id()
+        session_id = await self.u_cache.get_session_id()
         command_count = self.cache.command_counter.get(command_name)
         if not command_count:
             await self.conn.execute("INSERT INTO stats.commands(sessionid, commandname, count) VALUES($1, $2, $3)", session_id, command_name, 1)
@@ -104,7 +104,7 @@ class Miscellaneous(Utility):
 
     async def add_session_count(self):
         """Adds one to the current session count for commands used and for the total used."""
-        session_id = await self.get_session_id()
+        session_id = await self.u_cache.get_session_id()
         self.cache.current_session += 1
         self.cache.total_used += 1
         await self.conn.execute("UPDATE stats.sessions SET session = $1, totalused = $2 WHERE sessionid = $3", self.cache.current_session, self.cache.total_used, session_id)
@@ -133,7 +133,7 @@ class Miscellaneous(Utility):
                             guild_id = await self.get_server_id(message)
                         except Exception as e:
                             guild_id = None
-                        if await self.check_message_is_command(message) or await self.check_custom_command_name_exists(guild_id, msg_without_prefix):
+                        if await self.check_message_is_command(message) or await self.u_custom_commands.check_custom_command_name_exists(guild_id, msg_without_prefix):
                             await self.send_ban_message(message_channel)
                     else:
                         await self.client.process_commands(message)

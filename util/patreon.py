@@ -1,19 +1,20 @@
-from Utility import Utility
+from Utility import resources as ex
+from module.keys import bot_support_server_id, patreon_role_id, patreon_super_role_id
 
 
-class Patreon(Utility):
+class Patreon:
     async def get_patreon_users(self):
         """Get the permanent patron users"""
         return await self.conn.fetch("SELECT userid from patreon.users")
 
     async def get_patreon_role_members(self, super_patron=False):
         """Get the members in the patreon roles."""
-        support_guild = self.client.get_guild(int(keys.bot_support_server_id))
+        support_guild = self.client.get_guild(int(bot_support_server_id))
         # API call will not show role.members
         if not super_patron:
-            patreon_role = support_guild.get_role(int(keys.patreon_role_id))
+            patreon_role = support_guild.get_role(int(patreon_role_id))
         else:
-            patreon_role = support_guild.get_role(int(keys.patreon_super_role_id))
+            patreon_role = support_guild.get_role(int(patreon_super_role_id))
         return patreon_role.members
 
     async def check_if_patreon(self, user_id, super_patron=False):

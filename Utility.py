@@ -1,17 +1,10 @@
 from module import keys, logger as log, cache, exceptions
-from discord.ext import tasks
-from PIL import Image
 from Weverse.weverseasync import WeverseAsync
-import datetime
 import discord
 import random
 import asyncio
 import os
-import math
 import tweepy
-import json
-import time
-import aiofiles
 
 """
 Utility.py
@@ -228,236 +221,9 @@ class Utility:
         except Exception as e:
             return keys.bot_prefix
 
-    async def set_aces_used(self, card_list, user_id):
-        """Mark an ace as used."""
-        separator = ','
-        cards = separator.join(card_list)
-        await self.conn.execute("UPDATE blackjack.currentstatus SET acesused = $1 WHERE userid = $2", cards, user_id)
-
-    async def get_aces_used(self, user_id):
-        """Get the aces that were changed from 11 to 1."""
-        aces_used = self.first_result(await self.conn.fetchrow("SELECT acesused FROM blackjack.currentstatus WHERE userid = $1", user_id))
-        if aces_used is None:
-            return []
-        return aces_used.split(',')
-
-    def check_if_bot(self, user_id):
-        """Check if the player is a bot. (The bot would be Irene)"""
-        return str(self.get_int_index(keys.bot_id, 9)) in str(user_id)
-
-    async def add_card(self, user_id):
-        """Check status of a game, it's player, manages the bot that plays, and then adds a card."""
-        end_game = False
-        check = 0
-
-        separator = ','
-        current_cards = await self.get_current_cards(user_id)
-        game_id = await self.get_game_by_player(user_id)
-        game = await self.get_game(game_id)
-        channel = await self.client.fetch_channel(game[5])
-        stand = await self.check_player_standing(user_id)
-        player1_score = await self.get_player_total(game[1])
-        player2_score = await self.get_player_total(game[2])
-        player1_cards = await self.get_current_cards(game[1])
-        if not stand:
-            available_cards = await self.get_available_cards(game_id)
-            random_card = random.choice(available_cards)
-            current_cards.append(str(random_card))
-            cards = separator.join(current_cards)
-            current_total = await self.get_player_total(user_id)
-            random_card_value = await self.get_card_value(random_card)
-            if current_total + random_card_value > 21:
-                for card in current_cards:  # this includes the random card
-                    if await self.check_if_ace(card, user_id) and check != 1:
-                        check = 1
-                        current_total = (current_total + random_card_value) - 10
-                if check == 0:  # if there was no ace
-                    current_total = current_total + random_card_value
-            else:
-                current_total = current_total + random_card_value
-            await self.conn.execute("UPDATE blackjack.currentstatus SET inhand = $1, total = $2 WHERE userid = $3", cards, current_total, user_id)
-            if current_total > 21:
-                if user_id == game[2] and self.check_if_bot(game[2]):
-                    if player1_score > 21 and current_total >= 16:
-                        end_game = True
-                        await self.set_player_stand(game[1])
-                        await self.set_player_stand(game[2])
-                    elif player1_score > 21 and current_total < 16:
-                        await self.add_card(game[2])
-                    elif player1_score < 22 and current_total > 21:
-                        pass
-                    else:
-                        end_game = True
-                elif self.check_if_bot(game[2]) and not self.check_if_bot(user_id):  # if user_id is not the bot
-                    if player2_score < 16:
-                        await self.add_card(game[2])
-                    else:
-                        await self.set_player_stand(user_id)
-                        await self.set_player_stand(game[2])
-                        end_game = True
-            else:
-                if user_id == game[2] and self.check_if_bot(game[2]):
-                    if current_total < 16143478541328187392 and len(player1_cards) > 2:
-                        await self.add_card(game[2])
-                    if await self.check_player_standing(game[1]) and current_total >= 16:
-                        end_game = True
-            if not self.check_if_bot(user_id):
-                if self.check_if_bot(game[2]):
-                    await self.send_cards_to_channel(channel, user_id, random_card, True)
-                else:
-                    await self.send_cards_to_channel(channel, user_id, random_card)
-        else:
-            await channel.send(f"> **You already stood.**")
-            if await self.check_game_over(game_id):
-                await self.finish_game(game_id, channel)
-        if end_game:
-            await self.finish_game(game_id, channel)
-
-    async def send_cards_to_channel(self, channel, user_id, card, bot_mode=False):
-        """Send the cards to a specific channel."""
-        if bot_mode:
-            card_file = discord.File(fp=f'Cards/{card}.jpg', filename=f'{card}.jpg', spoiler=False)
-        else:
-            card_file = discord.File(fp=f'Cards/{card}.jpg', filename=f'{card}.jpg', spoiler=True)
-        total_score = str(await self.get_player_total(user_id))
-        if len(total_score) == 1:
-            total_score = '0' + total_score  # this is to prevent being able to detect the number of digits by the spoiler
-        card_name = await self.get_card_name(card)
-        if bot_mode:
-            await channel.send(f"<@{user_id}> pulled {card_name}. Their current score is {total_score}", file=card_file)
-        else:
-            await channel.send(f"<@{user_id}> pulled ||{card_name}||. Their current score is ||{total_score}||", file=card_file)
-
-    async def compare_channels(self, user_id, channel):
-        """Check if the channel is the correct channel."""
-        game_id = await self.get_game_by_player(user_id)
-        game = await self.get_game(game_id)
-        if game[5] == channel.id:
-            return True
-        else:
-            await channel.send(f"> **{user_id}, that game ({game_id}) is not available in this text channel.**")
-            return False
-
-    async def start_game(self, game_id):
-        """Start out the game of blackjack."""
-        game = await self.get_game(game_id)
-        player1 = game[1]
-        player2 = game[2]
-        await self.add_player_status(player1)
-        await self.add_player_status(player2)
-        # Add Two Cards to both players [ Not in a loop because the messages should be in order on discord ]
-        await self.add_card(player1)
-        await self.add_card(player1)
-        await self.add_card(player2)
-        await self.add_card(player2)
-
-    async def check_game_over(self, game_id):
-        """Check if the blackjack game is over."""
-        game = await self.get_game(game_id)
-        player1_stand = await self.check_player_standing(game[1])
-        player2_stand = await self.check_player_standing(game[2])
-        if player1_stand and player2_stand:
-            return True
-        else:
-            return False
-
-    @staticmethod
-    def determine_winner(score1, score2):
-        """Check which player won the blackjack game."""
-        if score1 == score2:
-            return 'tie'
-        elif score1 == 21:
-            return 'player1'
-        elif score2 == 21:
-            return 'player2'
-        elif score1 > 21 or score2 > 21:
-            if score1 > 21 and score2 > 21:
-                if score1 - 21 < score2 - 21:
-                    return 'player1'
-                else:
-                    return 'player2'
-            elif score1 > 21 and score2 < 21:
-                return 'player2'
-            elif score1 < 21 and score2 > 21:
-                return 'player1'
-        elif score1 < 21 and score2 < 21:
-            if score1 - score2 > 0:
-                return 'player1'
-            else:
-                return 'player2'
-        else:
-            return None
-
-    async def announce_winner(self, channel, winner, loser, winner_points, loser_points, win_amount):
-        """Send a message to the channel of who won the game."""
-        if self.check_if_bot(winner):
-            await channel.send(f"> **<@{keys.bot_id}> has won ${int(win_amount):,} with {winner_points} points against <@{loser}> with {loser_points}.**")
-        elif self.check_if_bot(loser):
-            await channel.send(f"> **<@{winner}> has won ${int(win_amount):,} with {winner_points} points against <@{keys.bot_id}> with {loser_points}.**")
-        else:
-            await channel.send(f"> **<@{winner}> has won ${int(win_amount):,} with {winner_points} points against <@{loser}> with {loser_points}.**")
-
-    async def announce_tie(self, channel, player1, player2, tied_points):
-        """Send a message to the channel of a tie."""
-        if self.check_if_bot(player1) or self.check_if_bot(player2):
-            await channel.send(f"> **<@{player1}> and <@{keys.bot_id}> have tied with {tied_points}**")
-        else:
-            await channel.send(f"> **<@{player1}> and <@{player2}> have tied with {tied_points}**")
-
-    async def finish_game(self, game_id, channel):
-        """Finish off a blackjack game and terminate it."""
-        game = await self.get_game(game_id)
-        player1_score = await self.get_player_total(game[1])
-        player2_score = await self.get_player_total(game[2])
-        if player2_score < 12 and self.check_if_bot(game[2]):
-            await self.add_card(game[2])
-        else:
-            winner = self.determine_winner(player1_score, player2_score)
-            player1_current_bal = await self.get_balance(game[1])
-            player2_current_bal = await self.get_balance(game[2])
-            if winner == 'player1':
-                await self.update_balance(game[1], player1_current_bal + int(game[4]))
-                if not self.check_if_bot(game[2]):
-                    await self.update_balance(game[2], player2_current_bal - int(game[4]))
-                await self.announce_winner(channel, game[1], game[2], player1_score, player2_score, game[4])
-            elif winner == 'player2':
-                if not self.check_if_bot(game[2]):
-                    await self.update_balance(game[2], player2_current_bal + int(game[3]))
-                await self.update_balance(game[1], player1_current_bal - int(game[3]))
-                await self.announce_winner(channel, game[2], game[1], player2_score, player1_score, game[3])
-            elif winner == 'tie':
-                await self.announce_tie(channel, game[1], game[2], player1_score)
-            await self.delete_game(game_id)
-
-    async def delete_game(self, game_id):
-        """Delete a blackjack game."""
-        game = await self.get_game(game_id)
-        await self.conn.execute("DELETE FROM blackjack.games WHERE gameid = $1", game_id)
-        await self.conn.execute("DELETE FROM blackjack.currentstatus WHERE userid = $1", game[1])
-        await self.conn.execute("DELETE FROM blackjack.currentstatus WHERE userid = $1", game[2])
-        log.console(f"Game {game_id} deleted.")
-
-    async def delete_all_games(self):
-        """Delete all blackjack games."""
-        all_games = await self.conn.fetch("SELECT gameid FROM blackjack.games")
-        for games in all_games:
-            game_id = games[0]
-            await self.delete_game(game_id)
-
-
-
-
-
-
-
     @staticmethod
     def check_file_exists(file_name):
         return os.path.isfile(file_name)
-
-
-    #######################
-    # ## GENERAL GAMES ## #
-    #######################
 
     async def stop_game(self, ctx, games):
         """Delete an ongoing game."""
@@ -478,13 +244,6 @@ class Utility:
         for game in games:
             if game.channel == channel:
                 return game
-
-
-
-
-
-
-
 
 
 resources = Utility()

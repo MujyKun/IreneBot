@@ -1,7 +1,8 @@
-from Utility import Utility
+from Utility import resources as ex
+from module import logger as log
 
 
-class CustomCommands(Utility):
+class CustomCommands:
     async def check_custom_command_name_exists(self, server_id, command_name):
         if server_id:
             custom_commands = self.cache.custom_commands.get(server_id)

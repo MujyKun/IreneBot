@@ -1,7 +1,7 @@
-from Utility import Utility
+from Utility import resources as ex
 
 
-class Logging(Utility):
+class Logging:
     #################
     # ## LOGGING ## #
     #################

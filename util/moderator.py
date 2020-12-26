@@ -1,7 +1,7 @@
-from Utility import Utility
+from Utility import resources as ex
 
 
-class Moderator(Utility):
+class Moderator:
     async def add_welcome_message_server(self, channel_id, guild_id, message, enabled):
         """Adds a new welcome message server."""
         await self.conn.execute(

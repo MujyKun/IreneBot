@@ -1,7 +1,7 @@
-from Utility import Utility
+from Utility import resources as ex
 
 
-class Levels(Utility):
+class Levels:
     async def get_level(self, user_id, command):
         """Get the level of a command (rob/beg/daily)."""
         count = self.first_result(

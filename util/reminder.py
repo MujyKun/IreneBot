@@ -1,10 +1,14 @@
-from Utility import Utility
+from Utility import resources as ex
+from module import logger as log, exceptions
 import re
 import pytz
 import parsedatetime
 import locale
+import datetime
+import random
 
-class Reminder(Utility):
+
+class Reminder:
     @staticmethod
     async def determine_time_type(user_input):
         """Determine if time is relative time or absolute time
@@ -37,7 +41,7 @@ class Reminder(Utility):
 
         if is_relative_time:
             if await self.process_relative_time_input(remind_time) > 2 * 3.154e7:  # 2 years in seconds
-                raise exceptions.TooLarge
+                raise self.exceptions.TooLarge
             return datetime.datetime.now() + datetime.timedelta(
                 seconds=await self.process_relative_time_input(remind_time))
 
@@ -77,14 +81,14 @@ class Reminder(Utility):
         """Returns the absolute date time of the input"""
         user_timezone = await self.get_user_timezone(user_id)
         if not user_timezone:
-            raise exceptions.NoTimeZone
+            raise self.exceptions.NoTimeZone
         cal = parsedatetime.Calendar()
         try:
             datetime_obj, _ = cal.parseDT(datetimeString=time_input, tzinfo=pytz.timezone(user_timezone))
             reminder_datetime = datetime_obj.astimezone(pytz.utc)
             return reminder_datetime
         except:
-            raise exceptions.ImproperFormat
+            raise self.exceptions.ImproperFormat
 
     async def get_user_timezone(self, user_id):
         """Returns the user's timezone"""

@@ -22,7 +22,6 @@ class GuessingGame(commands.Cog):
         ex.cache.guessing_games.append(game)
         await game.start_game(ctx, max_rounds=rounds, timeout=timeout, gender=gender)
         if game in ex.cache.guessing_games:
-            print('here')
             ex.cache.guessing_games.remove(game)
 
     @commands.command()

@@ -83,30 +83,30 @@ class Moderator(commands.Cog):
             if not message:
                 message = f"%user, Welcome to %guild_name."
                 if not server:
-                    await ex.add_welcome_message_server(channel_id, guild_id, message, 1)
+                    await ex.u_moderator.add_welcome_message_server(channel_id, guild_id, message, 1)
                     return await ctx.send(welcome_new_users)
                 else:
                     # this is to simplify code, and just swaps 0 and 1 no matter what it is.
                     updated_pos = int(not server.get("enabled"))
-                    await ex.update_welcome_message_enabled(guild_id, updated_pos)
+                    await ex.u_moderator.update_welcome_message_enabled(guild_id, updated_pos)
                     # check if the channel id was changed.
                     if not channel_id == server.get("channel_id"):
-                        await ex.update_welcome_message_channel(guild_id, channel_id)
+                        await ex.u_moderator.update_welcome_message_channel(guild_id, channel_id)
                     if updated_pos:
                         return await ctx.send(f"> Welcome Messages have been enabled in this channel. ")
                     else:
                         return await ctx.send(f"> Welcome Messages have been disabled in this channel. ")
             else:
                 if not server:
-                    await ex.add_welcome_message_server(channel_id, guild_id, message, 1)
+                    await ex.u_moderator.add_welcome_message_server(channel_id, guild_id, message, 1)
                     return await ctx.send(welcome_new_users)
                 else:
-                    enabled = await ex.check_welcome_message_enabled(guild_id)
+                    enabled = await ex.u_moderator.check_welcome_message_enabled(guild_id)
                     if not enabled:
-                        await ex.update_welcome_message_enabled(guild_id, 1)
+                        await ex.u_moderator.update_welcome_message_enabled(guild_id, 1)
                     if not channel_id == server.get("channel_id"):
-                        await ex.update_welcome_message_channel(guild_id, channel_id)
-                    await ex.update_welcome_message(guild_id, message)
+                        await ex.u_moderator.update_welcome_message_channel(guild_id, channel_id)
+                    await ex.u_moderator.update_welcome_message(guild_id, message)
                     return await ctx.send(welcome_new_users)
         except Exception as e:
             log.console(e)

@@ -2344,23 +2344,6 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
         """Get the channel where logs are made on a server."""
         return self.client.get_channel((self.cache.logged_channels.get(message.guild.id))['logging_channel'])
 
-    #################
-    # ## TWITTER ## #
-    #################
-    async def update_status(self, context):
-        self.api.update_status(status=context)
-        tweet = self.api.user_timeline(user_id=f'{keys.twitter_account_id}', count=1)[0]
-        return f"https://twitter.com/{keys.twitter_username}/status/{tweet.id}"
-
-    async def delete_status(self, context):
-        self.api.destroy_status(context)
-
-    async def recent_tweets(self, context):
-        tweets = self.api.user_timeline(user_id=f'{keys.twitter_account_id}', count=context)
-        final_tweet = ""
-        for tweet in tweets:
-            final_tweet += f"> **Tweet ID:** {tweet.id} | **Tweet:** {tweet.text}\n"
-        return final_tweet
 
     #################
     # ## LAST FM ## #

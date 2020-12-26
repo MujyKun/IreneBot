@@ -129,8 +129,8 @@ class BotMod(commands.Cog):
         # delete idol
         await ex.conn.execute("DELETE FROM groupmembers.member WHERE id = $1", duplicate_idol.id)
         # recreate cache
-        await ex.create_idol_cache()
-        await ex.create_group_cache()
+        await ex.u_cache.create_idol_cache()
+        await ex.u_cache.create_group_cache()
         await ctx.send(f"> Merged {duplicate_idol_id} to {original_idol_id}.")
 
     @commands.command()
@@ -156,8 +156,8 @@ class BotMod(commands.Cog):
         # delete group
         await ex.conn.execute("DELETE FROM groupmembers.groups WHERE groupid = $1", duplicate_group.id)
         # recreate cache
-        await ex.create_idol_cache()
-        await ex.create_group_cache()
+        await ex.u_cache.create_idol_cache()
+        await ex.u_cache.create_group_cache()
         await ctx.send(f"> Merged {duplicate_group_id} to {original_group_id}.")
 
     @commands.command()

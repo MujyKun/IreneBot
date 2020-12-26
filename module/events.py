@@ -23,7 +23,7 @@ class Events(commands.Cog):
             # check for the n word
             await Events.catch_on_message_errors(ex.check_for_nword, message)
             # check for self-assignable roles and process it.
-            await Events.catch_on_message_errors(ex.check_for_self_assignable_role, message)
+            await Events.catch_on_message_errors(ex.u_self_assign_roles.check_for_self_assignable_role, message)
             # process the commands with their prefixes.
             await Events.catch_on_message_errors(ex.process_commands, message)
         except Exception as e:

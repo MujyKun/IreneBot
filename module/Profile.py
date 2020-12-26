@@ -52,7 +52,7 @@ class Profile(commands.Cog):
             user_level = await ex.get_level(user_id, "profile")
             shortened_money = await ex.shorten_balance(str(await ex.get_balance(user_id)))
             rob_beg_daily_level = f"{await ex.get_level(user_id, 'rob')}/{await ex.get_level(user_id, 'beg')}/{await ex.get_level(user_id, 'daily')}"
-            user_timezone = await ex.get_user_timezone(user_id)
+            user_timezone = await ex.u_reminder.get_user_timezone(user_id)
             try:
                 timezone_utc = datetime.datetime.now(pytz.timezone(user_timezone)).strftime('%Z, UTC%z')
             except:

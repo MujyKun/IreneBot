@@ -10,16 +10,16 @@ class SelfAssignRoles:
     async def add_self_role(self, role_id, role_name, server_id):
         """Adds a self-assignable role to a server."""
         role_info = [role_id, role_name]
-        await self.conn.execute("INSERT INTO selfassignroles.roles(roleid, rolename, serverid) VALUES ($1, $2, $3)",
+        await ex.conn.execute("INSERT INTO selfassignroles.roles(roleid, rolename, serverid) VALUES ($1, $2, $3)",
                                 role_id, role_name, server_id)
         roles = await self.get_assignable_server_roles(server_id)
         if roles:
             roles.append(role_info)
         else:
-            cache_info = self.cache.assignable_roles.get(server_id)
+            cache_info = ex.cache.assignable_roles.get(server_id)
             if not cache_info:
-                self.cache.assignable_roles[server_id] = {}
-                cache_info = self.cache.assignable_roles.get(server_id)
+                ex.cache.assignable_roles[server_id] = {}
+                cache_info = ex.cache.assignable_roles.get(server_id)
             cache_info['roles'] = [role_info]
 
     async def get_self_role(self, message_content, server_id):
@@ -35,7 +35,7 @@ class SelfAssignRoles:
 
     async def check_self_role_exists(self, role_id, role_name, server_id):
         """Check if a role exists as a self-assignable role in a server."""
-        cache_info = self.cache.assignable_roles.get(server_id)
+        cache_info = ex.cache.assignable_roles.get(server_id)
         if cache_info:
             roles = cache_info.get('roles')
             if roles:
@@ -48,9 +48,9 @@ class SelfAssignRoles:
 
     async def remove_self_role(self, role_name, server_id):
         """Remove a self-assignable role from a server."""
-        await self.conn.execute("DELETE FROM selfassignroles.roles WHERE rolename = $1 AND serverid = $2", role_name,
+        await ex.conn.execute("DELETE FROM selfassignroles.roles WHERE rolename = $1 AND serverid = $2", role_name,
                                 server_id)
-        cache_info = self.cache.assignable_roles.get(server_id)
+        cache_info = ex.cache.assignable_roles.get(server_id)
         if cache_info:
             roles = cache_info.get('roles')
             if roles:
@@ -62,25 +62,25 @@ class SelfAssignRoles:
         """Add or Change a server's self-assignable role channel."""
 
         def update_cache():
-            cache_info = self.cache.assignable_roles.get(server_id)
+            cache_info = ex.cache.assignable_roles.get(server_id)
             if not cache_info:
-                self.cache.assignable_roles[server_id] = {'channel_id': channel_id}
+                ex.cache.assignable_roles[server_id] = {'channel_id': channel_id}
             else:
                 cache_info['channel_id'] = channel_id
 
-        amount_of_results = self.first_result(
-            await self.conn.fetchrow("SELECT COUNT(*) FROM selfassignroles.channels WHERE serverid = $1", server_id))
+        amount_of_results = ex.first_result(
+            await ex.conn.fetchrow("SELECT COUNT(*) FROM selfassignroles.channels WHERE serverid = $1", server_id))
         if amount_of_results:
             update_cache()
-            return await self.conn.execute("UPDATE selfassignroles.channels SET channelid = $1 WHERE serverid = $2",
+            return await ex.conn.execute("UPDATE selfassignroles.channels SET channelid = $1 WHERE serverid = $2",
                                            channel_id, server_id)
-        await self.conn.execute("INSERT INTO selfassignroles.channels(channelid, serverid) VALUES($1, $2)", channel_id,
+        await ex.conn.execute("INSERT INTO selfassignroles.channels(channelid, serverid) VALUES($1, $2)", channel_id,
                                 server_id)
         update_cache()
 
     async def get_assignable_server_roles(self, server_id):
         """Get all the self-assignable roles from a server."""
-        results = self.cache.assignable_roles.get(server_id)
+        results = ex.cache.assignable_roles.get(server_id)
         if results:
             return results.get('roles')
 
@@ -88,7 +88,7 @@ class SelfAssignRoles:
         """Main process for processing self-assignable roles."""
         try:
             author = message.author
-            server_id = await self.get_server_id(message)
+            server_id = await ex.get_server_id(message)
             if await self.check_self_assignable_channel(server_id, message.channel):
                 if message.content:
                     prefix = message.content[0]
@@ -104,7 +104,7 @@ class SelfAssignRoles:
     async def check_self_assignable_channel(self, server_id, channel):
         """Check if a channel is a self assignable role channel."""
         if server_id:
-            cache_info = self.cache.assignable_roles.get(server_id)
+            cache_info = ex.cache.assignable_roles.get(server_id)
             if cache_info:
                 channel_id = cache_info.get('channel_id')
                 if channel_id:

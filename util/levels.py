@@ -4,25 +4,25 @@ from Utility import resources as ex
 class Levels:
     async def get_level(self, user_id, command):
         """Get the level of a command (rob/beg/daily)."""
-        count = self.first_result(
-            await self.conn.fetchrow(f"SELECT COUNT(*) FROM currency.Levels WHERE UserID = $1 AND {command} > $2",
+        count = ex.first_result(
+            await ex.conn.fetchrow(f"SELECT COUNT(*) FROM currency.Levels WHERE UserID = $1 AND {command} > $2",
                                      user_id, 1))
         if not count:
             level = 1
         else:
-            level = self.first_result(
-                await self.conn.fetchrow(f"SELECT {command} FROM currency.Levels WHERE UserID = $1", user_id))
+            level = ex.first_result(
+                await ex.conn.fetchrow(f"SELECT {command} FROM currency.Levels WHERE UserID = $1", user_id))
         return int(level)
 
     async def set_level(self, user_id, level, command):
         """Set the level of a user for a specific command."""
         async def update_level():
             """Updates a user's level."""
-            await self.conn.execute(f"UPDATE currency.Levels SET {command} = $1 WHERE UserID = $2", level, user_id)
+            await ex.conn.execute(f"UPDATE currency.Levels SET {command} = $1 WHERE UserID = $2", level, user_id)
 
-        count = self.first_result(await self.conn.fetchrow(f"SELECT COUNT(*) FROM currency.Levels WHERE UserID = $1", user_id))
+        count = ex.first_result(await ex.conn.fetchrow(f"SELECT COUNT(*) FROM currency.Levels WHERE UserID = $1", user_id))
         if not count:
-            await self.conn.execute("INSERT INTO currency.Levels VALUES($1, NULL, NULL, NULL, NULL, 1)", user_id)
+            await ex.conn.execute("INSERT INTO currency.Levels VALUES($1, NULL, NULL, NULL, NULL, 1)", user_id)
             await update_level()
         else:
             await update_level()

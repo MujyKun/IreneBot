@@ -10,8 +10,8 @@ class Irene:
 
     def run(self):
         """Start the bot."""
-        self.create_util_objects()
-        ex.initialize_data_dog()  # initialize the class for DataDog metrics
+        self.create_util_objects()  # create sub-classes for Utility
+        ex.u_data_dog.initialize_data_dog()  # initialize the class for DataDog metrics
         # all active blackjack games are also deleted on db start, current session stats refreshed.
         # cache is reset in the on_ready event.
         ex.u_database.set_start_up_connection.start()

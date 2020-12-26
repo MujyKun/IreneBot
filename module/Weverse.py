@@ -24,16 +24,16 @@ class Weverse(commands.Cog):
 
             channel_id = ctx.channel.id
             community_name = community_name.lower()
-            if await ex.check_weverse_channel(channel_id, community_name):
+            if await ex.u_weverse.check_weverse_channel(channel_id, community_name):
                 if not role:
-                    await ex.delete_weverse_channel(channel_id, community_name)
+                    await ex.u_weverse.delete_weverse_channel(channel_id, community_name)
                     return await ctx.send(f"> {ctx.author.display_name}, You will no longer receive updates for {community_name}.")
                 else:
                     # add role to weverse subscription.
-                    await ex.add_weverse_role(channel_id, community_name, role.id)
+                    await ex.u_weverse.add_weverse_role(channel_id, community_name, role.id)
             for community in ex.weverse_client.communities:
                 if community.name.lower() == community_name:
-                    await ex.add_weverse_channel(channel_id, community_name)
+                    await ex.u_weverse.add_weverse_channel(channel_id, community_name)
                     return await ctx.send(f"> {ctx.author.display_name}, You will now receive weverse updates for {community.name} in this channel.")
             return await ctx.send(f"> {ctx.author.display_name},I could not find {community_name}. Available choices are:\n{self.available_choices}")
         except Exception as e:
@@ -46,10 +46,10 @@ class Weverse(commands.Cog):
     async def disablecomments(self, ctx, community_name):
         """Disable updates for comments on a community."""
         channel_id = ctx.channel.id
-        if await ex.check_weverse_channel(channel_id, community_name):
-            for channel in await ex.get_weverse_channels(community_name):
+        if await ex.u_weverse.check_weverse_channel(channel_id, community_name):
+            for channel in await ex.u_weverse.get_weverse_channels(community_name):
                 if channel[0] == channel_id:
-                    await ex.change_weverse_comment_status(channel_id, community_name, not channel[2], updated=True)
+                    await ex.u_weverse.change_weverse_comment_status(channel_id, community_name, not channel[2], updated=True)
                     if channel[2]:
                         return await ctx.send(f"> This channel will no longer receive comments from {community_name}.")
                     return await ctx.send(f"> This channel will now receive comments from {community_name}.")
@@ -69,17 +69,17 @@ class Weverse(commands.Cog):
                     community_name = latest_notification.community_name or latest_notification.bold_element
                     if not community_name:
                         return
-                    channels = await ex.get_weverse_channels(community_name.lower())
+                    channels = await ex.u_weverse.get_weverse_channels(community_name.lower())
                     noti_type = ex.weverse_client.determine_notification_type(latest_notification.message)
                     embed_title = f"New {community_name} Notification!"
                     message_text = None
                     if noti_type == 'comment':
                         is_comment = True
-                        embed = await ex.set_comment_embed(latest_notification, embed_title)
+                        embed = await ex.u_weverse.set_comment_embed(latest_notification, embed_title)
                     elif noti_type == 'post':
-                        embed, message_text = await ex.set_post_embed(latest_notification, embed_title)
+                        embed, message_text = await ex.u_weverse.set_post_embed(latest_notification, embed_title)
                     elif noti_type == 'media':
-                        embed, message_text = await ex.set_media_embed(latest_notification, embed_title)
+                        embed, message_text = await ex.u_weverse.set_media_embed(latest_notification, embed_title)
                     elif noti_type == 'announcement':
                         return  # not keeping track of announcements ATM
                     else:
@@ -88,9 +88,9 @@ class Weverse(commands.Cog):
                         channel_id = channel_info[0]
                         notification_ids = self.notifications_already_posted.get(channel_id)
                         if not notification_ids:
-                            await ex.send_weverse_to_channel(channel_info, message_text, embed, is_comment, community_name)
+                            await ex.u_weverse.send_weverse_to_channel(channel_info, message_text, embed, is_comment, community_name)
                             self.notifications_already_posted[channel_id] = [latest_notification.id]
                         else:
                             if latest_notification.id not in notification_ids:
                                 self.notifications_already_posted[channel_id].append(latest_notification.id)
-                                await ex.send_weverse_to_channel(channel_info, message_text, embed, is_comment, community_name)
+                                await ex.u_weverse.send_weverse_to_channel(channel_info, message_text, embed, is_comment, community_name)

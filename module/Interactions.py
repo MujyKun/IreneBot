@@ -97,7 +97,7 @@ class Interactions(commands.Cog):
             await ex.reset_patreon_cooldown(ctx)
             ctx_name = ctx.author.display_name
             user_name = user.display_name
-            random_idol_stage_name = (await ex.get_random_idol()).stage_name
+            random_idol_stage_name = (await ex.u_group_members.get_random_idol()).stage_name
             harm_phrases = [
                 f"Shame on you {user_name}!! You are not allowed to harm yourself.",
                 f"Did you really think you could hurt yourself {user_name}?",

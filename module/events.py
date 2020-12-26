@@ -140,7 +140,7 @@ class Events(commands.Cog):
                             dead_link = msg_info[0]
                             member_id = msg_info[2]
                             guessing_game = msg_info[3]
-                            image_link = await ex.get_google_drive_link(dead_link)
+                            image_link = await ex.u_group_members.get_google_drive_link(dead_link)
                             return msg, image_link, member_id, guessing_game
                 except Exception as e:
                     log.console(e)
@@ -152,20 +152,20 @@ class Events(commands.Cog):
                     if link:
                         await ex.conn.execute("DELETE FROM groupmembers.imagelinks WHERE link = $1 AND memberid = $2",
                                               link, idol_id)
-                        await ex.delete_dead_link(link, idol_id)
-                        await ex.set_forbidden_link(link, idol_id)
+                        await ex.u_group_members.delete_dead_link(link, idol_id)
+                        await ex.u_group_members.set_forbidden_link(link, idol_id)
                         await msg.delete()
 
                 elif str(emoji) == keys.check_emoji:
                     msg, link, idol_id, is_guessing_game = await get_msg_and_image()
                     if link:
-                        await ex.delete_dead_link(link, idol_id)
+                        await ex.u_group_members.delete_dead_link(link, idol_id)
                         await msg.delete()
 
                 elif str(emoji) == '➡':
                     msg, link, idol_id, is_guessing_game = await get_msg_and_image()
                     if link:
-                        await ex.set_as_group_photo(link)
+                        await ex.u_group_members.set_as_group_photo(link)
                         await msg.delete()
 
         except Exception as e:

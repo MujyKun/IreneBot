@@ -41,7 +41,7 @@ class Reminder:
 
         if is_relative_time:
             if await self.process_relative_time_input(remind_time) > 2 * 3.154e7:  # 2 years in seconds
-                raise self.exceptions.TooLarge
+                raise ex.exceptions.TooLarge
             return datetime.datetime.now() + datetime.timedelta(
                 seconds=await self.process_relative_time_input(remind_time))
 
@@ -81,34 +81,34 @@ class Reminder:
         """Returns the absolute date time of the input"""
         user_timezone = await self.get_user_timezone(user_id)
         if not user_timezone:
-            raise self.exceptions.NoTimeZone
+            raise ex.exceptions.NoTimeZone
         cal = parsedatetime.Calendar()
         try:
             datetime_obj, _ = cal.parseDT(datetimeString=time_input, tzinfo=pytz.timezone(user_timezone))
             reminder_datetime = datetime_obj.astimezone(pytz.utc)
             return reminder_datetime
         except:
-            raise self.exceptions.ImproperFormat
+            raise ex.exceptions.ImproperFormat
 
     async def get_user_timezone(self, user_id):
         """Returns the user's timezone"""
-        return self.cache.timezones.get(user_id)
+        return ex.cache.timezones.get(user_id)
 
     async def set_user_timezone(self, user_id, timezone):
         """Set user timezone"""
-        user_timezone = self.cache.timezones.get(user_id)
-        self.cache.timezones[user_id] = timezone
+        user_timezone = ex.cache.timezones.get(user_id)
+        ex.cache.timezones[user_id] = timezone
         if user_timezone:
-            await self.conn.execute("UPDATE reminders.timezones SET timezone = $1 WHERE userid = $2", timezone, user_id)
+            await ex.conn.execute("UPDATE reminders.timezones SET timezone = $1 WHERE userid = $2", timezone, user_id)
         else:
-            await self.conn.execute("INSERT INTO reminders.timezones(userid, timezone) VALUES ($1, $2)", user_id,
+            await ex.conn.execute("INSERT INTO reminders.timezones(userid, timezone) VALUES ($1, $2)", user_id,
                                     timezone)
 
     async def remove_user_timezone(self, user_id):
         """Remove user timezone"""
         try:
-            self.cache.timezones.pop(user_id)
-            await self.conn.execute("DELETE FROM reminders.timezones WHERE userid = $1", user_id)
+            ex.cache.timezones.pop(user_id)
+            await ex.conn.execute("DELETE FROM reminders.timezones WHERE userid = $1", user_id)
         except:
             pass
 
@@ -172,7 +172,7 @@ class Reminder:
         # Use weekday format of server
         weekday = m_time.strftime('%a')
 
-        locale.setlocale(locale.LC_ALL, self.cache.locale_by_timezone[user_timezone])  # Set to user locale
+        locale.setlocale(locale.LC_ALL, ex.cache.locale_by_timezone[user_timezone])  # Set to user locale
         locale_date = m_time.strftime('%x')
         locale.setlocale(locale.LC_ALL, '')  # Reset locale back to server locale
 
@@ -182,27 +182,27 @@ class Reminder:
 
     async def set_reminder(self, remind_reason, remind_time, user_id):
         """Add reminder date to cache and db."""
-        await self.conn.execute("INSERT INTO reminders.reminders(userid, reason, timestamp) VALUES ($1, $2, $3)",
+        await ex.conn.execute("INSERT INTO reminders.reminders(userid, reason, timestamp) VALUES ($1, $2, $3)",
                                 user_id, remind_reason, remind_time)
-        remind_id = self.first_result(await self.conn.fetchrow(
+        remind_id = ex.first_result(await ex.conn.fetchrow(
             "SELECT id FROM reminders.reminders WHERE userid=$1 AND reason=$2 AND timestamp=$3 ORDER BY id DESC",
             user_id, remind_reason, remind_time))
-        user_reminders = self.cache.reminders.get(user_id)
+        user_reminders = ex.cache.reminders.get(user_id)
         remind_info = [remind_id, remind_reason, remind_time]
         if user_reminders:
             user_reminders.append(remind_info)
         else:
-            self.cache.reminders[user_id] = [remind_info]
+            ex.cache.reminders[user_id] = [remind_info]
 
     async def get_reminders(self, user_id):
         """Get the reminders of a user"""
-        return self.cache.reminders.get(user_id)
+        return ex.cache.reminders.get(user_id)
 
     async def remove_user_reminder(self, user_id, reminder_id):
         """Remove a reminder from the cache and the database."""
         try:
             # remove from cache
-            reminders = self.cache.reminders.get(user_id)
+            reminders = ex.cache.reminders.get(user_id)
             if reminders:
                 for reminder in reminders:
                     current_reminder_id = reminder[0]
@@ -210,13 +210,13 @@ class Reminder:
                         reminders.remove(reminder)
         except Exception as e:
             log.console(e)
-        await self.conn.execute("DELETE FROM reminders.reminders WHERE id = $1", reminder_id)
+        await ex.conn.execute("DELETE FROM reminders.reminders WHERE id = $1", reminder_id)
 
     async def get_all_reminders_from_db(self):
         """Get all reminders from the db (all users)"""
-        return await self.conn.fetch("SELECT id, userid, reason, timestamp FROM reminders.reminders")
+        return await ex.conn.fetch("SELECT id, userid, reason, timestamp FROM reminders.reminders")
 
     async def get_all_timezones_from_db(self):
         """Get all timezones from the db (all users)"""
-        return await self.conn.fetch("SELECT userid, timezone FROM reminders.timezones")
+        return await ex.conn.fetch("SELECT userid, timezone FROM reminders.timezones")
 

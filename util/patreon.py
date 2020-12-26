@@ -5,11 +5,11 @@ from module.keys import bot_support_server_id, patreon_role_id, patreon_super_ro
 class Patreon:
     async def get_patreon_users(self):
         """Get the permanent patron users"""
-        return await self.conn.fetch("SELECT userid from patreon.users")
+        return await ex.conn.fetch("SELECT userid from patreon.users")
 
     async def get_patreon_role_members(self, super_patron=False):
         """Get the members in the patreon roles."""
-        support_guild = self.client.get_guild(int(bot_support_server_id))
+        support_guild = ex.client.get_guild(int(bot_support_server_id))
         # API call will not show role.members
         if not super_patron:
             patreon_role = support_guild.get_role(int(patreon_role_id))
@@ -24,17 +24,17 @@ class Patreon:
         The second way is a table to check for permanent patreon users that are directly added by the bot owner.
         -- After modifying -> We take it straight from cache now.
         """
-        if user_id in self.cache.patrons:
+        if user_id in ex.cache.patrons:
             if super_patron:
-                return self.cache.patrons.get(user_id) == super_patron
+                return ex.cache.patrons.get(user_id) == super_patron
             return True
 
     async def add_to_patreon(self, user_id):
         """Add user as a permanent patron."""
         try:
             user_id = int(user_id)
-            await self.conn.execute("INSERT INTO patreon.users(userid) VALUES($1)", user_id)
-            self.cache.patrons[user_id] = True
+            await ex.conn.execute("INSERT INTO patreon.users(userid) VALUES($1)", user_id)
+            ex.cache.patrons[user_id] = True
         except Exception as e:
             pass
 
@@ -42,8 +42,8 @@ class Patreon:
         """Remove user from being a permanent patron."""
         try:
             user_id = int(user_id)
-            await self.conn.execute("DELETE FROM patreon.users WHERE userid = $1", user_id)
-            self.cache.patrons.pop(user_id, None)
+            await ex.conn.execute("DELETE FROM patreon.users WHERE userid = $1", user_id)
+            ex.cache.patrons.pop(user_id, None)
         except Exception as e:
             pass
 

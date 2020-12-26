@@ -180,7 +180,7 @@ Maintenance Status: {maintenance_status}
         embed.set_thumbnail(url=app_icon_url)
         embed.add_field(name=f"Servers Connected", value=f"{ex.u_miscellaneous.get_server_count()} Servers", inline=True)
         embed.add_field(name=f"Text/Voice Channels Watched", value=f"{ex.u_miscellaneous.get_text_channel_count()}/{ex.u_miscellaneous.get_voice_channel_count()} Channels", inline=True)
-        embed.add_field(name=f"Servers/Channels Logged", value=f"{len(await ex.get_servers_logged())}/{len(await ex.get_channels_logged())} Logged", inline=True)
+        embed.add_field(name=f"Servers/Channels Logged", value=f"{len(await ex.u_logging.get_servers_logged())}/{len(await ex.u_logging.get_channels_logged())} Logged", inline=True)
         embed.add_field(name=f"Bot Uptime", value=bot_uptime, inline=True)
         embed.add_field(name=f"Total Commands Used", value=f"{ex.cache.total_used} Commands", inline=True)
         embed.add_field(name=f"This Session ({ex.cache.session_id} | {datetime.date.today()})", value=f"{ex.cache.current_session} Commands", inline=True)

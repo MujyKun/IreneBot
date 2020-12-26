@@ -10,10 +10,11 @@ class Irene:
 
     def run(self):
         """Start the bot."""
-        ex.initialize_data_dog()  # initialize the class for DataDog metrics
+        self.create_util_objects()  # create sub-classes for Utility
+        ex.u_data_dog.initialize_data_dog()  # initialize the class for DataDog metrics
         # all active blackjack games are also deleted on db start, current session stats refreshed.
         # cache is reset in the on_ready event.
-        ex.set_start_up_connection.start()
+        ex.u_database.set_start_up_connection.start()
         if ex.test_bot:
             self.run_test_bot()
         else:
@@ -60,16 +61,16 @@ class Irene:
         # Start Voice Client Loop
         module.Music.Music().check_voice_clients.start()
         # Update Cache Every 12 hours
-        ex.update_cache.start()
+        ex.u_cache.update_cache.start()
         # Start a loop that sends cache information to DataDog.
-        ex.send_cache_data_to_data_dog.start()
+        ex.u_cache.send_cache_data_to_data_dog.start()
         # after intents was pushed in place, d.py cache loaded a lot slower and patrons are not added properly.
         # therefore patron cache must be looped instead.
-        ex.update_patron_cache.start()
+        ex.u_cache.update_patron_cache.start()
         # Send Packets to localhost:5123 to show Irene is alive. This is meant for auto restarting Irene
         # This feature is essential in case of any overload or crashes by external sources.
         # This also avoids having to manually restart Irene.
-        ex.show_irene_alive.start()
+        ex.u_database.show_irene_alive.start()
 
     @staticmethod
     def add_listeners():
@@ -115,6 +116,7 @@ class Irene:
 
     @staticmethod
     def create_util_objects():
+        """Create SubClass Objects to attach to Parent for easier management and sharing between siblings."""
         ex.u_database = util.database.DataBase()
         ex.u_cache = util.cache.Cache()
         ex.u_currency = util.currency.Currency()

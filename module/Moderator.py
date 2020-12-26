@@ -16,10 +16,10 @@ class Moderator(commands.Cog):
         [Format: %addalias (alias) (ID of idol/group) ('idol' or 'group']"""
         alias = alias.replace("_", " ")
         if mode.lower() in ["idol", "member", "members", "idols"]:
-            obj = await ex.get_member(mem_id)
+            obj = await ex.u_group_members.get_member(mem_id)
             name = f"{obj.full_name} ({obj.stage_name}) [{obj.id}]"
         elif mode.lower() in ["group", "groups"]:
-            obj = await ex.get_group(mem_id)
+            obj = await ex.u_group_members.get_group(mem_id)
             name = f"{obj.name} [{obj.id}]"
         else:
             return await ctx.send("> Please select whether you want to add an idol or group alias.")
@@ -28,14 +28,14 @@ class Moderator(commands.Cog):
         if alias in obj.aliases:
             return await ctx.send(f"> {alias} is already a global alias for {name}.")
         if ex.check_if_mod(ctx):  # checks if the user is a bot mod.
-            await ex.set_global_alias(obj, alias.lower())
+            await ex.u_group_members.set_global_alias(obj, alias.lower())
             return await ctx.send(f"> {alias} has been added as a global alias for {mode} {mem_id}")
         else:
             server_aliases = obj.local_aliases.get(ctx.guild.id)
             if server_aliases:
                 if alias.lower() in server_aliases:
                     return await ctx.send(f"> {alias} is already a server alias for {name}.")
-            await ex.set_local_alias(obj, alias.lower(), ctx.guild.id)
+            await ex.u_group_members.set_local_alias(obj, alias.lower(), ctx.guild.id)
             return await ctx.send(f"> {alias} has been added as a server alias for {name}.")
 
     @commands.command(aliases=['removealias'])
@@ -45,10 +45,10 @@ class Moderator(commands.Cog):
         [Format: %deletealias (alias) (ID of idol/group) ('idol' or 'group')]"""
         alias = alias.replace("_", " ")
         if mode.lower() in ["idol", "member", "members", "idols"]:
-            obj = await ex.get_member(mem_id)
+            obj = await ex.u_group_members.get_member(mem_id)
             name = f"{obj.full_name} ({obj.stage_name}) [{obj.id}]"
         elif mode.lower() in ["group", "groups"]:
-            obj = await ex.get_group(mem_id)
+            obj = await ex.u_group_members.get_group(mem_id)
             name = f"{obj.name} [{obj.id}]"
         else:
             return await ctx.send("> Please select whether you want to add an idol or group alias.")
@@ -57,14 +57,14 @@ class Moderator(commands.Cog):
         if ex.check_if_mod(ctx):  # checks if the user is a bot mod.
             if alias not in obj.aliases:
                 return await ctx.send(f"> {alias} is not a global alias for {name}.")
-            await ex.remove_global_alias(obj, alias.lower())
+            await ex.u_group_members.remove_global_alias(obj, alias.lower())
             return await ctx.send(f"> {alias} has been removed from the global aliases for {mode} {mem_id}")
         else:
             server_aliases = obj.local_aliases.get(ctx.guild.id)
             if server_aliases:
                 if alias.lower() not in server_aliases:
                     return await ctx.send(f"> {alias} is not a server alias for {name}.")
-            await ex.remove_local_alias(obj, alias.lower(), ctx.guild.id)
+            await ex.u_group_members.remove_local_alias(obj, alias.lower(), ctx.guild.id)
             return await ctx.send(f"> {alias} has been removed from the server aliases for {name}.")
 
     @commands.command()
@@ -83,30 +83,30 @@ class Moderator(commands.Cog):
             if not message:
                 message = f"%user, Welcome to %guild_name."
                 if not server:
-                    await ex.add_welcome_message_server(channel_id, guild_id, message, 1)
+                    await ex.u_moderator.add_welcome_message_server(channel_id, guild_id, message, 1)
                     return await ctx.send(welcome_new_users)
                 else:
                     # this is to simplify code, and just swaps 0 and 1 no matter what it is.
                     updated_pos = int(not server.get("enabled"))
-                    await ex.update_welcome_message_enabled(guild_id, updated_pos)
+                    await ex.u_moderator.update_welcome_message_enabled(guild_id, updated_pos)
                     # check if the channel id was changed.
                     if not channel_id == server.get("channel_id"):
-                        await ex.update_welcome_message_channel(guild_id, channel_id)
+                        await ex.u_moderator.update_welcome_message_channel(guild_id, channel_id)
                     if updated_pos:
                         return await ctx.send(f"> Welcome Messages have been enabled in this channel. ")
                     else:
                         return await ctx.send(f"> Welcome Messages have been disabled in this channel. ")
             else:
                 if not server:
-                    await ex.add_welcome_message_server(channel_id, guild_id, message, 1)
+                    await ex.u_moderator.add_welcome_message_server(channel_id, guild_id, message, 1)
                     return await ctx.send(welcome_new_users)
                 else:
-                    enabled = await ex.check_welcome_message_enabled(guild_id)
+                    enabled = await ex.u_moderator.check_welcome_message_enabled(guild_id)
                     if not enabled:
-                        await ex.update_welcome_message_enabled(guild_id, 1)
+                        await ex.u_moderator.update_welcome_message_enabled(guild_id, 1)
                     if not channel_id == server.get("channel_id"):
-                        await ex.update_welcome_message_channel(guild_id, channel_id)
-                    await ex.update_welcome_message(guild_id, message)
+                        await ex.u_moderator.update_welcome_message_channel(guild_id, channel_id)
+                    await ex.u_moderator.update_welcome_message(guild_id, message)
                     return await ctx.send(welcome_new_users)
         except Exception as e:
             log.console(e)
@@ -124,11 +124,11 @@ class Moderator(commands.Cog):
             server_id = ctx.guild.id
             if not await ex.check_interaction_enabled(server_id=server_id, interaction=interaction):
                 # enable it
-                await ex.enable_interaction(server_id, interaction)
+                await ex.u_miscellaneous.enable_interaction(server_id, interaction)
                 await ctx.send(f"> **{interaction} has been enabled in this server.**")
             else:
                 # disable it
-                await ex.disable_interaction(server_id, interaction)
+                await ex.u_miscellaneous.disable_interaction(server_id, interaction)
                 await ctx.send(f"> **{interaction} has been disabled in this server.**")
 
         else:
@@ -424,7 +424,7 @@ class Moderator(commands.Cog):
             elif 0 < delay < 60:
                 return await ctx.send("> **The delay must be greater than 1 minute due to rate-limiting issues.**")
             else:
-                new_delay = await ex.get_cooldown_time(delay)
+                new_delay = await ex.u_miscellaneous.get_cooldown_time(delay)
                 temp_channel_delay = ex.cache.temp_channels.get(channel_id)
                 if temp_channel_delay:  # this channel is already a temp channel
                     await ex.conn.execute("UPDATE general.TempChannels SET delay = $1 WHERE chanID = $2", delay, channel_id)

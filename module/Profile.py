@@ -49,10 +49,10 @@ class Profile(commands.Cog):
                 count += 1
             if len(roles) > 500:
                 roles = f"{roles[0:498]}...."
-            user_level = await ex.get_level(user_id, "profile")
-            shortened_money = await ex.shorten_balance(str(await ex.get_balance(user_id)))
-            rob_beg_daily_level = f"{await ex.get_level(user_id, 'rob')}/{await ex.get_level(user_id, 'beg')}/{await ex.get_level(user_id, 'daily')}"
-            user_timezone = await ex.get_user_timezone(user_id)
+            user_level = await ex.u_levels.get_level(user_id, "profile")
+            shortened_money = await ex.u_currency.shorten_balance(str(await ex.u_currency.get_balance(user_id)))
+            rob_beg_daily_level = f"{await ex.u_levels.get_level(user_id, 'rob')}/{await ex.u_levels.get_level(user_id, 'beg')}/{await ex.u_levels.get_level(user_id, 'daily')}"
+            user_timezone = await ex.u_reminder.get_user_timezone(user_id)
             try:
                 timezone_utc = datetime.datetime.now(pytz.timezone(user_timezone)).strftime('%Z, UTC%z')
             except:
@@ -94,15 +94,15 @@ class Profile(commands.Cog):
         try:
             xp_per_message = 10
             user_id = msg.author.id
-            current_level = await ex.get_level(user_id, "profile")
-            current_xp = await ex.get_level(user_id, "profilexp")
-            xp_needed_for_level = await ex.get_xp(current_level, "profile")
+            current_level = await ex.u_levels.get_level(user_id, "profile")
+            current_xp = await ex.u_levels.get_level(user_id, "profilexp")
+            xp_needed_for_level = await ex.u_levels.get_xp(current_level, "profile")
 
             if current_xp + xp_per_message < xp_needed_for_level:
-                await ex.set_level(user_id, current_xp + xp_per_message, "profilexp")
+                await ex.u_levels.set_level(user_id, current_xp + xp_per_message, "profilexp")
             else:
-                await ex.set_level(user_id, 1, "profilexp")
-                await ex.set_level(user_id, current_level+1, "profile")
+                await ex.u_levels.set_level(user_id, 1, "profilexp")
+                await ex.u_levels.set_level(user_id, current_level+1, "profile")
         except Exception as e:
             pass
             # log.console(e)

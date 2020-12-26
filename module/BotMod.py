@@ -129,8 +129,8 @@ class BotMod(commands.Cog):
         # delete idol
         await ex.conn.execute("DELETE FROM groupmembers.member WHERE id = $1", duplicate_idol.id)
         # recreate cache
-        await ex.create_idol_cache()
-        await ex.create_group_cache()
+        await ex.u_cache.create_idol_cache()
+        await ex.u_cache.create_group_cache()
         await ctx.send(f"> Merged {duplicate_idol_id} to {original_idol_id}.")
 
     @commands.command()
@@ -156,8 +156,8 @@ class BotMod(commands.Cog):
         # delete group
         await ex.conn.execute("DELETE FROM groupmembers.groups WHERE groupid = $1", duplicate_group.id)
         # recreate cache
-        await ex.create_idol_cache()
-        await ex.create_group_cache()
+        await ex.u_cache.create_idol_cache()
+        await ex.u_cache.create_group_cache()
         await ctx.send(f"> Merged {duplicate_group_id} to {original_group_id}.")
 
     @commands.command()
@@ -257,7 +257,7 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
     async def botban(self, ctx, *, user: discord.User):
         """Bans a user from Irene. [Format: %botban (user id)]"""
         if not ex.check_if_mod(user.id, 1):
-            await ex.ban_user_from_bot(user.id)
+            await ex.u_miscellaneous.ban_user_from_bot(user.id)
             await ctx.send(f"> **<@{user.id}> has been banned from using Irene.**")
         else:
             await ctx.send(f"> **<@{ctx.author.id}>, you cannot ban a bot mod.**")
@@ -267,7 +267,7 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
     async def botunban(self, ctx, *, user: discord.User):
         """UnBans a user from Irene. [Format: %botunban (user id)]"""
         user_id = user.id
-        await ex.unban_user_from_bot(user_id)
+        await ex.u_miscellaneous.unban_user_from_bot(user_id)
         await ctx.send(f"> **If the user was banned, they are now unbanned.**")
 
     @commands.command()

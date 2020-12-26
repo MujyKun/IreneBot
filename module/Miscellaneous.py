@@ -138,11 +138,11 @@ class Miscellaneous(commands.Cog):
     async def botinfo(self, ctx):
         """Get information about the bot."""
         maintenance_status = api_status = db_status = images_status = weverse_status = ":red_circle:"
-        if await ex.get_api_status():
+        if await ex.u_miscellaneous.get_api_status():
             api_status = ":green_circle:"
-        if await ex.get_db_status():
+        if await ex.u_miscellaneous.get_db_status():
             db_status = ":green_circle:"
-        if await ex.get_images_status():
+        if await ex.u_miscellaneous.get_images_status():
             images_status = ":green_circle:"
         if ex.cache.maintenance_mode:
             maintenance_status = ":green_circle:"
@@ -158,7 +158,7 @@ class Miscellaneous(commands.Cog):
         app_owner = app.owner
         app_icon_url = app.icon_url
         patreon_url = keys.patreon_link
-        bot_uptime = await ex.get_cooldown_time((keys.datetime.now() - keys.startup_time).total_seconds())
+        bot_uptime = await ex.u_miscellaneous.get_cooldown_time((keys.datetime.now() - keys.startup_time).total_seconds())
         bot_server_links = """
 [Top.gg](https://top.gg/bot/520369375325454371)
 [Discord Bots](https://discord.bots.gg/bots/520369375325454371)
@@ -178,8 +178,8 @@ Maintenance Status: {maintenance_status}
 """
         embed = await ex.create_embed(title=f"I am {app_name}! ({app_id})", title_desc=title_desc)
         embed.set_thumbnail(url=app_icon_url)
-        embed.add_field(name=f"Servers Connected", value=f"{ex.get_server_count()} Servers", inline=True)
-        embed.add_field(name=f"Text/Voice Channels Watched", value=f"{ex.get_text_channel_count()}/{ex.get_voice_channel_count()} Channels", inline=True)
+        embed.add_field(name=f"Servers Connected", value=f"{ex.u_miscellaneous.get_server_count()} Servers", inline=True)
+        embed.add_field(name=f"Text/Voice Channels Watched", value=f"{ex.u_miscellaneous.get_text_channel_count()}/{ex.u_miscellaneous.get_voice_channel_count()} Channels", inline=True)
         embed.add_field(name=f"Servers/Channels Logged", value=f"{len(await ex.get_servers_logged())}/{len(await ex.get_channels_logged())} Logged", inline=True)
         embed.add_field(name=f"Bot Uptime", value=bot_uptime, inline=True)
         embed.add_field(name=f"Total Commands Used", value=f"{ex.cache.total_used} Commands", inline=True)
@@ -213,7 +213,7 @@ Maintenance Status: {maintenance_status}
     async def translate(self, ctx, from_language, to_language, *, message):
         """Translate between languages using Papago [Format: %translate English Korean this is a test phrase.]"""
         try:
-            response = await ex.translate(message, from_language, to_language)
+            response = await ex.u_miscellaneous.translate(message, from_language, to_language)
             if response:
                 code = response['code']
                 if code == 0:  # do not shorten (make sure "code" var exists)
@@ -404,7 +404,7 @@ Maintenance Status: {maintenance_status}
     @commands.command()
     async def servercount(self, ctx):
         """Shows how many servers the bot has [Format: %servercount]"""
-        await ctx.send(f"> **I am connected to {ex.get_server_count()} servers.**")
+        await ctx.send(f"> **I am connected to {ex.u_miscellaneous.get_server_count()} servers.**")
 
     @commands.command()
     async def serverinfo(self, ctx):

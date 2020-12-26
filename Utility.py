@@ -1,7 +1,6 @@
 from module import keys, logger as log, cache, exceptions
 from discord.ext import tasks
 from PIL import Image
-from concurrent.futures import ThreadPoolExecutor
 from datadog import initialize, api
 from Weverse.weverseasync import WeverseAsync
 import datetime
@@ -13,7 +12,6 @@ import math
 import tweepy
 import json
 import time
-import sys
 import aiofiles
 import re
 import pytz
@@ -68,44 +66,6 @@ class Utility:
         self.u_self_assign_roles = None
         self.u_reminder = None
 
-
-
-
-    ##################
-    # ## DATABASE ## #
-    ##################
-    @tasks.loop(seconds=0, minutes=0, hours=0, reconnect=True)
-    async def set_start_up_connection(self):
-        """Looping Until A Stable Connection to DB is formed. This is to confirm Irene starts before the DB connects.
-        Also creates thread pool and increases recursion limit.
-        """
-        if self.client.loop.is_running():
-            try:
-                self.conn = await self.get_db_connection()
-                # Delete all active blackjack games
-                await self.delete_all_games()
-                self.running_loop = asyncio.get_running_loop()
-                await self.create_thread_pool()
-                sys.setrecursionlimit(self.recursion_limit)
-            except Exception as e:
-                log.console(e)
-            self.set_start_up_connection.stop()
-
-    async def create_thread_pool(self):
-        self.thread_pool = ThreadPoolExecutor()
-
-    @tasks.loop(seconds=0, minutes=1, reconnect=True)
-    async def show_irene_alive(self):
-        """Looped every minute to send a connection to localhost:5123 to show bot is working well."""
-        source_link = "http://127.0.0.1:5123/restartBot"
-        async with self.session.get(source_link) as resp:
-            pass
-
-    @staticmethod
-    async def get_db_connection():
-        """Retrieve Database Connection"""
-        return await keys.connect_to_db()
-
     @staticmethod
     def first_result(record):
         """Returns the first item of a record if there is one."""
@@ -114,584 +74,23 @@ class Utility:
         else:
             return record[0]
 
-    ###############
-    # ## CACHE ## #
-    ###############
-    async def process_cache_time(self, method, name):
-        """Process the cache time."""
-        past_time = time.time()
-        result = await method()
-        if result is None or result:  # expecting False on methods that fail to load, do not simplify None.
-            log.console(f"Cache for {name} Created in {await self.get_cooldown_time(time.time() - past_time)}.")
-        return result
-
-    async def create_cache(self):
-        """Create the general cache on startup"""
-        past_time = time.time()
-        await self.process_cache_time(self.update_idols, "Idol Photo Count")
-        await self.process_cache_time(self.update_groups, "Group Photo Count")
-        await self.process_cache_time(self.update_user_notifications, "User Notifications")
-        # after intents was pushed in place, d.py cache loaded a lot slower and patrons are not added properly.
-        # therefore it must be looped instead.
-        # await self.process_cache_time(self.update_patreons, "Patrons")
-        await self.process_cache_time(self.update_mod_mail, "ModMail")
-        await self.process_cache_time(self.update_bot_bans, "Bot Bans")
-        await self.process_cache_time(self.update_logging_channels, "Logged Channels")
-        await self.process_cache_time(self.update_server_prefixes, "Server Prefixes")
-        await self.process_cache_time(self.update_welcome_message_cache, "Welcome Messages")
-        await self.process_cache_time(self.update_temp_channels, "Temp Channels")
-        await self.process_cache_time(self.update_n_word_counter, "NWord Counter")
-        await self.process_cache_time(self.update_command_counter, "Command Counter")
-        await self.process_cache_time(self.create_idol_cache, "Idol Objects")
-        await self.process_cache_time(self.create_group_cache, "Group Objects")
-        await self.process_cache_time(self.create_restricted_channel_cache, "Restricted Idol Channels")
-        await self.process_cache_time(self.create_dead_link_cache, "Dead Links")
-        await self.process_cache_time(self.create_bot_status_cache, "Bot Status")
-        await self.process_cache_time(self.create_bot_command_cache, "Custom Commands")
-        await self.process_cache_time(self.create_weverse_channel_cache, "Weverse Text Channels")
-        await self.process_cache_time(self.create_self_assignable_role_cache, "Self-Assignable Roles")
-        await self.process_cache_time(self.create_reminder_cache, "Reminders")
-        await self.process_cache_time(self.create_timezone_cache, "Timezones")
-        if not self.test_bot and not self.weverse_client.cache_loaded:
-            task = asyncio.create_task(self.process_cache_time(self.weverse_client.start, "Weverse"))
-        log.console(f"Cache Completely Created in {await self.get_cooldown_time(time.time() - past_time)}.")
-
-    async def create_timezone_cache(self):
-        self.cache.timezones = {}  # reset cache
-        timezones = await self.get_all_timezones_from_db()
-        for user_id, timezone in timezones:
-            self.cache.timezones[user_id] = timezone
-
-    async def create_reminder_cache(self):
-        """Create cache for reminders"""
-        self.cache.reminders = {}  # reset cache
-        all_reminders = await self.get_all_reminders_from_db()
-        for reason_id, user_id, reason, time_stamp in all_reminders:
-            reason_list = [reason_id, reason, time_stamp]
-            user_reminder = self.cache.reminders.get(user_id)
-            if user_reminder:
-                user_reminder.append(reason_list)
-            else:
-                self.cache.reminders[user_id] = [reason_list]
-
-    async def create_self_assignable_role_cache(self):
-        """Create cache for self assignable roles"""
-        all_roles = await self.conn.fetch("SELECT roleid, rolename, serverid FROM selfassignroles.roles")
-        all_channels = await self.conn.fetch("SELECT channelid, serverid FROM selfassignroles.channels")
-        for role_id, role_name, server_id in all_roles:
-            cache_info = self.cache.assignable_roles.get(server_id)
-            if not cache_info:
-                self.cache.assignable_roles[server_id] = {}
-                cache_info = self.cache.assignable_roles.get(server_id)
-            if not cache_info.get('roles'):
-                cache_info['roles'] = [[role_id, role_name]]
-            else:
-                cache_info['roles'].append([role_id, role_name])
-        for channel_id, server_id in all_channels:
-            cache_info = self.cache.assignable_roles.get(server_id)
-            if cache_info:
-                cache_info['channel_id'] = channel_id
-            else:
-                self.cache.assignable_roles[server_id] = {'channel_id': channel_id}
-
-    async def create_weverse_channel_cache(self):
-        """Create cache for channels that are following a community on weverse."""
-        all_channels = await self.conn.fetch("SELECT channelid, communityname, roleid, commentsdisabled FROM weverse.channels")
-        for channel_id, community_name, role_id, comments_disabled in all_channels:
-            await self.add_weverse_channel_to_cache(channel_id, community_name)
-            await self.add_weverse_role(channel_id, community_name, role_id)
-            await self.change_weverse_comment_status(channel_id, community_name, comments_disabled)
-
-    async def update_command_counter(self):
-        """Updates Cache for command counter and sessions"""
-        self.cache.command_counter = {}
-        session_id = await self.get_session_id()
-        all_commands = await self.conn.fetch("SELECT commandname, count FROM stats.commands WHERE sessionid = $1", session_id)
-        for command_name, count in all_commands:
-            self.cache.command_counter[command_name] = count
-        self.cache.current_session = self.first_result(
-            await self.conn.fetchrow("SELECT session FROM stats.sessions WHERE date = $1", datetime.date.today()))
-
-    async def create_restricted_channel_cache(self):
-        """Create restricted idol channel cache"""
-        restricted_channels = await self.conn.fetch("SELECT channelid, serverid, sendhere FROM groupmembers.restricted")
-        for channel_id, server_id, send_here in restricted_channels:
-            self.cache.restricted_channels[channel_id] = [server_id, send_here]
-
-    async def create_bot_command_cache(self):
-        """Create custom command cache"""
-        server_commands = await self.conn.fetch("SELECT serverid, commandname, message FROM general.customcommands")
-        self.cache.custom_commands = {}
-        for server_id, command_name, message in server_commands:
-            cache_info = self.cache.custom_commands.get(server_id)
-            if cache_info:
-                cache_info[command_name] = message
-            else:
-                self.cache.custom_commands[server_id] = {command_name: message}
-
-    async def create_bot_status_cache(self):
-        statuses = await self.conn.fetch("SELECT status FROM general.botstatus")
-        self.cache.bot_statuses = [status[0] for status in statuses] or None
-
-    async def create_dead_link_cache(self):
-        """Creates Dead Link Cache"""
-        self.cache.dead_image_cache = {}
-        try:
-            self.cache.dead_image_channel = await self.client.fetch_channel(keys.dead_image_channel_id)
-        except:
-            pass
-        dead_images = await self.conn.fetch("SELECT deadlink, userid, messageid, idolid, guessinggame FROM groupmembers.deadlinkfromuser")
-        for dead_link, user_id, message_id, idol_id, guessing_game in dead_images:
-            self.cache.dead_image_cache[message_id] = [dead_link, user_id, idol_id, guessing_game]
-
-    async def create_idol_cache(self):
-        """Create Idol Objects and store them as cache."""
-        self.cache.idols = []
-        for idol in await self.u_group_members.get_db_all_members():
-            idol_obj = self.u_group_members.Idol(**idol)
-            idol_obj.aliases, idol_obj.local_aliases = await self.u_group_members.get_db_aliases(idol_obj.id)
-            # add all group ids and remove potential duplicates
-            idol_obj.groups = list(dict.fromkeys(await self.u_group_members.get_db_groups_from_member(idol_obj.id)))
-            idol_obj.called = await self.u_group_members.get_db_idol_called(idol_obj.id)
-            idol_obj.photo_count = self.cache.idol_photos.get(idol_obj.id) or 0
-            self.cache.idols.append(idol_obj)
-
-    async def create_group_cache(self):
-        """Create Group Objects and store them as cache"""
-        self.cache.groups = []
-        for group in await self.u_group_members.get_all_groups():
-            group_obj = self.u_group_members.Group(**group)
-            group_obj.aliases, group_obj.local_aliases = await self.u_group_members.get_db_aliases(group_obj.id, group=True)
-            # add all idol ids and remove potential duplicates
-            group_obj.members = list(dict.fromkeys(await self.u_group_members.get_db_members_in_group(group_id=group_obj.id)))
-            group_obj.photo_count = self.cache.group_photos.get(group_obj.id) or 0
-            self.cache.groups.append(group_obj)
-
-    async def process_session(self):
-        """Sets the new session id, total used, and time format for distinguishing days."""
-        current_time_format = datetime.date.today()
-        if self.cache.session_id is None:
-            if self.cache.total_used is None:
-                self.cache.total_used = (self.first_result(await self.conn.fetchrow("SELECT totalused FROM stats.sessions ORDER BY totalused DESC"))) or 0
-            try:
-                await self.conn.execute("INSERT INTO stats.sessions(totalused, session, date) VALUES ($1, $2, $3)", self.cache.total_used, 0, current_time_format)
-            except Exception as e:
-                # session for today already exists.
-                pass
-            self.cache.session_id = self.first_result(await self.conn.fetchrow("SELECT sessionid FROM stats.sessions WHERE date = $1", current_time_format))
-            self.cache.session_time_format = current_time_format
-        else:
-            # check that the date is correct, and if not, call get_session_id to get the new session id.
-            if current_time_format != self.cache.session_time_format:
-                self.cache.current_session = 0
-                self.cache.session_id = None
-                self.cache.session_id = await self.get_session_id()
-
-    async def get_session_id(self):
-        """Force get the session id, this will also set total used and the session id."""
-        await self.process_session()
-        return self.cache.session_id
-
-    async def update_n_word_counter(self):
-        """Update NWord Cache"""
-        self.cache.n_word_counter = {}
-        user_info = await self.conn.fetch("SELECT userid, nword FROM general.nword")
-        for user in user_info:
-            self.cache.n_word_counter[user[0]] = user[1]
-
-    async def update_temp_channels(self):
-        """Create the cache for temp channels."""
-        self.cache.temp_channels = {}
-        channels = await self.get_temp_channels()
-        for channel_id, delay in channels:
-            removal_time = delay
-            if removal_time < 60:
-                removal_time = 60
-            self.cache.temp_channels[channel_id] = removal_time
-
-    async def update_welcome_message_cache(self):
-        """Create the cache for welcome messages."""
-        self.cache.welcome_messages = {}
-        info = await self.conn.fetch("SELECT channelid, serverid, message, enabled FROM general.welcome")
-        for server in info:
-            self.cache.welcome_messages[server[1]] = {"channel_id": server[0], "message": server[2], "enabled": server[3]}
-
-    async def update_server_prefixes(self):
-        """Create the cache for server prefixes."""
-        self.cache.server_prefixes = {}
-        info = await self.conn.fetch("SELECT serverid, prefix FROM general.serverprefix")
-        for server_id, prefix in info:
-            self.cache.server_prefixes[server_id] = prefix
-
-    async def update_logging_channels(self):
-        """Create the cache for logged servers and channels."""
-        self.cache.logged_channels = {}
-        self.cache.list_of_logged_channels = []
-        logged_servers = await self.conn.fetch("SELECT id, serverid, channelid, sendall FROM logging.servers WHERE status = $1", 1)
-        for p_id, server_id, channel_id, send_all in logged_servers:
-            channels = await self.conn.fetch("SELECT channelid FROM logging.channels WHERE server = $1", p_id)
-            for channel in channels:
-                self.cache.list_of_logged_channels.append(channel[0])
-            self.cache.logged_channels[server_id] = {
-                "send_all": send_all,
-                "logging_channel": channel_id,
-                "channels": [channel[0] for channel in channels]
-            }
-
-    async def update_bot_bans(self):
-        """Create the cache for banned users from the bot."""
-        self.cache.bot_banned = []
-        banned_users = await self.conn.fetch("SELECT userid FROM general.blacklisted")
-        for user in banned_users:
-            user_id = user[0]
-            self.cache.bot_banned.append(user_id)
-
-    async def update_mod_mail(self):
-        """Create the cache for existing mod mail"""
-        self.cache.mod_mail = {}
-        mod_mail = await self.conn.fetch("SELECT userid, channelid FROM general.modmail")
-        for user_id, channel_id in mod_mail:
-            self.cache.mod_mail[user_id] = [channel_id]
-
-    async def update_patreons(self):
-        """Create the cache for Patrons."""
-        try:
-            self.cache.patrons = {}
-            permanent_patrons = await self.get_patreon_users()
-            # normal patrons contains super patrons as well
-            normal_patrons = [patron.id for patron in await self.get_patreon_role_members(super=False)]
-            super_patrons = [patron.id for patron in await self.get_patreon_role_members(super=True)]
-
-            # the reason for db cache is because of the new discord rate limit
-            # where it now takes 20+ minutes for discord cache to fully load, meaning we can only
-            # access the roles after 20 minutes on boot.
-            # this is an alternative to get patreons instantly and later modifying the cache after the cache loads.
-            # remove any patrons from db set cache that should not exist or should be modified.
-            cached_patrons = await self.conn.fetch("SELECT userid, super FROM patreon.cache")
-            for user_id, super_patron in cached_patrons:
-                if user_id not in normal_patrons:
-                    # they are not a patron at all, so remove them from db cache
-                    await self.conn.execute("DELETE FROM patreon.cache WHERE userid = $1", user_id)
-                elif user_id in super_patrons and not super_patron:
-                    # if they are a super patron but their db is cache is a normal patron
-                    await self.conn.execute("UPDATE patreon.cache SET super = $1 WHERE userid = $2", 1, user_id)
-                elif user_id not in super_patrons and super_patron:
-                    # if they are not a super patron, but the db cache says they are.
-                    await self.conn.execute("UPDATE patreon.cache SET super = $1 WHERE userid = $2", 0, user_id)
-            cached_patrons = [patron[0] for patron in cached_patrons]  # list of user ids removing patron status.
-
-            # fix db cache and live Irene cache
-            for patron in normal_patrons:
-                if patron not in cached_patrons:
-                    # patron includes both normal and super patrons.
-                    await self.conn.execute("INSERT INTO patreon.cache(userid, super) VALUES($1, $2)", patron, 0)
-                self.cache.patrons[patron] = False
-            # super patrons must go after normal patrons to have a proper boolean set because
-            # super patrons have both roles.
-            for patron in super_patrons:
-                if patron not in cached_patrons:
-                    await self.conn.execute("UPDATE patreon.cache SET super = $1 WHERE userid = $2", 1, patron)
-                self.cache.patrons[patron] = True
-            for patron in permanent_patrons:
-                self.cache.patrons[patron[0]] = True
-            return True
-        except Exception as e:
-            return False
-
-    async def update_user_notifications(self):
-        """Set the cache for user phrases"""
-        self.cache.user_notifications = []
-        notifications = await self.conn.fetch("SELECT guildid,userid,phrase FROM general.notifications")
-        for guild_id, user_id, phrase in notifications:
-            self.cache.user_notifications.append([guild_id, user_id, phrase])
-
-    async def update_groups(self):
-        """Set cache for group photo count"""
-        self.cache.group_photos = {}
-        all_group_counts = await self.conn.fetch("SELECT g.groupid, g.groupname, COUNT(f.link) FROM groupmembers.groups g, groupmembers.member m, groupmembers.idoltogroup l, groupmembers.imagelinks f WHERE m.id = l.idolid AND g.groupid = l.groupid AND f.memberid = m.id GROUP BY g.groupid ORDER BY g.groupname")
-        for group in all_group_counts:
-            self.cache.group_photos[group[0]] = group[2]
-
-    async def update_idols(self):
-        """Set cache for idol photo count"""
-        self.cache.idol_photos = {}
-        all_idol_counts = await self.conn.fetch("SELECT memberid, COUNT(link) FROM groupmembers.imagelinks GROUP BY memberid")
-        for idol_id, count in all_idol_counts:
-            self.cache.idol_photos[idol_id] = count
-
-    @tasks.loop(seconds=0, minutes=0, hours=12, reconnect=True)
-    async def update_cache(self):
-        """Looped every 12 hours to update the cache in case of anything faulty."""
-        while not self.conn:
-            await asyncio.sleep(1)
-        await self.create_cache()
-
-    @tasks.loop(seconds=0, minutes=0, hours=0, reconnect=True)
-    async def update_patron_cache(self):
-        """Looped until patron cache is loaded.
-        This was added due to intents slowing d.py cache loading rate.
-        """
-        # create a temporary patron list based on the db cache while waiting for the discord cache to load
-        if self.conn:
-            if not self.temp_patrons_loaded:
-                self.cache.patrons = {}
-                cached_patrons = await self.conn.fetch("SELECT userid, super FROM patreon.cache")
-                for user_id, super_patron in cached_patrons:
-                    self.cache.patrons[user_id] = bool(super_patron)
-                self.temp_patrons_loaded = True
-            while not self.discord_cache_loaded:
-                await asyncio.sleep(1)
-            if await self.process_cache_time(self.update_patreons, "Patrons"):
-                self.update_patron_cache_hour.start()
-                self.update_patron_cache.stop()
-
-    @tasks.loop(seconds=0, minutes=0, hours=1, reconnect=True)
-    async def update_patron_cache_hour(self):
-        """Update Patron Cache every hour in the case of unaccounted errors."""
-        # this is to make sure on the first run it doesn't update since it is created elsewhere.
-        if self.loop_count != 0:
-            await self.process_cache_time(self.update_patreons, "Patrons")
-        self.loop_count += 1
-
-    @tasks.loop(seconds=0, minutes=1, hours=0, reconnect=True)
-    async def send_cache_data_to_data_dog(self):
-        """Sends metric information about cache to data dog every minute."""
-        if self.thread_pool:
-            active_user_reminders = 0
-            for user_id in self.cache.reminders:
-                reminders = self.cache.reminders.get(user_id)
-                if reminders:
-                    active_user_reminders += len(reminders)
-            metric_info = {
-                'total_commands_used': self.cache.total_used,
-                'bias_games': len(self.cache.bias_games),
-                'guessing_games': len(self.cache.guessing_games),
-                'patrons': len(self.cache.patrons),
-                'custom_server_prefixes': len(self.cache.server_prefixes),
-                'session_commands_used': self.cache.current_session,
-                'user_notifications': len(self.cache.user_notifications),
-                'mod_mail': len(self.cache.mod_mail),
-                'banned_from_bot': len(self.cache.bot_banned),
-                'logged_servers': len(self.cache.logged_channels),
-                # server count is based on discord.py guild cache which takes a large amount of time to load fully.
-                # There may be inaccurate data points on a new instance of the bot due to the amount of time it takes.
-                'server_count': len(self.client.guilds),
-                'welcome_messages': len(self.cache.welcome_messages),
-                'temp_channels': len(self.cache.temp_channels),
-                'amount_of_idols': len(self.cache.idols),
-                'amount_of_groups': len(self.cache.groups),
-                'channels_restricted': len(self.cache.restricted_channels),
-                'amount_of_bot_statuses': len(self.cache.bot_statuses),
-                'commands_per_minute': self.cache.commands_per_minute,
-                'amount_of_custom_commands': len(self.cache.custom_commands),
-                'discord_ping': self.get_ping(),
-                'n_words_per_minute': self.cache.n_words_per_minute,
-                'bot_api_idol_calls': self.cache.bot_api_idol_calls,
-                'bot_api_translation_calls': self.cache.bot_api_translation_calls,
-                'messages_received_per_min': self.cache.messages_received_per_minute,
-                'errors_per_minute': self.cache.errors_per_minute,
-                'wolfram_per_minute': self.cache.wolfram_per_minute,
-                'urban_per_minute': self.cache.urban_per_minute,
-                'active_user_reminders': active_user_reminders
-            }
-
-            # set all per minute metrics to 0 since this is a 60 second loop.
-            self.cache.n_words_per_minute = 0
-            self.cache.commands_per_minute = 0
-            self.cache.bot_api_idol_calls = 0
-            self.cache.bot_api_translation_calls = 0
-            self.cache.messages_received_per_minute = 0
-            self.cache.errors_per_minute = 0
-            self.cache.wolfram_per_minute = 0
-            self.cache.urban_per_minute = 0
-            for metric_name in metric_info:
-                metric_value = metric_info.get(metric_name)
-                # add to thread pool to prevent blocking.
-                result = (self.thread_pool.submit(self.send_metric, metric_name, metric_value)).result()
-
-    ##################
-    # ## CURRENCY ## #
-    ##################
-
-    async def register_user(self, user_id):
-        """Register a user to the database if they are not already registered."""
-        count = self.first_result(await self.conn.fetchrow("SELECT COUNT(*) FROM currency.Currency WHERE UserID = $1", user_id))
-        if not count:
-            await self.conn.execute("INSERT INTO currency.Currency (UserID, Money) VALUES ($1, $2)", user_id, "100")
-            return True
-
-    async def get_user_has_money(self, user_id):
-        """Check if a user has money."""
-        return not self.first_result(await self.conn.fetchrow("SELECT COUNT(*) FROM currency.Currency WHERE UserID = $1", user_id)) == 0
-
-    async def get_balance(self, user_id):
-        """Get current balance of a user."""
-        if not (await self.register_user(user_id)):
-            money = await self.conn.fetchrow("SELECT money FROM currency.currency WHERE userid = $1", user_id)
-            return int(self.first_result(money))
-        else:
-            return 100
-
-    @staticmethod
-    async def shorten_balance(money):  # money must be passed in as a string.
-        """Shorten an amount of money to it's value places."""
-        place_names = ['', 'Thousand', 'Million', 'Billion', 'Trillion', 'Quadrillion', 'Quintillion', 'Sextillion', 'Septillion', 'Octillion', 'Nonillion', 'Decillion', 'Undecillion', 'Duodecillion', 'Tredecillion', 'Quatturodecillion', 'Quindecillion', 'Sexdecillion', 'Septendecillion', 'Octodecillion', 'Novemdecillion', 'Vigintillion', 'Centillion']
-        try:
-            place_values = int(math.log10(int(money)) // 3)
-        except Exception as e:
-            # This will have a math domain error when the amount of balance is 0.
-            return "0"
-        try:
-            return f"{int(money) // (10 ** (3 * place_values))} {place_names[place_values]}"
-        except Exception as e:
-            return "Too Fucking Much$"
-
-    async def update_balance(self, user_id, new_balance):
-        """Update a user's balance."""
-        await self.conn.execute("UPDATE currency.Currency SET Money = $1::text WHERE UserID = $2", str(new_balance), user_id)
-
-    @staticmethod
-    async def get_robbed_amount(author_money, user_money, level):
-        """The amount to rob a specific person based on their rob level."""
-        max_amount = int(user_money // 100)  # b value
-        if max_amount > int(author_money // 2):
-            max_amount = int(author_money // 2)
-        min_amount = int((max_amount * level) // 100)
-        if min_amount > max_amount:  # kind of ironic, but it is possible for min to surpass max in this case
-            robbed_amount = random.randint(max_amount, min_amount)
-        else:
-            robbed_amount = random.randint(min_amount, max_amount)
-        return robbed_amount
-
     @staticmethod
     def remove_commas(amount):
         """Remove all commas from a string and make it an integer."""
         return int(amount.replace(',', ''))
 
-    #######################
-    # ## MISCELLANEOUS ## #
-    #######################
     async def kill_api(self):
         """restart the api"""
         source_link = "http://127.0.0.1:5123/restartAPI"
         async with self.session.get(source_link) as resp:
             log.console("Restarting API.")
 
-    async def get_number_of_emojis(self, emojis, animated=False):
-        not_animated_emojis = []
-        animated_emojis = []
-        for emoji in emojis:
-            if emoji.animated:
-                animated_emojis.append(emoji)
-            else:
-                not_animated_emojis.append(emoji)
-        return len(animated_emojis) if animated else len(not_animated_emojis)
-
     @staticmethod
     async def get_server_id(ctx):
-        """Get the server id by context."""
+        """Get the server id by context or message."""
         # make sure ctx.guild exists in the case discord.py cache isn't loaded.
         if ctx.guild:
             return ctx.guild.id
-
-    async def check_if_moderator(self, ctx):
-        """Check if a user is a moderator on a server"""
-        return (ctx.author.permissions_in(ctx.channel)).manage_messages
-
-    async def check_for_bot_mentions(self, message):
-        """Returns true if the message is only a bot mention and nothing else."""
-        return message.content == f"<@!{keys.bot_id}>"
-
-    async def get_api_status(self):
-        end_point = f"http://127.0.0.1:{keys.api_port}"
-        try:
-            async with self.session.get(end_point) as r:
-                return r.status == 200
-        except Exception as e:
-            pass
-
-    async def get_db_status(self):
-        end_point = f"http://127.0.0.1:{5050}"
-        try:
-            async with self.session.get(end_point) as r:
-                return r.status == 200
-
-        except Exception as e:
-            pass
-
-    async def get_images_status(self):
-        end_point = f"http://images.irenebot.com/index.html"
-        try:
-            async with self.session.get(end_point) as r:
-                return r.status == 200
-        except Exception as e:
-            pass
-
-    async def send_maintenance_message(self, channel):
-        try:
-            reason = ""
-            if self.cache.maintenance_reason:
-                reason = f"\nREASON: {self.cache.maintenance_reason}"
-            await channel.send(
-                f">>> **A maintenance is currently in progress. Join the support server for more information. <{keys.bot_support_server_link}>{reason}**")
-        except Exception as e:
-            pass
-
-    async def process_commands(self, message):
-        message_sender = message.author
-        if not message_sender.bot:
-            message_content = message.clean_content
-            message_channel = message.channel
-            server_prefix = await self.get_server_prefix_by_context(message)
-            # check if the user mentioned the bot and send them a help message.
-            if await self.check_for_bot_mentions(message):
-                await message.channel.send(
-                    f"Type `{server_prefix}help` for information on commands.")
-            if len(message_content) >= len(server_prefix):
-                changing_prefix = [keys.bot_prefix + 'setprefix', keys.bot_prefix + 'checkprefix']
-                if message.content[0:len(server_prefix)].lower() == server_prefix.lower() or message.content.lower() in changing_prefix:
-                    msg_without_prefix = message.content[len(server_prefix):len(message.content)]
-                    # only replace the prefix portion back to the default prefix if it is not %setprefix or %checkprefix
-                    if message.content.lower() not in changing_prefix:
-                        # change message.content so all on_message listeners have a bot prefix
-                        message.content = keys.bot_prefix + msg_without_prefix
-                    # if a user is banned from the bot.
-                    if await self.check_if_bot_banned(message_sender.id):
-                        try:
-                            guild_id = await self.get_guild_id(message)
-                        except Exception as e:
-                            guild_id = None
-                        if await self.check_message_is_command(message) or await self.check_custom_command_name_exists(guild_id, msg_without_prefix):
-                            await self.send_ban_message(message_channel)
-                    else:
-                        await self.client.process_commands(message)
-
-    async def get_guild_id(self, message):
-        try:
-            guild_id = message.guild.id
-        except Exception as e:
-            guild_id = None
-        return guild_id
-
-    async def check_for_nword(self, message):
-        """Processes new messages that contains the N word."""
-        message_sender = message.author
-        if not message_sender.bot:
-            message_content = message.clean_content
-            if self.check_message_not_empty(message):
-                # check if the message belongs to the bot
-                    if message_content[0] != '%':
-                        if self.check_nword(message_content):
-                            self.cache.n_words_per_minute += 1
-                            author_id = message_sender.id
-                            current_amount = self.cache.n_word_counter.get(author_id)
-                            if current_amount:
-                                await self.conn.execute("UPDATE general.nword SET nword = $1 WHERE userid = $2::bigint",
-                                                        current_amount + 1, author_id)
-                                self.cache.n_word_counter[author_id] = current_amount + 1
-                            else:
-                                await self.conn.execute("INSERT INTO general.nword VALUES ($1,$2)", author_id, 1)
-                                self.cache.n_word_counter[author_id] = 1
 
     async def get_dm_channel(self, user_id=None, user=None):
         try:
@@ -710,31 +109,13 @@ class Utility:
             log.console(f"{e} - get_dm_channel 2")
             return None
 
-    async def check_if_temp_channel(self, channel_id):
-        """Check if a channel is a temp channel"""
-        return self.cache.temp_channels.get(channel_id) is not None  # do not change structure
-
-    async def get_temp_channels(self):
-        """Get all temporary channels in the DB."""
-        return await self.conn.fetch("SELECT chanid, delay FROM general.tempchannels")
-
-    async def delete_temp_messages(self, message):
-        """Delete messages that are temp channels"""
-        if await self.check_if_temp_channel(message.channel.id):
-            await message.delete(delay=self.cache.temp_channels.get(message.channel.id))
-
-    async def get_disabled_server_interactions(self, server_id):
-        """Get a server's disabled interactions."""
-        interactions = await self.conn.fetchrow("SELECT interactions FROM general.disabledinteractions WHERE serverid = $1", server_id)
-        return self.first_result(interactions)
-
     @staticmethod
     async def check_interaction_enabled(ctx=None, server_id=None, interaction=None):
         """Check if the interaction is disabled in the current server, RETURNS False when it is disabled."""
         if not server_id and not interaction:
             server_id = await Utility.get_server_id(ctx)
             interaction = ctx.command.name
-        interactions = await resources.get_disabled_server_interactions(server_id)
+        interactions = await resources.u_miscellaneous.get_disabled_server_interactions(server_id)
         if not interactions:
             return True
         interaction_list = interactions.split(',')
@@ -742,110 +123,6 @@ class Utility:
             # normally we would alert the user that the command is disabled, but discord.py uses this function.
             return False
         return True
-
-    async def disable_interaction(self, server_id, interaction):
-        """Disable an interaction (to a specific server)"""
-        interaction = interaction.lower()
-        interactions = await self.get_disabled_server_interactions(server_id)
-        if not interactions:
-            await self.conn.execute("INSERT INTO general.disabledinteractions(serverid, interactions) VALUES ($1, $2)", server_id, interaction)
-        else:
-            interactions = interactions.split(',')
-            interactions.append(interaction)
-            interactions = ','.join(interactions)
-            await self.conn.execute("UPDATE general.disabledinteractions SET interactions = $1 WHERE serverid = $2", interactions, server_id)
-
-    async def enable_interaction(self, server_id, interaction):
-        """Reenable an interaction that was disabled by a server"""
-        interactions = await self.get_disabled_server_interactions(server_id)
-        if not interactions:
-            return
-        else:
-            interactions = interactions.split(',')
-            interactions.remove(interaction)
-            interactions = ','.join(interactions)
-            if not interactions:
-                return await self.conn.execute("DELETE FROM general.disabledinteractions WHERE serverid = $1", server_id)
-            await self.conn.execute("UPDATE general.disabledinteractions SET interactions = $1 WHERE serverid = $2", interactions, server_id)
-
-    async def interact_with_user(self, ctx, user, interaction, interaction_type, self_interaction=False):
-        await self.reset_patreon_cooldown(ctx)
-        try:
-            if user == discord.Member:
-                user = ctx.author
-            list_of_links = await self.conn.fetch("SELECT url FROM general.interactions WHERE interaction = $1", interaction_type)
-            if not self_interaction:
-                if ctx.author.id == user.id:
-                    ctx.command.reset_cooldown(ctx)
-                    return await ctx.send(f"> **{ctx.author.display_name}, you cannot perform this interaction on yourself.**")
-            link = random.choice(list_of_links)
-            embed = discord.Embed(title=f"**{ctx.author.display_name}** {interaction} **{user.display_name}**", color=self.get_random_color())
-            if not await self.check_if_patreon(ctx.author.id):
-                embed.set_footer(text=f"Become a {await self.get_server_prefix_by_context(ctx)}patreon to get rid of interaction cooldowns!")
-            embed.set_image(url=link[0])
-            return await ctx.send(embed=embed)
-        except Exception as e:
-            log.console(e)
-            return await ctx.send(f"> **{ctx.author.display_name}, there are no links saved for this interaction yet.**")
-
-    async def add_command_count(self, command_name):
-        """Add 1 to the specific command count and to the count of the current minute."""
-        self.cache.commands_per_minute += 1
-        session_id = await self.get_session_id()
-        command_count = self.cache.command_counter.get(command_name)
-        if not command_count:
-            await self.conn.execute("INSERT INTO stats.commands(sessionid, commandname, count) VALUES($1, $2, $3)", session_id, command_name, 1)
-            self.cache.command_counter[command_name] = 1
-        else:
-            await self.conn.execute("UPDATE stats.commands SET count = $1 WHERE commandname = $2 AND sessionid = $3", command_count + 1, command_name, session_id)
-            self.cache.command_counter[command_name] += 1
-
-    async def add_session_count(self):
-        """Adds one to the current session count for commands used and for the total used."""
-        session_id = await self.get_session_id()
-        self.cache.current_session += 1
-        self.cache.total_used += 1
-        await self.conn.execute("UPDATE stats.sessions SET session = $1, totalused = $2 WHERE sessionid = $3", self.cache.current_session, self.cache.total_used, session_id)
-
-    async def check_message_is_command(self, message, is_command_name=False):
-        """Check if a message is a command."""
-        if not is_command_name:
-            for command_name in self.client.all_commands:
-                if command_name in message.content:
-                    if len(command_name) != 1:
-                        return True
-            return False
-        if is_command_name:
-            return message in self.client.all_commands
-
-    @staticmethod
-    async def send_ban_message(channel):
-        """A message to send for a user that is banned from the bot."""
-        await channel.send(
-            f"> **You are banned from using {keys.bot_name}. Join <{keys.bot_support_server_link}>**")
-
-    async def ban_user_from_bot(self, user_id):
-        """Bans a user from using the bot."""
-        await self.conn.execute("INSERT INTO general.blacklisted(userid) VALUES ($1)", user_id)
-        self.cache.bot_banned.append(user_id)
-
-    async def unban_user_from_bot(self, user_id):
-        """UnBans a user from the bot."""
-        await self.conn.execute("DELETE FROM general.blacklisted WHERE userid = $1", user_id)
-        try:
-            self.cache.bot_banned.remove(user_id)
-        except Exception as e:
-            pass
-
-    async def check_if_bot_banned(self, user_id):
-        """Check if the user can use the bot."""
-        return user_id in self.cache.bot_banned
-
-    @staticmethod
-    def check_nword(message_content):
-        """Check if a message contains the NWord."""
-        message_split = message_content.lower().split()
-        return 'nigga' in message_split or 'nigger' in message_split and ':' not in message_split
 
     @staticmethod
     def check_if_mod(ctx, mode=0):  # as mode = 1, ctx is the author id.
@@ -859,17 +136,6 @@ class Utility:
     def get_ping(self):
         """Get the client's ping."""
         return int(self.client.latency * 1000)
-
-    @staticmethod
-    def get_int_index(original, index):
-        """Retrieves the specific index of an integer. Ex: Calling index 0 for integer 51 will return 5."""
-        entire_selection = ""
-        counter = 0
-        for value in str(original):
-            if counter < index:
-                entire_selection += value
-            counter += 1
-        return int(entire_selection)
 
     @staticmethod
     def get_random_color():
@@ -890,7 +156,7 @@ class Utility:
         embed.set_footer(text=footer_desc, icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
         return embed
 
-    async def check_reaction(self, msg, user_id, reaction_needed):
+    async def wait_for_reaction(self, msg, user_id, reaction_needed):
         """Wait for a user's reaction on a message."""
         def react_check(reaction_used, user_reacted):
             return (user_reacted.id == user_id) and (reaction_used.emoji == reaction_needed)
@@ -901,63 +167,6 @@ class Utility:
         except asyncio.TimeoutError:
             await msg.delete()
             return False
-
-    @staticmethod
-    async def get_cooldown_time(time):
-        """Turn command cooldown of seconds into hours, minutes, and seconds."""
-        time = round(time)
-        time_returned = ""
-        if time < 1:
-            return (f"{time}s")
-        if time % 86400 != time:
-            days = int(time//86400)
-            if days != 0:
-                time = time-(days*86400)
-                time_returned += f"{days}d "
-        if time % 3600 != time:
-            hours = int(time//3600)
-            if hours != 0:
-                time_returned += f"{hours}h "
-        if time % 3600 != 0:
-            minutes = int((time % 3600) // 60)
-            if minutes != 0:
-                time_returned += f"{minutes}m "
-        if (time % 3600) % 60 < 60:
-            seconds = (time % 3600) % 60
-            if seconds != 0:
-                time_returned += f"{seconds}s"
-        return time_returned
-
-    @staticmethod
-    def check_embed_exists(message):
-        """Check if a message has embeds."""
-        try:
-            for embed_check in message.embeds:
-                if embed_check:
-                    return True
-        except Exception as e:
-            pass
-        return False
-
-    @staticmethod
-    def check_message_not_empty(message):
-        """Check if a message has content."""
-        # do not simplify
-        try:
-            if message.clean_content:
-                return True
-        except Exception as e:
-            pass
-        return False
-
-    def get_message_prefix(self, message):
-        """Get the prefix of a message."""
-        try:
-            if self.check_message_not_empty(message):
-                return message.clean_content[0]
-        except Exception as e:
-            pass
-        return None
 
     async def check_left_or_right_reaction_embed(self, msg, embed_lists, original_page_number=0, reaction1=keys.previous_emoji, reaction2=keys.next_emoji):
         """This method is used for going between pages of embeds."""
@@ -1008,61 +217,6 @@ class Utility:
                          icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
         return embed
 
-    async def translate(self, text, src_lang, target_lang):
-        try:
-            data = {
-                'text': text,
-                'src_lang': await self.get_language_code(src_lang),
-                'target_lang': await self.get_language_code(target_lang),
-                'p_key': keys.translate_private_key
-            }
-            end_point = f"http://127.0.0.1:{keys.api_port}/translate"
-            if self.test_bot:
-                end_point = f"https://api.irenebot.com/translate"
-            async with self.session.post(end_point, data=data) as r:
-                self.cache.bot_api_translation_calls += 1
-                if r.status == 200:
-                    return json.loads(await r.text())
-                else:
-                    return None
-        except Exception as e:
-            log.console(e)
-            return None
-
-    @staticmethod
-    async def get_language_code(language):
-        """Returns a language code that is compatible with the papago framework."""
-        language = language.lower()
-        languages = ['ko', 'en', 'ja', 'zh-CN', 'zh-TW', 'es', 'fr', 'vi', 'th', 'id']
-        ko_keywords = ['korean', 'ko', 'kr', 'korea', 'kor']
-        eng_keywords = ['en', 'eng', 'english']
-        ja_keywords = ['jp', 'jap', 'japanese', 'japan']
-        zh_CN_keywords = ['chinese', 'ch', 'zh-cn', 'zhcn', 'c', 'china']
-        es_keywords = ['es', 'espanol', 'spanish', 'sp']
-        fr_keywords = ['french', 'fr', 'f', 'fren']
-        vi_keywords = ['viet', 'vi', 'vietnamese', 'vietnam']
-        th_keywords = ['th', 'thai', 'thailand']
-        id_keywords = ['id', 'indonesian', 'indonesia', 'ind']
-        if language in ko_keywords:
-            return languages[0]
-        elif language in eng_keywords:
-            return languages[1]
-        elif language in ja_keywords:
-            return languages[2]
-        elif language in zh_CN_keywords:
-            return languages[3]
-        elif language in es_keywords:
-            return languages[5]
-        elif language in fr_keywords:
-            return languages[6]
-        elif language in vi_keywords:
-            return languages[7]
-        elif language in th_keywords:
-            return languages[8]
-        elif languages in id_keywords:
-            return languages[9]
-        return None
-
     async def get_server_prefix(self, server_id):
         """Gets the prefix of a server by the server ID."""
         prefix = self.cache.server_prefixes.get(server_id)
@@ -1074,43 +228,10 @@ class Utility:
     async def get_server_prefix_by_context(self, ctx):  # this can also be passed in as a message
         """Gets the prefix of a server by the context."""
         try:
-            server_id = ctx.guild.id
+            prefix = await self.get_server_prefix(ctx.guild.id)
+            return prefix
         except Exception as e:
             return keys.bot_prefix
-        prefix = self.cache.server_prefixes.get(server_id)
-        return prefix or keys.bot_prefix
-
-    def get_user_count(self):
-        """Get the amount of users that the bot is watching over."""
-        counter = 0
-        for guild in self.client.guilds:
-            counter += guild.member_count
-        return counter
-
-    def get_server_count(self):
-        """Returns the guild count the bot is connected to."""
-        return len(self.client.guilds)
-
-    def get_channel_count(self):
-        """Returns the channel count from all the guilds the bot is connected to."""
-        count = 0
-        for guild in self.client.guilds:
-            count += len(guild.channels)
-        return count
-
-    def get_text_channel_count(self):
-        """Returns the text channel count from all the guilds the bot is connected to."""
-        count = 0
-        for guild in self.client.guilds:
-            count += len(guild.text_channels)
-        return count
-
-    def get_voice_channel_count(self):
-        """Returns the voice channel count from all the guilds the bot is connected to."""
-        count = 0
-        for guild in self.client.guilds:
-            count += len(guild.voice_channels)
-        return count
 
     ###################
     # ## BLACKJACK ## #
@@ -1134,7 +255,7 @@ class Utility:
         """pre requisites for joining a blackjack game."""
         if amount >= 0:
             if not await self.check_in_game(user_id, ctx):
-                if amount > await self.get_balance(user_id):
+                if amount > await self.u_currency.get_balance(user_id):
                     await ctx.send(f"> **{ctx.author}, you can not bet more than your current balance.**")
                 else:
                     return True
@@ -1235,7 +356,7 @@ class Utility:
 
     def check_if_bot(self, user_id):
         """Check if the player is a bot. (The bot would be Irene)"""
-        return str(self.get_int_index(keys.bot_id, 9)) in str(user_id)
+        return str(self.u_miscellaneous.get_int_index(keys.bot_id, 9)) in str(user_id)
 
     async def add_card(self, user_id):
         """Check status of a game, it's player, manages the bot that plays, and then adds a card."""
@@ -1405,8 +526,8 @@ class Utility:
             await self.add_card(game[2])
         else:
             winner = self.determine_winner(player1_score, player2_score)
-            player1_current_bal = await self.get_balance(game[1])
-            player2_current_bal = await self.get_balance(game[2])
+            player1_current_bal = await self.u_currency.get_balance(game[1])
+            player2_current_bal = await self.u_currency.get_balance(game[2])
             if winner == 'player1':
                 await self.update_balance(game[1], player1_current_bal + int(game[4]))
                 if not self.check_if_bot(game[2]):
@@ -1821,7 +942,7 @@ class Utility:
 
     async def stop_game(self, ctx, games):
         """Delete an ongoing game."""
-        is_moderator = await self.check_if_moderator(ctx)
+        is_moderator = await self.u_miscellaneous.check_if_moderator(ctx)
         game = self.find_game(ctx.channel, games)
         if game:
             if ctx.author.id == game.host or is_moderator:

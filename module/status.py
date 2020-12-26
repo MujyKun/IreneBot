@@ -12,10 +12,10 @@ class Status:
         if ex.client.loop.is_running():
             try:
                 random_statuses = [
-                    f'{ex.get_server_count()} servers.',
-                    f'{ex.get_channel_count()} channels.',
+                    f'{ex.u_miscellaneous.get_server_count()} servers.',
+                    f'{ex.u_miscellaneous.get_channel_count()} channels.',
                     f'{bot_prefix}help',
-                    f'{ex.get_user_count()} users.'
+                    f'{ex.u_miscellaneous.get_user_count()} users.'
                 ]
                 if ex.cache.bot_statuses:
                     final_statuses = []

@@ -20,12 +20,11 @@ class BlackJack(commands.Cog):
                 if await ex.u_blackjack.process_bj_game(ctx, amount, user_id):
                     await ex.u_blackjack.add_bj_game(user_id, amount, ctx, "bot")
                     game_id = await ex.u_blackjack.get_game_by_player(user_id)
-                    fake_bot_id = int(f"{ex.get_int_index(bot_id, 9)}{randint(1,999999999)}")
+                    fake_bot_id = int(f"{ex.u_miscellaneous.get_int_index(bot_id, 9)}{randint(1,999999999)}")
                     await ex.u_blackjack.add_player_two(game_id, fake_bot_id, amount)
                     await ex.u_blackjack.start_game(game_id)
         except Exception as e:
             log.console(e)
-            pass
 
     @commands.command(aliases=['jg'])
     async def joingame(self, ctx, game_id=0, amount="0"):

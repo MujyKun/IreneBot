@@ -59,7 +59,7 @@ class Currency(commands.Cog):
         try:
             if check:
                 user_id = ctx.author.id
-                if not await ex.check_in_game(user_id, ctx):
+                if not await ex.u_blackjack.check_in_game(user_id, ctx):
                     keep_going = True
                     if balance == 0:
                         await ctx.send("> **You are not allowed to bet 0.**")
@@ -285,7 +285,7 @@ class Currency(commands.Cog):
         try:
             if check:
                 user_id = ctx.author.id
-                if not await ex.check_in_game(user_id, ctx):
+                if not await ex.u_blackjack.check_in_game(user_id, ctx):
                     await ex.u_currency.register_user(user_id)
                     if mentioned_user.id != user_id:
                         current_amount = await ex.u_currency.get_balance(user_id)
@@ -322,7 +322,7 @@ class Currency(commands.Cog):
                 elif amount >= 0:
                     user_id = ctx.author.id
                     await ex.u_currency.register_user(user_id)
-                    if not await ex.check_in_game(user_id, ctx):
+                    if not await ex.u_blackjack.check_in_game(user_id, ctx):
                         current_balance = await ex.u_currency.get_balance(user_id)
                         if amount > current_balance:
                             await ctx.send("> ** You do not have enough money **", delete_after=60)

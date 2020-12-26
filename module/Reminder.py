@@ -16,8 +16,8 @@ class Reminder(commands.Cog):
     async def listreminders(self, ctx):
         """Lists out all of your reminders.
         [Format: %listreminders]"""
-        remind_list = await ex.get_reminders(ctx.author.id)
-        user_timezone = await ex.get_user_timezone(ctx.author.id)
+        remind_list = await ex.u_reminder.get_reminders(ctx.author.id)
+        user_timezone = await ex.u_reminder.get_user_timezone(ctx.author.id)
 
         if not remind_list:
             return await ctx.send(f"> {ctx.author.display_name}, you have no reminders.")
@@ -30,7 +30,7 @@ class Reminder(commands.Cog):
             if user_timezone:
                 remind_time = remind_time.replace(tzinfo=pytz.utc).astimezone(pytz.timezone(user_timezone))
             m_embed.add_field(name=f"{index_number}) {remind_reason}",
-                              value=f"{await ex.get_locale_time(remind_time,user_timezone)}",
+                              value=f"{await ex.u_reminder.get_locale_time(remind_time,user_timezone)}",
                               inline=False)
             remind_number += 1
             index_number += 1
@@ -48,7 +48,7 @@ class Reminder(commands.Cog):
         """Remove one of your reminders.
         [Format: %removereminder (reminder index)]"""
         reminders = ex.cache.reminders.get(ctx.author.id)
-        user_timezone = await ex.get_user_timezone(ctx.author.id)
+        user_timezone = await ex.u_reminder.get_user_timezone(ctx.author.id)
         if not reminders:
             return await ctx.send(f"> {ctx.author.display_name}, you have no reminders.")
         else:
@@ -56,8 +56,8 @@ class Reminder(commands.Cog):
                 remind_id, remind_reason, remind_time = reminders[reminder_index-1]
                 remind_time = remind_time.replace(tzinfo=pytz.utc).astimezone(pytz.timezone(user_timezone))
                 await ctx.send(f"> {ctx.author.display_name}, I will not remind you to **{remind_reason}**"
-                               f" on `{await ex.get_locale_time(remind_time,user_timezone)}`.")
-                await ex.remove_user_reminder(ctx.author.id, remind_id)
+                               f" on `{await ex.u_reminder.get_locale_time(remind_time,user_timezone)}`.")
+                await ex.u_reminder.remove_user_reminder(ctx.author.id, remind_id)
             except Exception as e:
                 return await ctx.send(f"> {ctx.author.display_name}, I could not find index {reminder_index}.")
 
@@ -68,14 +68,14 @@ class Reminder(commands.Cog):
         or
         %remindme to ____ in 6hrs 30mins]"""
         reminders = ex.cache.reminders.get(ctx.author.id)
-        user_timezone = await ex.get_user_timezone(ctx.author.id)
+        user_timezone = await ex.u_reminder.get_user_timezone(ctx.author.id)
         if reminders:
             if len(reminders) >= reminder_limit:
                 return await ctx.send(f"> {ctx.author.display_name}, You have reached the maximum limit "
                                       f"({reminder_limit}) for reminders you can have.")
         server_prefix = await ex.get_server_prefix_by_context(ctx)
         try:
-            is_relative_time, type_index = await ex.determine_time_type(user_input)
+            is_relative_time, type_index = await ex.u_reminder.determine_time_type(user_input)
         except ex.exceptions.ImproperFormat:
             return await ctx.send(
                 f"> {ctx.author.display_name}, that is not a proper reminder format. Use `{server_prefix}help remindme`"
@@ -85,9 +85,9 @@ class Reminder(commands.Cog):
             return await ctx.send(
                 f"> {ctx.author.display_name}, that is not a proper reminder format. Use `{server_prefix}help remindme`"
                 f" for help with the acceptable format.")
-        remind_reason = await ex.process_reminder_reason(user_input, type_index)
+        remind_reason = await ex.u_reminder.process_reminder_reason(user_input, type_index)
         try:
-            remind_time = await ex.process_reminder_time(user_input, type_index, is_relative_time, ctx.author.id)
+            remind_time = await ex.u_reminder.process_reminder_time(user_input, type_index, is_relative_time, ctx.author.id)
         except ex.exceptions.ImproperFormat:
             return await ctx.send(f"{ctx.author.display_name}, you did not enter the correct time format.")
         except ex.exceptions.TooLarge:
@@ -97,10 +97,10 @@ class Reminder(commands.Cog):
             return await ctx.send(f"> {ctx.author.display_name}, you do not have a timezone set. Please use "
                                   f"`{server_prefix}{self.set_timezone_format}`")
 
-        await ex.set_reminder(remind_reason, remind_time, ctx.author.id)
+        await ex.u_reminder.set_reminder(remind_reason, remind_time, ctx.author.id)
         return await ctx.send(
             f"> {ctx.author.display_name}, I will remind you to **{remind_reason}** on "
-            f"`{await ex.get_locale_time(remind_time,user_timezone)}`")
+            f"`{await ex.u_reminder.get_locale_time(remind_time,user_timezone)}`")
 
     @commands.command(aliases=['gettz', 'time'])
     async def gettimezone(self, ctx, user: discord.Member = None):
@@ -110,7 +110,7 @@ class Reminder(commands.Cog):
 
         if not user:
             user = ctx.author
-        user_timezone = await ex.get_user_timezone(user.id)
+        user_timezone = await ex.u_reminder.get_user_timezone(user.id)
         help_message = f" Please use `{server_prefix}{self.set_timezone_format}`."
         if not user_timezone:
             return await ctx.send(f"> {user.display_name}{', you do' if user==ctx.author else ' does'}"
@@ -127,16 +127,16 @@ class Reminder(commands.Cog):
         """Set your local timezone with a timezone abbreviation and country code.
         [Format: %settimezone (timezone name) (country code)]"""
         if not timezone_name and not country_code:
-            await ex.remove_user_timezone(ctx.author.id)
+            await ex.u_reminder.remove_user_timezone(ctx.author.id)
             return await ctx.send(f"> {ctx.author.display_name}, if your timezone was set, it was removed.")
 
-        user_timezone = await ex.process_timezone_input(timezone_name, country_code)
+        user_timezone = await ex.u_reminder.process_timezone_input(timezone_name, country_code)
         if not user_timezone:
             return await ctx.send(f"> {ctx.author.display_name}, that is not a valid timezone.")
 
         timezone_utc = datetime.datetime.now(pytz.timezone(user_timezone)).strftime('UTC%z')
         native_time = datetime.datetime.now(pytz.timezone(user_timezone)).strftime('%c')
-        await ex.set_user_timezone(ctx.author.id, user_timezone)
+        await ex.u_reminder.set_user_timezone(ctx.author.id, user_timezone)
         return await ctx.send(f"> {ctx.author.display_name}, your timezone has been set to `{user_timezone} "
                               f"{timezone_utc}`, where it is currently `{native_time}`")
 
@@ -155,7 +155,7 @@ class Reminder(commands.Cog):
                                 title_desc = f"This is a reminder to **{remind_reason}**."
                                 embed = await ex.create_embed(title="Reminder", title_desc=title_desc)
                                 await dm_channel.send(embed=embed)
-                                await ex.remove_user_reminder(user_id, remind_id)
+                                await ex.u_reminder.remove_user_reminder(user_id, remind_id)
                     except Exception as e:
                         # likely forbidden error -> do not have access to dm user
                         pass

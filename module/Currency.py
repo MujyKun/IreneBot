@@ -188,7 +188,7 @@ class Currency(commands.Cog):
                     msg = await ctx.send(embed=embed)
                     reaction = "\U0001f44d"
                     await msg.add_reaction(reaction)  # thumbs up
-                    if await ex.check_reaction(msg, user_id, reaction):
+                    if await ex.wait_for_reaction(msg, user_id, reaction):
                         await msg.delete()
                         if user_balance < money_needed_to_level:
                             await not_enough_money()

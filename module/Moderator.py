@@ -16,10 +16,10 @@ class Moderator(commands.Cog):
         [Format: %addalias (alias) (ID of idol/group) ('idol' or 'group']"""
         alias = alias.replace("_", " ")
         if mode.lower() in ["idol", "member", "members", "idols"]:
-            obj = await ex.get_member(mem_id)
+            obj = await ex.u_group_members.get_member(mem_id)
             name = f"{obj.full_name} ({obj.stage_name}) [{obj.id}]"
         elif mode.lower() in ["group", "groups"]:
-            obj = await ex.get_group(mem_id)
+            obj = await ex.u_group_members.get_group(mem_id)
             name = f"{obj.name} [{obj.id}]"
         else:
             return await ctx.send("> Please select whether you want to add an idol or group alias.")
@@ -28,14 +28,14 @@ class Moderator(commands.Cog):
         if alias in obj.aliases:
             return await ctx.send(f"> {alias} is already a global alias for {name}.")
         if ex.check_if_mod(ctx):  # checks if the user is a bot mod.
-            await ex.set_global_alias(obj, alias.lower())
+            await ex.u_group_members.set_global_alias(obj, alias.lower())
             return await ctx.send(f"> {alias} has been added as a global alias for {mode} {mem_id}")
         else:
             server_aliases = obj.local_aliases.get(ctx.guild.id)
             if server_aliases:
                 if alias.lower() in server_aliases:
                     return await ctx.send(f"> {alias} is already a server alias for {name}.")
-            await ex.set_local_alias(obj, alias.lower(), ctx.guild.id)
+            await ex.u_group_members.set_local_alias(obj, alias.lower(), ctx.guild.id)
             return await ctx.send(f"> {alias} has been added as a server alias for {name}.")
 
     @commands.command(aliases=['removealias'])
@@ -45,10 +45,10 @@ class Moderator(commands.Cog):
         [Format: %deletealias (alias) (ID of idol/group) ('idol' or 'group')]"""
         alias = alias.replace("_", " ")
         if mode.lower() in ["idol", "member", "members", "idols"]:
-            obj = await ex.get_member(mem_id)
+            obj = await ex.u_group_members.get_member(mem_id)
             name = f"{obj.full_name} ({obj.stage_name}) [{obj.id}]"
         elif mode.lower() in ["group", "groups"]:
-            obj = await ex.get_group(mem_id)
+            obj = await ex.u_group_members.get_group(mem_id)
             name = f"{obj.name} [{obj.id}]"
         else:
             return await ctx.send("> Please select whether you want to add an idol or group alias.")
@@ -57,14 +57,14 @@ class Moderator(commands.Cog):
         if ex.check_if_mod(ctx):  # checks if the user is a bot mod.
             if alias not in obj.aliases:
                 return await ctx.send(f"> {alias} is not a global alias for {name}.")
-            await ex.remove_global_alias(obj, alias.lower())
+            await ex.u_group_members.remove_global_alias(obj, alias.lower())
             return await ctx.send(f"> {alias} has been removed from the global aliases for {mode} {mem_id}")
         else:
             server_aliases = obj.local_aliases.get(ctx.guild.id)
             if server_aliases:
                 if alias.lower() not in server_aliases:
                     return await ctx.send(f"> {alias} is not a server alias for {name}.")
-            await ex.remove_local_alias(obj, alias.lower(), ctx.guild.id)
+            await ex.u_group_members.remove_local_alias(obj, alias.lower(), ctx.guild.id)
             return await ctx.send(f"> {alias} has been removed from the server aliases for {name}.")
 
     @commands.command()

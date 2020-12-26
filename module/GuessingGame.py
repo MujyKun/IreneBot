@@ -57,7 +57,7 @@ class Game:
         self.timeout = timeout
         if gender.lower() in ['male', 'm', 'female', 'f']:
             self.gender = gender.lower()[0]
-        task = asyncio.create_task(self.process_game())
+        await self.process_game()
 
     async def check_message(self):
         stop_phrases = ['stop', 'end']
@@ -99,7 +99,8 @@ class Game:
                     pass
             if self.rounds >= self.max_rounds:
                 if not self.force_ended:
-                    return await self.end_game()
+                    await self.end_game()
+                return True  # will properly end the game.
             self.idol = await ex.u_group_members.get_random_idol()
             if self.gender:
                 while self.idol.gender != self.gender:
@@ -128,7 +129,6 @@ class Game:
         self.force_ended = True
         self.rounds = self.max_rounds
         await self.display_winners()
-        return True
 
     async def print_answer(self, question_skipped=False):
         skipped = ""
@@ -146,6 +146,6 @@ class Game:
     async def process_game(self):
         """Ignores errors and continuously makes new questions until the game should end."""
         while not await self.create_new_question():
-            # the game will only end if the True from end_game() is returned.
+            # the game will only end if True is returned from create_new_question()
             pass
 

@@ -2,7 +2,6 @@ from module import keys, logger as log, cache, exceptions
 from discord.ext import tasks
 from PIL import Image
 from concurrent.futures import ThreadPoolExecutor
-from datadog import initialize, api
 from Weverse.weverseasync import WeverseAsync
 import datetime
 import discord
@@ -507,7 +506,7 @@ class Utility:
             for metric_name in metric_info:
                 metric_value = metric_info.get(metric_name)
                 # add to thread pool to prevent blocking.
-                result = (self.thread_pool.submit(self.send_metric, metric_name, metric_value)).result()
+                result = (self.thread_pool.submit(self.u_data_dog.send_metric, metric_name, metric_value)).result()
 
     ##################
     # ## CURRENCY ## #
@@ -2621,30 +2620,7 @@ Sent in by {user.name}#{user.discriminator} ({user.id}).**"""
             if game.channel == channel:
                 return game
 
-    #################
-    # ## DATADOG ## #
-    #################
-    @staticmethod
-    def initialize_data_dog():
-        """Initialize The DataDog Class"""
-        initialize()
 
-    def send_metric(self, metric_name, value):
-        """Send a metric value to DataDog."""
-        # some values at 0 are important such as active games, this was put in place to make sure they are updated at 0.
-        metrics_at_zero = ['bias_games', 'guessing_games', 'commands_per_minute', 'n_words_per_minute',
-                           'bot_api_idol_calls', 'bot_api_translation_calls', 'messages_received_per_min',
-                           'errors_per_minute', 'wolfram_per_minute', 'urban_per_minute']
-        if metric_name in metrics_at_zero and not value:
-            value = 0
-        else:
-            if not value:
-                return
-        if self.test_bot:
-            metric_name = 'test_bot_' + metric_name
-        else:
-            metric_name = 'irene_' + metric_name
-        api.Metric.send(metric=metric_name, points=[(time.time(), value)])
 
     #################
     # ## WEVERSE ## #

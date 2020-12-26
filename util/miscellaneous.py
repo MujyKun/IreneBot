@@ -94,7 +94,7 @@ class Miscellaneous:
         """Add 1 to the specific command count and to the count of the current minute."""
         ex.cache.commands_per_minute += 1
         session_id = await ex.u_cache.get_session_id()
-        command_count = self.cache.command_counter.get(command_name)
+        command_count = ex.cache.command_counter.get(command_name)
         if not command_count:
             await ex.conn.execute("INSERT INTO stats.commands(sessionid, commandname, count) VALUES($1, $2, $3)", session_id, command_name, 1)
             ex.cache.command_counter[command_name] = 1
@@ -107,7 +107,7 @@ class Miscellaneous:
         session_id = await ex.u_cache.get_session_id()
         ex.cache.current_session += 1
         ex.cache.total_used += 1
-        await ex.conn.execute("UPDATE stats.sessions SET session = $1, totalused = $2 WHERE sessionid = $3", self.cache.current_session, self.cache.total_used, session_id)
+        await ex.conn.execute("UPDATE stats.sessions SET session = $1, totalused = $2 WHERE sessionid = $3", ex.cache.current_session, ex.cache.total_used, session_id)
 
     async def process_commands(self, message):
         message_sender = message.author

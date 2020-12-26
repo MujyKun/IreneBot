@@ -138,7 +138,8 @@ class Archive(commands.Cog):
             log.console(e)
             await ctx.send("> **There was an error.**")
 
-    async def download_url(self, url, drive_id, channel_id):
+    @staticmethod
+    async def download_url(url, drive_id, channel_id):
         try:
             async with ex.session.get(url) as r:
                 check = False
@@ -168,7 +169,8 @@ class Archive(commands.Cog):
         except Exception as e:
             log.console(e)
 
-    async def deletephotos(self):
+    @staticmethod
+    async def deletephotos():
         """Delete photos that are not needed."""
         all_files = await ex.conn.fetch("SELECT filename from archive.ArchivedChannels")
         file_list = [file[0] for file in all_files]

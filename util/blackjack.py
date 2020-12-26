@@ -6,7 +6,8 @@ import discord
 
 
 class BlackJack:
-    async def check_in_game(self, user_id, ctx):  # this is meant for when it is accessed by commands outside of BlackJack.
+    @staticmethod
+    async def check_in_game(user_id, ctx):  # this is meant for when it is accessed by commands outside of BlackJack.
         """Check if a user is in a game."""
         check = ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) From blackjack.games WHERE player1 = $1 OR player2 = $1", user_id))
         if check:
@@ -31,34 +32,41 @@ class BlackJack:
         else:
             await ctx.send(f"> **{ctx.author}, you can not bet a negative number.**")
 
-    async def get_game_by_player(self, player_id):
+    @staticmethod
+    async def get_game_by_player(player_id):
         """Get the current game of a player."""
         return ex.first_result(await ex.conn.fetchrow("SELECT gameid FROM blackjack.games WHERE player1 = $1 OR player2 = $1", player_id))
 
-    async def get_game(self, game_id):
+    @staticmethod
+    async def get_game(game_id):
         """Get the game from its ID"""
         return await ex.conn.fetchrow("SELECT gameid, player1, player2, bid1, bid2, channelid FROM blackjack.games WHERE gameid = $1", game_id)
 
-    async def add_player_two(self, game_id, user_id, bid):
+    @staticmethod
+    async def add_player_two(game_id, user_id, bid):
         """Add a second player to a blackjack game."""
         await ex.conn.execute("UPDATE blackjack.games SET player2 = $1, bid2 = $2 WHERE gameid = $3 ", user_id, str(bid), game_id)
 
-    async def get_current_cards(self, user_id):
+    @staticmethod
+    async def get_current_cards(user_id):
         """Get the current cards of a user."""
         in_hand = ex.first_result(await ex.conn.fetchrow("SELECT inhand FROM blackjack.currentstatus WHERE userid = $1", user_id))
         if in_hand is None:
             return []
         return in_hand.split(',')
 
-    async def check_player_standing(self, user_id):
+    @staticmethod
+    async def check_player_standing(user_id):
         """Check if a player is standing."""
         return ex.first_result(await ex.conn.fetchrow("SELECT stand FROM blackjack.currentstatus WHERE userid = $1", user_id)) == 1
 
-    async def set_player_stand(self, user_id):
+    @staticmethod
+    async def set_player_stand(user_id):
         """Set a player to stand."""
         await ex.conn.execute("UPDATE blackjack.currentstatus SET stand = $1 WHERE userid = $2", 1, user_id)
 
-    async def delete_player_status(self, user_id):
+    @staticmethod
+    async def delete_player_status(user_id):
         """Remove a player's status from a game."""
         await ex.conn.execute("DELETE FROM blackjack.currentstatus WHERE userid = $1", user_id)
 
@@ -67,15 +75,18 @@ class BlackJack:
         await self.delete_player_status(user_id)
         await ex.conn.execute("INSERT INTO blackjack.currentstatus (userid, stand, total) VALUES ($1, $2, $2)", user_id, 0)
 
-    async def get_player_total(self, user_id):
+    @staticmethod
+    async def get_player_total(user_id):
         """Get a player's total score."""
         return ex.first_result(await ex.conn.fetchrow("SELECT total FROM blackjack.currentstatus WHERE userid = $1", user_id))
 
-    async def get_card_value(self, card):
+    @staticmethod
+    async def get_card_value(card):
         """Get the value of a card."""
         return ex.first_result(await ex.conn.fetchrow("SELECT value FROM blackjack.cards WHERE id = $1", card))
 
-    async def get_all_cards(self):
+    @staticmethod
+    async def get_all_cards():
         """Get all the cards from a deck."""
         card_tuple = await ex.conn.fetch("SELECT id FROM blackjack.cards")
         all_cards = []
@@ -95,7 +106,8 @@ class BlackJack:
                 available_cards.append(card)
         return available_cards
 
-    async def get_card_name(self, card_id):
+    @staticmethod
+    async def get_card_name(card_id):
         """Get the name of a card."""
         return ex.first_result(await ex.conn.fetchrow("SELECT name FROM blackjack.cards WHERE id = $1", card_id))
 
@@ -109,13 +121,15 @@ class BlackJack:
             return True
         return False
 
-    async def set_aces_used(self, card_list, user_id):
+    @staticmethod
+    async def set_aces_used(card_list, user_id):
         """Mark an ace as used."""
         separator = ','
         cards = separator.join(card_list)
         await ex.conn.execute("UPDATE blackjack.currentstatus SET acesused = $1 WHERE userid = $2", cards, user_id)
 
-    async def get_aces_used(self, user_id):
+    @staticmethod
+    async def get_aces_used(user_id):
         """Get the aces that were changed from 11 to 1."""
         aces_used = ex.first_result(await ex.conn.fetchrow("SELECT acesused FROM blackjack.currentstatus WHERE userid = $1", user_id))
         if aces_used is None:
@@ -257,9 +271,9 @@ class BlackJack:
                     return 'player1'
                 else:
                     return 'player2'
-            elif score1 > 21 and score2 < 21:
+            elif score2 < 21 < score1:
                 return 'player2'
-            elif score1 < 21 and score2 > 21:
+            elif score1 < 21 < score2:
                 return 'player1'
         elif score1 < 21 and score2 < 21:
             if score1 - score2 > 0:

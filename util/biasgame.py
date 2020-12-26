@@ -9,7 +9,8 @@ class BiasGame:
         result = (ex.thread_pool.submit(self.merge_images, first_idol_id, second_idol_id)).result()
         return f"{ bias_game_location}{first_idol_id}_{second_idol_id}.png"
 
-    def merge_images(self, first_idol_id, second_idol_id):
+    @staticmethod
+    def merge_images(first_idol_id, second_idol_id):
         """Merge Idol Images if the merge doesn't exist already."""
         file_name = f"{first_idol_id}_{second_idol_id}.png"
         if not ex.check_file_exists(f"{ bias_game_location}{file_name}"):
@@ -40,7 +41,8 @@ class BiasGame:
         result = (ex.thread_pool.submit(self.create_bracket, all_games, user_id, bracket_winner)).result()
         return f"{ bias_game_location}{user_id}.png"
 
-    def create_bracket(self, all_games, user_id, bracket_winner):
+    @staticmethod
+    def create_bracket(all_games, user_id, bracket_winner):
         def get_battle_images(idol_1_id, idol_2_id):
             return Image.open(f'{ idol_avatar_location}{idol_1_id}_IDOL.png'), Image.open(
                 f'{ idol_avatar_location}{idol_2_id}_IDOL.png')

@@ -46,7 +46,7 @@ class Cache:
         await self.process_cache_time(self.create_timezone_cache, "Timezones")
         if not ex.test_bot and not ex.weverse_client.cache_loaded:
             task = asyncio.create_task(self.process_cache_time(ex.weverse_client.start, "Weverse"))
-        log.console(f"Cache Completely Created in {await ex.u_currency.get_cooldown_time(time.time() - past_time)}.")
+        log.console(f"Cache Completely Created in {await ex.u_miscellaneous.get_cooldown_time(time.time() - past_time)}.")
 
     async def create_timezone_cache(self):
         ex.cache.timezones = {}  # reset cache

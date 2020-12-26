@@ -20,7 +20,7 @@ class DataDog:
         else:
             if not value:
                 return
-        if self.test_bot:
+        if ex.test_bot:
             metric_name = 'test_bot_' + metric_name
         else:
             metric_name = 'irene_' + metric_name

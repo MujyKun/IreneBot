@@ -8,23 +8,23 @@ import discord
 class BlackJack:
     async def check_in_game(self, user_id, ctx):  # this is meant for when it is accessed by commands outside of BlackJack.
         """Check if a user is in a game."""
-        check = self.first_result(await self.conn.fetchrow("SELECT COUNT(*) From blackjack.games WHERE player1 = $1 OR player2 = $1", user_id))
+        check = ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) From blackjack.games WHERE player1 = $1 OR player2 = $1", user_id))
         if check:
-            await ctx.send(f"> **{ctx.author}, you are already in a pending/active game. Please type {await self.get_server_prefix_by_context(ctx)}endgame.**")
+            await ctx.send(f"> **{ctx.author}, you are already in a pending/active game. Please type {await ex.get_server_prefix_by_context(ctx)}endgame.**")
             return True
 
     async def add_bj_game(self, user_id, bid, ctx, mode):
         """Add the user to a blackjack game."""
-        await self.conn.execute("INSERT INTO blackjack.games (player1, bid1, channelid) VALUES ($1, $2, $3)", user_id, str(bid), ctx.channel.id)
+        await ex.conn.execute("INSERT INTO blackjack.games (player1, bid1, channelid) VALUES ($1, $2, $3)", user_id, str(bid), ctx.channel.id)
         game_id = await self.get_game_by_player(user_id)
         if mode != "bot":
-            await ctx.send(f"> **There are currently 1/2 members signed up for BlackJack. To join the game, please type {await self.get_server_prefix_by_context(ctx)}joingame {game_id} (bid)** ")
+            await ctx.send(f"> **There are currently 1/2 members signed up for BlackJack. To join the game, please type {await ex.get_server_prefix_by_context(ctx)}joingame {game_id} (bid)** ")
 
     async def process_bj_game(self, ctx, amount, user_id):
         """pre requisites for joining a blackjack game."""
         if amount >= 0:
             if not await self.check_in_game(user_id, ctx):
-                if amount > await self.u_currency.get_balance(user_id):
+                if amount > await ex.u_currency.get_balance(user_id):
                     await ctx.send(f"> **{ctx.author}, you can not bet more than your current balance.**")
                 else:
                     return True
@@ -33,51 +33,51 @@ class BlackJack:
 
     async def get_game_by_player(self, player_id):
         """Get the current game of a player."""
-        return self.first_result(await self.conn.fetchrow("SELECT gameid FROM blackjack.games WHERE player1 = $1 OR player2 = $1", player_id))
+        return ex.first_result(await ex.conn.fetchrow("SELECT gameid FROM blackjack.games WHERE player1 = $1 OR player2 = $1", player_id))
 
     async def get_game(self, game_id):
         """Get the game from its ID"""
-        return await self.conn.fetchrow("SELECT gameid, player1, player2, bid1, bid2, channelid FROM blackjack.games WHERE gameid = $1", game_id)
+        return await ex.conn.fetchrow("SELECT gameid, player1, player2, bid1, bid2, channelid FROM blackjack.games WHERE gameid = $1", game_id)
 
     async def add_player_two(self, game_id, user_id, bid):
         """Add a second player to a blackjack game."""
-        await self.conn.execute("UPDATE blackjack.games SET player2 = $1, bid2 = $2 WHERE gameid = $3 ", user_id, str(bid), game_id)
+        await ex.conn.execute("UPDATE blackjack.games SET player2 = $1, bid2 = $2 WHERE gameid = $3 ", user_id, str(bid), game_id)
 
     async def get_current_cards(self, user_id):
         """Get the current cards of a user."""
-        in_hand = self.first_result(await self.conn.fetchrow("SELECT inhand FROM blackjack.currentstatus WHERE userid = $1", user_id))
+        in_hand = ex.first_result(await ex.conn.fetchrow("SELECT inhand FROM blackjack.currentstatus WHERE userid = $1", user_id))
         if in_hand is None:
             return []
         return in_hand.split(',')
 
     async def check_player_standing(self, user_id):
         """Check if a player is standing."""
-        return self.first_result(await self.conn.fetchrow("SELECT stand FROM blackjack.currentstatus WHERE userid = $1", user_id)) == 1
+        return ex.first_result(await ex.conn.fetchrow("SELECT stand FROM blackjack.currentstatus WHERE userid = $1", user_id)) == 1
 
     async def set_player_stand(self, user_id):
         """Set a player to stand."""
-        await self.conn.execute("UPDATE blackjack.currentstatus SET stand = $1 WHERE userid = $2", 1, user_id)
+        await ex.conn.execute("UPDATE blackjack.currentstatus SET stand = $1 WHERE userid = $2", 1, user_id)
 
     async def delete_player_status(self, user_id):
         """Remove a player's status from a game."""
-        await self.conn.execute("DELETE FROM blackjack.currentstatus WHERE userid = $1", user_id)
+        await ex.conn.execute("DELETE FROM blackjack.currentstatus WHERE userid = $1", user_id)
 
     async def add_player_status(self, user_id):
         """Add a player's status to a game."""
         await self.delete_player_status(user_id)
-        await self.conn.execute("INSERT INTO blackjack.currentstatus (userid, stand, total) VALUES ($1, $2, $2)", user_id, 0)
+        await ex.conn.execute("INSERT INTO blackjack.currentstatus (userid, stand, total) VALUES ($1, $2, $2)", user_id, 0)
 
     async def get_player_total(self, user_id):
         """Get a player's total score."""
-        return self.first_result(await self.conn.fetchrow("SELECT total FROM blackjack.currentstatus WHERE userid = $1", user_id))
+        return ex.first_result(await ex.conn.fetchrow("SELECT total FROM blackjack.currentstatus WHERE userid = $1", user_id))
 
     async def get_card_value(self, card):
         """Get the value of a card."""
-        return self.first_result(await self.conn.fetchrow("SELECT value FROM blackjack.cards WHERE id = $1", card))
+        return ex.first_result(await ex.conn.fetchrow("SELECT value FROM blackjack.cards WHERE id = $1", card))
 
     async def get_all_cards(self):
         """Get all the cards from a deck."""
-        card_tuple = await self.conn.fetch("SELECT id FROM blackjack.cards")
+        card_tuple = await ex.conn.fetch("SELECT id FROM blackjack.cards")
         all_cards = []
         for card in card_tuple:
             all_cards.append(card[0])
@@ -97,7 +97,7 @@ class BlackJack:
 
     async def get_card_name(self, card_id):
         """Get the name of a card."""
-        return self.first_result(await self.conn.fetchrow("SELECT name FROM blackjack.cards WHERE id = $1", card_id))
+        return ex.first_result(await ex.conn.fetchrow("SELECT name FROM blackjack.cards WHERE id = $1", card_id))
 
     async def check_if_ace(self, card_id, user_id):
         """Check if the card is an ace and is not used."""
@@ -113,11 +113,11 @@ class BlackJack:
         """Mark an ace as used."""
         separator = ','
         cards = separator.join(card_list)
-        await self.conn.execute("UPDATE blackjack.currentstatus SET acesused = $1 WHERE userid = $2", cards, user_id)
+        await ex.conn.execute("UPDATE blackjack.currentstatus SET acesused = $1 WHERE userid = $2", cards, user_id)
 
     async def get_aces_used(self, user_id):
         """Get the aces that were changed from 11 to 1."""
-        aces_used = self.first_result(await self.conn.fetchrow("SELECT acesused FROM blackjack.currentstatus WHERE userid = $1", user_id))
+        aces_used = ex.first_result(await ex.conn.fetchrow("SELECT acesused FROM blackjack.currentstatus WHERE userid = $1", user_id))
         if aces_used is None:
             return []
         return aces_used.split(',')
@@ -133,9 +133,9 @@ class BlackJack:
 
         separator = ','
         current_cards = await self.get_current_cards(user_id)
-        game_id = await self.u_blackjack.get_game_by_player(user_id)
+        game_id = await ex.u_blackjack.get_game_by_player(user_id)
         game = await self.get_game(game_id)
-        channel = await self.client.fetch_channel(game[5])
+        channel = await ex.client.fetch_channel(game[5])
         stand = await self.check_player_standing(user_id)
         player1_score = await self.get_player_total(game[1])
         player2_score = await self.get_player_total(game[2])
@@ -156,7 +156,7 @@ class BlackJack:
                     current_total = current_total + random_card_value
             else:
                 current_total = current_total + random_card_value
-            await self.conn.execute("UPDATE blackjack.currentstatus SET inhand = $1, total = $2 WHERE userid = $3", cards, current_total, user_id)
+            await ex.conn.execute("UPDATE blackjack.currentstatus SET inhand = $1, total = $2 WHERE userid = $3", cards, current_total, user_id)
             if current_total > 21:
                 if user_id == game[2] and self.check_if_bot(game[2]):
                     if player1_score > 21 and current_total >= 16:
@@ -211,7 +211,7 @@ class BlackJack:
 
     async def compare_channels(self, user_id, channel):
         """Check if the channel is the correct channel."""
-        game_id = await self.u_blackjack.get_game_by_player(user_id)
+        game_id = await ex.u_blackjack.get_game_by_player(user_id)
         game = await self.get_game(game_id)
         if game[5] == channel.id:
             return True
@@ -294,17 +294,17 @@ class BlackJack:
             await self.add_card(game[2])
         else:
             winner = self.determine_winner(player1_score, player2_score)
-            player1_current_bal = await self.u_currency.get_balance(game[1])
-            player2_current_bal = await self.u_currency.get_balance(game[2])
+            player1_current_bal = await ex.u_currency.get_balance(game[1])
+            player2_current_bal = await ex.u_currency.get_balance(game[2])
             if winner == 'player1':
-                await self.u_currency.update_balance(game[1], player1_current_bal + int(game[4]))
+                await ex.u_currency.update_balance(game[1], player1_current_bal + int(game[4]))
                 if not self.check_if_bot(game[2]):
-                    await self.u_currency.update_balance(game[2], player2_current_bal - int(game[4]))
+                    await ex.u_currency.update_balance(game[2], player2_current_bal - int(game[4]))
                 await self.announce_winner(channel, game[1], game[2], player1_score, player2_score, game[4])
             elif winner == 'player2':
                 if not self.check_if_bot(game[2]):
-                    await self.u_currency.update_balance(game[2], player2_current_bal + int(game[3]))
-                await self.u_currency.update_balance(game[1], player1_current_bal - int(game[3]))
+                    await ex.u_currency.update_balance(game[2], player2_current_bal + int(game[3]))
+                await ex.u_currency.update_balance(game[1], player1_current_bal - int(game[3]))
                 await self.announce_winner(channel, game[2], game[1], player2_score, player1_score, game[3])
             elif winner == 'tie':
                 await self.announce_tie(channel, game[1], game[2], player1_score)
@@ -313,14 +313,14 @@ class BlackJack:
     async def delete_game(self, game_id):
         """Delete a blackjack game."""
         game = await self.get_game(game_id)
-        await self.conn.execute("DELETE FROM blackjack.games WHERE gameid = $1", game_id)
-        await self.conn.execute("DELETE FROM blackjack.currentstatus WHERE userid = $1", game[1])
-        await self.conn.execute("DELETE FROM blackjack.currentstatus WHERE userid = $1", game[2])
+        await ex.conn.execute("DELETE FROM blackjack.games WHERE gameid = $1", game_id)
+        await ex.conn.execute("DELETE FROM blackjack.currentstatus WHERE userid = $1", game[1])
+        await ex.conn.execute("DELETE FROM blackjack.currentstatus WHERE userid = $1", game[2])
         log.console(f"Game {game_id} deleted.")
 
     async def delete_all_games(self):
         """Delete all blackjack games."""
-        all_games = await self.conn.fetch("SELECT gameid FROM blackjack.games")
+        all_games = await ex.conn.fetch("SELECT gameid FROM blackjack.games")
         for games in all_games:
             game_id = games[0]
             await self.delete_game(game_id)

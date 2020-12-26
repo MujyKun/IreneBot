@@ -6,13 +6,13 @@ from PIL import Image
 class BiasGame:
     async def create_bias_game_image(self, first_idol_id, second_idol_id):
         """Uses thread pool to create bias game image to prevent IO blocking."""
-        result = (self.thread_pool.submit(self.merge_images, first_idol_id, second_idol_id)).result()
+        result = (ex.thread_pool.submit(self.merge_images, first_idol_id, second_idol_id)).result()
         return f"{ bias_game_location}{first_idol_id}_{second_idol_id}.png"
 
     def merge_images(self, first_idol_id, second_idol_id):
         """Merge Idol Images if the merge doesn't exist already."""
         file_name = f"{first_idol_id}_{second_idol_id}.png"
-        if not self.check_file_exists(f"{ bias_game_location}{file_name}"):
+        if not ex.check_file_exists(f"{ bias_game_location}{file_name}"):
             # open the images.
             versus_image = Image.open(f'{bias_game_location}versus.png')
             first_idol_image = Image.open(f'{idol_avatar_location}{first_idol_id}_IDOL.png')
@@ -37,7 +37,7 @@ class BiasGame:
             versus_image.save(f"{ bias_game_location}{file_name}")
 
     async def create_bias_game_bracket(self, all_games, user_id, bracket_winner):
-        result = (self.thread_pool.submit(self.create_bracket, all_games, user_id, bracket_winner)).result()
+        result = (ex.thread_pool.submit(self.create_bracket, all_games, user_id, bracket_winner)).result()
         return f"{ bias_game_location}{user_id}.png"
 
     def create_bracket(self, all_games, user_id, bracket_winner):
@@ -58,8 +58,8 @@ class BiasGame:
             if len(c_round) <= 4:
                 for battle in c_round:
                     first_idol, second_idol = battle[0], battle[1]
-                    first_idol_info = self.cache.stored_bracket_positions.get(count)
-                    second_idol_info = self.cache.stored_bracket_positions.get(count + 1)
+                    first_idol_info = ex.cache.stored_bracket_positions.get(count)
+                    second_idol_info = ex.cache.stored_bracket_positions.get(count + 1)
 
                     # get images
                     first_idol_image, second_idol_image = get_battle_images(first_idol.id, second_idol.id)
@@ -76,7 +76,7 @@ class BiasGame:
                     count = count + 2
 
         # add winner
-        idol_info = self.cache.stored_bracket_positions.get(count)
+        idol_info = ex.cache.stored_bracket_positions.get(count)
         idol_image = Image.open(f'{ idol_avatar_location}{bracket_winner.id}_IDOL.png')
         idol_image = idol_image.resize(idol_info.get('img_size'))
         bracket.paste(idol_image, idol_info.get('pos'))

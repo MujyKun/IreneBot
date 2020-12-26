@@ -6,20 +6,20 @@ import random
 class Currency:
     async def register_user(self, user_id):
         """Register a user to the database if they are not already registered."""
-        count = self.first_result(await self.conn.fetchrow("SELECT COUNT(*) FROM currency.Currency WHERE UserID = $1", user_id))
+        count = ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) FROM currency.Currency WHERE UserID = $1", user_id))
         if not count:
-            await self.conn.execute("INSERT INTO currency.Currency (UserID, Money) VALUES ($1, $2)", user_id, "100")
+            await ex.conn.execute("INSERT INTO currency.Currency (UserID, Money) VALUES ($1, $2)", user_id, "100")
             return True
 
     async def get_user_has_money(self, user_id):
         """Check if a user has money."""
-        return not self.first_result(await self.conn.fetchrow("SELECT COUNT(*) FROM currency.Currency WHERE UserID = $1", user_id)) == 0
+        return not ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) FROM currency.Currency WHERE UserID = $1", user_id)) == 0
 
     async def get_balance(self, user_id):
         """Get current balance of a user."""
         if not (await self.register_user(user_id)):
-            money = await self.conn.fetchrow("SELECT money FROM currency.currency WHERE userid = $1", user_id)
-            return int(self.first_result(money))
+            money = await ex.conn.fetchrow("SELECT money FROM currency.currency WHERE userid = $1", user_id)
+            return int(ex.first_result(money))
         else:
             return 100
 
@@ -39,7 +39,7 @@ class Currency:
 
     async def update_balance(self, user_id, new_balance):
         """Update a user's balance."""
-        await self.conn.execute("UPDATE currency.Currency SET Money = $1::text WHERE UserID = $2", str(new_balance), user_id)
+        await ex.conn.execute("UPDATE currency.Currency SET Money = $1::text WHERE UserID = $2", str(new_balance), user_id)
 
     @staticmethod
     async def get_robbed_amount(author_money, user_money, level):

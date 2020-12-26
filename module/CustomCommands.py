@@ -8,13 +8,13 @@ class CustomCommands(commands.Cog):
     async def process_custom_commands(message):
         # custom server commands
         if message.content and not message.author.bot:
-            if not await ex.check_if_bot_banned(message.author.id):
-                guild_id = await ex.get_guild_id(message)
+            if not await ex.u_miscellaneous.check_if_bot_banned(message.author.id):
+                guild_id = await ex.get_server_id(message)
                 current_message_prefix = message.content[0:len(keys.bot_prefix)]
                 if current_message_prefix == keys.bot_prefix:
                     message_without_prefix = message.content[len(keys.bot_prefix):len(message.content)].lower()
-                    if await ex.check_custom_command_name_exists(guild_id, message_without_prefix):
-                        await message.channel.send(await ex.get_custom_command(guild_id, message_without_prefix))
+                    if await ex.u_custom_commands.check_custom_command_name_exists(guild_id, message_without_prefix):
+                        await message.channel.send(await ex.u_custom_commands.get_custom_command(guild_id, message_without_prefix))
 
     @commands.command(aliases=['addcommand'])
     @commands.has_guild_permissions(manage_messages=True)
@@ -22,13 +22,13 @@ class CustomCommands(commands.Cog):
         """Create a custom command. [Format: %createcommand (command name) (message)]"""
         try:
             command_name = command_name.lower()
-            msg_is_cmd = await ex.check_message_is_command(command_name, is_command_name=True)
+            msg_is_cmd = await ex.u_miscellaneous.check_message_is_command(command_name, is_command_name=True)
             if msg_is_cmd:
                 return await ctx.send(f"> {command_name} is already a bot command and can not be added.")
-            if await ex.check_custom_command_name_exists(ctx.guild.id, command_name):
+            if await ex.u_custom_commands.check_custom_command_name_exists(ctx.guild.id, command_name):
                 return await ctx.send(f"> {command_name} is already a custom command and can not be added.")
             else:
-                await ex.add_custom_command(ctx.guild.id, command_name, message)
+                await ex.u_custom_commands.add_custom_command(ctx.guild.id, command_name, message)
                 return await ctx.send(f"> {command_name} has been added as a command.")
         except Exception as e:
             await ctx.send(f"> An unexpected error occurred -> {e}. Please {await ex.get_server_prefix_by_context(ctx)}report it.")
@@ -39,7 +39,7 @@ class CustomCommands(commands.Cog):
     async def deletecommand(self, ctx, command_name):
         """Delete a custom command. [Format: %deletecommand (command name)]"""
         try:
-            await ex.remove_custom_command(ctx.guild.id, command_name.lower())
+            await ex.u_custom_commands.remove_custom_command(ctx.guild.id, command_name.lower())
             return await ctx.send(f"> If the `{command_name}` exists, it was removed.")
         except Exception as e:
             await ctx.send(f"> An unexpected error occurred -> {e}. Please {await ex.get_server_prefix_by_context(ctx)}report it.")

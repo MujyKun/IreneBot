@@ -41,7 +41,7 @@ class BiasGame(commands.Cog):
             msg_string = f"**Bias Game Leaderboard for {user.display_name}**:\n"
             counter = 1
             for idol_id, wins in user_wins:
-                member = await ex.get_member(idol_id)
+                member = await ex.u_group_members.get_member(idol_id)
                 msg_string += f"{counter}) {member.full_name} ({member.stage_name}) -> {wins} Win(s).\n"
                 counter += 1
         else:
@@ -131,11 +131,11 @@ class Game:
         for first_idol, second_idol in self.current_bracket_teams:
             if not self.force_ended:
                 try:
-                    first_idol_group = (await ex.get_group(random.choice(first_idol.groups))).name
+                    first_idol_group = (await ex.u_group_members.get_group(random.choice(first_idol.groups))).name
                 except Exception as e:
                     first_idol_group = first_idol.full_name
                 try:
-                    second_idol_group = (await ex.get_group(random.choice(second_idol.groups))).name
+                    second_idol_group = (await ex.u_group_members.get_group(random.choice(second_idol.groups))).name
                 except Exception as e:
                     second_idol_group = second_idol.full_name
 
@@ -145,7 +145,7 @@ Remaining Idols: {self.number_of_idols_left}
 {first_idol_group} ({first_idol.stage_name}) **VS** {second_idol_group} ({second_idol.stage_name})
 """
                 display_name = f"{first_idol.stage_name} VS {second_idol.stage_name}.png"
-                file_location = await ex.create_bias_game_image(first_idol.id, second_idol.id)
+                file_location = await ex.u_bias_game.create_bias_game_image(first_idol.id, second_idol.id)
                 image_file = discord.File(fp=file_location, filename=display_name)
                 msg = await self.channel.send(msg_body, file=image_file)
                 await msg.add_reaction(keys.previous_emoji)  # left arrow by default

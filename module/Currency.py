@@ -24,7 +24,7 @@ class Currency(commands.Cog):
         """Gives a certain amount of money every 24 hours [Format: %daily]"""
         try:
             user_balance = await ex.get_balance(ctx.author.id)
-            user_level = await ex.get_level(ctx.author.id, "daily")
+            user_level = await ex.u_levels.get_level(ctx.author.id, "daily")
             daily_amount = int(user_balance * (user_level/200))
             if daily_amount < 100:
                 daily_amount = 100
@@ -154,7 +154,7 @@ class Currency(commands.Cog):
         """Beg a homeless man for money [Format: %beg]"""
         try:
             user_balance = await ex.get_balance(ctx.author.id)
-            user_level = await ex.get_level(ctx.author.id, "beg")
+            user_level = await ex.u_levels.get_level(ctx.author.id, "beg")
             daily_amount = int(7/10 * (2 ** (user_level - 2)))
             if daily_amount < 100:
                 if user_balance > 10000:
@@ -173,8 +173,8 @@ class Currency(commands.Cog):
         try:
             user_id = ctx.author.id
             user_balance = await ex.get_balance(user_id)
-            user_level = await ex.get_level(user_id, command.lower())
-            money_needed_to_level = await ex.get_xp(user_level, command.lower())
+            user_level = await ex.u_levels.get_level(user_id, command.lower())
+            money_needed_to_level = await ex.u_levels.get_xp(user_level, command.lower())
 
             async def not_enough_money():
                 embed = await ex.create_embed(title="Not Enough Money!", title_desc=f"<@{user_id}> does not have **{money_needed_to_level:,}** dollars in order to level up {command}!")
@@ -194,7 +194,7 @@ class Currency(commands.Cog):
                             await not_enough_money()
                         else:
                             await ex.update_balance(user_id, str(user_balance - money_needed_to_level))
-                            await ex.set_level(user_id, user_level + 1, command.lower())
+                            await ex.u_levels.set_level(user_id, user_level + 1, command.lower())
                             embed = await ex.create_embed(title="You Have Leveled Up!",
                                                        title_desc=f"<@{ctx.author.id}>, You are now at level {user_level+1}")
                             await ctx.send(embed=embed)
@@ -221,8 +221,8 @@ class Currency(commands.Cog):
         """Rob a user [Format: %rob @user]"""
         try:
             # not actually a percent, this contains the a value of the random integer.
-            level = await ex.get_level(ctx.author.id, "rob")
-            rob_percent_to_win = await ex.get_rob_percentage(level)
+            level = await ex.u_levels.get_level(ctx.author.id, "rob")
+            rob_percent_to_win = await ex.u_levels.get_rob_percentage(level)
             do_this = True
             robbed_user_id = user.id
             if user == discord.Member:

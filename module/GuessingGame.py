@@ -100,18 +100,18 @@ class Game:
             if self.rounds >= self.max_rounds:
                 if not self.force_ended:
                     return await self.end_game()
-            self.idol = await ex.get_random_idol()
+            self.idol = await ex.u_group_members.get_random_idol()
             if self.gender:
                 while self.idol.gender != self.gender:
-                    self.idol = await ex.get_random_idol()
-            self.group_names = [(await ex.get_group(group_id)).name for group_id in self.idol.groups]
+                    self.idol = await ex.u_group_members.get_random_idol()
+            self.group_names = [(await ex.u_group_members.get_group(group_id)).name for group_id in self.idol.groups]
             self.correct_answers = []
             for alias in self.idol.aliases:
                 self.correct_answers.append(alias.lower())
             self.correct_answers.append(self.idol.full_name.lower())
             self.correct_answers.append(self.idol.stage_name.lower())
             log.console(f'{", ".join(self.correct_answers)} - {self.channel.id}')
-            self.idol_post_msg, self.photo_link = await ex.idol_post(self.channel, self.idol, user_id=self.host, guessing_game=True, scores=self.players)
+            self.idol_post_msg, self.photo_link = await ex.u_group_members.idol_post(self.channel, self.idol, user_id=self.host, guessing_game=True, scores=self.players)
             await self.check_message()
         except Exception as e:
             pass
@@ -139,7 +139,7 @@ class Game:
                                 delete_after=15)
         # create_task should not be awaited because this is meant to run in the background to check for reactions.
         try:
-            task = asyncio.create_task(ex.check_idol_post_reactions(msg, self.host_ctx.message, self.idol, self.photo_link, guessing_game=True))
+            task = asyncio.create_task(ex.u_group_members.check_idol_post_reactions(msg, self.host_ctx.message, self.idol, self.photo_link, guessing_game=True))
         except Exception as e:
             log.console(e)
 

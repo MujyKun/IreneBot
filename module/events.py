@@ -19,13 +19,13 @@ class Events(commands.Cog):
             # increment message count per minute
             ex.cache.messages_received_per_minute += 1
             # delete messages that are in temp channels
-            await Events.catch_on_message_errors(ex.delete_temp_messages, message)
+            await Events.catch_on_message_errors(ex.u_miscellaneous.delete_temp_messages, message)
             # check for the n word
-            await Events.catch_on_message_errors(ex.check_for_nword, message)
+            await Events.catch_on_message_errors(ex.u_miscellaneous.check_for_nword, message)
             # check for self-assignable roles and process it.
             await Events.catch_on_message_errors(ex.check_for_self_assignable_role, message)
             # process the commands with their prefixes.
-            await Events.catch_on_message_errors(ex.process_commands, message)
+            await Events.catch_on_message_errors(ex.u_miscellaneous.process_commands, message)
         except Exception as e:
             log.console(e)
 
@@ -54,7 +54,7 @@ class Events(commands.Cog):
             log.console(f"Command Invoke Error -- {error} -- {ctx.command.name}")
             ex.cache.errors_per_minute += 1
         elif isinstance(error, commands.errors.CommandOnCooldown):
-            await Events.error(ctx, f"You are on cooldown. Try again in {await ex.get_cooldown_time(error.retry_after)}.")
+            await Events.error(ctx, f"You are on cooldown. Try again in {await ex.u_miscellaneous.get_cooldown_time(error.retry_after)}.")
             log.console(f"{error}")
         elif isinstance(error, commands.errors.BadArgument):
             await Events.error(ctx, error)
@@ -99,14 +99,14 @@ class Events(commands.Cog):
         else:
             log.console(
                 f"MOD LOG: ChannelID = {ctx.channel.id} - {ctx.author} ({ctx.author.id})|| {msg_content} ")
-        if await ex.check_if_bot_banned(ctx.author.id):
-            ex.send_ban_message(ctx.channel)
+        if await ex.u_miscellaneous.check_if_bot_banned(ctx.author.id):
+            ex.u_miscellaneous.send_ban_message(ctx.channel)
 
     @staticmethod
     @ex.client.event
     async def on_command_completion(ctx):
-        await ex.add_command_count(ctx.command.name)
-        await ex.add_session_count()
+        await ex.u_miscellaneous.add_command_count(ctx.command.name)
+        await ex.u_miscellaneous.add_session_count()
 
     @staticmethod
     @ex.client.event
@@ -140,7 +140,7 @@ class Events(commands.Cog):
                             dead_link = msg_info[0]
                             member_id = msg_info[2]
                             guessing_game = msg_info[3]
-                            image_link = await ex.get_google_drive_link(dead_link)
+                            image_link = await ex.u_group_members.get_google_drive_link(dead_link)
                             return msg, image_link, member_id, guessing_game
                 except Exception as e:
                     log.console(e)
@@ -152,20 +152,20 @@ class Events(commands.Cog):
                     if link:
                         await ex.conn.execute("DELETE FROM groupmembers.imagelinks WHERE link = $1 AND memberid = $2",
                                               link, idol_id)
-                        await ex.delete_dead_link(link, idol_id)
-                        await ex.set_forbidden_link(link, idol_id)
+                        await ex.u_group_members.delete_dead_link(link, idol_id)
+                        await ex.u_group_members.set_forbidden_link(link, idol_id)
                         await msg.delete()
 
                 elif str(emoji) == keys.check_emoji:
                     msg, link, idol_id, is_guessing_game = await get_msg_and_image()
                     if link:
-                        await ex.delete_dead_link(link, idol_id)
+                        await ex.u_group_members.delete_dead_link(link, idol_id)
                         await msg.delete()
 
                 elif str(emoji) == '➡':
                     msg, link, idol_id, is_guessing_game = await get_msg_and_image()
                     if link:
-                        await ex.set_as_group_photo(link)
+                        await ex.u_group_members.set_as_group_photo(link)
                         await msg.delete()
 
         except Exception as e:
@@ -219,8 +219,8 @@ class Events(commands.Cog):
 
         # discord.boats
         try:
-            if ex.get_server_count():
-                await keys.discord_boats.post_stats(botid=keys.bot_id, server_count=ex.get_server_count())
+            if ex.u_miscellaneous.get_server_count():
+                await keys.discord_boats.post_stats(botid=keys.bot_id, server_count=ex.u_miscellaneous.get_server_count())
                 log.console("Server Count Updated on discord.boats")
         except Exception as e:
             log.console(f"Server Count Update FAILED on discord.boats - {e}")
@@ -232,7 +232,7 @@ class Events(commands.Cog):
         try:
             check = not ex.cache.maintenance_mode or ex.check_if_mod(ctx) or ctx.author.bot
             if not check:
-                await ex.send_maintenance_message(ctx)
+                await ex.u_miscellaneous.send_maintenance_message(ctx)
             return check
         except Exception as e:
             log.console(f"{e} - Check Maintenance")

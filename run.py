@@ -1,4 +1,5 @@
 import module
+import util
 from Utility import resources as ex
 
 
@@ -111,6 +112,27 @@ class Irene:
         ex.client.add_cog(module.Weverse.Weverse())
         ex.client.add_cog(module.SelfAssignRoles.SelfAssignRoles())
         ex.client.add_cog(module.Reminder.Reminder())
+
+    @staticmethod
+    def create_util_objects():
+        ex.u_database = util.database.DataBase()
+        ex.u_cache = util.cache.Cache()
+        ex.u_currency = util.currency.Currency()
+        ex.u_miscellaneous = util.miscellaneous.Miscellaneous()
+        ex.u_blackjack = util.blackjack.BlackJack()
+        ex.u_levels = util.levels.Levels()
+        ex.u_group_members = util.groupmembers.GroupMembers()
+        ex.u_logging = util.logging.Logging()
+        ex.u_twitter = util.twitter.Twitter()
+        ex.u_last_fm = util.lastfm.LastFM()
+        ex.u_patreon = util.patreon.Patreon()
+        ex.u_moderator = util.moderator.Moderator()
+        ex.u_custom_commands = util.customcommands.CustomCommands()
+        ex.u_bias_game = util.biasgame.BiasGame()
+        ex.u_data_dog = util.datadog.DataDog
+        ex.u_weverse = util.weverse.Weverse()
+        ex.u_self_assign_roles = util.selfassignroles.SelfAssignRoles()
+        ex.u_reminder = util.reminder.Reminder()
 
 
 if __name__ == '__main__':

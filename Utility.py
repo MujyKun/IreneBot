@@ -48,6 +48,29 @@ class Utility:
                                            verbose=True, loop=asyncio.get_event_loop())
         self.exceptions = exceptions
 
+        # SubClass Objects
+        self.u_database = None
+        self.u_cache = None
+        self.u_currency = None
+        self.u_miscellaneous = None
+        self.u_blackjack = None
+        self.u_levels = None
+        self.u_group_members = None
+        self.u_logging = None
+        self.u_twitter = None
+        self.u_last_fm = None
+        self.u_patreon = None
+        self.u_moderator = None
+        self.u_custom_commands = None
+        self.u_bias_game = None
+        self.u_data_dog = None
+        self.u_weverse = None
+        self.u_self_assign_roles = None
+        self.u_reminder = None
+
+
+
+
     ##################
     # ## DATABASE ## #
     ##################

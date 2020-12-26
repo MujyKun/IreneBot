@@ -50,7 +50,7 @@ class Profile(commands.Cog):
             if len(roles) > 500:
                 roles = f"{roles[0:498]}...."
             user_level = await ex.get_level(user_id, "profile")
-            shortened_money = await ex.shorten_balance(str(await ex.get_balance(user_id)))
+            shortened_money = await ex.u_currency.shorten_balance(str(await ex.u_currency.get_balance(user_id)))
             rob_beg_daily_level = f"{await ex.get_level(user_id, 'rob')}/{await ex.get_level(user_id, 'beg')}/{await ex.get_level(user_id, 'daily')}"
             user_timezone = await ex.get_user_timezone(user_id)
             try:

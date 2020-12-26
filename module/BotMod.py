@@ -115,8 +115,8 @@ class BotMod(commands.Cog):
         all of it's connections.
         [Format: %mergeidol (original idol id) (duplicate idol id)]"""
         # check groups
-        original_idol = await ex.get_member(original_idol_id)
-        duplicate_idol = await ex.get_member(duplicate_idol_id)
+        original_idol = await ex.u_group_members.get_member(original_idol_id)
+        duplicate_idol = await ex.u_group_members.get_member(duplicate_idol_id)
 
         if not duplicate_idol:
             return await ctx.send(f"> {duplicate_idol_id} could not find an Idol.")
@@ -129,8 +129,8 @@ class BotMod(commands.Cog):
         # delete idol
         await ex.conn.execute("DELETE FROM groupmembers.member WHERE id = $1", duplicate_idol.id)
         # recreate cache
-        await ex.create_idol_cache()
-        await ex.create_group_cache()
+        await ex.u_cache.create_idol_cache()
+        await ex.u_cache.create_group_cache()
         await ctx.send(f"> Merged {duplicate_idol_id} to {original_idol_id}.")
 
     @commands.command()
@@ -141,8 +141,8 @@ class BotMod(commands.Cog):
         If an idol ID is not in the original group, it will be added and then this group will be deleted along with
         all of it's connections.
         [Format: %mergegroup (original group id) (duplicate group id)]"""
-        original_group = await ex.get_group(original_group_id)
-        duplicate_group = await ex.get_group(duplicate_group_id)
+        original_group = await ex.u_group_members.get_group(original_group_id)
+        duplicate_group = await ex.u_group_members.get_group(duplicate_group_id)
         if not duplicate_group:
             return await ctx.send(f"> {duplicate_group_id} could not find a Group.")
         if not original_group:
@@ -156,8 +156,8 @@ class BotMod(commands.Cog):
         # delete group
         await ex.conn.execute("DELETE FROM groupmembers.groups WHERE groupid = $1", duplicate_group.id)
         # recreate cache
-        await ex.create_idol_cache()
-        await ex.create_group_cache()
+        await ex.u_cache.create_idol_cache()
+        await ex.u_cache.create_group_cache()
         await ctx.send(f"> Merged {duplicate_group_id} to {original_group_id}.")
 
     @commands.command()
@@ -257,7 +257,7 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
     async def botban(self, ctx, *, user: discord.User):
         """Bans a user from Irene. [Format: %botban (user id)]"""
         if not ex.check_if_mod(user.id, 1):
-            await ex.ban_user_from_bot(user.id)
+            await ex.u_miscellaneous.ban_user_from_bot(user.id)
             await ctx.send(f"> **<@{user.id}> has been banned from using Irene.**")
         else:
             await ctx.send(f"> **<@{ctx.author.id}>, you cannot ban a bot mod.**")
@@ -267,7 +267,7 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
     async def botunban(self, ctx, *, user: discord.User):
         """UnBans a user from Irene. [Format: %botunban (user id)]"""
         user_id = user.id
-        await ex.unban_user_from_bot(user_id)
+        await ex.u_miscellaneous.unban_user_from_bot(user_id)
         await ctx.send(f"> **If the user was banned, they are now unbanned.**")
 
     @commands.command()
@@ -312,12 +312,12 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
     async def addidoltogroup(self, ctx, idol_id: int, group_id: int):
         """Adds idol to group. [Format: %addidoltogroup (idol id) (group id)"""
         try:
-            member_name = (await ex.get_member(idol_id))[1]
+            member_name = (await ex.u_group_members.get_member(idol_id))[1]
             group_name = await ex.get_group_name(group_id)
             if await ex.check_member_in_group(idol_id, group_id):
                 return await ctx.send(f'> **{member_name} ({idol_id}) is already in {group_name} ({group_id}).**')
             else:
-                await ex.add_idol_to_group(idol_id, group_id)
+                await ex.u_group_members.add_idol_to_group(idol_id, group_id)
                 await ctx.send(f"**Added {member_name} ({idol_id}) to {group_name} ({group_id}).**")
         except Exception as e:
             await ctx.send(f"Something went wrong - {e}")
@@ -328,12 +328,12 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
     async def deleteidolfromgroup(self, ctx, idol_id: int, group_id: int):
         """Deletes idol from group. [Format: %deleteidolfromgroup (idol id) (group id)"""
         try:
-            member_name = (await ex.get_member(idol_id))[1]
+            member_name = (await ex.u_group_members.get_member(idol_id))[1]
             group_name = await ex.get_group_name(group_id)
             if not await ex.check_member_in_group(idol_id, group_id):
                 await ctx.send(f"> **{member_name} ({idol_id}) is not in {group_name} ({group_id}).**")
             else:
-                await ex.remove_idol_from_group(idol_id, group_id)
+                await ex.u_group_members.remove_idol_from_group(idol_id, group_id)
                 await ctx.send(f"**Removed {member_name} ({idol_id}) from {group_name} ({group_id}).**")
         except Exception as e:
             await ctx.send(f"Something went wrong - {e}")
@@ -349,7 +349,7 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
             group_name = await ex.get_group_name(group_id)
             await ex.conn.execute("INSERT INTO groupmembers.member (fullname, stagename) VALUES($1, $2)", full_name, stage_name)
             idol_id = await ex.get_idol_id_by_both_names(full_name, stage_name)
-            await ex.add_idol_to_group(idol_id, group_id)
+            await ex.u_group_members.add_idol_to_group(idol_id, group_id)
             await ctx.send(f"{full_name} was added and is in {group_name} ({group_id}).")
         except Exception as e:
             await ctx.send(f"Something went wrong - {e}")
@@ -360,7 +360,7 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
     async def deleteidol(self, ctx, idol_id: int):
         """Deletes an idol [Format: %deleteidol (idol id)]"""
         try:
-            idol_name = (await ex.get_member(idol_id))[1]
+            idol_name = (await ex.u_group_members.get_member(idol_id))[1]
             await ex.conn.execute("DELETE FROM groupmembers.member WHERE id = $1", idol_id)
             await ctx.send(f"{idol_name} ({idol_id}) deleted.")
         except Exception as e:

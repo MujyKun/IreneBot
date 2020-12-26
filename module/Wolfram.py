@@ -32,7 +32,7 @@ class Wolfram(commands.Cog):
         async with ctx.typing():
             result = self.evalute_math(query)
             if not result:
-                if await ex.check_if_patreon(ctx.author.id):
+                if await ex.u_patreon.check_if_patreon(ctx.author.id):
                     query = urllib.parse.quote(query)
                     query_link = f"http://api.wolframalpha.com/v2/query?input={query}&appid={wolfram_app_id}"
                     async with ex.session.get(query_link) as r:

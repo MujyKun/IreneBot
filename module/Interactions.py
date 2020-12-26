@@ -94,7 +94,7 @@ class Interactions(commands.Cog):
         if not type_of_slap:
             return await ex.u_miscellaneous.interact_with_user(ctx, user, "slapped", "slap")
         else:
-            await ex.reset_patreon_cooldown(ctx)
+            await ex.u_patreon.reset_patreon_cooldown(ctx)
             ctx_name = ctx.author.display_name
             user_name = user.display_name
             random_idol_stage_name = (await ex.u_group_members.get_random_idol()).stage_name

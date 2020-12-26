@@ -74,62 +74,6 @@ class Utility:
         else:
             return record[0]
 
-
-
-    ##################
-    # ## CURRENCY ## #
-    ##################
-
-    async def register_user(self, user_id):
-        """Register a user to the database if they are not already registered."""
-        count = self.first_result(await self.conn.fetchrow("SELECT COUNT(*) FROM currency.Currency WHERE UserID = $1", user_id))
-        if not count:
-            await self.conn.execute("INSERT INTO currency.Currency (UserID, Money) VALUES ($1, $2)", user_id, "100")
-            return True
-
-    async def get_user_has_money(self, user_id):
-        """Check if a user has money."""
-        return not self.first_result(await self.conn.fetchrow("SELECT COUNT(*) FROM currency.Currency WHERE UserID = $1", user_id)) == 0
-
-    async def get_balance(self, user_id):
-        """Get current balance of a user."""
-        if not (await self.register_user(user_id)):
-            money = await self.conn.fetchrow("SELECT money FROM currency.currency WHERE userid = $1", user_id)
-            return int(self.first_result(money))
-        else:
-            return 100
-
-    @staticmethod
-    async def shorten_balance(money):  # money must be passed in as a string.
-        """Shorten an amount of money to it's value places."""
-        place_names = ['', 'Thousand', 'Million', 'Billion', 'Trillion', 'Quadrillion', 'Quintillion', 'Sextillion', 'Septillion', 'Octillion', 'Nonillion', 'Decillion', 'Undecillion', 'Duodecillion', 'Tredecillion', 'Quatturodecillion', 'Quindecillion', 'Sexdecillion', 'Septendecillion', 'Octodecillion', 'Novemdecillion', 'Vigintillion', 'Centillion']
-        try:
-            place_values = int(math.log10(int(money)) // 3)
-        except Exception as e:
-            # This will have a math domain error when the amount of balance is 0.
-            return "0"
-        try:
-            return f"{int(money) // (10 ** (3 * place_values))} {place_names[place_values]}"
-        except Exception as e:
-            return "Too Fucking Much$"
-
-    async def update_balance(self, user_id, new_balance):
-        """Update a user's balance."""
-        await self.conn.execute("UPDATE currency.Currency SET Money = $1::text WHERE UserID = $2", str(new_balance), user_id)
-
-    @staticmethod
-    async def get_robbed_amount(author_money, user_money, level):
-        """The amount to rob a specific person based on their rob level."""
-        max_amount = int(user_money // 100)  # b value
-        if max_amount > int(author_money // 2):
-            max_amount = int(author_money // 2)
-        min_amount = int((max_amount * level) // 100)
-        if min_amount > max_amount:  # kind of ironic, but it is possible for min to surpass max in this case
-            robbed_amount = random.randint(max_amount, min_amount)
-        else:
-            robbed_amount = random.randint(min_amount, max_amount)
-        return robbed_amount
-
     @staticmethod
     def remove_commas(amount):
         """Remove all commas from a string and make it an integer."""
@@ -701,7 +645,7 @@ class Utility:
         """pre requisites for joining a blackjack game."""
         if amount >= 0:
             if not await self.check_in_game(user_id, ctx):
-                if amount > await self.get_balance(user_id):
+                if amount > await self.u_currency.get_balance(user_id):
                     await ctx.send(f"> **{ctx.author}, you can not bet more than your current balance.**")
                 else:
                     return True
@@ -972,8 +916,8 @@ class Utility:
             await self.add_card(game[2])
         else:
             winner = self.determine_winner(player1_score, player2_score)
-            player1_current_bal = await self.get_balance(game[1])
-            player2_current_bal = await self.get_balance(game[2])
+            player1_current_bal = await self.u_currency.get_balance(game[1])
+            player2_current_bal = await self.u_currency.get_balance(game[2])
             if winner == 'player1':
                 await self.update_balance(game[1], player1_current_bal + int(game[4]))
                 if not self.check_if_bot(game[2]):

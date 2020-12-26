@@ -61,12 +61,12 @@ class Irene:
         # Start Voice Client Loop
         module.Music.Music().check_voice_clients.start()
         # Update Cache Every 12 hours
-        ex.update_cache.start()
+        ex.u_cache.update_cache.start()
         # Start a loop that sends cache information to DataDog.
-        ex.send_cache_data_to_data_dog.start()
+        ex.u_cache.send_cache_data_to_data_dog.start()
         # after intents was pushed in place, d.py cache loaded a lot slower and patrons are not added properly.
         # therefore patron cache must be looped instead.
-        ex.update_patron_cache.start()
+        ex.u_cache.update_patron_cache.start()
         # Send Packets to localhost:5123 to show Irene is alive. This is meant for auto restarting Irene
         # This feature is essential in case of any overload or crashes by external sources.
         # This also avoids having to manually restart Irene.

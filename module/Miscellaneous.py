@@ -122,7 +122,7 @@ class Miscellaneous(commands.Cog):
         """Adds a patreon. [Format: %addpatreon (userid,userid,userid)]"""
         users = users.split(",")
         for user in users:
-            await ex.add_to_patreon(user)
+            await ex.u_patreon.add_to_patreon(user)
         await ctx.send(f">>> **Added {users} to Patreon.**")
 
     @commands.command()
@@ -131,7 +131,7 @@ class Miscellaneous(commands.Cog):
         """Removes a patreon. [Format: %removepatreon (userid,userid,userid)]"""
         users = users.split(",")
         for user in users:
-            await ex.remove_from_patreon(user)
+            await ex.u_patreon.remove_from_patreon(user)
         await ctx.send(f">>> **Removed {users} from Patreon.**")
 
     @commands.command()

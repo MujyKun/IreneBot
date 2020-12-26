@@ -37,8 +37,8 @@ async def check_user_limit(message_sender, message_channel, no_vote_limit=False)
         # amount of votes that can be sent without voting.
         limit = keys.idol_no_vote_send_limit
     if message_sender.id in ex.cache.commands_used:
-        if not await ex.check_if_patreon(message_sender.id) and ex.cache.commands_used[message_sender.id][0] > limit:
-            if not await ex.check_if_patreon(message_channel.guild.owner.id, super=True) and not no_vote_limit:
+        if not await ex.u_patreon.check_if_patreon(message_sender.id) and ex.cache.commands_used[message_sender.id][0] > limit:
+            if not await ex.u_patreon.check_if_patreon(message_channel.guild.owner.id, super=True) and not no_vote_limit:
                 return await message_channel.send(patron_message)
             elif ex.cache.commands_used[message_sender.id][0] > owner_super_patron_benefit and not no_vote_limit:
                 return await message_channel.send(patron_message)
@@ -53,7 +53,7 @@ async def request_image_post(message, idol, channel):
         async with channel.typing():
             try:
                 if await check_user_limit(message.author, message.channel, no_vote_limit=True):
-                    if not await ex.get_if_user_voted(message.author.id) and not await ex.check_if_patreon(message.author.id):
+                    if not await ex.get_if_user_voted(message.author.id) and not await ex.u_patreon.check_if_patreon(message.author.id):
                         return await ex.send_vote_message(message)
             except Exception as e:
                 log.console(e)

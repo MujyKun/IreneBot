@@ -58,7 +58,7 @@ class Profile(commands.Cog):
             except:
                 timezone_utc = None
 
-            if await ex.check_if_patreon(user_id):
+            if await ex.u_patreon.check_if_patreon(user_id):
                 embed = discord.Embed(title=f"{user.name} ({user_id})", color=0x90ee90, url=f"{user.avatar_url}", description=f"**{user.name} is supporting Irene on Patreon!**")
             else:
                 embed = discord.Embed(title=f"{user.name} ({user_id})", color=0x90ee90, url=f"{user.avatar_url}")

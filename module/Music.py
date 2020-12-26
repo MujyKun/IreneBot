@@ -503,7 +503,7 @@ class Music(commands.Cog):
     @queue.before_invoke
     @shuffle.before_invoke
     async def check_patreon(self, ctx):
-        if await ex.check_if_patreon(ctx.author.id, super=True) or await ex.check_if_patreon(ctx.guild.owner.id, super=True):
+        if await ex.u_patreon.check_if_patreon(ctx.author.id, super=True) or await ex.u_patreon.check_if_patreon(ctx.guild.owner.id, super=True):
             await self.ensure_voice(ctx)
         else:
             await ctx.send(f"""**Music is only available to $5 Patreons that support <@{keys.bot_id}>.

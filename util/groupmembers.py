@@ -22,9 +22,8 @@ class GroupMembers:
                 return True
         return False
 
-    @staticmethod
-    def check_idol_object(obj):
-        return type(obj) == Idol
+    def check_idol_object(self, obj):
+        return type(obj) == self.Idol
 
     async def send_vote_message(self, message):
         """Send the vote message to a user."""
@@ -742,10 +741,10 @@ class GroupMembers:
                 raise Exception
 
         except Exception as e:
-            self.api_issues += 1
-            if self.api_issues >= 50:
+            ex.api_issues += 1
+            if ex.api_issues >= 50:
                 await ex.kill_api()
-                self.api_issues = 0
+                ex.api_issues = 0
             await channel.send(
                 f"> An API issue has occurred. If this is constantly occurring, please join our support server.")
             log.console(
@@ -789,7 +788,7 @@ class GroupMembers:
                                                         special_message=special_message, guessing_game=guessing_game,
                                                         scores=scores)
                 if not msg and not api_url:
-                    self.api_issues += 1
+                    ex.api_issues += 1
                 await self.update_member_count(idol)
             except Exception as e:
                 if guessing_game:
@@ -803,71 +802,69 @@ class GroupMembers:
             log.console(e)
             return None, None
 
+    class Idol:
+        def __init__(self, **kwargs):
+            self.id = kwargs.get('id')
+            self.full_name = kwargs.get('fullname')
+            self.stage_name = kwargs.get('stagename')
+            self.former_full_name = kwargs.get('formerfullname')
+            self.former_stage_name = kwargs.get('formerstagename')
+            self.birth_date = kwargs.get('birthdate')
+            self.birth_country = kwargs.get('birthcountry')
+            self.birth_city = kwargs.get('birthcity')
+            self.gender = kwargs.get('gender')
+            self.description = kwargs.get('description')
+            self.height = kwargs.get('height')
+            self.twitter = kwargs.get('twitter')
+            self.youtube = kwargs.get('youtube')
+            self.melon = kwargs.get('melon')
+            self.instagram = kwargs.get('instagram')
+            self.vlive = kwargs.get('vlive')
+            self.spotify = kwargs.get('spotify')
+            self.fancafe = kwargs.get('fancafe')
+            self.facebook = kwargs.get('facebook')
+            self.tiktok = kwargs.get('tiktok')
+            self.aliases = []
+            self.local_aliases = {}  # server_id: [aliases]
+            self.groups = []
+            self.zodiac = kwargs.get('zodiac')
+            self.thumbnail = kwargs.get('thumbnail')
+            self.banner = kwargs.get('banner')
+            self.blood_type = kwargs.get('bloodtype')
+            self.photo_count = 0
+            # amount of times the idol has been called.
+            self.called = 0
+            self.tags = kwargs.get('tags')
+            if self.tags:
+                self.tags = self.tags.split(',')
 
-class Idol:
-    def __init__(self, **kwargs):
-        self.id = kwargs.get('id')
-        self.full_name = kwargs.get('fullname')
-        self.stage_name = kwargs.get('stagename')
-        self.former_full_name = kwargs.get('formerfullname')
-        self.former_stage_name = kwargs.get('formerstagename')
-        self.birth_date = kwargs.get('birthdate')
-        self.birth_country = kwargs.get('birthcountry')
-        self.birth_city = kwargs.get('birthcity')
-        self.gender = kwargs.get('gender')
-        self.description = kwargs.get('description')
-        self.height = kwargs.get('height')
-        self.twitter = kwargs.get('twitter')
-        self.youtube = kwargs.get('youtube')
-        self.melon = kwargs.get('melon')
-        self.instagram = kwargs.get('instagram')
-        self.vlive = kwargs.get('vlive')
-        self.spotify = kwargs.get('spotify')
-        self.fancafe = kwargs.get('fancafe')
-        self.facebook = kwargs.get('facebook')
-        self.tiktok = kwargs.get('tiktok')
-        self.aliases = []
-        self.local_aliases = {}  # server_id: [aliases]
-        self.groups = []
-        self.zodiac = kwargs.get('zodiac')
-        self.thumbnail = kwargs.get('thumbnail')
-        self.banner = kwargs.get('banner')
-        self.blood_type = kwargs.get('bloodtype')
-        self.photo_count = 0
-        # amount of times the idol has been called.
-        self.called = 0
-        self.tags = kwargs.get('tags')
-        if self.tags:
-            self.tags = self.tags.split(',')
-
-
-class Group:
-    def __init__(self, **kwargs):
-        self.id = kwargs.get('groupid')
-        self.name = kwargs.get('groupname')
-        self.debut_date = kwargs.get('debutdate')
-        self.disband_date = kwargs.get('disbanddate')
-        self.description = kwargs.get('description')
-        self.twitter = kwargs.get('twitter')
-        self.youtube = kwargs.get('youtube')
-        self.melon = kwargs.get('melon')
-        self.instagram = kwargs.get('instagram')
-        self.vlive = kwargs.get('vlive')
-        self.spotify = kwargs.get('spotify')
-        self.fancafe = kwargs.get('fancafe')
-        self.facebook = kwargs.get('facebook')
-        self.tiktok = kwargs.get('tiktok')
-        self.aliases = []
-        self.local_aliases = {}  # server_id: [aliases]
-        self.members = []
-        self.fandom = kwargs.get('fandom')
-        self.company = kwargs.get('company')
-        self.website = kwargs.get('website')
-        self.thumbnail = kwargs.get('thumbnail')
-        self.banner = kwargs.get('banner')
-        self.gender = kwargs.get('gender')
-        self.photo_count = 0
-        self.tags = kwargs.get('tags')
-        if self.tags:
-            self.tags = self.tags.split(',')
+    class Group:
+        def __init__(self, **kwargs):
+            self.id = kwargs.get('groupid')
+            self.name = kwargs.get('groupname')
+            self.debut_date = kwargs.get('debutdate')
+            self.disband_date = kwargs.get('disbanddate')
+            self.description = kwargs.get('description')
+            self.twitter = kwargs.get('twitter')
+            self.youtube = kwargs.get('youtube')
+            self.melon = kwargs.get('melon')
+            self.instagram = kwargs.get('instagram')
+            self.vlive = kwargs.get('vlive')
+            self.spotify = kwargs.get('spotify')
+            self.fancafe = kwargs.get('fancafe')
+            self.facebook = kwargs.get('facebook')
+            self.tiktok = kwargs.get('tiktok')
+            self.aliases = []
+            self.local_aliases = {}  # server_id: [aliases]
+            self.members = []
+            self.fandom = kwargs.get('fandom')
+            self.company = kwargs.get('company')
+            self.website = kwargs.get('website')
+            self.thumbnail = kwargs.get('thumbnail')
+            self.banner = kwargs.get('banner')
+            self.gender = kwargs.get('gender')
+            self.photo_count = 0
+            self.tags = kwargs.get('tags')
+            if self.tags:
+                self.tags = self.tags.split(',')
 

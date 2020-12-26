@@ -17,7 +17,7 @@ class DataBase:
             try:
                 ex.conn = await self.get_db_connection()
                 # Delete all active blackjack games
-                await ex.u_database.delete_all_games()
+                await ex.u_blackjack.delete_all_games()
                 ex.running_loop = asyncio.get_running_loop()
                 await self.create_thread_pool()
                 sys.setrecursionlimit(ex.recursion_limit)

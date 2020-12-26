@@ -240,7 +240,7 @@ class Miscellaneous:
         time = round(time)
         time_returned = ""
         if time < 1:
-            return (f"{time}s")
+            return f"{time}s"
         if time % 86400 != time:
             days = int(time//86400)
             if days != 0:

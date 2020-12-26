@@ -14,7 +14,7 @@ class Cache:
         past_time = time.time()
         result = await method()
         if result is None or result:  # expecting False on methods that fail to load, do not simplify None.
-            log.console(f"Cache for {name} Created in {await ex.u_currency.get_cooldown_time(time.time() - past_time)}.")
+            log.console(f"Cache for {name} Created in {await ex.u_miscellaneous.get_cooldown_time(time.time() - past_time)}.")
         return result
 
     async def create_cache(self):

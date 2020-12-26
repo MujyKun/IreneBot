@@ -8,8 +8,8 @@ class CustomCommands(commands.Cog):
     async def process_custom_commands(message):
         # custom server commands
         if message.content and not message.author.bot:
-            if not await ex.check_if_bot_banned(message.author.id):
-                guild_id = await ex.get_guild_id(message)
+            if not await ex.u_miscellaneous.check_if_bot_banned(message.author.id):
+                guild_id = await ex.get_server_id(message)
                 current_message_prefix = message.content[0:len(keys.bot_prefix)]
                 if current_message_prefix == keys.bot_prefix:
                     message_without_prefix = message.content[len(keys.bot_prefix):len(message.content)].lower()
@@ -22,7 +22,7 @@ class CustomCommands(commands.Cog):
         """Create a custom command. [Format: %createcommand (command name) (message)]"""
         try:
             command_name = command_name.lower()
-            msg_is_cmd = await ex.check_message_is_command(command_name, is_command_name=True)
+            msg_is_cmd = await ex.u_miscellaneous.check_message_is_command(command_name, is_command_name=True)
             if msg_is_cmd:
                 return await ctx.send(f"> {command_name} is already a bot command and can not be added.")
             if await ex.check_custom_command_name_exists(ctx.guild.id, command_name):

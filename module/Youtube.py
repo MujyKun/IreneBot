@@ -5,7 +5,7 @@ from module import logger as log
 from Utility import resources as ex
 
 
-# noinspection PyBroadException
+# noinspection PyBroadException,PyPep8
 class Youtube(commands.Cog):
     def __init__(self):
         self.current_yt_loop_instance = None
@@ -67,6 +67,7 @@ class Youtube(commands.Cog):
             await ctx.send("> **A loop is already running.**")
 
 
+# noinspection PyBroadException,PyPep8
 class YoutubeLoop:
     @staticmethod
     async def send_channel(channel_id, data):
@@ -95,7 +96,7 @@ class YoutubeLoop:
                         await ex.conn.execute("INSERT INTO youtube.views(linkid, views, date) VALUES ($1,$2,$3)",
                                               link_id, view_count, str(current_date))
                         await YoutubeLoop.send_channel(channel_id,
-                                                f"> **UPDATE FOR <{url}>: {view_count} -- {current_date}**")
+                                                       f"> **UPDATE FOR <{url}>: {view_count} -- {current_date}**")
             except Exception as e:
                 log.console(e)
         log.console("Updated Video Views Tracker")

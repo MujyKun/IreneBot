@@ -3,6 +3,7 @@ from module import logger as log, keys
 from Utility import resources as ex
 
 
+# noinspection PyPep8
 class CustomCommands(commands.Cog):
     @staticmethod
     async def process_custom_commands(message):
@@ -51,7 +52,7 @@ class CustomCommands(commands.Cog):
         try:
             async def get_new_embed(desc):
                 return await ex.create_embed(f"Custom Commands for {ctx.guild.name} ({ctx.guild.id})", color=ex.get_random_color(),
-                                          title_desc=desc)
+                                             title_desc=desc)
             custom_commands = ex.cache.custom_commands.get(ctx.guild.id)
             embed_list = []
             embed_message = ""

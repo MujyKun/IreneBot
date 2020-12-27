@@ -5,7 +5,7 @@ from Utility import resources as ex
 import aiofiles
 
 
-# noinspection PyBroadException
+# noinspection PyBroadException,PyPep8
 class BotMod(commands.Cog):
     @staticmethod
     async def mod_on_message(message):

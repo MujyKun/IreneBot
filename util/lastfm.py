@@ -3,6 +3,7 @@ from module.keys import last_fm_api_key, last_fm_root_url, last_fm_headers
 from module import logger as log
 
 
+# noinspection PyPep8
 class LastFM:
     @staticmethod
     def create_fm_payload(method, user=None, limit=None, time_period=None):

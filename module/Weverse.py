@@ -4,6 +4,7 @@ from module import logger as log
 from Utility import resources as ex
 
 
+# noinspection PyPep8
 class Weverse(commands.Cog):
     def __init__(self):
         self.current_notification_id = 0

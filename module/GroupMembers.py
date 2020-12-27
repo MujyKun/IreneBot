@@ -10,6 +10,7 @@ import typing
 client = keys.client
 # the amount normal users can use if the guild owner is a super patron.
 owner_super_patron_benefit = keys.idol_post_send_limit * 2
+# noinspection PyPep8
 patron_message = f"""
 As of September 23rd 2020, non-Patrons can only send {keys.idol_post_send_limit} photos a day maximum, as the current host can not reliably handle additional traffic.
 You may become a patron for as little as $3 per month in order to send unlimited photos; every Patron contributes to upgrading and maintaining the host.
@@ -31,6 +32,7 @@ def add_user_limit(message_sender):
         ex.cache.commands_used[message_sender.id] = [ex.cache.commands_used[message_sender.id][0] + 1, time.time()]
 
 
+# noinspection PyPep8
 async def check_user_limit(message_sender, message_channel, no_vote_limit=False):
     limit = keys.idol_post_send_limit
     if no_vote_limit:
@@ -38,6 +40,7 @@ async def check_user_limit(message_sender, message_channel, no_vote_limit=False)
         limit = keys.idol_no_vote_send_limit
     if message_sender.id in ex.cache.commands_used:
         if not await ex.u_patreon.check_if_patreon(message_sender.id) and ex.cache.commands_used[message_sender.id][0] > limit:
+            # noinspection PyPep8
             if not await ex.u_patreon.check_if_patreon(message_channel.guild.owner.id, super=True) and not no_vote_limit:
                 return await message_channel.send(patron_message)
             elif ex.cache.commands_used[message_sender.id][0] > owner_super_patron_benefit and not no_vote_limit:
@@ -47,6 +50,7 @@ async def check_user_limit(message_sender, message_channel, no_vote_limit=False)
     return False
 
 
+# noinspection PyPep8
 async def request_image_post(message, idol, channel):
     photo_msg, api_url, posted = None, None, False
     if not await ex.u_miscellaneous.check_if_bot_banned(message.author.id):
@@ -94,7 +98,7 @@ async def choose_random_member(members=None, groups=None):
     return idol
 
 
-# noinspection PyBroadException
+# noinspection PyBroadException,PyPep8
 class GroupMembers(commands.Cog):
     @staticmethod
     async def on_message2(message):

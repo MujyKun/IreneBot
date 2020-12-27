@@ -10,7 +10,7 @@ from module.keys import reload_emoji, dead_emoji, owner_id, mods_list, check_emo
     trash_emoji, next_emoji, translate_private_key, api_port
 
 
-# noinspection PyBroadException
+# noinspection PyBroadException,PyPep8
 class GroupMembers:
     async def get_if_user_voted(self, user_id):
         time_stamp = ex.first_result(
@@ -39,7 +39,7 @@ class GroupMembers:
         obj.aliases.append(alias)
         is_group = int(not self.check_idol_object(obj))
         await ex.conn.execute("INSERT INTO groupmembers.aliases(objectid, alias, isgroup) VALUES($1, $2, $3)", obj.id,
-                                alias, is_group)
+                              alias, is_group)
 
     async def set_local_alias(self, obj, alias, server_id):
         """Set an idol/group alias for a server"""
@@ -162,8 +162,7 @@ class GroupMembers:
             description += f"[TikTok](https://www.tiktok.com/{obj.tiktok})\n"
         if obj.photo_count:
             description += f"Photo Count: {obj.photo_count}\n"
-        embed = await ex.create_embed(title=title,
-                                        color=ex.get_random_color(), title_desc=description)
+        embed = await ex.create_embed(title=title, color=ex.get_random_color(), title_desc=description)
         if obj.tags:
             embed.add_field(name="Tags", value=', '.join(obj.tags), inline=False)
         if obj.aliases:
@@ -297,11 +296,11 @@ class GroupMembers:
 
     async def add_idol_to_group(self, member_id: int, group_id: int):
         return await ex.conn.execute("INSERT INTO groupmembers.idoltogroup(idolid, groupid) VALUES($1, $2)",
-                                       member_id, group_id)
+                                     member_id, group_id)
 
     async def remove_idol_from_group(self, member_id: int, group_id: int):
         return await ex.conn.execute("DELETE FROM groupmembers.idoltogroup WHERE idolid = $1 AND groupid = $2",
-                                       member_id, group_id)
+                                     member_id, group_id)
 
     async def send_names(self, ctx, mode, user_page_number=1, group_ids=None):
         """Send the names of all idols in an embed with many pages."""
@@ -311,10 +310,10 @@ class GroupMembers:
             """Check if it is grabbing their full names or stage names."""
             if mode == "fullname":
                 embed_temp = await ex.set_embed_author_and_footer(embed_temp,
-                                                                    f"Type {server_prefix}members for Stage Names.")
+                                                                  f"Type {server_prefix}members for Stage Names.")
             else:
                 embed_temp = await ex.set_embed_author_and_footer(embed_temp,
-                                                                    f"Type {server_prefix}fullnames for Full Names.")
+                                                                  f"Type {server_prefix}fullnames for Full Names.")
             return embed_temp
 
         is_mod = ex.check_if_mod(ctx)
@@ -440,8 +439,8 @@ class GroupMembers:
         """Check the reactions on an idol post or guessing game."""
         try:
             if message is not None:
-                reload_image_emoji =  reload_emoji
-                dead_link_emoji =  dead_emoji
+                reload_image_emoji = reload_emoji
+                dead_link_emoji = dead_emoji
                 if not guessing_game:
                     await message.add_reaction(reload_image_emoji)
                 await message.add_reaction(dead_link_emoji)
@@ -450,7 +449,7 @@ class GroupMembers:
                 def image_check(user_reaction, reaction_user):
                     """check the user that reacted to it and which emoji it was."""
                     user_check = (reaction_user == user_msg.author) or (
-                                reaction_user.id ==  owner_id) or reaction_user.id in  mods_list
+                                reaction_user.id == owner_id) or reaction_user.id in mods_list
                     dead_link_check = str(user_reaction.emoji) == dead_link_emoji
                     reload_image_check = str(user_reaction.emoji) == reload_image_emoji
                     guessing_game_check = user_check and dead_link_check and user_reaction.message.id == message.id
@@ -501,11 +500,11 @@ class GroupMembers:
 
     async def delete_dead_link(self, link, idol_id):
         return await ex.conn.execute("DELETE FROM groupmembers.deadlinkfromuser WHERE deadlink = $1 AND idolid = $2",
-                                       link, idol_id)
+                                     link, idol_id)
 
     async def set_forbidden_link(self, link, idol_id):
         return await ex.conn.execute("INSERT INTO groupmembers.forbiddenlinks(link, idolid) VALUES($1, $2)", link,
-                                       idol_id)
+                                     idol_id)
 
     async def send_dead_image(self, channel, link, user, idol, is_guessing_game):
         try:
@@ -519,9 +518,9 @@ class GroupMembers:
             await ex.conn.execute(
                 "INSERT INTO groupmembers.deadlinkfromuser(deadlink, userid, messageid, idolid, guessinggame) VALUES($1, $2, $3, $4, $5)",
                 str(link), user.id, msg.id, idol.id, is_guessing_game)
-            await msg.add_reaction( check_emoji)
-            await msg.add_reaction( trash_emoji)
-            await msg.add_reaction( next_emoji)
+            await msg.add_reaction(check_emoji)
+            await msg.add_reaction(trash_emoji)
+            await msg.add_reaction(next_emoji)
         except Exception as e:
             log.console(f"Send Dead Image - {e}")
 

@@ -5,7 +5,7 @@ import xmltodict
 import urllib.parse
 
 
-# noinspection PyBroadException
+# noinspection PyBroadException,PyPep8
 class Wolfram(commands.Cog):
     def __init__(self):
         self.division_by_zero = "It is not possible to divide by zero."

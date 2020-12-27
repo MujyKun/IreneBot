@@ -4,6 +4,7 @@ from module import logger as log
 from Utility import resources as ex
 
 
+# noinspection PyPep8
 class Logging(commands.Cog):
     @staticmethod
     async def on_message_log(message):

@@ -10,7 +10,7 @@ from datetime import datetime
 from Utility import resources as ex
 
 
-# noinspection PyBroadException,PyBroadException
+# noinspection PyBroadException,PyPep8
 class Archive(commands.Cog):
     @staticmethod
     async def on_message(message, owner=0):

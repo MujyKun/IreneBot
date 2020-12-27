@@ -7,7 +7,7 @@ from Utility import resources as ex
 import datetime
 
 
-# noinspection PyBroadException,PyBroadException
+# noinspection PyBroadException,PyPep8
 class Miscellaneous(commands.Cog):
     @staticmethod
     async def on_message_notifications(message):
@@ -350,7 +350,7 @@ Maintenance Status: {maintenance_status}
                         try:
                             first_result = (result['list'])[number-1]
                         except:
-                            return await ctx.send (f"> **It is not possible to find definition number `{number}` for the word: `{term}`.**")
+                            return await ctx.send(f"> **It is not possible to find definition number `{number}` for the word: `{term}`.**")
                         await ctx.send(f">>> **`Word: {term}`\n`Definition Number: {number}`\n{first_result['definition']}**")
                     else:
                         log.console(r.status)
@@ -413,14 +413,14 @@ Maintenance Status: {maintenance_status}
         """View information about the current guild. [Format: %serverinfo]"""
         try:
             guild = ctx.guild
-            embed = discord.Embed(title= f"{guild.name} ({guild.id})", color=0xffb6c1, url=f"{guild.icon_url}")
+            embed = discord.Embed(title=f"{guild.name} ({guild.id})", color=0xffb6c1, url=f"{guild.icon_url}")
             embed.set_author(name="Irene", url=keys.bot_website,
                              icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
             embed.set_footer(text="Thanks for using Irene.",
                              icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
             embed.set_thumbnail(url=guild.icon_url)
             embed.add_field(name="Owner", value=f"{guild.owner} ({guild.owner.id})", inline=True)
-            embed.add_field(name="Region", value=guild.region , inline=True)
+            embed.add_field(name="Region", value=guild.region, inline=True)
             embed.add_field(name="Users", value=guild.member_count, inline=True)
             embed.add_field(name="Roles", value=f"{len(guild.roles)}", inline=True)
             embed.add_field(name="Emojis", value=f"{len(guild.emojis)}", inline=True)

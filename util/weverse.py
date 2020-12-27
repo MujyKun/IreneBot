@@ -3,13 +3,13 @@ import aiofiles
 from module.keys import weverse_image_folder
 
 
-# noinspection PyBroadException
+# noinspection PyBroadException,PyPep8
 class Weverse:
     async def add_weverse_channel(self, channel_id, community_name):
         """Add a channel to get updates for a community"""
         community_name = community_name.lower()
         await ex.conn.execute("INSERT INTO weverse.channels(channelid, communityname) VALUES($1, $2)", channel_id,
-                                community_name)
+                              community_name)
         await ex.add_weverse_channel_to_cache(channel_id, community_name)
 
     async def add_weverse_channel_to_cache(self, channel_id, community_name):
@@ -38,7 +38,7 @@ class Weverse:
         """Delete a community from a channel's updates."""
         community_name = community_name.lower()
         await ex.conn.execute("DELETE FROM weverse.channels WHERE channelid = $1 AND communityname = $2", channel_id,
-                                community_name)
+                              community_name)
         channels = await self.get_weverse_channels(community_name)
         for channel in channels:
             if channel[0] == channel_id:
@@ -50,7 +50,7 @@ class Weverse:
     async def add_weverse_role(self, channel_id, community_name, role_id):
         """Add a weverse role to notify."""
         await ex.conn.execute("UPDATE weverse.channels SET roleid = $1 WHERE channelid = $2 AND communityname = $3",
-                                role_id, channel_id, community_name.lower())
+                              role_id, channel_id, community_name.lower())
         await self.replace_cache_role_id(channel_id, community_name, role_id)
 
     async def delete_weverse_role(self, channel_id, community_name):
@@ -85,7 +85,7 @@ class Weverse:
     async def set_comment_embed(self, notification, embed_title):
         """Set Comment Embed for Weverse."""
         artist_comments = await ex.weverse_client.fetch_artist_comments(notification.community_id,
-                                                                          notification.contents_id)
+                                                                        notification.contents_id)
         if not artist_comments:
             return
         comment = artist_comments[0]

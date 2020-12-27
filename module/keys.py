@@ -12,7 +12,7 @@ import ksoftapi
 
 
 def make_int(var):
-    # noinspection PyBroadException
+    # noinspection PyBroadException,PyPep8
     try:
         return int(var)
     except:

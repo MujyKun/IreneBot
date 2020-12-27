@@ -2,7 +2,7 @@ from Utility import resources as ex
 from module.keys import bot_support_server_id, patreon_role_id, patreon_super_role_id
 
 
-# noinspection PyBroadException
+# noinspection PyBroadException,PyPep8
 class Patreon:
     async def get_patreon_users(self):
         """Get the permanent patron users"""

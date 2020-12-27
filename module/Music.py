@@ -33,7 +33,7 @@ async def download_video(video):
     return YTDLSource(discord.FFmpegPCMAudio(file_name, **ffmpeg_options), data=data)
 
 
-# noinspection PyBroadException
+# noinspection PyBroadException,PyPep8
 def check_live(video):
     # return None = video is downloaded
     # return a message = video is ignored
@@ -49,6 +49,7 @@ def check_live(video):
             return 'live_video'
     except:
         return  # this error occurs from is_live not being found.
+
 
 # https://github.com/ytdl-org/youtube-dl/blob/2391941f283a1107b01f9df76a8b0e521a5abe3b/youtube_dl/YoutubeDL.py#L143
 ytdl_format_options = {
@@ -77,7 +78,7 @@ ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 queued = {}
 
 
-# noinspection PyBroadException
+# noinspection PyBroadException,PyPep8
 class Music(commands.Cog):
     # noinspection PyBroadException
     @tasks.loop(seconds=30, minutes=1, hours=0, reconnect=True)
@@ -318,7 +319,7 @@ class Music(commands.Cog):
 
     # noinspection PyBroadException
     @commands.command()
-    async def remove(self, ctx, song_number:int):
+    async def remove(self, ctx, song_number: int):
         """Remove a song from the queue. [Format: %remove (song number)] """
         try:
             if self.check_user_in_vc(ctx):
@@ -516,7 +517,7 @@ Become a Patron at {keys.patreon_link}.**""")
             raise commands.CommandError(f"{ctx.author.name} ({ctx.author.id}) is not a Patron.")
 
 
-# noinspection PyBroadException
+# noinspection PyBroadException,PyPep8
 class YTDLSource(discord.PCMVolumeTransformer):
     def __init__(self, source, *, data, volume=0.1):
         super().__init__(source, volume)

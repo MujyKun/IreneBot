@@ -6,7 +6,7 @@ from Utility import resources as ex
 from module import logger as log
 
 
-# noinspection PyBroadException
+# noinspection PyBroadException,PyPep8
 class Profile(commands.Cog):
     def __init__(self):
         ex.client.add_listener(self.profile_level, 'on_message')

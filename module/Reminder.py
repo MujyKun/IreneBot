@@ -6,7 +6,7 @@ import pytz
 import discord
 
 
-# noinspection PyBroadException
+# noinspection PyBroadException,PyPep8
 class Reminder(commands.Cog):
     def __init__(self):
         self.set_timezone_format = "settimezone (timezone abbreviation) (country code)"

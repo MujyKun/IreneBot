@@ -7,7 +7,7 @@ import asyncio
 import datetime
 
 
-# noinspection PyBroadException
+# noinspection PyBroadException,PyPep8
 class Cache:
 
     async def process_cache_time(self, method, name):

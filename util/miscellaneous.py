@@ -6,7 +6,7 @@ import random
 import json
 
 
-# noinspection PyBroadException,PyBroadException
+# noinspection PyBroadException,PyPep8
 class Miscellaneous:
     async def check_for_nword(self, message):
         """Processes new messages that contains the N word."""
@@ -22,7 +22,7 @@ class Miscellaneous:
                             current_amount = ex.cache.n_word_counter.get(author_id)
                             if current_amount:
                                 await ex.conn.execute("UPDATE general.nword SET nword = $1 WHERE userid = $2::bigint",
-                                                        current_amount + 1, author_id)
+                                                      current_amount + 1, author_id)
                                 ex.cache.n_word_counter[author_id] = current_amount + 1
                             else:
                                 await ex.conn.execute("INSERT INTO general.nword VALUES ($1,$2)", author_id, 1)

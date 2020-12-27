@@ -3,7 +3,7 @@ import math
 import random
 
 
-# noinspection PyBroadException
+# noinspection PyBroadException,PyPep8
 class Currency:
     async def register_user(self, user_id):
         """Register a user to the database if they are not already registered."""

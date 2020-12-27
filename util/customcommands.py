@@ -2,6 +2,7 @@ from Utility import resources as ex
 from module import logger as log
 
 
+# noinspection PyPep8
 class CustomCommands:
     async def check_custom_command_name_exists(self, server_id, command_name):
         if server_id:

@@ -4,6 +4,7 @@ from module import keys, logger as log
 import asyncio
 
 
+# noinspection PyPep8
 class GuessingGame(commands.Cog):
     @commands.command(aliases=['gg'])
     async def guessinggame(self, ctx, gender="all", rounds=20, timeout=20):
@@ -31,7 +32,7 @@ class GuessingGame(commands.Cog):
         await ex.stop_game(ctx, ex.cache.guessing_games)
 
 
-# noinspection PyBroadException
+# noinspection PyBroadException,PyPep8
 class Game:
     def __init__(self):
         self.photo_link = None
@@ -67,8 +68,7 @@ class Game:
             """Check if the user has the correct answer."""
             return ((message.content.lower() in self.correct_answers) or
                     ((message.content.lower() == 'skip' or message.content.lower() in stop_phrases)
-                     and message.author.id == self.host)) and \
-                     message.channel == self.channel
+                     and message.author.id == self.host)) and message.channel == self.channel
         try:
             msg = await ex.client.wait_for('message', check=check_correct_answer, timeout=self.timeout)
             await msg.add_reaction(keys.check_emoji)
@@ -137,8 +137,7 @@ class Game:
         if question_skipped:
             skipped = "Question Skipped. "
         msg = await self.channel.send(f"{skipped}The correct answer was `{self.idol.full_name} ({self.idol.stage_name})`"
-                                f" from the following group(s): `{', '.join(self.group_names)}`",
-                                delete_after=15)
+                                      f" from the following group(s): `{', '.join(self.group_names)}`", delete_after=15)
         # create_task should not be awaited because this is meant to run in the background to check for reactions.
         try:
             # noinspection PyUnusedLocal

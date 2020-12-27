@@ -5,6 +5,7 @@ import random
 import discord
 
 
+# noinspection PyPep8
 class BlackJack:
     @staticmethod
     async def check_in_game(user_id, ctx):  # this is meant for when it is accessed by commands outside of BlackJack.

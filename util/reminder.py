@@ -8,7 +8,7 @@ import datetime
 import random
 
 
-# noinspection PyBroadException
+# noinspection PyBroadException,PyPep8
 class Reminder:
     @staticmethod
     async def determine_time_type(user_input):
@@ -102,8 +102,7 @@ class Reminder:
         if user_timezone:
             await ex.conn.execute("UPDATE reminders.timezones SET timezone = $1 WHERE userid = $2", timezone, user_id)
         else:
-            await ex.conn.execute("INSERT INTO reminders.timezones(userid, timezone) VALUES ($1, $2)", user_id,
-                                    timezone)
+            await ex.conn.execute("INSERT INTO reminders.timezones(userid, timezone) VALUES ($1, $2)", user_id, timezone)
 
     async def remove_user_timezone(self, user_id):
         """Remove user timezone"""
@@ -137,7 +136,7 @@ class Reminder:
         try:
             matching_timezones = set(
                 filter(lambda x: datetime.datetime.now(pytz.timezone(x)).strftime("%Z") ==
-                                 datetime.datetime.now(pytz.timezone(input_timezone)).strftime("%Z"),
+                       datetime.datetime.now(pytz.timezone(input_timezone)).strftime("%Z"),
                        pytz.common_timezones))
         except pytz.exceptions.UnknownTimeZoneError:
             matching_timezones = set(
@@ -184,7 +183,7 @@ class Reminder:
     async def set_reminder(self, remind_reason, remind_time, user_id):
         """Add reminder date to cache and db."""
         await ex.conn.execute("INSERT INTO reminders.reminders(userid, reason, timestamp) VALUES ($1, $2, $3)",
-                                user_id, remind_reason, remind_time)
+                              user_id, remind_reason, remind_time)
         remind_id = ex.first_result(await ex.conn.fetchrow(
             "SELECT id FROM reminders.reminders WHERE userid=$1 AND reason=$2 AND timestamp=$3 ORDER BY id DESC",
             user_id, remind_reason, remind_time))

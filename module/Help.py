@@ -11,6 +11,7 @@ class Help(commands.Cog):
         ex.client.help_command = self.SubHelp()
         ex.client.help_command.cog = self
 
+    # noinspection PyPep8
     class SubHelp(commands.MinimalHelpCommand):
         async def get_server_prefix(self):
             return await ex.get_server_prefix_by_context(self.context)

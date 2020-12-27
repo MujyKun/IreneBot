@@ -6,6 +6,7 @@ from module.keys import bot_id
 from Utility import resources as ex
 
 
+# noinspection PyPep8
 class BlackJack(commands.Cog):
     @commands.command(aliases=['bj'])
     async def blackjack(self, ctx, amount="0", versus="player"):

@@ -5,7 +5,7 @@ from Utility import resources as ex
 import typing
 
 
-# noinspection PyBroadException
+# noinspection PyBroadException,PyPep8
 class LastFM(commands.Cog):
     def __init__(self):
         self.user_not_found = "That user was not found. Refer to `setfm` to link an account."

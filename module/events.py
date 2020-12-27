@@ -4,7 +4,7 @@ from discord.ext import commands
 import discord
 
 
-# noinspection PyBroadException
+# noinspection PyBroadException,PyPep8
 class Events(commands.Cog):
     @staticmethod
     async def catch_on_message_errors(method, message):

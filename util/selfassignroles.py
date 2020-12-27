@@ -11,7 +11,7 @@ class SelfAssignRoles:
         """Adds a self-assignable role to a server."""
         role_info = [role_id, role_name]
         await ex.conn.execute("INSERT INTO selfassignroles.roles(roleid, rolename, serverid) VALUES ($1, $2, $3)",
-                                role_id, role_name, server_id)
+                              role_id, role_name, server_id)
         roles = await self.get_assignable_server_roles(server_id)
         if roles:
             roles.append(role_info)
@@ -49,7 +49,7 @@ class SelfAssignRoles:
     async def remove_self_role(self, role_name, server_id):
         """Remove a self-assignable role from a server."""
         await ex.conn.execute("DELETE FROM selfassignroles.roles WHERE rolename = $1 AND serverid = $2", role_name,
-                                server_id)
+                              server_id)
         cache_info = ex.cache.assignable_roles.get(server_id)
         if cache_info:
             roles = cache_info.get('roles')
@@ -73,9 +73,9 @@ class SelfAssignRoles:
         if amount_of_results:
             update_cache()
             return await ex.conn.execute("UPDATE selfassignroles.channels SET channelid = $1 WHERE serverid = $2",
-                                           channel_id, server_id)
+                                         channel_id, server_id)
         await ex.conn.execute("INSERT INTO selfassignroles.channels(channelid, serverid) VALUES($1, $2)", channel_id,
-                                server_id)
+                              server_id)
         update_cache()
 
     async def get_assignable_server_roles(self, server_id):

@@ -1,7 +1,7 @@
 from Utility import resources as ex
 
 
-# noinspection PyBroadException
+# noinspection PyBroadException,PyPep8
 class Logging:
     #################
     # ## LOGGING ## #
@@ -34,7 +34,7 @@ class Logging:
                 await ex.conn.fetchrow("SELECT channelid FROM logging.servers WHERE serverid = $1", server_id))
             if current_channel_id != channel_id:
                 await ex.conn.execute("UPDATE logging.servers SET channelid = $1 WHERE serverid = $2", channel_id,
-                                        server_id)
+                                      server_id)
         return True
 
     async def check_if_logged(self, server_id=None, channel_id=None):  # only one parameter should be passed in
@@ -55,8 +55,7 @@ class Logging:
         else:
             logged_server = await ex.conn.fetchrow(
                 "SELECT id, serverid, channelid, sendall FROM logging.servers WHERE serverid = $1", server_id)
-            channels = await ex.conn.fetch("SELECT channelid FROM logging.channels WHERE server = $1",
-                                             logged_server[0])
+            channels = await ex.conn.fetch("SELECT channelid FROM logging.channels WHERE server = $1", logged_server[0])
             for channel in channels:
                 ex.cache.list_of_logged_channels.append(channel[0])
             ex.cache.logged_channels[logged_server[1]] = {

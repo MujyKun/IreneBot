@@ -8,7 +8,7 @@ import json
 import aiohttp
 
 
-# noinspection PyBroadException
+# noinspection PyBroadException,PyPep8
 class Moderator(commands.Cog):
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
@@ -200,7 +200,7 @@ class Moderator(commands.Cog):
                 return await ctx.send(">**This user was not muted by me as the mute role could not be found. In order for me to create a custom mute role, I need to mute someone first.**")
             if muted:
                 await user.remove_roles(mute_role,
-                                     reason=f"UnMuting User - Requested by {ctx.author.display_name} ({user.id})")
+                                        reason=f"UnMuting User - Requested by {ctx.author.display_name} ({user.id})")
                 return await ctx.send(f"> **<@{user.id}> has been unmuted.**")
             else:
                 return await ctx.send(f"> **<@{user.id}> is not muted.**")

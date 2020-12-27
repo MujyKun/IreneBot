@@ -6,6 +6,7 @@ import random
 import asyncio
 
 
+# noinspection PyPep8
 class BiasGame(commands.Cog):
     @commands.command(aliases=['bg'])
     async def biasgame(self, ctx, gender="all", bracket_size=8):
@@ -49,7 +50,7 @@ class BiasGame(commands.Cog):
         await ctx.send(msg_string)
 
 
-# noinspection PyBroadException
+# noinspection PyBroadException,PyPep8
 class Game:
     def __init__(self):
         self.host_ctx = None  # ctx of the host starting game

@@ -5,7 +5,7 @@ import random
 from Utility import resources as ex
 
 
-# noinspection PyBroadException
+# noinspection PyBroadException,PyPep8
 class Status:
     """Change the bot's playing status in a loop"""
     @tasks.loop(seconds=30, minutes=0, hours=0, reconnect=True)

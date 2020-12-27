@@ -7,7 +7,7 @@ from module.keys import bot_website
 from Utility import resources as ex
 
 
-# noinspection PyBroadException
+# noinspection PyBroadException,PyPep8
 class Currency(commands.Cog):
     """
     Will be rewritten from scratch
@@ -70,7 +70,7 @@ class Currency(commands.Cog):
                             await ex.u_currency.register_user(user_id)
                             amount = await ex.u_currency.get_balance(user_id)
                             if balance > amount:
-                                await ctx.send(embed=await ex.create_embed(title="Not Enough Money", title_desc=f"**You do not have enough money to bet {balance:,}. You have {amount:,} Dollars.**" ))
+                                await ctx.send(embed=await ex.create_embed(title="Not Enough Money", title_desc=f"**You do not have enough money to bet {balance:,}. You have {amount:,} Dollars.**"))
                             if balance <= amount:
                                 a = randint(1, 100)
                                 if a <= 50:
@@ -197,7 +197,7 @@ class Currency(commands.Cog):
                             await ex.u_currency.update_balance(user_id, str(user_balance - money_needed_to_level))
                             await ex.u_levels.set_level(user_id, user_level + 1, command.lower())
                             embed = await ex.create_embed(title="You Have Leveled Up!",
-                                                       title_desc=f"<@{ctx.author.id}>, You are now at level {user_level+1}")
+                                                          title_desc=f"<@{ctx.author.id}>, You are now at level {user_level+1}")
                             await ctx.send(embed=embed)
                             ctx.command.reset_cooldown(ctx)
                 else:
@@ -244,16 +244,16 @@ class Currency(commands.Cog):
                         if user_money >= 0:
                                 # b value is out of 20 so each 5% is considered 1
                                 all_possible_values = []
-                                for i in range (rob_percent_to_win, 21):
+                                for i in range(rob_percent_to_win, 21):
                                     if i == rob_percent_to_win:
-                                        for j in range (rob_percent_to_win):
+                                        for j in range(rob_percent_to_win):
                                             all_possible_values.append(i)
                                     else:
                                         all_possible_values.append(i)
                                 random_number = choice(all_possible_values)
                                 if random_number != rob_percent_to_win:
                                     await ctx.send(embed=await ex.create_embed(title="Robbed User",
-                                                                            title_desc=f"**<@{ctx.author.id}> has failed to rob <@{robbed_user_id}>.**"))
+                                                                               title_desc=f"**<@{ctx.author.id}> has failed to rob <@{robbed_user_id}>.**"))
                                 if random_number == rob_percent_to_win:
                                     if user_money >= 100:
                                         random_amount = await ex.u_currency.get_robbed_amount(author_money, user_money, level)
@@ -261,7 +261,7 @@ class Currency(commands.Cog):
                                             await ex.u_currency.update_balance(robbed_user_id, str(user_money - random_amount))
                                             await ex.u_currency.update_balance(ctx.author.id, str(author_money + random_amount))
                                             await ctx.send(embed=await ex.create_embed(title="Robbed User",
-                                                                                    title_desc=f"**<@{ctx.author.id}> has stolen ${random_amount:,} from <@{robbed_user_id}>.**"))
+                                                                                       title_desc=f"**<@{ctx.author.id}> has stolen ${random_amount:,} from <@{robbed_user_id}>.**"))
                                         except Exception as e:
                                             await ctx.send(f"> **The Database is locked... -- {e}**")
                                     elif user_money < 100:
@@ -344,7 +344,7 @@ class Currency(commands.Cog):
                                     await ctx.send(embed=await ex.create_embed(title="Rock Paper Scissors", title_desc=f"**You Won {cd:,} Dollars! I chose {compchoice} while you chose {rps_choice}!**"))
                                     await ex.u_currency.update_balance(user_id, str(current_balance + cd))
                                 if rps_choice == 'scissors' or rps_choice == 's':
-                                    await ctx.send(embed=await ex.create_embed(title="Rock Paper Scissors",title_desc=f"**You Lost {amount:,} Dollars! I chose {compchoice} while you chose {rps_choice}!**"))
+                                    await ctx.send(embed=await ex.create_embed(title="Rock Paper Scissors", title_desc=f"**You Lost {amount:,} Dollars! I chose {compchoice} while you chose {rps_choice}!**"))
                                     await ex.u_currency.update_balance(user_id, str(current_balance - amount))
                             if compchoice == 'paper':
                                 if rps_choice == 'rock' or rps_choice == 'r':

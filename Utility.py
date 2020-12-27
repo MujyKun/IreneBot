@@ -13,7 +13,7 @@ Any potentially useful/repeated functions will end up here
 """
 
 
-# noinspection PyBroadException
+# noinspection PyBroadException,PyPep8
 class Utility:
     def __init__(self):
         self.test_bot = None  # this is changed in run.py

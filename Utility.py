@@ -10,6 +10,7 @@ import tweepy
 Utility.py
 Resource Center for Irene -> Essentially serves as a client for Irene.
 Any potentially useful/repeated functions will end up here
+All categorized utility methods will be placed as objects prefixed with u_ as a property.
 """
 
 
@@ -17,11 +18,11 @@ Any potentially useful/repeated functions will end up here
 class Utility:
     def __init__(self):
         self.test_bot = None  # this is changed in run.py
-        self.client = keys.client
-        self.session = keys.client_session
+        self.client = keys.client  # discord.py client
+        self.session = keys.client_session  # aiohttp client session
         self.conn = None  # db connection
         self.discord_cache_loaded = False
-        self.cache = cache.Cache()
+        self.cache = cache.Cache()  # instance for loaded cache
         self.temp_patrons_loaded = False
         self.running_loop = None  # current asyncio running loop
         self.thread_pool = None  # ThreadPoolExecutor for operations that block the event loop.

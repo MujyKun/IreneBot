@@ -92,7 +92,6 @@ class Irene:
         ex.client.add_cog(module.Twitter.Twitter())
         ex.client.add_cog(module.Currency.Currency())
         ex.client.add_cog(module.BlackJack.BlackJack())
-        ex.client.add_cog(module.Cogs.Cogs())
         ex.client.add_cog(module.Youtube.Youtube())
         ex.client.add_cog(module.GroupMembers.GroupMembers())
         ex.client.add_cog(module.Archive.Archive())

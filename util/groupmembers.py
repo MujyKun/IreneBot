@@ -12,7 +12,8 @@ from module.keys import reload_emoji, dead_emoji, owner_id, mods_list, check_emo
 
 # noinspection PyBroadException,PyPep8
 class GroupMembers:
-    async def get_if_user_voted(self, user_id):
+    @staticmethod
+    async def get_if_user_voted(user_id):
         time_stamp = ex.first_result(
             await ex.conn.fetchrow("SELECT votetimestamp FROM general.lastvoted WHERE userid = $1", user_id))
         if time_stamp:
@@ -26,7 +27,8 @@ class GroupMembers:
     def check_idol_object(self, obj):
         return type(obj) == self.Idol
 
-    async def send_vote_message(self, message):
+    @staticmethod
+    async def send_vote_message(message):
         """Send the vote message to a user."""
         server_prefix = await ex.get_server_prefix_by_context(message)
         vote_message = f"> **To call more idol photos for the next 12 hours," \
@@ -71,7 +73,8 @@ class GroupMembers:
             "DELETE FROM groupmembers.aliases WHERE alias = $1 AND isgroup = $2 AND serverid = $3 AND objectid = $4",
             alias, is_group, server_id, obj.id)
 
-    async def get_member(self, idol_id):
+    @staticmethod
+    async def get_member(idol_id):
         """Get a member by the idol id."""
         try:
             idol_id = int(idol_id)
@@ -83,7 +86,8 @@ class GroupMembers:
             if idol.id == idol_id:
                 return idol
 
-    async def get_group(self, group_id):
+    @staticmethod
+    async def get_group(group_id):
         """Get a group by the group id."""
         try:
             group_id = int(group_id)
@@ -200,7 +204,8 @@ class GroupMembers:
                     await ex.conn.execute("DELETE FROM groupmembers.idoltogroup WHERE groupid = $1", group_id)
         return f"{' | '.join(group_names)}\n"
 
-    async def check_channel_sending_photos(self, channel_id):
+    @staticmethod
+    async def check_channel_sending_photos(channel_id):
         """Checks a text channel ID to see if it is restricted from having idol photos sent."""
         channel = ex.cache.restricted_channels.get(channel_id)
         if channel:
@@ -208,21 +213,24 @@ class GroupMembers:
                 return False  # returns False if they are restricted.
         return True
 
-    async def delete_restricted_channel_from_cache(self, channel_id, send_all):
+    @staticmethod
+    async def delete_restricted_channel_from_cache(channel_id, send_all):
         """Deletes restricted channel from cache."""
         r_channel = ex.cache.restricted_channels.get(channel_id)
         if r_channel:
             if r_channel[1] == send_all:
                 ex.cache.restricted_channels.pop(channel_id)
 
-    async def check_server_sending_photos(self, server_id):
+    @staticmethod
+    async def check_server_sending_photos(server_id):
         """Checks a server to see if it has a specific channel to send idol photos to"""
         for channel in ex.cache.restricted_channels:
             channel_info = ex.cache.restricted_channels.get(channel)
             if channel_info[0] == server_id and channel_info[1] == 1:
                 return True  # returns True if they are supposed to send it to a specific channel.
 
-    async def get_channel_sending_photos(self, server_id):
+    @staticmethod
+    async def get_channel_sending_photos(server_id):
         """Returns a text channel from a server that requires idol photos to be sent to a specific text channel."""
         for channel_id in ex.cache.restricted_channels:
             channel_info = ex.cache.restricted_channels.get(channel_id)
@@ -235,11 +243,13 @@ class GroupMembers:
         log.console(f"IDOL LOG: ChannelID = {message.channel.id} - {message.author} "
                     f"({message.author.id})|| {message.clean_content} ")
 
-    async def get_all_images_count(self):
+    @staticmethod
+    async def get_all_images_count():
         """Get the amount of images the bot has."""
         return ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) FROM groupmembers.imagelinks"))
 
-    async def get_db_idol_called(self, member_id):
+    @staticmethod
+    async def get_db_idol_called(member_id):
         """Get the amount of times an idol has been called from the database."""
         return ex.first_result(
             await ex.conn.fetchrow("SELECT Count FROM groupmembers.Count WHERE MemberID = $1", member_id))
@@ -251,19 +261,22 @@ class GroupMembers:
             idol = await self.get_random_idol()
         return idol
 
-    async def get_db_all_members(self):
+    @staticmethod
+    async def get_db_all_members():
         """Get all idols from the database."""
         return await ex.conn.fetch("""SELECT id, fullname, stagename, formerfullname, formerstagename, birthdate,
             birthcountry, birthcity, gender, description, height, twitter, youtube, melon, instagram, vlive, spotify,
             fancafe, facebook, tiktok, zodiac, thumbnail, banner, bloodtype, tags FROM groupmembers.Member ORDER BY id""")
 
-    async def get_all_groups(self):
+    @staticmethod
+    async def get_all_groups():
         """Get all groups."""
         return await ex.conn.fetch("""SELECT groupid, groupname, debutdate, disbanddate, description, twitter, youtube,
                                          melon, instagram, vlive, spotify, fancafe, facebook, tiktok, fandom, company,
                                           website, thumbnail, banner, gender, tags FROM groupmembers.groups ORDER BY groupname""")
 
-    async def get_db_members_in_group(self, group_name=None, group_id=None):
+    @staticmethod
+    async def get_db_members_in_group(group_name=None, group_id=None):
         """Get the members in a specific group from database."""
         if group_id is None:
             group_id = ex.first_result(
@@ -271,7 +284,8 @@ class GroupMembers:
         members = await ex.conn.fetch("SELECT idolid FROM groupmembers.idoltogroup WHERE groupid = $1", group_id)
         return [member[0] for member in members]
 
-    async def get_db_aliases(self, object_id, group=False):
+    @staticmethod
+    async def get_db_aliases(object_id, group=False):
         """Get the aliases of an idol or group from the database."""
         aliases = await ex.conn.fetch(
             "SELECT alias, serverid FROM groupmembers.aliases WHERE objectid = $1 AND isgroup = $2", object_id,
@@ -289,16 +303,19 @@ class GroupMembers:
                 global_aliases.append(alias)
         return global_aliases, local_aliases
 
-    async def get_db_groups_from_member(self, member_id):
+    @staticmethod
+    async def get_db_groups_from_member(member_id):
         """Return all the group ids an idol is in from the database."""
         groups = await ex.conn.fetch("SELECT groupid FROM groupmembers.idoltogroup WHERE idolid = $1", member_id)
         return [group[0] for group in groups]
 
-    async def add_idol_to_group(self, member_id: int, group_id: int):
+    @staticmethod
+    async def add_idol_to_group(member_id: int, group_id: int):
         return await ex.conn.execute("INSERT INTO groupmembers.idoltogroup(idolid, groupid) VALUES($1, $2)",
                                      member_id, group_id)
 
-    async def remove_idol_from_group(self, member_id: int, group_id: int):
+    @staticmethod
+    async def remove_idol_from_group(member_id: int, group_id: int):
         return await ex.conn.execute("DELETE FROM groupmembers.idoltogroup WHERE idolid = $1 AND groupid = $2",
                                      member_id, group_id)
 
@@ -398,7 +415,8 @@ class GroupMembers:
             embed_list.append(embed)
         return embed_list
 
-    async def set_embed_with_all_aliases(self, mode, server_id=None):
+    @staticmethod
+    async def set_embed_with_all_aliases(mode, server_id=None):
         """Send the names of all aliases in an embed with many pages."""
 
         def create_embed():
@@ -495,14 +513,17 @@ class GroupMembers:
         except:
             pass
 
-    async def get_dead_links(self):
+    @staticmethod
+    async def get_dead_links():
         return await ex.conn.fetch("SELECT deadlink, messageid, idolid FROM groupmembers.deadlinkfromuser")
 
-    async def delete_dead_link(self, link, idol_id):
+    @staticmethod
+    async def delete_dead_link(link, idol_id):
         return await ex.conn.execute("DELETE FROM groupmembers.deadlinkfromuser WHERE deadlink = $1 AND idolid = $2",
                                      link, idol_id)
 
-    async def set_forbidden_link(self, link, idol_id):
+    @staticmethod
+    async def set_forbidden_link(link, idol_id):
         return await ex.conn.execute("INSERT INTO groupmembers.forbiddenlinks(link, idolid) VALUES($1, $2)", link,
                                      idol_id)
 
@@ -556,7 +577,8 @@ class GroupMembers:
         idols = list(dict.fromkeys(idol_list))
         return idols
 
-    async def check_to_add_alias_to_list(self, alias, name, mode=0):
+    @staticmethod
+    async def check_to_add_alias_to_list(alias, name, mode=0):
         """Check whether to add an alias to a list. Compares a name with an existing alias."""
         if not mode:
             if alias == name:
@@ -629,7 +651,8 @@ class GroupMembers:
                     member_list.append(member)
         return member_list or None
 
-    async def update_member_count(self, idol):
+    @staticmethod
+    async def update_member_count(idol):
         """Update the amount of times an idol has been called."""
         if not idol.called:
             idol.called = 1
@@ -639,10 +662,12 @@ class GroupMembers:
             await ex.conn.execute("UPDATE groupmembers.Count SET Count = $1 WHERE MemberID = $2", idol.called,
                                     idol.id)
 
-    async def set_as_group_photo(self, link):
+    @staticmethod
+    async def set_as_group_photo(link):
         await ex.conn.execute("UPDATE groupmembers.imagelinks SET groupphoto = $1 WHERE link = $2", 1, str(link))
 
-    async def get_google_drive_link(self, api_url):
+    @staticmethod
+    async def get_google_drive_link(api_url):
         """Get the google drive link based on the api's image url."""
         return ex.first_result(
             await ex.conn.fetchrow("SELECT driveurl FROM groupmembers.apiurl WHERE apiurl = $1", str(api_url)))

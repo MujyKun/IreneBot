@@ -26,7 +26,8 @@ class LastFM:
         async with ex.session.get(last_fm_root_url, headers=last_fm_headers, params=self.create_fm_payload(method, user, limit, time_period)) as response:
             return await response.json()
 
-    async def get_fm_username(self, user_id):
+    @staticmethod
+    async def get_fm_username(user_id):
         """Gets Last FM username from the DB."""
         return ex.first_result(await ex.conn.fetchrow("SELECT username FROM lastfm.users WHERE userid = $1", user_id))
 

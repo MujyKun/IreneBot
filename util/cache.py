@@ -10,7 +10,8 @@ import datetime
 # noinspection PyBroadException,PyPep8
 class Cache:
 
-    async def process_cache_time(self, method, name):
+    @staticmethod
+    async def process_cache_time(method, name):
         """Process the cache time."""
         past_time = time.time()
         result = await method()
@@ -50,13 +51,15 @@ class Cache:
             task = asyncio.create_task(self.process_cache_time(ex.weverse_client.start, "Weverse"))
         log.console(f"Cache Completely Created in {await ex.u_miscellaneous.get_cooldown_time(time.time() - past_time)}.")
 
-    async def create_timezone_cache(self):
+    @staticmethod
+    async def create_timezone_cache():
         ex.cache.timezones = {}  # reset cache
         timezones = await ex.u_reminder.get_all_timezones_from_db()
         for user_id, timezone in timezones:
             ex.cache.timezones[user_id] = timezone
 
-    async def create_reminder_cache(self):
+    @staticmethod
+    async def create_reminder_cache():
         """Create cache for reminders"""
         ex.cache.reminders = {}  # reset cache
         all_reminders = await ex.u_reminder.get_all_reminders_from_db()
@@ -68,7 +71,8 @@ class Cache:
             else:
                 ex.cache.reminders[user_id] = [reason_list]
 
-    async def create_self_assignable_role_cache(self):
+    @staticmethod
+    async def create_self_assignable_role_cache():
         """Create cache for self assignable roles"""
         all_roles = await ex.conn.fetch("SELECT roleid, rolename, serverid FROM selfassignroles.roles")
         all_channels = await ex.conn.fetch("SELECT channelid, serverid FROM selfassignroles.channels")
@@ -88,7 +92,8 @@ class Cache:
             else:
                 ex.cache.assignable_roles[server_id] = {'channel_id': channel_id}
 
-    async def create_weverse_channel_cache(self):
+    @staticmethod
+    async def create_weverse_channel_cache():
         """Create cache for channels that are following a community on weverse."""
         all_channels = await ex.conn.fetch("SELECT channelid, communityname, roleid, commentsdisabled FROM weverse.channels")
         for channel_id, community_name, role_id, comments_disabled in all_channels:
@@ -106,13 +111,15 @@ class Cache:
         ex.cache.current_session = ex.first_result(
             await ex.conn.fetchrow("SELECT session FROM stats.sessions WHERE date = $1", datetime.date.today()))
 
-    async def create_restricted_channel_cache(self):
+    @staticmethod
+    async def create_restricted_channel_cache():
         """Create restricted idol channel cache"""
         restricted_channels = await ex.conn.fetch("SELECT channelid, serverid, sendhere FROM groupmembers.restricted")
         for channel_id, server_id, send_here in restricted_channels:
             ex.cache.restricted_channels[channel_id] = [server_id, send_here]
 
-    async def create_bot_command_cache(self):
+    @staticmethod
+    async def create_bot_command_cache():
         """Create custom command cache"""
         server_commands = await ex.conn.fetch("SELECT serverid, commandname, message FROM general.customcommands")
         ex.cache.custom_commands = {}
@@ -123,11 +130,13 @@ class Cache:
             else:
                 ex.cache.custom_commands[server_id] = {command_name: message}
 
-    async def create_bot_status_cache(self):
+    @staticmethod
+    async def create_bot_status_cache():
         statuses = await ex.conn.fetch("SELECT status FROM general.botstatus")
         ex.cache.bot_statuses = [status[0] for status in statuses] or None
 
-    async def create_dead_link_cache(self):
+    @staticmethod
+    async def create_dead_link_cache():
         """Creates Dead Link Cache"""
         ex.cache.dead_image_cache = {}
         try:
@@ -138,7 +147,8 @@ class Cache:
         for dead_link, user_id, message_id, idol_id, guessing_game in dead_images:
             ex.cache.dead_image_cache[message_id] = [dead_link, user_id, idol_id, guessing_game]
 
-    async def create_idol_cache(self):
+    @staticmethod
+    async def create_idol_cache():
         """Create Idol Objects and store them as cache."""
         ex.cache.idols = []
         for idol in await ex.u_group_members.get_db_all_members():
@@ -150,7 +160,8 @@ class Cache:
             idol_obj.photo_count = ex.cache.idol_photos.get(idol_obj.id) or 0
             ex.cache.idols.append(idol_obj)
 
-    async def create_group_cache(self):
+    @staticmethod
+    async def create_group_cache():
         """Create Group Objects and store them as cache"""
         ex.cache.groups = []
         for group in await ex.u_group_members.get_all_groups():
@@ -186,14 +197,16 @@ class Cache:
         await self.process_session()
         return ex.cache.session_id
 
-    async def update_n_word_counter(self):
+    @staticmethod
+    async def update_n_word_counter():
         """Update NWord Cache"""
         ex.cache.n_word_counter = {}
         user_info = await ex.conn.fetch("SELECT userid, nword FROM general.nword")
         for user in user_info:
             ex.cache.n_word_counter[user[0]] = user[1]
 
-    async def update_temp_channels(self):
+    @staticmethod
+    async def update_temp_channels():
         """Create the cache for temp channels."""
         ex.cache.temp_channels = {}
         channels = await ex.u_miscellaneous.get_temp_channels()
@@ -203,21 +216,24 @@ class Cache:
                 removal_time = 60
             ex.cache.temp_channels[channel_id] = removal_time
 
-    async def update_welcome_message_cache(self):
+    @staticmethod
+    async def update_welcome_message_cache():
         """Create the cache for welcome messages."""
         ex.cache.welcome_messages = {}
         info = await ex.conn.fetch("SELECT channelid, serverid, message, enabled FROM general.welcome")
         for server in info:
             ex.cache.welcome_messages[server[1]] = {"channel_id": server[0], "message": server[2], "enabled": server[3]}
 
-    async def update_server_prefixes(self):
+    @staticmethod
+    async def update_server_prefixes():
         """Create the cache for server prefixes."""
         ex.cache.server_prefixes = {}
         info = await ex.conn.fetch("SELECT serverid, prefix FROM general.serverprefix")
         for server_id, prefix in info:
             ex.cache.server_prefixes[server_id] = prefix
 
-    async def update_logging_channels(self):
+    @staticmethod
+    async def update_logging_channels():
         """Create the cache for logged servers and channels."""
         ex.cache.logged_channels = {}
         ex.cache.list_of_logged_channels = []
@@ -232,7 +248,8 @@ class Cache:
                 "channels": [channel[0] for channel in channels]
             }
 
-    async def update_bot_bans(self):
+    @staticmethod
+    async def update_bot_bans():
         """Create the cache for banned users from the bot."""
         ex.cache.bot_banned = []
         banned_users = await ex.conn.fetch("SELECT userid FROM general.blacklisted")
@@ -240,14 +257,16 @@ class Cache:
             user_id = user[0]
             ex.cache.bot_banned.append(user_id)
 
-    async def update_mod_mail(self):
+    @staticmethod
+    async def update_mod_mail():
         """Create the cache for existing mod mail"""
         ex.cache.mod_mail = {}
         mod_mail = await ex.conn.fetch("SELECT userid, channelid FROM general.modmail")
         for user_id, channel_id in mod_mail:
             ex.cache.mod_mail[user_id] = [channel_id]
 
-    async def update_patreons(self):
+    @staticmethod
+    async def update_patreons():
         """Create the cache for Patrons."""
         try:
             ex.cache.patrons = {}
@@ -292,21 +311,24 @@ class Cache:
         except:
             return False
 
-    async def update_user_notifications(self):
+    @staticmethod
+    async def update_user_notifications():
         """Set the cache for user phrases"""
         ex.cache.user_notifications = []
         notifications = await ex.conn.fetch("SELECT guildid,userid,phrase FROM general.notifications")
         for guild_id, user_id, phrase in notifications:
             ex.cache.user_notifications.append([guild_id, user_id, phrase])
 
-    async def update_groups(self):
+    @staticmethod
+    async def update_groups():
         """Set cache for group photo count"""
         ex.cache.group_photos = {}
         all_group_counts = await ex.conn.fetch("SELECT g.groupid, g.groupname, COUNT(f.link) FROM groupmembers.groups g, groupmembers.member m, groupmembers.idoltogroup l, groupmembers.imagelinks f WHERE m.id = l.idolid AND g.groupid = l.groupid AND f.memberid = m.id GROUP BY g.groupid ORDER BY g.groupname")
         for group in all_group_counts:
             ex.cache.group_photos[group[0]] = group[2]
 
-    async def update_idols(self):
+    @staticmethod
+    async def update_idols():
         """Set cache for idol photo count"""
         ex.cache.idol_photos = {}
         all_idol_counts = await ex.conn.fetch("SELECT memberid, COUNT(link) FROM groupmembers.imagelinks GROUP BY memberid")

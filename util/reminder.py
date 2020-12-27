@@ -91,11 +91,13 @@ class Reminder:
         except:
             raise ex.exceptions.ImproperFormat
 
-    async def get_user_timezone(self, user_id):
+    @staticmethod
+    async def get_user_timezone(user_id):
         """Returns the user's timezone"""
         return ex.cache.timezones.get(user_id)
 
-    async def set_user_timezone(self, user_id, timezone):
+    @staticmethod
+    async def set_user_timezone(user_id, timezone):
         """Set user timezone"""
         user_timezone = ex.cache.timezones.get(user_id)
         ex.cache.timezones[user_id] = timezone
@@ -104,7 +106,8 @@ class Reminder:
         else:
             await ex.conn.execute("INSERT INTO reminders.timezones(userid, timezone) VALUES ($1, $2)", user_id, timezone)
 
-    async def remove_user_timezone(self, user_id):
+    @staticmethod
+    async def remove_user_timezone(user_id):
         """Remove user timezone"""
         try:
             ex.cache.timezones.pop(user_id)
@@ -160,7 +163,8 @@ class Reminder:
 
         return random.choice(list(possible_timezones))
 
-    async def get_locale_time(self, m_time, user_timezone=None):
+    @staticmethod
+    async def get_locale_time(m_time, user_timezone=None):
         """ Return a string containing locale date format. For now, enforce all weekdays to be en_US format"""
         # Set locale to server locale
         time_format = '%I:%M:%S%p %Z'
@@ -180,7 +184,8 @@ class Reminder:
         local_time = local_time.strftime(time_format)
         return f"{weekday} {locale_date} {local_time}"
 
-    async def set_reminder(self, remind_reason, remind_time, user_id):
+    @staticmethod
+    async def set_reminder(remind_reason, remind_time, user_id):
         """Add reminder date to cache and db."""
         await ex.conn.execute("INSERT INTO reminders.reminders(userid, reason, timestamp) VALUES ($1, $2, $3)",
                               user_id, remind_reason, remind_time)
@@ -194,11 +199,13 @@ class Reminder:
         else:
             ex.cache.reminders[user_id] = [remind_info]
 
-    async def get_reminders(self, user_id):
+    @staticmethod
+    async def get_reminders(user_id):
         """Get the reminders of a user"""
         return ex.cache.reminders.get(user_id)
 
-    async def remove_user_reminder(self, user_id, reminder_id):
+    @staticmethod
+    async def remove_user_reminder(user_id, reminder_id):
         """Remove a reminder from the cache and the database."""
         try:
             # remove from cache
@@ -212,11 +219,13 @@ class Reminder:
             log.console(e)
         await ex.conn.execute("DELETE FROM reminders.reminders WHERE id = $1", reminder_id)
 
-    async def get_all_reminders_from_db(self):
+    @staticmethod
+    async def get_all_reminders_from_db():
         """Get all reminders from the db (all users)"""
         return await ex.conn.fetch("SELECT id, userid, reason, timestamp FROM reminders.reminders")
 
-    async def get_all_timezones_from_db(self):
+    @staticmethod
+    async def get_all_timezones_from_db():
         """Get all timezones from the db (all users)"""
         return await ex.conn.fetch("SELECT userid, timezone FROM reminders.timezones")
 

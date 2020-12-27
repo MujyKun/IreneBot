@@ -8,7 +8,8 @@ import json
 
 # noinspection PyBroadException,PyPep8
 class Miscellaneous:
-    async def check_for_nword(self, message):
+    @staticmethod
+    async def check_for_nword(message):
         """Processes new messages that contains the N word."""
         message_sender = message.author
         if not message_sender.bot:
@@ -28,11 +29,13 @@ class Miscellaneous:
                                 await ex.conn.execute("INSERT INTO general.nword VALUES ($1,$2)", author_id, 1)
                                 ex.cache.n_word_counter[author_id] = 1
 
-    async def check_if_temp_channel(self, channel_id):
+    @staticmethod
+    async def check_if_temp_channel(channel_id):
         """Check if a channel is a temp channel"""
         return ex.cache.temp_channels.get(channel_id) is not None  # do not change structure
 
-    async def get_temp_channels(self):
+    @staticmethod
+    async def get_temp_channels():
         """Get all temporary channels in the DB."""
         return await ex.conn.fetch("SELECT chanid, delay FROM general.tempchannels")
 
@@ -41,7 +44,8 @@ class Miscellaneous:
         if await self.check_if_temp_channel(message.channel.id):
             await message.delete(delay=ex.cache.temp_channels.get(message.channel.id))
 
-    async def get_disabled_server_interactions(self, server_id):
+    @staticmethod
+    async def get_disabled_server_interactions(server_id):
         """Get a server's disabled interactions."""
         interactions = await ex.conn.fetchrow("SELECT interactions FROM general.disabledinteractions WHERE serverid = $1", server_id)
         return ex.first_result(interactions)
@@ -71,7 +75,8 @@ class Miscellaneous:
                 return await ex.conn.execute("DELETE FROM general.disabledinteractions WHERE serverid = $1", server_id)
             await ex.conn.execute("UPDATE general.disabledinteractions SET interactions = $1 WHERE serverid = $2", interactions, server_id)
 
-    async def interact_with_user(self, ctx, user, interaction, interaction_type, self_interaction=False):
+    @staticmethod
+    async def interact_with_user(ctx, user, interaction, interaction_type, self_interaction=False):
         await ex.u_patreon.reset_patreon_cooldown(ctx)
         try:
             if user == discord.Member:
@@ -91,7 +96,8 @@ class Miscellaneous:
             log.console(e)
             return await ctx.send(f"> **{ctx.author.display_name}, there are no links saved for this interaction yet.**")
 
-    async def add_command_count(self, command_name):
+    @staticmethod
+    async def add_command_count(command_name):
         """Add 1 to the specific command count and to the count of the current minute."""
         ex.cache.commands_per_minute += 1
         session_id = await ex.u_cache.get_session_id()
@@ -103,7 +109,8 @@ class Miscellaneous:
             await ex.conn.execute("UPDATE stats.commands SET count = $1 WHERE commandname = $2 AND sessionid = $3", command_count + 1, command_name, session_id)
             ex.cache.command_counter[command_name] += 1
 
-    async def add_session_count(self):
+    @staticmethod
+    async def add_session_count():
         """Adds one to the current session count for commands used and for the total used."""
         session_id = await ex.u_cache.get_session_id()
         ex.cache.current_session += 1
@@ -139,7 +146,8 @@ class Miscellaneous:
                     else:
                         await ex.client.process_commands(message)
 
-    async def send_maintenance_message(self, channel):
+    @staticmethod
+    async def send_maintenance_message(channel):
         try:
             reason = ""
             if ex.cache.maintenance_reason:
@@ -149,7 +157,8 @@ class Miscellaneous:
         except:
             pass
 
-    async def get_api_status(self):
+    @staticmethod
+    async def get_api_status():
         end_point = f"http://127.0.0.1:{api_port}"
         try:
             async with ex.session.get(end_point) as r:
@@ -157,7 +166,8 @@ class Miscellaneous:
         except:
             pass
 
-    async def get_db_status(self):
+    @staticmethod
+    async def get_db_status():
         end_point = f"http://127.0.0.1:{5050}"
         try:
             async with ex.session.get(end_point) as r:
@@ -166,7 +176,8 @@ class Miscellaneous:
         except:
             pass
 
-    async def get_images_status(self):
+    @staticmethod
+    async def get_images_status():
         end_point = f"http://images.irenebot.com/index.html"
         try:
             async with ex.session.get(end_point) as r:
@@ -184,7 +195,8 @@ class Miscellaneous:
         """Returns true if the message is only a bot mention and nothing else."""
         return message.content == f"<@!{bot_id}>"
 
-    async def check_message_is_command(self, message, is_command_name=False):
+    @staticmethod
+    async def check_message_is_command(message, is_command_name=False):
         """Check if a message is a command."""
         if not is_command_name:
             for command_name in ex.client.all_commands:
@@ -201,12 +213,14 @@ class Miscellaneous:
         await channel.send(
             f"> **You are banned from using {bot_name}. Join <{bot_support_server_link}>**")
 
-    async def ban_user_from_bot(self, user_id):
+    @staticmethod
+    async def ban_user_from_bot(user_id):
         """Bans a user from using the bot."""
         await ex.conn.execute("INSERT INTO general.blacklisted(userid) VALUES ($1)", user_id)
         ex.cache.bot_banned.append(user_id)
 
-    async def unban_user_from_bot(self, user_id):
+    @staticmethod
+    async def unban_user_from_bot(user_id):
         """UnBans a user from the bot."""
         await ex.conn.execute("DELETE FROM general.blacklisted WHERE userid = $1", user_id)
         try:
@@ -214,7 +228,8 @@ class Miscellaneous:
         except:
             pass
 
-    async def check_if_bot_banned(self, user_id):
+    @staticmethod
+    async def check_if_bot_banned(user_id):
         """Check if the user can use the bot."""
         return user_id in ex.cache.bot_banned
 
@@ -324,32 +339,37 @@ class Miscellaneous:
         elif languages in id_keywords:
             return languages[9]
 
-    def get_user_count(self):
+    @staticmethod
+    def get_user_count():
         """Get the amount of users that the bot is watching over."""
         counter = 0
         for guild in ex.client.guilds:
             counter += guild.member_count
         return counter
 
-    def get_server_count(self):
+    @staticmethod
+    def get_server_count():
         """Returns the guild count the bot is connected to."""
         return len(ex.client.guilds)
 
-    def get_channel_count(self):
+    @staticmethod
+    def get_channel_count():
         """Returns the channel count from all the guilds the bot is connected to."""
         count = 0
         for guild in ex.client.guilds:
             count += len(guild.channels)
         return count
 
-    def get_text_channel_count(self):
+    @staticmethod
+    def get_text_channel_count():
         """Returns the text channel count from all the guilds the bot is connected to."""
         count = 0
         for guild in ex.client.guilds:
             count += len(guild.text_channels)
         return count
 
-    def get_voice_channel_count(self):
+    @staticmethod
+    def get_voice_channel_count():
         """Returns the voice channel count from all the guilds the bot is connected to."""
         count = 0
         for guild in ex.client.guilds:

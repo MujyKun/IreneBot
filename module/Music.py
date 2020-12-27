@@ -117,13 +117,15 @@ class Music(commands.Cog):
             except Exception as e:
                 log.console(e)
 
-    def check_user_in_vc(self, ctx):
+    @staticmethod
+    def check_user_in_vc(ctx):
         try:
             return ctx.author in ctx.voice_client.channel.members
         except AttributeError:
             return False  # NoneType object has no attribute channel
 
-    def reset_queue_for_guild(self, guild_id):
+    @staticmethod
+    def reset_queue_for_guild(guild_id):
         try:
             if queued[guild_id]:
                 for song in queued[guild_id]:
@@ -489,7 +491,8 @@ class Music(commands.Cog):
         except Exception as e:
             log.console(e)
 
-    async def ensure_voice(self, ctx):
+    @staticmethod
+    async def ensure_voice(ctx):
         if not ctx.voice_client:
             if ctx.author.voice:
                 await ctx.author.voice.channel.connect()

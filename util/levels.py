@@ -3,7 +3,8 @@ from Utility import resources as ex
 
 # noinspection PyPep8
 class Levels:
-    async def get_level(self, user_id, command):
+    @staticmethod
+    async def get_level(user_id, command):
         """Get the level of a command (rob/beg/daily)."""
         count = ex.first_result(
             await ex.conn.fetchrow(f"SELECT COUNT(*) FROM currency.Levels WHERE UserID = $1 AND {command} > $2",
@@ -15,7 +16,8 @@ class Levels:
                 await ex.conn.fetchrow(f"SELECT {command} FROM currency.Levels WHERE UserID = $1", user_id))
         return int(level)
 
-    async def set_level(self, user_id, level, command):
+    @staticmethod
+    async def set_level(user_id, level, command):
         """Set the level of a user for a specific command."""
         async def update_level():
             """Updates a user's level."""

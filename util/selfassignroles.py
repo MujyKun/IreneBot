@@ -33,7 +33,8 @@ class SelfAssignRoles:
                     return discord.Object(role_id), role_name
         return None, None
 
-    async def check_self_role_exists(self, role_id, role_name, server_id):
+    @staticmethod
+    async def check_self_role_exists(role_id, role_name, server_id):
         """Check if a role exists as a self-assignable role in a server."""
         cache_info = ex.cache.assignable_roles.get(server_id)
         if cache_info:
@@ -46,7 +47,8 @@ class SelfAssignRoles:
                         return True
         return False
 
-    async def remove_self_role(self, role_name, server_id):
+    @staticmethod
+    async def remove_self_role(role_name, server_id):
         """Remove a self-assignable role from a server."""
         await ex.conn.execute("DELETE FROM selfassignroles.roles WHERE rolename = $1 AND serverid = $2", role_name,
                               server_id)
@@ -58,7 +60,8 @@ class SelfAssignRoles:
                     if role[1].lower() == role_name.lower():
                         roles.remove(role)
 
-    async def modify_channel_role(self, channel_id, server_id):
+    @staticmethod
+    async def modify_channel_role(channel_id, server_id):
         """Add or Change a server's self-assignable role channel."""
 
         def update_cache():
@@ -78,7 +81,8 @@ class SelfAssignRoles:
                               server_id)
         update_cache()
 
-    async def get_assignable_server_roles(self, server_id):
+    @staticmethod
+    async def get_assignable_server_roles(server_id):
         """Get all the self-assignable roles from a server."""
         results = ex.cache.assignable_roles.get(server_id)
         if results:
@@ -101,7 +105,8 @@ class SelfAssignRoles:
         except Exception as e:
             log.console(e)
 
-    async def check_self_assignable_channel(self, server_id, channel):
+    @staticmethod
+    async def check_self_assignable_channel(server_id, channel):
         """Check if a channel is a self assignable role channel."""
         if server_id:
             cache_info = ex.cache.assignable_roles.get(server_id)

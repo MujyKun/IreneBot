@@ -4,11 +4,13 @@ from module.keys import bot_support_server_id, patreon_role_id, patreon_super_ro
 
 # noinspection PyBroadException,PyPep8
 class Patreon:
-    async def get_patreon_users(self):
+    @staticmethod
+    async def get_patreon_users():
         """Get the permanent patron users"""
         return await ex.conn.fetch("SELECT userid from patreon.users")
 
-    async def get_patreon_role_members(self, super_patron=False):
+    @staticmethod
+    async def get_patreon_role_members(super_patron=False):
         """Get the members in the patreon roles."""
         support_guild = ex.client.get_guild(int(bot_support_server_id))
         # API call will not show role.members
@@ -18,7 +20,8 @@ class Patreon:
             patreon_role = support_guild.get_role(int(patreon_super_role_id))
         return patreon_role.members
 
-    async def check_if_patreon(self, user_id, super_patron=False):
+    @staticmethod
+    async def check_if_patreon(user_id, super_patron=False):
         """Check if the user is a patreon.
         There are two ways to check if a user ia a patreon.
         The first way is getting the members in the Patreon/Super Patreon Role.
@@ -30,7 +33,8 @@ class Patreon:
                 return ex.cache.patrons.get(user_id) == super_patron
             return True
 
-    async def add_to_patreon(self, user_id):
+    @staticmethod
+    async def add_to_patreon(user_id):
         """Add user as a permanent patron."""
         try:
             user_id = int(user_id)
@@ -39,7 +43,8 @@ class Patreon:
         except:
             pass
 
-    async def remove_from_patreon(self, user_id):
+    @staticmethod
+    async def remove_from_patreon(user_id):
         """Remove user from being a permanent patron."""
         try:
             user_id = int(user_id)

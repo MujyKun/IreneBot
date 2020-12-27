@@ -5,14 +5,16 @@ from module.keys import weverse_image_folder
 
 # noinspection PyBroadException,PyPep8
 class Weverse:
-    async def add_weverse_channel(self, channel_id, community_name):
+    @staticmethod
+    async def add_weverse_channel(channel_id, community_name):
         """Add a channel to get updates for a community"""
         community_name = community_name.lower()
         await ex.conn.execute("INSERT INTO weverse.channels(channelid, communityname) VALUES($1, $2)", channel_id,
                               community_name)
         await ex.add_weverse_channel_to_cache(channel_id, community_name)
 
-    async def add_weverse_channel_to_cache(self, channel_id, community_name):
+    @staticmethod
+    async def add_weverse_channel_to_cache(channel_id, community_name):
         """Add a weverse channel to cache."""
         community_name = community_name.lower()
         channels = ex.cache.weverse_channels.get(community_name)
@@ -21,7 +23,8 @@ class Weverse:
         else:
             ex.cache.weverse_channels[community_name] = [[channel_id, None, False]]
 
-    async def check_weverse_channel(self, channel_id, community_name):
+    @staticmethod
+    async def check_weverse_channel(channel_id, community_name):
         """Check if a channel is already getting updates for a community"""
         channels = ex.cache.weverse_channels.get(community_name.lower())
         if channels:
@@ -30,7 +33,8 @@ class Weverse:
                     return True
         return False
 
-    async def get_weverse_channels(self, community_name):
+    @staticmethod
+    async def get_weverse_channels(community_name):
         """Get all of the channel ids for a specific community name"""
         return ex.cache.weverse_channels.get(community_name.lower())
 
@@ -60,7 +64,8 @@ class Weverse:
             community_name.lower())
         await self.replace_cache_role_id(channel_id, community_name, None)
 
-    async def replace_cache_role_id(self, channel_id, community_name, role_id):
+    @staticmethod
+    async def replace_cache_role_id(channel_id, community_name, role_id):
         """Replace the server role that gets notified on Weverse Updates."""
         channels = ex.cache.weverse_channels.get(community_name)
         for channel in channels:
@@ -68,7 +73,8 @@ class Weverse:
             if cache_channel_id == channel_id:
                 channel[1] = role_id
 
-    async def change_weverse_comment_status(self, channel_id, community_name, comments_disabled, updated=False):
+    @staticmethod
+    async def change_weverse_comment_status(channel_id, community_name, comments_disabled, updated=False):
         """Change a channel's subscription and whether or not they receive updates on comments."""
         comments_disabled = bool(comments_disabled)
         community_name = community_name.lower()
@@ -82,7 +88,8 @@ class Weverse:
             if cache_channel_id == channel_id:
                 channel[2] = comments_disabled
 
-    async def set_comment_embed(self, notification, embed_title):
+    @staticmethod
+    async def set_comment_embed(notification, embed_title):
         """Set Comment Embed for Weverse."""
         artist_comments = await ex.weverse_client.fetch_artist_comments(notification.community_id,
                                                                         notification.contents_id)
@@ -110,14 +117,16 @@ class Weverse:
             return embed, message
         return None, None
 
-    async def download_weverse_post(self, url, file_name):
+    @staticmethod
+    async def download_weverse_post(url, file_name):
         """Downloads an image url and returns image host url."""
         async with ex.session.get(url) as resp:
             fd = await aiofiles.open(weverse_image_folder + file_name, mode='wb')
             await fd.write(await resp.read())
         return f"https://images.irenebot.com/weverse/{file_name}"
 
-    async def set_media_embed(self, notification, embed_title):
+    @staticmethod
+    async def set_media_embed(notification, embed_title):
         """Set Media Embed for Weverse."""
         media = ex.weverse_client.get_media_by_id(notification.contents_id)
         if media:

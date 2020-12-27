@@ -25,7 +25,8 @@ class DataBase:
                 log.console(e)
             self.set_start_up_connection.stop()
 
-    async def create_thread_pool(self):
+    @staticmethod
+    async def create_thread_pool():
         ex.thread_pool = ThreadPoolExecutor()
 
     @tasks.loop(seconds=0, minutes=1, reconnect=True)

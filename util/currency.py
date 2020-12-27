@@ -5,14 +5,16 @@ import random
 
 # noinspection PyBroadException,PyPep8
 class Currency:
-    async def register_user(self, user_id):
+    @staticmethod
+    async def register_user(user_id):
         """Register a user to the database if they are not already registered."""
         count = ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) FROM currency.Currency WHERE UserID = $1", user_id))
         if not count:
             await ex.conn.execute("INSERT INTO currency.Currency (UserID, Money) VALUES ($1, $2)", user_id, "100")
             return True
 
-    async def get_user_has_money(self, user_id):
+    @staticmethod
+    async def get_user_has_money(user_id):
         """Check if a user has money."""
         return not ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) FROM currency.Currency WHERE UserID = $1", user_id)) == 0
 
@@ -38,7 +40,8 @@ class Currency:
         except:
             return "Too Fucking Much$"
 
-    async def update_balance(self, user_id, new_balance):
+    @staticmethod
+    async def update_balance(user_id, new_balance):
         """Update a user's balance."""
         await ex.conn.execute("UPDATE currency.Currency SET Money = $1::text WHERE UserID = $2", str(new_balance), user_id)
 

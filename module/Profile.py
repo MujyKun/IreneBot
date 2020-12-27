@@ -91,7 +91,8 @@ class Profile(commands.Cog):
             await ctx.send(f"> **There was an error. Please {server_prefix}report it**")
             log.console(e)
 
-    async def profile_level(self, msg):
+    @staticmethod
+    async def profile_level(msg):
         try:
             xp_per_message = 10
             user_id = msg.author.id

@@ -28,10 +28,12 @@ class AutoRestart:
         os.system("python3 run.py")
         self.bot_running = True
 
-    def start_api(self):
+    @staticmethod
+    def start_api():
         os.system("node API/index.js")
 
-    def start_site(self):
+    @staticmethod
+    def start_site():
         os.system("node irenebot-com/index.js")
 
     def restart_api(self):

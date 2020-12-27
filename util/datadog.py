@@ -9,7 +9,8 @@ class DataDog:
         """Initialize The DataDog Class"""
         initialize()
 
-    def send_metric(self, metric_name, value):
+    @staticmethod
+    def send_metric(metric_name, value):
         """Send a metric value to DataDog."""
         # some values at 0 are important such as active games, this was put in place to make sure they are updated at 0.
         metrics_at_zero = ['bias_games', 'guessing_games', 'commands_per_minute', 'n_words_per_minute',

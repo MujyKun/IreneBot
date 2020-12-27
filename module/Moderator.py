@@ -135,7 +135,8 @@ class Moderator(commands.Cog):
         else:
             return await ctx.send(f"> **That is not an interaction.**\n{interaction_msg}")
 
-    async def get_mute_role(self, ctx):
+    @staticmethod
+    async def get_mute_role(ctx):
         mute_roles = await ex.conn.fetch("SELECT roleid FROM general.muteroles")
         for role in mute_roles:
             role_id = role[0]
@@ -143,7 +144,8 @@ class Moderator(commands.Cog):
             if role:
                 return role
 
-    async def check_if_muted(self, user_id, role):
+    @staticmethod
+    async def check_if_muted(user_id, role):
         users = role.members
         for user in users:
             if user.id == user_id:
@@ -437,7 +439,8 @@ class Moderator(commands.Cog):
             await ctx.send(f"> Error - {e}")
             log.console(e)
 
-    async def make_emoji(self, ctx, emoji):
+    @staticmethod
+    async def make_emoji(ctx, emoji):
         # a simple emoji converter
         try:
             return await commands.PartialEmojiConverter().convert(ctx, emoji)

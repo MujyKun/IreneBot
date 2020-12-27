@@ -33,21 +33,22 @@ async def download_video(video):
     return YTDLSource(discord.FFmpegPCMAudio(file_name, **ffmpeg_options), data=data)
 
 
+# noinspection PyBroadException
 def check_live(video):
     # return None = video is downloaded
     # return a message = video is ignored
     try:
         if video['duration'] > 14400:
             return 'too_long'
-    except Exception as e:
+    except:
         pass
     try:
         if not video['is_live']:
-            return None
+            return
         else:
             return 'live_video'
-    except Exception as e:
-        return None  # this error occurs from is_live not being found.
+    except:
+        return  # this error occurs from is_live not being found.
 
 # https://github.com/ytdl-org/youtube-dl/blob/2391941f283a1107b01f9df76a8b0e521a5abe3b/youtube_dl/YoutubeDL.py#L143
 ytdl_format_options = {
@@ -76,7 +77,9 @@ ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 queued = {}
 
 
+# noinspection PyBroadException
 class Music(commands.Cog):
+    # noinspection PyBroadException
     @tasks.loop(seconds=30, minutes=1, hours=0, reconnect=True)
     async def check_voice_clients(self):
         if ex.client.loop.is_running():
@@ -92,7 +95,7 @@ class Music(commands.Cog):
                                         channel = songs_queued[0][1]
                                         msg = f"> **There are no users in this voice channel. Resetting queue and leaving.**"
                                         await channel.send(msg)
-                                except Exception as e:
+                                except:
                                     pass
                                 self.reset_queue_for_guild(voice_client.guild.id)
                                 voice_client.stop()
@@ -108,7 +111,7 @@ class Music(commands.Cog):
                         if file_location != "music":
                             try:
                                 os.remove(file_location)
-                            except Exception as e:
+                            except:
                                 pass
             except Exception as e:
                 log.console(e)
@@ -129,11 +132,11 @@ class Music(commands.Cog):
                         player.cleanup()
                     try:
                         os.remove(file_name)
-                    except Exception as e:
+                    except:
                         pass
 
                 queued.pop(guild_id, None)
-        except Exception as e:
+        except:
             pass
 
     @commands.command()
@@ -183,6 +186,7 @@ class Music(commands.Cog):
         except AttributeError:
             await ctx.send(f"> **There is no list to shuffle or I am not in a voice channel.**")
 
+    # noinspection PyBroadException
     @commands.command(aliases=['list', 'q'])
     async def queue(self, ctx, page_number=1):
         """Shows Current Queue [Format: %queue]"""
@@ -210,10 +214,10 @@ class Music(commands.Cog):
                 try:
                     try:
                         total_amount_of_time += duration
-                    except Exception as e:
+                    except:
                         pass
                     duration = await ex.u_miscellaneous.get_cooldown_time(duration)
-                except Exception as e:
+                except:
                     duration = "N/A"
                 if counter == 1:
                     song_desc = f"[{counter}] **NOW PLAYING:** [{youtube_channel} - {song_name}]({song_link}) - {duration} - Requested by <@{author_id}> \n\n"
@@ -240,7 +244,7 @@ class Music(commands.Cog):
             await ex.set_embed_author_and_footer(embed_list[page_number -1], footer_message=f"Total time of songs queued: {await ex.u_miscellaneous.get_cooldown_time(total_amount_of_time)}")
             msg = await ctx.send(embed=embed_list[page_number - 1])
             await ex.check_left_or_right_reaction_embed(msg, embed_list, page_number - 1)
-        except KeyError as e:
+        except KeyError:
             await ctx.send(f"> **There are no songs queued in this server.**")
         except Exception as e:
             log.console(e)
@@ -299,18 +303,20 @@ class Music(commands.Cog):
                 if not song_number:
                     await ctx.send(f"> **You can not move the song currently playing.**")
                 else:
+                    # noinspection PyBroadException
                     try:
                         title = get_video_title(queued[ctx.guild.id][song_number][0])
                         # inserts song information at index 1 and removes the old position.
                         queued[ctx.guild.id].insert(1, queued[ctx.guild.id].pop(song_number))
                         await ctx.send(f"> **{title} will now be the next song to play.**")
-                    except Exception as e:
+                    except:
                         await ctx.send(f"> **That song number was not found. Could not move it.**")
             else:
                 await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
-        except Exception as e:
+        except:
             pass
 
+    # noinspection PyBroadException
     @commands.command()
     async def remove(self, ctx, song_number:int):
         """Remove a song from the queue. [Format: %remove (song number)] """
@@ -321,11 +327,11 @@ class Music(commands.Cog):
                     title = get_video_title(queued[ctx.guild.id][song_number][0])
                     queued[ctx.guild.id].pop(song_number)
                     await ctx.send(f"> **Removed {title} from the queue.**")
-                except Exception as e:
+                except:
                     await ctx.send(f"> **That song number was not found. Could not remove it.**")
             else:
                 await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
-        except Exception as e:
+        except:
             pass
 
     @commands.command()
@@ -339,7 +345,7 @@ class Music(commands.Cog):
                 await ctx.send(f"> **Skipped {title}**")
             else:
                 await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
-        except Exception as e:
+        except:
             pass
 
     def remove_song_in_queue(self, client_guild_id):
@@ -351,15 +357,15 @@ class Music(commands.Cog):
         try:
             try:
                 (queued[client_guild_id][0][0]).cleanup()
-            except Exception as e:
+            except:
                 pass
             try:
                 os.remove(queued[client_guild_id][0][2])
-            except Exception as e:
+            except:
                 pass
             return queued[client_guild_id].pop(0)
         except KeyError:
-            return None
+            return
 
     @commands.command(aliases=['p'])
     async def play(self, ctx, *, url=None):
@@ -389,7 +395,7 @@ class Music(commands.Cog):
                                 # This makes the front of the queue always a player.
                                 # This is useful so that no code is changed for going to the next song (music rework)
                                 queued[ctx.guild.id][0][0] = player
-                            except Exception as e:  # Already Playing Audio
+                            except:  # Already Playing Audio
                                 return await ctx.send(f"> **Added {video_title} to the queue.**")
                             await ctx.send(f'> **Now playing: {video_title}**', delete_after=240)  # deletes after 4min
                         else:
@@ -441,8 +447,7 @@ class Music(commands.Cog):
                             send_channel.result()
                         except Exception as e:
                             log.console(e)
-                            pass
-                    except IndexError as e:
+                    except IndexError:
                         pass
                     except Exception as e:
                         log.console(e)
@@ -511,6 +516,7 @@ Become a Patron at {keys.patreon_link}.**""")
             raise commands.CommandError(f"{ctx.author.name} ({ctx.author.id}) is not a Patron.")
 
 
+# noinspection PyBroadException
 class YTDLSource(discord.PCMVolumeTransformer):
     def __init__(self, source, *, data, volume=0.1):
         super().__init__(source, volume)
@@ -534,10 +540,10 @@ class YTDLSource(discord.PCMVolumeTransformer):
                 else:
                     if status == 'live_video':
                         live = True
-                        loop = asyncio.get_event_loop()
-                        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=False))
+                        loop_t = asyncio.get_event_loop()
+                        data_t = await loop_t.run_in_executor(None, lambda: ytdl.extract_info(url, download=False))
                         file_name = video['url']
-                        video = cls(discord.FFmpegPCMAudio(file_name, **ffmpeg_options), data=data)
+                        video = cls(discord.FFmpegPCMAudio(file_name, **ffmpeg_options), data=data_t)
                     else:
                         file_name = video['url'] if stream else ytdl.prepare_filename(video)
                     videos.append(video)
@@ -548,8 +554,8 @@ class YTDLSource(discord.PCMVolumeTransformer):
                     else:
                         queued[guild_id] = [video_and_channel]
                 return live
-            except Exception as e:
-                return False
+            except:
+                return
 
         loop = loop or asyncio.get_event_loop()
         await asyncio.sleep(1)

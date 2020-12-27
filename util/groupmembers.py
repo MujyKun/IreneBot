@@ -10,6 +10,7 @@ from module.keys import reload_emoji, dead_emoji, owner_id, mods_list, check_emo
     trash_emoji, next_emoji, translate_private_key, api_port
 
 
+# noinspection PyBroadException
 class GroupMembers:
     async def get_if_user_voted(self, user_id):
         time_stamp = ex.first_result(
@@ -74,7 +75,7 @@ class GroupMembers:
         """Get a member by the idol id."""
         try:
             idol_id = int(idol_id)
-        except Exception as e:
+        except:
             # purposefully create an error if an idol id was not passed in. This is useful to not check for it
             # in other commands.
             return
@@ -86,7 +87,7 @@ class GroupMembers:
         """Get a group by the group id."""
         try:
             group_id = int(group_id)
-        except Exception as e:
+        except:
             # purposefully create an error if a group id was not passed in. This is useful to not check for it
             # in other commands.
             return
@@ -484,15 +485,15 @@ class GroupMembers:
                                 channel = ex.cache.dead_image_channel
                                 if channel is not None:
                                     await self.send_dead_image(channel, link, user, idol, int(guessing_game))
-                            except Exception as e:
+                            except:
                                 pass
                     except asyncio.TimeoutError:
                         await message.clear_reactions()
-                    except Exception as e:
-                        log.console(e)
+                    except Exception as err:
+                        log.console(err)
 
                 await reload_image()
-        except Exception as e:
+        except:
             pass
 
     async def get_dead_links(self):
@@ -659,7 +660,7 @@ class GroupMembers:
                     message = await channel.send(embed=m_embed, file=m_file)
                 else:
                     message = await channel.send(special_message, embed=m_embed, file=m_file)
-            except Exception as e:
+            except:
                 # cannot access API or API Link -> attempt to post it 5 times.
                 # this happens because the image link may not be properly registered.
                 if repeated < 5:
@@ -707,12 +708,10 @@ class GroupMembers:
                             # No photos were found.
                             log.console(f"No photos were found for this idol ({idol.id}).")
                             msg = await channel.send(f"**No photos were found for this idol ({idol.id}).**")
-                            find_post = False
                             return msg, None
                         elif r.status == 502:
                             msg = await channel.send("API is currently being overloaded with requests.")
                             log.console("API is currently being overloaded with requests or is down.")
-                            find_post = False
                             return msg, None
                         else:
                             # error unaccounted for.
@@ -790,7 +789,7 @@ class GroupMembers:
                 if not msg and not api_url:
                     ex.api_issues += 1
                 await self.update_member_count(idol)
-            except Exception as e:
+            except:
                 if guessing_game:
                     return self.idol_post(channel, idol, photo_link, group_id, special_message, user_id, guessing_game,
                                           scores)

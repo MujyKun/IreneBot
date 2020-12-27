@@ -6,6 +6,7 @@ import random
 import json
 
 
+# noinspection PyBroadException,PyBroadException
 class Miscellaneous:
     async def check_for_nword(self, message):
         """Processes new messages that contains the N word."""
@@ -131,7 +132,7 @@ class Miscellaneous:
                     if await self.check_if_bot_banned(message_sender.id):
                         try:
                             guild_id = await ex.get_server_id(message)
-                        except Exception as e:
+                        except:
                             guild_id = None
                         if await self.check_message_is_command(message) or await ex.u_custom_commands.check_custom_command_name_exists(guild_id, msg_without_prefix):
                             await self.send_ban_message(message_channel)
@@ -145,7 +146,7 @@ class Miscellaneous:
                 reason = f"\nREASON: {ex.cache.maintenance_reason}"
             await channel.send(
                 f">>> **A maintenance is currently in progress. Join the support server for more information. <{bot_support_server_link}>{reason}**")
-        except Exception as e:
+        except:
             pass
 
     async def get_api_status(self):
@@ -153,7 +154,7 @@ class Miscellaneous:
         try:
             async with ex.session.get(end_point) as r:
                 return r.status == 200
-        except Exception as e:
+        except:
             pass
 
     async def get_db_status(self):
@@ -162,7 +163,7 @@ class Miscellaneous:
             async with ex.session.get(end_point) as r:
                 return r.status == 200
 
-        except Exception as e:
+        except:
             pass
 
     async def get_images_status(self):
@@ -170,7 +171,7 @@ class Miscellaneous:
         try:
             async with ex.session.get(end_point) as r:
                 return r.status == 200
-        except Exception as e:
+        except:
             pass
 
     @staticmethod
@@ -210,7 +211,7 @@ class Miscellaneous:
         await ex.conn.execute("DELETE FROM general.blacklisted WHERE userid = $1", user_id)
         try:
             ex.cache.bot_banned.remove(user_id)
-        except Exception as e:
+        except:
             pass
 
     async def check_if_bot_banned(self, user_id):
@@ -267,7 +268,7 @@ class Miscellaneous:
         try:
             if message.clean_content:
                 return True
-        except Exception as e:
+        except:
             pass
 
     async def translate(self, text, src_lang, target_lang):
@@ -298,7 +299,7 @@ class Miscellaneous:
         ko_keywords = ['korean', 'ko', 'kr', 'korea', 'kor']
         eng_keywords = ['en', 'eng', 'english']
         ja_keywords = ['jp', 'jap', 'japanese', 'japan']
-        zh_CN_keywords = ['chinese', 'ch', 'zh-cn', 'zhcn', 'c', 'china']
+        zh_cn_keywords = ['chinese', 'ch', 'zh-cn', 'zhcn', 'c', 'china']
         es_keywords = ['es', 'espanol', 'spanish', 'sp']
         fr_keywords = ['french', 'fr', 'f', 'fren']
         vi_keywords = ['viet', 'vi', 'vietnamese', 'vietnam']
@@ -310,7 +311,7 @@ class Miscellaneous:
             return languages[1]
         elif language in ja_keywords:
             return languages[2]
-        elif language in zh_CN_keywords:
+        elif language in zh_cn_keywords:
             return languages[3]
         elif language in es_keywords:
             return languages[5]

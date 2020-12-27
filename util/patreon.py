@@ -2,6 +2,7 @@ from Utility import resources as ex
 from module.keys import bot_support_server_id, patreon_role_id, patreon_super_role_id
 
 
+# noinspection PyBroadException
 class Patreon:
     async def get_patreon_users(self):
         """Get the permanent patron users"""
@@ -35,7 +36,7 @@ class Patreon:
             user_id = int(user_id)
             await ex.conn.execute("INSERT INTO patreon.users(userid) VALUES($1)", user_id)
             ex.cache.patrons[user_id] = True
-        except Exception as e:
+        except:
             pass
 
     async def remove_from_patreon(self, user_id):
@@ -44,7 +45,7 @@ class Patreon:
             user_id = int(user_id)
             await ex.conn.execute("DELETE FROM patreon.users WHERE userid = $1", user_id)
             ex.cache.patrons.pop(user_id, None)
-        except Exception as e:
+        except:
             pass
 
     async def reset_patreon_cooldown(self, ctx):

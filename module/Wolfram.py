@@ -5,6 +5,7 @@ import xmltodict
 import urllib.parse
 
 
+# noinspection PyBroadException
 class Wolfram(commands.Cog):
     def __init__(self):
         self.division_by_zero = "It is not possible to divide by zero."
@@ -58,7 +59,7 @@ class Wolfram(commands.Cog):
                                             if pod.get('@primary'):
                                                 sub_pod_result = f"**{sub_pod_result}**"
                                             results.append(sub_pod_result)
-                                except Exception as e:
+                                except:
                                     pass
                         if not results:
                             return await ctx.send(f"> **{ctx.author.display_name}, I could not find an answer to that.**")

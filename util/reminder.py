@@ -8,6 +8,7 @@ import datetime
 import random
 
 
+# noinspection PyBroadException
 class Reminder:
     @staticmethod
     async def determine_time_type(user_input):
@@ -70,7 +71,7 @@ class Reminder:
         for time_element in input_elements:
             try:
                 int(time_element)
-            except Exception as e:
+            except:
                 # purposefully creating an error to locate which elements are words vs integers.
                 for time_unit in time_units:
                     if time_element in time_unit[0]:
@@ -126,8 +127,8 @@ class Reminder:
         if any(char.isdigit() for char in input_timezone):
             try:
                 timezone_offset = (re.findall(r"[+-]\d+", input_timezone))[0]
-                UTC_offset = f"-{timezone_offset[1]}" if timezone_offset[0] == "+" else f"+{timezone_offset[1]}"
-                input_timezone = 'Etc/GMT' + UTC_offset
+                utc_offset = f"-{timezone_offset[1]}" if timezone_offset[0] == "+" else f"+{timezone_offset[1]}"
+                input_timezone = 'Etc/GMT' + utc_offset
             except:
                 pass
 

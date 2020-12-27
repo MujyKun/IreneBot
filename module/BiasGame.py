@@ -49,6 +49,7 @@ class BiasGame(commands.Cog):
         await ctx.send(msg_string)
 
 
+# noinspection PyBroadException
 class Game:
     def __init__(self):
         self.host_ctx = None  # ctx of the host starting game
@@ -132,11 +133,11 @@ class Game:
             if not self.force_ended:
                 try:
                     first_idol_group = (await ex.u_group_members.get_group(random.choice(first_idol.groups))).name
-                except Exception as e:
+                except:
                     first_idol_group = first_idol.full_name
                 try:
                     second_idol_group = (await ex.u_group_members.get_group(random.choice(second_idol.groups))).name
-                except Exception as e:
+                except:
                     second_idol_group = second_idol.full_name
 
                 msg_body = f"""
@@ -173,7 +174,7 @@ Remaining Idols: {self.number_of_idols_left}
         file_location = await ex.create_bias_game_bracket(self.all_brackets_together, self.host, self.bracket_winner)
 
         image_file = discord.File(fp=file_location, filename=f"{self.host}.png")
-        msg = await self.channel.send(msg_body, file=image_file)
+        await self.channel.send(msg_body, file=image_file)
 
     async def update_user_wins(self):
         if self.bracket_winner:

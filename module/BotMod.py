@@ -5,6 +5,7 @@ from Utility import resources as ex
 import aiofiles
 
 
+# noinspection PyBroadException
 class BotMod(commands.Cog):
     @staticmethod
     async def mod_on_message(message):
@@ -195,7 +196,7 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
             try:
                 await dm_channel.send(message)
                 return await ctx.send(f"> **Message was sent to <@{user.id}>**")
-            except Exception as e:
+            except:
                 return await ctx.send(f"> I do not have permission to send a message to <@{user.id}>")
         return await ctx.send(f"> Could not find <@{user.id}>'s DM channel.")
 
@@ -208,12 +209,12 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
         for game in ex.cache.bias_games:
             try:
                 await game.channel.send(message)
-            except Exception as e:
+            except:
                 pass
         for game in ex.cache.guessing_games:
             try:
                 await game.channel.send(message)
-            except Exception as e:
+            except:
                 pass
         await ex.client.logout()
 
@@ -248,7 +249,7 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
                 url = url.replace('\n', '')
                 await ex.conn.execute("DELETE FROM general.interactions WHERE url = $1", url)
                 await ctx.send(f"Removed <{url}>")
-            except Exception as e:
+            except:
                 pass
         await ctx.send("Finished.")
 

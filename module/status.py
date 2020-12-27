@@ -5,6 +5,7 @@ import random
 from Utility import resources as ex
 
 
+# noinspection PyBroadException
 class Status:
     """Change the bot's playing status in a loop"""
     @tasks.loop(seconds=30, minutes=0, hours=0, reconnect=True)
@@ -27,5 +28,5 @@ class Status:
                     final_status = f"{bot_prefix}help"
                 activity = discord.Activity(name=final_status, type=discord.ActivityType.listening)
                 await ex.client.change_presence(status=discord.Status.online, activity=activity)
-            except Exception as e:
+            except:
                 pass

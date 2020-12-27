@@ -8,6 +8,7 @@ import json
 import aiohttp
 
 
+# noinspection PyBroadException
 class Moderator(commands.Cog):
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
@@ -168,7 +169,7 @@ class Moderator(commands.Cog):
                 for channel in guild_channels:
                     try:
                         await channel.set_permissions(mute_role, send_messages=False)
-                    except Exception as e:
+                    except:
                         pass
             muted = await self.check_if_muted(user.id, mute_role)
             if muted:
@@ -440,7 +441,7 @@ class Moderator(commands.Cog):
         # a simple emoji converter
         try:
             return await commands.PartialEmojiConverter().convert(ctx, emoji)
-        except Exception as e:
+        except:
             return str(emoji)
 
     @commands.command(aliases=['yoink'])
@@ -491,7 +492,7 @@ class Moderator(commands.Cog):
                     return await ctx.send(
                         f">>> **File cannot be larger than 256.0 kb. Please optimize the emoji here.**\n <{ezgif}>")
 
-            except aiohttp.InvalidURL as e:
+            except aiohttp.InvalidURL:
                 await ctx.send(f"> **Invalid URL.**")
             except Exception as e:
                 log.console(e)

@@ -3,6 +3,7 @@ import aiofiles
 from module.keys import weverse_image_folder
 
 
+# noinspection PyBroadException
 class Weverse:
     async def add_weverse_channel(self, channel_id, community_name):
         """Add a channel to get updates for a community"""
@@ -138,7 +139,7 @@ class Weverse:
                 if not channel:
                     # fetch channel instead (assuming discord.py cache did not load)
                     channel = await ex.client.fetch_channel(channel_id)
-            except Exception as e:
+            except:
                 # remove the channel from future updates as it cannot be found.
                 return await self.delete_weverse_channel(channel_id, community_name.lower())
             try:
@@ -149,7 +150,7 @@ class Weverse:
                     if role_id:
                         message_text = f"<@&{role_id}>\n{message_text}"
                     await channel.send(message_text)
-            except Exception as e:
+            except:
                 # no permission to post
                 return
 

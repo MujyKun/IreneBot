@@ -5,6 +5,7 @@ from Utility import resources as ex
 import typing
 
 
+# noinspection PyBroadException
 class LastFM(commands.Cog):
     def __init__(self):
         self.user_not_found = "That user was not found. Refer to `setfm` to link an account."
@@ -26,7 +27,7 @@ class LastFM(commands.Cog):
                     date = track['date']['#text']
                     album_name = track['album']['#text']
                     image_url = (track['image'][2])['#text']
-                except Exception as e:
+                except:
                     date = "Currently Playing"
                 main_desc = f"""
                 **[{track['name']} by {track['artist']['#text']}]({track['url']})**
@@ -150,7 +151,7 @@ class LastFM(commands.Cog):
             response = await ex.u_last_fm.get_fm_response('user.getRecentTracks', user)
             tracks_and_titles = self.get_recent_tracks(response, limit=10)
             await ctx.send(embed=await self.create_fm_embed(f"{user} **Recent Tracks **", tracks_and_titles, inline=True))
-        except KeyError as e:
+        except KeyError:
             await events.Events.error(ctx, self.user_not_found)
         except Exception as e:
             log.console(e)

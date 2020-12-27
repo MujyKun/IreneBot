@@ -4,6 +4,7 @@ from discord.ext import commands
 import discord
 
 
+# noinspection PyBroadException
 class Events(commands.Cog):
     @staticmethod
     async def catch_on_message_errors(method, message):
@@ -68,7 +69,7 @@ class Events(commands.Cog):
         try:
             if guild.system_channel:
                 await guild.system_channel.send(f">>> Hello!\nMy prefix for this server is set to {await ex.get_server_prefix(guild.id)}.\nIf you have any questions or concerns, you may join the support server ({await ex.get_server_prefix(guild.id)}support).")
-        except Exception as e:
+        except:
             pass
         log.console(f"{guild.name} ({guild.id}) has invited Irene.")
 
@@ -127,23 +128,22 @@ class Events(commands.Cog):
             user_id = payload.user_id
             emoji = payload.emoji
             channel_id = payload.channel_id
-            guild_id = payload.guild_id
 
             async def get_msg_and_image():
                 """Gets the message ID if it matches with the reaction."""
                 try:
                     if channel_id == keys.dead_image_channel_id:
                         channel = ex.cache.dead_image_channel
-                        msg = await channel.fetch_message(message_id)
+                        msg_t = await channel.fetch_message(message_id)
                         msg_info = ex.cache.dead_image_cache.get(message_id)
                         if msg_info:
                             dead_link = msg_info[0]
                             member_id = msg_info[2]
                             guessing_game = msg_info[3]
                             image_link = await ex.u_group_members.get_google_drive_link(dead_link)
-                            return msg, image_link, member_id, guessing_game
-                except Exception as e:
-                    log.console(e)
+                            return msg_t, image_link, member_id, guessing_game
+                except Exception as err:
+                    log.console(err)
                 return None, None, None, None
 
             if ex.check_if_mod(user_id, mode=1):

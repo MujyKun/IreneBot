@@ -7,6 +7,7 @@ import asyncio
 import datetime
 
 
+# noinspection PyBroadException
 class Cache:
 
     async def process_cache_time(self, method, name):
@@ -45,6 +46,7 @@ class Cache:
         await self.process_cache_time(self.create_reminder_cache, "Reminders")
         await self.process_cache_time(self.create_timezone_cache, "Timezones")
         if not ex.test_bot and not ex.weverse_client.cache_loaded:
+            # noinspection PyUnusedLocal
             task = asyncio.create_task(self.process_cache_time(ex.weverse_client.start, "Weverse"))
         log.console(f"Cache Completely Created in {await ex.u_miscellaneous.get_cooldown_time(time.time() - past_time)}.")
 
@@ -167,7 +169,7 @@ class Cache:
                 ex.cache.total_used = (ex.first_result(await ex.conn.fetchrow("SELECT totalused FROM stats.sessions ORDER BY totalused DESC"))) or 0
             try:
                 await ex.conn.execute("INSERT INTO stats.sessions(totalused, session, date) VALUES ($1, $2, $3)", ex.cache.total_used, 0, current_time_format)
-            except Exception as e:
+            except:
                 # session for today already exists.
                 pass
             ex.cache.session_id = ex.first_result(await ex.conn.fetchrow("SELECT sessionid FROM stats.sessions WHERE date = $1", current_time_format))
@@ -287,7 +289,7 @@ class Cache:
             for patron in permanent_patrons:
                 ex.cache.patrons[patron[0]] = True
             return True
-        except Exception as e:
+        except:
             return False
 
     async def update_user_notifications(self):
@@ -399,4 +401,5 @@ class Cache:
             for metric_name in metric_info:
                 metric_value = metric_info.get(metric_name)
                 # add to thread pool to prevent blocking.
+                # noinspection PyUnusedLocal
                 result = (ex.thread_pool.submit(ex.u_data_dog.send_metric, metric_name, metric_value)).result()

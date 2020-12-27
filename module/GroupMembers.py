@@ -94,6 +94,7 @@ async def choose_random_member(members=None, groups=None):
     return idol
 
 
+# noinspection PyBroadException
 class GroupMembers(commands.Cog):
     @staticmethod
     async def on_message2(message):
@@ -103,7 +104,7 @@ class GroupMembers(commands.Cog):
             try:
                 if await ex.u_group_members.check_server_sending_photos(message.guild.id):
                     channel = await ex.u_group_members.get_channel_sending_photos(message.guild.id)
-            except Exception as e:
+            except:
                 pass  # error is guild not found, likely being accessed from DMs
             posted = False
             api_url = None
@@ -149,7 +150,7 @@ class GroupMembers(commands.Cog):
                             add_user_limit(message.author)
                             if api_url:
                                 await ex.u_group_members.check_idol_post_reactions(photo_msg, message, random_member, api_url)
-            except Exception as e:
+            except:
                 pass
 
     @commands.command()
@@ -200,7 +201,7 @@ class GroupMembers(commands.Cog):
                 await ex.conn.execute("INSERT INTO groupmembers.restricted(channelid, serverid, sendhere) VALUES($1, $2, $3)", text_channel.id, ctx.guild.id, 0)
                 ex.cache.restricted_channels[text_channel.id] = [ctx.guild.id, 0]
                 await ctx.send(f"> **{text_channel.name} can no longer send idol photos.**")
-            except Exception as e:
+            except:
                 await ctx.send(f"> **{text_channel.name} is currently being used with {await ex.get_server_prefix_by_context(ctx)}sendimages and can not be restricted.**")
         else:
             await ex.conn.execute("DELETE FROM groupmembers.restricted WHERE channelid = $1 AND sendhere = $2", text_channel.id, 0)
@@ -248,7 +249,7 @@ class GroupMembers(commands.Cog):
             try:
                 if await ex.u_group_members.check_server_sending_photos(ctx.guild.id):
                     channel = await ex.u_group_members.get_channel_sending_photos(ctx.guild.id)
-            except Exception as e:
+            except:
                 pass  # error is guild not found, likely being accessed from DMs
             idol = await ex.u_group_members.get_random_idol()
             photo_msg, api_url, posted = await request_image_post(ctx.message, idol, channel)

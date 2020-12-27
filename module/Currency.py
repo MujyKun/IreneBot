@@ -7,6 +7,7 @@ from module.keys import bot_website
 from Utility import resources as ex
 
 
+# noinspection PyBroadException
 class Currency(commands.Cog):
     """
     Will be rewritten from scratch
@@ -53,7 +54,7 @@ class Currency(commands.Cog):
         try:
             balance = ex.remove_commas(balance)
             check = True
-        except Exception as e:
+        except:
             await ctx.send(f"> **{balance} is not a proper value.**")
             check = False
         try:
@@ -141,11 +142,11 @@ class Currency(commands.Cog):
             count = 0
             for a in sort_money:
                 count += 1
-                UserID = a[0]
-                Money = a[1]
-                UserName = ex.client.get_user(UserID)
+                user_id = a[0]
+                money = a[1]
+                user_name = ex.client.get_user(user_id)
                 if count <= 10:
-                    embed.add_field(name=f"{count}) {UserName} ({UserID})", value=await ex.u_currency.shorten_balance(str(Money)), inline=True)
+                    embed.add_field(name=f"{count}) {user_name} ({user_id})", value=await ex.u_currency.shorten_balance(str(money)), inline=True)
             await ctx.send(embed=embed)
 
     @commands.command()
@@ -279,7 +280,7 @@ class Currency(commands.Cog):
         try:
             amount = ex.remove_commas(amount)
             check = True
-        except Exception as e:
+        except:
             await ctx.send(f"> **{amount} is not a proper value.**")
             check = False
         try:
@@ -307,12 +308,12 @@ class Currency(commands.Cog):
             log.console(e)
 
     @commands.command(aliases=['rockpaperscissors'])
-    async def rps(self, ctx, choice='', amount="0"):
+    async def rps(self, ctx, rps_choice='', amount="0"):
         """Play Rock Paper Scissors for Money [Format: %rps (r/p/s)(amount)][Aliases: rockpaperscissors]"""
         try:
             amount = ex.remove_commas(amount)
             check = True
-        except Exception as e:
+        except:
             await ctx.send(f"> **{amount} is not a proper value.**")
             check = False
         try:
@@ -333,37 +334,37 @@ class Currency(commands.Cog):
                             cd = int(amount // (1/1.5))  # using floor division instead of multiplication
                             if amount == 0:
                                 cd = 0
-                            if choice == '':
-                                choice = rps[a]
+                            if rps_choice == '':
+                                rps_choice = rps[a]
                             compchoice = rps[b]
                             if compchoice == 'rock':
-                                if choice == 'rock' or choice == 'r':
+                                if rps_choice == 'rock' or rps_choice == 'r':
                                     await ctx.send(embed=await ex.create_embed(title="Rock Paper Scissors", title_desc=f"**We Both Chose {compchoice} and Tied! You get nothing!**"))
-                                if choice == 'paper' or choice == 'p':
-                                    await ctx.send(embed=await ex.create_embed(title="Rock Paper Scissors", title_desc=f"**You Won {cd:,} Dollars! I chose {compchoice} while you chose {choice}!**"))
+                                if rps_choice == 'paper' or rps_choice == 'p':
+                                    await ctx.send(embed=await ex.create_embed(title="Rock Paper Scissors", title_desc=f"**You Won {cd:,} Dollars! I chose {compchoice} while you chose {rps_choice}!**"))
                                     await ex.u_currency.update_balance(user_id, str(current_balance + cd))
-                                if choice == 'scissors' or choice == 's':
-                                    await ctx.send(embed=await ex.create_embed(title="Rock Paper Scissors",title_desc=f"**You Lost {amount:,} Dollars! I chose {compchoice} while you chose {choice}!**"))
+                                if rps_choice == 'scissors' or rps_choice == 's':
+                                    await ctx.send(embed=await ex.create_embed(title="Rock Paper Scissors",title_desc=f"**You Lost {amount:,} Dollars! I chose {compchoice} while you chose {rps_choice}!**"))
                                     await ex.u_currency.update_balance(user_id, str(current_balance - amount))
                             if compchoice == 'paper':
-                                if choice == 'rock' or choice == 'r':
-                                    await ctx.send(embed=await ex.create_embed(title="Rock Paper Scissors", title_desc=f"**You Lost {amount:,} Dollars! I chose {compchoice} while you chose {choice}!**"))
+                                if rps_choice == 'rock' or rps_choice == 'r':
+                                    await ctx.send(embed=await ex.create_embed(title="Rock Paper Scissors", title_desc=f"**You Lost {amount:,} Dollars! I chose {compchoice} while you chose {rps_choice}!**"))
                                     await ex.u_currency.update_balance(user_id, str(current_balance - amount))
                                     check_amount = str(current_balance - amount)
                                     await ex.u_currency.update_balance(user_id, check_amount)
-                                if choice == 'paper' or choice == 'p':
+                                if rps_choice == 'paper' or rps_choice == 'p':
                                     await ctx.send(embed=await ex.create_embed(title="Rock Paper Scissors", title_desc=f"**We Both Chose {compchoice} and Tied! You get nothing!**"))
-                                if choice == 'scissors' or choice == 's':
-                                    await ctx.send(embed=await ex.create_embed(title="Rock Paper Scissors", title_desc=f"**You Won {cd:,} Dollars! I chose {compchoice} while you chose {choice}!**"))
+                                if rps_choice == 'scissors' or rps_choice == 's':
+                                    await ctx.send(embed=await ex.create_embed(title="Rock Paper Scissors", title_desc=f"**You Won {cd:,} Dollars! I chose {compchoice} while you chose {rps_choice}!**"))
                                     await ex.u_currency.update_balance(user_id, str(current_balance + cd))
                             if compchoice == 'scissors':
-                                if choice == 'rock' or choice == 'r':
-                                    await ctx.send(embed=await ex.create_embed(title="Rock Paper Scissors", title_desc=f"**You Won {cd:,} Dollars! I chose {compchoice} while you chose {choice}!**"))
+                                if rps_choice == 'rock' or rps_choice == 'r':
+                                    await ctx.send(embed=await ex.create_embed(title="Rock Paper Scissors", title_desc=f"**You Won {cd:,} Dollars! I chose {compchoice} while you chose {rps_choice}!**"))
                                     await ex.u_currency.update_balance(user_id, str(current_balance + cd))
-                                if choice == 'paper' or choice == 'p':
-                                    await ctx.send(embed=await ex.create_embed(title="Rock Paper Scissors", title_desc=f"**You Lost {amount:,} Dollars! I chose {compchoice} while you chose {choice}!**"))
+                                if rps_choice == 'paper' or rps_choice == 'p':
+                                    await ctx.send(embed=await ex.create_embed(title="Rock Paper Scissors", title_desc=f"**You Lost {amount:,} Dollars! I chose {compchoice} while you chose {rps_choice}!**"))
                                     await ex.u_currency.update_balance(user_id, str(current_balance - amount))
-                                if choice == 'scissors' or choice == 's':
+                                if rps_choice == 'scissors' or rps_choice == 's':
                                     await ctx.send(embed=await ex.create_embed(title="Rock Paper Scissors", title_desc=f"**We Both Chose {compchoice} and Tied! You get nothing!**"))
                 await ctx.message.delete(delay=15)
         except Exception as e:

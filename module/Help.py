@@ -86,16 +86,16 @@ class Help(commands.Cog):
                 self.paginator.add_line(note, empty=True)
             no_category = '\u200b{0.no_category}'.format(self)
 
-            def get_category(command, *, no_category=no_category):
+            def get_category(command, *, no_category_t=no_category):
                 cog = command.cog
-                return cog.qualified_name if cog is not None else no_category
+                return cog.qualified_name if cog is not None else no_category_t
 
             filtered = await self.filter_commands(bot.commands, sort=True, key=get_category)
             to_iterate = itertools.groupby(filtered, key=get_category)
 
-            for category, commands in to_iterate:
-                commands = sorted(commands, key=lambda c: c.name) if self.sort_commands else list(commands)
-                self.add_bot_commands_formatting(commands, category)
+            for category, commands_t in to_iterate:
+                commands_t = sorted(commands_t, key=lambda c: c.name) if self.sort_commands else list(commands_t)
+                self.add_bot_commands_formatting(commands_t, category)
 
             note = self.get_ending_note()
             if note:

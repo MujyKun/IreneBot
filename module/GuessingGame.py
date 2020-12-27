@@ -31,6 +31,7 @@ class GuessingGame(commands.Cog):
         await ex.stop_game(ctx, ex.cache.guessing_games)
 
 
+# noinspection PyBroadException
 class Game:
     def __init__(self):
         self.photo_link = None
@@ -90,11 +91,12 @@ class Game:
 
     async def create_new_question(self):
         """Create a new question and send it to the channel."""
+        # noinspection PyBroadException
         try:
             if self.idol_post_msg:
                 try:
                     await self.idol_post_msg.delete()
-                except Exception as e:
+                except:
                     # message does not exist.
                     pass
             if self.rounds >= self.max_rounds:
@@ -114,7 +116,7 @@ class Game:
             log.console(f'{", ".join(self.correct_answers)} - {self.channel.id}')
             self.idol_post_msg, self.photo_link = await ex.u_group_members.idol_post(self.channel, self.idol, user_id=self.host, guessing_game=True, scores=self.players)
             await self.check_message()
-        except Exception as e:
+        except:
             pass
 
     async def display_winners(self):
@@ -139,6 +141,7 @@ class Game:
                                 delete_after=15)
         # create_task should not be awaited because this is meant to run in the background to check for reactions.
         try:
+            # noinspection PyUnusedLocal
             task = asyncio.create_task(ex.u_group_members.check_idol_post_reactions(msg, self.host_ctx.message, self.idol, self.photo_link, guessing_game=True))
         except Exception as e:
             log.console(e)

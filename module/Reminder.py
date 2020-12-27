@@ -6,6 +6,7 @@ import pytz
 import discord
 
 
+# noinspection PyBroadException
 class Reminder(commands.Cog):
     def __init__(self):
         self.set_timezone_format = "settimezone (timezone abbreviation) (country code)"
@@ -58,7 +59,7 @@ class Reminder(commands.Cog):
                 await ctx.send(f"> {ctx.author.display_name}, I will not remind you to **{remind_reason}**"
                                f" on `{await ex.u_reminder.get_locale_time(remind_time,user_timezone)}`.")
                 await ex.u_reminder.remove_user_reminder(ctx.author.id, remind_id)
-            except Exception as e:
+            except:
                 return await ctx.send(f"> {ctx.author.display_name}, I could not find index {reminder_index}.")
 
     @commands.command(aliases=["remind"])
@@ -156,7 +157,7 @@ class Reminder(commands.Cog):
                                 embed = await ex.create_embed(title="Reminder", title_desc=title_desc)
                                 await dm_channel.send(embed=embed)
                                 await ex.u_reminder.remove_user_reminder(user_id, remind_id)
-                    except Exception as e:
+                    except:
                         # likely forbidden error -> do not have access to dm user
                         pass
 

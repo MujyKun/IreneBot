@@ -3,6 +3,7 @@ import math
 import random
 
 
+# noinspection PyBroadException
 class Currency:
     async def register_user(self, user_id):
         """Register a user to the database if they are not already registered."""
@@ -29,12 +30,12 @@ class Currency:
         place_names = ['', 'Thousand', 'Million', 'Billion', 'Trillion', 'Quadrillion', 'Quintillion', 'Sextillion', 'Septillion', 'Octillion', 'Nonillion', 'Decillion', 'Undecillion', 'Duodecillion', 'Tredecillion', 'Quatturodecillion', 'Quindecillion', 'Sexdecillion', 'Septendecillion', 'Octodecillion', 'Novemdecillion', 'Vigintillion', 'Centillion']
         try:
             place_values = int(math.log10(int(money)) // 3)
-        except Exception as e:
+        except:
             # This will have a math domain error when the amount of balance is 0.
             return "0"
         try:
             return f"{int(money) // (10 ** (3 * place_values))} {place_names[place_values]}"
-        except Exception as e:
+        except:
             return "Too Fucking Much$"
 
     async def update_balance(self, user_id, new_balance):

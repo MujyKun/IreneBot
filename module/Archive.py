@@ -10,6 +10,7 @@ from datetime import datetime
 from Utility import resources as ex
 
 
+# noinspection PyBroadException,PyBroadException
 class Archive(commands.Cog):
     @staticmethod
     async def on_message(message, owner=0):
@@ -39,7 +40,7 @@ class Archive(commands.Cog):
                                     if ":large" in url:
                                         pos = url.find(":large")
                                         url = url[0:pos]
-                                    await Archive.download_url(ins, url, drive_id, message.channel.id)
+                                    await Archive.download_url(url, drive_id, message.channel.id)
                                 # quickstart.Drive.checker()
                             if len(message.embeds) > 0:
                                 for embed in message.embeds:
@@ -53,11 +54,10 @@ class Archive(commands.Cog):
                                         if ":large" in url:
                                             pos = url.find(":large")
                                             url = url[0:pos]
-                                        await Archive.download_url(ins, url, drive_id, message.channel.id)
+                                        await Archive.download_url(url, drive_id, message.channel.id)
                                     # quickstart.Drive.checker()
-                            await Archive.deletephotos(ins)
-                except Exception as e:
-                    # log.console(e)
+                            await Archive.deletephotos()
+                except:
                     pass
 
     @commands.has_guild_permissions(manage_messages=True)
@@ -97,6 +97,7 @@ class Archive(commands.Cog):
             await ctx.send("> **There was an error.**")
         pass
 
+    # noinspection PyBroadException
     @commands.has_guild_permissions(manage_messages=True)
     @commands.command()
     async def listchannels(self, ctx):
@@ -108,13 +109,14 @@ class Archive(commands.Cog):
         embed.set_footer(text="Thanks for using Irene.", icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
         check = False
         for p_id, channel_id, guild_id, drive_id, name in all_channels:
+            # noinspection PyBroadException,PyBroadException,PyBroadException
             try:
                 list_channel = (ex.client.get_channel(channel_id)).name
                 if ctx.guild.id == guild_id:
                     check = True
                     embed.insert_field_at(0, name=list_channel, value=f"https://drive.google.com/drive/folders/{drive_id} | {name}", inline=False)
                     pass
-            except Exception as e:
+            except:
                 # Error would occur on test bot if the client does not have access to a certain channel id
                 # this try-except will also be useful if a server removed the bot.
                 pass
@@ -157,7 +159,7 @@ class Archive(commands.Cog):
                     if src2 != -1:
                         check = True
                         src = f".{url[src2+8:src2+11]}"
-                        url = f"{url[0:src2-1]}{src}:orig"
+                        # url = f"{url[0:src2-1]}{src}:orig"
                     if src == ".jpg" or src == ".gif" or src == '.png' or check:
                         file_name = f"1_{unique_id}_{unique_id2}_{unique_id3}{src}"
                         fd = await aiofiles.open(
@@ -179,7 +181,7 @@ class Archive(commands.Cog):
             if photo != "placeholder.txt" and photo not in file_list:
                 try:
                     os.unlink('Photos/{}'.format(photo))
-                except Exception as e:
+                except:
                     pass
 
     @commands.has_guild_permissions(manage_messages=True)

@@ -6,7 +6,7 @@ from PIL import Image
 class BiasGame:
     async def create_bias_game_image(self, first_idol_id, second_idol_id):
         """Uses thread pool to create bias game image to prevent IO blocking."""
-        result = (ex.thread_pool.submit(self.merge_images, first_idol_id, second_idol_id)).result()
+        (ex.thread_pool.submit(self.merge_images, first_idol_id, second_idol_id)).result()
         return f"{ bias_game_location}{first_idol_id}_{second_idol_id}.png"
 
     @staticmethod
@@ -38,7 +38,7 @@ class BiasGame:
             versus_image.save(f"{ bias_game_location}{file_name}")
 
     async def create_bias_game_bracket(self, all_games, user_id, bracket_winner):
-        result = (ex.thread_pool.submit(self.create_bracket, all_games, user_id, bracket_winner)).result()
+        (ex.thread_pool.submit(self.create_bracket, all_games, user_id, bracket_winner)).result()
         return f"{ bias_game_location}{user_id}.png"
 
     @staticmethod

@@ -13,6 +13,7 @@ Any potentially useful/repeated functions will end up here
 """
 
 
+# noinspection PyBroadException
 class Utility:
     def __init__(self):
         self.test_bot = None  # this is changed in run.py
@@ -70,7 +71,7 @@ class Utility:
     async def kill_api(self):
         """restart the api"""
         source_link = "http://127.0.0.1:5123/restartAPI"
-        async with self.session.get(source_link) as resp:
+        async with self.session.get(source_link):
             log.console("Restarting API.")
 
     @staticmethod
@@ -150,6 +151,7 @@ class Utility:
             return (user_reacted.id == user_id) and (reaction_used.emoji == reaction_needed)
 
         try:
+            # noinspection PyUnusedLocal
             reaction, user = await self.client.wait_for('reaction_add', timeout=60, check=react_check)
             return True
         except asyncio.TimeoutError:
@@ -188,7 +190,7 @@ class Utility:
                 # only remove user's reaction instead of all reactions
                 try:
                     await reaction.remove(user)
-                except Exception as e:
+                except:
                     pass
                 await change_page(c_page)
             except Exception as e:
@@ -218,7 +220,7 @@ class Utility:
         try:
             prefix = await self.get_server_prefix(ctx.guild.id)
             return prefix
-        except Exception as e:
+        except:
             return keys.bot_prefix
 
     @staticmethod

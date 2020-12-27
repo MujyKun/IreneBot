@@ -12,6 +12,7 @@ class AutoRestart:
         self.site = None
         self.bot_running = False
 
+    # noinspection PyUnusedLocal
     def check_time(self, loop_on):
         while True:
             if not self.bot_running:

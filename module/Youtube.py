@@ -5,6 +5,7 @@ from module import logger as log
 from Utility import resources as ex
 
 
+# noinspection PyBroadException
 class Youtube(commands.Cog):
     def __init__(self):
         self.current_yt_loop_instance = None

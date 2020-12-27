@@ -32,7 +32,7 @@ class DataBase:
     async def show_irene_alive(self):
         """Looped every minute to send a connection to localhost:5123 to show bot is working well."""
         source_link = "http://127.0.0.1:5123/restartBot"
-        async with ex.session.get(source_link) as resp:
+        async with ex.session.get(source_link):
             pass
 
     @staticmethod

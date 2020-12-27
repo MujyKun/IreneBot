@@ -1,6 +1,7 @@
 from Utility import resources as ex
 
 
+# noinspection PyBroadException
 class Logging:
     #################
     # ## LOGGING ## #
@@ -76,9 +77,8 @@ class Logging:
                 if await self.check_if_logged(server_id=message.guild.id):
                     if await self.check_if_logged(channel_id=message.channel.id):
                         return True
-        except Exception as e:
+        except:
             pass
-        return False
 
     @staticmethod
     async def get_attachments(message):

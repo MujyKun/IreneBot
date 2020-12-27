@@ -6,6 +6,7 @@ from Utility import resources as ex
 from module import logger as log
 
 
+# noinspection PyBroadException
 class Profile(commands.Cog):
     def __init__(self):
         ex.client.add_listener(self.profile_level, 'on_message')
@@ -65,7 +66,7 @@ class Profile(commands.Cog):
             embed = await ex.set_embed_author_and_footer(embed, "Thanks for using Irene!")
             try:
                 user_activity = user.activity.name
-            except Exception as e:
+            except:
                 user_activity = None
             embed.set_thumbnail(url=user.avatar_url)
             embed.add_field(name="Profile Level", value=user_level, inline=True)
@@ -103,6 +104,6 @@ class Profile(commands.Cog):
             else:
                 await ex.u_levels.set_level(user_id, 1, "profilexp")
                 await ex.u_levels.set_level(user_id, current_level+1, "profile")
-        except Exception as e:
+        except:
             pass
             # log.console(e)

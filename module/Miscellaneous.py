@@ -7,6 +7,7 @@ from Utility import resources as ex
 import datetime
 
 
+# noinspection PyBroadException,PyBroadException
 class Miscellaneous(commands.Cog):
     @staticmethod
     async def on_message_notifications(message):
@@ -34,7 +35,7 @@ class Miscellaneous(commands.Cog):
     """
                         embed = await ex.create_embed(title="Phrase Found", color=ex.get_random_color(), title_desc=title_desc)
                         await dm_channel.send(embed=embed)
-        except Exception as e:
+        except:
             pass
 
     @commands.command()
@@ -82,7 +83,7 @@ class Miscellaneous(commands.Cog):
             except AttributeError:
                 return await ctx.send(
                     f"> **{ctx.author.display_name}, You are not allowed to use this command in DMs.**")
-            except Exception as e:
+            except:
                 pass
             await ctx.send(f"> **{ctx.author.display_name}, if you were receiving notifications for that phrase, it has been removed.**")
 
@@ -150,7 +151,7 @@ class Miscellaneous(commands.Cog):
             weverse_status = ":green_circle:"
         try:
             current_server_prefix = await ex.get_server_prefix(ctx.guild.id)
-        except Exception as e:
+        except:
             current_server_prefix = await ex.client.get_prefix(ctx.message)
         app = await ex.client.application_info()
         app_id = app.id
@@ -204,9 +205,10 @@ Maintenance Status: {maintenance_status}
     @commands.command()
     async def checkprefix(self, ctx):
         """Check the current prefix using the default prefix."""
+        # noinspection PyBroadException,PyBroadException,PyBroadException,PyBroadException,PyBroadException
         try:
             await ctx.send(f"> **Your current server prefix is {await ex.get_server_prefix(ctx.guild.id)}**")
-        except Exception as e:
+        except:
             await ctx.send(f"> **Your current prefix is {await ex.client.get_prefix(ctx.message)}")
 
     @commands.command(aliases=['trans', 't'])
@@ -245,7 +247,7 @@ Maintenance Status: {maintenance_status}
             await ctx.send("> **Your bug report has been sent.**")
             await msg.add_reaction("\U0001f44d")  # thumbs up
             await msg.add_reaction("\U0001f44e")  # thumbs down
-        except Exception as e:
+        except:
             # Error would occur on test bot if the client does not have access to a certain channel id
             # this try-except will also be useful if a server removed the bot.
             await ctx.send("Could not fetch channel to report to.")
@@ -311,7 +313,7 @@ Maintenance Status: {maintenance_status}
                 if count_loop <= 10:
                     try:
                         user_name = (ex.client.get_user(user_id)).name
-                    except Exception as e:
+                    except:
                         # if the user is not in discord.py's member cache, then set the user's name to null.
                         user_name = "NULL"
                     embed.add_field(name=f"{count_loop}) {user_name} ({user_id})", value=value)

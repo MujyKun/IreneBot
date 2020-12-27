@@ -12,9 +12,10 @@ import ksoftapi
 
 
 def make_int(var):
+    # noinspection PyBroadException
     try:
         return int(var)
-    except Exception as e:
+    except:
         return None
 
 
@@ -27,6 +28,7 @@ test_client_token = os.getenv("TEST_BOT_TOKEN")
 bot_name = None  # this is set in the on_ready event
 bot_id = make_int(os.getenv("BOT_ID"))
 owner_id = make_int(os.getenv("OWNER_ID"))
+# noinspection PyBroadException
 try:
     mods_list_split = (os.getenv("MODS_LIST")).split(',')
 except Exception as e:

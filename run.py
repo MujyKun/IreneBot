@@ -115,7 +115,8 @@ class Irene:
 
     @staticmethod
     def create_util_objects():
-        """Create SubClass Objects to attach to Parent for easier management and sharing between siblings."""
+        """Create SubClass Objects to attach to Utility object for easier management and sharing between siblings.
+        The Utility object serves as a client for Irene and is managed by the following objects"""
         ex.u_database = util.database.DataBase()
         ex.u_cache = util.cache.Cache()
         ex.u_currency = util.currency.Currency()

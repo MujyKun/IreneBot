@@ -36,7 +36,7 @@ class Utility:
                                            verbose=True, loop=asyncio.get_event_loop())
         self.exceptions = exceptions
 
-        # SubClass Objects
+        # SubClass Objects -- Defined in Utility.py
         self.u_database = None
         self.u_cache = None
         self.u_currency = None
@@ -59,9 +59,7 @@ class Utility:
     @staticmethod
     def first_result(record):
         """Returns the first item of a record if there is one."""
-        if not record:
-            return
-        else:
+        if record:
             return record[0]
 
     @staticmethod

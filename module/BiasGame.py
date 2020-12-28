@@ -172,7 +172,7 @@ Remaining Idols: {self.number_of_idols_left}
 
     async def print_winner(self):
         msg_body = f"> The winner is {self.bracket_winner.stage_name}."
-        file_location = await ex.create_bias_game_bracket(self.all_brackets_together, self.host, self.bracket_winner)
+        file_location = await ex.u_bias_game.create_bias_game_bracket(self.all_brackets_together, self.host, self.bracket_winner)
 
         image_file = discord.File(fp=file_location, filename=f"{self.host}.png")
         await self.channel.send(msg_body, file=image_file)

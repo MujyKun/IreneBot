@@ -87,7 +87,7 @@ class BlackJack(commands.Cog):
             if not game_id:
                 await ctx.send(f"> **{ctx.author}, you are not in a game.**")
             else:
-                if await ex.compare_channels(ctx.author.id, ctx.channel):
+                if await ex.u_blackjack.compare_channels(ctx.author.id, ctx.channel):
                     game = await ex.u_blackjack.get_game(game_id)
                     if ex.u_blackjack.check_if_bot(game[2]):
                         if await ex.u_blackjack.get_player_total(game[2]) < 16:
@@ -106,7 +106,7 @@ class BlackJack(commands.Cog):
             if game_id is None:
                 await ctx.send(f"> **{ctx.author}, you are not in a game.**")
             else:
-                if await ex.compare_channels(user_id, ctx.channel):
+                if await ex.u_blackjack.compare_channels(user_id, ctx.channel):
                     # Do not inform other users that the player already stood by busting.
                     # Instead, just send the same message that they are standing every time this command is called.
                     await ex.u_blackjack.set_player_stand(user_id)

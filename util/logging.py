@@ -32,7 +32,7 @@ class Logging:
                 ex.cache.list_of_logged_channels.append(channel_id)
                 server['channels'].append(channel_id)
         else:
-            await ex.set_logging_status(server_id, 1)
+            await self.set_logging_status(server_id, 1)
             current_channel_id = ex.first_result(
                 await ex.conn.fetchrow("SELECT channelid FROM logging.servers WHERE serverid = $1", server_id))
             if current_channel_id != channel_id:

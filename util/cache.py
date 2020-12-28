@@ -202,8 +202,8 @@ class Cache:
         """Update NWord Cache"""
         ex.cache.n_word_counter = {}
         user_info = await ex.conn.fetch("SELECT userid, nword FROM general.nword")
-        for user in user_info:
-            ex.cache.n_word_counter[user[0]] = user[1]
+        for user_id, n_word_counter in user_info:
+            ex.cache.n_word_counter[user_id] = n_word_counter
 
     @staticmethod
     async def update_temp_channels():
@@ -221,8 +221,8 @@ class Cache:
         """Create the cache for welcome messages."""
         ex.cache.welcome_messages = {}
         info = await ex.conn.fetch("SELECT channelid, serverid, message, enabled FROM general.welcome")
-        for server in info:
-            ex.cache.welcome_messages[server[1]] = {"channel_id": server[0], "message": server[2], "enabled": server[3]}
+        for channel_id, server_id, message_id, enabled in info:
+            ex.cache.welcome_messages[server_id] = {"channel_id": channel_id, "message": message_id, "enabled": enabled}
 
     @staticmethod
     async def update_server_prefixes():
@@ -365,7 +365,7 @@ class Cache:
     async def update_patron_cache_hour(self):
         """Update Patron Cache every hour in the case of unaccounted errors."""
         # this is to make sure on the first run it doesn't update since it is created elsewhere.
-        if ex.loop_count != 0:
+        if ex.loop_count:
             await self.process_cache_time(self.update_patreons, "Patrons")
         ex.loop_count += 1
 

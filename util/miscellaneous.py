@@ -16,18 +16,18 @@ class Miscellaneous:
             message_content = message.clean_content
             if ex.u_miscellaneous.check_message_not_empty(message):
                 # check if the message belongs to the bot
-                    if message_content[0] != '%':
-                        if ex.u_miscellaneous.check_nword(message_content):
-                            ex.cache.n_words_per_minute += 1
-                            author_id = message_sender.id
-                            current_amount = ex.cache.n_word_counter.get(author_id)
-                            if current_amount:
-                                await ex.conn.execute("UPDATE general.nword SET nword = $1 WHERE userid = $2::bigint",
-                                                      current_amount + 1, author_id)
-                                ex.cache.n_word_counter[author_id] = current_amount + 1
-                            else:
-                                await ex.conn.execute("INSERT INTO general.nword VALUES ($1,$2)", author_id, 1)
-                                ex.cache.n_word_counter[author_id] = 1
+                if message_content[0] != '%':
+                    if ex.u_miscellaneous.check_nword(message_content):
+                        ex.cache.n_words_per_minute += 1
+                        author_id = message_sender.id
+                        current_amount = ex.cache.n_word_counter.get(author_id)
+                        if current_amount:
+                            await ex.conn.execute("UPDATE general.nword SET nword = $1 WHERE userid = $2::bigint",
+                                                  current_amount + 1, author_id)
+                            ex.cache.n_word_counter[author_id] = current_amount + 1
+                        else:
+                            await ex.conn.execute("INSERT INTO general.nword VALUES ($1,$2)", author_id, 1)
+                            ex.cache.n_word_counter[author_id] = 1
 
     @staticmethod
     async def check_if_temp_channel(channel_id):

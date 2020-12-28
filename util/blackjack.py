@@ -148,7 +148,7 @@ class BlackJack:
 
         separator = ','
         current_cards = await self.get_current_cards(user_id)
-        game_id = await ex.u_blackjack.get_game_by_player(user_id)
+        game_id = await self.get_game_by_player(user_id)
         game = await self.get_game(game_id)
         channel = await ex.client.fetch_channel(game[5])
         stand = await self.check_player_standing(user_id)
@@ -226,7 +226,7 @@ class BlackJack:
 
     async def compare_channels(self, user_id, channel):
         """Check if the channel is the correct channel."""
-        game_id = await ex.u_blackjack.get_game_by_player(user_id)
+        game_id = await self.get_game_by_player(user_id)
         game = await self.get_game(game_id)
         if game[5] == channel.id:
             return True

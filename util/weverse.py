@@ -11,7 +11,7 @@ class Weverse:
         community_name = community_name.lower()
         await ex.conn.execute("INSERT INTO weverse.channels(channelid, communityname) VALUES($1, $2)", channel_id,
                               community_name)
-        await ex.add_weverse_channel_to_cache(channel_id, community_name)
+        await self.add_weverse_channel_to_cache(channel_id, community_name)
 
     @staticmethod
     async def add_weverse_channel_to_cache(channel_id, community_name):

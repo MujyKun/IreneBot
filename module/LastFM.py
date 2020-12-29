@@ -17,12 +17,10 @@ class LastFM(commands.Cog):
         image_url = False
         album_name = False
         list_of_tracks = response['recenttracks']['track']
-        counter = 0
         tracks_and_titles = []
-        for track in list_of_tracks:
-            counter += 1
-            if counter <= limit:
-                title = f"**#{counter} **"
+        for counter, track in enumerate(list_of_tracks):
+            if counter + 1 <= limit:
+                title = f"**#{counter + 1} **"
                 try:
                     date = track['date']['#text']
                     album_name = track['album']['#text']
@@ -101,28 +99,28 @@ class LastFM(commands.Cog):
         [Format: %fm @user]."""
         try:
             user = await self.set_user(ctx, user)
-            if user is not None:
-                response = await ex.u_last_fm.get_fm_response('user.getinfo', user)
-                user_info = response['user']
-                title_desc = f"""Age: {user_info['age']}
-
-                Country: {user_info['country']}
-
-                Gender: {user_info['gender']}
-
-                Name: {user_info['name']}
-
-                Total PlayCount: {user_info['playcount']}
-
-                Playlists: {user_info['playlists']}
-
-                URL: {user_info['url']}                
-                """
-                title = f"{user}'s LastFM Account Info"
-                embed = await ex.create_embed(title=title, color=ex.get_random_color(), title_desc=title_desc)
-                await ctx.send(embed=embed)
-            else:
+            if not user:
                 await events.Events.error(ctx, self.user_does_not_exist)
+            response = await ex.u_last_fm.get_fm_response('user.getinfo', user)
+            user_info = response['user']
+            title_desc = f"""Age: {user_info['age']}
+
+            Country: {user_info['country']}
+
+            Gender: {user_info['gender']}
+
+            Name: {user_info['name']}
+
+            Total PlayCount: {user_info['playcount']}
+
+            Playlists: {user_info['playlists']}
+
+            URL: {user_info['url']}                
+            """
+            title = f"{user}'s LastFM Account Info"
+            embed = await ex.create_embed(title=title, color=ex.get_random_color(), title_desc=title_desc)
+            await ctx.send(embed=embed)
+
         except KeyError:
             await events.Events.error(ctx, self.user_not_found)
         except Exception as e:

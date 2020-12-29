@@ -85,18 +85,19 @@ class YoutubeLoop:
                 link_id = ex.first_result(
                     await ex.conn.fetchrow("SELECT id FROM youtube.links WHERE link = $1", url))
                 async with ex.session.get(url) as r:
-                    if r.status == 200:
-                        page_html = await r.text()
-                        start_pos = page_html.find("viewCount") + 14
-                        end_loc = start_pos
-                        while page_html[end_loc] != '\\':
-                            end_loc += 1
-                        view_count = f"{int(page_html[start_pos:end_loc]):,} views"
-                        current_date = datetime.now()
-                        await ex.conn.execute("INSERT INTO youtube.views(linkid, views, date) VALUES ($1,$2,$3)",
-                                              link_id, view_count, str(current_date))
-                        await YoutubeLoop.send_channel(channel_id,
-                                                       f"> **UPDATE FOR <{url}>: {view_count} -- {current_date}**")
+                    if r.status != 200:
+                        continue
+                    page_html = await r.text()
+                    start_pos = page_html.find("viewCount") + 14
+                    end_loc = start_pos
+                    while page_html[end_loc] != '\\':
+                        end_loc += 1
+                    view_count = f"{int(page_html[start_pos:end_loc]):,} views"
+                    current_date = datetime.now()
+                    await ex.conn.execute("INSERT INTO youtube.views(linkid, views, date) VALUES ($1,$2,$3)",
+                                          link_id, view_count, str(current_date))
+                    await YoutubeLoop.send_channel(channel_id,
+                                                   f"> **UPDATE FOR <{url}>: {view_count} -- {current_date}**")
             except Exception as e:
                 log.console(e)
         log.console("Updated Video Views Tracker")
@@ -106,4 +107,3 @@ class YoutubeLoop:
         if ex.client.loop.is_running():
             if ex.conn:  # make sure a connection to the db exists.
                 await self.scrape_videos()
-

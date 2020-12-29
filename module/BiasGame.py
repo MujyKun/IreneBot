@@ -113,19 +113,22 @@ class Game:
         random.shuffle(ex.cache.idols)
         first_idol = None
         for idol in ex.cache.idols:
-            if len(self.current_bracket_teams) < self.bracket_size or first_idol:
-                if idol.thumbnail:
-                    check_gender = True
-                    if self.gender:
-                        if idol.gender != self.gender:
-                            check_gender = False
-                    if check_gender:
-                        if first_idol:
-                            self.current_bracket_teams.append([first_idol, idol])
-                            first_idol = None
-                        else:
-                            first_idol = idol
-                        self.original_idols_in_game.append(idol)
+            if not len(self.current_bracket_teams) < self.bracket_size or not first_idol:
+                continue
+            if not idol.thumbnail:
+                continue
+
+            check_gender = True
+            if self.gender:
+                if idol.gender != self.gender:
+                    check_gender = False
+            if check_gender:
+                if first_idol:
+                    self.current_bracket_teams.append([first_idol, idol])
+                    first_idol = None
+                else:
+                    first_idol = idol
+                self.original_idols_in_game.append(idol)
 
     async def create_new_question(self):
         """Generate a new question for the bias game."""

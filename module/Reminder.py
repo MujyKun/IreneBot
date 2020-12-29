@@ -120,8 +120,8 @@ class Reminder(commands.Cog):
         current_time = datetime.datetime.now(pytz.timezone(user_timezone)).strftime('%I:%M:%S %p')
         timezone_abbrev = datetime.datetime.now(pytz.timezone(user_timezone)).strftime('UTC%z')
         return await ctx.send(
-            f"> {user.display_name}{', your' if user==ctx.author else chr(39)+'s'} current time is set to "
-            f"`{current_time}` at the timezone `{user_timezone} {timezone_abbrev}`")
+            f"> {user.display_name}{', your' if user==ctx.author else chr(39)+'s'} current time is "
+            f"`{current_time}` in the timezone `{user_timezone} {timezone_abbrev}`")
 
     @commands.command(aliases=['settz'])
     async def settimezone(self, ctx, timezone_name=None, country_code=None):

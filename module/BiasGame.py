@@ -113,7 +113,7 @@ class Game:
         random.shuffle(ex.cache.idols)
         first_idol = None
         for idol in ex.cache.idols:
-            if not len(self.current_bracket_teams) < self.bracket_size or not first_idol:
+            if not len(self.current_bracket_teams) < self.bracket_size and not first_idol:
                 continue
             if not idol.thumbnail:
                 continue

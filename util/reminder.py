@@ -142,10 +142,11 @@ class Reminder:
         matching_timezones = None
 
         try:
-            matching_timezones = set(now_tz_str(common_tz) == now_tz_str(pytz.timezone(input_timezone)) for common_tz in
-                                     pytz.common_timezones)
+            matching_timezones = set(common_tz for common_tz in pytz.common_timezones
+                                     if now_tz_str(common_tz) == now_tz_str(input_timezone))
         except pytz.exceptions.UnknownTimeZoneError:
-            matching_timezones = set(now_tz_str(common_tz) == input_timezone for common_tz in pytz.common_timezones)
+            matching_timezones = set(common_tz for common_tz in pytz.common_timezones
+                                     if now_tz_str(common_tz) == input_timezone)
         except:
             pass
 

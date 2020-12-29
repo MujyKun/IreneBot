@@ -39,16 +39,15 @@ async def check_user_limit(message_sender, message_channel, no_vote_limit=False)
         # amount of votes that can be sent without voting.
         limit = keys.idol_no_vote_send_limit
     if message_sender.id not in ex.cache.commands_used:
-        return None
+        return
     if not await ex.u_patreon.check_if_patreon(message_sender.id) and ex.cache.commands_used[message_sender.id][0] > limit:
         # noinspection PyPep8
-        if not await ex.u_patreon.check_if_patreon(message_channel.guild.owner.id, super=True) and not no_vote_limit:
+        if not await ex.u_patreon.check_if_patreon(message_channel.guild.owner.id, super_patron=True) and not no_vote_limit:
             return await message_channel.send(patron_message)
         elif ex.cache.commands_used[message_sender.id][0] > owner_super_patron_benefit and not no_vote_limit:
             return await message_channel.send(patron_message)
         else:
             return True
-    return False
 
 
 # noinspection PyPep8
@@ -105,8 +104,8 @@ class GroupMembers(commands.Cog):
     async def on_message2(message):
         # create modifiable var without altering original
         channel = message.channel
-        if message.author.bot or not ex.u_group_members.check_channel_sending_photos(channel.id) or ex.u_miscellaneous.check_if_temp_channel(channel.id):
-            return None
+        if message.author.bot or not await ex.u_group_members.check_channel_sending_photos(channel.id) or await ex.u_miscellaneous.check_if_temp_channel(channel.id):
+            return
         try:
             if await ex.u_group_members.check_server_sending_photos(message.guild.id):
                 channel = await ex.u_group_members.get_channel_sending_photos(message.guild.id)
@@ -129,8 +128,8 @@ class GroupMembers(commands.Cog):
                 # we just need to make sure it has the bot's default prefix
                 # however this means if a user changes the prefix and uses the bot's default prefix
                 # it will still process idol photos, but not regular commands.
-                if message.content[0:len(keys.bot_prefix)] != keys.bot_prefix and message.content.lower() == f"{keys.bot_prefix}null":
-                    return None
+                if message.content[0:len(keys.bot_prefix)] != keys.bot_prefix or message.content.lower() == f"{keys.bot_prefix}null":
+                    return
                 message_content = message.content[len(keys.bot_prefix):len(message.content)]
                 server_id = await ex.get_server_id(message)
                 members = await ex.u_group_members.get_idol_where_member_matches_name(message_content, server_id=server_id)
@@ -306,7 +305,7 @@ class GroupMembers(commands.Cog):
         embed_list = []
         counter = 1
         for group in ex.cache.groups:
-            if group.name == "NULL" or is_mod:
+            if group.name == "NULL" and not is_mod:
                 continue
             if is_mod:
                 embed.insert_field_at(counter, name=f"{group.name} ({group.id})", value=f"{group.photo_count} Photos", inline=True)

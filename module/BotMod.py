@@ -15,9 +15,9 @@ class BotMod(commands.Cog):
             message_channel = message.channel
             message_content = message.content
             if message_sender.id == keys.bot_id:
-                return None
+                return
             if 'closedm' in message_content or 'createdm' in message_content:
-                return None
+                return
             for user_id in ex.cache.mod_mail:
                 channel_id = ex.cache.mod_mail.get(user_id)
                 mod_channel = await ex.client.fetch_channel(channel_id)

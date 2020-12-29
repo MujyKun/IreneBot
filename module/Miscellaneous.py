@@ -14,13 +14,13 @@ class Miscellaneous(commands.Cog):
         # user phrase notifications
         try:
             if message.author.bot:
-                return None
+                return
             for guild_id, user_id, phrase in ex.cache.user_notifications:
                 message_split = message.content.lower().split(" ")
                 if phrase not in message_split or guild_id != message.guild.id:
-                    return None
+                    return
                 if message.author.id == user_id or user_id not in [member.id for member in message.channel.members]:
-                    return None
+                    return
                 log.console(f"message_notifications 1 - {phrase} to {user_id}")
                 dm_channel = await ex.get_dm_channel(user_id)
                 log.console(f"message_notifications 2 - {phrase} to {user_id}")
@@ -29,7 +29,7 @@ class Miscellaneous(commands.Cog):
                 new_message_content = f"{message.content[0:start_loc]}`{message.content[start_loc:end_loc]}`{message.content[end_loc:len(message.content)]}"
                 title_desc = f"""
 Phrase: {phrase}
-Message Author: {message_sender}
+Message Author: {message.author}
 
 **Message:** {new_message_content}
 [Click to go to the Message]({message.jump_url})
@@ -297,7 +297,6 @@ Maintenance Status: {maintenance_status}
         ex.cache.n_word_counter[user.id] = None
         await ctx.send("**> Cleared.**")
 
-
     @commands.command(aliases=["nwl"])
     async def nwordleaderboard(self, ctx):
         """Shows leaderboards for how many times the nword has been said. [Format: %nwl]"""
@@ -316,7 +315,7 @@ Maintenance Status: {maintenance_status}
             except:
                 # if the user is not in discord.py's member cache, then set the user's name to null.
                 user_name = "NULL"
-            embed.add_field(name=f"{count_loop+1}) {user_name} ({user_id})", value=value)
+            embed.add_field(name=f"{count+1}) {user_name} ({user_id})", value=value)
         await ctx.send(embed=embed)
 
     @commands.command(aliases=['rand', 'randint', 'r'])
@@ -336,7 +335,7 @@ Maintenance Status: {maintenance_status}
     async def urban(self, ctx, term=None, number=1, override=0):
         """Search a term through UrbanDictionary. Underscores are spaces.
         [Format: %urban (term) (definition number)][Aliases: define,u]"""
-        if not ctx.channel.is_nsfw() and override != 0:
+        if not ctx.channel.is_nsfw() and not override == 1:
             server_prefix = await ex.get_server_prefix_by_context(ctx)
             return await ctx.send(f">>> **This text channel must be NSFW to use {server_prefix}"
                            f"urban (Guidelines set by top.gg).**\nTo override this, You may add a **1** after the "
@@ -349,7 +348,7 @@ Maintenance Status: {maintenance_status}
         async with ex.session.get(url, headers=keys.X_RapidAPI_headers, params=querystring) as r:
             ex.cache.urban_per_minute += 1
             if r.status != 200:
-                log.console(r.status)
+                log.console(f"The connection to the UrbanDictionary API failed. -> {r.status}")
                 return await ctx.send("> **The connection to the UrbanDictionary API failed.**")
             result = await r.json()
             try:
@@ -357,7 +356,6 @@ Maintenance Status: {maintenance_status}
             except:
                 return await ctx.send(f"> **It is not possible to find definition number `{number}` for the word: `{term}`.**")
             await ctx.send(f">>> **`Word: {term}`\n`Definition Number: {number}`\n{first_result['definition']}**")
-
 
     @commands.command()
     async def invite(self, ctx):
@@ -444,14 +442,9 @@ Maintenance Status: {maintenance_status}
                          icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
         embed.set_footer(text="Thanks for using Irene.",
                          icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
-        guilds_ordered = []
-        for guild in guilds:
-            guild_info = [guild.id, guild.member_count]
-            guilds_ordered.append(guild_info)
+        guilds_ordered = [[guild.id, guild.member_count] for guild in guilds]
         guilds_ordered.sort(key=lambda server_info: server_info[1])
-        guild_ids_sorted = []
-        for guild in guilds_ordered:
-            guild_ids_sorted.append(guild[0])
+        guild_ids_sorted = [guild[0] for guild in guilds_ordered]
         embed_list = []
         try:
             for main_guild_id in guild_ids_sorted:

@@ -17,8 +17,7 @@ class Logging:
         """Get all the channels that are being logged."""
         return ex.cache.list_of_logged_channels
 
-    @staticmethod
-    async def add_to_logging(server_id, channel_id):  # return true if status is on
+    async def add_to_logging(self, server_id, channel_id):  # return true if status is on
         """Add a channel to be logged."""
         if (ex.first_result(
                 await ex.conn.fetchrow("SELECT COUNT(*) FROM logging.servers WHERE serverid = $1", server_id))) == 0:

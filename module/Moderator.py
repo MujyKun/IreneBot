@@ -132,7 +132,6 @@ class Moderator(commands.Cog):
             await ex.u_miscellaneous.disable_interaction(ctx.guild.id, interaction)
             await ctx.send(f"> **{interaction} has been disabled in this server.**")
 
-
     @staticmethod
     async def get_mute_role(ctx):
         mute_roles = await ex.conn.fetch("SELECT roleid FROM general.muteroles")

@@ -8,11 +8,11 @@ class CustomCommands(commands.Cog):
     @staticmethod
     async def process_custom_commands(message):
         # custom server commands
-        if not message.content and message.author.bot:
-            return None
+        if not message.content or message.author.bot:
+            return
 
         if await ex.u_miscellaneous.check_if_bot_banned(message.author.id):
-            return None
+            return
 
         guild_id = await ex.get_server_id(message)
         current_message_prefix = message.content[0:len(keys.bot_prefix)]

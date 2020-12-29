@@ -84,21 +84,22 @@ class Music(commands.Cog):
     @tasks.loop(seconds=30, minutes=1, hours=0, reconnect=True)
     async def check_voice_clients(self):
         if not ex.client.loop.is_running():
-            return None
+            return
         try:
             for voice_client in ex.client.voice_clients:
-                if voice_client.is_connected() and voice_client.channel.members and voice_client.is_playing():
-                    try:
-                        songs_queued = queued[voice_client.guild.id]
-                        if songs_queued:
-                            channel = songs_queued[0][1]
-                            msg = f"> **There are no users in this voice channel. Resetting queue and leaving.**"
-                            await channel.send(msg)
-                    except:
-                        pass
-                    self.reset_queue_for_guild(voice_client.guild.id)
-                    voice_client.stop()
-                await voice_client.disconnect()
+                if voice_client.is_connected() and voice_client.channel.members:
+                    if voice_client.is_playing():
+                        try:
+                            songs_queued = queued[voice_client.guild.id]
+                            if songs_queued:
+                                channel = songs_queued[0][1]
+                                msg = f"> **There are no users in this voice channel. Resetting queue and leaving.**"
+                                await channel.send(msg)
+                        except:
+                            pass
+                        self.reset_queue_for_guild(voice_client.guild.id)
+                        voice_client.stop()
+                    await voice_client.disconnect()
             keep_files = []
             for key in queued:
                 file_name = (queued[key][0][2])
@@ -125,7 +126,7 @@ class Music(commands.Cog):
     def reset_queue_for_guild(guild_id):
         try:
             if not queued[guild_id]:
-                return None
+                return
             for song in queued[guild_id]:
                 player = song[0]
                 file_name = song[2]
@@ -135,7 +136,7 @@ class Music(commands.Cog):
                     os.remove(file_name)
                 except:
                     pass
-                queued.pop(guild_id, None)
+            queued.pop(guild_id, None)
         except:
             pass
 
@@ -293,7 +294,7 @@ class Music(commands.Cog):
         """Makes a song the next song to play without skipping the current song. [Format: %move (song number)] """
         try:
             if not self.check_user_in_vc(ctx):
-                await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
+                return await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
             song_number = song_number - 1  # account for starting from 0
             if not song_number:
                 return await ctx.send(f"> **You can not move the song currently playing.**")
@@ -360,7 +361,7 @@ class Music(commands.Cog):
     @commands.command(aliases=['p'])
     async def play(self, ctx, *, url=None):
         """Plays audio to a voice channel. [Format: %play (title/url)]"""
-        if url is None:
+        if not url:
             if not ctx.voice_client.is_paused:
                 return await ctx.send("> The player is not paused. Please enter a title or link to play audio.")
             ctx.voice_client.resume()
@@ -405,7 +406,7 @@ class Music(commands.Cog):
 
     def start_next_song(self, error):
         if error:
-            return None
+            return
         all_voice_clients = ex.client.voice_clients
         for voice_client in all_voice_clients:
             if voice_client.is_playing() or voice_client.is_paused():
@@ -447,13 +448,13 @@ class Music(commands.Cog):
         try:
             if not self.check_user_in_vc(ctx):
                 return await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
-            if volume < 1 or volume > 100:
+            if 1 > volume > 100:
                 return await ctx.send(f"> **{ctx.author}, please choose a volume from 1 to 100.**")
             else:
                 if not ctx.voice_client:
                     return await ctx.send(f"> **{ctx.author}, you are not connected to a voice channel.**")
                 ctx.voice_client.source.volume = volume / 100
-                await ctx.send("> **Changed volume to {}%**".format(volume))
+                await ctx.send(f"> **Changed volume to {volume}%**")
         except AttributeError:
             await ctx.send(f"> **{ctx.author}, I am not in a voice channel.**")
         except Exception as e:
@@ -495,7 +496,7 @@ class Music(commands.Cog):
     @queue.before_invoke
     @shuffle.before_invoke
     async def check_patreon(self, ctx):
-        if await ex.u_patreon.check_if_patreon(ctx.author.id, super=True) or await ex.u_patreon.check_if_patreon(ctx.guild.owner.id, super=True):
+        if await ex.u_patreon.check_if_patreon(ctx.author.id, super_patron=True) or await ex.u_patreon.check_if_patreon(ctx.guild.owner.id, super_patron=True):
             await self.ensure_voice(ctx)
         else:
             await ctx.send(f"""**Music is only available to $5 Patreons that support <@{keys.bot_id}>.

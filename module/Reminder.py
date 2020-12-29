@@ -149,12 +149,12 @@ class Reminder(commands.Cog):
         for user_id in ex.cache.reminders:
             reminders = ex.cache.reminders.get(user_id)
             if not reminders:
-                return None
+                return
             for remind_id, remind_reason, remind_time in reminders:
                 try:
                     current_time = datetime.datetime.now(remind_time.tzinfo)
                     if current_time < remind_time:
-                        return None
+                        return
                     dm_channel = await ex.get_dm_channel(user_id=user_id)
                     if dm_channel:
                         title_desc = f"This is a reminder to **{remind_reason}**."
@@ -162,5 +162,5 @@ class Reminder(commands.Cog):
                         await dm_channel.send(embed=embed)
                         await ex.u_reminder.remove_user_reminder(user_id, remind_id)
                 except:
-                    # likely forbidden error -> do not have access to dm user
-                    pass
+                    pass  # likely forbidden error -> do not have access to dm user
+

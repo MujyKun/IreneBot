@@ -5,8 +5,7 @@ from module.keys import weverse_image_folder
 
 # noinspection PyBroadException,PyPep8
 class Weverse:
-    @staticmethod
-    async def add_weverse_channel(channel_id, community_name):
+    async def add_weverse_channel(self, channel_id, community_name):
         """Add a channel to get updates for a community"""
         community_name = community_name.lower()
         await ex.conn.execute("INSERT INTO weverse.channels(channelid, communityname) VALUES($1, $2)", channel_id,

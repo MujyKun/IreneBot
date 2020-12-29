@@ -35,20 +35,20 @@ class Logging(commands.Cog):
         """Start logging a text channel. [Format:  %logadd #text-channel]"""
         if not text_channel:
             text_channel = ctx.channel
-        if await ex.u_logging.check_if_logged(server_id=ctx.guild.id):
-            if not await ex.u_logging.check_if_logged(channel_id=text_channel.id):
-                counter = ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) FROM logging.servers WHERE channelid = $1", text_channel.id))
-                if not counter:
-                    logging_id = await ex.u_logging.get_logging_id(ctx.guild.id)
-                    await ex.conn.execute("INSERT INTO logging.channels (channelid, server) VALUES($1, $2)", text_channel.id, logging_id)
-                    ex.cache.list_of_logged_channels.append(text_channel.id)
-                    await ctx.send(f"> **{text_channel.name} is now being logged.**")
-                else:
-                    await ctx.send(f"> **{text_channel.name} can not be logged since log messages are sent here.**")
-            else:
-                await ctx.send(f"> **{text_channel.name} is already being logged.**")
-        else:
-            await ctx.send(f"> **The server must be logged in order to log a channel. ({await ex.get_server_prefix_by_context(ctx)}startlogging)**")
+
+        if not await ex.u_logging.check_if_logged(server_id=ctx.guild.id):
+            return await ctx.send(
+                f"> **The server must be logged in order to log a channel. ({await ex.get_server_prefix_by_context(ctx)}startlogging)**")
+        if await ex.u_logging.check_if_logged(channel_id=text_channel.id):
+            return await ctx.send(f"> **{text_channel.name} is already being logged.**")
+
+        is_logging_channel = ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) FROM logging.servers WHERE channelid = $1", text_channel.id))
+        if is_logging_channel:
+            return await ctx.send(f"> **{text_channel.name} can not be logged since log messages are sent here.**")
+        logging_id = await ex.u_logging.get_logging_id(ctx.guild.id)
+        await ex.conn.execute("INSERT INTO logging.channels (channelid, server) VALUES($1, $2)", text_channel.id, logging_id)
+        ex.cache.list_of_logged_channels.append(text_channel.id)
+        await ctx.send(f"> **{text_channel.name} is now being logged.**")
 
     @commands.has_guild_permissions(manage_messages=True)
     @commands.command()
@@ -77,17 +77,16 @@ class Logging(commands.Cog):
     @commands.command()
     async def sendall(self, ctx):
         """Toggles sending all messages to log channel. If turned off, it only sends edited & deleted messages."""
-        if await ex.u_logging.check_if_logged(server_id=ctx.guild.id):
-            if not await ex.u_logging.get_send_all(ctx.guild.id):
-                await ex.conn.execute("UPDATE logging.servers SET sendall = $1 WHERE serverid = $2", 1, ctx.guild.id)
-                (ex.cache.logged_channels[ctx.guild.id])['send_all'] = 1
-                await ctx.send(f"> **All messages will now be sent in the logging channel.**")
-            else:
-                await ex.conn.execute("UPDATE logging.servers SET sendall = $1 WHERE serverid = $2", 0, ctx.guild.id)
-                (ex.cache.logged_channels[ctx.guild.id])['send_all'] = 0
-                await ctx.send(f"> **Only edited and deleted messages will be sent in the logging channel.**")
-        else:
-            await ctx.send("> **This server is not being logged.**")
+        if not await ex.u_logging.check_if_logged(server_id=ctx.guild.id):
+            return await ctx.send("> **This server is not being logged.**")
+        if not await ex.u_logging.get_send_all(ctx.guild.id):
+            await ex.conn.execute("UPDATE logging.servers SET sendall = $1 WHERE serverid = $2", 1, ctx.guild.id)
+            (ex.cache.logged_channels[ctx.guild.id])['send_all'] = 1
+            return await ctx.send(f"> **All messages will now be sent in the logging channel.**")
+
+        await ex.conn.execute("UPDATE logging.servers SET sendall = $1 WHERE serverid = $2", 0, ctx.guild.id)
+        (ex.cache.logged_channels[ctx.guild.id])['send_all'] = 0
+        await ctx.send(f"> **Only edited and deleted messages will be sent in the logging channel.**")
 
     @staticmethod
     async def logging_on_message_edit(msg_before, message):

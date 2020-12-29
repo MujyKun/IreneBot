@@ -121,19 +121,17 @@ class Moderator(commands.Cog):
         if not interaction:
             return await ctx.send(interaction_msg)
         interaction = interaction.lower()
-        if interaction in interaction_list:
-            server_id = ctx.guild.id
-            if not await ex.check_interaction_enabled(server_id=server_id, interaction=interaction):
-                # enable it
-                await ex.u_miscellaneous.enable_interaction(server_id, interaction)
-                await ctx.send(f"> **{interaction} has been enabled in this server.**")
-            else:
-                # disable it
-                await ex.u_miscellaneous.disable_interaction(server_id, interaction)
-                await ctx.send(f"> **{interaction} has been disabled in this server.**")
-
-        else:
+        if interaction not in interaction_list:
             return await ctx.send(f"> **That is not an interaction.**\n{interaction_msg}")
+        if not await ex.check_interaction_enabled(server_id=ctx.guild.id, interaction=interaction):
+            # enable it
+            await ex.u_miscellaneous.enable_interaction(ctx.guild.id, interaction)
+            await ctx.send(f"> **{interaction} has been enabled in this server.**")
+        else:
+            # disable it
+            await ex.u_miscellaneous.disable_interaction(ctx.guild.id, interaction)
+            await ctx.send(f"> **{interaction} has been disabled in this server.**")
+
 
     @staticmethod
     async def get_mute_role(ctx):
@@ -419,9 +417,9 @@ class Moderator(commands.Cog):
         channel_id = ctx.channel.id
         try:
             if delay == -1:
-                    await ex.conn.execute("DELETE FROM general.TempChannels WHERE chanID = $1", channel_id)
-                    ex.cache.temp_channels[channel_id] = None
-                    return await ctx.send("> **If this channel was a temporary channel, it has been removed.**")
+                await ex.conn.execute("DELETE FROM general.TempChannels WHERE chanID = $1", channel_id)
+                ex.cache.temp_channels[channel_id] = None
+                return await ctx.send("> **If this channel was a temporary channel, it has been removed.**")
             elif delay < -1:
                 return await ctx.send("> **The delay cannot be negative.**")
             elif 0 < delay < 60:

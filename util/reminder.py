@@ -104,7 +104,8 @@ class Reminder:
         if user_timezone:
             await ex.conn.execute("UPDATE reminders.timezones SET timezone = $1 WHERE userid = $2", timezone, user_id)
         else:
-            await ex.conn.execute("INSERT INTO reminders.timezones(userid, timezone) VALUES ($1, $2)", user_id, timezone)
+            await ex.conn.execute("INSERT INTO reminders.timezones(userid, timezone) VALUES ($1, $2)", user_id,
+                                  timezone)
 
     @staticmethod
     async def remove_user_timezone(user_id):
@@ -118,6 +119,8 @@ class Reminder:
     @staticmethod
     async def process_timezone_input(input_timezone, input_country_code=None):
         """Convert timezone abbreviation and country code to standard timezone name"""
+        def now_tz_str(time_zone):
+            return datetime.datetime.now(pytz.timezone(time_zone)).strftime("%Z")
 
         try:
             input_timezone = input_timezone.upper()
@@ -125,7 +128,7 @@ class Reminder:
         except:
             pass
 
-        # Format if user inputs number timezones
+        # Format if user input is in GMT offset format
         if any(char.isdigit() for char in input_timezone):
             try:
                 timezone_offset = (re.findall(r"[+-]\d+", input_timezone))[0]
@@ -134,17 +137,13 @@ class Reminder:
             except:
                 pass
 
-        # Filter for all timezones which are equivalent to the user inputted timezone
         matching_timezones = None
+
         try:
-            matching_timezones = set(
-                filter(lambda x: datetime.datetime.now(pytz.timezone(x)).strftime("%Z") ==
-                       datetime.datetime.now(pytz.timezone(input_timezone)).strftime("%Z"),
-                       pytz.common_timezones))
+            matching_timezones = set(now_tz_str(common_tz) == now_tz_str(pytz.timezone(input_timezone)) for common_tz in
+                                     pytz.common_timezones)
         except pytz.exceptions.UnknownTimeZoneError:
-            matching_timezones = set(
-                filter(lambda x: datetime.datetime.now(pytz.timezone(x)).strftime("%Z") == input_timezone,
-                       pytz.common_timezones))
+            matching_timezones = set(now_tz_str(common_tz) == input_timezone for common_tz in pytz.common_timezones)
         except:
             pass
 
@@ -228,4 +227,3 @@ class Reminder:
     async def get_all_timezones_from_db():
         """Get all timezones from the db (all users)"""
         return await ex.conn.fetch("SELECT userid, timezone FROM reminders.timezones")
-

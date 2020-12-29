@@ -38,15 +38,16 @@ async def check_user_limit(message_sender, message_channel, no_vote_limit=False)
     if no_vote_limit:
         # amount of votes that can be sent without voting.
         limit = keys.idol_no_vote_send_limit
-    if message_sender.id in ex.cache.commands_used:
-        if not await ex.u_patreon.check_if_patreon(message_sender.id) and ex.cache.commands_used[message_sender.id][0] > limit:
-            # noinspection PyPep8
-            if not await ex.u_patreon.check_if_patreon(message_channel.guild.owner.id, super=True) and not no_vote_limit:
-                return await message_channel.send(patron_message)
-            elif ex.cache.commands_used[message_sender.id][0] > owner_super_patron_benefit and not no_vote_limit:
-                return await message_channel.send(patron_message)
-            else:
-                return True
+    if message_sender.id not in ex.cache.commands_used:
+        return None
+    if not await ex.u_patreon.check_if_patreon(message_sender.id) and ex.cache.commands_used[message_sender.id][0] > limit:
+        # noinspection PyPep8
+        if not await ex.u_patreon.check_if_patreon(message_channel.guild.owner.id, super=True) and not no_vote_limit:
+            return await message_channel.send(patron_message)
+        elif ex.cache.commands_used[message_sender.id][0] > owner_super_patron_benefit and not no_vote_limit:
+            return await message_channel.send(patron_message)
+        else:
+            return True
     return False
 
 
@@ -104,58 +105,60 @@ class GroupMembers(commands.Cog):
     async def on_message2(message):
         # create modifiable var without altering original
         channel = message.channel
-        if not message.author.bot and await ex.u_group_members.check_channel_sending_photos(channel.id) and not await ex.u_miscellaneous.check_if_temp_channel(channel.id):
-            try:
-                if await ex.u_group_members.check_server_sending_photos(message.guild.id):
-                    channel = await ex.u_group_members.get_channel_sending_photos(message.guild.id)
-            except:
-                pass  # error is guild not found, likely being accessed from DMs
-            posted = False
-            api_url = None
-            try:
-                check_reset_limits()
-                if message.author.id in ex.cache.commands_used:
-                    time_difference = time.time() - ex.cache.commands_used[message.author.id][1]
-                    if time_difference < 2:
-                        # await asyncio.sleep(1)
-                        pass
-                if ex.u_miscellaneous.check_message_not_empty(message):
-                    random_member = False
-                    # since this is a listener, the prefix is put back to the default
-                    # (from the original on_message)
-                    # and we do not need to worry about the user's server prefix for idol photos
-                    # we just need to make sure it has the bot's default prefix
-                    # however this means if a user changes the prefix and uses the bot's default prefix
-                    # it will still process idol photos, but not regular commands.
-                    if message.content[0:len(keys.bot_prefix)] == keys.bot_prefix and message.content.lower() != f"{keys.bot_prefix}null":
-                        message_content = message.content[len(keys.bot_prefix):len(message.content)]
-                        server_id = await ex.get_server_id(message)
-                        members = await ex.u_group_members.get_idol_where_member_matches_name(message_content, server_id=server_id)
-                        groups = await ex.u_group_members.get_group_where_group_matches_name(message_content, server_id=server_id)
-                        photo_msg = None
-                        if members:
-                            random_member = await choose_random_member(members=members)
-                            if random_member:
-                                photo_msg, api_url, posted = await request_image_post(message, random_member, channel)
-                        elif groups:
-                            random_member = await choose_random_member(groups=groups)
-                            if random_member:
-                                photo_msg, api_url, posted = await request_image_post(message, random_member, channel)
-                        else:
-                            members = await ex.u_group_members.check_group_and_idol(message_content, server_id=server_id)
-                            if members:
-                                random_member = await choose_random_member(members=members)
-                                if random_member:
-                                    photo_msg, api_url, posted = await request_image_post(message, random_member, channel)
-                        if posted:
-                            ex.u_group_members.log_idol_command(message)
-                            await ex.u_miscellaneous.add_command_count(f"Idol {random_member.id}")
-                            await ex.u_miscellaneous.add_session_count()
-                            add_user_limit(message.author)
-                            if api_url:
-                                await ex.u_group_members.check_idol_post_reactions(photo_msg, message, random_member, api_url)
-            except:
-                pass
+        if message.author.bot or not ex.u_group_members.check_channel_sending_photos(channel.id) or ex.u_miscellaneous.check_if_temp_channel(channel.id):
+            return None
+        try:
+            if await ex.u_group_members.check_server_sending_photos(message.guild.id):
+                channel = await ex.u_group_members.get_channel_sending_photos(message.guild.id)
+        except:
+            pass  # error is guild not found, likely being accessed from DMs
+        posted = False
+        api_url = None
+        try:
+            check_reset_limits()
+            if message.author.id in ex.cache.commands_used:
+                time_difference = time.time() - ex.cache.commands_used[message.author.id][1]
+                if time_difference < 2:
+                    # await asyncio.sleep(1)
+                    pass
+            if ex.u_miscellaneous.check_message_not_empty(message):
+                random_member = False
+                # since this is a listener, the prefix is put back to the default
+                # (from the original on_message)
+                # and we do not need to worry about the user's server prefix for idol photos
+                # we just need to make sure it has the bot's default prefix
+                # however this means if a user changes the prefix and uses the bot's default prefix
+                # it will still process idol photos, but not regular commands.
+                if message.content[0:len(keys.bot_prefix)] != keys.bot_prefix and message.content.lower() == f"{keys.bot_prefix}null":
+                    return None
+                message_content = message.content[len(keys.bot_prefix):len(message.content)]
+                server_id = await ex.get_server_id(message)
+                members = await ex.u_group_members.get_idol_where_member_matches_name(message_content, server_id=server_id)
+                groups = await ex.u_group_members.get_group_where_group_matches_name(message_content, server_id=server_id)
+                photo_msg = None
+                if members:
+                    random_member = await choose_random_member(members=members)
+                    if random_member:
+                        photo_msg, api_url, posted = await request_image_post(message, random_member, channel)
+                elif groups:
+                    random_member = await choose_random_member(groups=groups)
+                    if random_member:
+                        photo_msg, api_url, posted = await request_image_post(message, random_member, channel)
+                else:
+                    members = await ex.u_group_members.check_group_and_idol(message_content, server_id=server_id)
+                    if members:
+                        random_member = await choose_random_member(members=members)
+                        if random_member:
+                            photo_msg, api_url, posted = await request_image_post(message, random_member, channel)
+                if posted:
+                    ex.u_group_members.log_idol_command(message)
+                    await ex.u_miscellaneous.add_command_count(f"Idol {random_member.id}")
+                    await ex.u_miscellaneous.add_session_count()
+                    add_user_limit(message.author)
+                    if api_url:
+                        await ex.u_group_members.check_idol_post_reactions(photo_msg, message, random_member, api_url)
+        except:
+            pass
 
     @commands.command()
     async def card(self, ctx, *, name):
@@ -303,17 +306,18 @@ class GroupMembers(commands.Cog):
         embed_list = []
         counter = 1
         for group in ex.cache.groups:
-            if group.name != "NULL" or is_mod:
-                if is_mod:
-                    embed.insert_field_at(counter, name=f"{group.name} ({group.id})", value=f"{group.photo_count} Photos", inline=True)
-                else:
-                    embed.insert_field_at(counter, name=f"{group.name}", value=f"{group.photo_count} Photos", inline=True)
-                if counter == 25:
-                    counter = 0
-                    embed_list.append(embed)
-                    page_number += 1
-                    embed = discord.Embed(title=f"Idol Group List Page {page_number}", color=0xffb6c1)
-                counter += 1
+            if group.name == "NULL" or is_mod:
+                continue
+            if is_mod:
+                embed.insert_field_at(counter, name=f"{group.name} ({group.id})", value=f"{group.photo_count} Photos", inline=True)
+            else:
+                embed.insert_field_at(counter, name=f"{group.name}", value=f"{group.photo_count} Photos", inline=True)
+            if counter == 25:
+                counter = 0
+                embed_list.append(embed)
+                page_number += 1
+                embed = discord.Embed(title=f"Idol Group List Page {page_number}", color=0xffb6c1)
+            counter += 1
         if counter:
             embed_list.append(embed)
         msg = await ctx.send(embed=embed_list[0])
@@ -362,12 +366,10 @@ class GroupMembers(commands.Cog):
                     await ctx.send(f"> **{member.full_name} ({member.stage_name}) has not been called by a user yet.**")
                 else:
                     rank_list = await ex.conn.fetch("SELECT memberid FROM groupmembers.count ORDER BY Count DESC")
-                    count = 0
-                    for rank_row in rank_list:
-                        count += 1
+                    for count, rank_row in enumerate(rank_list):
                         mem_id = rank_row[0]
                         if mem_id == member.id:
-                            final_rank = count
+                            final_rank = count + 1
                             await ctx.send(f"> **{member.full_name} ({member.stage_name}) has been called {member.called} times at rank {final_rank}.**")
         except Exception as e:
             await ctx.send(f"> **ERROR: {e}**")

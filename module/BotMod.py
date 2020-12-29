@@ -14,20 +14,21 @@ class BotMod(commands.Cog):
             message_sender = message.author
             message_channel = message.channel
             message_content = message.content
-            if message_sender.id != keys.bot_id:
-                if 'closedm' not in message_content and 'createdm' not in message_content:
-                    for user_id in ex.cache.mod_mail:
-                        channel_id = ex.cache.mod_mail.get(user_id)
-                        mod_channel = await ex.client.fetch_channel(channel_id)
-                        if user_id == message_sender.id:
-                            dm_channel = await ex.get_dm_channel(message_sender.id)
-                            if message_channel.id == dm_channel:
-                                await mod_channel.send(
-                                    f">>> FROM: {message_sender.display_name} ({message_sender.id}) - {message_content}")
-                        if mod_channel == message_channel:
-                            dm_channel = await ex.get_dm_channel(user_id)
-                            await dm_channel.send(
+            if message_sender.id == keys.bot_id:
+                return None
+            if 'closedm' not in message_content and 'createdm' not in message_content:
+                for user_id in ex.cache.mod_mail:
+                    channel_id = ex.cache.mod_mail.get(user_id)
+                    mod_channel = await ex.client.fetch_channel(channel_id)
+                    if user_id == message_sender.id:
+                        dm_channel = await ex.get_dm_channel(message_sender.id)
+                        if message_channel.id == dm_channel:
+                            await mod_channel.send(
                                 f">>> FROM: {message_sender.display_name} ({message_sender.id}) - {message_content}")
+                    if mod_channel == message_channel:
+                        dm_channel = await ex.get_dm_channel(user_id)
+                        await dm_channel.send(
+                            f">>> FROM: {message_sender.display_name} ({message_sender.id}) - {message_content}")
         except Exception as e:
             log.console(f"{e} - BotMod.mod_on_message")
 

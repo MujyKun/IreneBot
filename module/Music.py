@@ -83,39 +83,36 @@ class Music(commands.Cog):
     # noinspection PyBroadException
     @tasks.loop(seconds=30, minutes=1, hours=0, reconnect=True)
     async def check_voice_clients(self):
-        if ex.client.loop.is_running():
-            try:
-                voice_clients = ex.client.voice_clients
-                for voice_client in voice_clients:
-                    if voice_client.is_connected():
-                        if voice_client.channel.members:
-                            if voice_client.is_playing():
-                                try:
-                                    songs_queued = queued[voice_client.guild.id]
-                                    if songs_queued:
-                                        channel = songs_queued[0][1]
-                                        msg = f"> **There are no users in this voice channel. Resetting queue and leaving.**"
-                                        await channel.send(msg)
-                                except:
-                                    pass
-                                self.reset_queue_for_guild(voice_client.guild.id)
-                                voice_client.stop()
-                            await voice_client.disconnect()
-                keep_files = []
-                for key in queued:
-                    file_name = (queued[key][0][2])
-                    keep_files.append(file_name)
-                all_music = os.listdir("music")
-                for song_file_name in all_music:
-                    file_location = f"music/{song_file_name}"
-                    if file_location not in keep_files:
-                        if file_location != "music":
-                            try:
-                                os.remove(file_location)
-                            except:
-                                pass
-            except Exception as e:
-                log.console(e)
+        if not ex.client.loop.is_running():
+            return None
+        try:
+            for voice_client in ex.client.voice_clients:
+                if voice_client.is_connected() and voice_client.channel.members and voice_client.is_playing():
+                    try:
+                        songs_queued = queued[voice_client.guild.id]
+                        if songs_queued:
+                            channel = songs_queued[0][1]
+                            msg = f"> **There are no users in this voice channel. Resetting queue and leaving.**"
+                            await channel.send(msg)
+                    except:
+                        pass
+                    self.reset_queue_for_guild(voice_client.guild.id)
+                    voice_client.stop()
+                await voice_client.disconnect()
+            keep_files = []
+            for key in queued:
+                file_name = (queued[key][0][2])
+                keep_files.append(file_name)
+            for song_file_name in os.listdir("music"):
+                file_location = f"music/{song_file_name}"
+                if file_location in keep_files and file_location == "music":
+                    continue
+                try:
+                    os.remove(file_location)
+                except:
+                    pass
+        except Exception as e:
+            log.console(e)
 
     @staticmethod
     def check_user_in_vc(ctx):
@@ -127,17 +124,17 @@ class Music(commands.Cog):
     @staticmethod
     def reset_queue_for_guild(guild_id):
         try:
-            if queued[guild_id]:
-                for song in queued[guild_id]:
-                    player = song[0]
-                    file_name = song[2]
-                    if check_if_player(player):
-                        player.cleanup()
-                    try:
-                        os.remove(file_name)
-                    except:
-                        pass
-
+            if not queued[guild_id]:
+                return None
+            for song in queued[guild_id]:
+                player = song[0]
+                file_name = song[2]
+                if check_if_player(player):
+                    player.cleanup()
+                try:
+                    os.remove(file_name)
+                except:
+                    pass
                 queued.pop(guild_id, None)
         except:
             pass
@@ -175,17 +172,16 @@ class Music(commands.Cog):
     async def shuffle(self, ctx):
         """Shuffles the playlist."""
         try:
-            if self.check_user_in_vc(ctx):
-                # this is in a list so that it can be added to the beginning later
-                currently_playing = [queued[ctx.guild.id][0]]
-                number_of_songs_in_queue = len(queued[ctx.guild.id])
-                if number_of_songs_in_queue > 1:
-                    other_songs = queued[ctx.guild.id][1:number_of_songs_in_queue]
-                    random.shuffle(other_songs)
-                    queued[ctx.guild.id] = currently_playing + other_songs
-                await ctx.send(f"> **{ctx.author}, the current queue was shuffled.**")
-            else:
-                await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
+            if not self.check_user_in_vc(ctx):
+                return await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
+            # this is in a list so that it can be added to the beginning later
+            currently_playing = [queued[ctx.guild.id][0]]
+            number_of_songs_in_queue = len(queued[ctx.guild.id])
+            if number_of_songs_in_queue > 1:
+                other_songs = queued[ctx.guild.id][1:number_of_songs_in_queue]
+                random.shuffle(other_songs)
+                queued[ctx.guild.id] = currently_playing + other_songs
+            await ctx.send(f"> **{ctx.author}, the current queue was shuffled.**")
         except AttributeError:
             await ctx.send(f"> **There is no list to shuffle or I am not in a voice channel.**")
 
@@ -270,52 +266,45 @@ class Music(commands.Cog):
     @commands.command()
     async def pause(self, ctx):
         """Pauses currently playing song [Format: %pause]"""
-        if self.check_user_in_vc(ctx):
-            paused = ctx.voice_client.is_paused()
-            if not paused:
-                ctx.voice_client.pause()
-                await ctx.send("> **The player is now paused.**")
-
-        else:
-            await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
+        if not self.check_user_in_vc(ctx):
+            return await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
+        if ctx.voice_client.is_paused():
+            return await ctx.send("> **The player is already paused.**")
+        ctx.voice_client.pause()
+        await ctx.send("> **The player is now paused.**")
 
     @commands.command(aliases=['unpause'])
     async def resume(self, ctx):
         """Resumes a paused song [Format: %resume]"""
-        if self.check_user_in_vc(ctx):
-            paused = ctx.voice_client.is_paused()
-            if paused:
-                ctx.voice_client.resume()
-                video = (queued[ctx.guild.id])[0][0]
-                if check_if_player(video):
-                    title = video.title
-                else:
-                    title = video.get('title')
-                await ctx.send(f'> **Now resuming: {title}**')
-            else:
-                await ctx.send('> **The video player is not paused**')
+        if not self.check_user_in_vc(ctx):
+            return await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
+        if not ctx.voice_client.is_paused():
+            return await ctx.send('> **The video player is not paused**')
+        ctx.voice_client.resume()
+        video = (queued[ctx.guild.id])[0][0]
+        if check_if_player(video):
+            title = video.title
         else:
-            await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
+            title = video.get('title')
+        await ctx.send(f'> **Now resuming: {title}**')
 
     @commands.command(aliases=['skipto'])
     async def move(self, ctx, song_number: int):
         """Makes a song the next song to play without skipping the current song. [Format: %move (song number)] """
         try:
-            if self.check_user_in_vc(ctx):
-                song_number = song_number - 1  # account for starting from 0
-                if not song_number:
-                    await ctx.send(f"> **You can not move the song currently playing.**")
-                else:
-                    # noinspection PyBroadException
-                    try:
-                        title = get_video_title(queued[ctx.guild.id][song_number][0])
-                        # inserts song information at index 1 and removes the old position.
-                        queued[ctx.guild.id].insert(1, queued[ctx.guild.id].pop(song_number))
-                        await ctx.send(f"> **{title} will now be the next song to play.**")
-                    except:
-                        await ctx.send(f"> **That song number was not found. Could not move it.**")
-            else:
+            if not self.check_user_in_vc(ctx):
                 await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
+            song_number = song_number - 1  # account for starting from 0
+            if not song_number:
+                return await ctx.send(f"> **You can not move the song currently playing.**")
+                # noinspection PyBroadException
+            try:
+                title = get_video_title(queued[ctx.guild.id][song_number][0])
+                # inserts song information at index 1 and removes the old position.
+                queued[ctx.guild.id].insert(1, queued[ctx.guild.id].pop(song_number))
+                await ctx.send(f"> **{title} will now be the next song to play.**")
+            except:
+                await ctx.send(f"> **That song number was not found. Could not move it.**")
         except:
             pass
 
@@ -324,16 +313,15 @@ class Music(commands.Cog):
     async def remove(self, ctx, song_number: int):
         """Remove a song from the queue. [Format: %remove (song number)] """
         try:
-            if self.check_user_in_vc(ctx):
-                song_number = song_number - 1  # account for starting from 0
-                try:
-                    title = get_video_title(queued[ctx.guild.id][song_number][0])
-                    queued[ctx.guild.id].pop(song_number)
-                    await ctx.send(f"> **Removed {title} from the queue.**")
-                except:
-                    await ctx.send(f"> **That song number was not found. Could not remove it.**")
-            else:
-                await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
+            if not self.check_user_in_vc(ctx):
+                return await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
+            song_number = song_number - 1  # account for starting from 0
+            try:
+                title = get_video_title(queued[ctx.guild.id][song_number][0])
+                queued[ctx.guild.id].pop(song_number)
+                await ctx.send(f"> **Removed {title} from the queue.**")
+            except:
+                await ctx.send(f"> **That song number was not found. Could not remove it.**")
         except:
             pass
 
@@ -341,13 +329,12 @@ class Music(commands.Cog):
     async def skip(self, ctx):
         """Skips the current song. [Format: %skip]"""
         try:
-            if self.check_user_in_vc(ctx):
-                ctx.voice_client.stop()  # Will call error to remove the song.
-                player = queued[ctx.guild.id][0][0]
-                title = get_video_title(player)
-                await ctx.send(f"> **Skipped {title}**")
-            else:
-                await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
+            if not self.check_user_in_vc(ctx):
+                return await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
+            ctx.voice_client.stop()  # Will call error to remove the song.
+            player = queued[ctx.guild.id][0][0]
+            title = get_video_title(player)
+            await ctx.send(f"> **Skipped {title}**")
         except:
             pass
 
@@ -374,102 +361,99 @@ class Music(commands.Cog):
     async def play(self, ctx, *, url=None):
         """Plays audio to a voice channel. [Format: %play (title/url)]"""
         if url is None:
-            if ctx.voice_client.is_paused:
-                ctx.voice_client.resume()
-                await ctx.send(f"> **The video player is now resumed**")
-            else:
-                await ctx.send("> The player is not paused. Please enter a title or link to play audio.")
-        else:
-            try:
-                if self.check_user_in_vc(ctx):
-                    async with ctx.typing():
-                        msg = await ctx.send(f"> **Gathering information about the video/playlist, this may take a few minutes if it is a long playlist.**")
-                        videos, first_video_live = await YTDLSource.from_url(url, loop=ex.client.loop, stream=False, guild_id=ctx.guild.id, channel=ctx.channel, author_id=ctx.author.id)
-                        if not ctx.voice_client.is_playing():
-                            if not first_video_live:
-                                player = await download_video(videos[0])
-                                video_title = videos[0].get('title')
-                            else:
-                                player = videos[0]
-                                video_title = player.title
-                            try:
-                                ctx.voice_client.play(player, after=self.start_next_song)
-                                # THIS IS VERY IMPORTANT
-                                # This makes the front of the queue always a player.
-                                # This is useful so that no code is changed for going to the next song (music rework)
-                                queued[ctx.guild.id][0][0] = player
-                            except:  # Already Playing Audio
-                                return await ctx.send(f"> **Added {video_title} to the queue.**")
-                            await ctx.send(f'> **Now playing: {video_title}**', delete_after=240)  # deletes after 4min
-                        else:
-                            # grabbing the latest player
-                            if len(videos) == 1:  # do not shorten code
-                                if not first_video_live:
-                                    title = videos[0].get('title')
-                                else:
-                                    title = videos[0].title
-                                await ctx.send(f"> **Added {title} to the queue.**")
-                            else:
-                                await ctx.send(f"> **Added {len(videos)} songs to the queue.**")
-                        await msg.delete()
+            if not ctx.voice_client.is_paused:
+                return await ctx.send("> The player is not paused. Please enter a title or link to play audio.")
+            ctx.voice_client.resume()
+            return await ctx.send(f"> **The video player is now resumed**")
+        try:
+            if not self.check_user_in_vc(ctx):
+                return await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
+            async with ctx.typing():
+                msg = await ctx.send(f"> **Gathering information about the video/playlist, this may take a few minutes if it is a long playlist.**")
+                videos, first_video_live = await YTDLSource.from_url(url, loop=ex.client.loop, stream=False, guild_id=ctx.guild.id, channel=ctx.channel, author_id=ctx.author.id)
+                if not ctx.voice_client.is_playing():
+                    if not first_video_live:
+                        player = await download_video(videos[0])
+                        video_title = videos[0].get('title')
+                    else:
+                        player = videos[0]
+                        video_title = player.title
+                    try:
+                        ctx.voice_client.play(player, after=self.start_next_song)
+                        # THIS IS VERY IMPORTANT
+                        # This makes the front of the queue always a player.
+                        # This is useful so that no code is changed for going to the next song (music rework)
+                        queued[ctx.guild.id][0][0] = player
+                    except:  # Already Playing Audio
+                        return await ctx.send(f"> **Added {video_title} to the queue.**")
+                    await ctx.send(f'> **Now playing: {video_title}**', delete_after=240)  # deletes after 4min
                 else:
-                    await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
+                    # grabbing the latest player
+                    if len(videos) == 1:  # do not shorten code
+                        if not first_video_live:
+                            title = videos[0].get('title')
+                        else:
+                            title = videos[0].title
+                        await ctx.send(f"> **Added {title} to the queue.**")
+                    else:
+                        await ctx.send(f"> **Added {len(videos)} songs to the queue.**")
+                await msg.delete()
+        except IndexError:
+            pass
+        except Exception as e:
+            log.console(e)
+
+    def start_next_song(self, error):
+        if error:
+            return None
+        all_voice_clients = ex.client.voice_clients
+        for voice_client in all_voice_clients:
+            if voice_client.is_playing() or voice_client.is_paused():
+                continue
+            client_guild_id = voice_client.guild.id
+            self.remove_song_in_queue(client_guild_id)
+            try:
+                player = queued[client_guild_id][0][0]
+                channel = queued[client_guild_id][0][1]
+                live = queued[client_guild_id][0][3]
+                try:
+                    if not live:  # we know it's video information and not a player because it is not live.
+                        download_a_video = download_video(player)
+                        player = asyncio.run_coroutine_threadsafe(download_a_video, ex.client.loop)
+                        try:
+                            player = player.result()
+                            queued[client_guild_id][0][0] = player  # making front of queue a player
+                        except Exception as e:
+                            log.console(e)
+                    voice_client.play(player, after=self.start_next_song)
+                except Exception as e:
+                    log.console(e)
+                send_channel_song = channel.send(f'> **Now playing: **{player.title}', delete_after=240)  # 4min
+                # used because async function cannot be used.
+                # https://discordpy.readthedocs.io/en/latest/faq.html#how-do-i-pass-a-coroutine-to-the-player-s-after-function
+                send_channel = asyncio.run_coroutine_threadsafe(send_channel_song, ex.client.loop)
+                try:
+                    send_channel.result()
+                except Exception as e:
+                    log.console(e)
             except IndexError:
                 pass
             except Exception as e:
                 log.console(e)
 
-    def start_next_song(self, error):
-        if not error:
-            all_voice_clients = ex.client.voice_clients
-            for voice_client in all_voice_clients:
-                if not voice_client.is_playing() and not voice_client.is_paused():
-                    client_guild_id = voice_client.guild.id
-                    self.remove_song_in_queue(client_guild_id)
-                    try:
-                        player = queued[client_guild_id][0][0]
-                        channel = queued[client_guild_id][0][1]
-                        live = queued[client_guild_id][0][3]
-                        try:
-                            if not live:  # we know it's video information and not a player because it is not live.
-                                download_a_video = download_video(player)
-                                player = asyncio.run_coroutine_threadsafe(download_a_video, ex.client.loop)
-                                try:
-                                    player = player.result()
-                                    queued[client_guild_id][0][0] = player  # making front of queue a player
-                                except Exception as e:
-                                    log.console(e)
-                            voice_client.play(player, after=self.start_next_song)
-                        except Exception as e:
-                            log.console(e)
-                        send_channel_song = channel.send(f'> **Now playing: **{player.title}', delete_after=240)  # 4min
-                        # used because async function cannot be used.
-                        # https://discordpy.readthedocs.io/en/latest/faq.html#how-do-i-pass-a-coroutine-to-the-player-s-after-function
-                        send_channel = asyncio.run_coroutine_threadsafe(send_channel_song, ex.client.loop)
-                        try:
-                            send_channel.result()
-                        except Exception as e:
-                            log.console(e)
-                    except IndexError:
-                        pass
-                    except Exception as e:
-                        log.console(e)
-
     @commands.command()
     async def volume(self, ctx, volume: int = 10):
         """Changes the player's volume - Songs default to 10. [Format: %volume (1-100)]"""
         try:
-            if self.check_user_in_vc(ctx):
-                if volume < 1 or volume > 100:
-                    await ctx.send(f"> **{ctx.author}, please choose a volume from 1 to 100.**")
-                else:
-                    if not ctx.voice_client:
-                        return await ctx.send(f"> **{ctx.author}, you are not connected to a voice channel.**")
-
-                    ctx.voice_client.source.volume = volume / 100
-                    await ctx.send("> **Changed volume to {}%**".format(volume))
+            if not self.check_user_in_vc(ctx):
+                return await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
+            if volume < 1 or volume > 100:
+                return await ctx.send(f"> **{ctx.author}, please choose a volume from 1 to 100.**")
             else:
-                await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
+                if not ctx.voice_client:
+                    return await ctx.send(f"> **{ctx.author}, you are not connected to a voice channel.**")
+                ctx.voice_client.source.volume = volume / 100
+                await ctx.send("> **Changed volume to {}%**".format(volume))
         except AttributeError:
             await ctx.send(f"> **{ctx.author}, I am not in a voice channel.**")
         except Exception as e:
@@ -479,13 +463,12 @@ class Music(commands.Cog):
     async def stop(self, ctx):
         """Disconnects from voice channel and resets queue. [Format: %stop]"""
         try:
-            if self.check_user_in_vc(ctx):
-                voice_channel_name = ctx.voice_client.channel.name
-                self.reset_queue_for_guild(ctx.guild.id)
-                await ctx.voice_client.disconnect()
-                await ctx.send(f"**{ctx.author}, I left {voice_channel_name} and reset the queue.**")
-            else:
-                await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
+            if not self.check_user_in_vc(ctx):
+                return await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
+            voice_channel_name = ctx.voice_client.channel.name
+            self.reset_queue_for_guild(ctx.guild.id)
+            await ctx.voice_client.disconnect()
+            await ctx.send(f"**{ctx.author}, I left {voice_channel_name} and reset the queue.**")
         except AttributeError:
             pass
         except Exception as e:

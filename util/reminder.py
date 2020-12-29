@@ -119,6 +119,7 @@ class Reminder:
     @staticmethod
     async def process_timezone_input(input_timezone, input_country_code=None):
         """Convert timezone abbreviation and country code to standard timezone name"""
+
         def now_tz_str(time_zone):
             return datetime.datetime.now(pytz.timezone(time_zone)).strftime("%Z")
 
@@ -132,7 +133,8 @@ class Reminder:
         if any(char.isdigit() for char in input_timezone):
             try:
                 timezone_offset = (re.findall(r"[+-]\d+", input_timezone))[0]
-                utc_offset = f"-{timezone_offset[1]}" if timezone_offset[0] == "+" else f"+{timezone_offset[1]}"
+                utc_offset = f"-{timezone_offset[1:len(timezone_offset)]}" \
+                                if timezone_offset[0] == "+" else f"+{timezone_offset[1:len(timezone_offset)]}"
                 input_timezone = 'Etc/GMT' + utc_offset
             except:
                 pass

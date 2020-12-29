@@ -131,9 +131,11 @@ class Reminder(commands.Cog):
             await ex.u_reminder.remove_user_timezone(ctx.author.id)
             return await ctx.send(f"> {ctx.author.display_name}, if your timezone was set, it was removed.")
 
+        server_prefix = await ex.get_server_prefix_by_context(ctx)
         user_timezone = await ex.u_reminder.process_timezone_input(timezone_name, country_code)
         if not user_timezone:
-            return await ctx.send(f"> {ctx.author.display_name}, that is not a valid timezone.")
+            return await ctx.send(f"> {ctx.author.display_name}, that is not a valid timezone. "
+                                  f"Please use {server_prefix}settimezone (timezone name) (country code).")
 
         timezone_utc = datetime.datetime.now(pytz.timezone(user_timezone)).strftime('UTC%z')
         native_time = datetime.datetime.now(pytz.timezone(user_timezone)).strftime('%c')

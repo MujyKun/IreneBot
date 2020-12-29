@@ -15,7 +15,7 @@ class Archive(commands.Cog):
     @staticmethod
     async def on_message(message, is_owner=False):
         if message.author.bot:
-            return None
+            return
         if is_owner:
             try:
                 def check(m):

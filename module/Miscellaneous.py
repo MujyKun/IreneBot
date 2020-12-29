@@ -13,28 +13,29 @@ class Miscellaneous(commands.Cog):
     async def on_message_notifications(message):
         # user phrase notifications
         try:
-            message_sender = message.author
-            message_guild_id = message.guild.id
-            message_content = message.content
-            if not message_sender.bot:
-                for guild_id, user_id, phrase in ex.cache.user_notifications:
-                    message_split = message_content.lower().split(" ")
-                    if phrase in message_split and guild_id == message_guild_id and message_sender.id != user_id and user_id in [member.id for member in message.channel.members]:
-                        log.console(f"message_notifications 1 - {phrase} to {user_id}")
-                        dm_channel = await ex.get_dm_channel(user_id)
-                        log.console(f"message_notifications 2 - {phrase} to {user_id}")
-                        start_loc = (message_content.lower()).find(phrase)
-                        end_loc = start_loc + len(phrase)
-                        new_message_content = f"{message_content[0:start_loc]}`{message_content[start_loc:end_loc]}`{message_content[end_loc:len(message_content)]}"
-                        title_desc = f"""
-    Phrase: {phrase}
-    Message Author: {message_sender}
-    
-    **Message:** {new_message_content}
-    [Click to go to the Message]({message.jump_url})
-    """
-                        embed = await ex.create_embed(title="Phrase Found", color=ex.get_random_color(), title_desc=title_desc)
-                        await dm_channel.send(embed=embed)
+            if message.author.bot:
+                return None
+            for guild_id, user_id, phrase in ex.cache.user_notifications:
+                message_split = message.content.lower().split(" ")
+                if phrase not in message_split or guild_id != message.guild.id:
+                    return None
+                if message.author.id == user_id or user_id not in [member.id for member in message.channel.members]:
+                    return None
+                log.console(f"message_notifications 1 - {phrase} to {user_id}")
+                dm_channel = await ex.get_dm_channel(user_id)
+                log.console(f"message_notifications 2 - {phrase} to {user_id}")
+                start_loc = (message.content.lower()).find(phrase)
+                end_loc = start_loc + len(phrase)
+                new_message_content = f"{message.content[0:start_loc]}`{message.content[start_loc:end_loc]}`{message.content[end_loc:len(message.content)]}"
+                title_desc = f"""
+Phrase: {phrase}
+Message Author: {message_sender}
+
+**Message:** {new_message_content}
+[Click to go to the Message]({message.jump_url})
+"""
+                embed = await ex.create_embed(title="Phrase Found", color=ex.get_random_color(), title_desc=title_desc)
+                await dm_channel.send(embed=embed)
         except:
             pass
 
@@ -216,17 +217,16 @@ Maintenance Status: {maintenance_status}
         """Translate between languages using Papago [Format: %translate English Korean this is a test phrase.]"""
         try:
             response = await ex.u_miscellaneous.translate(message, from_language, to_language)
-            if response:
-                code = response['code']
-                if code == 0:  # do not shorten (make sure "code" var exists)
-                    text = response['text']
-                    target_lang = response['source']
-                    msg = f"Original ({target_lang}): {message} \nTranslated ({to_language}): {text} "
-                    return await ctx.send(msg)
-                else:
-                    return await ctx.send("> **Something went wrong and I did not receive a proper response from Papago.**")
-            else:
-                return await ctx.send(f"**My Papago Translation Service is currently turned off and cannot process requests OR you did not enter the right format.**")
+            if not response:
+                return await ctx.send(
+                    f"**My Papago Translation Service is currently turned off and cannot process requests OR you did not enter the right format.**")
+            code = response['code']
+            if code != 0:
+                return await ctx.send("> **Something went wrong and I did not receive a proper response from Papago.**")
+            text = response['text']
+            target_lang = response['source']
+            msg = f"Original ({target_lang}): {message} \nTranslated ({to_language}): {text} "
+            return await ctx.send(msg)
         except Exception as e:
             await ctx.send("An error has occurred with the Translation.")
             log.console(e)
@@ -288,15 +288,15 @@ Maintenance Status: {maintenance_status}
     async def clearnword(self, ctx, user: discord.Member = None):
         """Clear A User's Nword Counter [Format: %clearnword @user]"""
         if not user:
-            await ctx.send("> **Please @ a user**")
-        else:
-            current_amount = ex.cache.n_word_counter.get(user.id)
-            if current_amount:
-                await ex.conn.execute("DELETE FROM general.nword where userid = $1", user.id)
-                ex.cache.n_word_counter[user.id] = None
-                await ctx.send("**> Cleared.**")
-            else:
-                await ctx.send(f"> **<@{user.id}> has not said the N-Word a single time!**")
+            return await ctx.send("> **Please @ a user**")
+
+        if not ex.cache.n_word_counter.get(user.id):
+            return await ctx.send(f"> **<@{user.id}> has not said the N-Word a single time!**")
+
+        await ex.conn.execute("DELETE FROM general.nword where userid = $1", user.id)
+        ex.cache.n_word_counter[user.id] = None
+        await ctx.send("**> Cleared.**")
+
 
     @commands.command(aliases=["nwl"])
     async def nwordleaderboard(self, ctx):
@@ -305,18 +305,18 @@ Maintenance Status: {maintenance_status}
         embed.set_author(name="Irene", url=keys.bot_website, icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
         embed.set_footer(text=f"Type {await ex.get_server_prefix_by_context(ctx)}nword (user) to view their individual stats.", icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
         sorted_n_word = {key: value for key, value in sorted(ex.cache.n_word_counter.items(), key=lambda item: item[1], reverse=True)}
-        count_loop = 0
-        for user_id in sorted_n_word:
+        for count, user_id in enumerate(sorted_n_word):
             value = sorted_n_word.get(user_id)
-            if value:
-                count_loop += 1
-                if count_loop <= 10:
-                    try:
-                        user_name = (ex.client.get_user(user_id)).name
-                    except:
-                        # if the user is not in discord.py's member cache, then set the user's name to null.
-                        user_name = "NULL"
-                    embed.add_field(name=f"{count_loop}) {user_name} ({user_id})", value=value)
+            if not value:
+                continue
+            if count > 10:
+                break
+            try:
+                user_name = (ex.client.get_user(user_id)).name
+            except:
+                # if the user is not in discord.py's member cache, then set the user's name to null.
+                user_name = "NULL"
+            embed.add_field(name=f"{count_loop+1}) {user_name} ({user_id})", value=value)
         await ctx.send(embed=embed)
 
     @commands.command(aliases=['rand', 'randint', 'r'])
@@ -336,30 +336,28 @@ Maintenance Status: {maintenance_status}
     async def urban(self, ctx, term=None, number=1, override=0):
         """Search a term through UrbanDictionary. Underscores are spaces.
         [Format: %urban (term) (definition number)][Aliases: define,u]"""
-        if ctx.channel.is_nsfw() or override == 1:
-            if not term:
-                await ctx.send("> **Please enter a word for me to define**")
-            else:
-                term = term.replace("_", " ")
-                url = "https://mashape-community-urban-dictionary.p.rapidapi.com/define"
-                querystring = {"term": f"{term}"}
-                async with ex.session.get(url, headers=keys.X_RapidAPI_headers, params=querystring) as r:
-                    ex.cache.urban_per_minute += 1
-                    if r.status == 200:
-                        result = await r.json()
-                        try:
-                            first_result = (result['list'])[number-1]
-                        except:
-                            return await ctx.send(f"> **It is not possible to find definition number `{number}` for the word: `{term}`.**")
-                        await ctx.send(f">>> **`Word: {term}`\n`Definition Number: {number}`\n{first_result['definition']}**")
-                    else:
-                        log.console(r.status)
-                        await ctx.send("> **The connection to the UrbanDictionary API failed.**")
-        else:
+        if not ctx.channel.is_nsfw() and override != 0:
             server_prefix = await ex.get_server_prefix_by_context(ctx)
-            await ctx.send(f">>> **This text channel must be NSFW to use {server_prefix}"
+            return await ctx.send(f">>> **This text channel must be NSFW to use {server_prefix}"
                            f"urban (Guidelines set by top.gg).**\nTo override this, You may add a **1** after the "
                            f"definition number.\nExample: {server_prefix}urban hello (definition number) **1**.")
+        if not term:
+            return await ctx.send("> **Please enter a word for me to define**")
+        term = term.replace("_", " ")
+        url = "https://mashape-community-urban-dictionary.p.rapidapi.com/define"
+        querystring = {"term": f"{term}"}
+        async with ex.session.get(url, headers=keys.X_RapidAPI_headers, params=querystring) as r:
+            ex.cache.urban_per_minute += 1
+            if r.status != 200:
+                log.console(r.status)
+                return await ctx.send("> **The connection to the UrbanDictionary API failed.**")
+            result = await r.json()
+            try:
+                first_result = (result['list'])[number-1]
+            except:
+                return await ctx.send(f"> **It is not possible to find definition number `{number}` for the word: `{term}`.**")
+            await ctx.send(f">>> **`Word: {term}`\n`Definition Number: {number}`\n{first_result['definition']}**")
+
 
     @commands.command()
     async def invite(self, ctx):
@@ -459,25 +457,22 @@ Maintenance Status: {maintenance_status}
             for main_guild_id in guild_ids_sorted:
                 # need to do a nested loop due to fetch_guild not containing attributes needed.
                 for guild in guilds:
-                    if guild.id == main_guild_id:
-                        guild_id = guild.id
-                        guild_member_count = guild.member_count
-                        guild_owner = guild.owner
-                        guild_name = guild.name
-                        member_count = f"Member Count: {guild_member_count}\n"
-                        owner = f"Guild Owner: {guild_owner} ({guild_owner.id})\n"
-                        desc = member_count + owner
-                        embed.add_field(name=f"{guild_name} ({guild_id})", value=desc, inline=False)
-                        if count == 25:
-                            count = 0
-                            embed_list.append(embed)
-                            page_number += 1
-                            embed = discord.Embed(title=f"{len(guilds)} Servers - Page {page_number}", color=0xffb6c1)
-                            embed.set_author(name="Irene", url=keys.bot_website,
-                                             icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
-                            embed.set_footer(text="Thanks for using Irene.",
-                                             icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
-                        count += 1
+                    if guild.id != main_guild_id:
+                        continue
+                    member_count = f"Member Count: {guild.member.count}\n"
+                    owner = f"Guild Owner: {guild.owner} ({guild.owner.id})\n"
+                    desc = member_count + owner
+                    embed.add_field(name=f"{guild.name} ({guild.id})", value=desc, inline=False)
+                    if count == 25:
+                        count = 0
+                        embed_list.append(embed)
+                        page_number += 1
+                        embed = discord.Embed(title=f"{len(guilds)} Servers - Page {page_number}", color=0xffb6c1)
+                        embed.set_author(name="Irene", url=keys.bot_website,
+                                         icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
+                        embed.set_footer(text="Thanks for using Irene.",
+                                         icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
+                    count += 1
         except Exception as e:
             log.console(e)
         if count:

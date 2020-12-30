@@ -30,7 +30,7 @@ class Archive(commands.Cog):
             all_channels = await ex.conn.fetch("SELECT id, channelid, guildid, driveid, name FROM archive.channellist")
             for p_id, channel_id, guild_id, drive_id, name in all_channels:
                 if message.channel.id != channel_id:
-                    return None
+                    return
                 if len(message.attachments):
                     for file in message.attachments:
                         url = file.url
@@ -62,7 +62,7 @@ class Archive(commands.Cog):
 
     @commands.has_guild_permissions(manage_messages=True)
     @commands.command()
-    async def addchannel(self, ctx, drive_folder_id, name="NULL", owner_present=False):
+    async def addchannel(self, ctx, drive_folder_id, name="NULL", owner_present=0):
         """REQUIRES BOT OWNER PRESENCE -- Make the current channel start archiving images to google drive [Format: %addchannel <drive folder id> <optional - name>]"""
         try:
             if not owner_present:
@@ -73,12 +73,12 @@ class Archive(commands.Cog):
             if not await self.on_message(ctx, is_owner=True):
                 return await ctx.send("> **The bot owner did not confirm in time.**")
 
-            drive_id_in_db = ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) FROM archive.ChannelList WHERE DriveID = $1", drive_folder_id))
+            drive_id_in_db = ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) FROM archive.channellist WHERE driveid = $1", drive_folder_id))
             if not drive_id_in_db:
                 url = f"https://drive.google.com/drive/folders/{drive_folder_id}"
                 return await ctx.send(f"> **{url} is already being used.**")
 
-            channel_id_in_db = ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) FROM archive.ChannelList WHERE ChannelID = $1", ctx.channel.id))
+            channel_id_in_db = ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) FROM archive.channellist WHERE channelid = $1", ctx.channel.id))
             if not channel_id_in_db:
                 await ctx.send("> **This channel is already being archived**")
 
@@ -97,7 +97,6 @@ class Archive(commands.Cog):
         except Exception as e:
             log.console(e)
             await ctx.send("> **There was an error.**")
-        pass
 
     # noinspection PyBroadException
     @commands.has_guild_permissions(manage_messages=True)
@@ -134,9 +133,9 @@ class Archive(commands.Cog):
         try:
             channel_id_in_db = ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) FROM archive.ChannelList WHERE ChannelID = $1", ctx.channel.id))
             if not channel_id_in_db:
-                await ctx.send("> **This channel is not currently being archived.**")
+                return await ctx.send("> **This channel is not currently being archived.**")
             else:
-                await ex.conn.execute("DELETE FROM archive.ChannelList WHERE ChannelID = $1", ctx.channel.id)
+                await ex.conn.execute("DELETE FROM archive.channellist WHERE ChannelID = $1", ctx.channel.id)
                 await ctx.send("> **This channel is no longer being archived**")
         except Exception as e:
             log.console(e)
@@ -147,17 +146,17 @@ class Archive(commands.Cog):
         try:
             async with ex.session.get(url) as r:
                 if r.status != 200:
-                    return None
+                    return
 
                 check = False
                 unique_id = randint(0, 1000000000000)
                 unique_id2 = randint(0, 1000)
                 unique_id3 = randint(0, 500)
                 src = url[len(url)-4:len(url)]
-                checkerx = url.find(":large")
-                if checkerx != -1:
+                checker_x = url.find(":large")
+                if checker_x != -1:
                     src = url[len(url)-10:len(url)-6]
-                    url = f"{url[0:checkerx-1]}:orig"
+                    url = f"{url[0:checker_x-1]}:orig"
 
                 src2 = url.find('?format=')
                 if src2 != -1:

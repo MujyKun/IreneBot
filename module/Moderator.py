@@ -217,7 +217,7 @@ class Moderator(commands.Cog):
         if not text_channel:
             return await ctx.send(f"> **{ctx.author.display_name}, Please specify a message to send.**")
         if type(text_channel) == str:
-            if not message:
+            if message:
                 message = f"{text_channel} {message}"
             else:
                 message = text_channel

@@ -19,17 +19,21 @@ class BotMod(commands.Cog):
             if 'closedm' in message_content or 'createdm' in message_content:
                 return
             for user_id in ex.cache.mod_mail:
-                channel_id = ex.cache.mod_mail.get(user_id)
-                mod_channel = await ex.client.fetch_channel(channel_id)
-                if user_id == message_sender.id:
-                    dm_channel = await ex.get_dm_channel(message_sender.id)
-                    if message_channel.id == dm_channel:
-                        await mod_channel.send(
+                try:
+                    channel_id = ex.cache.mod_mail.get(user_id)
+                    mod_channel = await ex.client.fetch_channel(channel_id)
+                    if user_id == message_sender.id:
+                        dm_channel = await ex.get_dm_channel(message_sender.id)
+                        if message_channel.id == dm_channel:
+                            await mod_channel.send(
+                                f">>> FROM: {message_sender.display_name} ({message_sender.id}) - {message_content}")
+                    if mod_channel == message_channel:
+                        dm_channel = await ex.get_dm_channel(user_id)
+                        await dm_channel.send(
                             f">>> FROM: {message_sender.display_name} ({message_sender.id}) - {message_content}")
-                if mod_channel == message_channel:
-                    dm_channel = await ex.get_dm_channel(user_id)
-                    await dm_channel.send(
-                        f">>> FROM: {message_sender.display_name} ({message_sender.id}) - {message_content}")
+                except:
+                    # change in dictionary size should break the loop.
+                    break
         except Exception as e:
             log.console(f"{e} - BotMod.mod_on_message")
 

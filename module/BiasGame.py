@@ -133,8 +133,10 @@ class Game:
     async def create_new_question(self):
         """Generate a new question for the bias game."""
         self.number_of_idols_left = len(self.current_bracket_teams) * 2
-        for first_idol, second_idol in self.current_bracket_teams:
+        for battle in self.current_bracket_teams:
             if not self.force_ended:
+                first_idol = battle[0]
+                second_idol = battle[1]
                 try:
                     first_idol_group = (await ex.u_group_members.get_group(random.choice(first_idol.groups))).name
                 except:

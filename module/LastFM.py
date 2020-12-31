@@ -40,7 +40,10 @@ class LastFM(commands.Cog):
     async def create_fm_embed(title, stats_info, inline=False, individual=False):
         """Create and return an embed that matches the format for FM tracks and artists."""
         embed = await ex.create_embed(title=title, color=ex.get_random_color())
-        for name, value, image_url in stats_info:
+        for info in stats_info:
+            # DO NOT SHORTEN FOR LOOP -> stats_info may contain less/more values to unpack than needed.
+            name = info[0]
+            value = info[1]
             if not individual:
                 embed.add_field(name=name, value=value, inline=inline)
             else:

@@ -71,7 +71,6 @@ Message Author: {message.author}
         except AttributeError:
             return await ctx.send(f"> **{ctx.author.display_name}, You are not allowed to use this command in DMs.**")
         except Exception as e:
-            log.console(e)
             await ctx.send(f"> **{ctx.author.display_name}, You are already receiving notifications for `{phrase}`**")
 
     @commands.command(aliases=["deletenoti"])
@@ -80,14 +79,13 @@ Message Author: {message.author}
         try:
             await ex.conn.execute("DELETE FROM general.notifications WHERE guildid=$1 AND userid=$2 AND phrase=$3", ctx.guild.id, ctx.author.id, phrase.lower())
             try:
-                ex.cache.user_notifications.remove([ctx.guild_id, ctx.author.id, phrase.lower()])
-            except AttributeError:
+                ex.cache.user_notifications.remove([ctx.guild.id, ctx.author.id, phrase.lower()])
+            except AttributeError as e:
                 return await ctx.send(
                     f"> **{ctx.author.display_name}, You are not allowed to use this command in DMs.**")
             except:
                 pass
             await ctx.send(f"> **{ctx.author.display_name}, if you were receiving notifications for that phrase, it has been removed.**")
-
         except Exception as e:
             log.console(e)
             await ctx.send(f"> **Something Went Wrong, please {await ex.get_server_prefix_by_context(ctx)}report it.**")

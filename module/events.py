@@ -32,11 +32,14 @@ class Events(commands.Cog):
 
     @staticmethod
     async def error(ctx, error):
-        embed = discord.Embed(title="Error", description=f"** {error} **", color=0xff00f6)
-        await ctx.send(embed=embed)
-        log.console(f"{error}")
-        # increment general error count per minute
-        ex.cache.errors_per_minute += 1
+        try:
+            embed = discord.Embed(title="Error", description=f"** {error} **", color=0xff00f6)
+            await ctx.send(embed=embed)
+            log.console(f"{error}")
+            # increment general error count per minute -> Does not include unable to send messages to people.
+            ex.cache.errors_per_minute += 1
+        except:
+            pass
 
     @staticmethod
     @ex.client.event
@@ -52,8 +55,15 @@ class Events(commands.Cog):
         if isinstance(error, commands.errors.CommandNotFound):
             pass
         elif isinstance(error, commands.errors.CommandInvokeError):
+            try:
+                if error.original.status == 403:
+                    return
+            except AttributeError:
+                pass
+
             log.console(f"Command Invoke Error -- {error} -- {ctx.command.name}")
             ex.cache.errors_per_minute += 1
+
         elif isinstance(error, commands.errors.CommandOnCooldown):
             await Events.error(ctx, f"You are on cooldown. Try again in {await ex.u_miscellaneous.get_cooldown_time(error.retry_after)}.")
             log.console(f"{error}")

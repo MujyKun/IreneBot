@@ -178,7 +178,8 @@ class Reminder:
         # Use weekday format of server
         weekday = m_time.strftime('%a')
 
-        locale.setlocale(locale.LC_ALL, ex.cache.locale_by_timezone[user_timezone])  # Set to user locale
+        simplified_user_timezone = f"{(ex.cache.locale_by_timezone[user_timezone].replace('-', '_'))}.utf8"
+        locale.setlocale(locale.LC_ALL, simplified_user_timezone)  # Set to user locale
         locale_date = m_time.strftime('%x')
         locale.setlocale(locale.LC_ALL, '')  # Reset locale back to server locale
 

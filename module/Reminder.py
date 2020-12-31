@@ -55,7 +55,8 @@ class Reminder(commands.Cog):
         else:
             try:
                 remind_id, remind_reason, remind_time = reminders[reminder_index-1]
-                remind_time = remind_time.replace(tzinfo=pytz.utc).astimezone(pytz.timezone(user_timezone))
+                if user_timezone:
+                    remind_time = remind_time.replace(tzinfo=pytz.utc).astimezone(pytz.timezone(user_timezone))
                 await ctx.send(f"> {ctx.author.display_name}, I will not remind you to **{remind_reason}**"
                                f" on `{await ex.u_reminder.get_locale_time(remind_time,user_timezone)}`.")
                 await ex.u_reminder.remove_user_reminder(ctx.author.id, remind_id)

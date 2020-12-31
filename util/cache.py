@@ -372,56 +372,64 @@ class Cache:
     @tasks.loop(seconds=0, minutes=1, hours=0, reconnect=True)
     async def send_cache_data_to_data_dog(self):
         """Sends metric information about cache to data dog every minute."""
-        if ex.thread_pool:
-            active_user_reminders = 0
-            for user_id in ex.cache.reminders:
-                reminders = ex.cache.reminders.get(user_id)
-                if reminders:
-                    active_user_reminders += len(reminders)
-            metric_info = {
-                'total_commands_used': ex.cache.total_used,
-                'bias_games': len(ex.cache.bias_games),
-                'guessing_games': len(ex.cache.guessing_games),
-                'patrons': len(ex.cache.patrons),
-                'custom_server_prefixes': len(ex.cache.server_prefixes),
-                'session_commands_used': ex.cache.current_session,
-                'user_notifications': len(ex.cache.user_notifications),
-                'mod_mail': len(ex.cache.mod_mail),
-                'banned_from_bot': len(ex.cache.bot_banned),
-                'logged_servers': len(ex.cache.logged_channels),
-                # server count is based on discord.py guild cache which takes a large amount of time to load fully.
-                # There may be inaccurate data points on a new instance of the bot due to the amount of time it takes.
-                'server_count': len(ex.client.guilds),
-                'welcome_messages': len(ex.cache.welcome_messages),
-                'temp_channels': len(ex.cache.temp_channels),
-                'amount_of_idols': len(ex.cache.idols),
-                'amount_of_groups': len(ex.cache.groups),
-                'channels_restricted': len(ex.cache.restricted_channels),
-                'amount_of_bot_statuses': len(ex.cache.bot_statuses),
-                'commands_per_minute': ex.cache.commands_per_minute,
-                'amount_of_custom_commands': len(ex.cache.custom_commands),
-                'discord_ping': ex.get_ping(),
-                'n_words_per_minute': ex.cache.n_words_per_minute,
-                'bot_api_idol_calls': ex.cache.bot_api_idol_calls,
-                'bot_api_translation_calls': ex.cache.bot_api_translation_calls,
-                'messages_received_per_min': ex.cache.messages_received_per_minute,
-                'errors_per_minute': ex.cache.errors_per_minute,
-                'wolfram_per_minute': ex.cache.wolfram_per_minute,
-                'urban_per_minute': ex.cache.urban_per_minute,
-                'active_user_reminders': active_user_reminders
-            }
+        try:
+            if ex.thread_pool:
+                active_user_reminders = 0
+                for user_id in ex.cache.reminders:
+                    reminders = ex.cache.reminders.get(user_id)
+                    if reminders:
+                        active_user_reminders += len(reminders)
+                metric_info = {
+                    'total_commands_used': ex.cache.total_used,
+                    'bias_games': len(ex.cache.bias_games),
+                    'guessing_games': len(ex.cache.guessing_games),
+                    'patrons': len(ex.cache.patrons),
+                    'custom_server_prefixes': len(ex.cache.server_prefixes),
+                    'session_commands_used': ex.cache.current_session,
+                    'user_notifications': len(ex.cache.user_notifications),
+                    'mod_mail': len(ex.cache.mod_mail),
+                    'banned_from_bot': len(ex.cache.bot_banned),
+                    'logged_servers': len(ex.cache.logged_channels),
+                    # server count is based on discord.py guild cache which takes a large amount of time to load fully.
+                    # There may be inaccurate data points on a new instance of the bot due to the amount of time it takes.
+                    'server_count': len(ex.client.guilds),
+                    'welcome_messages': len(ex.cache.welcome_messages),
+                    'temp_channels': len(ex.cache.temp_channels),
+                    'amount_of_idols': len(ex.cache.idols),
+                    'amount_of_groups': len(ex.cache.groups),
+                    'channels_restricted': len(ex.cache.restricted_channels),
+                    'amount_of_bot_statuses': len(ex.cache.bot_statuses),
+                    'commands_per_minute': ex.cache.commands_per_minute,
+                    'amount_of_custom_commands': len(ex.cache.custom_commands),
+                    'discord_ping': ex.get_ping(),
+                    'n_words_per_minute': ex.cache.n_words_per_minute,
+                    'bot_api_idol_calls': ex.cache.bot_api_idol_calls,
+                    'bot_api_translation_calls': ex.cache.bot_api_translation_calls,
+                    'messages_received_per_min': ex.cache.messages_received_per_minute,
+                    'errors_per_minute': ex.cache.errors_per_minute,
+                    'wolfram_per_minute': ex.cache.wolfram_per_minute,
+                    'urban_per_minute': ex.cache.urban_per_minute,
+                    'active_user_reminders': active_user_reminders
+                }
 
-            # set all per minute metrics to 0 since this is a 60 second loop.
-            ex.cache.n_words_per_minute = 0
-            ex.cache.commands_per_minute = 0
-            ex.cache.bot_api_idol_calls = 0
-            ex.cache.bot_api_translation_calls = 0
-            ex.cache.messages_received_per_minute = 0
-            ex.cache.errors_per_minute = 0
-            ex.cache.wolfram_per_minute = 0
-            ex.cache.urban_per_minute = 0
-            for metric_name in metric_info:
-                metric_value = metric_info.get(metric_name)
-                # add to thread pool to prevent blocking.
-                # noinspection PyUnusedLocal
-                result = (ex.thread_pool.submit(ex.u_data_dog.send_metric, metric_name, metric_value)).result()
+                # set all per minute metrics to 0 since this is a 60 second loop.
+                ex.cache.n_words_per_minute = 0
+                ex.cache.commands_per_minute = 0
+                ex.cache.bot_api_idol_calls = 0
+                ex.cache.bot_api_translation_calls = 0
+                ex.cache.messages_received_per_minute = 0
+                ex.cache.errors_per_minute = 0
+                ex.cache.wolfram_per_minute = 0
+                ex.cache.urban_per_minute = 0
+                for metric_name in metric_info:
+                    try:
+                        metric_value = metric_info.get(metric_name)
+                        # add to thread pool to prevent blocking.
+                        # noinspection PyUnusedLocal
+                        result = (ex.thread_pool.submit(ex.u_data_dog.send_metric, metric_name, metric_value)).result()
+                    except Exception as e:
+                        log.console(e)
+        except Exception as e:
+            # loop appears to stop working after a while and no errors were recognized in log file
+            # adding this try except to see if issue continues.
+            log.console(e)

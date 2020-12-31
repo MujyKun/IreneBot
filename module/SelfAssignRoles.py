@@ -23,7 +23,7 @@ class SelfAssignRoles(commands.Cog):
 
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
-    async def removerole(self, ctx, role_name):
+    async def removerole(self, ctx, *, role_name):
         """Remove a self-assignable role based on the role name given.
         [Format: %removerole <role_name>]"""
         try:

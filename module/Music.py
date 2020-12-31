@@ -87,7 +87,8 @@ class Music(commands.Cog):
             return
         try:
             for voice_client in ex.client.voice_clients:
-                if voice_client.is_connected() and voice_client.channel.members:
+                # members in vc must be equal to 1 to stop playing (includes the bot)
+                if voice_client.is_connected() and voice_client.channel.members == 1:
                     if voice_client.is_playing():
                         try:
                             songs_queued = queued[voice_client.guild.id]

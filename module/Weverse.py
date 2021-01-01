@@ -57,21 +57,20 @@ class Weverse(commands.Cog):
                 return await ctx.send(f"> This channel will no longer receive comments from {community_name}.")
             return await ctx.send(f"> This channel will now receive comments from {community_name}.")
 
-
     # testing with the amount of seconds to avoid duplicates (checks have been put in place).
     @tasks.loop(seconds=30, minutes=0, hours=0, reconnect=True)
     async def weverse_updates(self):
         """Process for checking for Weverse updates and sending to discord channels."""
-        if not ex.weverse_client.cache_loaded or not await ex.weverse_client.check_new_user_notifications():
-            return None
+        if not ex.weverse_client.cache_loaded and not await ex.weverse_client.check_new_user_notifications():
+            return
         user_notifications = ex.weverse_client.user_notifications
         if not user_notifications:
-            return None
+            return
         is_comment = False
         latest_notification = user_notifications[0]
         community_name = latest_notification.community_name or latest_notification.bold_element
         if not community_name:
-            return None
+            return
         channels = await ex.u_weverse.get_weverse_channels(community_name.lower())
         noti_type = ex.weverse_client.determine_notification_type(latest_notification.message)
         embed_title = f"New {community_name} Notification!"
@@ -84,7 +83,7 @@ class Weverse(commands.Cog):
         elif noti_type == 'media':
             embed, message_text = await ex.u_weverse.set_media_embed(latest_notification, embed_title)
         elif noti_type == 'announcement':
-            return None# not keeping track of announcements ATM
+            return None  # not keeping track of announcements ATM
         else:
             return None
         for channel_info in channels:

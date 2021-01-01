@@ -6,6 +6,8 @@ from module import keys
 from Utility import resources as ex
 import time
 import typing
+import json
+import datetime
 
 client = keys.client
 # the amount normal users can use if the guild owner is a super patron.
@@ -158,6 +160,140 @@ class GroupMembers(commands.Cog):
                         await ex.u_group_members.check_idol_post_reactions(photo_msg, message, random_member, api_url)
         except:
             pass
+
+    @commands.command()
+    async def addidol(self, ctx, *, idol_json):
+        """Adds an idol using the syntax from https://irenebot.com/addidol.html
+        [Format: %addidol (json)]"""
+        try:
+            # load string to json
+            idol_json = json.loads(idol_json)
+
+            # set empty strings to NoneType
+            for key in idol_json:
+                if not idol_json.get(key):
+                    idol_json[key] = None
+
+            # create variables for values used more than once or that need to be adjusted.
+            birth_date = idol_json.get("Birth Date")
+            if birth_date:
+                birth_date = (datetime.datetime.strptime(birth_date, "%Y-%m-%d")).date()
+            height = idol_json.get("Height")
+            full_name = idol_json.get("Full Name")
+            stage_name = idol_json.get("Stage Name")
+            if height:
+                height = int(height)
+
+            # for security purposes, do not simplify the structure.
+            await ex.conn.execute("INSERT INTO groupmembers.unregisteredmembers(fullname, stagename, formerfullname, "
+                                  "formerstagename, birthdate, birthcountry, birthcity, gender, description, height, "
+                                  "twitter, youtube, melon, instagram, vlive, spotify, fancafe, facebook, tiktok, zodiac,"
+                                  " thumbnail, banner, bloodtype, tags, groupids, notes) VALUES ($1, $2, $3, $4, $5, $6, "
+                                  "$7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, "
+                                  "$25, $26)", full_name, stage_name, idol_json.get("Former Full Name"),
+                                  idol_json.get("Former Stage Name"), birth_date, idol_json.get("Birth Country"),
+                                  idol_json.get("Birth City"), idol_json.get("Gender"), idol_json.get("Description"),
+                                  height, idol_json.get("Twitter"), idol_json.get("Youtube"),
+                                  idol_json.get("Melon"), idol_json.get("Instagram"), idol_json.get("VLive"),
+                                  idol_json.get("Spotify"), idol_json.get("Fancafe"), idol_json.get("Facebook"),
+                                  idol_json.get("TikTok"), idol_json.get("Zodiac"), idol_json.get("Avatar"),
+                                  idol_json.get("Banner"), idol_json.get("BloodType"), idol_json.get("Tags"),
+                                  idol_json.get("Group IDs"), idol_json.get("Approver Notes"))
+
+            # get the id of the data that was just added to db.
+            query_id = ex.first_result(await ex.conn.fetchrow("SELECT id FROM groupmembers.unregisteredmembers WHERE fullname = $1 AND stagename = $2 ORDER BY id DESC", full_name, stage_name))
+
+            # get the channel to send idol information to.
+            channel = client.get_channel(keys.add_idol_channel_id)
+            # fetch if discord.py cache is not loaded.
+            if not channel:
+                channel = await ex.client.fetch_channel(keys.add_idol_channel_id)
+            title_description = f"""
+==================
+Query ID: {query_id} 
+Requester: {ctx.author.display_name} ({ctx.author.id})
+==================
+"""
+            # Add all the key values to the title description
+            for key in idol_json:
+                title_description += f"\n{key}: {idol_json.get(key)}"
+
+            # send embed to approval/deny channel
+            embed = await ex.create_embed(title="New Unregistered Idol", title_desc=title_description)
+            msg = await channel.send(embed=embed)
+            await msg.add_reaction(keys.check_emoji)
+            await msg.add_reaction(keys.trash_emoji)
+            await ctx.send(f"{ctx.author.display_name}, your request for adding this Idol has been successfully sent."
+                           f"The Idol's query ID is {query_id}.")
+        except Exception as e:
+            log.console(e)
+            await ctx.send(f"Something Went Wrong. You may not understand the following error. Please report it.-> {e}")
+
+    @commands.command()
+    async def addgroup(self, ctx, *, group_json):
+        """Adds a group using the syntax from https://irenebot.com/addgroup.html
+        [Format: %addgroup (json)]"""
+        try:
+            # load string to json
+            group_json = json.loads(group_json)
+
+            # set empty strings to NoneType
+            for key in group_json:
+                if not group_json.get(key):
+                    group_json[key] = None
+
+            # create variables for values used more than once or that need to be adjusted.
+            debut_date = group_json.get("Debut Date")
+            disband_date = group_json.get("Disband Date")
+            if debut_date:
+                debut_date = (datetime.datetime.strptime(debut_date, "%Y-%m-%d")).date()
+            if disband_date:
+                disband_date = (datetime.datetime.strptime(disband_date, "%Y-%m-%d")).date()
+
+            group_name = group_json.get("Group Name")
+
+            # for security purposes, do not simplify the structure.
+            await ex.conn.execute("INSERT INTO groupmembers.unregisteredgroups(groupname, debutdate, disbanddate, "
+                                  "description, twitter, youtube, melon, instagram, vlive, spotify, fancafe, "
+                                  "facebook, tiktok, fandom, company, website, thumbnail, banner, gender, tags, "
+                                  "notes) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, "
+                                  "$16, $17, $18, $19, $20, $21)", group_name, debut_date, disband_date,
+                                  group_json.get("Description"), group_json.get("Twitter"), group_json.get("Youtube"),
+                                  group_json.get("Melon"), group_json.get("Instagram"), group_json.get("VLive"),
+                                  group_json.get("Spotify"), group_json.get("Fancafe"), group_json.get("Facebook"),
+                                  group_json.get("TikTok"), group_json.get("Fandom"), group_json.get("Company"),
+                                  group_json.get("Website"), group_json.get("Avatar"), group_json.get("Banner"),
+                                  group_json.get("Gender"), group_json.get("Tags"), group_json.get("Approver Notes"))
+
+            # get the id of the data that was just added to db.
+            query_id = ex.first_result(await ex.conn.fetchrow(
+                "SELECT id FROM groupmembers.unregisteredgroups WHERE groupname = $1 ORDER BY id DESC", group_name))
+
+            # get the channel to send idol information to.
+            channel = client.get_channel(keys.add_group_channel_id)
+            # fetch if discord.py cache is not loaded.
+            if not channel:
+                channel = await ex.client.fetch_channel(keys.add_group_channel_id)
+            title_description = f"""
+==================
+Query ID: {query_id} 
+Requester: {ctx.author.display_name} ({ctx.author.id})
+==================
+"""
+            # Add all the key values to the title description
+            for key in group_json:
+                title_description += f"\n{key}: {group_json.get(key)}"
+
+            # send embed to approval/deny channel
+            embed = await ex.create_embed(title="New Unregistered Group", title_desc=title_description)
+            msg = await channel.send(embed=embed)
+            await msg.add_reaction(keys.check_emoji)
+            await msg.add_reaction(keys.trash_emoji)
+            await ctx.send(f"{ctx.author.display_name}, your request for adding this Group has been successfully sent."
+                           f" The Group's query ID is {query_id}.")
+        except Exception as e:
+            log.console(e)
+            await ctx.send(f"Something Went Wrong. You may not understand the following error. Please report it.-> {e}")
 
     @commands.command()
     async def card(self, ctx, *, name):

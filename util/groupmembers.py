@@ -175,7 +175,10 @@ class GroupMembers:
             embed.add_field(name="Server Aliases", value=', '.join(obj.local_aliases.get(server_id)), inline=False)
         if group:
             if obj.members:
-                value = f"{' | '.join([(await self.get_member(idol_id)).full_name for idol_id in obj.members])}\n"
+                try:
+                    value = f"{' | '.join([(await self.get_member(idol_id)).full_name for idol_id in obj.members])}\n"
+                except:
+                    value = "This group has an Idol that doesn't exist. Please report it.\n"
                 embed.add_field(name="Members", value=value, inline=False)
 
         else:

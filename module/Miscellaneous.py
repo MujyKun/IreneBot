@@ -17,22 +17,25 @@ class Miscellaneous(commands.Cog):
                 return
             for guild_id, user_id, phrase in ex.cache.user_notifications:
                 message_split = message.content.lower().split(" ")
-                if phrase in message_split and guild_id == message.guild.id and message.author.id != user_id and user_id in [member.id for member in message.channel.members]:
-                    log.console(f"message_notifications 1 - {phrase} to {user_id}")
-                    dm_channel = await ex.get_dm_channel(user_id)
-                    log.console(f"message_notifications 2 - {phrase} to {user_id}")
-                    start_loc = (message.content.lower()).find(phrase)
-                    end_loc = start_loc + len(phrase)
-                    new_message_content = f"{message.content[0:start_loc]}`{message.content[start_loc:end_loc]}`{message.content[end_loc:len(message.content)]}"
-                    title_desc = f"""
-    Phrase: {phrase}
-    Message Author: {message.author}
-    
-    **Message:** {new_message_content}
-    [Click to go to the Message]({message.jump_url})
-    """
-                    embed = await ex.create_embed(title="Phrase Found", color=ex.get_random_color(), title_desc=title_desc)
-                    await dm_channel.send(embed=embed)
+                if phrase not in message_split or guild_id != message.guild.id:
+                    continue
+                if message.author.id == user_id or user_id not in [member.id for member in message.channel.members]:
+                    continue
+                log.console(f"message_notifications 1 - {phrase} to {user_id}")
+                dm_channel = await ex.get_dm_channel(user_id)
+                log.console(f"message_notifications 2 - {phrase} to {user_id}")
+                start_loc = (message.content.lower()).find(phrase)
+                end_loc = start_loc + len(phrase)
+                new_message_content = f"{message.content[0:start_loc]}`{message.content[start_loc:end_loc]}`{message.content[end_loc:len(message.content)]}"
+                title_desc = f"""
+Phrase: {phrase}
+Message Author: {message.author}
+
+**Message:** {new_message_content}
+[Click to go to the Message]({message.jump_url})
+"""
+                embed = await ex.create_embed(title="Phrase Found", color=ex.get_random_color(), title_desc=title_desc)
+                await dm_channel.send(embed=embed)
         except:
             pass
 

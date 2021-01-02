@@ -92,10 +92,10 @@ class Utility:
             return dm_channel
         except discord.errors.HTTPException as e:
             log.console(f"{e} - get_dm_channel 1")
-            return None
+            return
         except Exception as e:
             log.console(f"{e} - get_dm_channel 2")
-            return None
+            return
 
     @staticmethod
     async def check_interaction_enabled(ctx=None, server_id=None, interaction=None):

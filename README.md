@@ -121,7 +121,7 @@ To find out more, look at the `GroupMembers` category.
 #### GuessingGame:  
 | Command          | Description                                                                                                                          | Format                          | Aliases        |
 |------------------|--------------------------------------------------------------------------------------------------------------------------------------|---------------------------------|----------------|
-| guessinggame | Start an idol guessing game in the current channel. The host of the game can use `stop` to end the game or `skip` to skip the current round without affecting the round number. | %guessinggame (Male/Female/All) (# of rounds - default 20) (timeout for each round - default 20s) | gg |
+| guessinggame | Start an idol guessing game in the current channel. The host of the game can use `stop` to end the game or `skip` to skip the current round without affecting the round number. | %guessinggame (Male/Female/All) (easy/medium/hard) (# of rounds - default 20) (timeout for each round - default 20s) | gg |
 | stopgg | Force-end a guessing game if you are a moderator or host of the game. This command is meant for any issues or if a game happens to be stuck. Must be game host or access to manage messages. | %stopgg | ★/Host|
 
 #### Interactions:

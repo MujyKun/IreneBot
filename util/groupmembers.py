@@ -146,6 +146,7 @@ class GroupMembers:
                 description += f"Blood Type: {obj.blood_type}\n"
             if obj.called:
                 description += f"Called: {obj.called} times\n"
+            description += f"GuessingGame Difficulty: {obj.difficulty}\n"
         if obj.twitter:
             description += f"[Twitter](https://twitter.com/{obj.twitter})\n"
         if obj.youtube:

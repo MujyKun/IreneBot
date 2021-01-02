@@ -176,7 +176,7 @@ class GroupMembers:
         if group:
             if obj.members:
                 try:
-                    value = f"{' | '.join([(await self.get_member(idol_id)).full_name for idol_id in obj.members])}\n"
+                    value = f"{' | '.join([f'{(await self.get_member(idol_id)).full_name} ({idol_id})' for idol_id in obj.members])}\n"
                 except:
                     value = "This group has an Idol that doesn't exist. Please report it.\n"
                 embed.add_field(name="Members", value=value, inline=False)
@@ -199,7 +199,7 @@ class GroupMembers:
         for group_id in idol.groups:
             group = await self.get_group(group_id)
             if group:
-                group_names.append(group.name)
+                group_names.append(f"{group.name} ({group_id})")
             else:
                 # make sure the cache exists first before deleting.
                 if ex.cache.groups:
@@ -862,7 +862,7 @@ class GroupMembers:
             # amount of times the idol has been called.
             self.called = 0
             self.tags = kwargs.get('tags')
-            self.difficulty = kwargs.get('difficulty')
+            self.difficulty = kwargs.get('difficulty') or "medium"
             if self.tags:
                 self.tags = self.tags.split(',')
 

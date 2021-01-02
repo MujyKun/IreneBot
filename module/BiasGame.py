@@ -78,7 +78,8 @@ class Game:
         if gender.lower() in ['male', 'm', 'female', 'f']:
             self.gender = gender.lower()[0]
         await self.generate_brackets()
-        await self.create_new_question()
+        while not await self.create_new_question():
+            pass  # returns true when game is done.
         await self.print_winner()
         await self.update_user_wins()
 
@@ -164,11 +165,10 @@ Remaining Idols: {self.number_of_idols_left}
         if len(self.current_bracket_teams) == 1:
             # final round finished.
             self.bracket_winner = self.secondary_bracket_teams[0][0]
-            return
+            return True
 
         self.current_bracket_teams = self.secondary_bracket_teams
         self.secondary_bracket_teams = []
-        await self.create_new_question()
 
     async def end_game(self):
         """End the game"""

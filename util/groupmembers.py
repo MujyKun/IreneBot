@@ -785,11 +785,11 @@ class GroupMembers:
         """The embed for an idol post."""
         if not guessing_game:
             if not group_id:
-                embed = discord.Embed(title=f"{idol.full_name} ({idol.stage_name})", color=ex.get_random_color(),
+                embed = discord.Embed(title=f"{idol.full_name} ({idol.stage_name}) [{idol.id}]", color=ex.get_random_color(),
                                       url=photo_link)
             else:
                 group = await self.get_group(group_id)
-                embed = discord.Embed(title=f"{group.name} ({idol.stage_name})",
+                embed = discord.Embed(title=f"{group.name} ({idol.stage_name}) [{idol.id}]",
                                       color=ex.get_random_color(), url=photo_link)
             patron_msg = f"Please consider becoming a {await ex.get_server_prefix(guild_id)}patreon."
 

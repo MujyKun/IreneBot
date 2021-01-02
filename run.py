@@ -1,5 +1,6 @@
 import module
 import util
+import dbl
 from Utility import resources as ex
 
 
@@ -22,6 +23,7 @@ class Irene:
 
     def run_live_bot(self):
         """Run Production Ver. of the the bot."""
+        module.keys.top_gg = dbl.DBLClient(ex.client, module.keys.top_gg_key, autopost=True)  # set top.gg client
         self.start_up()
         self.start_loops()
         ex.client.run(module.keys.client_token)

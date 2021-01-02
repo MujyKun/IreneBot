@@ -1,7 +1,6 @@
 import asyncpg
 from pypapago import Translator
 from discord.ext import commands
-import dbl
 import discord
 import discordboats
 from datetime import datetime
@@ -122,7 +121,9 @@ tenor_key = os.getenv("TENOR_KEY")
 
 # top.gg api - https://top.gg/api/docs
 top_gg_key = os.getenv("TOP_GG_KEY")
-top_gg = dbl.DBLClient(client, top_gg_key, autopost=True)
+
+# this is set in run.py (ONLY ON THE LIVE/PRODUCTION BOT)
+top_gg = None
 
 
 # discord.boats api - https://docs.discord.boats/

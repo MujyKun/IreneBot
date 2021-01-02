@@ -1,6 +1,7 @@
 from Utility import resources as ex
 from module import logger as log
 import discord
+import asyncio
 
 
 class SelfAssignRoles:
@@ -90,7 +91,7 @@ class SelfAssignRoles:
         if not cache_info or cache_info['channel_id'] != channel_id:
             raise KeyError
 
-        del ex.cache.assignable_roles[server_id]
+        cache_info['channel_id'] = None
         return await ex.conn.execute("DELETE FROM selfassignroles.channels WHERE serverid = $1", server_id)
 
     @staticmethod
@@ -153,7 +154,8 @@ class SelfAssignRoles:
                 await author.add_roles(role, reason="Self-Assignable Role", atomic=True)
                 await message.channel.send(f"> {author.display_name}, You have been given the {role_name} role.",
                                                   delete_after=10)
-        await message.delete()  # remove the message if it exists in a self-assignable role channel
+        if not author.bot:
+            await message.delete()  # remove the message if it exists in a self-assignable role channel
 
 
 

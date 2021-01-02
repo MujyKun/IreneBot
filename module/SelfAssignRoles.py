@@ -11,18 +11,20 @@ class SelfAssignRoles(commands.Cog):
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
     async def setrolechannel(self, ctx, text_channel: discord.TextChannel = None):
-        """Set the channel for self-assignable roles to be used in."""
+        """Set the channel for self-assignable roles to be used in. -> Will automatically delete future messages.
+        Use sendrolemessage before using this command.
+        [Format: %setrolechannel [text channel]"""
         if not text_channel:
             text_channel = ctx.channel
         try:
             await ex.u_self_assign_roles.remove_current_channel_role(text_channel.id, ctx.guild.id)
-            return await ctx.send(f"> Self-Assignable Roles was removed for {text_channel.name}")
+            return await ctx.send(f"> Self-Assignable Roles was removed for {text_channel.name}", delete_after=20)
         except KeyError:
             await ex.u_self_assign_roles.modify_channel_role(text_channel.id, ctx.guild.id)
-            return await ctx.send(f"> Self-Assignable Roles can now only be used in {text_channel.name}")
+            return await ctx.send(f"> Self-Assignable Roles can now only be used in {text_channel.name}", delete_after=20)
         except Exception as e:
             log.console(e)
-            return await ctx.send(self.error_msg)
+            return await ctx.send(self.error_msg, delete_after=20)
 
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)

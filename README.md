@@ -288,7 +288,7 @@ To find out more, look at the `GroupMembers` category.
 | listroles | List all the self-assignable roles in a server. | %listroles |  |
 | removerole | Remove a self-assignable role based on the role name given. | %removerole (custom role name) |  |
 | sendrolemessage | Sends the default role message in the current channel. Is not needed for the roles to work. | %sendrolemessage |  |
-| setrolechannel | Set the channel for self-assignable roles to be used in. | %setrolechannel #text-channel |  |
+| setrolechannel | Set the channel for self-assignable roles to be used in. This will automatically delete future messages. Use sendrolemessage before using this command.| %setrolechannel #text-channel |  |
 
 #### Reminder:
 | Command     | Description                          | Format                 | Aliases           |

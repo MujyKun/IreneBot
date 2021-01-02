@@ -7,9 +7,9 @@ import asyncio
 # noinspection PyPep8
 class GuessingGame(commands.Cog):
     @commands.command(aliases=['gg'])
-    async def guessinggame(self, ctx, gender="all", rounds=20, timeout=20):
+    async def guessinggame(self, ctx, gender="all", difficulty="easy", rounds=20, timeout=20):
         """Start an idol guessing game in the current channel. The host of the game can use `stop`/`end` to end the game or `skip` to skip the current round without affecting the round number.
-        [Format: %guessinggame (Male/Female/All) (# of rounds - default 20) (timeout for each round - default 20s)]"""
+        [Format: %guessinggame (Male/Female/All) (easy/medium/hard) (# of rounds - default 20) (timeout for each round - default 20s)]"""
         if not ctx.guild:
             return await ctx.send("> You are not allowed to play guessing game in DMs.")
         if ex.find_game(ctx.channel, ex.cache.guessing_games):
@@ -21,7 +21,7 @@ class GuessingGame(commands.Cog):
             return await ctx.send("> **ERROR -> The minimum rounds is 1 and the minimum timeout is 3 seconds.**")
         game = Game()
         ex.cache.guessing_games.append(game)
-        await game.start_game(ctx, max_rounds=rounds, timeout=timeout, gender=gender)
+        await game.start_game(ctx, max_rounds=rounds, timeout=timeout, gender=gender, difficulty=difficulty)
         if game in ex.cache.guessing_games:
             ex.cache.guessing_games.remove(game)
 
@@ -50,8 +50,9 @@ class Game:
         self.force_ended = False
         self.idol_post_msg = None
         self.gender = None
+        self.difficulty = None
 
-    async def start_game(self, ctx, max_rounds=20, timeout=20, gender="all"):
+    async def start_game(self, ctx, max_rounds=20, timeout=20, gender="all", difficulty="easy"):
         self.host_ctx = ctx
         self.channel = ctx.channel
         self.host = ctx.author.id
@@ -59,6 +60,8 @@ class Game:
         self.timeout = timeout
         if gender.lower() in ['male', 'm', 'female', 'f']:
             self.gender = gender.lower()[0]
+        if difficulty.lower() in ['easy', 'medium', 'hard']:
+            self.difficulty = difficulty.lower()
         await self.process_game()
 
     async def check_message(self):
@@ -107,6 +110,9 @@ class Game:
             if self.gender:
                 while self.idol.gender != self.gender:
                     self.idol = await ex.u_group_members.get_random_idol()
+            if self.difficulty:
+                while self.idol.difficulty != self.difficulty:
+                    self.idol = await ex.u_group_members.get_random_idol()
             self.group_names = [(await ex.u_group_members.get_group(group_id)).name for group_id in self.idol.groups]
             self.correct_answers = []
             for alias in self.idol.aliases:
@@ -150,4 +156,3 @@ class Game:
         while not await self.create_new_question():
             # the game will only end if True is returned from create_new_question()
             pass
-

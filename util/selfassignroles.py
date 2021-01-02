@@ -82,6 +82,18 @@ class SelfAssignRoles:
         update_cache()
 
     @staticmethod
+    async def remove_current_channel_role(channel_id, server_id):
+        """Remove the self-assignable role channel if the current channel was previously assigned."""
+
+        cache_info = ex.cache.assignable_roles.get(server_id)
+
+        if not cache_info or cache_info['channel_id'] != channel_id:
+            raise KeyError
+
+        del ex.cache.assignable_roles[server_id]
+        return await ex.conn.execute("DELETE FROM selfassignroles.channels WHERE serverid = $1", server_id)
+
+    @staticmethod
     async def get_assignable_server_roles(server_id):
         """Get all the self-assignable roles from a server."""
         results = ex.cache.assignable_roles.get(server_id)

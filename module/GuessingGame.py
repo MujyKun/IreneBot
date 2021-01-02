@@ -4,6 +4,7 @@ from module import keys, logger as log
 import asyncio
 import random
 
+
 # noinspection PyPep8
 class GuessingGame(commands.Cog):
     @commands.command(aliases=['gg'])
@@ -19,17 +20,20 @@ class GuessingGame(commands.Cog):
             return await ctx.send("> **ERROR -> The max rounds is 60 and the max timeout is 60s.**")
         elif rounds < 1 or timeout < 3:
             return await ctx.send("> **ERROR -> The minimum rounds is 1 and the minimum timeout is 3 seconds.**")
-        game = Game()
-        ex.cache.guessing_games.append(game)
-        await game.start_game(ctx, max_rounds=rounds, timeout=timeout, gender=gender, difficulty=difficulty)
-        if game in ex.cache.guessing_games:
-            ex.cache.guessing_games.remove(game)
+        task = asyncio.create_task(self.start_game(ctx, rounds, timeout, gender, difficulty))
 
     @commands.command()
     async def stopgg(self, ctx):
         """Force-end a guessing game if you are a moderator or host of the game. This command is meant for any issues or if a game happens to be stuck.
         [Format: %stopgg]"""
         await ex.stop_game(ctx, ex.cache.guessing_games)
+
+    async def start_game(self, ctx, rounds, timeout, gender, difficulty):
+        game = Game()
+        ex.cache.guessing_games.append(game)
+        await game.start_game(ctx, max_rounds=rounds, timeout=timeout, gender=gender, difficulty=difficulty)
+        if game in ex.cache.guessing_games:
+            ex.cache.guessing_games.remove(game)
 
 
 # noinspection PyBroadException,PyPep8
@@ -118,9 +122,10 @@ class Game:
                 return True  # will properly end the game.
             self.idol = await ex.u_group_members.get_random_idol()
             if not self.gender_forced:
-                self.gender = random.choice['m', 'f']
+                self.gender = random.choice(['m', 'f'])
 
             while self.idol.gender != self.gender and self.idol.difficulty not in self.difficulty:
+                # will result in an infinite loop if there are no idols on easy mode and difficulty is easy mode.
                 self.idol = await ex.u_group_members.get_random_idol()
 
             self.group_names = [(await ex.u_group_members.get_group(group_id)).name for group_id in self.idol.groups]
@@ -132,7 +137,7 @@ class Game:
             log.console(f'{", ".join(self.correct_answers)} - {self.channel.id}')
             self.idol_post_msg, self.photo_link = await ex.u_group_members.idol_post(self.channel, self.idol, user_id=self.host, guessing_game=True, scores=self.players)
             await self.check_message()
-        except:
+        except Exception as e:
             pass
 
     async def display_winners(self):

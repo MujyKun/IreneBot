@@ -15,6 +15,9 @@ class SelfAssignRoles(commands.Cog):
         if not text_channel:
             text_channel = ctx.channel
         try:
+            await ex.u_self_assign_roles.remove_current_channel_role(text_channel.id, ctx.guild.id)
+            return await ctx.send(f"> Self-Assignable Roles was removed for {text_channel.name}")
+        except KeyError:
             await ex.u_self_assign_roles.modify_channel_role(text_channel.id, ctx.guild.id)
             return await ctx.send(f"> Self-Assignable Roles can now only be used in {text_channel.name}")
         except Exception as e:

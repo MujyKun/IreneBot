@@ -79,15 +79,6 @@ To find out more, look at the `GroupMembers` category.
 | stopbg | Force-end a bias game if you are a moderator or host of the game. This command is meant for any issues or if a game happens to be stuck. | %stopbg | ★/Host |
 | listbg | List a user's bias game leaderboards. | %listbg (user) | |
 
-
-#### Cogs: ♥♥♥
-| Command           | Description                                                               | Format                       |
-|-------------------|---------------------------------------------------------------------------|------------------------------|
-| load              | Command which Loads a Module. Remember to use dot path. e.g: cogs.owner   | %load Module.(filename.py)   |
-| reload            | Command which Reloads a Module. Remember to use dot path. e.g: cogs.owner | %reload Module.(filename.py) |
-| unload            | Command which Unloads a Module. Remember to use dot path. e.g: cogs.owner | %unload Module.(filename.py) |
-
-
 #### Currency:
 | Command     | Description                          | Format                 | Aliases           |
 |-------------|--------------------------------------|------------------------|-------------------|

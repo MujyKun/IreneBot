@@ -269,7 +269,8 @@ class GroupMembers:
         """Get all idols from the database."""
         return await ex.conn.fetch("""SELECT id, fullname, stagename, formerfullname, formerstagename, birthdate,
             birthcountry, birthcity, gender, description, height, twitter, youtube, melon, instagram, vlive, spotify,
-            fancafe, facebook, tiktok, zodiac, thumbnail, banner, bloodtype, tags FROM groupmembers.Member ORDER BY id""")
+            fancafe, facebook, tiktok, zodiac, thumbnail, banner, bloodtype, tags, difficulty
+             FROM groupmembers.Member ORDER BY id""")
 
     @staticmethod
     async def get_all_groups():
@@ -861,6 +862,7 @@ class GroupMembers:
             # amount of times the idol has been called.
             self.called = 0
             self.tags = kwargs.get('tags')
+            self.difficulty = kwargs.get('difficulty')
             if self.tags:
                 self.tags = self.tags.split(',')
 

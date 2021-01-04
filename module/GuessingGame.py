@@ -124,7 +124,7 @@ class Game:
             if not self.gender_forced:
                 self.gender = random.choice(['m', 'f'])
 
-            while self.idol.gender != self.gender and self.idol.difficulty not in self.difficulty:
+            while self.idol.gender != self.gender or self.idol.difficulty not in self.difficulty:
                 # will result in an infinite loop if there are no idols on easy mode and difficulty is easy mode.
                 self.idol = await ex.u_group_members.get_random_idol()
 

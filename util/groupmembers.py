@@ -177,7 +177,7 @@ class GroupMembers:
         if group:
             if obj.members:
                 try:
-                    value = f"{' | '.join([f'{(await self.get_member(idol_id)).full_name} ({idol_id})' for idol_id in obj.members])}\n"
+                    value = f"{' | '.join([f'{(await self.get_member(idol_id)).full_name} {(await self.get_member(idol_id)).stage_name} ({idol_id})' for idol_id in obj.members])}\n"
                 except:
                     value = "This group has an Idol that doesn't exist. Please report it.\n"
                 embed.add_field(name="Members", value=value, inline=False)

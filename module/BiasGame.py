@@ -75,8 +75,12 @@ class Game:
         self.channel = ctx.channel
         if (bracket_size % 8 == 0 and 4 <= bracket_size <= 32) or bracket_size == 4:
             self.bracket_size = bracket_size
-        if gender.lower() in ['male', 'm', 'female', 'f']:
-            self.gender = gender.lower()[0]
+
+        if gender.lower() in ex.cache.male_aliases:
+            self.gender = 'm'
+        elif gender.lower() in ex.cache.female_aliases:
+            self.gender = 'f'
+
         await self.generate_brackets()
         await ctx.send(f"> Starting a {self.bracket_size} bracket bias game for "
                        f"`{'male' if self.gender =='m' else 'female' if self.gender=='f' else 'both male and female'}` idols.")

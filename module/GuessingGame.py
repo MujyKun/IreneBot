@@ -59,8 +59,6 @@ class Game:
         self.gender_forced = False
         # difficulty must be in this list in order for it to
         self.difficulty = ['easy', 'medium']  # have default set to medium
-        self.female_aliases = ['girl', 'girls', 'female', 'woman', 'women', 'girlgroup', 'girlgroups', 'f']
-        self.male_aliases = ['male', 'm', 'men', 'boy', 'boys', 'boygroup', 'boygroups']
 
     async def start_game(self, ctx, max_rounds=20, timeout=20, gender="all", difficulty="medium"):
         self.host_ctx = ctx
@@ -68,10 +66,10 @@ class Game:
         self.host = ctx.author.id
         self.max_rounds = max_rounds
         self.timeout = timeout
-        if gender.lower() in self.male_aliases:
+        if gender.lower() in ex.cache.male_aliases:
             self.gender = 'm'
             self.gender_forced = True
-        elif gender.lower() in self.female_aliases:
+        elif gender.lower() in ex.cache.female_aliases:
             self.gender = 'f'
             self.gender_forced = True
         if difficulty.lower() == 'easy':

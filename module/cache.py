@@ -146,6 +146,10 @@ class Cache(commands.Cog):
         with open('locale_by_timezone.json') as json_file:
             self.locale_by_timezone = json.load(json_file)
 
+        # aliases for genders
+        self.female_aliases = ['girl', 'girls', 'female', 'woman', 'women', 'girlgroup', 'girlgroups', 'f']
+        self.male_aliases = ['male', 'm', 'men', 'boy', 'boys', 'boygroup', 'boygroups']
+
         # bracket position for bias game stored due to annoyance when using previous x and y values.
         # counting starts from left to right, bottom to top
         self.stored_bracket_positions = {

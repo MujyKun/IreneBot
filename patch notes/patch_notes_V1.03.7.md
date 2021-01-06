@@ -47,7 +47,7 @@ Utility.py (the brain of Irene) ~3000 lines were refactored into about 17-19 sub
 
 Fixed profile not loading because of timezone.  
 
-Hotfixes:  
+**Hotfixes:**  
 Fixed Reminder Timezones, inability to remove reminders, remove reminders once the message has been sent,
 majority fm commands not being unpacked correctly, user phrases not properly being removed, %say not adjusting to current text channel properly if not specifying one.  
 

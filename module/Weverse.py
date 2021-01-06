@@ -29,12 +29,12 @@ class Weverse(commands.Cog):
                 if not role:
                     await ex.u_weverse.delete_weverse_channel(channel_id, community_name)
                     return await ctx.send(f"> {ctx.author.display_name}, You will no longer receive updates for {community_name}.")
-                else:
-                    # add role to weverse subscription.
-                    await ex.u_weverse.add_weverse_role(channel_id, community_name, role.id)
             for community in ex.weverse_client.communities:
                 if community.name.lower() == community_name:
                     await ex.u_weverse.add_weverse_channel(channel_id, community_name)
+                    # add role to weverse subscription after channel is added to db.
+                    if role:
+                        await ex.u_weverse.add_weverse_role(channel_id, community_name, role.id)
                     return await ctx.send(f"> {ctx.author.display_name}, You will now receive weverse updates for {community.name} in this channel.")
             return await ctx.send(f"> {ctx.author.display_name},I could not find {community_name}. Available choices are:\n{self.available_choices}")
         except Exception as e:

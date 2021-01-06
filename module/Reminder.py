@@ -150,12 +150,12 @@ class Reminder(commands.Cog):
         for user_id in ex.cache.reminders:
             reminders = ex.cache.reminders.get(user_id)
             if not reminders:
-                return
+                continue
             for remind_id, remind_reason, remind_time in reminders:
                 try:
                     current_time = datetime.datetime.now(remind_time.tzinfo)
                     if current_time < remind_time:
-                        return
+                        continue
                     dm_channel = await ex.get_dm_channel(user_id=user_id)
                     if dm_channel:
                         title_desc = f"This is a reminder to **{remind_reason}**."

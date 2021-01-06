@@ -78,6 +78,8 @@ class Game:
         if gender.lower() in ['male', 'm', 'female', 'f']:
             self.gender = gender.lower()[0]
         await self.generate_brackets()
+        await ctx.send(f"> Starting a {self.bracket_size} bracket bias game for "
+                       f"`{'male' if self.gender =='m' else 'female' if self.gender=='f' else 'both male and female'}` idols.")
         while not await self.create_new_question():
             pass  # returns true when game is done.
         await self.print_winner()

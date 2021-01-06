@@ -1,4 +1,6 @@
 import module
+import util
+import dbl
 from Utility import resources as ex
 
 
@@ -9,10 +11,11 @@ class Irene:
 
     def run(self):
         """Start the bot."""
-        ex.initialize_data_dog()  # initialize the class for DataDog metrics
+        self.create_util_objects()  # create sub-classes for Utility
+        ex.u_data_dog.initialize_data_dog()  # initialize the class for DataDog metrics
         # all active blackjack games are also deleted on db start, current session stats refreshed.
         # cache is reset in the on_ready event.
-        ex.set_start_up_connection.start()
+        ex.u_database.set_start_up_connection.start()
         if ex.test_bot:
             self.run_test_bot()
         else:
@@ -20,6 +23,7 @@ class Irene:
 
     def run_live_bot(self):
         """Run Production Ver. of the the bot."""
+        module.keys.top_gg = dbl.DBLClient(ex.client, module.keys.top_gg_key, autopost=True)  # set top.gg client
         self.start_up()
         self.start_loops()
         ex.client.run(module.keys.client_token)
@@ -28,7 +32,7 @@ class Irene:
         """Run Test Ver. of the the bot."""
         self.start_up()
         # background loops are optional with test bot.
-        self.start_loops()
+        self.start_loops(run_weverse=False)
         module.log.console("--TEST BOT--")
         ex.client.run(module.keys.test_client_token)
 
@@ -44,27 +48,31 @@ class Irene:
         # module.log.debug()
 
     @staticmethod
-    def start_loops():
+    def start_loops(run_weverse=True):
         """Start Loops (Optional)"""
         # Start checking for Weverse Updates
-        module.Weverse.Weverse().weverse_updates.start()
+        if run_weverse:
+            module.Weverse.Weverse().weverse_updates.start()
+        # Check for Reminders
+        module.Reminder.Reminder().reminder_loop.start()
         # Start Automatic Youtube Scrape Loop
-        module.Youtube.YoutubeLoop().new_task5.start()
+        ex.cache.main_youtube_instance = module.Youtube.YoutubeLoop()
+        ex.cache.main_youtube_instance.loop_youtube_videos.start()
         # Start Status Change Loop
         module.status.Status().change_bot_status_loop.start()
         # Start Voice Client Loop
         module.Music.Music().check_voice_clients.start()
         # Update Cache Every 12 hours
-        ex.update_cache.start()
+        ex.u_cache.update_cache.start()
         # Start a loop that sends cache information to DataDog.
-        ex.send_cache_data_to_data_dog.start()
+        ex.u_cache.send_cache_data_to_data_dog.start()
         # after intents was pushed in place, d.py cache loaded a lot slower and patrons are not added properly.
         # therefore patron cache must be looped instead.
-        ex.update_patron_cache.start()
+        ex.u_cache.update_patron_cache.start()
         # Send Packets to localhost:5123 to show Irene is alive. This is meant for auto restarting Irene
         # This feature is essential in case of any overload or crashes by external sources.
         # This also avoids having to manually restart Irene.
-        ex.show_irene_alive.start()
+        ex.u_database.show_irene_alive.start()
 
     @staticmethod
     def add_listeners():
@@ -86,11 +94,9 @@ class Irene:
         ex.client.add_cog(module.Twitter.Twitter())
         ex.client.add_cog(module.Currency.Currency())
         ex.client.add_cog(module.BlackJack.BlackJack())
-        ex.client.add_cog(module.Cogs.Cogs())
         ex.client.add_cog(module.Youtube.Youtube())
         ex.client.add_cog(module.GroupMembers.GroupMembers())
         ex.client.add_cog(module.Archive.Archive())
-        ex.client.add_cog(module.BotSites.BotSites())
         ex.client.add_cog(module.Moderator.Moderator())
         ex.client.add_cog(module.Profile.Profile())
         ex.client.add_cog(module.Help.Help())
@@ -98,7 +104,6 @@ class Irene:
         ex.client.add_cog(module.Music.Music())
         ex.client.add_cog(module.BotMod.BotMod())
         ex.client.add_cog(module.events.Events())
-        ex.client.add_cog(module.Testing.Testing())
         ex.client.add_cog(module.LastFM.LastFM())
         ex.client.add_cog(module.Interactions.Interactions())
         ex.client.add_cog(module.Wolfram.Wolfram())
@@ -109,6 +114,30 @@ class Irene:
         ex.client.add_cog(module.Weverse.Weverse())
         ex.client.add_cog(module.SelfAssignRoles.SelfAssignRoles())
         ex.client.add_cog(module.Reminder.Reminder())
+
+    @staticmethod
+    def create_util_objects():
+        """Create SubClass Objects to attach to Utility object for easier management and sharing between siblings.
+        The Utility object serves as a client for Irene and is managed by the following objects"""
+        ex.u_database = util.database.DataBase()
+        ex.u_cache = util.cache.Cache()
+        ex.u_currency = util.currency.Currency()
+        ex.u_miscellaneous = util.miscellaneous.Miscellaneous()
+        ex.u_blackjack = util.blackjack.BlackJack()
+        ex.u_levels = util.levels.Levels()
+        ex.u_group_members = util.groupmembers.GroupMembers()
+        ex.u_logging = util.logging.Logging()
+        ex.u_twitter = util.twitter.Twitter()
+        ex.u_last_fm = util.lastfm.LastFM()
+        ex.u_patreon = util.patreon.Patreon()
+        ex.u_moderator = util.moderator.Moderator()
+        ex.u_custom_commands = util.customcommands.CustomCommands()
+        ex.u_bias_game = util.biasgame.BiasGame()
+        ex.u_data_dog = util.datadog.DataDog
+        ex.u_weverse = util.weverse.Weverse()
+        ex.u_self_assign_roles = util.selfassignroles.SelfAssignRoles()
+        ex.u_reminder = util.reminder.Reminder()
+        ex.u_guessinggame = util.guessinggame.GuessingGame()
 
 
 if __name__ == '__main__':

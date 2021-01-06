@@ -12,6 +12,7 @@ class AutoRestart:
         self.site = None
         self.bot_running = False
 
+    # noinspection PyUnusedLocal
     def check_time(self, loop_on):
         while True:
             if not self.bot_running:
@@ -27,14 +28,16 @@ class AutoRestart:
         os.system("python3 run.py")
         self.bot_running = True
 
-    def start_api(self):
+    @staticmethod
+    def start_api():
         os.system("node API/index.js")
 
-    def start_site(self):
+    @staticmethod
+    def start_site():
         os.system("node irenebot-com/index.js")
 
     def restart_api(self):
-        if self.api is not None:
+        if self.api:
             self.api.terminate()
             os.system("fuser -k 5454/tcp")
         while self.api.is_alive():

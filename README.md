@@ -48,11 +48,10 @@ To find out more, look at the `GroupMembers` category.
 #### BotMod: 😇😇😇  
 | Command           | Description                                                                                           | Format                               | Aliases |
 |-------------------|-------------------------------------------------------------------------------------------------------|--------------------------------------|---------|
-| addgroup         | Adds a group.                                                              | %addgroup (group name)                                                                                                      |                       |
-| addidol         | Adds an idol (Use underscores for spaces).                                                              | %addidol (full name) (stage name) (group id)                                                                                                      |                      |
 | addidoltogroup         | Adds idol to group.                                                              | %addidoltogroup (idol id) (group id)                                                                                                     |                       |
 | addinteraction       | Add a gif/photo to an interaction (ex: slap,kiss,lick,hug)                                   | %addinteraction (interaction) (url,url)               |               |
 | addstatus       | Add a playing status to Irene.                                   | %addstatus (status)               |               |
+| approve       | Approve a query id for an unregistered group or idol. | %approve (query id) ('idol' or 'group') |  ♥  |
 | botban       | Bans a user from Irene.                                   | %botban (user id)               |               |
 | botunban       | UnBans a user from Irene.                                   | %botunban (user id)               |               |
 | botwarn   | Warns a user from Irene's DMs                                   | %botwarn (user id) (reason)               |               |
@@ -80,15 +79,6 @@ To find out more, look at the `GroupMembers` category.
 | stopbg | Force-end a bias game if you are a moderator or host of the game. This command is meant for any issues or if a game happens to be stuck. | %stopbg | ★/Host |
 | listbg | List a user's bias game leaderboards. | %listbg (user) | |
 
-
-#### Cogs: ♥♥♥
-| Command           | Description                                                               | Format                       |
-|-------------------|---------------------------------------------------------------------------|------------------------------|
-| load              | Command which Loads a Module. Remember to use dot path. e.g: cogs.owner   | %load Module.(filename.py)   |
-| reload            | Command which Reloads a Module. Remember to use dot path. e.g: cogs.owner | %reload Module.(filename.py) |
-| unload            | Command which Unloads a Module. Remember to use dot path. e.g: cogs.owner | %unload Module.(filename.py) |
-
-
 #### Currency:
 | Command     | Description                          | Format                 | Aliases           |
 |-------------|--------------------------------------|------------------------|-------------------|
@@ -112,8 +102,10 @@ To find out more, look at the `GroupMembers` category.
 #### GroupMembers:
 | Command          | Description                                                                        | Format                                                                                                         | Aliases                |
 |------------------|------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|------------------------|
+| addidol         | Adds an idol using the syntax from https://irenebot.com/addidol.html | %addidol (json)                                                                                                      |                      |
+| addgroup         | Adds a group using the syntax from https://irenebot.com/addgroup.html | %addgroup (json)                                                                                                      |                       |
 | aliases          | Lists the aliases of idols or groups that have one. Underscores are spaces and commas are to split idol or group names                                        | %aliases (name of idol or group) [page number] ex: %aliases irene,seulgi,red_velvet                                                                                                       |                        |
-| card | Displays an Idol/Group's profile card. | %card (Idol/Group Name) | |
+| card | Displays an Idol/Group's profile card. | %card (Idol/Group Name/ID) | |
 | count            | Shows howmany times an idol has been called.                                       | %count (name)                                                                                                  |                        |
 | countleaderboard | Shows leaderboards for how many times an idol has been called.                     | %clb                                                                                                           | highestcount, cb, clb |
 | countgroup      | Shows how many images of a certain group there are.                               | %countgroup (group)                                                                                          |                        |
@@ -129,7 +121,8 @@ To find out more, look at the `GroupMembers` category.
 #### GuessingGame:  
 | Command          | Description                                                                                                                          | Format                          | Aliases        |
 |------------------|--------------------------------------------------------------------------------------------------------------------------------------|---------------------------------|----------------|
-| guessinggame | Start an idol guessing game in the current channel. The host of the game can use `stop` to end the game or `skip` to skip the current round without affecting the round number. | %guessinggame (Male/Female/All) (# of rounds - default 20) (timeout for each round - default 20s) | gg |
+| guessinggame | Start an idol guessing game in the current channel. The host of the game can use `stop` to end the game or `skip` to skip the current round without affecting the round number. | %guessinggame (Male/Female/All) (easy/medium/hard) (# of rounds - default 20) (timeout for each round - default 20s) | gg |
+| ggleaderboard | Shows global leaderboards for guessing game. | %ggleaderboard (easy/medium/hard) (server/global)| ggl, gglb |
 | stopgg | Force-end a guessing game if you are a moderator or host of the game. This command is meant for any issues or if a game happens to be stuck. Must be game host or access to manage messages. | %stopgg | ★/Host|
 
 #### Interactions:
@@ -161,7 +154,7 @@ To find out more, look at the `GroupMembers` category.
 #### Miscellaneous:
 | Command          | Description                                                    | Format                          | Aliases        |
 |------------------|----------------------------------------------------------------|---------------------------------|----------------|
-| _8ball           | Asks the 8ball a question.                                     | %8ball (Question)               | 8ball,8        |
+| 8ball           | Asks the 8ball a question.                                     | %8ball (Question)               | 8        |
 | addnoti         | Receive a DM whenever a phrase or word is said in the current server. | %addnoti (phrase/word)    |               |
 | addpatreon         | Adds a patreon.                           | %addpatreon (userid,userid,userid)             | ♥              |
 | botinfo       | Get information about the bot.                                   | %botinfo               |               |
@@ -287,4 +280,13 @@ To find out more, look at the `GroupMembers` category.
 | listroles | List all the self-assignable roles in a server. | %listroles |  |
 | removerole | Remove a self-assignable role based on the role name given. | %removerole (custom role name) |  |
 | sendrolemessage | Sends the default role message in the current channel. Is not needed for the roles to work. | %sendrolemessage |  |
-| setrolechannel | Set the channel for self-assignable roles to be used in. | %setrolechannel #text-channel |  |
+| setrolechannel | Set the channel for self-assignable roles to be used in. This will automatically delete future messages. Use sendrolemessage before using this command.| %setrolechannel #text-channel |  |
+
+#### Reminder:
+| Command     | Description                          | Format                 | Aliases           |
+|-------------|--------------------------------------|------------------------|-------------------|
+| gettimezone | Display a user's current timezone and local time. | %gettimezone @user | gettz, time |
+| listreminders | Lists out all of your reminders. | %listreminders | listreminds, reminders, reminds |
+| remindme | Create a reminder to do a task at a certain time. | %remindme to ______ at 9PM or %remindme to ____ in 6hrs 30mins  | remind |
+| removereminder | Remove one of your reminders. | %removereminder (reminder index) | removeremind |
+| settimezone | Set your local timezone with a timezone abbreviation and country code. | %settimezone (timezone name ex: PST) (country code ex: US) | settz |

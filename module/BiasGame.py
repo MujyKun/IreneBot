@@ -1,11 +1,12 @@
 import discord
 from Utility import resources as ex
-from discord.ext import commands, tasks
-from module import keys, logger as log
+from discord.ext import commands
+from module import keys
 import random
 import asyncio
 
 
+# noinspection PyPep8
 class BiasGame(commands.Cog):
     @commands.command(aliases=['bg'])
     async def biasgame(self, ctx, gender="all", bracket_size=8):
@@ -19,6 +20,8 @@ class BiasGame(commands.Cog):
         game = Game()
         ex.cache.bias_games.append(game)
         await game.start_game(ctx, bracket_size=bracket_size, gender=gender.lower())
+
+        # remove game once it's complete
         if game in ex.cache.bias_games:
             ex.cache.bias_games.remove(game)
 
@@ -38,10 +41,8 @@ class BiasGame(commands.Cog):
         if user_wins:
             msg_string = f"**Bias Game Leaderboard for {user.display_name}**:\n"
             counter = 1
-            for user_win in user_wins:
-                idol_id = user_win[0]
-                wins = user_win[1]
-                member = await ex.get_member(idol_id)
+            for idol_id, wins in user_wins:
+                member = await ex.u_group_members.get_member(idol_id)
                 msg_string += f"{counter}) {member.full_name} ({member.stage_name}) -> {wins} Win(s).\n"
                 counter += 1
         else:
@@ -49,6 +50,7 @@ class BiasGame(commands.Cog):
         await ctx.send(msg_string)
 
 
+# noinspection PyBroadException,PyPep8
 class Game:
     def __init__(self):
         self.host_ctx = None  # ctx of the host starting game
@@ -73,10 +75,17 @@ class Game:
         self.channel = ctx.channel
         if (bracket_size % 8 == 0 and 4 <= bracket_size <= 32) or bracket_size == 4:
             self.bracket_size = bracket_size
-        if gender.lower() in ['male', 'm', 'female', 'f']:
-            self.gender = gender.lower()[0]
+
+        if gender.lower() in ex.cache.male_aliases:
+            self.gender = 'm'
+        elif gender.lower() in ex.cache.female_aliases:
+            self.gender = 'f'
+
         await self.generate_brackets()
-        await self.create_new_question()
+        await ctx.send(f"> Starting a {self.bracket_size} bracket bias game for "
+                       f"`{'male' if self.gender =='m' else 'female' if self.gender=='f' else 'both male and female'}` idols.")
+        while not await self.create_new_question():
+            pass  # returns true when game is done.
         await self.print_winner()
         await self.update_user_wins()
 
@@ -111,19 +120,22 @@ class Game:
         random.shuffle(ex.cache.idols)
         first_idol = None
         for idol in ex.cache.idols:
-            if len(self.current_bracket_teams) < self.bracket_size or first_idol:
-                if idol.thumbnail:
-                    check_gender = True
-                    if self.gender:
-                        if idol.gender != self.gender:
-                            check_gender = False
-                    if check_gender:
-                        if first_idol:
-                            self.current_bracket_teams.append([first_idol, idol])
-                            first_idol = None
-                        else:
-                           first_idol = idol
-                        self.original_idols_in_game.append(idol)
+            if not len(self.current_bracket_teams) < self.bracket_size and not first_idol:
+                continue
+            if not idol.thumbnail:
+                continue
+
+            check_gender = True
+            if self.gender:
+                if idol.gender != self.gender:
+                    check_gender = False
+            if check_gender:
+                if first_idol:
+                    self.current_bracket_teams.append([first_idol, idol])
+                    first_idol = None
+                else:
+                    first_idol = idol
+                self.original_idols_in_game.append(idol)
 
     async def create_new_question(self):
         """Generate a new question for the bias game."""
@@ -133,12 +145,12 @@ class Game:
                 first_idol = battle[0]
                 second_idol = battle[1]
                 try:
-                    first_idol_group = (await ex.get_group(random.choice(first_idol.groups))).name
-                except Exception as e:
+                    first_idol_group = (await ex.u_group_members.get_group(random.choice(first_idol.groups))).name
+                except:
                     first_idol_group = first_idol.full_name
                 try:
-                    second_idol_group = (await ex.get_group(random.choice(second_idol.groups))).name
-                except Exception as e:
+                    second_idol_group = (await ex.u_group_members.get_group(random.choice(second_idol.groups))).name
+                except:
                     second_idol_group = second_idol.full_name
 
                 msg_body = f"""
@@ -147,7 +159,7 @@ Remaining Idols: {self.number_of_idols_left}
 {first_idol_group} ({first_idol.stage_name}) **VS** {second_idol_group} ({second_idol.stage_name})
 """
                 display_name = f"{first_idol.stage_name} VS {second_idol.stage_name}.png"
-                file_location = await ex.create_bias_game_image(first_idol.id, second_idol.id)
+                file_location = await ex.u_bias_game.create_bias_game_image(first_idol.id, second_idol.id)
                 image_file = discord.File(fp=file_location, filename=display_name)
                 msg = await self.channel.send(msg_body, file=image_file)
                 await msg.add_reaction(keys.previous_emoji)  # left arrow by default
@@ -159,11 +171,10 @@ Remaining Idols: {self.number_of_idols_left}
         if len(self.current_bracket_teams) == 1:
             # final round finished.
             self.bracket_winner = self.secondary_bracket_teams[0][0]
-            return
+            return True
 
         self.current_bracket_teams = self.secondary_bracket_teams
         self.secondary_bracket_teams = []
-        await self.create_new_question()
 
     async def end_game(self):
         """End the game"""
@@ -172,10 +183,10 @@ Remaining Idols: {self.number_of_idols_left}
 
     async def print_winner(self):
         msg_body = f"> The winner is {self.bracket_winner.stage_name}."
-        file_location = await ex.create_bias_game_bracket(self.all_brackets_together, self.host, self.bracket_winner)
+        file_location = await ex.u_bias_game.create_bias_game_bracket(self.all_brackets_together, self.host, self.bracket_winner)
 
         image_file = discord.File(fp=file_location, filename=f"{self.host}.png")
-        msg = await self.channel.send(msg_body, file=image_file)
+        await self.channel.send(msg_body, file=image_file)
 
     async def update_user_wins(self):
         if self.bracket_winner:

@@ -11,23 +11,29 @@ class SelfAssignRoles(commands.Cog):
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
     async def setrolechannel(self, ctx, text_channel: discord.TextChannel = None):
-        """Set the channel for self-assignable roles to be used in."""
+        """Set the channel for self-assignable roles to be used in. -> Will automatically delete future messages.
+        Use sendrolemessage before using this command.
+        [Format: %setrolechannel [text channel]"""
         if not text_channel:
             text_channel = ctx.channel
         try:
-            await ex.modify_channel_role(text_channel.id, ctx.guild.id)
-            return await ctx.send(f"> Self-Assignable Roles can now only be used in {text_channel.name}")
+            await ex.u_self_assign_roles.remove_current_channel_role(text_channel.id, ctx.guild.id)
+            return await ctx.send(f"> Self-Assignable Roles was removed for {text_channel.name}", delete_after=20)
+        except KeyError:
+            await ex.u_self_assign_roles.modify_channel_role(text_channel.id, ctx.guild.id)
+            return await ctx.send(f"> Self-Assignable Roles can now only be used in {text_channel.name}",
+                                  delete_after=20)
         except Exception as e:
             log.console(e)
-            return await ctx.send(self.error_msg)
+            return await ctx.send(self.error_msg, delete_after=20)
 
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
-    async def removerole(self, ctx, role_name):
+    async def removerole(self, ctx, *, role_name):
         """Remove a self-assignable role based on the role name given.
         [Format: %removerole <role_name>]"""
         try:
-            await ex.remove_self_role(role_name, ctx.guild.id)
+            await ex.u_self_assign_roles.remove_self_role(role_name, ctx.guild.id)
             return await ctx.send(f"> If {role_name} existed as a Self-Assignable role, it was removed.")
         except Exception as e:
             log.console(e)
@@ -39,13 +45,11 @@ class SelfAssignRoles(commands.Cog):
         """List all the self-assignable roles in a server.
         [Format: %listroles]"""
         try:
-            roles = await ex.get_assignable_server_roles(ctx.guild.id)
+            roles = await ex.u_self_assign_roles.get_assignable_server_roles(ctx.guild.id)
             if not roles:
                 return await ctx.send("> You have no Self-Assignable roles in this server.")
             msg_body = ""
-            for role in roles:
-                role_id = role[0]
-                role_name = role[1]
+            for role_id, role_name in roles:
                 msg_body += f"<@&{role_id}> - {role_name}\n"
             embed_title = f"{ctx.guild}'s Self-Assignable Roles"
             embed = await ex.create_embed(title=embed_title, title_desc=msg_body)
@@ -60,9 +64,9 @@ class SelfAssignRoles(commands.Cog):
         """Add a role to be self-assignable.
         [Format: %addrole <role> <role name>]"""
         try:
-            if await ex.check_self_role_exists(role.id, role_name, ctx.guild.id):
+            if await ex.u_self_assign_roles.check_self_role_exists(role.id, role_name, ctx.guild.id):
                 return await ctx.send("> You have an identical role or role name, remove it first.")
-            await ex.add_self_role(role.id, role_name, ctx.guild.id)
+            await ex.u_self_assign_roles.add_self_role(role.id, role_name, ctx.guild.id)
             await ctx.send(f"> Added {role.name} ({role_name}) to Self-Assignable Roles.")
         except Exception as e:
             log.console(e)
@@ -72,7 +76,7 @@ class SelfAssignRoles(commands.Cog):
     @commands.has_guild_permissions(manage_messages=True)
     async def sendrolemessage(self, ctx):
         """Sends the default role message in the current channel. Is not needed for the roles to work."""
-        roles = await ex.get_assignable_server_roles(ctx.guild.id)
+        roles = await ex.u_self_assign_roles.get_assignable_server_roles(ctx.guild.id)
         if not roles:
             return await ctx.send("> This server does not have any self-assignable roles.")
         role_names = [f"`{role[1]}`" for role in roles]

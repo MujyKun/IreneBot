@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AddGroup</title>
+</head>
+<body style="background-color: darkgrey;">
+    <form action="https://api.irenebot.com/jsonifyform" method="POST">
+        <label for="gname">Group Name [English]:</label><br>
+        <input type="text" id="gname" name="Group Name" placeholder="ex: Red Velvet" required><br>
+
+        <label for="debutdate">Debut Date:</label><br>
+        <input type="date" id="debutdate" name="Debut Date" required><br>
+
+        <label for="disbanddate">Disband Date:</label><br>
+        <input type="date" id="disbanddate" name="Disband Date"><br>
+
+        <label for="gender">Gender:</label><br>
+        <input type="radio" id="gender" name="Gender" value="m" required>Male<br>
+        <input type="radio" id="gender" name="Gender" value="f" required>Female<br>
+        <input type="radio" id="gender" name="Gender" value="mixed" required>Mixed<br>
+
+        <label for="description">Description:</label><br>
+        <textarea id="description" name="Description" cols="50" rows="5"></textarea><br>
+        
+        <label for="Fandom">Fandom:</label><br>
+        <input type="text" id="Fandom" name="Fandom" placeholder="ex: ONCE"><br>
+
+        <label for="Company">Company:</label><br>
+        <input type="text" id="Company" name="Company" placeholder="ex: SM Entertainment"><br>
+
+        <label for="Website">Custom Website:</label><br>
+        <input type="text" id="Website" name="Website" placeholder="ex: http://got7.jype.com/"><br>
+
+        <label for="twitter">Twitter:</label><br>
+        <input type="text" id="twitter" name="Twitter" placeholder="ex: b_hundred_hyun"><br>
+        
+        <label for="youtube">Youtube:</label><br>
+        <input type="text" id="youtube" name="Youtube" placeholder="ex: UCoYjlElfo5RAV8ABkU0GtBA"><br>
+        
+        <label for="melon">Melon:</label><br>
+        <input type="text" id="melon" name="Melon" placeholder="ex: 1229429"><br>
+        
+        <label for="instagram">Instagram:</label><br>
+        <input type="text" id="instagram" name="Instagram" placeholder="ex: zhou_jieqiong1216"><br>
+        
+        <label for="vlive">VLive:</label><br>
+        <input type="text" id="vlive" name="VLive" placeholder="ex: D7A4F1"><br>
+        
+        <label for="spotify">Spotify Artist ID:</label><br>
+        <input type="text" id="spotify" name="Spotify" placeholder="ex: 0ghlgldX5Dd6720Q3qFyQB"><br>
+        
+        <label for="fancafe">Fancafe:</label><br>
+        <input type="text" id="fancafe" name="Fancafe" placeholder="EVERGLOW"><br>
+        
+        <label for="facebook">Facebook:</label><br>
+        <input type="text" id="facebook" name="Facebook" placeholder="ex: EXIDOfficial"><br>
+        
+        <label for="tiktok">Tiktok:</label><br>
+        <input type="text" id="tiktok" name="TikTok" placeholder="ex: @bp_tiktok"><br>
+        
+        <label for="avatar">Avatar:</label><br>
+        <textarea id="avatar" name="Avatar" cols="140" rows="1" placeholder="ex: https://static.wikia.nocookie.net/kpop/images/c/c9/Red_Velvet_Irene_The_ReVe_Festival_Day_2_concept_photo_2.png/revision/latest/" required></textarea><br>
+
+        <label for="banner">Banner:</label><br>
+        <textarea id="banner" name="Banner" cols="140" rows="1" placeholder="ex: https://kprofiles.com/wp-content/uploads/2016/05/Wonder-Girls-Yeeun.jpg" required></textarea><br>
+
+        <label for="tags">Tags [If unsure, just put kpop, separate by commas]:</label><br>
+        <input type="text" id="tags" name="Tags" value="kpop"><br>
+
+        <label for="notes">Notes:</label><br>
+        <textarea id="notes" name="Approver Notes" cols="50" rows="5" placeholder="Any notes you have for the person reviewing this."></textarea><br>
+        
+        <br>
+        <strong>After clicking submit, copy the JSON you see on the screen and paste it on discord under the command %addgroup.</strong><br>
+        <input type="submit" value="Submit">
+      </form> 
+      
+
+</body>
+</html>

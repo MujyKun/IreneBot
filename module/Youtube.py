@@ -5,6 +5,7 @@ from module import logger as log
 from Utility import resources as ex
 
 
+# noinspection PyBroadException,PyPep8
 class Youtube(commands.Cog):
     def __init__(self):
         self.current_yt_loop_instance = None
@@ -41,9 +42,11 @@ class Youtube(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def stoploop(self, ctx):
-        """Stops scraping youtube videos [Format: %stoploop]"""
-        if self.current_yt_loop_instance is not None:
-            self.current_yt_loop_instance.new_task5.stop()
+        """Stops scraping youtube videos (Including main loop from start up)[Format: %stoploop]"""
+        if ex.cache.main_youtube_instance:
+            ex.cache.main_youtube_instance.loop_youtube_videos.stop()
+        if self.current_yt_loop_instance:
+            self.current_yt_loop_instance.loop_youtube_videos.stop()
             self.current_yt_loop_instance = None
             return await ctx.send("> **The loop was stopped.**")
         return await ctx.send("> **There is no new loop currently running.**")
@@ -58,16 +61,14 @@ class Youtube(commands.Cog):
                 if seconds > 0:
                     await ctx.send(f"> Starting loop in {seconds} seconds.")
                 await asyncio.sleep(seconds)
-                self.current_yt_loop_instance.new_task5.start()
+                self.current_yt_loop_instance.loop_youtube_videos.start()
                 await ctx.send("> **Loop started.**")
         except:
             await ctx.send("> **A loop is already running.**")
 
 
+# noinspection PyBroadException,PyPep8
 class YoutubeLoop:
-    def __init__(self):
-        self.first_loop = True
-
     @staticmethod
     async def send_channel(channel_id, data):
         try:
@@ -77,40 +78,32 @@ class YoutubeLoop:
             log.console(f"{e} - Failed to send data to {channel_id}")
 
     @staticmethod
-    async def scrape_videos(check=True):
-        try:
-            links = await ex.conn.fetch("SELECT link, channelid FROM youtube.links")
-            check = True
-        except Exception as e:
-            pass
-        if check:
+    async def scrape_videos():
+        links = await ex.conn.fetch("SELECT link, channelid FROM youtube.links")
+        for url, channel_id in links:
             try:
-                for link in links:
-                    link_id = ex.first_result(
-                        await ex.conn.fetchrow("SELECT id FROM youtube.links WHERE link = $1", link[0]))
-                    async with ex.session.get(link[0]) as r:
-                        if r.status == 200:
-                            page_html = await r.text()
-                            start_pos = page_html.find("viewCount") + 14
-                            end_loc = start_pos
-                            while page_html[end_loc] != '\\':
-                                end_loc += 1
-                            view_count = f"{int(page_html[start_pos:end_loc]):,} views"
-                            current_date = datetime.now()
-                            await ex.conn.execute("INSERT INTO youtube.views(linkid, views, date) VALUES ($1,$2,$3)",
-                                                  link_id, view_count, str(current_date))
-                            await YoutubeLoop.send_channel(link[1],
-                                                    f"> **UPDATE FOR <{link[0]}>: {view_count} -- {current_date}**")
-                log.console("Updated Video Views Tracker")
+                link_id = ex.first_result(
+                    await ex.conn.fetchrow("SELECT id FROM youtube.links WHERE link = $1", url))
+                async with ex.session.get(url) as r:
+                    if r.status != 200:
+                        continue
+                    page_html = await r.text()
+                    start_pos = page_html.find("viewCount") + 14
+                    end_loc = start_pos
+                    while page_html[end_loc] != '\\':
+                        end_loc += 1
+                    view_count = f"{int(page_html[start_pos:end_loc]):,} views"
+                    current_date = datetime.now()
+                    await ex.conn.execute("INSERT INTO youtube.views(linkid, views, date) VALUES ($1,$2,$3)",
+                                          link_id, view_count, str(current_date))
+                    await YoutubeLoop.send_channel(channel_id,
+                                                   f"> **UPDATE FOR <{url}>: {view_count} -- {current_date}**")
             except Exception as e:
                 log.console(e)
+        log.console("Updated Video Views Tracker")
 
     @tasks.loop(seconds=0, minutes=30, hours=0, reconnect=True)
-    async def new_task5(self):
+    async def loop_youtube_videos(self):
         if ex.client.loop.is_running():
-            if self.first_loop:
-                await asyncio.sleep(10)  # sleeping to stabilize connection to DB
-                self.first_loop = False
-            check = False
-            await self.scrape_videos(check)
-
+            if ex.conn:  # make sure a connection to the db exists.
+                await self.scrape_videos()

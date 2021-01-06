@@ -1,7 +1,6 @@
 import asyncpg
 from pypapago import Translator
 from discord.ext import commands
-import dbl
 import discord
 import discordboats
 from datetime import datetime
@@ -12,9 +11,11 @@ import ksoftapi
 
 
 def make_int(var):
-    if len(var) != 0:
-        var = int(var)
-    return var
+    # noinspection PyBroadException,PyPep8
+    try:
+        return int(var)
+    except:
+        return None
 
 
 load_dotenv()  # Adds .env to memory
@@ -26,7 +27,12 @@ test_client_token = os.getenv("TEST_BOT_TOKEN")
 bot_name = None  # this is set in the on_ready event
 bot_id = make_int(os.getenv("BOT_ID"))
 owner_id = make_int(os.getenv("OWNER_ID"))
-mods_list_split = (os.getenv("MODS_LIST")).split(',')
+# noinspection PyBroadException
+try:
+    mods_list_split = (os.getenv("MODS_LIST")).split(',')
+except Exception as e:
+    mods_list_split = None
+
 mods_list = []
 for mod in mods_list_split:
     mods_list.append(int(mod))
@@ -39,8 +45,11 @@ dc_app_test_channel_id = make_int(os.getenv("DC_APP_TEST_CHANNEL_ID"))
 report_channel_id = make_int(os.getenv("REPORT_CHANNEL_ID"))
 suggest_channel_id = make_int(os.getenv("SUGGEST_CHANNEL_ID"))
 dead_image_channel_id = make_int(os.getenv("DEAD_IMAGE_CHANNEL_ID"))
+add_idol_channel_id = make_int(os.getenv("ADD_IDOL_CHANNEL_ID"))
+add_group_channel_id = make_int(os.getenv("ADD_GROUP_CHANNEL_ID"))
 idol_post_send_limit = make_int(os.getenv("IDOL_POST_LIMIT"))
 idol_no_vote_send_limit = make_int(os.getenv("IDOL_NO_VOTE_LIMIT"))  # amount of votes that can be sent without voting.
+reminder_limit = make_int(os.getenv("REMINDER_LIMIT"))
 
 interaction_list = [
     'slap',
@@ -112,7 +121,9 @@ tenor_key = os.getenv("TENOR_KEY")
 
 # top.gg api - https://top.gg/api/docs
 top_gg_key = os.getenv("TOP_GG_KEY")
-top_gg = dbl.DBLClient(client, top_gg_key, autopost=True)
+
+# this is set in run.py (ONLY ON THE LIVE/PRODUCTION BOT)
+top_gg = None
 
 
 # discord.boats api - https://docs.discord.boats/

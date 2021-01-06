@@ -5,6 +5,7 @@ import xmltodict
 import urllib.parse
 
 
+# noinspection PyBroadException,PyPep8
 class Wolfram(commands.Cog):
     def __init__(self):
         self.division_by_zero = "It is not possible to divide by zero."
@@ -31,40 +32,38 @@ class Wolfram(commands.Cog):
         [Format: %w (query)]"""
         async with ctx.typing():
             result = self.evalute_math(query)
-            if not result:
-                if await ex.check_if_patreon(ctx.author.id):
-                    query = urllib.parse.quote(query)
-                    query_link = f"http://api.wolframalpha.com/v2/query?input={query}&appid={wolfram_app_id}"
-                    async with ex.session.get(query_link) as r:
-                        ex.cache.wolfram_per_minute += 1
-                        xml_content = await r.content.read()
-                        dict_content = (xmltodict.parse(xml_content)).get('queryresult')
-                        results = []
-                        pods = dict_content.get('pod')
-                        if pods:
+            if result:
+                return await ctx.send(result)
+            if not await ex.u_patreon.check_if_patreon(ctx.author.id):
+                return await ctx.send(self.patreon_msg)
+            query = urllib.parse.quote(query)
+            query_link = f"http://api.wolframalpha.com/v2/query?input={query}&appid={wolfram_app_id}"
+            async with ex.session.get(query_link) as r:
+                ex.cache.wolfram_per_minute += 1
+                xml_content = await r.content.read()
+                dict_content = (xmltodict.parse(xml_content)).get('queryresult')
+                results = []
+                pods = dict_content.get('pod')
+                if pods:
+                    # we need to iterate through the pods, so put it in a list if there is only one.
+                    if len(pods) == 1:  # do not shorten, has to be exactly 1
+                        pods = [pods]
+                    for pod in pods:
+                        try:
+                            sub_pods = pod.get('subpod')
+                            if not sub_pods:
+                                continue
                             # we need to iterate through the pods, so put it in a list if there is only one.
-                            if len(pods) == 1:
-                                pods = [pods]
-                            for pod in pods:
-                                try:
-                                    sub_pods = pod.get('subpod')
-                                    if sub_pods:
-                                        # we need to iterate through the pods, so put it in a list if there is only one.
-                                        if pod.get('@numsubpods') == '1':
-                                            sub_pods = [sub_pods]
-                                        for sub_pod in sub_pods:
-                                            image = sub_pod.get('img')
-                                            sub_pod_result = image.get('@alt')
-                                            if pod.get('@primary'):
-                                                sub_pod_result = f"**{sub_pod_result}**"
-                                            results.append(sub_pod_result)
-                                except Exception as e:
-                                    pass
-                        if len(results) == 0:
-                            return await ctx.send(f"> **{ctx.author.display_name}, I could not find an answer to that.**")
-                        await ctx.send("\n".join(results))
-
-                else:
-                    return await ctx.send(self.patreon_msg)
-            else:
-                await ctx.send(result)
+                            if pod.get('@numsubpods') == '1':
+                                sub_pods = [sub_pods]
+                            for sub_pod in sub_pods:
+                                image = sub_pod.get('img')
+                                sub_pod_result = image.get('@alt')
+                                if pod.get('@primary'):
+                                    sub_pod_result = f"**{sub_pod_result}**"
+                                results.append(sub_pod_result)
+                        except:
+                            pass
+                if not results:
+                    return await ctx.send(f"> **{ctx.author.display_name}, I could not find an answer to that.**")
+                return await ctx.send("\n".join(results))

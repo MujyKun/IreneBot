@@ -6,10 +6,8 @@ from module.keys import bot_id
 from Utility import resources as ex
 
 
+# noinspection PyPep8
 class BlackJack(commands.Cog):
-    def __init__(self):
-        pass
-
     @commands.command(aliases=['bj'])
     async def blackjack(self, ctx, amount="0", versus="player"):
         """Start a game of BlackJack [Format: %blackjack (amount)] [Aliases: bj]"""
@@ -17,18 +15,17 @@ class BlackJack(commands.Cog):
             amount = ex.remove_commas(amount)
             user_id = ctx.author.id
             if versus != "bot":
-                if await ex.process_bj_game(ctx, amount, user_id):
-                    await ex.add_bj_game(user_id, amount, ctx, "player")
+                if await ex.u_blackjack.process_bj_game(ctx, amount, user_id):
+                    await ex.u_blackjack.add_bj_game(user_id, amount, ctx, "player")
             else:
-                if await ex.process_bj_game(ctx, amount, user_id):
-                    await ex.add_bj_game(user_id, amount, ctx, "bot")
-                    game_id = await ex.get_game_by_player(user_id)
-                    fake_bot_id = int(f"{ex.get_int_index(bot_id, 9)}{randint(1,999999999)}")
-                    await ex.add_player_two(game_id, fake_bot_id, amount)
-                    await ex.start_game(game_id)
+                if await ex.u_blackjack.process_bj_game(ctx, amount, user_id):
+                    await ex.u_blackjack.add_bj_game(user_id, amount, ctx, "bot")
+                    game_id = await ex.u_blackjack.get_game_by_player(user_id)
+                    fake_bot_id = int(f"{ex.u_miscellaneous.get_int_index(bot_id, 9)}{randint(1,999999999)}")
+                    await ex.u_blackjack.add_player_two(game_id, fake_bot_id, amount)
+                    await ex.u_blackjack.start_game(game_id)
         except Exception as e:
             log.console(e)
-            pass
 
     @commands.command(aliases=['jg'])
     async def joingame(self, ctx, game_id=0, amount="0"):
@@ -36,14 +33,14 @@ class BlackJack(commands.Cog):
         try:
             amount = ex.remove_commas(amount)
             user_id = ctx.author.id
-            if await ex.process_bj_game(ctx, amount, user_id):
-                game = await ex.get_game(game_id)
+            if await ex.u_blackjack.process_bj_game(ctx, amount, user_id):
+                game = await ex.u_blackjack.get_game(game_id)
                 if game is None:
                     await ctx.send(f"> **{ctx.author}, {game_id} is not a valid game.**")
                 else:
                     if game[5] == ctx.channel.id:  # Did not use already existing function due to incompatibility.
-                        await ex.add_player_two(game_id, user_id, amount)
-                        await ex.start_game(game_id)
+                        await ex.u_blackjack.add_player_two(game_id, user_id, amount)
+                        await ex.u_blackjack.start_game(game_id)
                     else:
                         await ctx.send(f"> **{ctx.author}, that game ({game_id}) is not available in this text channel.**")
         except Exception as e:
@@ -53,11 +50,11 @@ class BlackJack(commands.Cog):
     async def endgame(self, ctx):
         """End your current game [Format: %endgame] [Aliases: eg]"""
         try:
-            game_id = await ex.get_game_by_player(ctx.author.id)
+            game_id = await ex.u_blackjack.get_game_by_player(ctx.author.id)
             if game_id is None:
                 await ctx.send(f"> **{ctx.author}, you are not in a game.**")
             else:
-                await ex.delete_game(game_id)
+                await ex.u_blackjack.delete_game(game_id)
                 await ctx.send(f"> **{ctx.author}, your game has been deleted.**")
         except Exception as e:
             log.console(e)
@@ -67,35 +64,35 @@ class BlackJack(commands.Cog):
     async def addcards(self, ctx):
         """Fill The CardValues Table with Cards [Format: %addcards]"""
         await ex.conn.execute("DELETE FROM blackjack.cards")
-        suitName = ("Hearts", "Diamonds", "Spades", "Clubs")
-        rankName = ("Ace", "Two", "Three", "Four", "Five", "Six", "Seven",
+        suit_names = ("Hearts", "Diamonds", "Spades", "Clubs")
+        rank_names = ("Ace", "Two", "Three", "Four", "Five", "Six", "Seven",
                     "Eight", "Nine", "Ten", "Jack", "Queen", "King")
-        cardvalues = [11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11, 2, 3,
+        card_values = [11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11, 2, 3,
                       4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
         cards = []
-        for suit in suitName[0:4]:
-            for rank in rankName[0:13]:
+        for suit in suit_names[0:4]:
+            for rank in rank_names[0:13]:
                 cards += [("{} of {}".format(rank, suit))]
-        countx = -1
+        count_x = -1
         for card in cards:
-            countx += 1
-            await ex.conn.execute("INSERT INTO blackjack.cards (id, name, value) VALUES ($3, $1, $2)", card, cardvalues[countx], countx+1)
+            count_x += 1
+            await ex.conn.execute("INSERT INTO blackjack.cards (id, name, value) VALUES ($3, $1, $2)", card, card_values[count_x], count_x+1)
         await ctx.send("> **All cards have been added into the table.**", delete_after=40)
 
     @commands.command()
     async def hit(self, ctx):
         """Pick A Card [Format: %hit]"""
         try:
-            game_id = await ex.get_game_by_player(ctx.author.id)
-            if game_id is None:
+            game_id = await ex.u_blackjack.get_game_by_player(ctx.author.id)
+            if not game_id:
                 await ctx.send(f"> **{ctx.author}, you are not in a game.**")
             else:
-                if await ex.compare_channels(ctx.author.id, ctx.channel):
-                    game = await ex.get_game(game_id)
-                    if ex.check_if_bot(game[2]):
-                        if await ex.get_player_total(game[2]) < 16:
-                            await ex.add_card(game[2])
-                    await ex.add_card(ctx.author.id)
+                if await ex.u_blackjack.compare_channels(ctx.author.id, ctx.channel):
+                    game = await ex.u_blackjack.get_game(game_id)
+                    if ex.u_blackjack.check_if_bot(game[2]):
+                        if await ex.u_blackjack.get_player_total(game[2]) < 16:
+                            await ex.u_blackjack.add_card(game[2])
+                    await ex.u_blackjack.add_card(ctx.author.id)
         except Exception as e:
             log.console(e)
 
@@ -105,28 +102,28 @@ class BlackJack(commands.Cog):
         try:
             check = False
             user_id = ctx.author.id
-            game_id = await ex.get_game_by_player(user_id)
+            game_id = await ex.u_blackjack.get_game_by_player(user_id)
             if game_id is None:
                 await ctx.send(f"> **{ctx.author}, you are not in a game.**")
             else:
-                if await ex.compare_channels(user_id, ctx.channel):
+                if await ex.u_blackjack.compare_channels(user_id, ctx.channel):
                     # Do not inform other users that the player already stood by busting.
                     # Instead, just send the same message that they are standing every time this command is called.
-                    await ex.set_player_stand(user_id)
-                    game = await ex.get_game(game_id)
+                    await ex.u_blackjack.set_player_stand(user_id)
+                    game = await ex.u_blackjack.get_game(game_id)
 
-                    if ex.check_if_bot(game[2]):
+                    if ex.u_blackjack.check_if_bot(game[2]):
                         check = True
-                        await ex.finish_game(game_id, ctx.channel)
+                        await ex.u_blackjack.finish_game(game_id, ctx.channel)
 
                     if not check:
-                        total_score = str(await ex.get_player_total(user_id))
+                        total_score = str(await ex.u_blackjack.get_player_total(user_id))
                         if len(total_score) == 1:
                             total_score = '0' + total_score  # this is to prevent being able to detect the number of digits by the spoiler
-                        if not ex.check_if_bot(game[2]):
+                        if not ex.u_blackjack.check_if_bot(game[2]):
                             await ctx.send(f"> **{ctx.author} finalized their deck with ||{total_score}|| points.**")
-                        if await ex.check_game_over(game_id):
-                            await ex.finish_game(game_id, ctx.channel)
+                        if await ex.u_blackjack.check_game_over(game_id):
+                            await ex.u_blackjack.finish_game(game_id, ctx.channel)
         except Exception as e:
             log.console(e)
 
@@ -152,5 +149,6 @@ class BlackJack(commands.Cog):
         embed = discord.Embed(title="BlackJack Rules", description=msg)
         embed = await ex.set_embed_author_and_footer(embed, f"{server_prefix}help BlackJack for the available commands.")
         await ctx.send(embed=embed)
+
 
 

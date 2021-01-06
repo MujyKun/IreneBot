@@ -1,11 +1,11 @@
 import discord
 from discord.ext import commands
-from module import keys, events, logger as log
+from module import events, logger as log
 from Utility import resources as ex
 import typing
-client = keys.client
 
 
+# noinspection PyBroadException,PyPep8
 class LastFM(commands.Cog):
     def __init__(self):
         self.user_not_found = "That user was not found. Refer to `setfm` to link an account."
@@ -17,17 +17,15 @@ class LastFM(commands.Cog):
         image_url = False
         album_name = False
         list_of_tracks = response['recenttracks']['track']
-        counter = 0
         tracks_and_titles = []
-        for track in list_of_tracks:
-            counter += 1
-            if counter <= limit:
-                title = f"**#{counter} **"
+        for counter, track in enumerate(list_of_tracks):
+            if counter + 1 <= limit:
+                title = f"**#{counter + 1} **"
                 try:
                     date = track['date']['#text']
                     album_name = track['album']['#text']
                     image_url = (track['image'][2])['#text']
-                except Exception as e:
+                except:
                     date = "Currently Playing"
                 main_desc = f"""
                 **[{track['name']} by {track['artist']['#text']}]({track['url']})**
@@ -43,10 +41,13 @@ class LastFM(commands.Cog):
         """Create and return an embed that matches the format for FM tracks and artists."""
         embed = await ex.create_embed(title=title, color=ex.get_random_color())
         for info in stats_info:
+            # DO NOT SHORTEN FOR LOOP -> stats_info may contain less/more values to unpack than needed.
+            name = info[0]
+            value = info[1]
             if not individual:
-                embed.add_field(name=info[0], value=info[1], inline=inline)
+                embed.add_field(name=name, value=value, inline=inline)
             else:
-                embed.description = info[1]
+                embed.description = value
         return embed
 
     async def set_user(self, ctx, org_user, time_period=None):
@@ -54,19 +55,19 @@ class LastFM(commands.Cog):
         # this condition is set in place to make the parameters reversible
         if type(time_period) is discord.User:
             org_user = time_period
-        if time_period is None:
+        if not time_period:
             if self.set_period(None, org_user) != "overall":
                 org_user = None
-        if org_user is None:
-            user = await ex.get_fm_username(ctx.author.id)
+        if not org_user:
+            user = await ex.u_last_fm.get_fm_username(ctx.author.id)
         elif type(org_user) is str:
             return org_user
         elif type(org_user) is discord.User:
-            user = await ex.get_fm_username(org_user.id)
-            if user is None:
+            user = await ex.u_last_fm.get_fm_username(org_user.id)
+            if not user:
                 user = org_user.name
         else:
-            return None
+            return
         return user
 
     @staticmethod
@@ -75,7 +76,7 @@ class LastFM(commands.Cog):
         # this condition is set in place to make the parameters reversible
         if type(time_period) is discord.User:
             time_period = user
-        if time_period is None:
+        if not time_period:
             time_period = user
         weeks = ["7day", "7days", "week", "weekly"]
         month = ["1month", "4weeks", "4week", "month", "mo"]
@@ -101,28 +102,28 @@ class LastFM(commands.Cog):
         [Format: %fm @user]."""
         try:
             user = await self.set_user(ctx, user)
-            if user is not None:
-                response = await ex.get_fm_response('user.getinfo', user)
-                user_info = response['user']
-                title_desc = f"""Age: {user_info['age']}
-
-                Country: {user_info['country']}
-
-                Gender: {user_info['gender']}
-
-                Name: {user_info['name']}
-
-                Total PlayCount: {user_info['playcount']}
-
-                Playlists: {user_info['playlists']}
-
-                URL: {user_info['url']}                
-                """
-                title = f"{user}'s LastFM Account Info"
-                embed = await ex.create_embed(title=title, color=ex.get_random_color(), title_desc=title_desc)
-                await ctx.send(embed=embed)
-            else:
+            if not user:
                 await events.Events.error(ctx, self.user_does_not_exist)
+            response = await ex.u_last_fm.get_fm_response('user.getinfo', user)
+            user_info = response['user']
+            title_desc = f"""Age: {user_info['age']}
+
+            Country: {user_info['country']}
+
+            Gender: {user_info['gender']}
+
+            Name: {user_info['name']}
+
+            Total PlayCount: {user_info['playcount']}
+
+            Playlists: {user_info['playlists']}
+
+            URL: {user_info['url']}                
+            """
+            title = f"{user}'s LastFM Account Info"
+            embed = await ex.create_embed(title=title, color=ex.get_random_color(), title_desc=title_desc)
+            await ctx.send(embed=embed)
+
         except KeyError:
             await events.Events.error(ctx, self.user_not_found)
         except Exception as e:
@@ -134,8 +135,8 @@ class LastFM(commands.Cog):
         """Attach a Last FM username to your Discord Account.
         [Format: %setfm username]."""
         try:
-            response = await ex.set_fm_username(ctx.author.id, username)
-            if response is True:
+            response = await ex.u_last_fm.set_fm_username(ctx.author.id, username)  # can be an Exception or True
+            if response:
                 await ctx.send(f"> **{username} (last.fm) is now attached to {ctx.author.display_name}.**")
             else:
                 await events.Events.error(ctx, response)
@@ -148,10 +149,10 @@ class LastFM(commands.Cog):
         """Get the recent tracks of a Last FM Account by a discord user or a Last FM username"""
         try:
             user = await self.set_user(ctx, user)
-            response = await ex.get_fm_response('user.getRecentTracks', user)
+            response = await ex.u_last_fm.get_fm_response('user.getRecentTracks', user)
             tracks_and_titles = self.get_recent_tracks(response, limit=10)
             await ctx.send(embed=await self.create_fm_embed(f"{user} **Recent Tracks **", tracks_and_titles, inline=True))
-        except KeyError as e:
+        except KeyError:
             await events.Events.error(ctx, self.user_not_found)
         except Exception as e:
             log.console(e)
@@ -162,7 +163,7 @@ class LastFM(commands.Cog):
         """Get the last listened track of a Last FM Account by a discord user or a Last FM username"""
         try:
             user = await self.set_user(ctx, user)
-            response = await ex.get_fm_response('user.getRecentTracks', user)
+            response = await ex.u_last_fm.get_fm_response('user.getRecentTracks', user)
             tracks_and_titles = self.get_recent_tracks(response, limit=1)
             embed = await self.create_fm_embed(f"{user}'s **Most Recent Track**", tracks_and_titles, individual=True)
             image_url = tracks_and_titles[0][2]
@@ -182,7 +183,7 @@ class LastFM(commands.Cog):
         Time period options are ``overall | week | month | 3month | 6month | year``. Time period defaults to overall."""
         try:
             user, time_period = await self.set_user(ctx, user, time_period), self.set_period(user, time_period)
-            response = await ex.get_fm_response('user.getTopArtists', user, limit=10, time_period=time_period)
+            response = await ex.u_last_fm.get_fm_response('user.getTopArtists', user, limit=10, time_period=time_period)
             list_of_artists = response['topartists']['artist']
             counter = 0
             artist_and_titles = []
@@ -206,7 +207,7 @@ class LastFM(commands.Cog):
         Time period defaults to overall."""
         try:
             user, time_period = await self.set_user(ctx, user, time_period), self.set_period(user, time_period)
-            response = await ex.get_fm_response('user.getTopTracks', user, limit=10, time_period=time_period)
+            response = await ex.u_last_fm.get_fm_response('user.getTopTracks', user, limit=10, time_period=time_period)
             list_of_tracks = response['toptracks']['track']
             counter = 0
             tracks_and_titles = []
@@ -231,7 +232,7 @@ class LastFM(commands.Cog):
         Time period defaults to overall."""
         try:
             user, time_period = await self.set_user(ctx, user, time_period), self.set_period(user, time_period)
-            response = await ex.get_fm_response('user.getTopAlbums', user, limit=10, time_period=time_period)
+            response = await ex.u_last_fm.get_fm_response('user.getTopAlbums', user, limit=10, time_period=time_period)
             list_of_albums = response['topalbums']['album']
             counter = 0
             tracks_and_titles = []

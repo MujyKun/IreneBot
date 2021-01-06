@@ -5,8 +5,41 @@ import asyncio
 import random
 
 
-# noinspection PyPep8
+# noinspection PyPep8,PyBroadException
 class GuessingGame(commands.Cog):
+    @commands.command(aliases=['ggl', 'gglb'])
+    async def ggleaderboard(self, ctx, difficulty="medium", mode="server"):
+        """Shows global leaderboards for guessing game
+        [Format: %ggleaderboard (easy/medium/hard) (server/global)]"""
+        if difficulty.lower() not in ['easy', 'medium', 'hard']:
+            difficulty = "medium"
+
+        try:
+            if mode.lower() not in ["server", "global"]:
+                mode = "server"
+            if mode == "server":
+                server_id = await ex.get_server_id(ctx)
+                if not server_id:
+                    return await ctx.send("> You should not use this command in DMs.")
+                members = f"({', '.join([str(member.id) for member in ex.client.get_guild(server_id).members])})"
+                top_user_scores = await ex.u_guessinggame.get_guessing_game_top_ten(difficulty, members=members)
+
+            else:
+                top_user_scores = await ex.u_guessinggame.get_guessing_game_top_ten(difficulty)
+
+            user_position = 0
+            lb_string = ""
+            for user_id, score in top_user_scores:
+                user_position += 1
+                score = await ex.u_guessinggame.get_user_score(difficulty.lower(), user_id)
+                lb_string += f"**{user_position})** <@{user_id}> - {score}\n"
+            m_embed = await ex.create_embed(title=f"Guessing Game Leaderboard ({difficulty.lower()}) ({mode})",
+                                            title_desc=lb_string)
+            await ctx.send(embed=m_embed)
+        except Exception as e:
+            log.console(e)
+            return await ctx.send(f"> You may not understand this error. Please report it -> {e}")
+
     @commands.command(aliases=['gg'])
     async def guessinggame(self, ctx, gender="all", difficulty="medium", rounds=20, timeout=20):
         """Start an idol guessing game in the current channel. The host of the game can use `stop`/`end` to end the game or `skip` to skip the current round without affecting the round number.
@@ -20,6 +53,8 @@ class GuessingGame(commands.Cog):
             return await ctx.send("> **ERROR -> The max rounds is 60 and the max timeout is 60s.**")
         elif rounds < 1 or timeout < 3:
             return await ctx.send("> **ERROR -> The minimum rounds is 1 and the minimum timeout is 3 seconds.**")
+        await ctx.send(f"> Starting a guessing game for `{gender if gender != 'all' else 'both male and female'}` idols"
+                       f" with `{difficulty}` difficulty, `{rounds}` rounds, and `{timeout}s` of guessing time.")
         await self.start_game(ctx, rounds, timeout, gender, difficulty)
         # Bot has been crashing without issue being known. Reverting creating a separate task for every game.
         # task = asyncio.create_task(self.start_game(ctx, rounds, timeout, gender, difficulty))
@@ -30,7 +65,8 @@ class GuessingGame(commands.Cog):
         [Format: %stopgg]"""
         await ex.stop_game(ctx, ex.cache.guessing_games)
 
-    async def start_game(self, ctx, rounds, timeout, gender, difficulty):
+    @staticmethod
+    async def start_game(ctx, rounds, timeout, gender, difficulty):
         game = Game()
         ex.cache.guessing_games.append(game)
         await game.start_game(ctx, max_rounds=rounds, timeout=timeout, gender=gender, difficulty=difficulty)
@@ -58,9 +94,10 @@ class Game:
         self.gender = None
         self.gender_forced = False
         # difficulty must be in this list in order for it to
-        self.difficulty = ['easy', 'medium']  # have default set to medium
+        self.difficulty = None
 
     async def start_game(self, ctx, max_rounds=20, timeout=20, gender="all", difficulty="medium"):
+        """Start a guessing game."""
         self.host_ctx = ctx
         self.channel = ctx.channel
         self.host = ctx.author.id
@@ -72,13 +109,16 @@ class Game:
         elif gender.lower() in ex.cache.female_aliases:
             self.gender = 'f'
             self.gender_forced = True
-        if difficulty.lower() == 'easy':
-            self.difficulty.remove('medium')
-        elif difficulty.lower() == 'hard':
-            self.difficulty.append('hard')
+        self.difficulty = ex.cache.difficulty_aliases.get(difficulty)
+        if not self.difficulty:
+            self.difficulty = 2  # set to medium by default
         await self.process_game()
 
     async def check_message(self):
+        """Check incoming messages in the text channel and determine if it is correct."""
+        if self.force_ended:
+            return
+
         stop_phrases = ['stop', 'end']
 
         def check_correct_answer(message):
@@ -91,7 +131,7 @@ class Game:
             await msg.add_reaction(keys.check_emoji)
             if msg.content.lower() == 'skip':
                 await self.print_answer(question_skipped=True)
-            elif msg.content.lower() in stop_phrases:
+            elif msg.content.lower() in stop_phrases and not self.force_ended:
                 return await self.end_game()
             else:
                 score = self.players.get(msg.author.id)
@@ -124,7 +164,7 @@ class Game:
             if not self.gender_forced:
                 self.gender = random.choice(['m', 'f'])
 
-            while self.idol.gender != self.gender or self.idol.difficulty not in self.difficulty:
+            while self.idol.gender != self.gender or ex.cache.difficulty_aliases[self.idol.difficulty] > self.difficulty:
                 # will result in an infinite loop if there are no idols on easy mode and difficulty is easy mode.
                 self.idol = await ex.u_group_members.get_random_idol()
 
@@ -137,10 +177,11 @@ class Game:
             log.console(f'{", ".join(self.correct_answers)} - {self.channel.id}')
             self.idol_post_msg, self.photo_link = await ex.u_group_members.idol_post(self.channel, self.idol, user_id=self.host, guessing_game=True, scores=self.players)
             await self.check_message()
-        except Exception as e:
+        except:
             pass
 
     async def display_winners(self):
+        """Displays the winners and their scores."""
         final_scores = ""
         if self.players:
             for user_id in self.players:
@@ -148,12 +189,21 @@ class Game:
         return await self.channel.send(f">>> Guessing game has finished.\nScores:\n{final_scores}")
 
     async def end_game(self):
+        """Ends a guessing game."""
         await self.channel.send(f"The current game has now ended.")
         self.force_ended = True
         self.rounds = self.max_rounds
+        await self.update_scores()
         await self.display_winners()
 
+    async def update_scores(self):
+        """Updates all player scores"""
+        for user_id in self.players:
+            await ex.u_guessinggame.update_user_guessing_game_score(self.difficulty, user_id=user_id,
+                                                                    score=self.players.get(user_id))
+
     async def print_answer(self, question_skipped=False):
+        """Prints the current round's answer."""
         skipped = ""
         if question_skipped:
             skipped = "Question Skipped. "

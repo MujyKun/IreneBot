@@ -137,6 +137,7 @@ class Irene:
         ex.u_weverse = util.weverse.Weverse()
         ex.u_self_assign_roles = util.selfassignroles.SelfAssignRoles()
         ex.u_reminder = util.reminder.Reminder()
+        ex.u_guessinggame = util.guessinggame.GuessingGame()
 
 
 if __name__ == '__main__':

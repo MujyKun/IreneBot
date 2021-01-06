@@ -863,7 +863,7 @@ class GroupMembers:
             # amount of times the idol has been called.
             self.called = 0
             self.tags = kwargs.get('tags')
-            self.difficulty = kwargs.get('difficulty') or "medium"
+            self.difficulty = kwargs.get('difficulty') or "medium"  # easy = 1, medium = 2, hard = 3
             if self.tags:
                 self.tags = self.tags.split(',')
 

@@ -55,6 +55,7 @@ class Utility:
         self.u_weverse = None
         self.u_self_assign_roles = None
         self.u_reminder = None
+        self.u_guessinggame = None
 
     @staticmethod
     def first_result(record):

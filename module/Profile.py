@@ -84,6 +84,8 @@ class Profile(commands.Cog):
                 embed.add_field(name="Activity", value=user_activity, inline=True)
             if user_timezone:
                 embed.add_field(name="Timezone", value=f"{user_timezone} ({timezone_utc})", inline=True)
+            embed.add_field(name="GuessingGame [Easy/Medium/Hard]", value=user_scores, inline=True)
+
             await ctx.send(embed=embed)
 
         except Exception as e:

@@ -1,7 +1,6 @@
 from Utility import resources as ex
 from module import logger as log
 import discord
-import asyncio
 
 
 class SelfAssignRoles:
@@ -146,14 +145,14 @@ class SelfAssignRoles:
                         f"> {author.display_name}, You no longer have the {role_name} role.", delete_after=10)
                 else:
                     await message.channel.send(f"> {author.display_name}, You do not have the {role_name} role.",
-                                                      delete_after=10)
+                                               delete_after=10)
             elif prefix == '+':
                 if await self.check_member_has_role(author.roles, role.id):
                     return await message.channel.send(
                         f"> {author.display_name}, You already have the {role_name} role.", delete_after=10)
                 await author.add_roles(role, reason="Self-Assignable Role", atomic=True)
                 await message.channel.send(f"> {author.display_name}, You have been given the {role_name} role.",
-                                                  delete_after=10)
+                                           delete_after=10)
         if not author.bot:
             await message.delete()  # remove the message if it exists in a self-assignable role channel
 

@@ -46,10 +46,18 @@ class Cache:
         await self.process_cache_time(self.create_self_assignable_role_cache, "Self-Assignable Roles")
         await self.process_cache_time(self.create_reminder_cache, "Reminders")
         await self.process_cache_time(self.create_timezone_cache, "Timezones")
+        await self.process_cache_time(self.create_guessing_game_cache, "Guessing Game Scores")
         if not ex.test_bot and not ex.weverse_client.cache_loaded:
             # noinspection PyUnusedLocal
             task = asyncio.create_task(self.process_cache_time(ex.weverse_client.start, "Weverse"))
         log.console(f"Cache Completely Created in {await ex.u_miscellaneous.get_cooldown_time(time.time() - past_time)}.")
+
+    @staticmethod
+    async def create_guessing_game_cache():
+        ex.cache.guessing_game_counter = {}
+        all_scores = await ex.conn.fetch("SELECT userid, easy, medium, hard FROM stats.guessinggame")
+        for user_id, easy_score, medium_score, hard_score in all_scores:
+            ex.cache.guessing_game_counter[user_id] = {"easy": easy_score, "medium": medium_score, "hard": hard_score}
 
     @staticmethod
     async def create_timezone_cache():

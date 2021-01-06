@@ -131,7 +131,18 @@ class Cache(commands.Cog):
         # Text channels to send Weverse updates to.
         self.weverse_channels = {}  # { community_name: [ [channel_id, role_id, comments_disabled] ] }
 
-        self.assignable_roles = {}  #
+        # Guessing Game User Scores
+        self.guessing_game_counter = {}
+        # {
+        # user_id:
+        #   {
+        #       easy: int
+        #       medium: int
+        #       hard: int
+        #   }
+        # }
+
+        self.assignable_roles = {}   #
         # { server_id:
         #    {channel_id: channel_id,
         #    roles: [role_id, role_name]
@@ -149,6 +160,12 @@ class Cache(commands.Cog):
         # aliases for genders
         self.female_aliases = ['girl', 'girls', 'female', 'woman', 'women', 'girlgroup', 'girlgroups', 'f']
         self.male_aliases = ['male', 'm', 'men', 'boy', 'boys', 'boygroup', 'boygroups']
+
+        # difficulty aliases for guessing game
+        self.difficulty_aliases = {'easy': 1, 'e': 1, 'medium': 2, 'm': 2, 'hard': 3, 'h': 3}
+
+        # possible levels for guessing game
+        self.difficulty_levels = ['easy', 'medium', 'hard']
 
         # bracket position for bias game stored due to annoyance when using previous x and y values.
         # counting starts from left to right, bottom to top

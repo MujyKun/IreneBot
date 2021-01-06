@@ -131,7 +131,11 @@ class Cache(commands.Cog):
         # Text channels to send Weverse updates to.
         self.weverse_channels = {}  # { community_name: [ [channel_id, role_id, comments_disabled] ] }
 
-        self.assignable_roles = {}  #
+        # Guessing Game User Scores
+        self.guessing_game_counter = {}  # { user_id: [ easy_score, medium_score, hard_score] }
+
+
+        self.assignable_roles = {} #
         # { server_id:
         #    {channel_id: channel_id,
         #    roles: [role_id, role_name]

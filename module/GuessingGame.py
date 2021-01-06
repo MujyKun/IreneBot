@@ -7,6 +7,26 @@ import random
 
 # noinspection PyPep8
 class GuessingGame(commands.Cog):
+    @commdands.command(aliases=['ggl'])
+    async def ggleaderboard(self, ctx, difficulty):
+        """Shows leaderboards"""
+        m_embed = await ex.create_embed(title="Guessing Game Leaderboard")
+        sorted_ggleaderboard = {key: value for key, value in sorted(ex.cache.guessing_game_counter.items(),
+                                                                    key=lambda item: item[difficulty], reverse=True)}
+        for count, user_id in enumerate(sorted_ggleaderboard):
+            score = sorted_ggleaderboard.get(user_id)
+            if not score:
+                continue
+            if count > 9:
+                break
+            try:
+                user_name = (ex.client.get_user(user_id)).name
+            except:
+                # if the user is not in discord.py's member cache, then set the user's name to null.
+                user_name = "NULL"
+            m_embed.add_field(name=f"{count+1}) {user_name} ({user_id})", value=score[difficulty])
+        await ctx.send(embed=m_embed)
+
     @commands.command(aliases=['gg'])
     async def guessinggame(self, ctx, gender="all", difficulty="medium", rounds=20, timeout=20):
         """Start an idol guessing game in the current channel. The host of the game can use `stop`/`end` to end the game or `skip` to skip the current round without affecting the round number.
@@ -20,6 +40,9 @@ class GuessingGame(commands.Cog):
             return await ctx.send("> **ERROR -> The max rounds is 60 and the max timeout is 60s.**")
         elif rounds < 1 or timeout < 3:
             return await ctx.send("> **ERROR -> The minimum rounds is 1 and the minimum timeout is 3 seconds.**")
+
+        await ctx.send(f"> Starting a guessing game for `{gender if gender != 'all' else 'both male and female'}` idols "
+                       f"with `{difficulty}` difficulty, `{rounds}` rounds, and `{timeout}s` of guessing time.")
         await self.start_game(ctx, rounds, timeout, gender, difficulty)
         # Bot has been crashing without issue being known. Reverting creating a separate task for every game.
         # task = asyncio.create_task(self.start_game(ctx, rounds, timeout, gender, difficulty))
@@ -57,8 +80,8 @@ class Game:
         self.idol_post_msg = None
         self.gender = None
         self.gender_forced = False
-        # difficulty must be in this list in order for it to
-        self.difficulty = ['easy', 'medium']  # have default set to medium
+        self.difficulty = None
+        self.difficulty_aliases = {'easy': 1, 'e': 1, 'medium': 2, 'm': 2, 'hard': 3, 'h': 3}
         self.female_aliases = ['girl', 'girls', 'female', 'woman', 'women', 'girlgroup', 'girlgroups', 'f']
         self.male_aliases = ['male', 'm', 'men', 'boy', 'boys', 'boygroup', 'boygroups']
 
@@ -74,10 +97,10 @@ class Game:
         elif gender.lower() in self.female_aliases:
             self.gender = 'f'
             self.gender_forced = True
-        if difficulty.lower() == 'easy':
-            self.difficulty.remove('medium')
-        elif difficulty.lower() == 'hard':
-            self.difficulty.append('hard')
+        try:
+            self.difficulty = self.difficulty_aliases[difficulty]
+        except:
+            self.difficulty = 2
         await self.process_game()
 
     async def check_message(self):
@@ -126,7 +149,7 @@ class Game:
             if not self.gender_forced:
                 self.gender = random.choice(['m', 'f'])
 
-            while self.idol.gender != self.gender or self.idol.difficulty not in self.difficulty:
+            while self.idol.gender != self.gender or self.difficulty_aliases[self.idol.difficulty] > self.difficulty:
                 # will result in an infinite loop if there are no idols on easy mode and difficulty is easy mode.
                 self.idol = await ex.u_group_members.get_random_idol()
 
@@ -149,10 +172,25 @@ class Game:
                 final_scores += f"<@{user_id}> -> {self.players.get(user_id)}\n"
         return await self.channel.send(f">>> Guessing game has finished.\nScores:\n{final_scores}")
 
+    async def update_user_guessing_game_score(self):
+        if self.players:
+            for user_id, score in self.players.items():
+                try:
+                    ex.cache.guessing_game_counter[user_id][self.difficulty - 1] += score
+                    ex.conn.execute("UPDATE stats.guessinggame SET easyscore = $1, mediumscore = $2, hardscore = $3 "
+                                    "WHERE userid = $4", *ex.cache.guessing_game_counter[user_id], user_id)
+                except KeyError:
+                    ex.cache.guessing_games_counter[user_id] = score
+                    ex.conn.execute("INSERT INTO stats.guessinggame (userid, easyscore, mediumscore, hardscore) VALUES "
+                                    "($1, $2, $3, $4)", user_id, *ex.cache.guessing_game_counter[user_id])
+                except Exception as e:
+                    log.console(e)
+
     async def end_game(self):
         await self.channel.send(f"The current game has now ended.")
         self.force_ended = True
         self.rounds = self.max_rounds
+        await self.update_user_guessing_game_score()
         await self.display_winners()
 
     async def print_answer(self, question_skipped=False):

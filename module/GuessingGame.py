@@ -20,7 +20,9 @@ class GuessingGame(commands.Cog):
             return await ctx.send("> **ERROR -> The max rounds is 60 and the max timeout is 60s.**")
         elif rounds < 1 or timeout < 3:
             return await ctx.send("> **ERROR -> The minimum rounds is 1 and the minimum timeout is 3 seconds.**")
-        task = asyncio.create_task(self.start_game(ctx, rounds, timeout, gender, difficulty))
+        await self.start_game(ctx, rounds, timeout, gender, difficulty)
+        # Bot has been crashing without issue being known. Reverting creating a separate task for every game.
+        # task = asyncio.create_task(self.start_game(ctx, rounds, timeout, gender, difficulty))
 
     @commands.command()
     async def stopgg(self, ctx):

@@ -219,7 +219,10 @@ class Events(commands.Cog):
                     message = server.get("message")
                     message = message.replace("%user", f"<@{member.id}>")
                     message = message.replace("%guild_name", guild.name)
-                    await channel.send(message)
+                    try:
+                        await channel.send(message)
+                    except:
+                        pass
 
     @staticmethod
     @ex.client.event

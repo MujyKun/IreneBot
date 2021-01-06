@@ -26,6 +26,7 @@ class GuessingGame:
     @staticmethod
     async def create_user_in_guessing_game_db(user_id):
         """Inserts a user into the guessing game db with no scores. This allows for updating scores easier."""
+        ex.cache.guessing_game_counter[user_id] = {"easy": 0, "medium": 0, "hard": 0}
         return await ex.conn.execute("INSERT INTO stats.guessinggame(userid) VALUES ($1)", user_id)
 
     @staticmethod

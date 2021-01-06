@@ -53,6 +53,9 @@ class Profile(commands.Cog):
             user_level = await ex.u_levels.get_level(user_id, "profile")
             shortened_money = await ex.u_currency.shorten_balance(str(await ex.u_currency.get_balance(user_id)))
             rob_beg_daily_level = f"{await ex.u_levels.get_level(user_id, 'rob')}/{await ex.u_levels.get_level(user_id, 'beg')}/{await ex.u_levels.get_level(user_id, 'daily')}"
+            user_scores = f"{await ex.u_guessinggame.get_user_score('easy', user_id)}/" \
+                f"{await ex.u_guessinggame.get_user_score('medium', user_id)}/" \
+                f"{await ex.u_guessinggame.get_user_score('hard', user_id)}"
             user_timezone = await ex.u_reminder.get_user_timezone(user_id)
             try:
                 timezone_utc = datetime.datetime.now(pytz.timezone(user_timezone)).strftime('%Z, UTC%z')

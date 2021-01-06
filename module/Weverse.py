@@ -1,4 +1,5 @@
 import discord
+import asyncio
 from discord.ext import commands, tasks
 from module import logger as log
 from Utility import resources as ex
@@ -31,6 +32,8 @@ class Weverse(commands.Cog):
                     return await ctx.send(f"> {ctx.author.display_name}, You will no longer receive updates for {community_name}.")
             for community in ex.weverse_client.communities:
                 if community.name.lower() == community_name:
+                    # delete any existing before adding a new one.
+                    await ex.u_weverse.delete_weverse_channel(channel_id, community_name)
                     await ex.u_weverse.add_weverse_channel(channel_id, community_name)
                     # add role to weverse subscription after channel is added to db.
                     if role:
@@ -87,6 +90,8 @@ class Weverse(commands.Cog):
                 else:
                     return None
                 for channel_info in channels:
+                    # sleep for 5 seconds per channel because of rate-limiting issues on the bot.
+                    await asyncio.sleep(5)
                     channel_id = channel_info[0]
                     notification_ids = self.notifications_already_posted.get(channel_id)
                     if not notification_ids:

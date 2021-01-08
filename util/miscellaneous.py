@@ -294,6 +294,7 @@ class Miscellaneous:
         for language, keywords in ex.cache.lang_keywords.items():
             if input_language.lower() in keywords:
                 return language
+
     @staticmethod
     def get_user_count():
         """Get the amount of users that the bot is watching over."""

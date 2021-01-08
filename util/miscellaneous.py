@@ -12,22 +12,25 @@ class Miscellaneous:
     async def check_for_nword(message):
         """Processes new messages that contains the N word."""
         message_sender = message.author
-        if not message_sender.bot:
-            message_content = message.clean_content
-            if ex.u_miscellaneous.check_message_not_empty(message):
-                # check if the message belongs to the bot
-                if message_content[0] != '%':
-                    if ex.u_miscellaneous.check_nword(message_content):
-                        ex.cache.n_words_per_minute += 1
-                        author_id = message_sender.id
-                        current_amount = ex.cache.n_word_counter.get(author_id)
-                        if current_amount:
-                            await ex.conn.execute("UPDATE general.nword SET nword = $1 WHERE userid = $2::bigint",
-                                                  current_amount + 1, author_id)
-                            ex.cache.n_word_counter[author_id] = current_amount + 1
-                        else:
-                            await ex.conn.execute("INSERT INTO general.nword VALUES ($1,$2)", author_id, 1)
-                            ex.cache.n_word_counter[author_id] = 1
+        if message_sender.bot:
+            return
+        message_content = message.clean_content
+        if ex.u_miscellaneous.check_message_not_empty(message):
+            # check if the message belongs to the bot
+            if message_content[0] == '%':
+                return
+            if not ex.u_miscellaneous.check_nword(message_content):
+                return
+            ex.cache.n_words_per_minute += 1
+            author_id = message_sender.id
+            current_amount = ex.cache.n_word_counter.get(author_id)
+            if current_amount:
+                await ex.conn.execute("UPDATE general.nword SET nword = $1 WHERE userid = $2::bigint",
+                                      current_amount + 1, author_id)
+                ex.cache.n_word_counter[author_id] = current_amount + 1
+            else:
+                await ex.conn.execute("INSERT INTO general.nword VALUES ($1,$2)", author_id, 1)
+                ex.cache.n_word_counter[author_id] = 1
 
     @staticmethod
     async def check_if_temp_channel(channel_id):
@@ -67,13 +70,12 @@ class Miscellaneous:
         interactions = await self.get_disabled_server_interactions(server_id)
         if not interactions:
             return
-        else:
-            interactions = interactions.split(',')
-            interactions.remove(interaction)
-            interactions = ','.join(interactions)
-            if not interactions:
-                return await ex.conn.execute("DELETE FROM general.disabledinteractions WHERE serverid = $1", server_id)
-            await ex.conn.execute("UPDATE general.disabledinteractions SET interactions = $1 WHERE serverid = $2", interactions, server_id)
+        interactions = interactions.split(',')
+        interactions.remove(interaction)
+        interactions = ','.join(interactions)
+        if not interactions:
+            return await ex.conn.execute("DELETE FROM general.disabledinteractions WHERE serverid = $1", server_id)
+        await ex.conn.execute("UPDATE general.disabledinteractions SET interactions = $1 WHERE serverid = $2", interactions, server_id)
 
     @staticmethod
     async def interact_with_user(ctx, user, interaction, interaction_type, self_interaction=False):
@@ -82,10 +84,9 @@ class Miscellaneous:
             if user == discord.Member:
                 user = ctx.author
             list_of_links = await ex.conn.fetch("SELECT url FROM general.interactions WHERE interaction = $1", interaction_type)
-            if not self_interaction:
-                if ctx.author.id == user.id:
-                    ctx.command.reset_cooldown(ctx)
-                    return await ctx.send(f"> **{ctx.author.display_name}, you cannot perform this interaction on yourself.**")
+            if not self_interaction and ctx.author.id == user.id:
+                ctx.command.reset_cooldown(ctx)
+                return await ctx.send(f"> **{ctx.author.display_name}, you cannot perform this interaction on yourself.**")
             link = random.choice(list_of_links)
             embed = discord.Embed(title=f"**{ctx.author.display_name}** {interaction} **{user.display_name}**", color=ex.get_random_color())
             if not await ex.u_patreon.check_if_patreon(ctx.author.id):
@@ -119,32 +120,35 @@ class Miscellaneous:
 
     async def process_commands(self, message):
         message_sender = message.author
-        if not message_sender.bot:
-            message_content = message.clean_content
-            message_channel = message.channel
-            server_prefix = await ex.get_server_prefix_by_context(message)
-            # check if the user mentioned the bot and send them a help message.
-            if await self.check_for_bot_mentions(message):
-                await message.channel.send(
-                    f"Type `{server_prefix}help` for information on commands.")
-            if len(message_content) >= len(server_prefix):
-                changing_prefix = [bot_prefix + 'setprefix', bot_prefix + 'checkprefix']
-                if message.content[0:len(server_prefix)].lower() == server_prefix.lower() or message.content.lower() in changing_prefix:
-                    msg_without_prefix = message.content[len(server_prefix):len(message.content)]
-                    # only replace the prefix portion back to the default prefix if it is not %setprefix or %checkprefix
-                    if message.content.lower() not in changing_prefix:
-                        # change message.content so all on_message listeners have a bot prefix
-                        message.content = bot_prefix + msg_without_prefix
-                    # if a user is banned from the bot.
-                    if await self.check_if_bot_banned(message_sender.id):
-                        try:
-                            guild_id = await ex.get_server_id(message)
-                        except:
-                            guild_id = None
-                        if await self.check_message_is_command(message) or await ex.u_custom_commands.check_custom_command_name_exists(guild_id, msg_without_prefix):
-                            await self.send_ban_message(message_channel)
-                    else:
-                        await ex.client.process_commands(message)
+        if message_sender.bot:
+            return
+        message_content = message.clean_content
+        message_channel = message.channel
+        server_prefix = await ex.get_server_prefix_by_context(message)
+        # check if the user mentioned the bot and send them a help message.
+        if await self.check_for_bot_mentions(message):
+            await message.channel.send(
+                f"Type `{server_prefix}help` for information on commands.")
+        if len(message_content) <= len(server_prefix):
+            return
+        changing_prefix = [bot_prefix + 'setprefix', bot_prefix + 'checkprefix']
+        if message.content[0:len(server_prefix)].lower() != server_prefix.lower() and message.content.lower() not in changing_prefix:
+            return
+        msg_without_prefix = message.content[len(server_prefix):len(message.content)]
+        # only replace the prefix portion back to the default prefix if it is not %setprefix or %checkprefix
+        if message.content.lower() not in changing_prefix:
+            # change message.content so all on_message listeners have a bot prefix
+            message.content = bot_prefix + msg_without_prefix
+        # if a user is banned from the bot.
+        if await self.check_if_bot_banned(message_sender.id):
+            try:
+                guild_id = await ex.get_server_id(message)
+            except:
+                guild_id = None
+            if await self.check_message_is_command(message) or await ex.u_custom_commands.check_custom_command_name_exists(guild_id, msg_without_prefix):
+                await self.send_ban_message(message_channel)
+        else:
+            await ex.client.process_commands(message)
 
     @staticmethod
     async def send_maintenance_message(channel):
@@ -237,41 +241,22 @@ class Miscellaneous:
         return 'nigga' in message_split or 'nigger' in message_split and ':' not in message_split
 
     @staticmethod
-    def get_int_index(original, index):
-        """Retrieves the specific index of an integer. Ex: Calling index 0 for integer 51 will return 5."""
-        entire_selection = ""
-        counter = 0
-        for value in str(original):
-            if counter < index:
-                entire_selection += value
-            counter += 1
-        return int(entire_selection)
+    def get_int_index(number, index):
+        """Retrieves the specific index of an integer. Ex: Calling index 3 for integer 12345 will return 123."""
+        return int(str(number)[0: index])
 
     @staticmethod
     async def get_cooldown_time(time):
         """Turn command cooldown of seconds into hours, minutes, and seconds."""
         time = round(time)
-        time_returned = ""
-        if time < 1:
-            return f"{time}s"
-        if time % 86400 != time:
-            days = int(time//86400)
-            if days != 0:
-                time = time-(days*86400)
-                time_returned += f"{days}d "
-        if time % 3600 != time:
-            hours = int(time//3600)
-            if hours != 0:
-                time_returned += f"{hours}h "
-        if time % 3600 != 0:
-            minutes = int((time % 3600) // 60)
-            if minutes != 0:
-                time_returned += f"{minutes}m "
-        if (time % 3600) % 60 < 60:
-            seconds = (time % 3600) % 60
-            if seconds != 0:
-                time_returned += f"{seconds}s"
-        return time_returned
+        min, sec = divmod(time, 60)
+        hour, min = divmod(min, 60)
+        day, hour = divmod(hour, 24)
+
+        return f"{f'{day}d ' if day else ''}" \
+               f"{f'{hour}h ' if hour else ''}" \
+               f"{f'{min}m ' if min else ''}" \
+               f"{f'{sec}s' if sec else ''}"
 
     @staticmethod
     def check_message_not_empty(message):

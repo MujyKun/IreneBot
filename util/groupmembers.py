@@ -120,16 +120,16 @@ class GroupMembers:
 
         if group:
             title = f"{obj.name} [{obj.id}]\n"
+            card_description = await self.format_card_fields(obj, ex.cache.group_description)
         else:
             title = f"{obj.full_name} ({obj.stage_name}) [{obj.id}]\n"
+            card_description = await self.format_card_fields(obj, ex.cache.idol_description)
 
-        general_description = self.format_card_fields(obj, ex.cache.general_description)
-        group_description = self.format_card_fields(obj, ex.cache.group_description)
-        idol_description = self.format_card_fields(obj, ex.cache.idol_description)
-        website_description = self.format_card_fields(obj, ex.cache.website_description)
+        general_description = await self.format_card_fields(obj, ex.cache.general_description)
+        website_description = await self.format_card_fields(obj, ex.cache.website_description)
 
-        full_description = f"{general_description}\n" \
-                           f"{group_description if group else idol_description}\n" \
+        full_description = f"{general_description}" \
+                           f"{card_description}" \
                            f"{website_description}"
 
         embed = await ex.create_embed(title=title, color=ex.get_random_color(), title_desc=full_description)

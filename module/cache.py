@@ -188,10 +188,11 @@ class Cache(commands.Cog):
         }
 
         # Equivalent keyword for translate languages
-        lang_keywords = {
-            'ko' : ['korean', 'ko', 'kr', 'korea', 'kor'],
-            'en' : ['en', 'eng', 'english'],
-            'ja' : ['jp', 'jap', 'japanese', 'japan'],
+        # { papago_code : lang_keyword_aliases }
+        self.lang_keywords = {
+            'ko': ['korean', 'ko', 'kr', 'korea', 'kor'],
+            'en': ['en', 'eng', 'english'],
+            'ja': ['jp', 'jap', 'japanese', 'japan'],
             'zh-CN': ['chinese', 'ch', 'zh-cn', 'zhcn', 'c', 'china'],
             'zh-TW': [],
             'es': ['es', 'espanol', 'spanish', 'sp'],
@@ -199,6 +200,58 @@ class Cache(commands.Cog):
             'vi': ['viet', 'vi', 'vietnamese', 'vietnam'],
             'th': ['th', 'thai', 'thailand'],
             'id': ['id', 'indonesian', 'indonesia', 'ind']
+        }
+
+        # General card description format
+        # Create list if the attribute should be surrounded by two strings
+        self.general_description = {
+            'description': ['', '\n'],
+            'id': 'ID: ',
+            'gender': 'Gender: ',
+            'photo_count': 'Photo Count: ',
+        }
+
+        # Group card description format
+        # { field/attribute name : Card Display Format }
+        # Create list if the attribute should be surrounded by two strings
+        self.group_description = {
+            'name': 'Name: ',
+            'debut_date': 'Debut Date: ',
+            'disband_date': 'Disband Date: ',
+            'fandom': 'Fandom Name: ',
+            'company': 'Company: ',
+            'website': ['[Official Website](', ')']
+        }
+
+        # Idol card description format
+        # Create list if the attribute should be surrounded by two strings
+        self.idol_description = {
+            'full_name': 'Full Name: ',
+            'stage_name': 'Stage Name: ',
+            'former_full_name': 'Former Full Name: ',
+            'former_stage_name': 'Former Stage Name: ',
+            'birth_date': 'Birth Date: ',
+            'birth_country': 'Birth Country: ',
+            'birth_city': 'Birth City: ',
+            'height': ['Height: ', 'cm'],
+            'zodiac': 'Zodiac Sign: ',
+            'blood_type': 'Blood Type: ',
+            'called': ['Called: ', ' times'],
+            'difficulty': 'Guessing Game Difficulty: ',
+        }
+
+        # Website card description format
+        # Create list if the attribute should be surrounded by two strings
+        self.website_description = {
+            'twitter': ['[Twitter](https://twitter.com/', ')'],
+            'youtube': ['[Youtube](https://www.youtube.com/channel/', ')'],
+            'melon': ['[Melon](https://www.melon.com/artist/song.htm?artistId=', ')'],
+            'instagram': ['[Instagram](https://instagram.com/', ')'],
+            'vlive': ['[V Live](https://channels.vlive.tv/', ')'],
+            'spotify': ['[Spotify](https://open.spotify.com/artist/', ')'],
+            'fancafe': ['[FanCafe](https://m.cafe.daum.net/', ')'],
+            'facebook': ['[Facebook](https://www.facebook.com/', ')'],
+            'tiktok': ['[TikTok](https://www.tiktok.com/', ')'],
         }
 
         self.eight_ball_responses = [

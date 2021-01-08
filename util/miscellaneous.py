@@ -307,38 +307,11 @@ class Miscellaneous:
             log.console(e)
 
     @staticmethod
-    async def get_language_code(language):
+    async def get_language_code(input_language):
         """Returns a language code that is compatible with the papago framework."""
-        language = language.lower()
-        languages = ['ko', 'en', 'ja', 'zh-CN', 'zh-TW', 'es', 'fr', 'vi', 'th', 'id']
-        ko_keywords = ['korean', 'ko', 'kr', 'korea', 'kor']
-        eng_keywords = ['en', 'eng', 'english']
-        ja_keywords = ['jp', 'jap', 'japanese', 'japan']
-        zh_cn_keywords = ['chinese', 'ch', 'zh-cn', 'zhcn', 'c', 'china']
-        es_keywords = ['es', 'espanol', 'spanish', 'sp']
-        fr_keywords = ['french', 'fr', 'f', 'fren']
-        vi_keywords = ['viet', 'vi', 'vietnamese', 'vietnam']
-        th_keywords = ['th', 'thai', 'thailand']
-        id_keywords = ['id', 'indonesian', 'indonesia', 'ind']
-        if language in ko_keywords:
-            return languages[0]
-        elif language in eng_keywords:
-            return languages[1]
-        elif language in ja_keywords:
-            return languages[2]
-        elif language in zh_cn_keywords:
-            return languages[3]
-        elif language in es_keywords:
-            return languages[5]
-        elif language in fr_keywords:
-            return languages[6]
-        elif language in vi_keywords:
-            return languages[7]
-        elif language in th_keywords:
-            return languages[8]
-        elif languages in id_keywords:
-            return languages[9]
-
+        for language, keywords in ex.cache.lang_keywords.items():
+            if input_language.lower() in keywords:
+                return language
     @staticmethod
     def get_user_count():
         """Get the amount of users that the bot is watching over."""

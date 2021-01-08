@@ -187,6 +187,20 @@ class Cache(commands.Cog):
             15: {'img_size': (134, 130), 'pos': (235, 55)}
         }
 
+        # Equivalent keyword for translate languages
+        lang_keywords = {
+            'ko' : ['korean', 'ko', 'kr', 'korea', 'kor'],
+            'en' : ['en', 'eng', 'english'],
+            'ja' : ['jp', 'jap', 'japanese', 'japan'],
+            'zh-CN': ['chinese', 'ch', 'zh-cn', 'zhcn', 'c', 'china'],
+            'zh-TW': [],
+            'es': ['es', 'espanol', 'spanish', 'sp'],
+            'fr': ['french', 'fr', 'f', 'fren'],
+            'vi': ['viet', 'vi', 'vietnamese', 'vietnam'],
+            'th': ['th', 'thai', 'thailand'],
+            'id': ['id', 'indonesian', 'indonesia', 'ind']
+        }
+
         self.eight_ball_responses = [
                 # Positive 13
                 "It is certain.",

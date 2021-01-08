@@ -199,12 +199,9 @@ class Miscellaneous:
     async def check_message_is_command(message, is_command_name=False):
         """Check if a message is a command."""
         if not is_command_name:
-            for command_name in ex.client.all_commands:
-                if command_name in message.content:
-                    if len(command_name) != 1:
-                        return True
-            return False
-        if is_command_name:
+            return any(command_name in message.content and len(command_name) != 1
+                       for command_name in ex.client.all_commands)
+        else:
             return message in ex.client.all_commands
 
     @staticmethod

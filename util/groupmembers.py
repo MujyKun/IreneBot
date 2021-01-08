@@ -101,72 +101,60 @@ class GroupMembers:
 
     async def set_embed_card_info(self, obj, group=False, server_id=None):
         """Sets General Information about a Group or Idol."""
-        description = ""
-        if obj.description:
-            description += f"{obj.description}\n\n"
-        if obj.id:
-            description += f"ID: {obj.id}\n"
-        if obj.gender:
-            description += f"Gender: {obj.gender}\n"
-        if group:
-            title = f"{obj.name} [{obj.id}]\n"
-            if obj.name:
-                description += f"Name: {obj.name}\n"
-            if obj.debut_date:
-                description += f"Debut Date: {obj.debut_date}\n"
-            if obj.disband_date:
-                description += f"Disband Date: {obj.disband_date}\n"
-            if obj.fandom:
-                description += f"Fandom Name: {obj.fandom}\n"
-            if obj.company:
-                description += f"Company: {obj.company}\n"
-            if obj.website:
-                description += f"[Official Website]({obj.website})\n"
-        else:
-            title = f"{obj.full_name} ({obj.stage_name}) [{obj.id}]\n"
-            if obj.full_name:
-                description += f"Full Name: {obj.full_name}\n"
-            if obj.stage_name:
-                description += f"Stage Name: {obj.stage_name}\n"
-            if obj.former_full_name:
-                description += f"Former Full Name: {obj.former_full_name}\n"
-            if obj.former_stage_name:
-                description += f"Former Stage Name: {obj.former_stage_name}\n"
-            if obj.birth_date:
-                description += f"Birth Date: {obj.birth_date}\n"
-            if obj.birth_country:
-                description += f"Birth Country: {obj.birth_country}\n"
-            if obj.birth_city:
-                description += f"Birth City: {obj.birth_city}\n"
-            if obj.height:
-                description += f"Height: {obj.height}cm\n"
-            if obj.zodiac:
-                description += f"Zodiac Sign: {obj.zodiac}\n"
-            if obj.blood_type:
-                description += f"Blood Type: {obj.blood_type}\n"
-            if obj.called:
-                description += f"Called: {obj.called} times\n"
-            description += f"GuessingGame Difficulty: {obj.difficulty}\n"
-        if obj.twitter:
-            description += f"[Twitter](https://twitter.com/{obj.twitter})\n"
-        if obj.youtube:
-            description += f"[Youtube](https://www.youtube.com/channel/{obj.youtube})\n"
-        if obj.melon:
-            description += f"[Melon](https://www.melon.com/artist/song.htm?artistId={obj.melon})\n"
-        if obj.instagram:
-            description += f"[Instagram](https://instagram.com/{obj.instagram})\n"
-        if obj.vlive:
-            description += f"[V Live](https://channels.vlive.tv/{obj.vlive})\n"
-        if obj.spotify:
-            description += f"[Spotify](https://open.spotify.com/artist/{obj.spotify})\n"
-        if obj.fancafe:
-            description += f"[FanCafe](https://m.cafe.daum.net/{obj.fancafe})\n"
-        if obj.facebook:
-            description += f"[Facebook](https://www.facebook.com/{obj.facebook})\n"
-        if obj.tiktok:
-            description += f"[TikTok](https://www.tiktok.com/{obj.tiktok})\n"
-        if obj.photo_count:
-            description += f"Photo Count: {obj.photo_count}\n"
+        def str_if(text, content):
+            """Only return the string if the content exists"""
+            if content:
+                return f"{text}"
+            else:
+                return ''
+
+        title = f"{obj.name} [{obj.id}]\n" \
+            if group else \
+            f"{obj.full_name} ({obj.stage_name}) [{obj.id}]\n"
+
+        group_description = '\n'.join([
+            str_if(f"Name: {obj.name}", obj.name),
+            str_if(f"Debut Date: {obj.debut_date}", obj.debut_date),
+            str_if(f"Disband Date: {obj.disband_date}", obj.disband_date),
+            str_if(f"Fandom Name: {obj.fandom}", obj.fandom),
+            str_if(f"Company: {obj.company}", obj.company),
+            str_if(f"[Official Website]({obj.website})", obj.website),
+        ])
+
+        idol_description = '\n'.join([
+            str_if(f"Full Name: {obj.full_name}", obj.full_name),
+            str_if(f"Stage Name: {obj.stage_name}", obj.stage_name),
+            str_if(f"Former Full Name: {obj.former_full_name}", obj.former_full_name),
+            str_if(f"Former Stage Name: {obj.former_stage_name}", obj.former_stage_name),
+            str_if(f"Birth Date: {obj.birth_date}", obj.birth_date),
+            str_if(f"Birth Country: {obj.birth_country}", obj.birth_country),
+            str_if(f"Birth City: {obj.birth_city}", obj.birth_city),
+            str_if(f"Height: {obj.height}cm", obj.height),
+            str_if(f"Zodiac Sign: {obj.zodiac}", obj.zodiac),
+            str_if(f"Blood Type: {obj.blood_type}", obj.blood_type),
+            str_if(f"Called: {obj.called} times", obj.called),
+            str_if(f"Guessing Game Difficulty: {obj.difficulty}", obj.difficulty)
+        ])
+
+        description = '\n'.join([
+            str_if(f"{obj.description}\n", obj.description),
+            str_if(f"ID: {obj.id}", obj.id),
+            str_if(f"Gender: {obj.gender}", obj.gender),
+
+            group_description if group else idol_description,
+
+            str_if(f"[Twitter](https://twitter.com/{obj.twitter})", obj.twitter),
+            str_if(f"[Youtube](https://www.youtube.com/channel/{obj.youtube})", obj.youtube),
+            str_if(f"[Melon](https://www.melon.com/artist/song.htm?artistId={obj.melon})", obj.melon),
+            str_if(f"[Instagram](https://instagram.com/{obj.instagram})", obj.instagram),
+            str_if(f"[V Live](https://channels.vlive.tv/{obj.vlive})", obj.vlive),
+            str_if(f"[Spotify](https://open.spotify.com/artist/{obj.spotify})", obj.spotify),
+            str_if(f"[FanCafe](https://m.cafe.daum.net/{obj.fancafe})", obj.fancafe),
+            str_if(f"[Facebook](https://www.facebook.com/{obj.facebook})", obj.facebook),
+            str_if(f"[TikTok](https://www.tiktok.com/{obj.tiktok})", obj.tiktok),
+            str_if(f"Photo Count: {obj.photo_count}", obj.photo_count),
+        ])
+
         embed = await ex.create_embed(title=title, color=ex.get_random_color(), title_desc=description)
         if obj.tags:
             embed.add_field(name="Tags", value=', '.join(obj.tags), inline=False)
@@ -181,7 +169,6 @@ class GroupMembers:
                 except:
                     value = "This group has an Idol that doesn't exist. Please report it.\n"
                 embed.add_field(name="Members", value=value, inline=False)
-
         else:
             if obj.groups:
                 value = await self.get_group_names_as_string(obj)

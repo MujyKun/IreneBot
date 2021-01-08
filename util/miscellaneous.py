@@ -256,7 +256,8 @@ class Miscellaneous:
         return f"{f'{day}d ' if day else ''}" \
                f"{f'{hour}h ' if hour else ''}" \
                f"{f'{min}m ' if min else ''}" \
-               f"{f'{sec}s' if sec else ''}"
+               f"{f'{sec}s' if sec else ''}" \
+               f"{f'0s' if time < 1 else ''}"
 
     @staticmethod
     def check_message_not_empty(message):

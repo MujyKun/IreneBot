@@ -315,10 +315,7 @@ class Miscellaneous:
     @staticmethod
     def get_user_count():
         """Get the amount of users that the bot is watching over."""
-        counter = 0
-        for guild in ex.client.guilds:
-            counter += guild.member_count
-        return counter
+        return sum([guild.member_count for guild in ex.client.guilds])
 
     @staticmethod
     def get_server_count():
@@ -328,23 +325,14 @@ class Miscellaneous:
     @staticmethod
     def get_channel_count():
         """Returns the channel count from all the guilds the bot is connected to."""
-        count = 0
-        for guild in ex.client.guilds:
-            count += len(guild.channels)
-        return count
+        return sum([len(guild.channels) for guild in ex.clients.guilds])
 
     @staticmethod
     def get_text_channel_count():
         """Returns the text channel count from all the guilds the bot is connected to."""
-        count = 0
-        for guild in ex.client.guilds:
-            count += len(guild.text_channels)
-        return count
+        return sum([len(guild.text_channels) for guild in ex.client.guilds])
 
     @staticmethod
     def get_voice_channel_count():
         """Returns the voice channel count from all the guilds the bot is connected to."""
-        count = 0
-        for guild in ex.client.guilds:
-            count += len(guild.voice_channels)
-        return count
+        return sum([len(guild.voice_channels) for guild in ex.client.guilds])

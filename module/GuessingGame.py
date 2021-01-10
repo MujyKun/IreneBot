@@ -67,42 +67,33 @@ class GuessingGame(commands.Cog):
 
     @staticmethod
     async def start_game(ctx, rounds, timeout, gender, difficulty):
-        game = Game()
+        game = Game(ctx,max_rounds=rounds, timeout=timeout, gender=gender, difficulty=difficulty)
         ex.cache.guessing_games.append(game)
-        await game.start_game(ctx, max_rounds=rounds, timeout=timeout, gender=gender, difficulty=difficulty)
+        await game.process_game()
         if game in ex.cache.guessing_games:
             ex.cache.guessing_games.remove(game)
 
 
 # noinspection PyBroadException,PyPep8
 class Game:
-    def __init__(self):
+    def __init__(self, ctx, max_rounds=20, timeout=20, gender="all", difficulty="medium"):
         self.photo_link = None
-        self.host_ctx = None
-        self.host = None
+        self.host_ctx = ctx
+        self.host = ctx.author.id
         # user_id : score
         self.players = {}
         self.rounds = 0
-        self.channel = None
+        self.channel = ctx.channel
         self.idol = None
         self.group_names = None
         self.correct_answers = []
-        self.timeout = 0
-        self.max_rounds = 0
+        self.timeout = timeout
+        self.max_rounds = max_rounds
         self.force_ended = False
         self.idol_post_msg = None
         self.gender = None
         self.gender_forced = False
         # difficulty must be in this list in order for it to
-        self.difficulty = None
-
-    async def start_game(self, ctx, max_rounds=20, timeout=20, gender="all", difficulty="medium"):
-        """Start a guessing game."""
-        self.host_ctx = ctx
-        self.channel = ctx.channel
-        self.host = ctx.author.id
-        self.max_rounds = max_rounds
-        self.timeout = timeout
         if gender.lower() in ex.cache.male_aliases:
             self.gender = 'm'
             self.gender_forced = True
@@ -112,7 +103,6 @@ class Game:
         self.difficulty = ex.cache.difficulty_aliases.get(difficulty)
         if not self.difficulty:
             self.difficulty = 2  # set to medium by default
-        await self.process_game()
 
     async def check_message(self):
         """Check incoming messages in the text channel and determine if it is correct."""

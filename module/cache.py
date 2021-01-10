@@ -142,15 +142,15 @@ class Cache(commands.Cog):
         #   }
         # }
 
-        self.assignable_roles = {}   #
+        self.assignable_roles = {}  #
         # { server_id:
         #    {channel_id: channel_id,
         #    roles: [role_id, role_name]
         # }}
 
         # Reminder dictionary
-        self.reminders = {}   # { user_id: [ [remind_id, remind_reason, remind_time] ] }
-        self.timezones = {}   # { user_id: timezone }
+        self.reminders = {}  # { user_id: [ [remind_id, remind_reason, remind_time] ] }
+        self.timezones = {}  # { user_id: timezone }
         self.main_youtube_instance = None  # Youtube Object that exists on start up.
 
         # Timezone to Locale dictionary
@@ -173,8 +173,19 @@ class Cache(commands.Cog):
 
         # guessing game difficulty or gender selection
         # { selection_key_word : idol_set}
-        self.difficulty_selection = {}
-        self.gender_selection = {}
+        self.difficulty_selection = {
+            'easy': self.idols_easy,
+            'e': self.idols_easy,
+            'medium': self.idols_medium,
+            'm': self.idols_medium,
+            'hard': self.idols_hard,
+            'h': self.idols_hard
+        }
+        self.gender_selection = {
+            'f': self.idols_female,
+            'm': self.idols_male,
+            'all': set(self.idols)
+        }
 
         # bracket position for bias game stored due to annoyance when using previous x and y values.
         # counting starts from left to right, bottom to top
@@ -264,42 +275,38 @@ class Cache(commands.Cog):
         }
 
         self.eight_ball_responses = [
-                # Positive 13
-                "It is certain.",
-                "It is decidedly so.",
-                "Without a doubt.",
-                "Yes - definitely.",
-                "You may rely on it.",
-                "As I see it, yes.",
-                "Most likely.",
-                "Outlook good.",
-                "Yes.",
-                "Signs point to yes.",
-                ":thumbsup:",
-                "Well, duh",
-                "Of course, that was a stupid question.",
+            # Positive 13
+            "It is certain.",
+            "It is decidedly so.",
+            "Without a doubt.",
+            "Yes - definitely.",
+            "You may rely on it.",
+            "As I see it, yes.",
+            "Most likely.",
+            "Outlook good.",
+            "Yes.",
+            "Signs point to yes.",
+            ":thumbsup:",
+            "Well, duh",
+            "Of course, that was a stupid question.",
 
+            # Neutral 7
+            "Reply hazy, try again.",
+            "Ask again later.",
+            "Better not tell you now.",
+            "Cannot predict now.",
+            "Concentrate and ask again.",
+            "Why the fuck are you asking me you dumb rat.",
+            "You should already know this you 바보.",
 
-                # Neutral 7
-                "Reply hazy, try again.",
-                "Ask again later.",
-                "Better not tell you now.",
-                "Cannot predict now.",
-                "Concentrate and ask again.",
-                "Why the fuck are you asking me you dumb rat.",
-                "You should already know this you 바보.",
-
-                # Negative 10
-                "Don't count on it.",
-                "My reply is no.",
-                "My sources say no.",
-                "Outlook not so good.",
-                "Very doubtful.",
-                ":thumbsdown:",
-                "Are you kidding?",
-                "Don't bet on it.",
-                "Forget about it.",
-                "It's just not meant to be."]
-
-
-
+            # Negative 10
+            "Don't count on it.",
+            "My reply is no.",
+            "My sources say no.",
+            "Outlook not so good.",
+            "Very doubtful.",
+            ":thumbsdown:",
+            "Are you kidding?",
+            "Don't bet on it.",
+            "Forget about it.",
+            "It's just not meant to be."]

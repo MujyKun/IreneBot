@@ -57,25 +57,26 @@ class BiasGame:
         bracket = Image.open(f'{ bias_game_location}bracket8.png')
         count = 1
         for c_round in all_games:
-            if len(c_round) <= 4:
-                for battle in c_round:
-                    first_idol, second_idol = battle[0], battle[1]
-                    first_idol_info = ex.cache.stored_bracket_positions.get(count)
-                    second_idol_info = ex.cache.stored_bracket_positions.get(count + 1)
+            if len(c_round) > 4:
+                continue
+            for battle in c_round:
+                first_idol, second_idol = battle[0], battle[1]
+                first_idol_info = ex.cache.stored_bracket_positions.get(count)
+                second_idol_info = ex.cache.stored_bracket_positions.get(count + 1)
 
-                    # get images
-                    first_idol_image, second_idol_image = get_battle_images(first_idol.id, second_idol.id)
+                # get images
+                first_idol_image, second_idol_image = get_battle_images(first_idol.id, second_idol.id)
 
-                    # resize images
-                    first_idol_image, second_idol_image = resize_images(first_idol_image, second_idol_image,
-                                                                        first_idol_info.get('img_size'),
-                                                                        second_idol_info.get('img_size'))
+                # resize images
+                first_idol_image, second_idol_image = resize_images(first_idol_image, second_idol_image,
+                                                                    first_idol_info.get('img_size'),
+                                                                    second_idol_info.get('img_size'))
 
-                    # paste image to bracket
-                    paste_image(first_idol_image, second_idol_image, first_idol_info.get('pos'),
-                                second_idol_info.get('pos'))
+                # paste image to bracket
+                paste_image(first_idol_image, second_idol_image, first_idol_info.get('pos'),
+                            second_idol_info.get('pos'))
 
-                    count = count + 2
+                count = count + 2
 
         # add winner
         idol_info = ex.cache.stored_bracket_positions.get(count)

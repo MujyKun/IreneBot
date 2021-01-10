@@ -3,6 +3,7 @@ from discord.ext import commands
 from module import keys, logger as log
 import asyncio
 import random
+import async_timeout
 
 
 # noinspection PyPep8,PyBroadException
@@ -90,6 +91,7 @@ class Game:
         self.force_ended = False
         self.idol_post_msg = None
         self.gender = None
+        self.post_attempt_timeout = 10
         if gender.lower() in ex.cache.male_aliases:
             self.gender = 'm'
         elif gender.lower() in ex.cache.female_aliases:
@@ -166,8 +168,13 @@ class Game:
                 self.correct_answers.append(self.idol.full_name.lower())
                 self.correct_answers.append(self.idol.stage_name.lower())
                 log.console(f'{", ".join(self.correct_answers)} - {self.channel.id}')
-
-                self.idol_post_msg, self.photo_link = await ex.u_group_members.idol_post(self.channel, self.idol, user_id=self.host, guessing_game=True, scores=self.players)
+                # Skip this idol if it is taking too long
+                async with async_timeout.timeout(self.post_attempt_timeout) as posting:
+                    self.idol_post_msg, self.photo_link = await ex.u_group_members.idol_post(self.channel, self.idol, user_id=self.host, guessing_game=True, scores=self.players)
+                if posting.expired:
+                    log.console(f"Posting for {self.idol.full_name} ({self.idol.stage_name}) [{self.idol.id}]"
+                                f" took more than {self.post_attempt_timeout}")
+                    continue
                 question_posted = True
             except LookupError:
                 raise

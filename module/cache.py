@@ -161,11 +161,20 @@ class Cache(commands.Cog):
         self.female_aliases = ['girl', 'girls', 'female', 'woman', 'women', 'girlgroup', 'girlgroups', 'f']
         self.male_aliases = ['male', 'm', 'men', 'boy', 'boys', 'boygroup', 'boygroups']
 
-        # difficulty aliases for guessing game
-        self.difficulty_aliases = {'easy': 1, 'e': 1, 'medium': 2, 'm': 2, 'hard': 3, 'h': 3}
-
         # possible levels for guessing game
         self.difficulty_levels = ['easy', 'medium', 'hard']
+
+        # sets of idols for guessing game
+        self.idols_female = set()
+        self.idols_male = set()
+        self.idols_easy = set()
+        self.idols_medium = set()
+        self.idols_hard = set()
+
+        # guessing game difficulty or gender selection
+        # { selection_key_word : idol_set}
+        self.difficulty_selection = {}
+        self.gender_selection = {}
 
         # bracket position for bias game stored due to annoyance when using previous x and y values.
         # counting starts from left to right, bottom to top

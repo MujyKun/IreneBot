@@ -38,12 +38,13 @@ class GuessingGame:
     async def get_guessing_game_top_ten(difficulty, members=None):
         """Get the top ten of a certain guessing game difficulty"""
         # make sure it is actually a difficulty in case of sql-injection. (condition created in case of future changes)
-        if difficulty.lower() in ex.cache.difficulty_levels:
-            if members:
-                return await ex.conn.fetch(f"SELECT userid, {difficulty} FROM stats.guessinggame WHERE {difficulty} "
-                                           f"is not null AND userid IN {members} ORDER BY {difficulty} DESC LIMIT 10")
+        if difficulty.lower() not in ex.cache.difficulty_levels:
+            raise ValueError("invalid difficulty given to get_guessing_game_top_ten()")
+        if members:
             return await ex.conn.fetch(f"SELECT userid, {difficulty} FROM stats.guessinggame WHERE {difficulty} "
-                                       f"is not null ORDER BY {difficulty} DESC LIMIT 10")
+                                       f"is not null AND userid IN {members} ORDER BY {difficulty} DESC LIMIT 10")
+        return await ex.conn.fetch(f"SELECT userid, {difficulty} FROM stats.guessinggame WHERE {difficulty} "
+                                   f"is not null ORDER BY {difficulty} DESC LIMIT 10")
 
     @staticmethod
     async def get_user_score(difficulty: str, user_id):

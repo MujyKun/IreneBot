@@ -73,12 +73,13 @@ class GuessingGame(commands.Cog):
             log.console(f"Ending Guessing Game in {ctx.channel.id}")
             ex.cache.guessing_games.remove(game)
 
-    @stopgg.before_invoke
-    @guessinggame.before_invoke
-    @ggleaderboard.before_invoke
-    async def disabled_weverse(self, ctx):
-        await ctx.send(f"""**Guessing Game will be disabled until we find out Irene's API issue.**""")
-        raise Exception
+
+    # @stopgg.before_invoke
+    # @guessinggame.before_invoke
+    # @ggleaderboard.before_invoke
+    # async def disabled_weverse(self, ctx):
+    #     await ctx.send(f"""**Guessing Game will be disabled until we find out Irene's API issue.**""")
+    #     raise Exception
 
 
 # noinspection PyBroadException,PyPep8
@@ -175,10 +176,11 @@ class Game:
                 self.correct_answers = [alias.lower() for alias in self.idol.aliases]
                 self.correct_answers.append(self.idol.full_name.lower())
                 self.correct_answers.append(self.idol.stage_name.lower())
-                log.console(f'{", ".join(self.correct_answers)} - {self.channel.id}')
                 # Skip this idol if it is taking too long
                 async with async_timeout.timeout(self.post_attempt_timeout) as posting:
                     self.idol_post_msg, self.photo_link = await ex.u_group_members.idol_post(self.channel, self.idol, user_id=self.host, guessing_game=True, scores=self.players)
+                    log.console(f'{", ".join(self.correct_answers)} - {self.channel.id}')
+
                 if posting.expired:
                     log.console(f"Posting for {self.idol.full_name} ({self.idol.stage_name}) [{self.idol.id}]"
                                 f" took more than {self.post_attempt_timeout}")

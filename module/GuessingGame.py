@@ -27,12 +27,10 @@ class GuessingGame(commands.Cog):
             else:
                 top_user_scores = await ex.u_guessinggame.get_guessing_game_top_ten(difficulty)
 
-            user_position = 0
             lb_string = ""
-            for user_id, score in top_user_scores:
-                user_position += 1
+            for user_position, (user_id, score) in enumerate(top_user_scores):
                 score = await ex.u_guessinggame.get_user_score(difficulty.lower(), user_id)
-                lb_string += f"**{user_position})** <@{user_id}> - {score}\n"
+                lb_string += f"**{user_position + 1})** <@{user_id}> - {score}\n"
             m_embed = await ex.create_embed(title=f"Guessing Game Leaderboard ({difficulty.lower()}) ({mode})",
                                             title_desc=lb_string)
             await ctx.send(embed=m_embed)
@@ -112,9 +110,15 @@ class Game:
 
         def check_correct_answer(message):
             """Check if the user has the correct answer."""
-            return ((message.content.lower() in self.correct_answers) or
-                    ((message.content.lower() == 'skip' or message.content.lower() in stop_phrases)
-                     and message.author.id == self.host)) and message.channel == self.channel
+            if message.channel != self.channel:
+                return False
+            if message.content.lower() in self.correct_answers:
+                return True
+            if message.author.id != self.host:
+                return False
+            if message.content.lower() == 'skip' or message.content.lower() in stop_phrases:
+                return True
+
         try:
             msg = await ex.client.wait_for('message', check=check_correct_answer, timeout=self.timeout)
             await msg.add_reaction(keys.check_emoji)

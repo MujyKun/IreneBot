@@ -74,6 +74,13 @@ class GuessingGame(commands.Cog):
             log.console(f"Ending Guessing Game in {ctx.channel.id}")
             ex.cache.guessing_games.remove(game)
 
+    @stopgg.before_invoke
+    @guessinggame.before_invoke
+    @ggleaderboard.before_invoke
+    async def disabled_weverse(self, ctx):
+        await ctx.send(f"""**Guessing Game will be disabled until we find out Irene's API issue.**""")
+        raise Exception
+
 
 # noinspection PyBroadException,PyPep8
 class Game:
@@ -178,8 +185,7 @@ class Game:
             log.console(f'{", ".join(self.correct_answers)} - {self.channel.id}')
             self.idol_post_msg, self.photo_link = await ex.u_group_members.idol_post(self.channel, self.idol, user_id=self.host, guessing_game=True, scores=self.players)
             await self.check_message()
-        except Exception as e:
-            print(e)
+        except:
             pass
 
     async def display_winners(self):

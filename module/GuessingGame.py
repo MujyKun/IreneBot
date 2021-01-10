@@ -142,34 +142,38 @@ class Game:
     async def create_new_question(self):
         """Create a new question and send it to the channel."""
         # noinspection PyBroadException
-        try:
-            if self.idol_post_msg:
-                try:
-                    await self.idol_post_msg.delete()
-                except:
-                    # message does not exist.
-                    pass
-            if self.rounds >= self.max_rounds:
-                if not self.force_ended:
-                    await self.end_game()
-                return True  # will properly end the game.
+        question_posted = False
+        while not question_posted:
+            try:
+                if self.idol_post_msg:
+                    try:
+                        await self.idol_post_msg.delete()
+                    except:
+                        # message does not exist.
+                        pass
 
-            idol_gender_set = ex.cache.gender_selection.get(self.gender)
-            idol_difficulty_set = ex.cache.difficulty_selection.get(self.difficulty)
-            idol_set = list(idol_gender_set & idol_difficulty_set)
-            if not idol_set:
-                raise LookupError(f"No valid idols for the group {self.gender} and {self.difficulty}.")
-            self.idol = random.choice(idol_set)
+                # Create random idol selection
+                idol_gender_set = ex.cache.gender_selection.get(self.gender)
+                idol_difficulty_set = ex.cache.difficulty_selection.get(self.difficulty)
+                idol_set = list(idol_gender_set & idol_difficulty_set)
+                if not idol_set:
+                    raise LookupError(f"No valid idols for the group {self.gender} and {self.difficulty}.")
+                self.idol = random.choice(idol_set)
 
-            self.group_names = [(await ex.u_group_members.get_group(group_id)).name for group_id in self.idol.groups]
-            self.correct_answers = [alias.lower() for alias in self.idol.aliases]
-            self.correct_answers.append(self.idol.full_name.lower())
-            self.correct_answers.append(self.idol.stage_name.lower())
-            log.console(f'{", ".join(self.correct_answers)} - {self.channel.id}')
-            self.idol_post_msg, self.photo_link = await ex.u_group_members.idol_post(self.channel, self.idol, user_id=self.host, guessing_game=True, scores=self.players)
-            await self.check_message()
-        except:
-            pass
+                # Create acceptable answers
+                self.group_names = [(await ex.u_group_members.get_group(group_id)).name for group_id in self.idol.groups]
+                self.correct_answers = [alias.lower() for alias in self.idol.aliases]
+                self.correct_answers.append(self.idol.full_name.lower())
+                self.correct_answers.append(self.idol.stage_name.lower())
+                log.console(f'{", ".join(self.correct_answers)} - {self.channel.id}')
+
+                self.idol_post_msg, self.photo_link = await ex.u_group_members.idol_post(self.channel, self.idol, user_id=self.host, guessing_game=True, scores=self.players)
+                question_posted = True
+            except LookupError:
+                raise
+            except Exception as e:
+                log.console(e)
+                continue
 
     async def display_winners(self):
         """Displays the winners and their scores."""
@@ -210,8 +214,12 @@ class Game:
     async def process_game(self):
         """Ignores errors and continuously makes new questions until the game should end."""
         try:
-            while not await self.create_new_question():
-                # the game will only end if True is returned from create_new_question()
-                pass
+            while self.rounds < self.max_rounds and not self.force_ended:
+                try:
+                    await self.create_new_question()
+                except LookupError as e:
+                    self.channel.send(f"The gender and difficulty settings selected have no idols.")
+                    log.console(e)
+                await self.check_message()
         except Exception as e:
             log.console(e)

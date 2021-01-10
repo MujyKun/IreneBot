@@ -100,17 +100,16 @@ class Game:
         self.force_ended = False
         self.idol_post_msg = None
         self.gender = None
-        self.gender_forced = False
-        # difficulty must be in this list in order for it to
         if gender.lower() in ex.cache.male_aliases:
             self.gender = 'm'
-            self.gender_forced = True
         elif gender.lower() in ex.cache.female_aliases:
             self.gender = 'f'
-            self.gender_forced = True
-        self.difficulty = ex.cache.difficulty_aliases.get(difficulty)
-        if not self.difficulty:
-            self.difficulty = 2  # set to medium by default
+        else:
+            self.gender = "all"
+        if difficulty in ex.cache.difficulty_selection.keys():
+            self.difficulty = difficulty
+        else:
+            self.difficulty = "medium"
 
     async def check_message(self):
         """Check incoming messages in the text channel and determine if it is correct."""
@@ -158,13 +157,13 @@ class Game:
                 if not self.force_ended:
                     await self.end_game()
                 return True  # will properly end the game.
-            self.idol = await ex.u_group_members.get_random_idol()
-            if not self.gender_forced:
-                self.gender = random.choice(['m', 'f'])
 
-            while self.idol.gender != self.gender or ex.cache.difficulty_aliases[self.idol.difficulty] > self.difficulty:
-                # will result in an infinite loop if there are no idols on easy mode and difficulty is easy mode.
-                self.idol = await ex.u_group_members.get_random_idol()
+            idol_gender_set = ex.cache.gender_selection.get(self.gender)
+            idol_difficulty_set = ex.cache.difficulty_selection.get(self.difficulty)
+            idol_set = list(idol_gender_set & idol_difficulty_set)
+            if not idol_set:
+                raise LookupError(f"No valid idols for the group {self.gender} and {self.difficulty}.")
+            self.idol = random.choice(idol_set)
 
             self.group_names = [(await ex.u_group_members.get_group(group_id)).name for group_id in self.idol.groups]
             self.correct_answers = []
@@ -216,6 +215,9 @@ class Game:
 
     async def process_game(self):
         """Ignores errors and continuously makes new questions until the game should end."""
-        while not await self.create_new_question():
-            # the game will only end if True is returned from create_new_question()
-            pass
+        try:
+            while not await self.create_new_question():
+                # the game will only end if True is returned from create_new_question()
+                pass
+        except Exception as e:
+            log.console(e)

@@ -25,6 +25,8 @@ class AutoRestart:
                 self.start_bot()
 
     def start_bot(self):
+        os.system("sudo killall python3")
+        os.system("python3 external/quickstart.py")
         os.system("python3 run.py")
         self.bot_running = True
 

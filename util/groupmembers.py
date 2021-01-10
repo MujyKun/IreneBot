@@ -674,8 +674,15 @@ class GroupMembers:
     @staticmethod
     async def get_google_drive_link(api_url):
         """Get the google drive link based on the api's image url."""
-        return ex.first_result(
-            await ex.conn.fetchrow("SELECT driveurl FROM groupmembers.apiurl WHERE apiurl = $1", str(api_url)))
+        # commenting this out because now the file ids are in the api urls.
+        # return ex.first_result(
+        #   await ex.conn.fetchrow("SELECT driveurl FROM groupmembers.apiurl WHERE apiurl = $1", str(api_url)))
+        beginning_position = api_url.find("/idol/") + 6
+        ending_position = api_url.find("image.")
+        if ending_position == -1:
+            ending_position = api_url.find("video.")
+        api_url_id = int(api_url[beginning_position:ending_position])  # the file id hidden in the url
+        return ex.first_result(await ex.conn.fetch("SELECT link FROM groupmembers.imagelinks WHERE id = $1", api_url_id))
 
     async def get_image_msg(self, idol, group_id, channel, photo_link, user_id=None, guild_id=None, api_url=None,
                             special_message=None, guessing_game=False, scores=None):
@@ -720,8 +727,8 @@ class GroupMembers:
                             # video
                             if guessing_game:
                                 # do not allow videos in the guessing game.
-                                return self.get_image_msg(idol, group_id, channel, photo_link, user_id, guild_id,
-                                                          api_url, special_message, guessing_game, scores)
+                                return await self.get_image_msg(idol, group_id, channel, photo_link, user_id, guild_id,
+                                                                api_url, special_message, guessing_game, scores)
                             url_data = json.loads(await r.text())
                             api_url = url_data.get('final_image_link')
                             file_location = url_data.get('location')
@@ -739,9 +746,12 @@ class GroupMembers:
                             msg = await channel.send(f"**No photos were found for this idol ({idol.id}).**")
                             return msg, None
                         elif r.status == 502:
-                            msg = await channel.send("API is currently being overloaded with requests.")
+                            msg = await channel.send("API is currently being overloaded with requests or is down.")
                             log.console("API is currently being overloaded with requests or is down.")
                             return msg, None
+                        elif r.status == 500:
+                            #log.console("Server Issue -> Error 500")
+                            return None, None
                         else:
                             # error unaccounted for.
                             log.console(f"{r.status} - Status Code from API.")
@@ -816,14 +826,21 @@ class GroupMembers:
                                                         special_message=special_message, guessing_game=guessing_game,
                                                         scores=scores)
                 if not msg and not api_url:
+                    if guessing_game:
+                        # ensure the message posts.
+                        return await self.idol_post(channel, idol, photo_link, group_id, special_message, user_id,
+                                                    guessing_game, scores)
                     ex.api_issues += 1
                 await self.update_member_count(idol)
-            except:
-                if guessing_game:
-                    return self.idol_post(channel, idol, photo_link, group_id, special_message, user_id, guessing_game,
-                                          scores)
+            except AttributeError:
                 await channel.send(
                     f"> An error has occurred. If you are in DMs, It is not possible to receive Idol Photos.")
+                return None, None
+
+            except Exception as e:
+                if guessing_game:
+                    return await self.idol_post(channel, idol, photo_link, group_id, special_message, user_id,
+                                                guessing_game, scores)
                 return None, None
             return msg, api_url
         except Exception as e:

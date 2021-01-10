@@ -49,6 +49,13 @@ class BiasGame(commands.Cog):
             msg_string = f"> **There are no bias game wins for {user.display_name}.**"
         await ctx.send(msg_string)
 
+    @biasgame.before_invoke
+    @stopbg.before_invoke
+    @listbg.before_invoke
+    async def disabled_weverse(self, ctx):
+        await ctx.send(f"""**Bias Game will be disabled until we find out Irene's cause for a memory leak.**""")
+        raise Exception
+
 
 # noinspection PyBroadException,PyPep8
 class Game:

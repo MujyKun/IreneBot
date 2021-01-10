@@ -71,6 +71,7 @@ class GuessingGame(commands.Cog):
         ex.cache.guessing_games.append(game)
         await game.start_game(ctx, max_rounds=rounds, timeout=timeout, gender=gender, difficulty=difficulty)
         if game in ex.cache.guessing_games:
+            log.console(f"Ending Guessing Game in {ctx.channel.id}")
             ex.cache.guessing_games.remove(game)
 
 
@@ -177,7 +178,8 @@ class Game:
             log.console(f'{", ".join(self.correct_answers)} - {self.channel.id}')
             self.idol_post_msg, self.photo_link = await ex.u_group_members.idol_post(self.channel, self.idol, user_id=self.host, guessing_game=True, scores=self.players)
             await self.check_message()
-        except:
+        except Exception as e:
+            print(e)
             pass
 
     async def display_winners(self):

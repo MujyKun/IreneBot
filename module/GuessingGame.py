@@ -227,6 +227,7 @@ class Game:
                 except LookupError as e:
                     self.channel.send(f"The gender and difficulty settings selected have no idols.")
                     log.console(e)
+                    return
                 await self.check_message()
         except Exception as e:
             log.console(e)

@@ -167,22 +167,19 @@ class Cache:
             idol_obj.called = await ex.u_group_members.get_db_idol_called(idol_obj.id)
             idol_obj.photo_count = ex.cache.idol_photos.get(idol_obj.id) or 0
             ex.cache.idols.append(idol_obj)
-        ex.cache.idols_female = {idol for idol in ex.cache.idols if idol.gender == 'f' and idol.photo_count}
-        ex.cache.idols_male = {idol for idol in ex.cache.idols if idol.gender == 'm' and idol.photo_count}
-        ex.cache.idols_easy = {idol for idol in ex.cache.idols if idol.difficulty == 'easy' and idol.photo_count}
-        ex.cache.idols_medium = {idol for idol in ex.cache.idols if idol.difficulty in ['easy', 'medium'] and idol.photo_count}
-        ex.cache.idols_hard = {idol for idol in ex.cache.idols if idol.difficulty in ['easy', 'medium', 'hard'] and idol.photo_count}
-        ex.cache.difficulty_selection = {'easy': ex.cache.idols_easy,
-                                         'e': ex.cache.idols_easy,
-                                         'medium': ex.cache.idols_medium,
-                                         'm': ex.cache.idols_medium,
-                                         'hard': ex.cache.idols_hard,
-                                         'h': ex.cache.idols_hard
-                                         }
-        ex.cache.gender_selection = {'f': ex.cache.idols_female,
-                                     'm': ex.cache.idols_male,
-                                     'all': set(ex.cache.idols)
-                                     }
+        # Clear and update these cache values to prevent breaking the memory reference made by
+        # ex.cache.difficulty_selection and ex.cache.gender_selection
+        ex.cache.idols_female.clear()
+        ex.cache.idols_male.clear()
+        ex.cache.idols_easy.clear()
+        ex.cache.idols_medium.clear()
+        ex.cache.idols_hard.clear()
+        ex.cache.idols_female.update({idol for idol in ex.cache.idols if idol.gender == 'f' and idol.photo_count})
+        ex.cache.idols_male.update({idol for idol in ex.cache.idols if idol.gender == 'm' and idol.photo_count})
+        ex.cache.idols_easy.update({idol for idol in ex.cache.idols if idol.difficulty == 'easy' and idol.photo_count})
+        ex.cache.idols_medium.update({idol for idol in ex.cache.idols if idol.difficulty in ['easy', 'medium'] and idol.photo_count})
+        ex.cache.idols_hard.update({idol for idol in ex.cache.idols if idol.difficulty in ['easy', 'medium', 'hard'] and idol.photo_count})
+
 
     @staticmethod
     async def create_group_cache():

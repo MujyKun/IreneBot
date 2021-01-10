@@ -166,9 +166,7 @@ class Game:
             self.idol = random.choice(idol_set)
 
             self.group_names = [(await ex.u_group_members.get_group(group_id)).name for group_id in self.idol.groups]
-            self.correct_answers = []
-            for alias in self.idol.aliases:
-                self.correct_answers.append(alias.lower())
+            self.correct_answers = [alias.lower() for alias in self.idol.aliases]
             self.correct_answers.append(self.idol.full_name.lower())
             self.correct_answers.append(self.idol.stage_name.lower())
             log.console(f'{", ".join(self.correct_answers)} - {self.channel.id}')

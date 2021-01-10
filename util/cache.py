@@ -179,7 +179,7 @@ class Cache:
         ex.cache.idols_easy.update({idol for idol in ex.cache.idols if idol.difficulty == 'easy' and idol.photo_count})
         ex.cache.idols_medium.update({idol for idol in ex.cache.idols if idol.difficulty in ['easy', 'medium'] and idol.photo_count})
         ex.cache.idols_hard.update({idol for idol in ex.cache.idols if idol.difficulty in ['easy', 'medium', 'hard'] and idol.photo_count})
-
+        ex.cache.gender_selection['all'] = set(ex.cache.idols)
 
     @staticmethod
     async def create_group_cache():

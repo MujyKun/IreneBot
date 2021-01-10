@@ -52,8 +52,6 @@ class GuessingGame(commands.Cog):
             return await ctx.send("> **ERROR -> The max rounds is 60 and the max timeout is 60s.**")
         elif rounds < 1 or timeout < 3:
             return await ctx.send("> **ERROR -> The minimum rounds is 1 and the minimum timeout is 3 seconds.**")
-        await ctx.send(f"> Starting a guessing game for `{gender if gender != 'all' else 'both male and female'}` idols"
-                       f" with `{difficulty}` difficulty, `{rounds}` rounds, and `{timeout}s` of guessing time.")
         await self.start_game(ctx, rounds, timeout, gender, difficulty)
         # Bot has been crashing without issue being known. Reverting creating a separate task for every game.
         # task = asyncio.create_task(self.start_game(ctx, rounds, timeout, gender, difficulty))
@@ -66,8 +64,10 @@ class GuessingGame(commands.Cog):
 
     @staticmethod
     async def start_game(ctx, rounds, timeout, gender, difficulty):
-        game = Game(ctx,max_rounds=rounds, timeout=timeout, gender=gender, difficulty=difficulty)
+        game = Game(ctx, max_rounds=rounds, timeout=timeout, gender=gender, difficulty=difficulty)
         ex.cache.guessing_games.append(game)
+        await ctx.send(f"> Starting a guessing game for `{game.gender if game.gender != 'all' else 'both male and female'}` idols"
+                       f" with `{game.difficulty}` difficulty, `{rounds}` rounds, and `{timeout}s` of guessing time.")
         await game.process_game()
         if game in ex.cache.guessing_games:
             ex.cache.guessing_games.remove(game)

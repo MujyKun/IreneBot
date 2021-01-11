@@ -182,8 +182,8 @@ class Cache(commands.Cog):
             'h': self.idols_hard
         }
         self.gender_selection = {
-            'f': self.idols_female,
-            'm': self.idols_male,
+            'female': self.idols_female,
+            'male': self.idols_male,
             'all': set(self.idols)
         }
 

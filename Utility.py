@@ -32,7 +32,7 @@ class Utility:
         self.loop_count = 0
         self.recursion_limit = 10000
         self.api_issues = 0
-        self.max_idol_post_attempts = 20
+        self.max_idol_post_attempts = 100
         self.weverse_client = WeverseAsync(authorization=keys.weverse_auth_token, web_session=self.session,
                                            verbose=True, loop=asyncio.get_event_loop())
         self.exceptions = exceptions

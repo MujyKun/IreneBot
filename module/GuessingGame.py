@@ -149,8 +149,6 @@ class Game:
                 raise RuntimeError(f"msg passed check_correct_message() but was not correct, 'skip', or 'stop'."
                                    f"msg: {msg.content.lower()}")
         except asyncio.TimeoutError:
-            # reveal the answer
-            self.rounds += 1
             if not self.force_ended:
                 await self.print_answer()
                 self.rounds += 1

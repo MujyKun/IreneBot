@@ -125,30 +125,35 @@ class Game:
                 return False
             if message.content.lower() in self.correct_answers:
                 return True
-            if message.author.id != self.host:
-                return False
-            if message.content.lower() == 'skip' or message.content.lower() in stop_phrases:
-                return True
+            if message.author.id == self.host:
+                return message.content.lower() == 'skip' or message.content.lower() in stop_phrases
 
         try:
             msg = await ex.client.wait_for('message', check=check_correct_answer, timeout=self.timeout)
             await msg.add_reaction(keys.check_emoji)
             if msg.content.lower() == 'skip':
                 await self.print_answer(question_skipped=True)
-            elif msg.content.lower() in stop_phrases and not self.force_ended:
-                return await self.end_game()
-            else:
+                return
+            elif msg.content.lower() in self.correct_answers:
                 score = self.players.get(msg.author.id)
                 if not score:
                     self.players[msg.author.id] = 1
                 else:
                     self.players[msg.author.id] = score + 1
                 self.rounds += 1
+            elif msg.content.lower() in stop_phrases or self.force_ended:
+                self.force_ended = True
+                return
+            else:
+                # Forbidden error
+                raise RuntimeError(f"msg passed check_correct_message() but was not correct, 'skip', or 'stop'."
+                                   f"msg: {msg.content.lower()}")
         except asyncio.TimeoutError:
             # reveal the answer
             self.rounds += 1
             if not self.force_ended:
                 await self.print_answer()
+                self.rounds += 1
 
     async def create_new_question(self):
         """Create a new question and send it to the channel."""
@@ -241,4 +246,5 @@ class Game:
                 await self.check_message()
             await self.end_game()
         except Exception as e:
+            self.channel.send(f"An error has occurred and the game has ended. Please report this.")
             log.console(e)

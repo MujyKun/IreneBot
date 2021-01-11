@@ -783,7 +783,10 @@ class GroupMembers:
     async def idol_post(self, channel, idol, photo_link=None, group_id=None, special_message=None, user_id=None,
                         guessing_game=False, scores=None):
         """The main process for posting an idol's photo."""
-        try:
+        msg, api_url = None, None
+        post_success = False
+        post_attempts = 0
+        while not post_success and post_attempts < ex.max_idol_post_attempts:
             try:
                 msg, api_url = await self.get_image_msg(idol, group_id, channel, photo_link, user_id=user_id,
                                                         guild_id=channel.guild.id, api_url=photo_link,
@@ -792,10 +795,13 @@ class GroupMembers:
                 if not msg and not api_url:
                     if guessing_game:
                         # ensure the message posts.
-                        return await self.idol_post(channel, idol, photo_link, group_id, special_message, user_id,
-                                                    guessing_game, scores)
+                        post_success = False
+                        post_attempts += 1
+                        continue
                     ex.api_issues += 1
                 await self.update_member_count(idol)
+                # Setting to true even if non-guessing game idol has no msg or api_url to prevent infinite loop
+                post_success = True
             except AttributeError:
                 await channel.send(
                     f"> An error has occurred. If you are in DMs, It is not possible to receive Idol Photos.")
@@ -803,13 +809,17 @@ class GroupMembers:
 
             except Exception as e:
                 if guessing_game:
-                    return await self.idol_post(channel, idol, photo_link, group_id, special_message, user_id,
-                                                guessing_game, scores)
+                    post_success = False
+                    post_attempts += 1
+                    continue
+                log.console(e)
                 return None, None
-            return msg, api_url
-        except Exception as e:
-            log.console(e)
-            return None, None
+        if post_attempts >= ex.max_idol_post_attempts:
+            raise StopIteration(f"Idol posting reached max attempts of {ex.max_idol_post_attempts} for {idol.full_name} "
+                                f"({idol.stage_name}) [{idol.id}] in channel {channel.guild.id}\n"
+                                f"photo link: {photo_link}\n"
+                                f"Photo was {'guessing game call' if guessing_game else 'regular idol call'}.")
+        return msg, api_url
 
     class Idol:
         def __init__(self, **kwargs):

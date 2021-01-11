@@ -239,5 +239,6 @@ class Game:
                     log.console(e)
                     return
                 await self.check_message()
+            await self.end_game()
         except Exception as e:
             log.console(e)

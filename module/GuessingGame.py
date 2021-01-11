@@ -102,9 +102,9 @@ class Game:
         self.gender = None
         self.post_attempt_timeout = 10
         if gender.lower() in ex.cache.male_aliases:
-            self.gender = 'm'
+            self.gender = 'male'
         elif gender.lower() in ex.cache.female_aliases:
-            self.gender = 'f'
+            self.gender = 'female'
         else:
             self.gender = "all"
         if difficulty in ex.cache.difficulty_selection.keys():

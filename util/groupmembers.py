@@ -600,9 +600,9 @@ class GroupMembers:
 
     async def process_names(self, ctx, page_number_or_group, mode):
         """Structures the input for idol names commands and sends information to transfer the names to the channels."""
-        if type(page_number_or_group) == int:
+        if isinstance(page_number_or_group, int):
             await self.send_names(ctx, mode, page_number_or_group)
-        elif type(page_number_or_group) == str:
+        elif isinstance(page_number_or_group, str):
             server_id = await ex.get_server_id(ctx)
             groups, name = await self.get_group_where_group_matches_name(page_number_or_group, mode=1,
                                                                          server_id=server_id)
@@ -612,12 +612,10 @@ class GroupMembers:
         """returns specific idols being called from a reference to a group ex: redvelvet irene"""
         groups, new_message = await self.get_group_where_group_matches_name(message_content, mode=1,
                                                                             server_id=server_id)
-        member_list = []
         members = await self.get_idol_where_member_matches_name(new_message, mode=1, server_id=server_id)
-        for group in groups:
-            for member in members:
-                if member.id in group.members:
-                    member_list.append(member)
+        member_list = [member
+                       for group in groups for member in members
+                       if member.id in group.members]
         return member_list or None
 
     @staticmethod
@@ -629,7 +627,7 @@ class GroupMembers:
         else:
             idol.called += 1
             await ex.conn.execute("UPDATE groupmembers.Count SET Count = $1 WHERE MemberID = $2", idol.called,
-                                    idol.id)
+                                  idol.id)
 
     @staticmethod
     async def set_as_group_photo(link):

@@ -650,21 +650,24 @@ class GroupMembers:
                             special_message=None, guessing_game=False, scores=None):
         """Get the image link from the API and return the message containing the image."""
 
-        async def post_msg(m_file=None, m_embed=None, repeated=0):
+        async def post_msg(m_file=None, m_embed=None):
             """Send the message to the channel and return it."""
             message = None
-            try:
-                if not special_message:
-                    message = await channel.send(embed=m_embed, file=m_file)
-                else:
-                    message = await channel.send(special_message, embed=m_embed, file=m_file)
-            except:
-                # cannot access API or API Link -> attempt to post it 5 times.
-                # this happens because the image link may not be properly registered.
-                if repeated < 5:
-                    if not message:
-                        await asyncio.sleep(0.5)
-                        message = await post_msg(m_file=m_file, m_embed=m_embed, repeated=repeated + 1)
+            max_post_attempt = 5
+            for attempt in range(0, max_post_attempt):
+                try:
+                    if not special_message:
+                        message = await channel.send(embed=m_embed, file=m_file)
+                    else:
+                        message = await channel.send(special_message, embed=m_embed, file=m_file)
+                    break
+                except:
+                    # cannot access API or API Link -> attempt to post it 5 times.
+                    # this happens because the image link may not be properly registered.
+                    if message:
+                        break
+                    await asyncio.sleep(0.5)
+                    continue
             return message
 
         file = None

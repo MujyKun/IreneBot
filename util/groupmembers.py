@@ -114,7 +114,6 @@ class GroupMembers:
                 raise TypeError
         return final_string
 
-
     async def set_embed_card_info(self, obj, group=False, server_id=None):
         """Sets General Information about a Group or Idol."""
 
@@ -816,10 +815,11 @@ class GroupMembers:
                 log.console(e)
                 return None, None
         if post_attempts >= ex.max_idol_post_attempts:
-            raise StopIteration(f"Idol posting reached max attempts of {ex.max_idol_post_attempts} for {idol.full_name} "
-                                f"({idol.stage_name}) [{idol.id}] in channel {channel.guild.id}\n"
-                                f"photo link: {photo_link}\n"
-                                f"Photo was {'guessing game call' if guessing_game else 'regular idol call'}.")
+            raise ex.exceptions.MaxAttempts(
+                f"Idol posting reached max attempts of {ex.max_idol_post_attempts} for {idol.full_name} "
+                f"({idol.stage_name}) [{idol.id}] in channel {channel.guild.id}\n"
+                f"photo link: {photo_link}\n"
+                f"Photo was {'guessing game call' if guessing_game else 'regular idol call'}.")
         return msg, api_url
 
     class Idol:

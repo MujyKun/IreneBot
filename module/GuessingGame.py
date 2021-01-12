@@ -146,8 +146,8 @@ class Game:
                 return
             else:
                 # Forbidden error
-                raise RuntimeError(f"msg passed check_correct_message() but was not correct, 'skip', or 'stop'."
-                                   f"msg: {msg.content.lower()}")
+                raise ex.exceptions.ShouldNotBeHere(f"msg passed check_correct_message() but was not correct, "
+                                                    f"'skip', or 'stop'. msg: {msg.content.lower()}")
         except asyncio.TimeoutError:
             if not self.force_ended:
                 await self.print_answer()

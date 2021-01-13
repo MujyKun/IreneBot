@@ -16,7 +16,9 @@ class BiasGame(commands.Cog):
             return await ctx.send("> You are not allowed to play bias game in DMs.")
         if ex.find_game(ctx.channel, ex.cache.bias_games):
             server_prefix = await ex.get_server_prefix_by_context(ctx)
-            return await ctx.send(f"> **A bias game is currently in progress in this channel. Only 1 Bias Game can run in a channel at once. If this is a mistake, use `{server_prefix}stopbg`.**")
+            return await ctx.send(f"> **A bias game is currently in progress in this channel. "
+                                  f"Only 1 Bias Game can run in a channel at once. "
+                                  f"If this is a mistake, use `{server_prefix}stopbg`.**")
         game = Game(ctx, bracket_size, gender)
         ex.cache.bias_games.append(game)
         await ctx.send(f"> Starting a {game.bracket_size} bracket bias game for "
@@ -50,12 +52,12 @@ class BiasGame(commands.Cog):
             msg_string = f"> **There are no bias game wins for {user.display_name}.**"
         await ctx.send(msg_string)
 
-    @biasgame.before_invoke
-    @stopbg.before_invoke
-    @listbg.before_invoke
-    async def disabled_weverse(self, ctx):
-        await ctx.send(f"""**Bias Game will be disabled until we find out Irene's cause for a memory leak.**""")
-        raise Exception
+    # @biasgame.before_invoke
+    # @stopbg.before_invoke
+    # @listbg.before_invoke
+    # async def disabled_weverse(self, ctx):
+    #     await ctx.send(f"""**Bias Game will be disabled until we find out Irene's cause for a memory leak.**""")
+    #     raise Exception
 
 
 # noinspection PyBroadException,PyPep8
@@ -105,6 +107,9 @@ class Game:
                 add_winner(first_idol)
             elif reaction.emoji == '➡':
                 add_winner(second_idol)
+            else:
+                raise ex.exceptions.ShouldNotBeHere("Bias game reaction was returned from wait_for() "
+                                                    "when it is neither ⬅ nor ➡")
             await message.delete()
         except asyncio.TimeoutError:
             await message.delete()
@@ -120,7 +125,7 @@ class Game:
         odd_idols = self.original_idols_in_game[1::2]
         self.current_bracket_teams = [list(idol_pair) for idol_pair in zip(even_idols, odd_idols)]
 
-    async def create_new_question(self):
+    async def run_current_bracket(self):
         """Generate a new question for the bias game."""
         self.number_of_idols_left = len(self.current_bracket_teams) * 2
         for first_idol, second_idol in self.current_bracket_teams:
@@ -182,7 +187,7 @@ class Game:
             await self.generate_brackets()
             while len(self.current_bracket_teams) > 1 and not self.force_ended:
                 try:
-                    await self.create_new_question()
+                    await self.run_current_bracket()
                 except:
                     raise RuntimeError
             self.bracket_winner = self.secondary_bracket_teams[0][0]

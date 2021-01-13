@@ -1,7 +1,7 @@
 import discord
 from Utility import resources as ex
 from discord.ext import commands
-from module import keys
+from module import keys, logger as log
 import random
 import asyncio
 
@@ -23,6 +23,7 @@ class BiasGame(commands.Cog):
 
         # remove game once it's complete
         if game in ex.cache.bias_games:
+            log.console(f"Ending Bias Game in {ctx.channel.id}")
             ex.cache.bias_games.remove(game)
 
     @commands.command()

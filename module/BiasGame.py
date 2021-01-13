@@ -164,9 +164,7 @@ Remaining Idols: {self.number_of_idols_left}
 
         self.all_brackets_together.append(self.current_bracket_teams)
         if len(self.current_bracket_teams) == 1:
-            # final round finished.
-            self.bracket_winner = self.secondary_bracket_teams[0][0]
-            return True
+            return
 
         self.current_bracket_teams = self.secondary_bracket_teams
         self.secondary_bracket_teams = []
@@ -190,3 +188,19 @@ Remaining Idols: {self.number_of_idols_left}
                 await ex.conn.execute("UPDATE biasgame.winners SET wins = $1 WHERE userid = $2 AND idolid = $3", wins + 1, self.host, self.bracket_winner.id)
             else:
                 await ex.conn.execute("INSERT INTO biasgame.winners(idolid, userid, wins) VALUES ($1, $2, $3)", self.bracket_winner.id, self.host, 1)
+
+    async def process_game(self):
+        """Process bias guessing game by sending messages and new questions until the game should end."""
+        try:
+            await self.generate_brackets()
+            while len(self.current_bracket_teams) > 1:
+                try:
+                    await self.create_new_question()
+                except:
+                    raise RuntimeError
+            self.bracket_winner = self.secondary_bracket_teams[0][0]
+            await self.print_winner()
+            await self.update_user_wins()
+        except Exception as e:
+            self.channel.send(f"An error has occurred and the game has ended. Please report this.")
+            log.console(e)

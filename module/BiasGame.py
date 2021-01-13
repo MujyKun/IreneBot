@@ -123,32 +123,31 @@ class Game:
     async def create_new_question(self):
         """Generate a new question for the bias game."""
         self.number_of_idols_left = len(self.current_bracket_teams) * 2
-        for battle in self.current_bracket_teams:
-            if not self.force_ended:
-                first_idol = battle[0]
-                second_idol = battle[1]
-                try:
-                    first_idol_group = (await ex.u_group_members.get_group(random.choice(first_idol.groups))).name
-                except:
-                    first_idol_group = first_idol.full_name
-                try:
-                    second_idol_group = (await ex.u_group_members.get_group(random.choice(second_idol.groups))).name
-                except:
-                    second_idol_group = second_idol.full_name
+        for first_idol, second_idol in self.current_bracket_teams:
+            if self.force_ended:
+                return
+            try:
+                first_idol_group = (await ex.u_group_members.get_group(random.choice(first_idol.groups))).name
+            except:
+                first_idol_group = first_idol.full_name
+            try:
+                second_idol_group = (await ex.u_group_members.get_group(random.choice(second_idol.groups))).name
+            except:
+                second_idol_group = second_idol.full_name
 
-                msg_body = f"""
-**@{self.host_ctx.author.display_name}**
-Remaining Idols: {self.number_of_idols_left}
-{first_idol_group} ({first_idol.stage_name}) **VS** {second_idol_group} ({second_idol.stage_name})
-"""
-                display_name = f"{first_idol.stage_name} VS {second_idol.stage_name}.png"
-                file_location = await ex.u_bias_game.create_bias_game_image(first_idol.id, second_idol.id)
-                image_file = discord.File(fp=file_location, filename=display_name)
-                msg = await self.channel.send(msg_body, file=image_file)
-                await msg.add_reaction(keys.previous_emoji)  # left arrow by default
-                await msg.add_reaction(keys.next_emoji)  # right arrow by default
-                await self.check_message(msg, first_idol, second_idol)
-                self.number_of_idols_left -= 1
+            msg_body = f"""
+                        **@{self.host_ctx.author.display_name}**
+                        Remaining Idols: {self.number_of_idols_left}
+                        {first_idol_group} ({first_idol.stage_name}) **VS** {second_idol_group} ({second_idol.stage_name})
+                        """
+            display_name = f"{first_idol.stage_name} VS {second_idol.stage_name}.png"
+            file_location = await ex.u_bias_game.create_bias_game_image(first_idol.id, second_idol.id)
+            image_file = discord.File(fp=file_location, filename=display_name)
+            msg = await self.channel.send(msg_body, file=image_file)
+            await msg.add_reaction(keys.previous_emoji)  # left arrow by default
+            await msg.add_reaction(keys.next_emoji)  # right arrow by default
+            await self.check_message(msg, first_idol, second_idol)
+            self.number_of_idols_left -= 1
 
         self.all_brackets_together.append(self.current_bracket_teams)
         if len(self.current_bracket_teams) == 1:
@@ -181,7 +180,7 @@ Remaining Idols: {self.number_of_idols_left}
         """Process bias guessing game by sending messages and new questions until the game should end."""
         try:
             await self.generate_brackets()
-            while len(self.current_bracket_teams) > 1:
+            while len(self.current_bracket_teams) > 1 and not self.force_ended:
                 try:
                     await self.create_new_question()
                 except:

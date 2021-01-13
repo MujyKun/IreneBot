@@ -133,32 +133,35 @@ class Reminder:
         if any(char.isdigit() for char in input_timezone):
             try:
                 timezone_offset = (re.findall(r"[+-]\d+", input_timezone))[0]
-                utc_offset = f"-{timezone_offset[1:len(timezone_offset)]}" \
-                                if timezone_offset[0] == "+" else f"+{timezone_offset[1:len(timezone_offset)]}"
+                timezone_sign = timezone_offset[0]
+                timezone_value = timezone_offset[1:]
+                # Swap GMT and UTC definitions, which are inverted of each other
+                utc_offset = f"-{timezone_value}" if timezone_sign == "+" else f"+{timezone_value}"
                 input_timezone = 'Etc/GMT' + utc_offset
             except:
                 pass
 
-        matching_timezones = None
-
         try:
-            matching_timezones = set(common_tz for common_tz in pytz.common_timezones
-                                     if now_tz_str(common_tz) == now_tz_str(input_timezone))
+            name_matching_timezones = set(common_tz for common_tz in pytz.common_timezones
+                                          if now_tz_str(common_tz) == now_tz_str(input_timezone))
         except pytz.exceptions.UnknownTimeZoneError:
-            matching_timezones = set(common_tz for common_tz in pytz.common_timezones
-                                     if now_tz_str(common_tz) == input_timezone)
+            name_matching_timezones = set(common_tz for common_tz in pytz.common_timezones
+                                          if now_tz_str(common_tz) == input_timezone)
         except:
-            pass
+            name_matching_timezones = None
 
         # Find the timezones which share both same timezone input and the same country code
         if input_country_code:
             try:
                 country_timezones = set(pytz.country_timezones[input_country_code])
-                possible_timezones = matching_timezones.intersection(country_timezones)
-            except:
-                possible_timezones = matching_timezones
-        else:
-            possible_timezones = matching_timezones
+                possible_timezones = name_matching_timezones & country_timezones
+            except KeyError:  # Given country code is not a valid country code
+                possible_timezones = name_matching_timezones
+        else:  # Try to default to US timezone
+            us_timezones = set(pytz.country_timezones['US'])
+            possible_timezones = name_matching_timezones & us_timezones
+            if not possible_timezones:
+                possible_timezones = name_matching_timezones
 
         if not possible_timezones:
             return None
@@ -166,25 +169,38 @@ class Reminder:
         return random.choice(list(possible_timezones))
 
     @staticmethod
-    async def get_locale_time(m_time, user_timezone=None):
+    async def format_time(string_format, user_timezone, input_time: datetime.datetime = None):
+        """ Format time according to the user timezone"""
+        if not input_time:
+            return datetime.datetime.now(pytz.timezone(user_timezone)).strftime(string_format)
+        else:
+            return input_time.astimezone(pytz.timezone(user_timezone)).strftime(string_format)
+
+    async def get_locale_time(self, m_time, user_timezone=None):
         """ Return a string containing locale date format. For now, enforce all weekdays to be en_US format"""
         # Set locale to server locale
+        weekday_format = '%a'
+        date_format = '%x'
         time_format = '%I:%M:%S%p %Z'
         locale.setlocale(locale.LC_ALL, '')
 
         if not user_timezone:
-            return m_time.strftime('%a %x %I:%M:%S%p %Z')
+            return m_time.strftime(f"{weekday_format} {date_format} {time_format}")
 
         # Use weekday format of server
-        weekday = m_time.astimezone(pytz.timezone(user_timezone)).strftime('%a')
+        weekday = await self.format_time(weekday_format, user_timezone, m_time)
 
-        simplified_user_timezone = f"{(ex.cache.locale_by_timezone[user_timezone].replace('-', '_'))}.utf8"
-        locale.setlocale(locale.LC_ALL, simplified_user_timezone)  # Set to user locale
-        locale_date = m_time.astimezone(pytz.timezone(user_timezone)).strftime('%x')
+        # Format date according to the locale of the user
+        user_locale = f"{(ex.cache.locale_by_timezone[user_timezone].replace('-', '_'))}.utf8"
+        try:
+            locale.setlocale(locale.LC_ALL, user_locale)  # Set to user locale
+        except:
+            locale.setlocale(locale.LC_ALL, 'en_US.utf8')
+        locale_date = await self.format_time(date_format, user_timezone, m_time)
         locale.setlocale(locale.LC_ALL, '')  # Reset locale back to server locale
 
-        local_time = m_time.astimezone(pytz.timezone(user_timezone))
-        local_time = local_time.strftime(time_format)
+        # Use time format of the server
+        local_time = await self.format_time(time_format, user_timezone, m_time)
         return f"{weekday} {locale_date} {local_time}"
 
     @staticmethod

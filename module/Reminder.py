@@ -118,8 +118,8 @@ class Reminder(commands.Cog):
             return await ctx.send(f"> {user.display_name}{', you do' if user==ctx.author else ' does'}"
                                   f" not have a timezone set." + (help_message if user == ctx.author else ""))
 
-        current_time = datetime.datetime.now(pytz.timezone(user_timezone)).strftime('%I:%M:%S %p')
-        timezone_abbrev = datetime.datetime.now(pytz.timezone(user_timezone)).strftime('UTC%z')
+        current_time = await ex.u_reminder.format_time('%I:%M:%S %p', user_timezone)
+        timezone_abbrev = await ex.u_reminder.format_time('UTC%z', user_timezone)
         return await ctx.send(
             f"> {user.display_name}{', your' if user==ctx.author else chr(39)+'s'} current time is "
             f"`{current_time}` in the timezone `{user_timezone} {timezone_abbrev}`")
@@ -138,8 +138,8 @@ class Reminder(commands.Cog):
             return await ctx.send(f"> {ctx.author.display_name}, that is not a valid timezone. "
                                   f"Please use {server_prefix}settimezone (timezone name) (country code).")
 
-        timezone_utc = datetime.datetime.now(pytz.timezone(user_timezone)).strftime('UTC%z')
-        native_time = datetime.datetime.now(pytz.timezone(user_timezone)).strftime('%c')
+        timezone_utc = await ex.u_reminder.format_time('UTC%z', user_timezone)
+        native_time = await ex.u_reminder.format_time('%c', user_timezone)
         await ex.u_reminder.set_user_timezone(ctx.author.id, user_timezone)
         return await ctx.send(f"> {ctx.author.display_name}, your timezone has been set to `{user_timezone} "
                               f"{timezone_utc}`, where it is currently `{native_time}`")

@@ -74,7 +74,7 @@ class Game:
         self.all_brackets_together = []
         self.original_idols_in_game = []
         self.bracket_winner = None
-        self.number_of_idols_left = 0
+        self.number_of_idols_left = 2 * bracket_size
 
         if (bracket_size % 8 == 0 and 4 <= bracket_size <= 32) or bracket_size == 4:
             self.bracket_size = bracket_size
@@ -185,7 +185,7 @@ class Game:
         """Process bias guessing game by sending messages and new questions until the game should end."""
         try:
             await self.generate_brackets()
-            while len(self.current_bracket_teams) > 1 and not self.force_ended:
+            while self.number_of_idols_left > 1 and not self.force_ended:
                 try:
                     await self.run_current_bracket()
                 except:
@@ -194,5 +194,5 @@ class Game:
             await self.print_winner()
             await self.update_user_wins()
         except Exception as e:
-            self.channel.send(f"An error has occurred and the game has ended. Please report this.")
+            await self.channel.send(f"An error has occurred and the game has ended. Please report this.")
             log.console(e)

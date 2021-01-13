@@ -112,25 +112,13 @@ class Game:
 
     async def generate_brackets(self):
         """Generates the brackets and the idols going against each other"""
-        random.shuffle(ex.cache.idols)
-        first_idol = None
-        for idol in ex.cache.idols:
-            if not len(self.current_bracket_teams) < self.bracket_size and not first_idol:
-                continue
-            if not idol.thumbnail:
-                continue
+        idol_selection = ex.cache.gender_selection.get(self.gender)
+        idol_selection = [idol for idol in idol_selection if idol.thumbnail]
+        self.original_idols_in_game = random.sample(idol_selection, self.bracket_size)
 
-            check_gender = True
-            if self.gender:
-                if idol.gender != self.gender:
-                    check_gender = False
-            if check_gender:
-                if first_idol:
-                    self.current_bracket_teams.append([first_idol, idol])
-                    first_idol = None
-                else:
-                    first_idol = idol
-                self.original_idols_in_game.append(idol)
+        even_idols = self.original_idols_in_game[::2]
+        odd_idols = self.original_idols_in_game[1::2]
+        self.current_bracket_teams = [list(idol_pair) for idol_pair in zip(even_idols, odd_idols)]
 
     async def create_new_question(self):
         """Generate a new question for the bias game."""

@@ -17,11 +17,11 @@ class BiasGame(commands.Cog):
         if ex.find_game(ctx.channel, ex.cache.bias_games):
             server_prefix = await ex.get_server_prefix_by_context(ctx)
             return await ctx.send(f"> **A bias game is currently in progress in this channel. Only 1 Bias Game can run in a channel at once. If this is a mistake, use `{server_prefix}stopbg`.**")
-        game = Game()
+        game = Game(ctx, bracket_size, gender)
         ex.cache.bias_games.append(game)
-        await game.start_game(ctx, bracket_size=bracket_size, gender=gender.lower())
-
-        # remove game once it's complete
+        await ctx.send(f"> Starting a {game.bracket_size} bracket bias game for "
+                       f"`{game.gender if game.gender != 'all' else 'both male and female'}` idols.")
+        await game.process_game()
         if game in ex.cache.bias_games:
             log.console(f"Ending Bias Game in {ctx.channel.id}")
             ex.cache.bias_games.remove(game)
@@ -60,12 +60,10 @@ class BiasGame(commands.Cog):
 
 # noinspection PyBroadException,PyPep8
 class Game:
-    def __init__(self):
-        self.host_ctx = None  # ctx of the host starting game
-        self.host = None  # id of the host - realistically should be storing author here instead of id but meh
-        self.bracket_size = 8  # bracket size
-        self.gender = None  # gender of game
-        self.channel = None
+    def __init__(self, ctx, bracket_size=8, gender="all"):
+        self.host_ctx = ctx  # ctx of the host starting game
+        self.host = ctx.author.id  # id of the host - realistically should be storing author here instead of id but meh
+        self.channel = ctx.channel
         self.force_ended = False
         self.current_bracket_teams = []
         # secondary is the next teams up the bracket and is a temporary holder to be moved into current bracket teams.
@@ -76,26 +74,15 @@ class Game:
         self.bracket_winner = None
         self.number_of_idols_left = 0
 
-    async def start_game(self, ctx, bracket_size=8, gender="all"):
-        """Start the bias game."""
-        self.host_ctx = ctx
-        self.host = ctx.author.id
-        self.channel = ctx.channel
         if (bracket_size % 8 == 0 and 4 <= bracket_size <= 32) or bracket_size == 4:
             self.bracket_size = bracket_size
 
         if gender.lower() in ex.cache.male_aliases:
-            self.gender = 'm'
+            self.gender = 'male'
         elif gender.lower() in ex.cache.female_aliases:
-            self.gender = 'f'
-
-        await self.generate_brackets()
-        await ctx.send(f"> Starting a {self.bracket_size} bracket bias game for "
-                       f"`{'male' if self.gender =='m' else 'female' if self.gender=='f' else 'both male and female'}` idols.")
-        while not await self.create_new_question():
-            pass  # returns true when game is done.
-        await self.print_winner()
-        await self.update_user_wins()
+            self.gender = 'female'
+        else:
+            self.gender = 'all'
 
     async def check_message(self, message, first_idol, second_idol):
         """Check the reactions of the message and process results"""

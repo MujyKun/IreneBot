@@ -114,7 +114,7 @@ class Game:
         """Generates the brackets and the idols going against each other"""
         idol_selection = ex.cache.gender_selection.get(self.gender)
         idol_selection = [idol for idol in idol_selection if idol.thumbnail]
-        self.original_idols_in_game = random.sample(idol_selection, self.bracket_size)
+        self.original_idols_in_game = random.sample(idol_selection, 2 * self.bracket_size)
 
         even_idols = self.original_idols_in_game[::2]
         odd_idols = self.original_idols_in_game[1::2]

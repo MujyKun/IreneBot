@@ -99,13 +99,13 @@ class Game:
     async def check_message(self, message, first_idol, second_idol):
         """Check the reactions of the message and process results"""
         def check_response(user_reaction, reaction_user):
-            return ((user_reaction.emoji == '➡') or (user_reaction.emoji == '⬅')) and reaction_user != message.author\
+            return user_reaction.emoji in ['➡', '⬅'] and reaction_user != message.author\
                    and user_reaction.message.id == message.id and reaction_user.id == self.host
 
         def add_winner(idol):
             """Add the winner to the next bracket and have them face the previous idol that won."""
             if self.secondary_bracket_teams:
-                latest_fight = self.secondary_bracket_teams[len(self.secondary_bracket_teams) - 1]
+                latest_fight = self.secondary_bracket_teams[-1]
                 if len(latest_fight) == 1:
                     latest_fight.append(idol)
                     return

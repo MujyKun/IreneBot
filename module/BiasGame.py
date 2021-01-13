@@ -141,9 +141,9 @@ class Game:
                 second_idol_group = second_idol.full_name
 
             msg_body = f"""
-                        **@{self.host_ctx.author.display_name}**
-                        Remaining Idols: {self.number_of_idols_left}
-                        {first_idol_group} ({first_idol.stage_name}) **VS** {second_idol_group} ({second_idol.stage_name})
+**@{self.host_ctx.author.display_name}**
+Remaining Idols: {self.number_of_idols_left}
+{first_idol_group} ({first_idol.stage_name}) **VS** {second_idol_group} ({second_idol.stage_name})
                         """
             display_name = f"{first_idol.stage_name} VS {second_idol.stage_name}.png"
             file_location = await ex.u_bias_game.create_bias_game_image(first_idol.id, second_idol.id)
@@ -163,7 +163,8 @@ class Game:
 
     async def end_game(self):
         """End the game"""
-        await self.channel.send(f"The current game has now ended due to not responding in time or it was force closed.")
+        if not self.force_ended:
+            await self.channel.send(f"The current game has now ended due to not responding in time or it was force closed.")
         self.force_ended = True
 
     async def print_winner(self):
@@ -190,6 +191,8 @@ class Game:
                     await self.run_current_bracket()
                 except:
                     raise RuntimeError
+            if self.force_ended:
+                return
             self.bracket_winner = self.secondary_bracket_teams[0][0]
             await self.print_winner()
             await self.update_user_wins()

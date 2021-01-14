@@ -1,6 +1,6 @@
 from module import logger as log
 from Utility import resources as ex
-from module.keys import bot_prefix, bot_support_server_link, site_port, bot_id, bot_name, translate_private_key
+from module.keys import bot_prefix, bot_support_server_link, site_port, bot_id, bot_name, translate_private_key, api_port
 import discord
 import random
 import json

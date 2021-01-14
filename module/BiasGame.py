@@ -4,6 +4,7 @@ from discord.ext import commands
 from module import keys, logger as log
 import random
 import asyncio
+from math import log2
 
 
 # noinspection PyPep8
@@ -74,11 +75,13 @@ class Game:
         self.all_brackets_together = []
         self.original_idols_in_game = []
         self.bracket_winner = None
-        self.bracket_size = bracket_size
         self.number_of_idols_left = 2 * bracket_size
 
-        if (bracket_size % 8 == 0 and 4 <= bracket_size <= 32) or bracket_size == 4:
-            self.bracket_size = bracket_size
+        if bracket_size > 32:
+            bracket_size = 32
+        elif bracket_size < 4:
+            bracket_size = 4
+        self.bracket_size = 2**int(log2(bracket_size))
 
         if gender.lower() in ex.cache.male_aliases:
             self.gender = 'male'

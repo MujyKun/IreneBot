@@ -12,7 +12,6 @@ app = Flask(__name__)
 
 @app.route('/members/', methods=['GET'])
 def get_all_members():
-    # TODO
     """Gets all full names and stage names of idols."""
     c.execute("SELECT id, fullname, stagename FROM groupmembers.member")
     all_members = {}

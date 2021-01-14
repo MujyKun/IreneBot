@@ -238,11 +238,11 @@ class Game:
                 try:
                     await self.create_new_question()
                 except LookupError as e:
-                    self.channel.send(f"The gender and difficulty settings selected have no idols.")
+                    await self.channel.send(f"The gender and difficulty settings selected have no idols.")
                     log.console(e)
                     return
                 await self.check_message()
             await self.end_game()
         except Exception as e:
-            self.channel.send(f"An error has occurred and the game has ended. Please report this.")
+            await self.channel.send(f"An error has occurred and the game has ended. Please report this.")
             log.console(e)

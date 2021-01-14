@@ -676,9 +676,11 @@ class GroupMembers:
 
                 data = {'allow_group_photos': int(not guessing_game)}
                 headers = {'Authorization': translate_private_key}
-                end_point = f"http://127.0.0.1:{api_port}/photos/{idol.id}"
-                if ex.test_bot:
-                    end_point = f"https://api.irenebot.com/photos/{idol.id}"
+                # end_point = f"http://127.0.0.1:{api_port}/photos/{idol.id}"
+                # if ex.test_bot:
+                #     end_point = f"https://api.irenebot.com/photos/{idol.id}"
+                # attempt to access link directly instead of from localhost.
+                end_point = f"https://api.irenebot.com/photos/{idol.id}"
                 while find_post:  # guarantee we get a post sent to the user.
                     async with ex.session.post(end_point, headers=headers, data=data) as r:
                         ex.cache.bot_api_idol_calls += 1
@@ -712,7 +714,7 @@ class GroupMembers:
                             log.console("API is currently being overloaded with requests or is down.")
                             return msg, None
                         elif r.status == 500:
-                            #log.console("Server Issue -> Error 500")
+                            log.console("Server Issue -> Error 500")
                             return None, None
                         else:
                             # error unaccounted for.

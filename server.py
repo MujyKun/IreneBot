@@ -31,7 +31,7 @@ class AutoRestart:
 
     @staticmethod
     def start_api():
-        os.system("sudo gunicorn --bind 0.0.0.0:5454 --workers=1 --threads=10 --chdir API run:app")
+        os.system("sudo gunicorn --bind 0.0.0.0:5454 --workers=25 --threads=1 --chdir API run:app")
 
     @staticmethod
     def start_site():

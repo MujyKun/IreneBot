@@ -21,7 +21,7 @@
 <h2>GroupMembers:</h2>
 <p class="api_info">
     <strong>Pass in Private Keys as an Authorization Bearer Token in the header.</strong><br><br><br>
-    <strong>https://api.irenebot.com/photos/:idolID</strong>   (POST)-> Get redirected to an image of the Idol. Psss in 'allow_group_photos' as 1 to get any photos, or 0 to not get group photos. <br>
+    <strong>https://api.irenebot.com/photos/:idolID</strong>   (POST)-> Get redirected to an image of the Idol. Pass in 'allow_group_photos' as 1 to get any photos, or 0 to not get group photos. <br>
         Status 404 -> Idol has no Photos<br>
         Status 500 -> Server Issue<br>
         Status 200 -> You have been redirected to the image (essentially 308). If using from code and not postman, you can typically get the url of the open connection and that will be the image url.<br>

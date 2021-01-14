@@ -195,3 +195,7 @@ weverse_image_folder = os.getenv("WEVERSE_IMAGE_FOLDER")
 api_port = os.getenv("API_PORT")
 # translate private key is the same as the idol photo key.
 translate_private_key = ((os.getenv("PRIVATE_KEYS")).split(','))[0]  # use the first result in the list of keys.
+
+# Site
+
+site_port = os.getenv("SITE_PORT")

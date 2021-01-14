@@ -1,6 +1,6 @@
 from module import logger as log
 from Utility import resources as ex
-from module.keys import bot_prefix, bot_support_server_link, api_port, bot_id, bot_name, translate_private_key
+from module.keys import bot_prefix, bot_support_server_link, site_port, bot_id, bot_name, translate_private_key
 import discord
 import random
 import json
@@ -275,12 +275,12 @@ class Miscellaneous:
                 'text': text,
                 'src_lang': await self.get_language_code(src_lang),
                 'target_lang': await self.get_language_code(target_lang),
-                'p_key': translate_private_key
             }
-            end_point = f"http://127.0.0.1:{api_port}/translate"
+            headers = {"Authorization": translate_private_key}
+            end_point = f"http://127.0.0.1:{site_port}/translate"
             if ex.test_bot:
-                end_point = f"https://api.irenebot.com/translate"
-            async with ex.session.post(end_point, data=data) as r:
+                end_point = f"https://irenebot.com/translate"
+            async with ex.session.post(end_point, headers=headers, data=data) as r:
                 ex.cache.bot_api_translation_calls += 1
                 if r.status == 200:
                     return json.loads(await r.text())

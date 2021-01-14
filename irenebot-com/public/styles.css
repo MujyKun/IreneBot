@@ -164,13 +164,20 @@ h4 {
   color: #ecf0fc;
 }
 
+h2 {
+  font-family: "Playfair Display", serif;
+  font-size: 20px;
+  font-weight: 100;
+  color: #ecf0fc;
+}
+
 .commands {
   margin-top: 50px;
   margin-left: 150px;
   margin-right: 150px;
 }
 
-h5 {
+h5, .api_info, blockquote {
   padding-top: 25px;
   padding-left: 150px;
   align-items: center;

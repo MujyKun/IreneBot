@@ -674,15 +674,13 @@ class GroupMembers:
             try:
                 find_post = True
 
-                data = {
-                    'p_key':  translate_private_key,
-                    'no_group_photos': int(guessing_game)
-                }
-                end_point = f"http://127.0.0.1:{ api_port}/photos/{idol.id}"
+                data = {'allow_group_photos': int(not guessing_game)}
+                headers = {'Authorization': translate_private_key}
+                end_point = f"http://127.0.0.1:{api_port}/photos/{idol.id}"
                 if ex.test_bot:
                     end_point = f"https://api.irenebot.com/photos/{idol.id}"
                 while find_post:  # guarantee we get a post sent to the user.
-                    async with ex.session.post(end_point, data=data) as r:
+                    async with ex.session.post(end_point, headers=headers, data=data) as r:
                         ex.cache.bot_api_idol_calls += 1
                         if r.status == 200 or r.status == 301:
                             api_url = r.url

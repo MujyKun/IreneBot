@@ -74,6 +74,7 @@ class Game:
         self.all_brackets_together = []
         self.original_idols_in_game = []
         self.bracket_winner = None
+        self.bracket_size = bracket_size
         self.number_of_idols_left = 2 * bracket_size
 
         if (bracket_size % 8 == 0 and 4 <= bracket_size <= 32) or bracket_size == 4:

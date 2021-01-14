@@ -141,8 +141,7 @@ def get_top_gg_vote():
 
 @app.route('/', methods=['GET'])
 def get_default_route():
-    # return redirect("https://irenebot.com/api", code=308)
-    return redirect("http://localhost:4848/api", code=308)
+    return redirect("https://irenebot.com/api", code=308)
 
 
 def check_webhook_key(key):

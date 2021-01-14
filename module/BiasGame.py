@@ -81,7 +81,7 @@ class Game:
             bracket_size = 32
         elif bracket_size < 4:
             bracket_size = 4
-        self.bracket_size = 2**int(log2(bracket_size))
+        self.bracket_size = 2**int(log2(bracket_size))  # rounds down to the closest power of 2
 
         if gender.lower() in ex.cache.male_aliases:
             self.gender = 'male'

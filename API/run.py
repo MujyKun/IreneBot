@@ -124,7 +124,7 @@ def get_top_gg_vote():
         # Invalid Webhook Key
         return Response(status=403)
 
-    user_id = request.args.get('user')
+    user_id = (request.get_json()).get('user')
     if not user_id:
         return Response(status=400)
 
@@ -190,4 +190,7 @@ def process_image(link_info):
         return file_data, 415
 
     return redirect(image_host_url, code=308)
+
+
+app.run(port=5454)
 

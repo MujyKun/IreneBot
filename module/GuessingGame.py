@@ -112,6 +112,11 @@ class Game:
         else:
             self.difficulty = "medium"
 
+        # create the game's idol pool.
+        idol_gender_set = ex.cache.gender_selection.get(self.gender)
+        idol_difficulty_set = ex.cache.difficulty_selection.get(self.difficulty)
+        self.idol_set = list(idol_gender_set & idol_difficulty_set)
+
     async def check_message(self):
         """Check incoming messages in the text channel and determine if it is correct."""
         if self.force_ended:
@@ -167,18 +172,16 @@ class Game:
                         pass
 
                 # Create random idol selection
-                idol_gender_set = ex.cache.gender_selection.get(self.gender)
-                idol_difficulty_set = ex.cache.difficulty_selection.get(self.difficulty)
-                idol_set = list(idol_gender_set & idol_difficulty_set)
-                if not idol_set:
+                if not self.idol_set:
                     raise LookupError(f"No valid idols for the group {self.gender} and {self.difficulty}.")
-                self.idol = random.choice(idol_set)
+                self.idol = random.choice(self.idol_set)
 
                 # Create acceptable answers
                 self.group_names = [(await ex.u_group_members.get_group(group_id)).name for group_id in self.idol.groups]
                 self.correct_answers = [alias.lower() for alias in self.idol.aliases]
                 self.correct_answers.append(self.idol.full_name.lower())
                 self.correct_answers.append(self.idol.stage_name.lower())
+
                 # Skip this idol if it is taking too long
                 async with async_timeout.timeout(self.post_attempt_timeout) as posting:
                     self.idol_post_msg, self.photo_link = await ex.u_group_members.idol_post(self.channel, self.idol, user_id=self.host, guessing_game=True, scores=self.players)

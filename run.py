@@ -114,6 +114,7 @@ class Irene:
         ex.client.add_cog(module.Weverse.Weverse())
         ex.client.add_cog(module.SelfAssignRoles.SelfAssignRoles())
         ex.client.add_cog(module.Reminder.Reminder())
+        ex.client.add_cog(module.Gacha.Gacha())
 
     @staticmethod
     def create_util_objects():
@@ -138,6 +139,7 @@ class Irene:
         ex.u_self_assign_roles = util.selfassignroles.SelfAssignRoles()
         ex.u_reminder = util.reminder.Reminder()
         ex.u_guessinggame = util.guessinggame.GuessingGame()
+        ex.u_gacha = util.gacha.Gacha()
 
 
 if __name__ == '__main__':

@@ -4,6 +4,7 @@ from Utility import resources as ex
 import datetime
 import pytz
 import discord
+import typing
 
 
 # noinspection PyBroadException,PyPep8
@@ -105,10 +106,24 @@ class Reminder(commands.Cog):
             f"`{await ex.u_reminder.get_locale_time(remind_time,user_timezone)}`")
 
     @commands.command(aliases=['gettz', 'time'])
-    async def gettimezone(self, ctx, user: discord.Member = None):
+    async def gettimezone(self, ctx, user_input: typing.Union[discord.Member, str] = None):
         """Get your current set timezone.
         [Format: %gettimezone]"""
         server_prefix = await ex.get_server_prefix_by_context(ctx)
+
+        if isinstance(user_input, str):
+            try:
+                timezone_input = await ex.u_reminder.process_timezone_input(user_input)
+                current_time = await ex.u_reminder.format_time('%I:%M:%S %p', timezone_input)
+                return await ctx.send(f"The current time in `{timezone_input}` is `{current_time}`.")
+            except:
+                return await ctx.send(f"Your input was neither a user or a valid timezone.")
+        elif isinstance(user_input, discord.Member):
+            user = user_input
+        elif not user_input:
+            user = None
+        else:
+            return await ctx.send(f"Your input was neither a user or a valid timezone.")
 
         if not user:
             user = ctx.author

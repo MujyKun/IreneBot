@@ -57,6 +57,7 @@ class Utility:
         self.u_self_assign_roles = None
         self.u_reminder = None
         self.u_guessinggame = None
+        self.u_gacha = None
 
     @staticmethod
     def first_result(record):

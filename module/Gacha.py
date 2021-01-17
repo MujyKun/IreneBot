@@ -124,3 +124,69 @@ class Gacha(commands.Cog):
         [Format: %buypack (pack name)]"""
         pass
 
+
+class IdolCard():
+    def __init__(self, idol, issue_number, rap_skill, vocal_skill, dance_skill, rarity):
+        self.idol = idol
+        self.issue_number = issue_number
+        self.rap_skill = rap_skill
+        self.vocal_skill = vocal_skill
+        self.dance_skill = dance_skill
+        self.rarity = rarity
+
+    @staticmethod
+    async def create_new_idol_card(user):
+        pass
+
+
+class Album():
+    def __init__(self, album_name, idol_cards, rap_score, dance_score, vocal_score, popularity, income_rate):
+        self.album_name = album_name
+        self.idol_cards = idol_cards
+        self.idol_number = len(idols)
+        self.rap_score = rap_score
+        self.dance_score = dance_score
+        self.vocal_score = vocal_score
+        self.popularity = popularity
+        self.income_rate = income_rate
+        self.active = True
+        self.total_generated_currency = 0
+
+    @staticmethod
+    async def create_album(album_name, idol_cards):
+        popularity = await ex.u_gacha.random_album_popularity
+        rap_score = await Album.calculate_rap_score(idol_cards)
+        dance_score = await Album.calculate_dance_score(idol_cards)
+        vocal_score = await Album.calculate_vocal_score(idol_cards)
+        return Album(album_name, idol_cards, rap_score, dance_score, vocal_score, popularity, income_rate)
+
+    async def calculate_income_rate(self):
+        max_income_rate = 10000
+
+        completion_bonus = await self.full_group_stat_bonus()
+        # This assumes that idols have only 1 primary skill that ranges 0-99.
+        income_rate = max_income_rate * self.popularity \
+                      * (self.rap_score + self.dance_score + self.vocal_score) / (100*self.idol_number) \
+                      * completion_bonus
+
+    async def full_group_stat_bonus(self):
+        """Provides a small bonus for having idols that fulfill all of the different categories."""
+        number_of_non_zero_skills = bool(self.rap_score) + bool(self.vocal_score) + bool(self.dance_score)
+        if number_of_non_zero_skills == 3:
+            return 1
+        elif number_of_non_zero_skills == 2:
+            return 0.8
+        else:
+            return 0.6
+
+    @staticmethod
+    async def calculate_rap_score(idol_cards):
+        return sum(idol_card.rap_skill for idol_card in idol_cards)
+
+    @staticmethod
+    async def calculate_dance_score(idol_cards):
+        return sum(idol_card.dance_skill for idol_card in idol_cards)
+
+    @staticmethod
+    async def calculate_vocal_score(idol_cards):
+        return sum(idol_card.vocal_skill for idol_card in idol_cards)

@@ -16,5 +16,8 @@
     "php-express": "0.0.3",
     "popper.js": "^1.16.1",
     "serve-favicon": "^2.5.0"
+  },
+  "devDependencies": {
+    "@vue/cli": "^4.5.9"
   }
 }

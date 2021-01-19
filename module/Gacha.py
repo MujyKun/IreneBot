@@ -1,8 +1,8 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 from Utility import resources as ex
 from module import logger as log
-
+import datetime
 
 # noinspection PyPep8
 class Gacha(commands.Cog):
@@ -123,6 +123,27 @@ class Gacha(commands.Cog):
         """Buys/Opens a pack using Regular/Purchasable Currency. (Opens Instantly)
         [Format: %buypack (pack name)]"""
         pass
+
+    @tasks.loop(seconds=0, minutes=5, hours=0, reconnect=True)
+    async def album_loop(self):
+        for user_id in ex.cache.gacha_albums:
+            albums = ex.cache.gacha_albums.get(user_id)
+            if not albums:
+                continue
+            for album in albums:
+                current_time = datetime.datetime.now()
+                next_money_add_time = album.last_money_generated_time + \
+                                      datetime.timedelta(minutes=GachaValues.album_money_generation_time_in_minutes)
+                if not album.active and current_time > next_money_add_time:
+                    # TODO: Update user money in cache and in db
+                    album.total_generated_currency += GachaValues.album_inactive_income_rate
+                    album.last_money_generated_time = current_time
+                elif album.active and current_time > next_money_add_time:
+                    # TODO: Update user money in cache and in db
+                    album.total_generated_currency += album.income_rate
+                    album.last_money_generated_time = current_time
+                if current_time > album.inactive_time:
+                    album.active = False
 
 
 class GachaValues:

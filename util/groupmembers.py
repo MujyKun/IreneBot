@@ -884,6 +884,7 @@ class GroupMembers:
             self.thumbnail = kwargs.get('thumbnail')
             self.banner = kwargs.get('banner')
             self.gender = kwargs.get('gender')
+            self.skill = kwargs.get('skill')
             self.photo_count = 0
             self.tags = kwargs.get('tags')
             if self.tags:

@@ -187,6 +187,12 @@ class Cache(commands.Cog):
             'all': set(self.idols)
         }
 
+        # Dictionary containing the list of all idol_cards each user owns
+        self.idol_cards = {}  # {user_id : [ idol_cards ]}
+
+        # Dictionary containing the list of all idol_albums each user owns
+        self.gacha_albums = {}  # {user_id : [ albums ]}
+
         # bracket position for bias game stored due to annoyance when using previous x and y values.
         # counting starts from left to right, bottom to top
         self.stored_bracket_positions = {

@@ -62,7 +62,11 @@ class Gacha(commands.Cog):
         """Create an active album with maximum 6 idols. Album names must be unique.
         [Format: %createalbum (album name) (idol 1) (idol 2) ...]"""
         idols = idols.split(' ')
-        pass
+        #TODO: convert idol string to idol objects
+        new_album = Album.create_album(idols)
+        albums = ex.cache.gacha_albums.get(ctx.author.id)
+        albums.append(new_album)
+        #TODO: add album to db
 
     @commands.command()
     async def viewalbums(self, ctx, user: discord.User):

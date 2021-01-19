@@ -125,25 +125,50 @@ class Gacha(commands.Cog):
         pass
 
 
-class IdolCard():
-    def __init__(self, idol, issue_number, rap_skill, vocal_skill, dance_skill, rarity):
+class GachaValues:
+    album_max_income_rate = 10000
+    album_inactive_income_rate = 5
+    album_three_skill_mult = 1
+    album_two_skill_mult = 0.8
+    album_one_skill_mult = 0.6
+    album_money_generation_time_in_minutes = 30
+    album_active_time_in_hours = 24
+
+class IdolCard:
+    def __init__(self, idol, card_owner: discord.User, issue_number=1,
+                 rap_skill=0, vocal_skill=0, dance_skill=0, rarity='common'):
         self.idol = idol
         self.issue_number = issue_number
         self.rap_skill = rap_skill
         self.vocal_skill = vocal_skill
         self.dance_skill = dance_skill
         self.rarity = rarity
+        self.card_owner = card_owner
 
     @staticmethod
-    async def create_new_idol_card(user):
-        pass
+    async def create_new_idol_card(user, idol=None,
+                                   rap_skill=0, vocal_skill=0, dance_skill=0, card_rarity='common'):
+        if not idol:
+            idol = ex.u_group_members.get_random_idol()
+        idol_card = IdolCard(idol, user)
+        if not rap_skill:
+            idol_card.rap_skill = rap_skill
+        if not vocal_skill:
+            idol_card.vocal_skill = vocal_skill
+        if not dance_skill:
+            idol_card.dance_skill = dance_skill
+        setattr(idol_card, f"{idol.skill}_skill", ex.u_gacha.random_skill_score(card_rarity))
+
+        return idol_card
 
 
-class Album():
-    def __init__(self, album_name, idol_cards, rap_score, dance_score, vocal_score, popularity, income_rate):
+class Album:
+    def __init__(self, album_name, idol_cards,
+                 rap_score=0, dance_score=0, vocal_score=0, popularity=0, income_rate=0,
+                 album_active_time=datetime.timedelta(hours=GachaValues.album_active_time_in_hours)):
         self.album_name = album_name
         self.idol_cards = idol_cards
-        self.idol_number = len(idols)
+        self.idol_number = len(idol_cards)
         self.rap_score = rap_score
         self.dance_score = dance_score
         self.vocal_score = vocal_score
@@ -151,6 +176,9 @@ class Album():
         self.income_rate = income_rate
         self.active = True
         self.total_generated_currency = 0
+        self.creation_time = datetime.datetime.now()
+        self.inactive_time = self.creation_time + album_active_time
+        self.last_money_generated_time = datetime.datetime.now()
 
     @staticmethod
     async def create_album(album_name, idol_cards):
@@ -166,23 +194,25 @@ class Album():
         return album
 
     async def calculate_income_rate(self):
-        max_income_rate = 10000
+        max_income_rate = GachaValues.album_max_income_rate
 
-        completion_bonus = await self.full_group_stat_bonus()
+        completion_bonus = await self.skill_completion_multiplier()
+
         # This assumes that idols have only 1 primary skill that ranges 0-99.
-        income_rate = max_income_rate * self.popularity \
-                      * (self.rap_score + self.dance_score + self.vocal_score) / (100*self.idol_number) \
-                      * completion_bonus
+        income_rate = int(max_income_rate * self.popularity *
+                          (self.rap_score + self.dance_score + self.vocal_score) / (100 * self.idol_number)
+                          * completion_bonus)
+        return income_rate
 
-    async def full_group_stat_bonus(self):
+    async def skill_completion_multiplier(self):
         """Provides a small bonus for having idols that fulfill all of the different categories."""
         number_of_non_zero_skills = bool(self.rap_score) + bool(self.vocal_score) + bool(self.dance_score)
         if number_of_non_zero_skills == 3:
-            return 1
+            return GachaValues.album_three_skill_mult
         elif number_of_non_zero_skills == 2:
-            return 0.8
+            return GachaValues.album_two_skill_mult
         else:
-            return 0.6
+            return GachaValues.album_one_skill_mult
 
     async def calculate_rap_score(self):
         """Returns the total rap skills of all idols in the album"""

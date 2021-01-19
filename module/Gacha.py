@@ -4,6 +4,7 @@ from Utility import resources as ex
 from module import logger as log
 import datetime
 
+
 # noinspection PyPep8
 class Gacha(commands.Cog):
     @commands.command()
@@ -104,7 +105,7 @@ class Gacha(commands.Cog):
         [Format: %convert (amount)]"""
         pass
 
-    @commands.command(aliases="gachaleaderboard")
+    @commands.command(aliases=["gachaleaderboard"])
     async def gachalb(self, ctx, mode="server"):
         """Convert Regular Currency to Purchasable Currency
         [Format: %gachalb (server/global)]"""

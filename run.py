@@ -134,7 +134,7 @@ class Irene:
         ex.u_moderator = util.moderator.Moderator()
         ex.u_custom_commands = util.customcommands.CustomCommands()
         ex.u_bias_game = util.biasgame.BiasGame()
-        ex.u_data_dog = util.datadog.DataDog
+        ex.u_data_dog = util.datadog.DataDog()
         ex.u_weverse = util.weverse.Weverse()
         ex.u_self_assign_roles = util.selfassignroles.SelfAssignRoles()
         ex.u_reminder = util.reminder.Reminder()

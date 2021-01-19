@@ -1,10 +1,16 @@
 from module import keys, logger as log, cache, exceptions
 from Weverse.weverseasync import WeverseAsync
+from typing import TYPE_CHECKING
 import discord
 import random
 import asyncio
 import os
 import tweepy
+
+if TYPE_CHECKING:
+    # do not import in runtime. This is used for type-hints.
+    import util
+
 
 """
 Utility.py
@@ -31,33 +37,37 @@ class Utility:
         self.api = tweepy.API(auth)
         self.loop_count = 0
         self.recursion_limit = 10000
-        self.api_issues = 0
+        self.api_issues = 0  # api issues in a given minute
         self.max_idol_post_attempts = 100
         self.weverse_client = WeverseAsync(authorization=keys.weverse_auth_token, web_session=self.session,
                                            verbose=True, loop=asyncio.get_event_loop())
-        self.exceptions = exceptions
+        self.exceptions = exceptions  # custom error handling
 
-        # SubClass Objects -- Defined in Utility.py
-        self.u_database = None
-        self.u_cache = None
-        self.u_currency = None
-        self.u_miscellaneous = None
-        self.u_blackjack = None
-        self.u_levels = None
-        self.u_group_members = None
-        self.u_logging = None
-        self.u_twitter = None
-        self.u_last_fm = None
-        self.u_patreon = None
-        self.u_moderator = None
-        self.u_custom_commands = None
-        self.u_bias_game = None
-        self.u_data_dog = None
-        self.u_weverse = None
-        self.u_self_assign_roles = None
-        self.u_reminder = None
-        self.u_guessinggame = None
-        self.u_gacha = None
+        # SubClass Objects -- Instances given in run.py
+        self.u_database: util.database.DataBase = None
+        self.u_cache: util.cache.Cache = None
+        self.u_currency: util.currency.Currency = None
+        self.u_miscellaneous: util.miscellaneous.Miscellaneous = None
+        self.u_blackjack: util.blackjack.BlackJack = None
+        self.u_levels: util.levels.Levels = None
+        self.u_group_members: util.groupmembers.GroupMembers = None
+        self.u_logging: util.logging.Logging = None
+        self.u_twitter: util.twitter.Twitter = None
+        self.u_last_fm: util.lastfm.LastFM = None
+        self.u_patreon: util.patreon.Patreon = None
+        self.u_moderator: util.moderator.Moderator = None
+        self.u_custom_commands: util.customcommands.CustomCommands = None
+        self.u_bias_game: util.biasgame.BiasGame = None
+        self.u_data_dog: util.datadog.DataDog = None
+        self.u_weverse: util.weverse.Weverse = None
+        self.u_self_assign_roles: util.selfassignroles.SelfAssignRoles = None
+        self.u_reminder: util.reminder.Reminder = None
+        self.u_guessinggame: util.guessinggame.GuessingGame = None
+        self.u_gacha: util.gacha.Gacha = None
+
+    def first_resultx(self):
+        """Returns the first item of a record if there is one."""
+        pass
 
     @staticmethod
     def first_result(record):

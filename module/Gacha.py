@@ -154,11 +154,16 @@ class Album():
 
     @staticmethod
     async def create_album(album_name, idol_cards):
-        popularity = await ex.u_gacha.random_album_popularity
-        rap_score = await Album.calculate_rap_score(idol_cards)
-        dance_score = await Album.calculate_dance_score(idol_cards)
-        vocal_score = await Album.calculate_vocal_score(idol_cards)
-        return Album(album_name, idol_cards, rap_score, dance_score, vocal_score, popularity, income_rate)
+        popularity = await ex.u_gacha.random_album_popularity()
+        album = Album(album_name, idol_cards, popularity=popularity)
+        album.rap_score = await album.calculate_rap_score()
+        album.dance_score = await album.calculate_dance_score()
+        album.vocal_score = await album.calculate_vocal_score()
+        album.income_rate = await album.calculate_income_rate()
+
+        await album.calculate_income_rate()
+
+        return album
 
     async def calculate_income_rate(self):
         max_income_rate = 10000
@@ -179,14 +184,14 @@ class Album():
         else:
             return 0.6
 
-    @staticmethod
-    async def calculate_rap_score(idol_cards):
-        return sum(idol_card.rap_skill for idol_card in idol_cards)
+    async def calculate_rap_score(self):
+        """Returns the total rap skills of all idols in the album"""
+        return sum(idol_card.rap_skill for idol_card in self.idol_cards)
 
-    @staticmethod
-    async def calculate_dance_score(idol_cards):
-        return sum(idol_card.dance_skill for idol_card in idol_cards)
+    async def calculate_dance_score(self):
+        """Returns the total dance skills of all idols in the album"""
+        return sum(idol_card.dance_skill for idol_card in self.idol_cards)
 
-    @staticmethod
-    async def calculate_vocal_score(idol_cards):
-        return sum(idol_card.vocal_skill for idol_card in idol_cards)
+    async def calculate_vocal_score(self):
+        """returns the total vocal skills of all idols in the album"""
+        return sum(idol_card.vocal_skill for idol_card in self.idol_cards)

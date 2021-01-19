@@ -3,11 +3,12 @@ import random
 import math
 from scipy.special import erf, erfinv
 
+
 class Gacha:
 
     @staticmethod
     async def random_album_popularity():
-        """Returns a random popularity between 0 and 1 that follows the PDF
+        """Returns a truncated normal random popularity between 0 and 1 that follows the PDF
         f(y) = exp( -a * (y - c)^2 ) where a is the curvature and c is the bell center.
         This is a truncated normal distribution.
         The random variable transformation g(x) : x -> y needs to be used where x is a uniform distribution
@@ -40,6 +41,7 @@ class Gacha:
         else:
             raise ex.exceptions.ShouldNotBeHere(f"random_skill_score received the card rarity: {card_rarity} "
                                                 f"which is not a valid card_rarity.")
+
     @staticmethod
     async def get_all_skill_scores(idol_skill_type, card_rarity):
         """Returns the rap, dance, and vocal scores of an idol"""
@@ -47,4 +49,4 @@ class Gacha:
 
         all_skills = [0, 0, 0]
         all_skills[skill_types.get(idol_skill_type)] = await Gacha.random_skill_score(card_rarity)
-        return all_skillsl
+        return all_skills

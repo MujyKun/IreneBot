@@ -5,6 +5,8 @@ import json
 
 class Cache(commands.Cog):
     def __init__(self):
+        # dict of discord (util) User objects -> not from d.py. Stored as a dict for easier searching.
+        self.users = {}  # {user_id: User_object}
         # maintenance mode
         self.maintenance_mode = False
         # maintenance reason
@@ -46,8 +48,6 @@ class Cache(commands.Cog):
         self.idol_photos = {}  # { idol_id: photo_count }
         # All custom server prefixes
         self.server_prefixes = {}  # { server_id: server_prefix }
-        # list of patrons
-        self.patrons = {}  # { user_id: is_super_patron ( True or False ) }
         """
         reset timer for idol photos (keeps track of command usage)
         {
@@ -55,12 +55,6 @@ class Cache(commands.Cog):
             userid: [commands_used, time_since_last_command]
         }"""
         self.commands_used = {"reset_time": time.time()}
-        # phrases that will notify users [guild_id, user_id, phrase]
-        self.user_notifications = []
-        # mod mail user and channel {user_id: channel_id}
-        self.mod_mail = {}
-        # user ids banned from bot [user_id]
-        self.bot_banned = []
         # server to channels being logged
         """
         {
@@ -101,6 +95,7 @@ class Cache(commands.Cog):
         user_id : counter
         }
         """
+        #TODO: Integrate n_word counter on the Util User object as well as the leaderboard and other influencers.
         self.n_word_counter = {}
 
         # list of idol objects
@@ -148,9 +143,6 @@ class Cache(commands.Cog):
         #    roles: [role_id, role_name]
         # }}
 
-        # Reminder dictionary
-        self.reminders = {}  # { user_id: [ [remind_id, remind_reason, remind_time] ] }
-        self.timezones = {}  # { user_id: timezone }
         self.main_youtube_instance = None  # Youtube Object that exists on start up.
 
         # Timezone to Locale dictionary
@@ -186,12 +178,6 @@ class Cache(commands.Cog):
             'male': self.idols_male,
             'all': set(self.idols)
         }
-
-        # Dictionary containing the list of all idol_cards each user owns
-        self.idol_cards = {}  # {user_id : [ idol_cards ]}
-
-        # Dictionary containing the list of all idol_albums each user owns
-        self.gacha_albums = {}  # {user_id : [ albums ]}
 
         # bracket position for bias game stored due to annoyance when using previous x and y values.
         # counting starts from left to right, bottom to top

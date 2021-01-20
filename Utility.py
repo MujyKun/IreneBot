@@ -7,8 +7,8 @@ import asyncio
 import os
 import tweepy
 
+# do not import in runtime. This is used for type-hints.
 if TYPE_CHECKING:
-    # do not import in runtime. This is used for type-hints.
     import util
 
 
@@ -65,9 +65,19 @@ class Utility:
         self.u_guessinggame: util.guessinggame.GuessingGame = None
         self.u_gacha: util.gacha.Gacha = None
 
-    def first_resultx(self):
-        """Returns the first item of a record if there is one."""
-        pass
+        # Util Directory that contains needed objects as attributes.
+        self.u_objects: util.objects = None
+
+    async def get_user(self, user_id):
+        """Creates a user if not created and adds it to the cache, then returns the user object.
+
+        :rtype: util.objects.User
+        """
+        user = self.cache.users.get(user_id)
+        if not user:
+            user = self.u_objects.User(user_id)
+            self.cache.users[user_id] = user
+        return user
 
     @staticmethod
     def first_result(record):
@@ -98,6 +108,8 @@ class Utility:
             if user_id:
                 # user = await self.client.fetch_user(user_id)
                 user = self.client.get_user(user_id)
+                if not user:
+                    user = await self.client.fetch_user(user_id)
             dm_channel = user.dm_channel
             if not dm_channel:
                 await user.create_dm()
@@ -105,6 +117,8 @@ class Utility:
             return dm_channel
         except discord.errors.HTTPException as e:
             log.console(f"{e} - get_dm_channel 1")
+            return
+        except AttributeError:
             return
         except Exception as e:
             log.console(f"{e} - get_dm_channel 2")

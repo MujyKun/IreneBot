@@ -4,6 +4,7 @@ import math
 from scipy.special import erf, erfinv
 
 
+# noinspection SpellCheckingInspection
 class Gacha:
 
     @staticmethod

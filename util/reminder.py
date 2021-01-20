@@ -94,24 +94,25 @@ class Reminder:
     @staticmethod
     async def get_user_timezone(user_id):
         """Returns the user's timezone"""
-        return ex.cache.timezones.get(user_id)
+        return (await ex.get_user(user_id)).timezone
 
     @staticmethod
     async def set_user_timezone(user_id, timezone):
         """Set user timezone"""
-        user_timezone = ex.cache.timezones.get(user_id)
-        ex.cache.timezones[user_id] = timezone
-        if user_timezone:
+        user = await ex.get_user(user_id)
+        if user.timezone:
             await ex.conn.execute("UPDATE reminders.timezones SET timezone = $1 WHERE userid = $2", timezone, user_id)
         else:
             await ex.conn.execute("INSERT INTO reminders.timezones(userid, timezone) VALUES ($1, $2)", user_id,
                                   timezone)
+        user.timezone = timezone
 
     @staticmethod
     async def remove_user_timezone(user_id):
         """Remove user timezone"""
         try:
-            ex.cache.timezones.pop(user_id)
+            user = await ex.get_user(user_id)
+            user.timezone = None
             await ex.conn.execute("DELETE FROM reminders.timezones WHERE userid = $1", user_id)
         except:
             pass
@@ -211,24 +212,23 @@ class Reminder:
         remind_id = ex.first_result(await ex.conn.fetchrow(
             "SELECT id FROM reminders.reminders WHERE userid=$1 AND reason=$2 AND timestamp=$3 ORDER BY id DESC",
             user_id, remind_reason, remind_time))
-        user_reminders = ex.cache.reminders.get(user_id)
+        user = await ex.get_user(user_id)
         remind_info = [remind_id, remind_reason, remind_time]
-        if user_reminders:
-            user_reminders.append(remind_info)
+        if user.reminders:
+            user.reminders.append(remind_info)
         else:
-            ex.cache.reminders[user_id] = [remind_info]
+            user.reminders = [remind_info]
 
     @staticmethod
     async def get_reminders(user_id):
         """Get the reminders of a user"""
-        return ex.cache.reminders.get(user_id)
+        return (await ex.get_user(user_id)).reminders
 
-    @staticmethod
-    async def remove_user_reminder(user_id, reminder_id):
+    async def remove_user_reminder(self, user_id, reminder_id):
         """Remove a reminder from the cache and the database."""
         try:
             # remove from cache
-            reminders = ex.cache.reminders.get(user_id)
+            reminders = await self.get_reminders(user_id)
             if reminders:
                 for reminder in reminders:
                     current_reminder_id = reminder[0]

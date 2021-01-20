@@ -10,32 +10,35 @@ import datetime
 # noinspection PyBroadException,PyPep8
 class Miscellaneous(commands.Cog):
     @staticmethod
-    async def on_message_notifications(message):
+    async def on_message_user_notifications(message):
         # user phrase notifications
         try:
             if message.author.bot:
                 return
-            for guild_id, user_id, phrase in ex.cache.user_notifications:
-                message_split = message.content.lower().split(" ")
-                if phrase not in message_split or guild_id != message.guild.id:
+            message_split = message.content.lower().split(" ")
+            for user in ex.cache.users.values():
+                if not user.notifications:
                     continue
-                if message.author.id == user_id or user_id not in [member.id for member in message.channel.members]:
-                    continue
-                log.console(f"message_notifications 1 - {phrase} to {user_id}")
-                dm_channel = await ex.get_dm_channel(user_id)
-                log.console(f"message_notifications 2 - {phrase} to {user_id}")
-                start_loc = (message.content.lower()).find(phrase)
-                end_loc = start_loc + len(phrase)
-                new_message_content = f"{message.content[0:start_loc]}`{message.content[start_loc:end_loc]}`{message.content[end_loc:len(message.content)]}"
-                title_desc = f"""
+                for guild_id, phrase in user.notifications:
+                    if phrase not in message_split or guild_id != message.guild.id:
+                        continue
+                    if message.author.id == user.id or user.id not in [member.id for member in message.channel.members]:
+                        continue
+                    log.console(f"Sending User Notification - {phrase} to {user.id}")
+                    dm_channel = await ex.get_dm_channel(user.id)
+                    start_loc = (message.content.lower()).find(phrase)
+                    end_loc = start_loc + len(phrase)
+                    new_message_content = f"{message.content[0:start_loc]}`{message.content[start_loc:end_loc]}`" \
+                        f"{message.content[end_loc:len(message.content)]}"
+                    title_desc = f"""
 Phrase: {phrase}
 Message Author: {message.author}
 
 **Message:** {new_message_content}
 [Click to go to the Message]({message.jump_url})
 """
-                embed = await ex.create_embed(title="Phrase Found", color=ex.get_random_color(), title_desc=title_desc)
-                await dm_channel.send(embed=embed)
+                    embed = await ex.create_embed(title="Phrase Found", color=ex.get_random_color(), title_desc=title_desc)
+                    await dm_channel.send(embed=embed)
         except:
             pass
 
@@ -66,7 +69,8 @@ Message Author: {message.author}
             if check_exists:
                 raise Exception
             await ex.conn.execute("INSERT INTO general.notifications(guildid,userid,phrase) VALUES($1, $2, $3)", ctx.guild.id, ctx.author.id, phrase.lower())
-            ex.cache.user_notifications.append([ctx.guild.id, ctx.author.id, phrase.lower()])
+            user = await ex.get_user(ctx.author.id)
+            user.notifications.append([ctx.guild.id, phrase.lower()])
             await ctx.send(f"> **{ctx.author.display_name}, I added `{phrase}` to your notifications.**")
         except AttributeError:
             return await ctx.send(f"> **{ctx.author.display_name}, You are not allowed to use this command in DMs.**")
@@ -79,7 +83,8 @@ Message Author: {message.author}
         try:
             await ex.conn.execute("DELETE FROM general.notifications WHERE guildid=$1 AND userid=$2 AND phrase=$3", ctx.guild.id, ctx.author.id, phrase.lower())
             try:
-                ex.cache.user_notifications.remove([ctx.guild.id, ctx.author.id, phrase.lower()])
+                user = await ex.get_user(ctx.author.id)
+                user.notifications.remove([ctx.guild.id, phrase.lower()])
             except AttributeError:
                 return await ctx.send(
                     f"> **{ctx.author.display_name}, You are not allowed to use this command in DMs.**")
@@ -94,19 +99,24 @@ Message Author: {message.author}
     async def listnoti(self, ctx):
         """list all your notification phrases that exist in the current server. [Format: %listnoti]"""
         try:
-            # use db call instead of cache (would be quicker here)
-            phrases = await ex.conn.fetch("SELECT phrase FROM general.notifications WHERE guildid = $1 AND userid = $2", ctx.guild.id, ctx.author.id)
-            if not phrases:
-                return await ctx.send(f"> **{ctx.author.display_name}, You do not have any notification phrases on this server.**")
+            user = await ex.get_user(ctx.author.id)
+            if not user.notifications:
+                raise AttributeError
             final_list = ""
-            counter = 1
-            for phrase in phrases:
-                if counter != len(phrases):
-                    final_list += f"**{phrase[0]}**,"
-                else:
-                    final_list += f"**{phrase[0]}**"
+            counter = 0
+            current_guild_id = ctx.guild.id
+            for guild_id, phrase in user.notifications:
                 counter += 1
+                if guild_id != current_guild_id:
+                    continue
+                if counter != len(user.notifications):
+                    final_list += f"**{phrase}**,"
+                else:
+                    final_list += f"**{phrase}**"
             await ctx.send(final_list)
+        except AttributeError:
+            return await ctx.send(
+                f"> **{ctx.author.display_name}, You do not have any notification phrases on this server.**")
         except Exception as e:
             log.console(e)
             await ctx.send(f"> **Something Went Wrong, please {await ex.get_server_prefix_by_context(ctx)}report it.**")
@@ -450,7 +460,7 @@ Maintenance Status: {maintenance_status}
                 for guild in guilds:
                     if guild.id != main_guild_id:
                         continue
-                    member_count = f"Member Count: {guild.member.count}\n"
+                    member_count = f"Member Count: {guild.member_count}\n"
                     owner = f"Guild Owner: {guild.owner} ({guild.owner.id})\n"
                     desc = member_count + owner
                     embed.add_field(name=f"{guild.name} ({guild.id})", value=desc, inline=False)

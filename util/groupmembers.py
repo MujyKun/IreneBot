@@ -745,7 +745,8 @@ class GroupMembers:
         except Exception as e:
             ex.api_issues += 1
             if ex.api_issues >= 50:
-                await ex.kill_api()
+                # do not kill api anymore after the api was recoded. Needs to be tested.
+                # await ex.kill_api()
                 ex.api_issues = 0
             await channel.send(
                 f"> An API issue has occurred. If this is constantly occurring, please join our support server.")

@@ -18,12 +18,7 @@ class GroupMembers:
             await ex.conn.fetchrow("SELECT votetimestamp FROM general.lastvoted WHERE userid = $1", user_id))
         if time_stamp:
             tz_info = time_stamp.tzinfo
-            """
-            Defaulting a value from pgadmin on the `lastvoted` table will result in UTC+1 time, however, when the API
-            sends a request, for some reason, it defaults to UTC-9 Even tho it says UTC+1
-            to counter this issue, we subtract 9 hours from the timezone received as a temporary fix.
-            """
-            current_time = datetime.datetime.now(tz_info) - datetime.timedelta(hours=9)
+            current_time = datetime.datetime.now(tz_info)
             check = current_time - time_stamp
             log.console(f"It has been {check.seconds} seconds since {user_id} voted.")
             return check.seconds <= 43200

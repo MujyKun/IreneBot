@@ -20,9 +20,9 @@ class GroupMembers:
             tz_info = time_stamp.tzinfo
             current_time = datetime.datetime.now(tz_info)
             check = current_time - time_stamp
-            if check.seconds <= 43200:
-                return True
-        return False
+            log.console(f"It has been {check.seconds} seconds since {user_id} voted.")
+            return check.seconds <= 43200
+        log.console(f"{user_id} has not voted.")
 
     def check_idol_object(self, obj):
         return type(obj) == self.Idol
@@ -643,7 +643,7 @@ class GroupMembers:
         if ending_position == -1:
             ending_position = api_url.find("video.")
         api_url_id = int(api_url[beginning_position:ending_position])  # the file id hidden in the url
-        return ex.first_result(await ex.conn.fetch("SELECT link FROM groupmembers.imagelinks WHERE id = $1", api_url_id))
+        return ex.first_result(await ex.conn.fetchrow("SELECT link FROM groupmembers.imagelinks WHERE id = $1", api_url_id))
 
     async def get_image_msg(self, idol, group_id, channel, photo_link, user_id=None, guild_id=None, api_url=None,
                             special_message=None, guessing_game=False, scores=None):

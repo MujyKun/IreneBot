@@ -40,7 +40,7 @@ class Twitch:
         if guilds:
             guilds.append(guild_id)
         else:
-            ex.cache.twitch_channels[guild_id] = [twitch_username]
+            ex.cache.twitch_channels[twitch_username] = [guild_id]
         await ex.conn.execute("INSERT INTO twitch.channels(username, guildid) VALUES($1, $2)", twitch_username,
                               guild_id)
 

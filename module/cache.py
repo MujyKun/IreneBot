@@ -187,6 +187,13 @@ class Cache(commands.Cog):
             'all': set(self.idols)
         }
 
+        #  guilds will soon have their own object, for now these will be separated.
+        self.twitch_channels = {}  # {twitch_username: [guild ids]}
+        self.twitch_guild_to_channels = {}  # guild_id: channel_id
+        self.twitch_guild_to_roles = {}  # guild_id: role_id
+
+        self.twitch_channels_is_live = {}  # twitch_username : false/true
+
         # bracket position for bias game stored due to annoyance when using previous x and y values.
         # counting starts from left to right, bottom to top
         self.stored_bracket_positions = {

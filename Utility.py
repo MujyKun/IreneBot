@@ -33,9 +33,11 @@ class Utility:
         self.recursion_limit = 10000
         self.api_issues = 0
         self.max_idol_post_attempts = 100
+        self.twitch_guild_follow_limit = 2
         self.weverse_client = WeverseAsync(authorization=keys.weverse_auth_token, web_session=self.session,
                                            verbose=True, loop=asyncio.get_event_loop())
         self.exceptions = exceptions
+        self.twitch_token = None  # access tokens are set everytime the token is refreshed.
 
         # SubClass Objects -- Defined in Utility.py
         self.u_database = None
@@ -57,6 +59,7 @@ class Utility:
         self.u_self_assign_roles = None
         self.u_reminder = None
         self.u_guessinggame = None
+        self.u_twitch = None
 
     @staticmethod
     def first_result(record):

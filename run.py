@@ -55,6 +55,8 @@ class Irene:
             module.Weverse.Weverse().weverse_updates.start()
         # Check for Reminders
         module.Reminder.Reminder().reminder_loop.start()
+        # Check if twitch channels go live and send the announcements to discord channels.
+        module.Twitch.Twitch().twitch_updates.start()
         # Start Automatic Youtube Scrape Loop
         ex.cache.main_youtube_instance = module.Youtube.YoutubeLoop()
         ex.cache.main_youtube_instance.loop_youtube_videos.start()
@@ -114,6 +116,7 @@ class Irene:
         ex.client.add_cog(module.Weverse.Weverse())
         ex.client.add_cog(module.SelfAssignRoles.SelfAssignRoles())
         ex.client.add_cog(module.Reminder.Reminder())
+        ex.client.add_cog(module.Twitch.Twitch())
 
     @staticmethod
     def create_util_objects():
@@ -138,6 +141,7 @@ class Irene:
         ex.u_self_assign_roles = util.selfassignroles.SelfAssignRoles()
         ex.u_reminder = util.reminder.Reminder()
         ex.u_guessinggame = util.guessinggame.GuessingGame()
+        ex.u_twitch = util.twitch.Twitch()
 
 
 if __name__ == '__main__':

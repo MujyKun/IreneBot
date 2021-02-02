@@ -290,3 +290,12 @@ To find out more, look at the `GroupMembers` category.
 | remindme | Create a reminder to do a task at a certain time. | %remindme to ______ at 9PM or %remindme to ____ in 6hrs 30mins  | remind |
 | removereminder | Remove one of your reminders. | %removereminder (reminder index) | removeremind |
 | settimezone | Set your local timezone with a timezone abbreviation and country code. | %settimezone (timezone name ex: PST) (country code ex: US) | settz |
+
+#### Twitch: ★★★
+| Command     | Description                          | Format                 | Aliases           |
+|-------------|--------------------------------------|------------------------|-------------------|
+| addtwitch | Adds a Twitch username to keep track of. Maximum 2 Twitch channels per server. | %addtwitch (twitch username) | |
+| listtwitch | List the twitch channels the server follows.| %listtwitch | |
+| removetwitch | Removes a twitch username that is being kept track of. | %removetwitch (twitch username) | |
+| settwitchchannel | Set the discord channel that the twitch announcements will be posted on. | %settwitchchannel [#text channel] | |
+| settwitchrole | Set the discord role that will be mentioned on twitch announcements. If a discord role is set, everyone will not be mentioned. Use the command without a role to mention everyone. |%settwitchrole [@role] | |

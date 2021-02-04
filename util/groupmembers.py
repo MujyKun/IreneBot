@@ -21,8 +21,8 @@ class GroupMembers:
             current_time = datetime.datetime.now(tz_info)
             check = current_time - time_stamp
             log.console(f"It has been {check.seconds} seconds since {user_id} voted.")
-            return check.seconds <= 43200
-        log.console(f"{user_id} has not voted.")
+            return check.seconds <= 86400
+        log.console(f"{user_id} has not voted in the past 24 hours.")
 
     def check_idol_object(self, obj):
         return type(obj) == self.Idol
@@ -31,7 +31,7 @@ class GroupMembers:
     async def send_vote_message(message):
         """Send the vote message to a user."""
         server_prefix = await ex.get_server_prefix_by_context(message)
-        vote_message = f"> **To call more idol photos for the next 12 hours," \
+        vote_message = f"> **To call more idol photos for the next 24 hours," \
                        f" please support Irene by voting or becoming a patron through the links at " \
                        f"`{server_prefix}vote` or `{server_prefix}patreon`!**"
         return await message.channel.send(vote_message)

@@ -94,29 +94,35 @@ class Twitch(commands.Cog):
     @tasks.loop(seconds=30, minutes=0, hours=0, reconnect=True)
     async def twitch_updates(self):
         """Process for checking for Twitch channels that are live and sending to discord channels."""
-        if not ex.twitch_token:
-            await ex.u_twitch.reset_twitch_token()
-            await asyncio.sleep(5)  # allow time for token to refresh.
+        try:
+            if not ex.twitch_token:
+                await ex.u_twitch.reset_twitch_token()
+                await asyncio.sleep(5)  # allow time for token to refresh.
 
-        headers = {
-            'Authorization': f'Bearer {ex.twitch_token}',
-            'client-id': twitch_client_id
-        }
+            headers = {
+                'Authorization': f'Bearer {ex.twitch_token}',
+                'client-id': twitch_client_id
+            }
 
-        for twitch_username in ex.cache.twitch_channels.keys():
-            end_point = f"https://api.twitch.tv/helix/search/channels?query={twitch_username}"
-            async with ex.session.get(end_point, headers=headers) as r:
-                if r.status == 200:
-                    data = await r.text()
-                    data_json = json.loads(data)
-                    all_streamers = data_json.get('data')
-                    for streamer in all_streamers:
-                        if streamer.get('display_name') == twitch_username:
-                            was_live = ex.cache.twitch_channels_is_live.get(twitch_username)
-                            is_live = streamer.get('is_live')
-                            if (not was_live) and is_live:
-                                await ex.u_twitch.send_twitch_announcement(twitch_username)
-                            ex.cache.twitch_channels_is_live[twitch_username] = is_live
-                elif r.status == 401:
-                    ex.twitch_token = None  # resets twitch token on next loop
-                    break
+            for twitch_username in ex.cache.twitch_channels.keys():
+                try:
+                    end_point = f"https://api.twitch.tv/helix/search/channels?query={twitch_username}"
+                    async with ex.session.get(end_point, headers=headers) as r:
+                        if r.status == 200:
+                            data = await r.text()
+                            data_json = json.loads(data)
+                            all_streamers = data_json.get('data')
+                            for streamer in all_streamers:
+                                if streamer.get('display_name') == twitch_username:
+                                    was_live = ex.cache.twitch_channels_is_live.get(twitch_username)
+                                    is_live = streamer.get('is_live')
+                                    if (not was_live) and is_live:
+                                        await ex.u_twitch.send_twitch_announcement(twitch_username)
+                                    ex.cache.twitch_channels_is_live[twitch_username] = is_live
+                        elif r.status == 401:
+                            ex.twitch_token = None  # resets twitch token on next loop
+                            break
+                except Exception as e:
+                    log.console(e)
+        except Exception as e:
+            log.console(e)

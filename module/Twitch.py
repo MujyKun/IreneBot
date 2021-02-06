@@ -103,7 +103,6 @@ class Twitch(commands.Cog):
                 'Authorization': f'Bearer {ex.twitch_token}',
                 'client-id': twitch_client_id
             }
-
             for twitch_username in ex.cache.twitch_channels.keys():
                 try:
                     end_point = f"https://api.twitch.tv/helix/search/channels?query={twitch_username}"
@@ -113,7 +112,7 @@ class Twitch(commands.Cog):
                             data_json = json.loads(data)
                             all_streamers = data_json.get('data')
                             for streamer in all_streamers:
-                                if streamer.get('display_name') == twitch_username:
+                                if streamer.get('display_name').lower() == twitch_username.lower():
                                     was_live = ex.cache.twitch_channels_is_live.get(twitch_username)
                                     is_live = streamer.get('is_live')
                                     if (not was_live) and is_live:

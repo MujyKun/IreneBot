@@ -1,4 +1,5 @@
 from Utility import resources as ex
+from decimal import Decimal
 import math
 import random
 
@@ -33,12 +34,13 @@ class Currency:
         try:
             place_values = int(math.log10(int(money)) // 3)
         except:
-            # This will have a math domain error when the amount of balance is 0.
+            # This will have a math domain error when the balance is 0.
             return "0"
         try:
             return f"{int(money) // (10 ** (3 * place_values))} {place_names[place_values]}"
         except:
-            return "Too Fucking Much$"
+            # user has money outside of the value places. resort to scientific notation.
+            return f"{Decimal(money):.2E}"
 
     @staticmethod
     async def update_balance(user_id, new_balance):

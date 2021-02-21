@@ -84,7 +84,6 @@ class Utility:
             self.cache.users[user_id] = user
         return user
 
-
     @staticmethod
     def first_result(record):
         """Returns the first item of a record if there is one."""

@@ -166,7 +166,7 @@ To find out more, look at the `GroupMembers` category.
 | invite           | Invite Link for Irene                                          | %invite                         |                |
 | listnoti          | list all your notification phrases that exist in the current server.| %listnoti     |               |
 | nword            | Checks how many times a user has said the N Word               | %nword @user                    |                |
-| nwordleaderboard | Shows leaderboards for how many times the nword has been said. | %nwl                            | nwl            |
+| nwordleaderboard | Shows leaderboards for how many times the nword has been said. | %nwl (server/global)                           | nwl            |
 | patreon             | Displays Patreon Information.                                       | %patreon                           |   patron         |
 | ping             | Shows Latency to Discord                                       | %ping                           | pong           |
 | random           | Choose a random number from a range (a,b)                      | %random a b [Ex: %random 1 100] | r,rand,randint |

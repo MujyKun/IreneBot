@@ -471,22 +471,26 @@ class Cache:
                     'active_user_reminders': active_user_reminders,
                     'weverse_channels_following': sum([len(channels) for channels in ex.cache.weverse_channels.
                                                       values()]),
-                    'weverse_following_txt': len(ex.cache.weverse_channels.get("txt")),
-                    'weverse_following_bts': len(ex.cache.weverse_channels.get("bts")),
-                    'weverse_following_gfriend': len(ex.cache.weverse_channels.get("gfriend")),
-                    'weverse_following_seventeen': len(ex.cache.weverse_channels.get("seventeen")),
-                    'weverse_following_enhypen': len(ex.cache.weverse_channels.get("enhypen")),
-                    'weverse_following_nuest': len(ex.cache.weverse_channels.get("nu'est")),
-                    'weverse_following_cl': len(ex.cache.weverse_channels.get("cl")),
-                    'weverse_following_p1harmony': len(ex.cache.weverse_channels.get("p1harmony")),
-                    'weverse_following_weeekly': len(ex.cache.weverse_channels.get("weeekly")),
-                    'weverse_following_sunmi': len(ex.cache.weverse_channels.get("sunmi")),
-                    'weverse_following_henry': len(ex.cache.weverse_channels.get("henry")),
-                    'weverse_following_dreamcatcher': len(ex.cache.weverse_channels.get("dreamcatcher")),
-                    'twitch_channels_followed': len(ex.cache.twitch_channels.keys()),
+                    'weverse_following_txt': len(ex.cache.weverse_channels.get("txt") or []),
+                    'weverse_following_bts': len(ex.cache.weverse_channels.get("bts") or []),
+                    'weverse_following_gfriend': len(ex.cache.weverse_channels.get("gfriend") or []),
+                    'weverse_following_seventeen': len(ex.cache.weverse_channels.get("seventeen") or []),
+                    'weverse_following_enhypen': len(ex.cache.weverse_channels.get("enhypen") or []),
+                    'weverse_following_nuest': len(ex.cache.weverse_channels.get("nu'est") or []),
+                    'weverse_following_cl': len(ex.cache.weverse_channels.get("cl") or []),
+                    'weverse_following_p1harmony': len(ex.cache.weverse_channels.get("p1harmony") or []),
+                    'weverse_following_weeekly': len(ex.cache.weverse_channels.get("weeekly") or []),
+                    'weverse_following_sunmi': len(ex.cache.weverse_channels.get("sunmi") or []),
+                    'weverse_following_henry': len(ex.cache.weverse_channels.get("henry") or []),
+                    'weverse_following_dreamcatcher': len(ex.cache.weverse_channels.get("dreamcatcher") or []),
+                    'twitch_channels_followed': len(ex.cache.twitch_channels.keys() or []),
                     'text_channels_following_twitch': sum([len(channels) for channels in ex.cache.twitch_channels.
                                                           values()]),
-                    'voice_clients': len(ex.client.voice_clients())
+                    'voice_clients': len(ex.client.voice_clients or []),
+                    'servers_using_self_assignable_roles': len(ex.cache.assignable_roles.keys() or []),
+                    'total_amount_of_self_assignable_roles': sum([len(channel_and_roles.get('roles') or [])
+                                                                  for channel_and_roles in
+                                                                  ex.cache.assignable_roles.values()])
                 }
 
                 # set all per minute metrics to 0 since this is a 60 second loop.

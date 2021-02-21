@@ -10,9 +10,10 @@ class Status:
     """Change the bot's playing status in a loop"""
     @tasks.loop(seconds=30, minutes=0, hours=0, reconnect=True)
     async def change_bot_status_loop(self):
-        if not ex.client.loop.is_running():
-            return
         try:
+            if not ex.client.loop.is_running():
+                raise Exception
+
             random_statuses = [
                 f'{ex.u_miscellaneous.get_server_count()} servers.',
                 f'{ex.u_miscellaneous.get_channel_count()} channels.',

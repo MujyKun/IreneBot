@@ -190,22 +190,20 @@ class Events(commands.Cog):
             added_roles = (list(set(after_roles) - set(before_roles)))
             removed_roles = (list(set(before_roles) - set(after_roles)))
             # if the user received the patron or super patron role, update cache
+            user = await ex.get_user(member_after.id)
             if added_roles:
                 for role in added_roles:
                     if role.id == keys.patreon_super_role_id:
-                        ex.cache.patrons[member_after.id] = True
+                        user.patron = True
+                        user.super_patron = True
                     if role.id == keys.patreon_role_id:
-                        ex.cache.patrons[member_after.id] = False
+                        user.patron = True
             # if the user was removed from patron or super patron role, update cache
             after_role_ids = [after_role.id for after_role in after_roles]
             if removed_roles:
                 # only update if there were removed roles
-                if keys.patreon_super_role_id in after_role_ids:
-                    ex.cache.patrons[member_after.id] = True
-                elif keys.patreon_role_id in after_role_ids:
-                    ex.cache.patrons[member_after.id] = False
-                else:
-                    ex.cache.patrons.pop(member_after.id, None)
+                user.super_patron = keys.patreon_super_role_id in after_role_ids
+                user.patron = keys.patreon_role_id in after_role_ids
 
     @staticmethod
     @ex.client.event

@@ -68,7 +68,11 @@ class Help(commands.Cog):
         async def get_opening_note(self):
             """Was changed to async. Gets the opening message of a help command."""
             server_prefix = await ex.get_server_prefix_by_context(self.context)
-            return f"Use ``{server_prefix}help [command]`` for more info on a command.\nYou can also use ``{server_prefix}help [category]`` (CASE-SENSITIVE) for more info on a category.\nTo reset a server prefix, you may type ``{bot_prefix}setprefix``.\n\n **Support Server:** {bot_support_server_link}"
+            return f"Use ``{server_prefix}help [command]`` for more info on a command.\nYou can also use " \
+                f"``{server_prefix}help [category]`` (CASE-SENSITIVE) for more info on a category.\nTo reset a " \
+                f"server prefix, you may type ``{bot_prefix}setprefix``.\n\n " \
+                f"**Support Server:** {bot_support_server_link}\n\n" \
+                f"**[Link to Commands](https://irenebot.com/commands)**"
 
         async def send_bot_help(self, mapping):
             """

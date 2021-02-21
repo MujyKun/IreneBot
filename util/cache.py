@@ -402,7 +402,10 @@ class Cache:
                     for user_id, super_patron in cached_patrons:
                         user = await ex.get_user(user_id)
                         if super_patron:
+                            log.console(f"Made {user_id} a temporary super patron & patron.")
                             user.super_patron = True
+                        else:
+                            log.console(f"Made {user_id} a temporary patron.")
                         user.patron = True
                     ex.temp_patrons_loaded = True
                     log.console("Cache for Temporary Patrons has been created.")

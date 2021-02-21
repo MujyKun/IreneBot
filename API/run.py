@@ -197,5 +197,6 @@ def process_image(link_info):
     return redirect(image_host_url, code=308)
 
 
-app.run(port=5454)
+#  should be run through gunicorn
+#  app.run(port=5454)
 

@@ -63,4 +63,7 @@ def download_media(file_id, file_location):
     with open(file_location, 'wb') as f:
         fh.seek(0)  # go to start of stream
         f.write(fh.read())
-    fh.close()
+    try:
+        fh.close()
+    except Exception as e:
+        print(e, "--download")

@@ -19,7 +19,8 @@ class Twitch(commands.Cog):
             if not guild_id:
                 return await ctx.send("> You can not use this command in DMs.")
             if not await ex.u_twitch.check_guild_limit(guild_id):
-                return await ctx.send(f"> You are only allowed to have {ex.twitch_guild_follow_limit} channels followed.")
+                return await ctx.send(f"> You are only allowed to have {ex.twitch_guild_follow_limit} "
+                                      f"channels followed.")
             if await ex.u_twitch.check_channel_followed(twitch_username, guild_id):
                 return await ctx.send("> That twitch channel is already being followed.")
 

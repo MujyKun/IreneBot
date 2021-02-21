@@ -285,7 +285,7 @@ Maintenance Status: {maintenance_status}
         """Checks how many times a user has said the N Word [Format: %nword @user]"""
         if not user:
             user = ctx.author
-        current_amount = ex.cache.n_word_counter.get(user.id)
+        current_amount = (await ex.get_user(user.id)).n_word
         if not current_amount:
             return await ctx.send(f"> **<@{user.id}> has not said the N-Word a single time!**")
         else:
@@ -298,11 +298,11 @@ Maintenance Status: {maintenance_status}
         if not user:
             return await ctx.send("> **Please @ a user**")
 
-        if not ex.cache.n_word_counter.get(user.id):
+        if not (await ex.get_user(user.id)).n_word:
             return await ctx.send(f"> **<@{user.id}> has not said the N-Word a single time!**")
 
         await ex.conn.execute("DELETE FROM general.nword where userid = $1", user.id)
-        ex.cache.n_word_counter[user.id] = None
+        (await ex.get_user(user.id)).n_word = 0
         await ctx.send("**> Cleared.**")
 
     @commands.command(aliases=["nwl"])
@@ -311,12 +311,17 @@ Maintenance Status: {maintenance_status}
         embed = discord.Embed(title=f"NWord Leaderboard", color=0xffb6c1)
         embed.set_author(name="Irene", url=keys.bot_website, icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
         embed.set_footer(text=f"Type {await ex.get_server_prefix_by_context(ctx)}nword (user) to view their individual stats.", icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
-        sorted_n_word = {key: value for key, value in sorted(ex.cache.n_word_counter.items(), key=lambda item: item[1], reverse=True)}
+
+        n_word_list = {}  # user_id : n_word_count
+        for user in ex.cache.users.values():
+            n_word_list[user.id] = user.n_word
+
+        sorted_n_word = {key: value for key, value in sorted(n_word_list.items(), key=lambda item: item[1], reverse=True)}
         for count, user_id in enumerate(sorted_n_word):
             value = sorted_n_word.get(user_id)
             if not value:
                 continue
-            if count > 10:
+            if count >= 10:
                 break
             try:
                 user_name = (ex.client.get_user(user_id)).name

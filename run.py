@@ -119,7 +119,6 @@ class Irene:
         ex.client.add_cog(module.Reminder.Reminder())
         ex.client.add_cog(module.Twitch.Twitch())
         # ex.client.add_cog(module.Gacha.Gacha())
-        
 
     @staticmethod
     def create_util_objects():

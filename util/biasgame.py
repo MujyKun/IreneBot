@@ -61,7 +61,7 @@ class BiasGame:
                     second_idol_info = ex.cache.stored_bracket_positions.get(count + 1)
 
                     with Image.open(f'{ idol_avatar_location}{first_idol.id}_IDOL.png') as first_idol_image, \
-                        Image.open(f'{ idol_avatar_location}{second_idol.id}_IDOL.png') as second_idol_image:
+                            Image.open(f'{ idol_avatar_location}{second_idol.id}_IDOL.png') as second_idol_image:
 
                         # resize images
                         first_idol_image, second_idol_image = resize_images(first_idol_image, second_idol_image,

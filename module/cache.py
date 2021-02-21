@@ -89,14 +89,6 @@ class Cache(commands.Cog):
         }
         """
         self.temp_channels = {}
-        """
-        NWord Counter
-        {
-        user_id : counter
-        }
-        """
-        #TODO: Integrate n_word counter on the Util User object as well as the leaderboard and other influencers.
-        self.n_word_counter = {}
 
         # list of idol objects
         self.idols = []

@@ -1,6 +1,7 @@
 from module import logger as log
 from Utility import resources as ex
-from module.keys import bot_prefix, bot_support_server_link, site_port, bot_id, bot_name, translate_private_key, api_port
+from module.keys import bot_prefix, bot_support_server_link, site_port, bot_id, bot_name, translate_private_key, \
+    api_port
 import discord
 import random
 import json
@@ -23,14 +24,14 @@ class Miscellaneous:
                 return
             ex.cache.n_words_per_minute += 1
             author_id = message_sender.id
-            current_amount = ex.cache.n_word_counter.get(author_id)
-            if current_amount:
+            user = await ex.get_user(author_id)
+            if user.n_word:
                 await ex.conn.execute("UPDATE general.nword SET nword = $1 WHERE userid = $2::bigint",
-                                      current_amount + 1, author_id)
-                ex.cache.n_word_counter[author_id] = current_amount + 1
+                                      user.n_word + 1, author_id)
+                user.n_word += 1
             else:
                 await ex.conn.execute("INSERT INTO general.nword VALUES ($1,$2)", author_id, 1)
-                ex.cache.n_word_counter[author_id] = 1
+                user.n_word = 1
 
     @staticmethod
     async def check_if_temp_channel(channel_id):
@@ -245,13 +246,13 @@ class Miscellaneous:
     async def get_cooldown_time(time):
         """Turn command cooldown of seconds into hours, minutes, and seconds."""
         time = round(time)
-        min, sec = divmod(time, 60)
-        hour, min = divmod(min, 60)
+        minute, sec = divmod(time, 60)
+        hour, minute = divmod(minute, 60)
         day, hour = divmod(hour, 24)
 
         return f"{f'{day}d ' if day else ''}" \
                f"{f'{hour}h ' if hour else ''}" \
-               f"{f'{min}m ' if min else ''}" \
+               f"{f'{minute}m ' if minute else ''}" \
                f"{f'{sec}s' if sec else ''}" \
                f"{f'0s' if time < 1 else ''}"
 

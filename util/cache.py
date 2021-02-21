@@ -242,10 +242,10 @@ class Cache:
     @staticmethod
     async def update_n_word_counter():
         """Update NWord Cache"""
-        ex.cache.n_word_counter = {}
         user_info = await ex.conn.fetch("SELECT userid, nword FROM general.nword")
         for user_id, n_word_counter in user_info:
-            ex.cache.n_word_counter[user_id] = n_word_counter
+            user = await ex.get_user(user_id)
+            user.n_word = n_word_counter
 
     @staticmethod
     async def update_temp_channels():

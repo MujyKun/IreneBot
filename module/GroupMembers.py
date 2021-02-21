@@ -13,6 +13,12 @@ import datetime
 class GroupMembers(commands.Cog):
     @staticmethod
     async def on_message2(message):
+        """
+        This method detects messages that are meant to be idol posts and sends them.
+
+        :param message:
+        :return:
+        """
         # create modifiable var without altering original
         channel = message.channel
         if message.author.bot or not await ex.u_group_members.check_channel_sending_photos(channel.id) or await ex.u_miscellaneous.check_if_temp_channel(channel.id):

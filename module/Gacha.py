@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands, tasks
 from Utility import resources as ex
-from module import logger as log
 import datetime
 
 

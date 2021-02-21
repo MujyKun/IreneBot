@@ -1,7 +1,9 @@
-from flask import Flask, request, Response, redirect, jsonify
+from flask import Flask, request, Response, redirect
 
 # expected import error. API is run as a standalone from server.py
+# noinspection PyUnresolvedReferences, PyPackageRequirements
 from resources.keys import c, private_keys, idol_folder, top_gg_webhook_key, db_conn
+# noinspection PyUnresolvedReferences, PyPackageRequirements
 from resources.drive import get_file_type, download_media
 
 import random
@@ -40,6 +42,7 @@ def get_groups():
     return all_groups
 
 
+# noinspection PyBroadException,PyPep8
 @app.route('/groups/<group_id>/', methods=['GET'])
 def get_group(group_id):
     """Get group name by group id"""
@@ -59,6 +62,7 @@ def get_image_ids(idol_id):
     return all_ids
 
 
+# noinspection PyBroadException
 @app.route('/photos/<idol_id>/', methods=['POST'])
 def get_idol_photo(idol_id):
     """Download an idol's photo and redirect the user to the image link."""
@@ -70,6 +74,7 @@ def get_idol_photo(idol_id):
     # delete files after a certain amount exist in the directory.
     currently_existing_photos = os.listdir(idol_folder)
     if len(currently_existing_photos) > 150000:
+        # noinspection PyPep8
         try:
             for file in currently_existing_photos:
                 os.remove(file)

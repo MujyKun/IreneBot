@@ -48,12 +48,26 @@ class SelfAssignRoles(commands.Cog):
             roles = await ex.u_self_assign_roles.get_assignable_server_roles(ctx.guild.id)
             if not roles:
                 return await ctx.send("> You have no Self-Assignable roles in this server.")
+            msg_bodies = []
             msg_body = ""
             for role_id, role_name in roles:
+                if len(msg_body) > 1500:
+                    msg_bodies.append(msg_body)
+                    msg_body = ""
                 msg_body += f"<@&{role_id}> - {role_name}\n"
+
+            if len(msg_body) != 0:
+                msg_bodies.append(msg_body)
+
             embed_title = f"{ctx.guild}'s Self-Assignable Roles"
-            embed = await ex.create_embed(title=embed_title, title_desc=msg_body)
-            return await ctx.send(embed=embed)
+            embed_list = []
+            for body in msg_bodies:
+                embed = await ex.create_embed(title=embed_title, title_desc=body)
+                embed_list.append(embed)
+            msg = await ctx.send(embed=embed_list[0])
+            if len(embed_list) > 1:
+                await ex.check_left_or_right_reaction_embed(msg, embed_list)
+
         except Exception as e:
             log.console(e)
             return await ctx.send(self.error_msg)

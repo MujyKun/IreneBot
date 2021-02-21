@@ -28,10 +28,10 @@ class Patreon:
         The second way is a table to check for permanent patreon users that are directly added by the bot owner.
         -- After modifying -> We take it straight from cache now.
         """
-        if user_id in ex.cache.patrons:
-            if super_patron:
-                return ex.cache.patrons.get(user_id) == super_patron
-            return True
+        user = await ex.get_user(user_id)
+        if super_patron:
+            return user.super_patron
+        return user.patron
 
     @staticmethod
     async def add_to_patreon(user_id):
@@ -39,7 +39,9 @@ class Patreon:
         try:
             user_id = int(user_id)
             await ex.conn.execute("INSERT INTO patreon.users(userid) VALUES($1)", user_id)
-            ex.cache.patrons[user_id] = True
+            user = await ex.get_user(user_id)
+            user.patron = True
+            user.super_patron = True
         except:
             pass
 
@@ -49,7 +51,9 @@ class Patreon:
         try:
             user_id = int(user_id)
             await ex.conn.execute("DELETE FROM patreon.users WHERE userid = $1", user_id)
-            ex.cache.patrons.pop(user_id, None)
+            user = await ex.get_user(user_id)
+            user.patron = False
+            user.super_patron = False
         except:
             pass
 

@@ -25,3 +25,4 @@ git+git://github.com/MujyKun/Weverse@main#Weverse
 pytz==2020.4
 parsedatetime==2.6
 Flask==1.1.1
+scipy==1.6.0

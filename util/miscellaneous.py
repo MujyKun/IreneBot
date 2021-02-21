@@ -141,10 +141,7 @@ class Miscellaneous:
             message.content = bot_prefix + msg_without_prefix
         # if a user is banned from the bot.
         if await self.check_if_bot_banned(message_sender.id):
-            try:
-                guild_id = await ex.get_server_id(message)
-            except:
-                guild_id = None
+            guild_id = await ex.get_server_id(message)
             if await self.check_message_is_command(message) or await ex.u_custom_commands.check_custom_command_name_exists(guild_id, msg_without_prefix):
                 await self.send_ban_message(message_channel)
         else:
@@ -218,21 +215,20 @@ class Miscellaneous:
     async def ban_user_from_bot(user_id):
         """Bans a user from using the bot."""
         await ex.conn.execute("INSERT INTO general.blacklisted(userid) VALUES ($1)", user_id)
-        ex.cache.bot_banned.append(user_id)
+        user = await ex.get_user(user_id)
+        user.bot_banned = True
 
     @staticmethod
     async def unban_user_from_bot(user_id):
         """UnBans a user from the bot."""
         await ex.conn.execute("DELETE FROM general.blacklisted WHERE userid = $1", user_id)
-        try:
-            ex.cache.bot_banned.remove(user_id)
-        except:
-            pass
+        user = await ex.get_user(user_id)
+        user.bot_banned = False
 
     @staticmethod
     async def check_if_bot_banned(user_id):
         """Check if the user can use the bot."""
-        return user_id in ex.cache.bot_banned
+        return (await ex.get_user(user_id)).bot_banned
 
     @staticmethod
     def check_nword(message_content):

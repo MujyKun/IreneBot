@@ -49,7 +49,7 @@ class Reminder(commands.Cog):
     async def removereminder(self, ctx, reminder_index: int):
         """Remove one of your reminders.
         [Format: %removereminder (reminder index)]"""
-        reminders = ex.cache.reminders.get(ctx.author.id)
+        reminders = await ex.u_reminder.get_reminders(ctx.author.id)
         user_timezone = await ex.u_reminder.get_user_timezone(ctx.author.id)
         if not reminders:
             return await ctx.send(f"> {ctx.author.display_name}, you have no reminders.")
@@ -70,7 +70,7 @@ class Reminder(commands.Cog):
         [Format: %remindme to ______ at 9PM
         or
         %remindme to ____ in 6hrs 30mins]"""
-        reminders = ex.cache.reminders.get(ctx.author.id)
+        reminders = await ex.u_reminder.get_reminders(ctx.author.id)
         user_timezone = await ex.u_reminder.get_user_timezone(ctx.author.id)
         if reminders:
             if len(reminders) >= reminder_limit:
@@ -162,21 +162,20 @@ class Reminder(commands.Cog):
     @tasks.loop(seconds=5, minutes=0, hours=0, reconnect=True)
     async def reminder_loop(self):
         """Process for checking for reminders and sending them out if they are past overdue."""
-        for user_id in ex.cache.reminders:
-            reminders = ex.cache.reminders.get(user_id)
-            if not reminders:
+        for user in ex.cache.users.values():
+            if not user.reminders:
                 continue
-            for remind_id, remind_reason, remind_time in reminders:
+            for remind_id, remind_reason, remind_time in user.reminders:
                 try:
                     current_time = datetime.datetime.now(remind_time.tzinfo)
                     if current_time < remind_time:
                         continue
-                    dm_channel = await ex.get_dm_channel(user_id=user_id)
+                    dm_channel = await ex.get_dm_channel(user_id=user.id)
                     if dm_channel:
                         title_desc = f"This is a reminder to **{remind_reason}**."
                         embed = await ex.create_embed(title="Reminder", title_desc=title_desc)
                         await dm_channel.send(embed=embed)
-                        await ex.u_reminder.remove_user_reminder(user_id, remind_id)
+                        await ex.u_reminder.remove_user_reminder(user.id, remind_id)
                 except:
                     pass  # likely forbidden error -> do not have access to dm user
 

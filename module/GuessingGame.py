@@ -122,7 +122,7 @@ class Game:
         if self.force_ended:
             return
 
-        stop_phrases = ['stop', 'end']
+        stop_phrases = ['stop', 'end', 'quit']
 
         def check_correct_answer(message):
             """Check if the user has the correct answer."""

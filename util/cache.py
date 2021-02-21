@@ -49,10 +49,30 @@ class Cache:
         await self.process_cache_time(self.create_reminder_cache, "Reminders")
         await self.process_cache_time(self.create_timezone_cache, "Timezones")
         await self.process_cache_time(self.create_guessing_game_cache, "Guessing Game Scores")
+        await self.process_cache_time(self.create_twitch_cache, "Twitch Channels")
         if not ex.test_bot and not ex.weverse_client.cache_loaded:
             # noinspection PyUnusedLocal
             task = asyncio.create_task(self.process_cache_time(ex.weverse_client.start, "Weverse"))
         log.console(f"Cache Completely Created in {await ex.u_miscellaneous.get_cooldown_time(time.time() - past_time)}.")
+
+    @staticmethod
+    async def create_twitch_cache():
+        ex.cache.twitch_channels = {}
+        ex.cache.twitch_guild_to_channels = {}
+        ex.cache.twitch_guild_to_roles = {}
+        guilds_and_channels = await ex.conn.fetch("SELECT guildid, channelid, roleid FROM twitch.guilds")
+        for guild_id, channel_id, role_id in guilds_and_channels:
+            ex.cache.twitch_guild_to_channels[guild_id] = channel_id
+            ex.cache.twitch_guild_to_roles[guild_id] = role_id
+
+        twitch_channels = await ex.conn.fetch("SELECT username, guildid FROM twitch.channels")
+
+        for username, guild_id in twitch_channels:
+            guilds_in_channel = ex.cache.twitch_channels.get(username)
+            if guilds_in_channel:
+                guilds_in_channel.append(username)
+            else:
+                ex.cache.twitch_channels[username] = [guild_id]
 
     @staticmethod
     async def create_guessing_game_cache():

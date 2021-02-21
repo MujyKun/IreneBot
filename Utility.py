@@ -39,9 +39,12 @@ class Utility:
         self.recursion_limit = 10000
         self.api_issues = 0  # api issues in a given minute
         self.max_idol_post_attempts = 100
+        self.twitch_guild_follow_limit = 2
         self.weverse_client = WeverseAsync(authorization=keys.weverse_auth_token, web_session=self.session,
                                            verbose=True, loop=asyncio.get_event_loop())
+
         self.exceptions = exceptions  # custom error handling
+        self.twitch_token = None  # access tokens are set everytime the token is refreshed.
 
         # SubClass Objects -- Instances given in run.py
         self.u_database: util.database.DataBase = None
@@ -63,6 +66,7 @@ class Utility:
         self.u_self_assign_roles: util.selfassignroles.SelfAssignRoles = None
         self.u_reminder: util.reminder.Reminder = None
         self.u_guessinggame: util.guessinggame.GuessingGame = None
+        self.u_twitch: util.twitch.Twitch = None
         self.u_gacha: util.gacha.Gacha = None
 
         # Util Directory that contains needed objects as attributes.
@@ -78,6 +82,7 @@ class Utility:
             user = self.u_objects.User(user_id)
             self.cache.users[user_id] = user
         return user
+
 
     @staticmethod
     def first_result(record):

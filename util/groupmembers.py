@@ -20,9 +20,9 @@ class GroupMembers:
             tz_info = time_stamp.tzinfo
             current_time = datetime.datetime.now(tz_info)
             check = current_time - time_stamp
-            if check.seconds <= 43200:
-                return True
-        return False
+            log.console(f"It has been {check.seconds} seconds since {user_id} voted.")
+            return check.seconds <= 86400
+        log.console(f"{user_id} has not voted in the past 24 hours.")
 
     @staticmethod
     def check_idol_object(obj):
@@ -32,7 +32,7 @@ class GroupMembers:
     async def send_vote_message(message):
         """Send the vote message to a user."""
         server_prefix = await ex.get_server_prefix_by_context(message)
-        vote_message = f"> **To call more idol photos for the next 12 hours," \
+        vote_message = f"> **To call more idol photos for the next 24 hours," \
                        f" please support Irene by voting or becoming a patron through the links at " \
                        f"`{server_prefix}vote` or `{server_prefix}patreon`!**"
         return await message.channel.send(vote_message)
@@ -644,7 +644,7 @@ class GroupMembers:
         if ending_position == -1:
             ending_position = api_url.find("video.")
         api_url_id = int(api_url[beginning_position:ending_position])  # the file id hidden in the url
-        return ex.first_result(await ex.conn.fetch("SELECT link FROM groupmembers.imagelinks WHERE id = $1", api_url_id))
+        return ex.first_result(await ex.conn.fetchrow("SELECT link FROM groupmembers.imagelinks WHERE id = $1", api_url_id))
 
     async def get_image_msg(self, idol, group_id, channel, photo_link, user_id=None, guild_id=None, api_url=None,
                             special_message=None, guessing_game=False, scores=None):
@@ -746,7 +746,8 @@ class GroupMembers:
         except Exception as e:
             ex.api_issues += 1
             if ex.api_issues >= 50:
-                await ex.kill_api()
+                # do not kill api anymore after the api was recoded. Needs to be tested.
+                # await ex.kill_api()
                 ex.api_issues = 0
             await channel.send(
                 f"> An API issue has occurred. If this is constantly occurring, please join our support server.")

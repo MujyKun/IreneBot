@@ -118,7 +118,7 @@ class Irene:
         ex.client.add_cog(module.SelfAssignRoles.SelfAssignRoles())
         ex.client.add_cog(module.Reminder.Reminder())
         ex.client.add_cog(module.Twitch.Twitch())
-        ex.client.add_cog(module.Gacha.Gacha())
+        # ex.client.add_cog(module.Gacha.Gacha())
         
 
     @staticmethod
@@ -145,10 +145,9 @@ class Irene:
         ex.u_reminder = util.reminder.Reminder()
         ex.u_guessinggame = util.guessinggame.GuessingGame()
         ex.u_twitch = util.twitch.Twitch()
-        ex.u_gacha = util.gacha.Gacha()
+        # ex.u_gacha = util.gacha.Gacha()
         
         ex.u_objects = util.objects  # util directory that has the objects directly imported
-        
 
 
 if __name__ == '__main__':

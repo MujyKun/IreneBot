@@ -54,6 +54,7 @@ class Cache:
             # noinspection PyUnusedLocal
             task = asyncio.create_task(self.process_cache_time(ex.weverse_client.start, "Weverse"))
         log.console(f"Cache Completely Created in {await ex.u_miscellaneous.get_cooldown_time(time.time() - past_time)}.")
+        ex.irene_cache_loaded = True
 
     @staticmethod
     async def create_twitch_cache():

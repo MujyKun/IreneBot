@@ -27,7 +27,8 @@ class Utility:
         self.client = keys.client  # discord.py client
         self.session = keys.client_session  # aiohttp client session
         self.conn = None  # db connection
-        self.discord_cache_loaded = False
+        self.discord_cache_loaded = False  # d.py library cache finished loading
+        self.irene_cache_loaded = False  # IreneBot cache finished loading
         self.cache = cache.Cache()  # instance for loaded cache
         self.temp_patrons_loaded = False
         self.running_loop = None  # current asyncio running loop

@@ -147,17 +147,25 @@ Message Author: {message.author}
     @commands.command()
     async def botinfo(self, ctx):
         """Get information about the bot."""
-        maintenance_status = api_status = db_status = images_status = weverse_status = ":red_circle:"
+        maintenance_status = api_status = db_status = images_status = weverse_status = d_py_status = irene_cache_status \
+            = ":red_circle:"
+
+        working = ":green_circle:"
         if await ex.u_miscellaneous.get_api_status():
-            api_status = ":green_circle:"
+            api_status = working
         if await ex.u_miscellaneous.get_db_status():
-            db_status = ":green_circle:"
+            db_status = working
         if await ex.u_miscellaneous.get_images_status():
-            images_status = ":green_circle:"
+            images_status = working
         if ex.cache.maintenance_mode:
-            maintenance_status = ":green_circle:"
+            maintenance_status = working
         if await ex.weverse_client.check_token_works():
-            weverse_status = ":green_circle:"
+            weverse_status = working
+        if ex.discord_cache_loaded:
+            d_py_status = working
+        if ex.irene_cache_loaded:
+            irene_cache_status = working
+
         try:
             current_server_prefix = await ex.get_server_prefix(ctx.guild.id)
         except:
@@ -184,6 +192,8 @@ API Status: {api_status}
 Images Status: {images_status} 
 Database Status: {db_status} 
 Weverse Status: {weverse_status}
+Irene Cache: {irene_cache_status}
+discord.py Cache: {d_py_status}
 Maintenance Status: {maintenance_status}
 """
         embed = await ex.create_embed(title=f"I am {app_name}! ({app_id})", title_desc=title_desc)

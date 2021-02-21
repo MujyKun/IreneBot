@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands
-from module import logger as log, events
-import random
+from module import logger as log
 from module import keys
 from Utility import resources as ex
 import time
@@ -10,94 +9,6 @@ import json
 import datetime
 
 client = keys.client
-# the amount normal users can use if the guild owner is a super patron.
-owner_super_patron_benefit = keys.idol_post_send_limit * 2
-# noinspection PyPep8
-patron_message = f"""
-As of September 23rd 2020, non-Patrons can only send {keys.idol_post_send_limit} photos a day maximum, as the current host can not reliably handle additional traffic.
-You may become a patron for as little as $3 per month in order to send unlimited photos; every Patron contributes to upgrading and maintaining the host.
-If the guild owner is a super patron, All guild members (non-patrons) get {owner_super_patron_benefit} photos a day.
-Please support <@{keys.bot_id}>'s development at {keys.patreon_link}.
-Thank You."""
-
-
-def check_reset_limits():
-    if time.time() - ex.cache.commands_used['reset_time'] > 86400:  # 1 day in seconds
-        # reset the dict
-        ex.cache.commands_used = {"reset_time": time.time()}
-
-
-def add_user_limit(message_sender):
-    if message_sender.id not in ex.cache.commands_used:
-        ex.cache.commands_used[message_sender.id] = [1, time.time()]
-    else:
-        ex.cache.commands_used[message_sender.id] = [ex.cache.commands_used[message_sender.id][0] + 1, time.time()]
-
-
-# noinspection PyPep8
-async def check_user_limit(message_sender, message_channel, no_vote_limit=False):
-    limit = keys.idol_post_send_limit
-    if no_vote_limit:
-        # amount of votes that can be sent without voting.
-        limit = keys.idol_no_vote_send_limit
-    if message_sender.id not in ex.cache.commands_used:
-        return
-    if not await ex.u_patreon.check_if_patreon(message_sender.id) and ex.cache.commands_used[message_sender.id][0] > limit:
-        # noinspection PyPep8
-        if not await ex.u_patreon.check_if_patreon(message_channel.guild.owner.id, super_patron=True) and not no_vote_limit:
-            return await message_channel.send(patron_message)
-        elif ex.cache.commands_used[message_sender.id][0] > owner_super_patron_benefit and not no_vote_limit:
-            return await message_channel.send(patron_message)
-        else:
-            return True
-
-
-# noinspection PyPep8
-async def request_image_post(message, idol, channel):
-    photo_msg, api_url, posted = None, None, False
-    if not await ex.u_miscellaneous.check_if_bot_banned(message.author.id):
-        async with channel.typing():
-            try:
-                if await check_user_limit(message.author, message.channel, no_vote_limit=True):
-                    if not await ex.u_group_members.get_if_user_voted(message.author.id) and not await ex.u_patreon.check_if_patreon(message.author.id):
-                        return await ex.u_group_members.send_vote_message(message)
-            except Exception as e:
-                log.console(e)
-            if not await check_user_limit(message.author, channel):
-                if not await events.Events.check_maintenance(message):
-                    return await ex.u_miscellaneous.send_maintenance_message(channel)
-                photo_msg, api_url = await ex.u_group_members.idol_post(channel, idol, user_id=message.author.id)
-                posted = True
-    return photo_msg, api_url, posted
-
-
-async def choose_random_member(members=None, groups=None):
-    """Choose a random member object from a member or group list given."""
-    async def check_photo_count(t_member_ids):
-        t_member_id = random.choice(t_member_ids)
-        t_member = await ex.u_group_members.get_member(t_member_id)
-        if not t_member.photo_count:
-            t_member = await check_photo_count(t_member_ids)
-        return t_member
-
-    idol = None
-    new_groups = []
-    if groups:
-        for group in groups:
-            if group.photo_count:
-                new_groups.append(group)
-    if new_groups:
-        member_ids = (random.choice(new_groups)).members
-        idol = await check_photo_count(member_ids)
-
-    new_members = []
-    if members:
-        for member in members:
-            if member.photo_count:
-                new_members.append(member)
-    if new_members:
-        idol = random.choice(new_members)
-    return idol
 
 
 # noinspection PyBroadException,PyPep8
@@ -116,7 +27,7 @@ class GroupMembers(commands.Cog):
         posted = False
         api_url = None
         try:
-            check_reset_limits()
+            ex.u_group_members.check_reset_limits()
             if message.author.id in ex.cache.commands_used:
                 time_difference = time.time() - ex.cache.commands_used[message.author.id][1]
                 if time_difference < 2:
@@ -138,24 +49,24 @@ class GroupMembers(commands.Cog):
                 groups = await ex.u_group_members.get_group_where_group_matches_name(message_content, server_id=server_id)
                 photo_msg = None
                 if members:
-                    random_member = await choose_random_member(members=members)
+                    random_member = await ex.u_group_members.choose_random_member(members=members)
                     if random_member:
-                        photo_msg, api_url, posted = await request_image_post(message, random_member, channel)
+                        photo_msg, api_url, posted = await ex.u_group_members.request_image_post(message, random_member, channel)
                 elif groups:
-                    random_member = await choose_random_member(groups=groups)
+                    random_member = await ex.u_group_members.choose_random_member(groups=groups)
                     if random_member:
-                        photo_msg, api_url, posted = await request_image_post(message, random_member, channel)
+                        photo_msg, api_url, posted = await ex.u_group_members.request_image_post(message, random_member, channel)
                 else:
                     members = await ex.u_group_members.check_group_and_idol(message_content, server_id=server_id)
                     if members:
-                        random_member = await choose_random_member(members=members)
+                        random_member = await ex.u_group_members.choose_random_member(members=members)
                         if random_member:
-                            photo_msg, api_url, posted = await request_image_post(message, random_member, channel)
+                            photo_msg, api_url, posted = await ex.u_group_members.request_image_post(message, random_member, channel)
                 if posted:
                     ex.u_group_members.log_idol_command(message)
                     await ex.u_miscellaneous.add_command_count(f"Idol {random_member.id}")
                     await ex.u_miscellaneous.add_session_count()
-                    add_user_limit(message.author)
+                    ex.u_group_members.add_user_limit(message.author)
                     if api_url:
                         await ex.u_group_members.check_idol_post_reactions(photo_msg, message, random_member, api_url)
         except:
@@ -394,9 +305,9 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
             except:
                 pass  # error is guild not found, likely being accessed from DMs
             idol = await ex.u_group_members.get_random_idol()
-            photo_msg, api_url, posted = await request_image_post(ctx.message, idol, channel)
+            photo_msg, api_url, posted = await ex.u_group_members.request_image_post(ctx.message, idol, channel)
             if posted:
-                add_user_limit(ctx.author)
+                ex.u_group_members.add_user_limit(ctx.author)
                 if api_url:
                     await ex.u_group_members.check_idol_post_reactions(photo_msg, ctx.message, idol.id, api_url)
 

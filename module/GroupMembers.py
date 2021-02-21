@@ -8,8 +8,6 @@ import typing
 import json
 import datetime
 
-client = keys.client
-
 
 # noinspection PyBroadException,PyPep8
 class GroupMembers(commands.Cog):
@@ -115,7 +113,7 @@ class GroupMembers(commands.Cog):
             query_id = ex.first_result(await ex.conn.fetchrow("SELECT id FROM groupmembers.unregisteredmembers WHERE fullname = $1 AND stagename = $2 ORDER BY id DESC", full_name, stage_name))
 
             # get the channel to send idol information to.
-            channel = client.get_channel(keys.add_idol_channel_id)
+            channel = ex.client.get_channel(keys.add_idol_channel_id)
             # fetch if discord.py cache is not loaded.
             if not channel:
                 channel = await ex.client.fetch_channel(keys.add_idol_channel_id)
@@ -181,7 +179,7 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
                 "SELECT id FROM groupmembers.unregisteredgroups WHERE groupname = $1 ORDER BY id DESC", group_name))
 
             # get the channel to send idol information to.
-            channel = client.get_channel(keys.add_group_channel_id)
+            channel = ex.client.get_channel(keys.add_group_channel_id)
             # fetch if discord.py cache is not loaded.
             if not channel:
                 channel = await ex.client.fetch_channel(keys.add_group_channel_id)

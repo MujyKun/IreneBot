@@ -306,15 +306,28 @@ Maintenance Status: {maintenance_status}
         await ctx.send("**> Cleared.**")
 
     @commands.command(aliases=["nwl"])
-    async def nwordleaderboard(self, ctx):
-        """Shows leaderboards for how many times the nword has been said. [Format: %nwl]"""
+    async def nwordleaderboard(self, ctx, mode="server"):
+        """Shows leaderboards for how many times the nword has been said. [Format: %nwl (server/global)]"""
         embed = discord.Embed(title=f"NWord Leaderboard", color=0xffb6c1)
         embed.set_author(name="Irene", url=keys.bot_website, icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
         embed.set_footer(text=f"Type {await ex.get_server_prefix_by_context(ctx)}nword (user) to view their individual stats.", icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
 
+        guild_id = await ex.get_server_id(ctx)
+        if not guild_id:
+            # server rankings can not be accessed from DMs.
+            mode = "global"
+
+        guild = ex.client.get_guild(guild_id)
+        member_list = [member.id for member in guild.members]
         n_word_list = {}  # user_id : n_word_count
+
         for user in ex.cache.users.values():
-            n_word_list[user.id] = user.n_word
+            if mode.lower() == "global":
+                n_word_list[user.id] = user.n_word
+            else:
+                # server
+                if user.id in member_list:
+                    n_word_list[user.id] = user.n_word
 
         sorted_n_word = {key: value for key, value in sorted(n_word_list.items(), key=lambda item: item[1], reverse=True)}
         for count, user_id in enumerate(sorted_n_word):

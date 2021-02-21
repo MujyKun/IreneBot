@@ -395,20 +395,24 @@ class Cache:
         This was added due to intents slowing d.py cache loading rate.
         """
         # create a temporary patron list based on the db cache while waiting for the discord cache to load
-        if ex.conn:
-            if not ex.temp_patrons_loaded:
-                cached_patrons = await ex.conn.fetch("SELECT userid, super FROM patreon.cache")
-                for user_id, super_patron in cached_patrons:
-                    user = await ex.get_user(user_id)
-                    if super_patron:
-                        user.super_patron = True
-                    user.patron = True
-                ex.temp_patrons_loaded = True
-            while not ex.discord_cache_loaded:
-                await asyncio.sleep(1)
-            if await self.process_cache_time(self.update_patreons, "Patrons"):
-                self.update_patron_cache_hour.start()
-                self.update_patron_cache.stop()
+        try:
+            if ex.conn:
+                if not ex.temp_patrons_loaded:
+                    cached_patrons = await ex.conn.fetch("SELECT userid, super FROM patreon.cache")
+                    for user_id, super_patron in cached_patrons:
+                        user = await ex.get_user(user_id)
+                        if super_patron:
+                            user.super_patron = True
+                        user.patron = True
+                    ex.temp_patrons_loaded = True
+                    log.console("Cache for Temporary Patrons has been created.")
+                while not ex.discord_cache_loaded:
+                    await asyncio.sleep(60)  # check every minute if discord cache has loaded.
+                if await self.process_cache_time(self.update_patreons, "Patrons"):
+                    self.update_patron_cache_hour.start()
+                    self.update_patron_cache.stop()
+        except Exception as e:
+            log.console(e)
 
     @tasks.loop(seconds=0, minutes=0, hours=1, reconnect=True)
     async def update_patron_cache_hour(self):

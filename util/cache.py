@@ -396,11 +396,13 @@ class Cache:
         """
         # create a temporary patron list based on the db cache while waiting for the discord cache to load
         try:
-            # wait a minute for user objects to create themselves in other cache to not have any overlapping
-            # concurrently
-            await asyncio.sleep(60)
             if ex.conn:
                 if not ex.temp_patrons_loaded:
+                    while not ex.irene_cache_loaded:
+                        # wait until Irene's cache has been loaded before creating temporary patrons
+                        # this is so that the user objects do not overwrite each other
+                        # when being created.
+                        await asyncio.sleep(5)
                     cached_patrons = await ex.conn.fetch("SELECT userid, super FROM patreon.cache")
                     for user_id, super_patron in cached_patrons:
                         user = await ex.get_user(user_id)

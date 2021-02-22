@@ -18,10 +18,10 @@ class BotMod(commands.Cog):
                 return
             if 'closedm' in message_content or 'createdm' in message_content:
                 return
-            for user in ex.cache.users.values():
+
+            mod_mail_list = await ex.u_miscellaneous.get_mod_mail_list()
+            for user in mod_mail_list:
                 try:
-                    if not user.mod_mail_channel_id:
-                        continue
                     channel_id = user.mod_mail_channel_id
                     try:
                         mod_channel = ex.client.get_channel(channel_id)

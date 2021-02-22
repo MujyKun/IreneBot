@@ -16,9 +16,8 @@ class Miscellaneous(commands.Cog):
             if message.author.bot:
                 return
             message_split = message.content.lower().split(" ")
-            for user in ex.cache.users.values():
-                if not user.notifications:
-                    continue
+            user_notification_list = await ex.u_miscellaneous.get_user_notification_list()
+            for user in user_notification_list:
                 for guild_id, phrase in user.notifications:
                     if phrase not in message_split or guild_id != message.guild.id:
                         continue

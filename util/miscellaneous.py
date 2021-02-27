@@ -317,15 +317,3 @@ class Miscellaneous:
     def get_voice_channel_count():
         """Returns the voice channel count from all the guilds the bot is connected to."""
         return sum([len(guild.voice_channels) for guild in ex.client.guilds])
-
-    @staticmethod
-    async def get_mod_mail_list():
-        """Returns a list of users that are engaged in a mod mail channel."""
-        return [user for user in ex.cache.users.values() if user.mod_mail_channel_id]
-
-    @staticmethod
-    async def get_user_notification_list():
-        """Returns a list of users with user notifications."""
-        return [user for user in ex.cache.users.values() if user.notifications]
-
-

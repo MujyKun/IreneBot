@@ -19,27 +19,24 @@ class BotMod(commands.Cog):
             if 'closedm' in message_content or 'createdm' in message_content:
                 return
 
-            mod_mail_list = await ex.u_miscellaneous.get_mod_mail_list()
-            for user in mod_mail_list:
+            for user_id in ex.cache.mod_mail:
                 try:
-                    channel_id = user.mod_mail_channel_id
-                    try:
-                        mod_channel = ex.client.get_channel(channel_id)
-                    except:
-                        mod_channel = await ex.client.fetch_channel(channel_id)
-
-                    dm_channel = await ex.get_dm_channel(message_sender.id)
-                    if user.id == message_sender.id:
-                        if not dm_channel:
-                            continue
-                        if message_channel == dm_channel:
+                    channel_id = ex.cache.mod_mail.get(user_id)
+                    mod_channel = await ex.client.fetch_channel(channel_id)
+                    if user_id == message_sender.id:
+                        dm_channel = await ex.get_dm_channel(message_sender.id)
+                        if message_channel.id == dm_channel:
                             await mod_channel.send(
                                 f">>> FROM: {message_sender.display_name} ({message_sender.id}) - {message_content}")
-                        if message_channel == mod_channel:
-                            await dm_channel.send(
-                                f">>> FROM: {message_sender.display_name} ({message_sender.id}) - {message_content}")
+                    if mod_channel == message_channel:
+                        dm_channel = await ex.get_dm_channel(user_id)
+                        await dm_channel.send(
+                            f">>> FROM: {message_sender.display_name} ({message_sender.id}) - {message_content}")
                 except Exception as e:
                     log.console(f"{e} - Iteration Error in BotMod.mod_mail_on_message")
+                    # change in dictionary size should break the loop.
+                    break
+
         except Exception as e:
             log.console(f"{e} - BotMod.mod_mail_on_message")
 
@@ -464,6 +461,7 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
             if dm_channel:
                 user = await ex.get_user(user.id)
                 user.mod_mail_channel_id = ctx.channel.id
+                ex.cache.mod_mail[user.id] = ctx.channel.id  # full list
                 await ex.conn.execute("INSERT INTO general.modmail(userid, channelid) VALUES ($1, $2)", user.id, ctx.channel.id)
                 await dm_channel.send(f"> {ctx.author.display_name} ({ctx.author.id}) has created a DM with you. All messages sent here will be sent to them.")
                 await ctx.send(f"> A DM has been created with {user.id}. All messages you type in this channel will be sent to the user.")
@@ -488,6 +486,7 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
                 return await ctx.send("> **There are no DMs set up in this channel.**")
             user = await ex.get_user(user_id)
             user.mod_mail_channel_id = None
+            ex.cache.mod_mail.pop(user_id, None)  # full list
             await ex.conn.execute("DELETE FROM general.modmail WHERE userid = $1 and channelid = $2", user_id, ctx.channel.id)
             await ctx.send(f"> The DM with {user_id} has been deleted successfully.")
             await dm_channel.send(f"> {ctx.author.display_name} ({ctx.author.id}) has closed the DM with you. Your messages will no longer be sent to them.")

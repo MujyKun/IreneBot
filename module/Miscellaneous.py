@@ -15,29 +15,30 @@ class Miscellaneous(commands.Cog):
         try:
             if message.author.bot:
                 return
+
             message_split = message.content.lower().split(" ")
-            user_notification_list = await ex.u_miscellaneous.get_user_notification_list()
-            for user in user_notification_list:
-                for guild_id, phrase in user.notifications:
-                    if phrase not in message_split or guild_id != message.guild.id:
-                        continue
-                    if message.author.id == user.id or user.id not in [member.id for member in message.channel.members]:
-                        continue
-                    log.console(f"Sending User Notification - {phrase} to {user.id}")
-                    dm_channel = await ex.get_dm_channel(user.id)
-                    start_loc = (message.content.lower()).find(phrase)
-                    end_loc = start_loc + len(phrase)
-                    new_message_content = f"{message.content[0:start_loc]}`{message.content[start_loc:end_loc]}`" \
-                        f"{message.content[end_loc:len(message.content)]}"
-                    title_desc = f"""
+            for guild_id, user_id, phrase in ex.cache.user_notifications:
+                if phrase not in message_split or guild_id != message.guild.id:
+                    continue
+                if message.author.id == user_id or user_id not in [member.id for member in message.channel.members]:
+                    continue
+
+                log.console(f"message_notifications 1 - {phrase} to {user_id}")
+                dm_channel = await ex.get_dm_channel(user_id)
+                log.console(f"message_notifications 2 - {phrase} to {user_id}")
+                start_loc = (message.content.lower()).find(phrase)
+                end_loc = start_loc + len(phrase)
+                new_message_content = f"{message.content[0:start_loc]}`{message.content[start_loc:end_loc]}`" \
+                    f"{message.content[end_loc:len(message.content)]}"
+                title_desc = f"""
 Phrase: {phrase}
 Message Author: {message.author}
 
 **Message:** {new_message_content}
 [Click to go to the Message]({message.jump_url})
 """
-                    embed = await ex.create_embed(title="Phrase Found", color=ex.get_random_color(), title_desc=title_desc)
-                    await dm_channel.send(embed=embed)
+                embed = await ex.create_embed(title="Phrase Found", color=ex.get_random_color(), title_desc=title_desc)
+                await dm_channel.send(embed=embed)
         except:
             pass
 
@@ -70,6 +71,7 @@ Message Author: {message.author}
             await ex.conn.execute("INSERT INTO general.notifications(guildid,userid,phrase) VALUES($1, $2, $3)", ctx.guild.id, ctx.author.id, phrase.lower())
             user = await ex.get_user(ctx.author.id)
             user.notifications.append([ctx.guild.id, phrase.lower()])
+            ex.cache.user_notifications.append([ctx.guild.id, ctx.author.id, phrase.lower()])  # full list
             await ctx.send(f"> **{ctx.author.display_name}, I added `{phrase}` to your notifications.**")
         except AttributeError:
             return await ctx.send(f"> **{ctx.author.display_name}, You are not allowed to use this command in DMs.**")
@@ -84,6 +86,7 @@ Message Author: {message.author}
             try:
                 user = await ex.get_user(ctx.author.id)
                 user.notifications.remove([ctx.guild.id, phrase.lower()])
+                ex.cache.user_notifications.remove([ctx.guild.id, ctx.author.id, phrase.lower()])  # full list
             except AttributeError:
                 return await ctx.send(
                     f"> **{ctx.author.display_name}, You are not allowed to use this command in DMs.**")

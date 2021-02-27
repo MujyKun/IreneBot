@@ -303,10 +303,12 @@ class Cache:
     @staticmethod
     async def update_mod_mail():
         """Create the cache for existing mod mail"""
+        ex.cache.mod_mail = {}
         mod_mail = await ex.conn.fetch("SELECT userid, channelid FROM general.modmail")
         for user_id, channel_id in mod_mail:
             user = await ex.get_user(user_id)
             user.mod_mail_channel_id = channel_id
+            ex.cache.mod_mail[user_id] = [channel_id]  # full list
 
     @staticmethod
     async def update_patreons():
@@ -361,10 +363,12 @@ class Cache:
     @staticmethod
     async def update_user_notifications():
         """Set the cache for user phrases"""
+        ex.cache.user_notifications = []
         notifications = await ex.conn.fetch("SELECT guildid,userid,phrase FROM general.notifications")
         for guild_id, user_id, phrase in notifications:
             user = await ex.get_user(user_id)
             user.notifications.append([guild_id, phrase])
+            ex.cache.user_notifications.append([guild_id, user_id, phrase])  # full list.
 
     @staticmethod
     async def update_groups():

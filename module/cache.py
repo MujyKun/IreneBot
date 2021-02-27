@@ -178,6 +178,18 @@ class Cache(commands.Cog):
 
         self.twitch_channels_is_live = {}  # twitch_username : false/true
 
+        """
+        User Notifications and Mod Mail are constantly iterated over, therefore we need a synced list
+        apart from the information present in the user objects to stop the bot from being blocked/behind
+        on future commands. These were removed and put into the user objects, but will now be placed back due to 
+        this issue.
+        """
+        self.user_notifications = []
+        # mod mail user and channel {user_id: channel_id}
+        self.mod_mail = {}
+
+
+
         # bracket position for bias game stored due to annoyance when using previous x and y values.
         # counting starts from left to right, bottom to top
         self.stored_bracket_positions = {

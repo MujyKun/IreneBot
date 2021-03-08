@@ -119,9 +119,13 @@ class Music(commands.Cog):
     @staticmethod
     def check_user_in_vc(ctx):
         try:
+            log.console(f"Members in VC {ctx.voice_client.channel.id} -> {ctx.voice_client.channel.members}")
             return ctx.author in ctx.voice_client.channel.members
-        except AttributeError:
+        except AttributeError as e:
+            log.console(f"{e} - check_user_in_vc")
             return False  # NoneType object has no attribute channel
+        except Exception as e:
+            log.console(f"{e} - check_user_in_vc")
 
     @staticmethod
     def reset_queue_for_guild(guild_id):

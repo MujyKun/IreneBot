@@ -104,6 +104,7 @@ class Cache:
     @staticmethod
     async def create_self_assignable_role_cache():
         """Create cache for self assignable roles"""
+        ex.cache.assignable_roles = {}
         all_roles = await ex.conn.fetch("SELECT roleid, rolename, serverid FROM selfassignroles.roles")
         all_channels = await ex.conn.fetch("SELECT channelid, serverid FROM selfassignroles.channels")
         for role_id, role_name, server_id in all_roles:
@@ -125,6 +126,7 @@ class Cache:
     @staticmethod
     async def create_weverse_channel_cache():
         """Create cache for channels that are following a community on weverse."""
+        ex.cache.weverse_channels = {}
         all_channels = await ex.conn.fetch("SELECT channelid, communityname, roleid, commentsdisabled FROM weverse.channels")
         for channel_id, community_name, role_id, comments_disabled in all_channels:
             await ex.u_weverse.add_weverse_channel_to_cache(channel_id, community_name)

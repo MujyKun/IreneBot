@@ -117,6 +117,15 @@ class Game:
         idol_difficulty_set = ex.cache.difficulty_selection.get(self.difficulty)
         self.idol_set = list(idol_gender_set & idol_difficulty_set)
 
+    async def credit_user(self, user_id):
+        """Increment a user's score"""
+        score = self.players.get(user_id)
+        if not score:
+            self.players[user_id] = 1
+        else:
+            self.players[user_id] = score + 1
+        self.rounds += 1
+
     async def check_message(self):
         """Check incoming messages in the text channel and determine if it is correct."""
         if self.force_ended:
@@ -140,19 +149,17 @@ class Game:
                 await self.print_answer(question_skipped=True)
                 return
             elif msg.content.lower() in self.correct_answers:
-                score = self.players.get(msg.author.id)
-                if not score:
-                    self.players[msg.author.id] = 1
-                else:
-                    self.players[msg.author.id] = score + 1
-                self.rounds += 1
+                await self.credit_user(msg.author.id)
             elif msg.content.lower() in stop_phrases or self.force_ended:
                 self.force_ended = True
                 return
             else:
-                # Forbidden error
-                raise ex.exceptions.ShouldNotBeHere(f"msg passed check_correct_message() but was not correct, "
-                                                    f"'skip', or 'stop'. msg: {msg.content.lower()}")
+                # the only time this code is reached is when a prefix was changed in the middle of a round.
+                # for example, if the user had to guess "irene", but their server prefix was 'i', then
+                # the bot will change the msg content to "%rene" and the above conditions will not properly work.
+                # if we had reached this point, we'll give them +1 instead of ending the game
+                await self.credit_user(msg.author.id)
+
         except asyncio.TimeoutError:
             if not self.force_ended:
                 await self.print_answer()

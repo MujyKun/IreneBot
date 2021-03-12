@@ -1,6 +1,6 @@
 beautifulsoup4==4.8.2
 aiofiles==0.4.0
-aiohttp==3.6.2
+aiohttp==3.7.4
 asyncio==3.4.3
 asyncpg==0.20.1
 git+git://github.com/MujyKun/boats.py@master#boats.py

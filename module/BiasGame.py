@@ -41,7 +41,7 @@ class BiasGame(commands.Cog):
         [Foramt: %listbg]"""
         if not user:
             user = ctx.author
-        user_wins = await ex.conn.fetch("SELECT idolid, wins FROM biasgame.winners WHERE userid = $1 ORDER BY WINS DESC LIMIT $2", user.id, 10)
+        user_wins = await ex.conn.fetch("SELECT idolid, wins FROM biasgame.winners WHERE userid = $1 ORDER BY WINS DESC LIMIT $2", user.id, 15)
         if user_wins:
             msg_string = f"**Bias Game Leaderboard for {user.display_name}**:\n"
             counter = 1

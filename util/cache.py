@@ -345,7 +345,7 @@ class Cache:
                     # patron includes both normal and super patrons.
                     await ex.conn.execute("INSERT INTO patreon.cache(userid, super) VALUES($1, $2)", patron, 0)
                 user = await ex.get_user(patron)
-                user.patron = False
+                user.patron = True
             # super patrons must go after normal patrons to have a proper boolean set because
             # super patrons have both roles.
             for patron in super_patrons:

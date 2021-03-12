@@ -92,7 +92,10 @@ class Twitch(commands.Cog):
         channels_followed = await ex.u_twitch.get_channels_followed(guild_id)
         await ctx.send(f"> This server is following these channels: **{', '.join(channels_followed)}**")
 
-    @tasks.loop(seconds=30, minutes=0, hours=0, reconnect=True)
+    # we now check every minute instead of 30 seconds since Irene was at times posting twice.
+    # instead of keeping track of which channels it was sent to, increasing the check time uses less resources
+    # and would prevent the issue at hand.
+    @tasks.loop(seconds=0, minutes=1, hours=0, reconnect=True)
     async def twitch_updates(self):
         """Process for checking for Twitch channels that are live and sending to discord channels."""
         try:

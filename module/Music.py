@@ -119,9 +119,13 @@ class Music(commands.Cog):
     @staticmethod
     def check_user_in_vc(ctx):
         try:
+            log.console(f"Members in VC {ctx.voice_client.channel.id} -> {ctx.voice_client.channel.members}")
             return ctx.author in ctx.voice_client.channel.members
-        except AttributeError:
+        except AttributeError as e:
+            log.console(f"{e} - check_user_in_vc")
             return False  # NoneType object has no attribute channel
+        except Exception as e:
+            log.console(f"{e} - check_user_in_vc")
 
     @staticmethod
     def reset_queue_for_guild(guild_id):
@@ -244,7 +248,8 @@ class Music(commands.Cog):
                 page_number = 1
             await ex.set_embed_author_and_footer(embed_list[page_number -1], footer_message=f"Total time of songs queued: {await ex.u_miscellaneous.get_cooldown_time(total_amount_of_time)}")
             msg = await ctx.send(embed=embed_list[page_number - 1])
-            await ex.check_left_or_right_reaction_embed(msg, embed_list, page_number - 1)
+            if len(embed_list) > 1:
+                await ex.check_left_or_right_reaction_embed(msg, embed_list, page_number - 1)
         except KeyError:
             await ctx.send(f"> **There are no songs queued in this server.**")
         except Exception as e:

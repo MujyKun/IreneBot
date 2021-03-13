@@ -4,6 +4,7 @@ from Utility import resources as ex
 import datetime
 import pytz
 import discord
+import typing
 
 
 # noinspection PyBroadException,PyPep8
@@ -48,7 +49,7 @@ class Reminder(commands.Cog):
     async def removereminder(self, ctx, reminder_index: int):
         """Remove one of your reminders.
         [Format: %removereminder (reminder index)]"""
-        reminders = ex.cache.reminders.get(ctx.author.id)
+        reminders = await ex.u_reminder.get_reminders(ctx.author.id)
         user_timezone = await ex.u_reminder.get_user_timezone(ctx.author.id)
         if not reminders:
             return await ctx.send(f"> {ctx.author.display_name}, you have no reminders.")
@@ -69,7 +70,7 @@ class Reminder(commands.Cog):
         [Format: %remindme to ______ at 9PM
         or
         %remindme to ____ in 6hrs 30mins]"""
-        reminders = ex.cache.reminders.get(ctx.author.id)
+        reminders = await ex.u_reminder.get_reminders(ctx.author.id)
         user_timezone = await ex.u_reminder.get_user_timezone(ctx.author.id)
         if reminders:
             if len(reminders) >= reminder_limit:
@@ -105,10 +106,24 @@ class Reminder(commands.Cog):
             f"`{await ex.u_reminder.get_locale_time(remind_time,user_timezone)}`")
 
     @commands.command(aliases=['gettz', 'time'])
-    async def gettimezone(self, ctx, user: discord.Member = None):
+    async def gettimezone(self, ctx, user_input: typing.Union[discord.Member, str] = None):
         """Get your current set timezone.
         [Format: %gettimezone]"""
         server_prefix = await ex.get_server_prefix_by_context(ctx)
+
+        if isinstance(user_input, str):
+            try:
+                timezone_input = await ex.u_reminder.process_timezone_input(user_input)
+                current_time = await ex.u_reminder.format_time('%I:%M:%S %p', timezone_input)
+                return await ctx.send(f"The current time in `{timezone_input}` is `{current_time}`.")
+            except:
+                return await ctx.send(f"Your input was neither a user or a valid timezone.")
+        elif isinstance(user_input, discord.Member):
+            user = user_input
+        elif not user_input:
+            user = None
+        else:
+            return await ctx.send(f"Your input was neither a user or a valid timezone.")
 
         if not user:
             user = ctx.author
@@ -118,8 +133,8 @@ class Reminder(commands.Cog):
             return await ctx.send(f"> {user.display_name}{', you do' if user==ctx.author else ' does'}"
                                   f" not have a timezone set." + (help_message if user == ctx.author else ""))
 
-        current_time = datetime.datetime.now(pytz.timezone(user_timezone)).strftime('%I:%M:%S %p')
-        timezone_abbrev = datetime.datetime.now(pytz.timezone(user_timezone)).strftime('UTC%z')
+        current_time = await ex.u_reminder.format_time('%I:%M:%S %p', user_timezone)
+        timezone_abbrev = await ex.u_reminder.format_time('UTC%z', user_timezone)
         return await ctx.send(
             f"> {user.display_name}{', your' if user==ctx.author else chr(39)+'s'} current time is "
             f"`{current_time}` in the timezone `{user_timezone} {timezone_abbrev}`")
@@ -138,8 +153,8 @@ class Reminder(commands.Cog):
             return await ctx.send(f"> {ctx.author.display_name}, that is not a valid timezone. "
                                   f"Please use {server_prefix}settimezone (timezone name) (country code).")
 
-        timezone_utc = datetime.datetime.now(pytz.timezone(user_timezone)).strftime('UTC%z')
-        native_time = datetime.datetime.now(pytz.timezone(user_timezone)).strftime('%c')
+        timezone_utc = await ex.u_reminder.format_time('UTC%z', user_timezone)
+        native_time = await ex.u_reminder.format_time('%c', user_timezone)
         await ex.u_reminder.set_user_timezone(ctx.author.id, user_timezone)
         return await ctx.send(f"> {ctx.author.display_name}, your timezone has been set to `{user_timezone} "
                               f"{timezone_utc}`, where it is currently `{native_time}`")
@@ -147,21 +162,23 @@ class Reminder(commands.Cog):
     @tasks.loop(seconds=5, minutes=0, hours=0, reconnect=True)
     async def reminder_loop(self):
         """Process for checking for reminders and sending them out if they are past overdue."""
-        for user_id in ex.cache.reminders:
-            reminders = ex.cache.reminders.get(user_id)
-            if not reminders:
-                return
-            for remind_id, remind_reason, remind_time in reminders:
-                try:
-                    current_time = datetime.datetime.now(remind_time.tzinfo)
-                    if current_time < remind_time:
-                        return
-                    dm_channel = await ex.get_dm_channel(user_id=user_id)
-                    if dm_channel:
-                        title_desc = f"This is a reminder to **{remind_reason}**."
-                        embed = await ex.create_embed(title="Reminder", title_desc=title_desc)
-                        await dm_channel.send(embed=embed)
-                        await ex.u_reminder.remove_user_reminder(user_id, remind_id)
-                except:
-                    pass  # likely forbidden error -> do not have access to dm user
+        try:
+            for user in ex.cache.users.values():
+                if not user.reminders:
+                    continue
+                for remind_id, remind_reason, remind_time in user.reminders:
+                    try:
+                        current_time = datetime.datetime.now(remind_time.tzinfo)
+                        if current_time < remind_time:
+                            continue
+                        dm_channel = await ex.get_dm_channel(user_id=user.id)
+                        if dm_channel:
+                            title_desc = f"This is a reminder to **{remind_reason}**."
+                            embed = await ex.create_embed(title="Reminder", title_desc=title_desc)
+                            await dm_channel.send(embed=embed)
+                            await ex.u_reminder.remove_user_reminder(user.id, remind_id)
+                    except:
+                        pass  # likely forbidden error -> do not have access to dm user
+        except:
+            pass  # dictionary changed size during iteration -> Next Loop instance will take care of this loop.
 

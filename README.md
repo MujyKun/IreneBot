@@ -1,4 +1,4 @@
-# [IreneBot V1.03.7](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=1609956823)
+# [IreneBot V1.03.8](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=1609956823)
 
 ## [Support Irene by becoming a Patron!](https://www.patreon.com/bePatron?u=38971435)  
 **[Become a Patron!](https://www.patreon.com/bePatron?u=38971435)**
@@ -166,7 +166,7 @@ To find out more, look at the `GroupMembers` category.
 | invite           | Invite Link for Irene                                          | %invite                         |                |
 | listnoti          | list all your notification phrases that exist in the current server.| %listnoti     |               |
 | nword            | Checks how many times a user has said the N Word               | %nword @user                    |                |
-| nwordleaderboard | Shows leaderboards for how many times the nword has been said. | %nwl                            | nwl            |
+| nwordleaderboard | Shows leaderboards for how many times the nword has been said. | %nwl (server/global)                           | nwl            |
 | patreon             | Displays Patreon Information.                                       | %patreon                           |   patron         |
 | ping             | Shows Latency to Discord                                       | %ping                           | pong           |
 | random           | Choose a random number from a range (a,b)                      | %random a b [Ex: %random 1 100] | r,rand,randint |
@@ -290,3 +290,12 @@ To find out more, look at the `GroupMembers` category.
 | remindme | Create a reminder to do a task at a certain time. | %remindme to ______ at 9PM or %remindme to ____ in 6hrs 30mins  | remind |
 | removereminder | Remove one of your reminders. | %removereminder (reminder index) | removeremind |
 | settimezone | Set your local timezone with a timezone abbreviation and country code. | %settimezone (timezone name ex: PST) (country code ex: US) | settz |
+
+#### Twitch: ★★★
+| Command     | Description                          | Format                 | Aliases           |
+|-------------|--------------------------------------|------------------------|-------------------|
+| addtwitch | Adds a Twitch username to keep track of. Maximum 2 Twitch channels per server. | %addtwitch (twitch username) | |
+| listtwitch | List the twitch channels the server follows.| %listtwitch | |
+| removetwitch | Removes a twitch username that is being kept track of. | %removetwitch (twitch username) | |
+| settwitchchannel | Set the discord channel that the twitch announcements will be posted on. | %settwitchchannel [#text channel] | |
+| settwitchrole | Set the discord role that will be mentioned on twitch announcements. If a discord role is set, everyone will not be mentioned. Use the command without a role to mention everyone. |%settwitchrole [@role] | |

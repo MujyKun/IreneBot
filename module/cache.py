@@ -5,6 +5,8 @@ import json
 
 class Cache(commands.Cog):
     def __init__(self):
+        # dict of discord (util) User objects -> not from d.py. Stored as a dict for easier searching.
+        self.users = {}  # {user_id: User_object}
         # maintenance mode
         self.maintenance_mode = False
         # maintenance reason
@@ -46,8 +48,6 @@ class Cache(commands.Cog):
         self.idol_photos = {}  # { idol_id: photo_count }
         # All custom server prefixes
         self.server_prefixes = {}  # { server_id: server_prefix }
-        # list of patrons
-        self.patrons = {}  # { user_id: is_super_patron ( True or False ) }
         """
         reset timer for idol photos (keeps track of command usage)
         {
@@ -55,12 +55,6 @@ class Cache(commands.Cog):
             userid: [commands_used, time_since_last_command]
         }"""
         self.commands_used = {"reset_time": time.time()}
-        # phrases that will notify users [guild_id, user_id, phrase]
-        self.user_notifications = []
-        # mod mail user and channel {user_id: channel_id}
-        self.mod_mail = {}
-        # user ids banned from bot [user_id]
-        self.bot_banned = []
         # server to channels being logged
         """
         {
@@ -95,13 +89,6 @@ class Cache(commands.Cog):
         }
         """
         self.temp_channels = {}
-        """
-        NWord Counter
-        {
-        user_id : counter
-        }
-        """
-        self.n_word_counter = {}
 
         # list of idol objects
         self.idols = []
@@ -142,15 +129,12 @@ class Cache(commands.Cog):
         #   }
         # }
 
-        self.assignable_roles = {}   #
+        self.assignable_roles = {}  #
         # { server_id:
         #    {channel_id: channel_id,
         #    roles: [role_id, role_name]
         # }}
 
-        # Reminder dictionary
-        self.reminders = {}   # { user_id: [ [remind_id, remind_reason, remind_time] ] }
-        self.timezones = {}   # { user_id: timezone }
         self.main_youtube_instance = None  # Youtube Object that exists on start up.
 
         # Timezone to Locale dictionary
@@ -161,11 +145,50 @@ class Cache(commands.Cog):
         self.female_aliases = ['girl', 'girls', 'female', 'woman', 'women', 'girlgroup', 'girlgroups', 'f']
         self.male_aliases = ['male', 'm', 'men', 'boy', 'boys', 'boygroup', 'boygroups']
 
-        # difficulty aliases for guessing game
-        self.difficulty_aliases = {'easy': 1, 'e': 1, 'medium': 2, 'm': 2, 'hard': 3, 'h': 3}
-
         # possible levels for guessing game
         self.difficulty_levels = ['easy', 'medium', 'hard']
+
+        # sets of idols for guessing game
+        self.idols_female = set()
+        self.idols_male = set()
+        self.idols_easy = set()
+        self.idols_medium = set()
+        self.idols_hard = set()
+
+        # guessing game difficulty or gender selection
+        # { selection_key_word : idol_set}
+        self.difficulty_selection = {
+            'easy': self.idols_easy,
+            'e': self.idols_easy,
+            'medium': self.idols_medium,
+            'm': self.idols_medium,
+            'hard': self.idols_hard,
+            'h': self.idols_hard
+        }
+        self.gender_selection = {
+            'female': self.idols_female,
+            'male': self.idols_male,
+            'all': set(self.idols)
+        }
+
+        #  guilds will soon have their own object, for now these will be separated.
+        self.twitch_channels = {}  # {twitch_username: [guild ids]}
+        self.twitch_guild_to_channels = {}  # guild_id: channel_id
+        self.twitch_guild_to_roles = {}  # guild_id: role_id
+
+        self.twitch_channels_is_live = {}  # twitch_username : false/true
+
+        """
+        User Notifications and Mod Mail are constantly iterated over, therefore we need a synced list
+        apart from the information present in the user objects to stop the bot from being blocked/behind
+        on future commands. These were removed and put into the user objects, but will now be placed back due to 
+        this issue.
+        """
+        self.user_notifications = []
+        # mod mail user and channel {user_id: channel_id}
+        self.mod_mail = {}
+
+
 
         # bracket position for bias game stored due to annoyance when using previous x and y values.
         # counting starts from left to right, bottom to top
@@ -187,43 +210,106 @@ class Cache(commands.Cog):
             15: {'img_size': (134, 130), 'pos': (235, 55)}
         }
 
+        # Equivalent keyword for translate languages
+        # { papago_code : lang_keyword_aliases }
+        self.lang_keywords = {
+            'ko': ['korean', 'ko', 'kr', 'korea', 'kor'],
+            'en': ['en', 'eng', 'english'],
+            'ja': ['jp', 'jap', 'japanese', 'japan'],
+            'zh-CN': ['chinese', 'ch', 'zh-cn', 'zhcn', 'c', 'china'],
+            'zh-TW': [],
+            'es': ['es', 'espanol', 'spanish', 'sp'],
+            'fr': ['french', 'fr', 'f', 'fren'],
+            'vi': ['viet', 'vi', 'vietnamese', 'vietnam'],
+            'th': ['th', 'thai', 'thailand'],
+            'id': ['id', 'indonesian', 'indonesia', 'ind']
+        }
+
+        # General card description format
+        # Create list if the attribute should be surrounded by two strings
+        self.general_description = {
+            'description': ['', '\n'],
+            'id': 'ID: ',
+            'gender': 'Gender: ',
+            'photo_count': 'Photo Count: ',
+        }
+
+        # Group card description format
+        # { field/attribute name : Card Display Format }
+        # Create list if the attribute should be surrounded by two strings
+        self.group_description = {
+            'name': 'Name: ',
+            'debut_date': 'Debut Date: ',
+            'disband_date': 'Disband Date: ',
+            'fandom': 'Fandom Name: ',
+            'company': 'Company: ',
+            'website': ['[Official Website](', ')']
+        }
+
+        # Idol card description format
+        # Create list if the attribute should be surrounded by two strings
+        self.idol_description = {
+            'full_name': 'Full Name: ',
+            'stage_name': 'Stage Name: ',
+            'former_full_name': 'Former Full Name: ',
+            'former_stage_name': 'Former Stage Name: ',
+            'birth_date': 'Birth Date: ',
+            'birth_country': 'Birth Country: ',
+            'birth_city': 'Birth City: ',
+            'height': ['Height: ', 'cm'],
+            'zodiac': 'Zodiac Sign: ',
+            'blood_type': 'Blood Type: ',
+            'called': ['Called: ', ' times'],
+            'difficulty': 'Guessing Game Difficulty: ',
+        }
+
+        # Website card description format
+        # Create list if the attribute should be surrounded by two strings
+        self.website_description = {
+            'twitter': ['[Twitter](https://twitter.com/', ')'],
+            'youtube': ['[Youtube](https://www.youtube.com/channel/', ')'],
+            'melon': ['[Melon](https://www.melon.com/artist/song.htm?artistId=', ')'],
+            'instagram': ['[Instagram](https://instagram.com/', ')'],
+            'vlive': ['[V Live](https://channels.vlive.tv/', ')'],
+            'spotify': ['[Spotify](https://open.spotify.com/artist/', ')'],
+            'fancafe': ['[FanCafe](https://m.cafe.daum.net/', ')'],
+            'facebook': ['[Facebook](https://www.facebook.com/', ')'],
+            'tiktok': ['[TikTok](https://www.tiktok.com/', ')'],
+        }
+
         self.eight_ball_responses = [
-                # Positive 13
-                "It is certain.",
-                "It is decidedly so.",
-                "Without a doubt.",
-                "Yes - definitely.",
-                "You may rely on it.",
-                "As I see it, yes.",
-                "Most likely.",
-                "Outlook good.",
-                "Yes.",
-                "Signs point to yes.",
-                ":thumbsup:",
-                "Well, duh",
-                "Of course, that was a stupid question.",
+            # Positive 13
+            "It is certain.",
+            "It is decidedly so.",
+            "Without a doubt.",
+            "Yes - definitely.",
+            "You may rely on it.",
+            "As I see it, yes.",
+            "Most likely.",
+            "Outlook good.",
+            "Yes.",
+            "Signs point to yes.",
+            ":thumbsup:",
+            "Well, duh",
+            "Of course, that was a stupid question.",
 
+            # Neutral 7
+            "Reply hazy, try again.",
+            "Ask again later.",
+            "Better not tell you now.",
+            "Cannot predict now.",
+            "Concentrate and ask again.",
+            "Why the fuck are you asking me you dumb rat.",
+            "You should already know this you 바보.",
 
-                # Neutral 7
-                "Reply hazy, try again.",
-                "Ask again later.",
-                "Better not tell you now.",
-                "Cannot predict now.",
-                "Concentrate and ask again.",
-                "Why the fuck are you asking me you dumb rat.",
-                "You should already know this you 바보.",
-
-                # Negative 10
-                "Don't count on it.",
-                "My reply is no.",
-                "My sources say no.",
-                "Outlook not so good.",
-                "Very doubtful.",
-                ":thumbsdown:",
-                "Are you kidding?",
-                "Don't bet on it.",
-                "Forget about it.",
-                "It's just not meant to be."]
-
-
-
+            # Negative 10
+            "Don't count on it.",
+            "My reply is no.",
+            "My sources say no.",
+            "Outlook not so good.",
+            "Very doubtful.",
+            ":thumbsdown:",
+            "Are you kidding?",
+            "Don't bet on it.",
+            "Forget about it.",
+            "It's just not meant to be."]

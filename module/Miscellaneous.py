@@ -10,23 +10,26 @@ import datetime
 # noinspection PyBroadException,PyPep8
 class Miscellaneous(commands.Cog):
     @staticmethod
-    async def on_message_notifications(message):
+    async def on_message_user_notifications(message):
         # user phrase notifications
         try:
             if message.author.bot:
                 return
+
+            message_split = message.content.lower().split(" ")
             for guild_id, user_id, phrase in ex.cache.user_notifications:
-                message_split = message.content.lower().split(" ")
                 if phrase not in message_split or guild_id != message.guild.id:
                     continue
                 if message.author.id == user_id or user_id not in [member.id for member in message.channel.members]:
                     continue
+
                 log.console(f"message_notifications 1 - {phrase} to {user_id}")
                 dm_channel = await ex.get_dm_channel(user_id)
                 log.console(f"message_notifications 2 - {phrase} to {user_id}")
                 start_loc = (message.content.lower()).find(phrase)
                 end_loc = start_loc + len(phrase)
-                new_message_content = f"{message.content[0:start_loc]}`{message.content[start_loc:end_loc]}`{message.content[end_loc:len(message.content)]}"
+                new_message_content = f"{message.content[0:start_loc]}`{message.content[start_loc:end_loc]}`" \
+                    f"{message.content[end_loc:len(message.content)]}"
                 title_desc = f"""
 Phrase: {phrase}
 Message Author: {message.author}
@@ -66,7 +69,9 @@ Message Author: {message.author}
             if check_exists:
                 raise Exception
             await ex.conn.execute("INSERT INTO general.notifications(guildid,userid,phrase) VALUES($1, $2, $3)", ctx.guild.id, ctx.author.id, phrase.lower())
-            ex.cache.user_notifications.append([ctx.guild.id, ctx.author.id, phrase.lower()])
+            user = await ex.get_user(ctx.author.id)
+            user.notifications.append([ctx.guild.id, phrase.lower()])
+            ex.cache.user_notifications.append([ctx.guild.id, ctx.author.id, phrase.lower()])  # full list
             await ctx.send(f"> **{ctx.author.display_name}, I added `{phrase}` to your notifications.**")
         except AttributeError:
             return await ctx.send(f"> **{ctx.author.display_name}, You are not allowed to use this command in DMs.**")
@@ -79,7 +84,9 @@ Message Author: {message.author}
         try:
             await ex.conn.execute("DELETE FROM general.notifications WHERE guildid=$1 AND userid=$2 AND phrase=$3", ctx.guild.id, ctx.author.id, phrase.lower())
             try:
-                ex.cache.user_notifications.remove([ctx.guild.id, ctx.author.id, phrase.lower()])
+                user = await ex.get_user(ctx.author.id)
+                user.notifications.remove([ctx.guild.id, phrase.lower()])
+                ex.cache.user_notifications.remove([ctx.guild.id, ctx.author.id, phrase.lower()])  # full list
             except AttributeError:
                 return await ctx.send(
                     f"> **{ctx.author.display_name}, You are not allowed to use this command in DMs.**")
@@ -94,19 +101,24 @@ Message Author: {message.author}
     async def listnoti(self, ctx):
         """list all your notification phrases that exist in the current server. [Format: %listnoti]"""
         try:
-            # use db call instead of cache (would be quicker here)
-            phrases = await ex.conn.fetch("SELECT phrase FROM general.notifications WHERE guildid = $1 AND userid = $2", ctx.guild.id, ctx.author.id)
-            if not phrases:
-                return await ctx.send(f"> **{ctx.author.display_name}, You do not have any notification phrases on this server.**")
+            user = await ex.get_user(ctx.author.id)
+            if not user.notifications:
+                raise AttributeError
             final_list = ""
-            counter = 1
-            for phrase in phrases:
-                if counter != len(phrases):
-                    final_list += f"**{phrase[0]}**,"
-                else:
-                    final_list += f"**{phrase[0]}**"
+            counter = 0
+            current_guild_id = ctx.guild.id
+            for guild_id, phrase in user.notifications:
                 counter += 1
+                if guild_id != current_guild_id:
+                    continue
+                if counter != len(user.notifications):
+                    final_list += f"**{phrase}**,"
+                else:
+                    final_list += f"**{phrase}**"
             await ctx.send(final_list)
+        except AttributeError:
+            return await ctx.send(
+                f"> **{ctx.author.display_name}, You do not have any notification phrases on this server.**")
         except Exception as e:
             log.console(e)
             await ctx.send(f"> **Something Went Wrong, please {await ex.get_server_prefix_by_context(ctx)}report it.**")
@@ -137,17 +149,25 @@ Message Author: {message.author}
     @commands.command()
     async def botinfo(self, ctx):
         """Get information about the bot."""
-        maintenance_status = api_status = db_status = images_status = weverse_status = ":red_circle:"
+        maintenance_status = api_status = db_status = images_status = weverse_status = d_py_status = irene_cache_status \
+            = ":red_circle:"
+
+        working = ":green_circle:"
         if await ex.u_miscellaneous.get_api_status():
-            api_status = ":green_circle:"
+            api_status = working
         if await ex.u_miscellaneous.get_db_status():
-            db_status = ":green_circle:"
+            db_status = working
         if await ex.u_miscellaneous.get_images_status():
-            images_status = ":green_circle:"
+            images_status = working
         if ex.cache.maintenance_mode:
-            maintenance_status = ":green_circle:"
+            maintenance_status = working
         if await ex.weverse_client.check_token_works():
-            weverse_status = ":green_circle:"
+            weverse_status = working
+        if ex.discord_cache_loaded:
+            d_py_status = working
+        if ex.irene_cache_loaded:
+            irene_cache_status = working
+
         try:
             current_server_prefix = await ex.get_server_prefix(ctx.guild.id)
         except:
@@ -174,6 +194,8 @@ API Status: {api_status}
 Images Status: {images_status} 
 Database Status: {db_status} 
 Weverse Status: {weverse_status}
+Irene Cache: {irene_cache_status}
+discord.py Cache: {d_py_status}
 Maintenance Status: {maintenance_status}
 """
         embed = await ex.create_embed(title=f"I am {app_name}! ({app_id})", title_desc=title_desc)
@@ -275,7 +297,7 @@ Maintenance Status: {maintenance_status}
         """Checks how many times a user has said the N Word [Format: %nword @user]"""
         if not user:
             user = ctx.author
-        current_amount = ex.cache.n_word_counter.get(user.id)
+        current_amount = (await ex.get_user(user.id)).n_word
         if not current_amount:
             return await ctx.send(f"> **<@{user.id}> has not said the N-Word a single time!**")
         else:
@@ -288,25 +310,43 @@ Maintenance Status: {maintenance_status}
         if not user:
             return await ctx.send("> **Please @ a user**")
 
-        if not ex.cache.n_word_counter.get(user.id):
+        if not (await ex.get_user(user.id)).n_word:
             return await ctx.send(f"> **<@{user.id}> has not said the N-Word a single time!**")
 
         await ex.conn.execute("DELETE FROM general.nword where userid = $1", user.id)
-        ex.cache.n_word_counter[user.id] = None
+        (await ex.get_user(user.id)).n_word = 0
         await ctx.send("**> Cleared.**")
 
     @commands.command(aliases=["nwl"])
-    async def nwordleaderboard(self, ctx):
-        """Shows leaderboards for how many times the nword has been said. [Format: %nwl]"""
+    async def nwordleaderboard(self, ctx, mode="server"):
+        """Shows leaderboards for how many times the nword has been said. [Format: %nwl (server/global)]"""
         embed = discord.Embed(title=f"NWord Leaderboard", color=0xffb6c1)
         embed.set_author(name="Irene", url=keys.bot_website, icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
         embed.set_footer(text=f"Type {await ex.get_server_prefix_by_context(ctx)}nword (user) to view their individual stats.", icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
-        sorted_n_word = {key: value for key, value in sorted(ex.cache.n_word_counter.items(), key=lambda item: item[1], reverse=True)}
+
+        guild_id = await ex.get_server_id(ctx)
+        if not guild_id:
+            # server rankings can not be accessed from DMs.
+            mode = "global"
+
+        guild = ex.client.get_guild(guild_id)
+        member_list = [member.id for member in guild.members]
+        n_word_list = {}  # user_id : n_word_count
+
+        for user in ex.cache.users.values():
+            if mode.lower() == "global":
+                n_word_list[user.id] = user.n_word
+            else:
+                # server
+                if user.id in member_list:
+                    n_word_list[user.id] = user.n_word
+
+        sorted_n_word = {key: value for key, value in sorted(n_word_list.items(), key=lambda item: item[1], reverse=True)}
         for count, user_id in enumerate(sorted_n_word):
             value = sorted_n_word.get(user_id)
             if not value:
                 continue
-            if count > 10:
+            if count >= 10:
                 break
             try:
                 user_name = (ex.client.get_user(user_id)).name
@@ -450,7 +490,7 @@ Maintenance Status: {maintenance_status}
                 for guild in guilds:
                     if guild.id != main_guild_id:
                         continue
-                    member_count = f"Member Count: {guild.member.count}\n"
+                    member_count = f"Member Count: {guild.member_count}\n"
                     owner = f"Guild Owner: {guild.owner} ({guild.owner.id})\n"
                     desc = member_count + owner
                     embed.add_field(name=f"{guild.name} ({guild.id})", value=desc, inline=False)

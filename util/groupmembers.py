@@ -1,17 +1,30 @@
 from Utility import resources as ex
 import datetime
 import discord
-from module import logger as log
+from module import logger as log, events
 import asyncio
 import json
 import os
 import random
-from module.keys import reload_emoji, dead_emoji, owner_id, mods_list, check_emoji,\
-    trash_emoji, next_emoji, translate_private_key, api_port
+import time
+from module.keys import reload_emoji, dead_emoji, owner_id, mods_list, check_emoji, idol_no_vote_send_limit,\
+    trash_emoji, next_emoji, translate_private_key, idol_post_send_limit, patreon_link, bot_id
 
 
 # noinspection PyBroadException,PyPep8
 class GroupMembers:
+    def __init__(self):
+        # the amount normal users can use if the guild owner is a super patron.
+        self.owner_super_patron_benefit = idol_post_send_limit * 2
+
+        self.patron_message = f"""
+        As of September 23rd 2020, non-Patrons can only send {idol_post_send_limit} photos a day maximum, as the current host can not reliably handle additional traffic.
+        You may become a patron for as little as $3 per month in order to send unlimited photos; every Patron contributes to upgrading and maintaining the host.
+        If the guild owner is a super patron, All guild members (non-patrons) get {self.owner_super_patron_benefit} photos a day.
+        Please support <@{bot_id}>'s development at {patreon_link}.
+        Thank You."""
+
+
     @staticmethod
     async def get_if_user_voted(user_id):
         time_stamp = ex.first_result(
@@ -20,18 +33,19 @@ class GroupMembers:
             tz_info = time_stamp.tzinfo
             current_time = datetime.datetime.now(tz_info)
             check = current_time - time_stamp
-            if check.seconds <= 43200:
-                return True
-        return False
+            log.console(f"It has been {check.seconds} seconds since {user_id} voted.")
+            return check.seconds <= 86400
+        log.console(f"{user_id} has not voted in the past 24 hours.")
 
-    def check_idol_object(self, obj):
-        return type(obj) == self.Idol
+    @staticmethod
+    def check_idol_object(obj):
+        return isinstance(obj, ex.u_objects.Idol)
 
     @staticmethod
     async def send_vote_message(message):
         """Send the vote message to a user."""
         server_prefix = await ex.get_server_prefix_by_context(message)
-        vote_message = f"> **To call more idol photos for the next 12 hours," \
+        vote_message = f"> **To call more idol photos for the next 24 hours," \
                        f" please support Irene by voting or becoming a patron through the links at " \
                        f"`{server_prefix}vote` or `{server_prefix}patreon`!**"
         return await message.channel.send(vote_message)
@@ -99,75 +113,39 @@ class GroupMembers:
             if group.id == group_id:
                 return group
 
+    @staticmethod
+    async def format_card_fields(obj, card_formats):
+        """Formats all relevant card fields to be displayed"""
+        final_string = ""
+        for attr_name, display_format in card_formats.items():
+            if not getattr(obj, attr_name):
+                continue
+            if isinstance(display_format, str):
+                final_string += f"{display_format}{getattr(obj, attr_name)}\n"
+            elif isinstance(display_format, list) and len(display_format) == 2:
+                final_string += f"{display_format[0]}{getattr(obj, attr_name)}{display_format[1]}\n"
+            else:
+                raise TypeError
+        return final_string
+
     async def set_embed_card_info(self, obj, group=False, server_id=None):
         """Sets General Information about a Group or Idol."""
-        description = ""
-        if obj.description:
-            description += f"{obj.description}\n\n"
-        if obj.id:
-            description += f"ID: {obj.id}\n"
-        if obj.gender:
-            description += f"Gender: {obj.gender}\n"
+
         if group:
             title = f"{obj.name} [{obj.id}]\n"
-            if obj.name:
-                description += f"Name: {obj.name}\n"
-            if obj.debut_date:
-                description += f"Debut Date: {obj.debut_date}\n"
-            if obj.disband_date:
-                description += f"Disband Date: {obj.disband_date}\n"
-            if obj.fandom:
-                description += f"Fandom Name: {obj.fandom}\n"
-            if obj.company:
-                description += f"Company: {obj.company}\n"
-            if obj.website:
-                description += f"[Official Website]({obj.website})\n"
+            card_description = await self.format_card_fields(obj, ex.cache.group_description)
         else:
             title = f"{obj.full_name} ({obj.stage_name}) [{obj.id}]\n"
-            if obj.full_name:
-                description += f"Full Name: {obj.full_name}\n"
-            if obj.stage_name:
-                description += f"Stage Name: {obj.stage_name}\n"
-            if obj.former_full_name:
-                description += f"Former Full Name: {obj.former_full_name}\n"
-            if obj.former_stage_name:
-                description += f"Former Stage Name: {obj.former_stage_name}\n"
-            if obj.birth_date:
-                description += f"Birth Date: {obj.birth_date}\n"
-            if obj.birth_country:
-                description += f"Birth Country: {obj.birth_country}\n"
-            if obj.birth_city:
-                description += f"Birth City: {obj.birth_city}\n"
-            if obj.height:
-                description += f"Height: {obj.height}cm\n"
-            if obj.zodiac:
-                description += f"Zodiac Sign: {obj.zodiac}\n"
-            if obj.blood_type:
-                description += f"Blood Type: {obj.blood_type}\n"
-            if obj.called:
-                description += f"Called: {obj.called} times\n"
-            description += f"GuessingGame Difficulty: {obj.difficulty}\n"
-        if obj.twitter:
-            description += f"[Twitter](https://twitter.com/{obj.twitter})\n"
-        if obj.youtube:
-            description += f"[Youtube](https://www.youtube.com/channel/{obj.youtube})\n"
-        if obj.melon:
-            description += f"[Melon](https://www.melon.com/artist/song.htm?artistId={obj.melon})\n"
-        if obj.instagram:
-            description += f"[Instagram](https://instagram.com/{obj.instagram})\n"
-        if obj.vlive:
-            description += f"[V Live](https://channels.vlive.tv/{obj.vlive})\n"
-        if obj.spotify:
-            description += f"[Spotify](https://open.spotify.com/artist/{obj.spotify})\n"
-        if obj.fancafe:
-            description += f"[FanCafe](https://m.cafe.daum.net/{obj.fancafe})\n"
-        if obj.facebook:
-            description += f"[Facebook](https://www.facebook.com/{obj.facebook})\n"
-        if obj.tiktok:
-            description += f"[TikTok](https://www.tiktok.com/{obj.tiktok})\n"
-        if obj.photo_count:
-            description += f"Photo Count: {obj.photo_count}\n"
-        embed = await ex.create_embed(title=title, color=ex.get_random_color(), title_desc=description)
+            card_description = await self.format_card_fields(obj, ex.cache.idol_description)
+
+        general_description = await self.format_card_fields(obj, ex.cache.general_description)
+        website_description = await self.format_card_fields(obj, ex.cache.website_description)
+
+        full_description = f"{general_description}" \
+                           f"{card_description}" \
+                           f"{website_description}"
+
+        embed = await ex.create_embed(title=title, color=ex.get_random_color(), title_desc=full_description)
         if obj.tags:
             embed.add_field(name="Tags", value=', '.join(obj.tags), inline=False)
         if obj.aliases:
@@ -181,7 +159,6 @@ class GroupMembers:
                 except:
                     value = "This group has an Idol that doesn't exist. Please report it.\n"
                 embed.add_field(name="Members", value=value, inline=False)
-
         else:
             if obj.groups:
                 value = await self.get_group_names_as_string(obj)
@@ -636,9 +613,9 @@ class GroupMembers:
 
     async def process_names(self, ctx, page_number_or_group, mode):
         """Structures the input for idol names commands and sends information to transfer the names to the channels."""
-        if type(page_number_or_group) == int:
+        if isinstance(page_number_or_group, int):
             await self.send_names(ctx, mode, page_number_or_group)
-        elif type(page_number_or_group) == str:
+        elif isinstance(page_number_or_group, str):
             server_id = await ex.get_server_id(ctx)
             groups, name = await self.get_group_where_group_matches_name(page_number_or_group, mode=1,
                                                                          server_id=server_id)
@@ -648,12 +625,10 @@ class GroupMembers:
         """returns specific idols being called from a reference to a group ex: redvelvet irene"""
         groups, new_message = await self.get_group_where_group_matches_name(message_content, mode=1,
                                                                             server_id=server_id)
-        member_list = []
         members = await self.get_idol_where_member_matches_name(new_message, mode=1, server_id=server_id)
-        for group in groups:
-            for member in members:
-                if member.id in group.members:
-                    member_list.append(member)
+        member_list = [member
+                       for group in groups for member in members
+                       if member.id in group.members]
         return member_list or None
 
     @staticmethod
@@ -665,7 +640,7 @@ class GroupMembers:
         else:
             idol.called += 1
             await ex.conn.execute("UPDATE groupmembers.Count SET Count = $1 WHERE MemberID = $2", idol.called,
-                                    idol.id)
+                                  idol.id)
 
     @staticmethod
     async def set_as_group_photo(link):
@@ -674,28 +649,38 @@ class GroupMembers:
     @staticmethod
     async def get_google_drive_link(api_url):
         """Get the google drive link based on the api's image url."""
-        return ex.first_result(
-            await ex.conn.fetchrow("SELECT driveurl FROM groupmembers.apiurl WHERE apiurl = $1", str(api_url)))
+        # commenting this out because now the file ids are in the api urls.
+        # return ex.first_result(
+        #   await ex.conn.fetchrow("SELECT driveurl FROM groupmembers.apiurl WHERE apiurl = $1", str(api_url)))
+        beginning_position = api_url.find("/idol/") + 6
+        ending_position = api_url.find("image.")
+        if ending_position == -1:
+            ending_position = api_url.find("video.")
+        api_url_id = int(api_url[beginning_position:ending_position])  # the file id hidden in the url
+        return ex.first_result(await ex.conn.fetchrow("SELECT link FROM groupmembers.imagelinks WHERE id = $1", api_url_id))
 
     async def get_image_msg(self, idol, group_id, channel, photo_link, user_id=None, guild_id=None, api_url=None,
                             special_message=None, guessing_game=False, scores=None):
         """Get the image link from the API and return the message containing the image."""
 
-        async def post_msg(m_file=None, m_embed=None, repeated=0):
+        async def post_msg(m_file=None, m_embed=None):
             """Send the message to the channel and return it."""
             message = None
-            try:
-                if not special_message:
-                    message = await channel.send(embed=m_embed, file=m_file)
-                else:
-                    message = await channel.send(special_message, embed=m_embed, file=m_file)
-            except:
-                # cannot access API or API Link -> attempt to post it 5 times.
-                # this happens because the image link may not be properly registered.
-                if repeated < 5:
-                    if not message:
-                        await asyncio.sleep(0.5)
-                        message = await post_msg(m_file=m_file, m_embed=m_embed, repeated=repeated + 1)
+            max_post_attempt = 5
+            for attempt in range(0, max_post_attempt):
+                try:
+                    if not special_message:
+                        message = await channel.send(embed=m_embed, file=m_file)
+                    else:
+                        message = await channel.send(special_message, embed=m_embed, file=m_file)
+                    break
+                except:
+                    # cannot access API or API Link -> attempt to post it 5 times.
+                    # this happens because the image link may not be properly registered.
+                    if message:
+                        break
+                    await asyncio.sleep(0.5)
+                    continue
             return message
 
         file = None
@@ -703,15 +688,15 @@ class GroupMembers:
             try:
                 find_post = True
 
-                data = {
-                    'p_key':  translate_private_key,
-                    'no_group_photos': int(guessing_game)
-                }
-                end_point = f"http://127.0.0.1:{ api_port}/photos/{idol.id}"
-                if ex.test_bot:
-                    end_point = f"https://api.irenebot.com/photos/{idol.id}"
+                data = {'allow_group_photos': int(not guessing_game)}
+                headers = {'Authorization': translate_private_key}
+                # end_point = f"http://127.0.0.1:{api_port}/photos/{idol.id}"
+                # if ex.test_bot:
+                #     end_point = f"https://api.irenebot.com/photos/{idol.id}"
+                # attempt to access link directly instead of from localhost.
+                end_point = f"https://api.irenebot.com/photos/{idol.id}"
                 while find_post:  # guarantee we get a post sent to the user.
-                    async with ex.session.post(end_point, data=data) as r:
+                    async with ex.session.post(end_point, headers=headers, data=data) as r:
                         ex.cache.bot_api_idol_calls += 1
                         if r.status == 200 or r.status == 301:
                             api_url = r.url
@@ -720,8 +705,8 @@ class GroupMembers:
                             # video
                             if guessing_game:
                                 # do not allow videos in the guessing game.
-                                return self.get_image_msg(idol, group_id, channel, photo_link, user_id, guild_id,
-                                                          api_url, special_message, guessing_game, scores)
+                                return await self.get_image_msg(idol, group_id, channel, photo_link, user_id, guild_id,
+                                                                api_url, special_message, guessing_game, scores)
                             url_data = json.loads(await r.text())
                             api_url = url_data.get('final_image_link')
                             file_location = url_data.get('location')
@@ -739,9 +724,12 @@ class GroupMembers:
                             msg = await channel.send(f"**No photos were found for this idol ({idol.id}).**")
                             return msg, None
                         elif r.status == 502:
-                            msg = await channel.send("API is currently being overloaded with requests.")
+                            msg = await channel.send("API is currently being overloaded with requests or is down.")
                             log.console("API is currently being overloaded with requests or is down.")
                             return msg, None
+                        elif r.status == 500:
+                            log.console("Server Issue -> Error 500")
+                            return None, None
                         else:
                             # error unaccounted for.
                             log.console(f"{r.status} - Status Code from API.")
@@ -771,7 +759,8 @@ class GroupMembers:
         except Exception as e:
             ex.api_issues += 1
             if ex.api_issues >= 50:
-                await ex.kill_api()
+                # do not kill api anymore after the api was recoded. Needs to be tested.
+                # await ex.kill_api()
                 ex.api_issues = 0
             await channel.send(
                 f"> An API issue has occurred. If this is constantly occurring, please join our support server.")
@@ -809,91 +798,122 @@ class GroupMembers:
     async def idol_post(self, channel, idol, photo_link=None, group_id=None, special_message=None, user_id=None,
                         guessing_game=False, scores=None):
         """The main process for posting an idol's photo."""
-        try:
+        msg, api_url = None, None
+        post_success = False
+        post_attempts = 0
+        while not post_success and post_attempts < ex.max_idol_post_attempts:
             try:
                 msg, api_url = await self.get_image_msg(idol, group_id, channel, photo_link, user_id=user_id,
                                                         guild_id=channel.guild.id, api_url=photo_link,
                                                         special_message=special_message, guessing_game=guessing_game,
                                                         scores=scores)
                 if not msg and not api_url:
+                    if guessing_game:
+                        # ensure the message posts.
+                        post_success = False
+                        post_attempts += 1
+                        continue
                     ex.api_issues += 1
                 await self.update_member_count(idol)
-            except:
-                if guessing_game:
-                    return self.idol_post(channel, idol, photo_link, group_id, special_message, user_id, guessing_game,
-                                          scores)
+                # Setting to true even if non-guessing game idol has no msg or api_url to prevent infinite loop
+                post_success = True
+            except AttributeError:
                 await channel.send(
                     f"> An error has occurred. If you are in DMs, It is not possible to receive Idol Photos.")
                 return None, None
-            return msg, api_url
-        except Exception as e:
-            log.console(e)
-            return None, None
 
-    class Idol:
-        def __init__(self, **kwargs):
-            self.id = kwargs.get('id')
-            self.full_name = kwargs.get('fullname')
-            self.stage_name = kwargs.get('stagename')
-            self.former_full_name = kwargs.get('formerfullname')
-            self.former_stage_name = kwargs.get('formerstagename')
-            self.birth_date = kwargs.get('birthdate')
-            self.birth_country = kwargs.get('birthcountry')
-            self.birth_city = kwargs.get('birthcity')
-            self.gender = kwargs.get('gender')
-            self.description = kwargs.get('description')
-            self.height = kwargs.get('height')
-            self.twitter = kwargs.get('twitter')
-            self.youtube = kwargs.get('youtube')
-            self.melon = kwargs.get('melon')
-            self.instagram = kwargs.get('instagram')
-            self.vlive = kwargs.get('vlive')
-            self.spotify = kwargs.get('spotify')
-            self.fancafe = kwargs.get('fancafe')
-            self.facebook = kwargs.get('facebook')
-            self.tiktok = kwargs.get('tiktok')
-            self.aliases = []
-            self.local_aliases = {}  # server_id: [aliases]
-            self.groups = []
-            self.zodiac = kwargs.get('zodiac')
-            self.thumbnail = kwargs.get('thumbnail')
-            self.banner = kwargs.get('banner')
-            self.blood_type = kwargs.get('bloodtype')
-            self.photo_count = 0
-            # amount of times the idol has been called.
-            self.called = 0
-            self.tags = kwargs.get('tags')
-            self.difficulty = kwargs.get('difficulty') or "medium"  # easy = 1, medium = 2, hard = 3
-            if self.tags:
-                self.tags = self.tags.split(',')
+            except Exception as e:
+                if guessing_game:
+                    post_success = False
+                    post_attempts += 1
+                    continue
+                log.console(e)
+                return None, None
+        if post_attempts >= ex.max_idol_post_attempts:
+            raise ex.exceptions.MaxAttempts(
+                f"Idol posting reached max attempts of {ex.max_idol_post_attempts} for {idol.full_name} "
+                f"({idol.stage_name}) [{idol.id}] in channel {channel.guild.id}\n"
+                f"photo link: {photo_link}\n"
+                f"Photo was {'guessing game call' if guessing_game else 'regular idol call'}.")
+        return msg, api_url
 
-    class Group:
-        def __init__(self, **kwargs):
-            self.id = kwargs.get('groupid')
-            self.name = kwargs.get('groupname')
-            self.debut_date = kwargs.get('debutdate')
-            self.disband_date = kwargs.get('disbanddate')
-            self.description = kwargs.get('description')
-            self.twitter = kwargs.get('twitter')
-            self.youtube = kwargs.get('youtube')
-            self.melon = kwargs.get('melon')
-            self.instagram = kwargs.get('instagram')
-            self.vlive = kwargs.get('vlive')
-            self.spotify = kwargs.get('spotify')
-            self.fancafe = kwargs.get('fancafe')
-            self.facebook = kwargs.get('facebook')
-            self.tiktok = kwargs.get('tiktok')
-            self.aliases = []
-            self.local_aliases = {}  # server_id: [aliases]
-            self.members = []
-            self.fandom = kwargs.get('fandom')
-            self.company = kwargs.get('company')
-            self.website = kwargs.get('website')
-            self.thumbnail = kwargs.get('thumbnail')
-            self.banner = kwargs.get('banner')
-            self.gender = kwargs.get('gender')
-            self.photo_count = 0
-            self.tags = kwargs.get('tags')
-            if self.tags:
-                self.tags = self.tags.split(',')
+    @staticmethod
+    def check_reset_limits():
+        if time.time() - ex.cache.commands_used['reset_time'] > 86400:  # 1 day in seconds
+            # reset the dict
+            ex.cache.commands_used = {"reset_time": time.time()}
+
+    @staticmethod
+    def add_user_limit(message_sender):
+        if message_sender.id not in ex.cache.commands_used:
+            ex.cache.commands_used[message_sender.id] = [1, time.time()]
+        else:
+            ex.cache.commands_used[message_sender.id] = [ex.cache.commands_used[message_sender.id][0] + 1, time.time()]
+
+    # noinspection PyPep8
+    async def check_user_limit(self, message_sender, message_channel, no_vote_limit=False):
+        limit = idol_post_send_limit
+        if no_vote_limit:
+            # amount of votes that can be sent without voting.
+            limit = idol_no_vote_send_limit
+        if message_sender.id not in ex.cache.commands_used:
+            return
+        if not await ex.u_patreon.check_if_patreon(message_sender.id) and ex.cache.commands_used[message_sender.id][
+            0] > limit:
+            # noinspection PyPep8
+            if not await ex.u_patreon.check_if_patreon(message_channel.guild.owner.id,
+                                                       super_patron=True) and not no_vote_limit:
+                return await message_channel.send(self.patron_message)
+            elif ex.cache.commands_used[message_sender.id][0] > self.owner_super_patron_benefit and not no_vote_limit:
+                return await message_channel.send(self.patron_message)
+            else:
+                return True
+
+    # noinspection PyPep8
+    async def request_image_post(self, message, idol, channel):
+        photo_msg, api_url, posted = None, None, False
+        if not await ex.u_miscellaneous.check_if_bot_banned(message.author.id):
+            async with channel.typing():
+                try:
+                    if await self.check_user_limit(message.author, message.channel, no_vote_limit=True):
+                        if not await self.get_if_user_voted(
+                                message.author.id) and not await ex.u_patreon.check_if_patreon(message.author.id):
+                            return await self.send_vote_message(message)
+                except Exception as e:
+                    log.console(e)
+                if not await self.check_user_limit(message.author, channel):
+                    if not await events.Events.check_maintenance(message):
+                        return await ex.u_miscellaneous.send_maintenance_message(channel)
+                    photo_msg, api_url = await self.idol_post(channel, idol, user_id=message.author.id)
+                    posted = True
+        return photo_msg, api_url, posted
+
+    async def choose_random_member(self, members=None, groups=None):
+        """Choose a random member object from a member or group list given."""
+
+        async def check_photo_count(t_member_ids):
+            t_member_id = random.choice(t_member_ids)
+            t_member = await self.get_member(t_member_id)
+            if not t_member.photo_count:
+                t_member = await check_photo_count(t_member_ids)
+            return t_member
+
+        idol = None
+        new_groups = []
+        if groups:
+            for group in groups:
+                if group.photo_count:
+                    new_groups.append(group)
+        if new_groups:
+            member_ids = (random.choice(new_groups)).members
+            idol = await check_photo_count(member_ids)
+
+        new_members = []
+        if members:
+            for member in members:
+                if member.photo_count:
+                    new_members.append(member)
+        if new_members:
+            idol = random.choice(new_members)
+        return idol
 

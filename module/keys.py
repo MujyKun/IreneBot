@@ -191,7 +191,15 @@ bias_game_location = os.getenv("BIAS_GAME_LOCATION")
 weverse_auth_token = os.getenv("WEVERSE_AUTH")
 weverse_image_folder = os.getenv("WEVERSE_IMAGE_FOLDER")
 
+# Twitch
+twitch_client_id = os.getenv("TWITCH_CLIENT_ID")
+twitch_client_secret = os.getenv("TWITCH_CLIENT_SECRET")
+
 # API
 api_port = os.getenv("API_PORT")
 # translate private key is the same as the idol photo key.
 translate_private_key = ((os.getenv("PRIVATE_KEYS")).split(','))[0]  # use the first result in the list of keys.
+
+# Site
+
+site_port = os.getenv("SITE_PORT")

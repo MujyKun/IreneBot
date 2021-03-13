@@ -25,12 +25,13 @@ class AutoRestart:
                 self.start_bot()
 
     def start_bot(self):
+        os.system("killall run.py")
         os.system("python3 run.py")
         self.bot_running = True
 
     @staticmethod
     def start_api():
-        os.system("node API/index.js")
+        os.system("sudo gunicorn --bind 0.0.0.0:5454 --workers=25 --threads=1 --chdir API run:app")
 
     @staticmethod
     def start_site():

@@ -3,6 +3,7 @@ from discord.ext import commands
 from module import keys, logger as log
 import asyncio
 import random
+import async_timeout
 
 
 # noinspection PyPep8,PyBroadException
@@ -27,12 +28,10 @@ class GuessingGame(commands.Cog):
             else:
                 top_user_scores = await ex.u_guessinggame.get_guessing_game_top_ten(difficulty)
 
-            user_position = 0
             lb_string = ""
-            for user_id, score in top_user_scores:
-                user_position += 1
+            for user_position, (user_id, score) in enumerate(top_user_scores):
                 score = await ex.u_guessinggame.get_user_score(difficulty.lower(), user_id)
-                lb_string += f"**{user_position})** <@{user_id}> - {score}\n"
+                lb_string += f"**{user_position + 1})** <@{user_id}> - {score}\n"
             m_embed = await ex.create_embed(title=f"Guessing Game Leaderboard ({difficulty.lower()}) ({mode})",
                                             title_desc=lb_string)
             await ctx.send(embed=m_embed)
@@ -53,8 +52,6 @@ class GuessingGame(commands.Cog):
             return await ctx.send("> **ERROR -> The max rounds is 60 and the max timeout is 60s.**")
         elif rounds < 1 or timeout < 3:
             return await ctx.send("> **ERROR -> The minimum rounds is 1 and the minimum timeout is 3 seconds.**")
-        await ctx.send(f"> Starting a guessing game for `{gender if gender != 'all' else 'both male and female'}` idols"
-                       f" with `{difficulty}` difficulty, `{rounds}` rounds, and `{timeout}s` of guessing time.")
         await self.start_game(ctx, rounds, timeout, gender, difficulty)
         # Bot has been crashing without issue being known. Reverting creating a separate task for every game.
         # task = asyncio.create_task(self.start_game(ctx, rounds, timeout, gender, difficulty))
@@ -67,118 +64,146 @@ class GuessingGame(commands.Cog):
 
     @staticmethod
     async def start_game(ctx, rounds, timeout, gender, difficulty):
-        game = Game()
+        game = Game(ctx, max_rounds=rounds, timeout=timeout, gender=gender, difficulty=difficulty)
         ex.cache.guessing_games.append(game)
-        await game.start_game(ctx, max_rounds=rounds, timeout=timeout, gender=gender, difficulty=difficulty)
+        await ctx.send(f"> Starting a guessing game for `{game.gender if game.gender != 'all' else 'both male and female'}` idols"
+                       f" with `{game.difficulty}` difficulty, `{rounds}` rounds, and `{timeout}s` of guessing time.")
+        await game.process_game()
         if game in ex.cache.guessing_games:
+            log.console(f"Ending Guessing Game in {ctx.channel.id}")
             ex.cache.guessing_games.remove(game)
+
+
+    # @stopgg.before_invoke
+    # @guessinggame.before_invoke
+    # @ggleaderboard.before_invoke
+    # async def disabled_weverse(self, ctx):
+    #     await ctx.send(f"""**Guessing Game will be disabled until we find out Irene's API issue.**""")
+    #     raise Exception
 
 
 # noinspection PyBroadException,PyPep8
 class Game:
-    def __init__(self):
+    def __init__(self, ctx, max_rounds=20, timeout=20, gender="all", difficulty="medium"):
         self.photo_link = None
-        self.host_ctx = None
-        self.host = None
+        self.host_ctx = ctx
+        self.host = ctx.author.id
         # user_id : score
         self.players = {}
         self.rounds = 0
-        self.channel = None
+        self.channel = ctx.channel
         self.idol = None
         self.group_names = None
         self.correct_answers = []
-        self.timeout = 0
-        self.max_rounds = 0
+        self.timeout = timeout
+        self.max_rounds = max_rounds
         self.force_ended = False
         self.idol_post_msg = None
         self.gender = None
-        self.gender_forced = False
-        # difficulty must be in this list in order for it to
-        self.difficulty = None
-
-    async def start_game(self, ctx, max_rounds=20, timeout=20, gender="all", difficulty="medium"):
-        """Start a guessing game."""
-        self.host_ctx = ctx
-        self.channel = ctx.channel
-        self.host = ctx.author.id
-        self.max_rounds = max_rounds
-        self.timeout = timeout
+        self.post_attempt_timeout = 10
         if gender.lower() in ex.cache.male_aliases:
-            self.gender = 'm'
-            self.gender_forced = True
+            self.gender = 'male'
         elif gender.lower() in ex.cache.female_aliases:
-            self.gender = 'f'
-            self.gender_forced = True
-        self.difficulty = ex.cache.difficulty_aliases.get(difficulty)
-        if not self.difficulty:
-            self.difficulty = 2  # set to medium by default
-        await self.process_game()
+            self.gender = 'female'
+        else:
+            self.gender = "all"
+        if difficulty in ex.cache.difficulty_selection.keys():
+            self.difficulty = difficulty
+        else:
+            self.difficulty = "medium"
+
+        # create the game's idol pool.
+        idol_gender_set = ex.cache.gender_selection.get(self.gender)
+        idol_difficulty_set = ex.cache.difficulty_selection.get(self.difficulty)
+        self.idol_set = list(idol_gender_set & idol_difficulty_set)
+
+    async def credit_user(self, user_id):
+        """Increment a user's score"""
+        score = self.players.get(user_id)
+        if not score:
+            self.players[user_id] = 1
+        else:
+            self.players[user_id] = score + 1
+        self.rounds += 1
 
     async def check_message(self):
         """Check incoming messages in the text channel and determine if it is correct."""
         if self.force_ended:
             return
 
-        stop_phrases = ['stop', 'end']
+        stop_phrases = ['stop', 'end', 'quit']
 
         def check_correct_answer(message):
             """Check if the user has the correct answer."""
-            return ((message.content.lower() in self.correct_answers) or
-                    ((message.content.lower() == 'skip' or message.content.lower() in stop_phrases)
-                     and message.author.id == self.host)) and message.channel == self.channel
+            if message.channel != self.channel:
+                return False
+            if message.content.lower() in self.correct_answers:
+                return True
+            if message.author.id == self.host:
+                return message.content.lower() == 'skip' or message.content.lower() in stop_phrases
+
         try:
             msg = await ex.client.wait_for('message', check=check_correct_answer, timeout=self.timeout)
             await msg.add_reaction(keys.check_emoji)
             if msg.content.lower() == 'skip':
                 await self.print_answer(question_skipped=True)
-            elif msg.content.lower() in stop_phrases and not self.force_ended:
-                return await self.end_game()
+                return
+            elif msg.content.lower() in self.correct_answers:
+                await self.credit_user(msg.author.id)
+            elif msg.content.lower() in stop_phrases or self.force_ended:
+                self.force_ended = True
+                return
             else:
-                score = self.players.get(msg.author.id)
-                if not score:
-                    self.players[msg.author.id] = 1
-                else:
-                    self.players[msg.author.id] = score + 1
-                self.rounds += 1
+                # the only time this code is reached is when a prefix was changed in the middle of a round.
+                # for example, if the user had to guess "irene", but their server prefix was 'i', then
+                # the bot will change the msg content to "%rene" and the above conditions will not properly work.
+                # if we had reached this point, we'll give them +1 instead of ending the game
+                await self.credit_user(msg.author.id)
+
         except asyncio.TimeoutError:
-            # reveal the answer
-            self.rounds += 1
             if not self.force_ended:
                 await self.print_answer()
+                self.rounds += 1
 
     async def create_new_question(self):
         """Create a new question and send it to the channel."""
         # noinspection PyBroadException
-        try:
-            if self.idol_post_msg:
-                try:
-                    await self.idol_post_msg.delete()
-                except:
-                    # message does not exist.
-                    pass
-            if self.rounds >= self.max_rounds:
-                if not self.force_ended:
-                    await self.end_game()
-                return True  # will properly end the game.
-            self.idol = await ex.u_group_members.get_random_idol()
-            if not self.gender_forced:
-                self.gender = random.choice(['m', 'f'])
+        question_posted = False
+        while not question_posted:
+            try:
+                if self.idol_post_msg:
+                    try:
+                        await self.idol_post_msg.delete()
+                    except:
+                        # message does not exist.
+                        pass
 
-            while self.idol.gender != self.gender or ex.cache.difficulty_aliases[self.idol.difficulty] > self.difficulty:
-                # will result in an infinite loop if there are no idols on easy mode and difficulty is easy mode.
-                self.idol = await ex.u_group_members.get_random_idol()
+                # Create random idol selection
+                if not self.idol_set:
+                    raise LookupError(f"No valid idols for the group {self.gender} and {self.difficulty}.")
+                self.idol = random.choice(self.idol_set)
 
-            self.group_names = [(await ex.u_group_members.get_group(group_id)).name for group_id in self.idol.groups]
-            self.correct_answers = []
-            for alias in self.idol.aliases:
-                self.correct_answers.append(alias.lower())
-            self.correct_answers.append(self.idol.full_name.lower())
-            self.correct_answers.append(self.idol.stage_name.lower())
-            log.console(f'{", ".join(self.correct_answers)} - {self.channel.id}')
-            self.idol_post_msg, self.photo_link = await ex.u_group_members.idol_post(self.channel, self.idol, user_id=self.host, guessing_game=True, scores=self.players)
-            await self.check_message()
-        except:
-            pass
+                # Create acceptable answers
+                self.group_names = [(await ex.u_group_members.get_group(group_id)).name for group_id in self.idol.groups]
+                self.correct_answers = [alias.lower() for alias in self.idol.aliases]
+                self.correct_answers.append(self.idol.full_name.lower())
+                self.correct_answers.append(self.idol.stage_name.lower())
+
+                # Skip this idol if it is taking too long
+                async with async_timeout.timeout(self.post_attempt_timeout) as posting:
+                    self.idol_post_msg, self.photo_link = await ex.u_group_members.idol_post(self.channel, self.idol, user_id=self.host, guessing_game=True, scores=self.players)
+                    log.console(f'{", ".join(self.correct_answers)} - {self.channel.id}')
+
+                if posting.expired:
+                    log.console(f"Posting for {self.idol.full_name} ({self.idol.stage_name}) [{self.idol.id}]"
+                                f" took more than {self.post_attempt_timeout}")
+                    continue
+                question_posted = True
+            except LookupError:
+                raise
+            except Exception as e:
+                log.console(e)
+                continue
 
     async def display_winners(self):
         """Displays the winners and their scores."""
@@ -218,6 +243,16 @@ class Game:
 
     async def process_game(self):
         """Ignores errors and continuously makes new questions until the game should end."""
-        while not await self.create_new_question():
-            # the game will only end if True is returned from create_new_question()
-            pass
+        try:
+            while self.rounds < self.max_rounds and not self.force_ended:
+                try:
+                    await self.create_new_question()
+                except LookupError as e:
+                    await self.channel.send(f"The gender and difficulty settings selected have no idols.")
+                    log.console(e)
+                    return
+                await self.check_message()
+            await self.end_game()
+        except Exception as e:
+            await self.channel.send(f"An error has occurred and the game has ended. Please report this.")
+            log.console(e)

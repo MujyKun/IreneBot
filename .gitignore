@@ -5,3 +5,6 @@
 module/Funtimes.py
 venv/
 .idea/
+*token.json
+*credentials.json
+*.pickle

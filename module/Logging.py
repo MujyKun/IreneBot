@@ -4,7 +4,7 @@ from module import logger as log
 from Utility import resources as ex
 
 
-# noinspection PyPep8
+# noinspection PyPep8,PyBroadException
 class Logging(commands.Cog):
     @staticmethod
     async def on_message_log(message):
@@ -17,7 +17,8 @@ class Logging(commands.Cog):
                     embed = discord.Embed(title="Message Sent", description=embed_message, color=0xffffff)
                     await logging_channel.send(embed=embed, files=files)
             except Exception as e:
-                log.console(f"ON_MESSAGE_LOG ERROR: {e} Server ID: {message.guild.id} Channel ID: {message.channel.id}")
+                pass
+                # log.console(f"ON_MESSAGE_LOG ERROR: {e} Server ID: {message.guild.id} Channel ID: {message.channel.id}")
 
     @commands.has_guild_permissions(manage_messages=True)
     @commands.command()

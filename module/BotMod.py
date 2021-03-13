@@ -8,7 +8,7 @@ import aiofiles
 # noinspection PyBroadException,PyPep8
 class BotMod(commands.Cog):
     @staticmethod
-    async def mod_on_message(message):
+    async def mod_mail_on_message(message):
         # mod mail
         try:
             message_sender = message.author
@@ -18,6 +18,7 @@ class BotMod(commands.Cog):
                 return
             if 'closedm' in message_content or 'createdm' in message_content:
                 return
+
             for user_id in ex.cache.mod_mail:
                 try:
                     channel_id = ex.cache.mod_mail.get(user_id)
@@ -31,11 +32,13 @@ class BotMod(commands.Cog):
                         dm_channel = await ex.get_dm_channel(user_id)
                         await dm_channel.send(
                             f">>> FROM: {message_sender.display_name} ({message_sender.id}) - {message_content}")
-                except:
+                except Exception as e:
+                    log.console(f"{e} - Iteration Error in BotMod.mod_mail_on_message")
                     # change in dictionary size should break the loop.
                     break
+
         except Exception as e:
-            log.console(f"{e} - BotMod.mod_on_message")
+            log.console(f"{e} - BotMod.mod_mail_on_message")
 
     @commands.command()
     @commands.check(ex.check_if_mod)
@@ -277,13 +280,13 @@ class BotMod(commands.Cog):
 **Reason:** {reason}
 Have questions? Join the support server at {keys.bot_support_server_link}."""
         dm_channel = await ex.get_dm_channel(user.id)
-        if dm_channel:
-            try:
-                await dm_channel.send(message)
-                return await ctx.send(f"> **Message was sent to <@{user.id}>**")
-            except:
-                return await ctx.send(f"> I do not have permission to send a message to <@{user.id}>")
-        return await ctx.send(f"> Could not find <@{user.id}>'s DM channel.")
+        if not dm_channel:
+            return await ctx.send(f"> Could not find <@{user.id}>'s DM channel.")
+        try:
+            await dm_channel.send(message)
+            return await ctx.send(f"> **Message was sent to <@{user.id}>**")
+        except:
+            return await ctx.send(f"> I do not have permission to send a message to <@{user.id}>")
 
     @commands.command()
     @commands.check(ex.check_if_mod)
@@ -301,6 +304,7 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
                 await game.channel.send(message)
             except:
                 pass
+        await ex.session.close()  # close the aiohttp client session.
         await ex.client.logout()
 
     @commands.command()
@@ -352,8 +356,7 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
     @commands.check(ex.check_if_mod)
     async def botunban(self, ctx, *, user: discord.User):
         """UnBans a user from Irene. [Format: %botunban (user id)]"""
-        user_id = user.id
-        await ex.u_miscellaneous.unban_user_from_bot(user_id)
+        await ex.u_miscellaneous.unban_user_from_bot(user.id)
         await ctx.send(f"> **If the user was banned, they are now unbanned.**")
 
     @commands.command()
@@ -455,8 +458,10 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
         [Format: %createdm (user id)]"""
         try:
             dm_channel = await ex.get_dm_channel(user=user)
-            if dm_channel is not None:
-                ex.cache.mod_mail[user.id] = ctx.channel.id
+            if dm_channel:
+                user = await ex.get_user(user.id)
+                user.mod_mail_channel_id = ctx.channel.id
+                ex.cache.mod_mail[user.id] = ctx.channel.id  # full list
                 await ex.conn.execute("INSERT INTO general.modmail(userid, channelid) VALUES ($1, $2)", user.id, ctx.channel.id)
                 await dm_channel.send(f"> {ctx.author.display_name} ({ctx.author.id}) has created a DM with you. All messages sent here will be sent to them.")
                 await ctx.send(f"> A DM has been created with {user.id}. All messages you type in this channel will be sent to the user.")
@@ -472,16 +477,18 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
         """Closes a DM either by the User ID or by the current channel.
         [Format: %closedm <user id>] """
         try:
-            if user is not None:
+            if user:
                 user_id = user.id
             else:
                 user_id = ex.first_result(await ex.conn.fetchrow("SELECT userid FROM general.modmail WHERE channelid = $1", ctx.channel.id))
             dm_channel = await ex.get_dm_channel(user_id)
-            if dm_channel is None:
+            if not dm_channel:
                 return await ctx.send("> **There are no DMs set up in this channel.**")
-            ex.cache.mod_mail.pop(user_id, None)
+            user = await ex.get_user(user_id)
+            user.mod_mail_channel_id = None
+            ex.cache.mod_mail.pop(user_id, None)  # full list
             await ex.conn.execute("DELETE FROM general.modmail WHERE userid = $1 and channelid = $2", user_id, ctx.channel.id)
-            await ctx.send(f"> The DM has been deleted successfully.")
+            await ctx.send(f"> The DM with {user_id} has been deleted successfully.")
             await dm_channel.send(f"> {ctx.author.display_name} ({ctx.author.id}) has closed the DM with you. Your messages will no longer be sent to them.")
         except Exception as e:
             await ctx.send(f"ERROR - {e}")

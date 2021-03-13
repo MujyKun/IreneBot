@@ -22,6 +22,8 @@ class Cache:
     async def create_cache(self):
         """Create the general cache on startup"""
         past_time = time.time()
+        # reset custom user cache
+        ex.cache.users = {}
         await self.process_cache_time(self.update_idols, "Idol Photo Count")
         await self.process_cache_time(self.update_groups, "Group Photo Count")
         await self.process_cache_time(self.update_user_notifications, "User Notifications")
@@ -47,10 +49,31 @@ class Cache:
         await self.process_cache_time(self.create_reminder_cache, "Reminders")
         await self.process_cache_time(self.create_timezone_cache, "Timezones")
         await self.process_cache_time(self.create_guessing_game_cache, "Guessing Game Scores")
+        await self.process_cache_time(self.create_twitch_cache, "Twitch Channels")
         if not ex.test_bot and not ex.weverse_client.cache_loaded:
             # noinspection PyUnusedLocal
             task = asyncio.create_task(self.process_cache_time(ex.weverse_client.start, "Weverse"))
         log.console(f"Cache Completely Created in {await ex.u_miscellaneous.get_cooldown_time(time.time() - past_time)}.")
+        ex.irene_cache_loaded = True
+
+    @staticmethod
+    async def create_twitch_cache():
+        ex.cache.twitch_channels = {}
+        ex.cache.twitch_guild_to_channels = {}
+        ex.cache.twitch_guild_to_roles = {}
+        guilds_and_channels = await ex.conn.fetch("SELECT guildid, channelid, roleid FROM twitch.guilds")
+        for guild_id, channel_id, role_id in guilds_and_channels:
+            ex.cache.twitch_guild_to_channels[guild_id] = channel_id
+            ex.cache.twitch_guild_to_roles[guild_id] = role_id
+
+        twitch_channels = await ex.conn.fetch("SELECT username, guildid FROM twitch.channels")
+
+        for username, guild_id in twitch_channels:
+            guilds_in_channel = ex.cache.twitch_channels.get(username)
+            if guilds_in_channel:
+                guilds_in_channel.append(username)
+            else:
+                ex.cache.twitch_channels[username] = [guild_id]
 
     @staticmethod
     async def create_guessing_game_cache():
@@ -61,27 +84,27 @@ class Cache:
 
     @staticmethod
     async def create_timezone_cache():
-        ex.cache.timezones = {}  # reset cache
         timezones = await ex.u_reminder.get_all_timezones_from_db()
         for user_id, timezone in timezones:
-            ex.cache.timezones[user_id] = timezone
+            user = await ex.get_user(user_id)
+            user.timezone = timezone
 
     @staticmethod
     async def create_reminder_cache():
         """Create cache for reminders"""
-        ex.cache.reminders = {}  # reset cache
         all_reminders = await ex.u_reminder.get_all_reminders_from_db()
         for reason_id, user_id, reason, time_stamp in all_reminders:
+            user = await ex.get_user(user_id)
             reason_list = [reason_id, reason, time_stamp]
-            user_reminder = ex.cache.reminders.get(user_id)
-            if user_reminder:
-                user_reminder.append(reason_list)
+            if user.reminders:
+                user.reminders.append(reason_list)
             else:
-                ex.cache.reminders[user_id] = [reason_list]
+                user.reminders = [reason_list]
 
     @staticmethod
     async def create_self_assignable_role_cache():
         """Create cache for self assignable roles"""
+        ex.cache.assignable_roles = {}
         all_roles = await ex.conn.fetch("SELECT roleid, rolename, serverid FROM selfassignroles.roles")
         all_channels = await ex.conn.fetch("SELECT channelid, serverid FROM selfassignroles.channels")
         for role_id, role_name, server_id in all_roles:
@@ -103,6 +126,7 @@ class Cache:
     @staticmethod
     async def create_weverse_channel_cache():
         """Create cache for channels that are following a community on weverse."""
+        ex.cache.weverse_channels = {}
         all_channels = await ex.conn.fetch("SELECT channelid, communityname, roleid, commentsdisabled FROM weverse.channels")
         for channel_id, community_name, role_id, comments_disabled in all_channels:
             await ex.u_weverse.add_weverse_channel_to_cache(channel_id, community_name)
@@ -160,20 +184,33 @@ class Cache:
         """Create Idol Objects and store them as cache."""
         ex.cache.idols = []
         for idol in await ex.u_group_members.get_db_all_members():
-            idol_obj = ex.u_group_members.Idol(**idol)
+            idol_obj = ex.u_objects.Idol(**idol)
             idol_obj.aliases, idol_obj.local_aliases = await ex.u_group_members.get_db_aliases(idol_obj.id)
             # add all group ids and remove potential duplicates
             idol_obj.groups = list(dict.fromkeys(await ex.u_group_members.get_db_groups_from_member(idol_obj.id)))
             idol_obj.called = await ex.u_group_members.get_db_idol_called(idol_obj.id)
             idol_obj.photo_count = ex.cache.idol_photos.get(idol_obj.id) or 0
             ex.cache.idols.append(idol_obj)
+        # Clear and update these cache values to prevent breaking the memory reference made by
+        # ex.cache.difficulty_selection and ex.cache.gender_selection
+        ex.cache.idols_female.clear()
+        ex.cache.idols_male.clear()
+        ex.cache.idols_easy.clear()
+        ex.cache.idols_medium.clear()
+        ex.cache.idols_hard.clear()
+        ex.cache.idols_female.update({idol for idol in ex.cache.idols if idol.gender == 'f' and idol.photo_count})
+        ex.cache.idols_male.update({idol for idol in ex.cache.idols if idol.gender == 'm' and idol.photo_count})
+        ex.cache.idols_easy.update({idol for idol in ex.cache.idols if idol.difficulty == 'easy' and idol.photo_count})
+        ex.cache.idols_medium.update({idol for idol in ex.cache.idols if idol.difficulty in ['easy', 'medium'] and idol.photo_count})
+        ex.cache.idols_hard.update({idol for idol in ex.cache.idols if idol.difficulty in ['easy', 'medium', 'hard'] and idol.photo_count})
+        ex.cache.gender_selection['all'] = set(ex.cache.idols)
 
     @staticmethod
     async def create_group_cache():
         """Create Group Objects and store them as cache"""
         ex.cache.groups = []
         for group in await ex.u_group_members.get_all_groups():
-            group_obj = ex.u_group_members.Group(**group)
+            group_obj = ex.u_objects.Group(**group)
             group_obj.aliases, group_obj.local_aliases = await ex.u_group_members.get_db_aliases(group_obj.id, group=True)
             # add all idol ids and remove potential duplicates
             group_obj.members = list(dict.fromkeys(await ex.u_group_members.get_db_members_in_group(group_id=group_obj.id)))
@@ -208,10 +245,10 @@ class Cache:
     @staticmethod
     async def update_n_word_counter():
         """Update NWord Cache"""
-        ex.cache.n_word_counter = {}
         user_info = await ex.conn.fetch("SELECT userid, nword FROM general.nword")
         for user_id, n_word_counter in user_info:
-            ex.cache.n_word_counter[user_id] = n_word_counter
+            user = await ex.get_user(user_id)
+            user.n_word = n_word_counter
 
     @staticmethod
     async def update_temp_channels():
@@ -259,11 +296,11 @@ class Cache:
     @staticmethod
     async def update_bot_bans():
         """Create the cache for banned users from the bot."""
-        ex.cache.bot_banned = []
         banned_users = await ex.conn.fetch("SELECT userid FROM general.blacklisted")
         for user in banned_users:
             user_id = user[0]
-            ex.cache.bot_banned.append(user_id)
+            user_obj = await ex.get_user(user_id)
+            user_obj.bot_banned = True
 
     @staticmethod
     async def update_mod_mail():
@@ -271,13 +308,14 @@ class Cache:
         ex.cache.mod_mail = {}
         mod_mail = await ex.conn.fetch("SELECT userid, channelid FROM general.modmail")
         for user_id, channel_id in mod_mail:
-            ex.cache.mod_mail[user_id] = [channel_id]
+            user = await ex.get_user(user_id)
+            user.mod_mail_channel_id = channel_id
+            ex.cache.mod_mail[user_id] = [channel_id]  # full list
 
     @staticmethod
     async def update_patreons():
         """Create the cache for Patrons."""
         try:
-            ex.cache.patrons = {}
             permanent_patrons = await ex.u_patreon.get_patreon_users()
             # normal patrons contains super patrons as well
             normal_patrons = [patron.id for patron in await ex.u_patreon.get_patreon_role_members(super_patron=False)]
@@ -306,15 +344,20 @@ class Cache:
                 if patron not in cached_patrons:
                     # patron includes both normal and super patrons.
                     await ex.conn.execute("INSERT INTO patreon.cache(userid, super) VALUES($1, $2)", patron, 0)
-                ex.cache.patrons[patron] = False
+                user = await ex.get_user(patron)
+                user.patron = True
             # super patrons must go after normal patrons to have a proper boolean set because
             # super patrons have both roles.
             for patron in super_patrons:
                 if patron not in cached_patrons:
                     await ex.conn.execute("UPDATE patreon.cache SET super = $1 WHERE userid = $2", 1, patron)
-                ex.cache.patrons[patron] = True
+                user = await ex.get_user(patron)
+                user.patron = True
+                user.super_patron = True
             for patron in permanent_patrons:
-                ex.cache.patrons[patron[0]] = True
+                user = await ex.get_user(patron[0])
+                user.patron = True
+                user.super_patron = True
             return True
         except:
             return False
@@ -325,7 +368,9 @@ class Cache:
         ex.cache.user_notifications = []
         notifications = await ex.conn.fetch("SELECT guildid,userid,phrase FROM general.notifications")
         for guild_id, user_id, phrase in notifications:
-            ex.cache.user_notifications.append([guild_id, user_id, phrase])
+            user = await ex.get_user(user_id)
+            user.notifications.append([guild_id, phrase])
+            ex.cache.user_notifications.append([guild_id, user_id, phrase])  # full list.
 
     @staticmethod
     async def update_groups():
@@ -356,18 +401,32 @@ class Cache:
         This was added due to intents slowing d.py cache loading rate.
         """
         # create a temporary patron list based on the db cache while waiting for the discord cache to load
-        if ex.conn:
-            if not ex.temp_patrons_loaded:
-                ex.cache.patrons = {}
-                cached_patrons = await ex.conn.fetch("SELECT userid, super FROM patreon.cache")
-                for user_id, super_patron in cached_patrons:
-                    ex.cache.patrons[user_id] = bool(super_patron)
-                ex.temp_patrons_loaded = True
-            while not ex.discord_cache_loaded:
-                await asyncio.sleep(1)
-            if await self.process_cache_time(self.update_patreons, "Patrons"):
-                self.update_patron_cache_hour.start()
-                self.update_patron_cache.stop()
+        try:
+            if ex.conn:
+                if not ex.temp_patrons_loaded:
+                    while not ex.irene_cache_loaded:
+                        # wait until Irene's cache has been loaded before creating temporary patrons
+                        # this is so that the user objects do not overwrite each other
+                        # when being created.
+                        await asyncio.sleep(5)
+                    cached_patrons = await ex.conn.fetch("SELECT userid, super FROM patreon.cache")
+                    for user_id, super_patron in cached_patrons:
+                        user = await ex.get_user(user_id)
+                        if super_patron:
+                            log.console(f"Made {user_id} a temporary super patron & patron.")
+                            user.super_patron = True
+                        else:
+                            log.console(f"Made {user_id} a temporary patron.")
+                        user.patron = True
+                    ex.temp_patrons_loaded = True
+                    log.console("Cache for Temporary Patrons has been created.")
+                while not ex.discord_cache_loaded:
+                    await asyncio.sleep(60)  # check every minute if discord cache has loaded.
+                if await self.process_cache_time(self.update_patreons, "Patrons"):
+                    self.update_patron_cache_hour.start()
+                    self.update_patron_cache.stop()
+        except Exception as e:
+            log.console(e)
 
     @tasks.loop(seconds=0, minutes=0, hours=1, reconnect=True)
     async def update_patron_cache_hour(self):
@@ -382,21 +441,31 @@ class Cache:
         """Sends metric information about cache to data dog every minute."""
         try:
             if ex.thread_pool:
+                user_notifications = 0
+                patron_count = 0
+                mod_mail = 0
+                bot_banned = 0
                 active_user_reminders = 0
-                for user_id in ex.cache.reminders:
-                    reminders = ex.cache.reminders.get(user_id)
-                    if reminders:
-                        active_user_reminders += len(reminders)
+                for user in ex.cache.users.values():
+                    user_notifications += len(user.notifications)
+                    if user.patron:
+                        patron_count += 1
+                    if user.mod_mail_channel_id:
+                        mod_mail += 1
+                    if user.bot_banned:
+                        bot_banned += 1
+                    active_user_reminders += len(user.reminders)
+
                 metric_info = {
                     'total_commands_used': ex.cache.total_used,
                     'bias_games': len(ex.cache.bias_games),
                     'guessing_games': len(ex.cache.guessing_games),
-                    'patrons': len(ex.cache.patrons),
+                    'patrons': patron_count,
                     'custom_server_prefixes': len(ex.cache.server_prefixes),
                     'session_commands_used': ex.cache.current_session,
-                    'user_notifications': len(ex.cache.user_notifications),
-                    'mod_mail': len(ex.cache.mod_mail),
-                    'banned_from_bot': len(ex.cache.bot_banned),
+                    'user_notifications': user_notifications,
+                    'mod_mail': mod_mail,
+                    'banned_from_bot': bot_banned,
                     'logged_servers': len(ex.cache.logged_channels),
                     # server count is based on discord.py guild cache which takes a large amount of time to load fully.
                     # There may be inaccurate data points on a new instance of the bot due to the amount of time it takes.
@@ -417,7 +486,29 @@ class Cache:
                     'errors_per_minute': ex.cache.errors_per_minute,
                     'wolfram_per_minute': ex.cache.wolfram_per_minute,
                     'urban_per_minute': ex.cache.urban_per_minute,
-                    'active_user_reminders': active_user_reminders
+                    'active_user_reminders': active_user_reminders,
+                    'weverse_channels_following': sum([len(channels) for channels in ex.cache.weverse_channels.
+                                                      values()]),
+                    'weverse_following_txt': len(ex.cache.weverse_channels.get("txt") or []),
+                    'weverse_following_bts': len(ex.cache.weverse_channels.get("bts") or []),
+                    'weverse_following_gfriend': len(ex.cache.weverse_channels.get("gfriend") or []),
+                    'weverse_following_seventeen': len(ex.cache.weverse_channels.get("seventeen") or []),
+                    'weverse_following_enhypen': len(ex.cache.weverse_channels.get("enhypen") or []),
+                    'weverse_following_nuest': len(ex.cache.weverse_channels.get("nu'est") or []),
+                    'weverse_following_cl': len(ex.cache.weverse_channels.get("cl") or []),
+                    'weverse_following_p1harmony': len(ex.cache.weverse_channels.get("p1harmony") or []),
+                    'weverse_following_weeekly': len(ex.cache.weverse_channels.get("weeekly") or []),
+                    'weverse_following_sunmi': len(ex.cache.weverse_channels.get("sunmi") or []),
+                    'weverse_following_henry': len(ex.cache.weverse_channels.get("henry") or []),
+                    'weverse_following_dreamcatcher': len(ex.cache.weverse_channels.get("dreamcatcher") or []),
+                    'twitch_channels_followed': len(ex.cache.twitch_channels.keys() or []),
+                    'text_channels_following_twitch': sum([len(channels) for channels in ex.cache.twitch_channels.
+                                                          values()]),
+                    'voice_clients': len(ex.client.voice_clients or []),
+                    'servers_using_self_assignable_roles': len(ex.cache.assignable_roles.keys() or []),
+                    'total_amount_of_self_assignable_roles': sum([len(channel_and_roles.get('roles') or [])
+                                                                  for channel_and_roles in
+                                                                  ex.cache.assignable_roles.values()])
                 }
 
                 # set all per minute metrics to 0 since this is a 60 second loop.

@@ -1,5 +1,6 @@
 import module
 import util
+import util.objects
 import dbl
 from Utility import resources as ex
 
@@ -55,6 +56,8 @@ class Irene:
             module.Weverse.Weverse().weverse_updates.start()
         # Check for Reminders
         module.Reminder.Reminder().reminder_loop.start()
+        # Check if twitch channels go live and send the announcements to discord channels.
+        module.Twitch.Twitch().twitch_updates.start()
         # Start Automatic Youtube Scrape Loop
         ex.cache.main_youtube_instance = module.Youtube.YoutubeLoop()
         ex.cache.main_youtube_instance.loop_youtube_videos.start()
@@ -82,8 +85,8 @@ class Irene:
         module.keys.client.add_listener(module.Logging.Logging.on_message_log, 'on_message')
         module.keys.client.add_listener(module.Logging.Logging.logging_on_message_edit, 'on_message_edit')
         module.keys.client.add_listener(module.Logging.Logging.logging_on_message_delete, 'on_message_delete')
-        module.keys.client.add_listener(module.Miscellaneous.Miscellaneous.on_message_notifications, 'on_message')
-        module.keys.client.add_listener(module.BotMod.BotMod.mod_on_message, 'on_message')
+        module.keys.client.add_listener(module.Miscellaneous.Miscellaneous.on_message_user_notifications, 'on_message')
+        module.keys.client.add_listener(module.BotMod.BotMod.mod_mail_on_message, 'on_message')
         module.keys.client.add_listener(module.CustomCommands.CustomCommands.process_custom_commands, 'on_message')
 
     @staticmethod
@@ -114,6 +117,8 @@ class Irene:
         ex.client.add_cog(module.Weverse.Weverse())
         ex.client.add_cog(module.SelfAssignRoles.SelfAssignRoles())
         ex.client.add_cog(module.Reminder.Reminder())
+        ex.client.add_cog(module.Twitch.Twitch())
+        # ex.client.add_cog(module.Gacha.Gacha())
 
     @staticmethod
     def create_util_objects():
@@ -133,11 +138,15 @@ class Irene:
         ex.u_moderator = util.moderator.Moderator()
         ex.u_custom_commands = util.customcommands.CustomCommands()
         ex.u_bias_game = util.biasgame.BiasGame()
-        ex.u_data_dog = util.datadog.DataDog
+        ex.u_data_dog = util.datadog.DataDog()
         ex.u_weverse = util.weverse.Weverse()
         ex.u_self_assign_roles = util.selfassignroles.SelfAssignRoles()
         ex.u_reminder = util.reminder.Reminder()
         ex.u_guessinggame = util.guessinggame.GuessingGame()
+        ex.u_twitch = util.twitch.Twitch()
+        # ex.u_gacha = util.gacha.Gacha()
+        
+        ex.u_objects = util.objects  # util directory that has the objects directly imported
 
 
 if __name__ == '__main__':

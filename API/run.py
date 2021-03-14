@@ -123,6 +123,12 @@ def get_image(image_id):
         return Response(status=500)
 
 
+@app.route('/random/', methods=['POST'])
+def random_image():
+    random_idol_id = get_random_idol_id_with_photo()
+    return get_idol_photo(random_idol_id)
+
+
 @app.route('/webhook/', methods=['POST'])
 def get_top_gg_vote():
     if not check_webhook_key(request.headers.get('Authorization')):
@@ -171,6 +177,12 @@ def get_google_drive_id(link):
     return link.replace("https://drive.google.com/uc?export=view&id=", "")
 
 
+def get_random_idol_id_with_photo():
+    """Get a random idol id that definitely has a photo."""
+    c.execute("SELECT DISTINCT(memberid) FROM groupmembers.imagelinks")
+    return random.choice(c.fetchall())[0]
+
+
 def process_image(link_info):
     # get information about the file from google drive
     file_db_id = link_info[0]
@@ -199,4 +211,5 @@ def process_image(link_info):
 
 #  should be run through gunicorn
 #  app.run(port=5454)
+
 

@@ -147,7 +147,7 @@ def get_downloaded_images():
         if '.mp4' in file_name or '.webm' in file_name:
             currently_existing_photos.remove(file_name)
 
-    return currently_existing_photos, 200
+    return {currently_existing_photos}, 200
 
 
 @app.route('/webhook/', methods=['POST'])

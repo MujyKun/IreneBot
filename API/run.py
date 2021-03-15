@@ -138,9 +138,15 @@ def random_image():
 @app.route('/downloaded/', methods=['GET'])
 def get_downloaded_images():
     currently_existing_photos = os.listdir(idol_folder)
+    random.shuffle(currently_existing_photos)
+
+    if len(currently_existing_photos) > 1000:
+        currently_existing_photos = currently_existing_photos[0:999]
+
     for file_name in currently_existing_photos:
         if '.mp4' in file_name or '.webm' in file_name:
             currently_existing_photos.remove(file_name)
+
     return currently_existing_photos, 200
 
 

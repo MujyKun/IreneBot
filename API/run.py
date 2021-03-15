@@ -70,10 +70,10 @@ def get_image_ids(idol_id):
 
 # noinspection PyBroadException
 @app.route('/photos/<idol_id>/', methods=['POST'])
-def get_idol_photo(idol_id, redirect_user = True):
+def get_idol_photo(idol_id, redirect_user=True, auth=True):
     """Download an idol's photo and redirect the user to the image link."""
     # check authorization
-    if not check_auth_key(request.headers.get('Authorization')):
+    if not check_auth_key(request.headers.get('Authorization')) and auth:
         # Invalid API Key
         return Response(status=403)
 
@@ -129,10 +129,10 @@ def get_image(image_id):
         return Response(status=500)
 
 
-@app.route('/random/', methods=['POST'])
+@app.route('/random/', methods=['GET'])
 def random_image():
     random_idol_id = get_random_idol_id_with_photo()
-    return get_idol_photo(random_idol_id, redirect_user=False)
+    return get_idol_photo(random_idol_id, redirect_user=False, auth=False)
 
 
 @app.route('/webhook/', methods=['POST'])

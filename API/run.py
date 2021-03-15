@@ -1,4 +1,4 @@
-from flask import Flask, request, Response, redirect
+from flask import Flask, request, Response, redirect, jsonify
 
 # expected import error. API is run as a standalone from server.py
 # noinspection PyUnresolvedReferences, PyPackageRequirements
@@ -70,7 +70,7 @@ def get_image_ids(idol_id):
 
 # noinspection PyBroadException
 @app.route('/photos/<idol_id>/', methods=['POST'])
-def get_idol_photo(idol_id):
+def get_idol_photo(idol_id, redirect_user = True):
     """Download an idol's photo and redirect the user to the image link."""
     # check authorization
     if not check_auth_key(request.headers.get('Authorization')):
@@ -104,7 +104,7 @@ def get_idol_photo(idol_id):
             # idol has no photos
             return Response(status=404)
         random_link = random.choice(all_links)
-        return process_image(random_link)
+        return process_image(random_link, redirect_user=redirect_user)
 
     except Exception as e:
         print(e)
@@ -132,7 +132,7 @@ def get_image(image_id):
 @app.route('/random/', methods=['POST'])
 def random_image():
     random_idol_id = get_random_idol_id_with_photo()
-    return get_idol_photo(random_idol_id)
+    return get_idol_photo(random_idol_id, redirect_user=False)
 
 
 @app.route('/webhook/', methods=['POST'])
@@ -189,7 +189,7 @@ def get_random_idol_id_with_photo():
     return random.choice(c.fetchall())[0]
 
 
-def process_image(link_info):
+def process_image(link_info, redirect_user=True):
     # get information about the file from google drive
     file_db_id = link_info[0]
     file_url = link_info[1]
@@ -211,6 +211,9 @@ def process_image(link_info):
     if '.mp4' in file_type or '.webm' in file_type:
         # return a json of the video info
         return file_data, 415
+
+    if not redirect_user:
+        return file_data, 200
 
     return redirect(image_host_url, code=308)
 

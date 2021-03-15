@@ -12,6 +12,12 @@ import os.path
 app = Flask(__name__)
 
 
+@app.after_request
+def add_header(response):
+    response.headers['X-Content-Type-Options'] = '*'
+    return response
+
+
 @app.route('/members/', methods=['GET'])
 def get_all_members():
     """Gets all full names and stage names of idols."""

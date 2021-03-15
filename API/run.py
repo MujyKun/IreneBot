@@ -143,11 +143,16 @@ def get_downloaded_images():
     if len(currently_existing_photos) > 1000:
         currently_existing_photos = currently_existing_photos[0:999]
 
+    randomized_images = {
+        'images': []
+    }
     for file_name in currently_existing_photos:
         if '.mp4' in file_name or '.webm' in file_name:
-            currently_existing_photos.remove(file_name)
+            continue
 
-    return {currently_existing_photos}, 200
+        randomized_images['images'].append(file_name)
+
+    return randomized_images, 200
 
 
 @app.route('/webhook/', methods=['POST'])

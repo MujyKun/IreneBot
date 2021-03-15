@@ -228,6 +228,6 @@ def process_image(link_info, redirect_user=True):
 
 
 #  should be run through gunicorn
-app.run(port=5454)
+# app.run(port=5454)
 
 

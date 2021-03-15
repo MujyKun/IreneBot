@@ -135,6 +135,15 @@ def random_image():
     return get_idol_photo(random_idol_id, redirect_user=False, auth=False)
 
 
+@app.route('/downloaded/', methods=['GET'])
+def get_downloaded_images():
+    currently_existing_photos = os.listdir(idol_folder)
+    for file_name in currently_existing_photos:
+        if '.mp4' in file_name or '.webm' in file_name:
+            currently_existing_photos.remove(file_name)
+    return currently_existing_photos, 200
+
+
 @app.route('/webhook/', methods=['POST'])
 def get_top_gg_vote():
     if not check_webhook_key(request.headers.get('Authorization')):
@@ -219,6 +228,6 @@ def process_image(link_info, redirect_user=True):
 
 
 #  should be run through gunicorn
-#  app.run(port=5454)
+app.run(port=5454)
 
 

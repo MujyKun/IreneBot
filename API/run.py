@@ -14,7 +14,7 @@ app = Flask(__name__)
 
 @app.after_request
 def add_header(response):
-    response.headers['X-Content-Type-Options'] = '*'
+    response.headers['Access-Control-Allow-Origin'] = '*'
     return response
 
 

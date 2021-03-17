@@ -179,11 +179,7 @@ def get_top_gg_vote():
 @app.route('/botinfo/', methods=['GET'])
 def get_bot_info():
     """Sends a list of bot information such as
-    Server Count, User Count, Total commands used, Amount of Idol Photos, Amount of Idol Photo Commands Used."""
-
-    # Amount of Idol Photo Commands Used.
-    c.execute("SELECT SUM(count) FROM stats.commands WHERE commandname LIKE 'Idol %' OR commandname LIKE 'randomidol'")
-    idol_commands_used = c.fetchone()[0]
+    Server Count, User Count, Total commands used, Amount of Idol Photos """
 
     c.execute("SELECT totalused FROM stats.sessions ORDER BY totalused DESC")
     total_commands_used = c.fetchone()[0]
@@ -198,12 +194,18 @@ def get_bot_info():
     idol_photo_count = c.fetchone()[0]
 
     return {
-        'idol_commands_used': idol_commands_used,
         'total_commands_used': total_commands_used,
         'server_count': server_count,
         'member_count': member_count,
         'idol_photo_count': idol_photo_count
     }, 200
+
+
+@app.route('/idolcommandsused/', methods=['GET'])
+def get_idol_commands_used():
+    """Get th eAmount of Idol Photo Commands Used."""
+    c.execute("SELECT SUM(count) FROM stats.commands WHERE commandname LIKE 'Idol %' OR commandname LIKE 'randomidol'")
+    return {'idol_commands_used': c.fetchone()[0]}, 200
 
 
 @app.route('/', methods=['GET'])

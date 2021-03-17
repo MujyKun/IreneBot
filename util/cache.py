@@ -383,20 +383,24 @@ class Cache:
     async def update_guild_cache():
         """Update the DB Guild Cache. Useful for updating info for API."""
         # much simpler to just delete all of the cache and reinsert instead of updating fields.
-        await ex.conn.execute("DELETE FROM stats.guilds")
+        try:
+            log.console("Attempting to send guild information to DB.")
+            await ex.conn.execute("DELETE FROM stats.guilds")
 
-        guild_data = []
-        for guild in ex.client.guilds:
-            guild_data.append(
-                (guild.id, guild.name, len(guild.emojis), f"{guild.region}", guild.afk_timeout, guild.icon, guild.owner_id,
-                 guild.banner, guild.description, guild.mfa_level, guild.splash,
-                 guild.premium_tier, guild.premium_subscription_count, len(guild.text_channels),
-                 len(guild.voice_channels), len(guild.categories), guild.emoji_limit, guild.member_count,
-                 len(guild.roles), guild.shard_id, guild.created_at)
-            )
+            guild_data = []
+            for guild in ex.client.guilds:
+                guild_data.append(
+                    (guild.id, guild.name, len(guild.emojis), f"{guild.region}", guild.afk_timeout, guild.icon, guild.owner_id,
+                     guild.banner, guild.description, guild.mfa_level, guild.splash,
+                     guild.premium_tier, guild.premium_subscription_count, len(guild.text_channels),
+                     len(guild.voice_channels), len(guild.categories), guild.emoji_limit, guild.member_count,
+                     len(guild.roles), guild.shard_id, guild.created_at)
+                )
 
-        async with ex.conn.acquire() as direct_conn:
-            await direct_conn.copy_records_to_table('guilds', records=guild_data, schema_name="stats")
+            async with ex.conn.acquire() as direct_conn:
+                await direct_conn.copy_records_to_table('guilds', records=guild_data, schema_name="stats")
+        except Exception as e:
+            log.console(f"{e} - Failed to update guild cache")
 
     @staticmethod
     async def update_idols():

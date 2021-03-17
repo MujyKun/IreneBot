@@ -346,8 +346,7 @@ class Cache:
                     await ex.conn.execute("INSERT INTO patreon.cache(userid, super) VALUES($1, $2)", patron, 0)
                 user = await ex.get_user(patron)
                 user.patron = True
-            # super patrons must go after normal patrons to have a proper boolean set because
-            # super patrons have both roles.
+
             for patron in super_patrons:
                 if patron not in cached_patrons:
                     await ex.conn.execute("UPDATE patreon.cache SET super = $1 WHERE userid = $2", 1, patron)
@@ -381,6 +380,25 @@ class Cache:
             ex.cache.group_photos[group[0]] = group[2]
 
     @staticmethod
+    async def update_guild_cache():
+        """Update the DB Guild Cache. Useful for updating info for API."""
+        # much simpler to just delete all of the cache and reinsert instead of updating fields.
+        await ex.conn.execute("DELETE FROM stats.guilds")
+
+        guild_data = []
+        for guild in ex.client.guilds:
+            guild_data.append(
+                (guild.id, guild.name, len(guild.emojis), f"{guild.region}", guild.afk_timeout, guild.icon, guild.owner_id,
+                 guild.banner, guild.description, guild.mfa_level, guild.splash,
+                 guild.premium_tier, guild.premium_subscription_count, len(guild.text_channels),
+                 len(guild.voice_channels), len(guild.categories), guild.emoji_limit, guild.member_count,
+                 len(guild.roles), guild.shard_id, guild.created_at)
+            )
+
+        async with ex.conn.acquire() as direct_conn:
+            await direct_conn.copy_records_to_table('guilds', records=guild_data, schema_name="stats")
+
+    @staticmethod
     async def update_idols():
         """Set cache for idol photo count"""
         ex.cache.idol_photos = {}
@@ -396,7 +414,7 @@ class Cache:
         await self.create_cache()
 
     @tasks.loop(seconds=0, minutes=0, hours=0, reconnect=True)
-    async def update_patron_cache(self):
+    async def update_patron_and_guild_cache(self):
         """Looped until patron cache is loaded.
         This was added due to intents slowing d.py cache loading rate.
         """
@@ -422,9 +440,13 @@ class Cache:
                     log.console("Cache for Temporary Patrons has been created.")
                 while not ex.discord_cache_loaded:
                     await asyncio.sleep(60)  # check every minute if discord cache has loaded.
+                # update guild cache
+                await self.process_cache_time(self.update_guild_cache, "DB Guild")
+
+                # update patron cache
                 if await self.process_cache_time(self.update_patreons, "Patrons"):
                     self.update_patron_cache_hour.start()
-                    self.update_patron_cache.stop()
+                    self.update_patron_and_guild_cache.stop()
         except Exception as e:
             log.console(e)
 

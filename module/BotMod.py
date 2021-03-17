@@ -304,6 +304,7 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
                 await game.channel.send(message)
             except:
                 pass
+        await ex.conn.terminate()  # close all db connections.
         await ex.session.close()  # close the aiohttp client session.
         await ex.client.logout()
 

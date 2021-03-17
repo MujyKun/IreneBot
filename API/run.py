@@ -190,7 +190,7 @@ def get_bot_info():
     c.execute("SELECT SUM(membercount) FROM stats.guilds")
     member_count = c.fetchone()[0]
 
-    c.execute("SELECT COUNT(*) FROM groupmembers.images")
+    c.execute("SELECT COUNT(*) FROM groupmembers.imagelinks")
     idol_photo_count = c.fetchone()[0]
 
     return {
@@ -203,7 +203,7 @@ def get_bot_info():
 
 @app.route('/idolcommandsused/', methods=['GET'])
 def get_idol_commands_used():
-    """Get th eAmount of Idol Photo Commands Used."""
+    """Get the Amount of Idol Photo Commands Used."""
     c.execute("SELECT SUM(count) FROM stats.commands WHERE commandname LIKE 'Idol %' OR commandname LIKE 'randomidol'")
     return {'idol_commands_used': c.fetchone()[0]}, 200
 

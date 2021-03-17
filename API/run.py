@@ -176,6 +176,36 @@ def get_top_gg_vote():
         return Response(status=500)
 
 
+@app.route('/botinfo/', methods=['GET'])
+def get_bot_info():
+    """Sends a list of bot information such as
+    Server Count, User Count, Total commands used, Amount of Idol Photos, Amount of Idol Photo Commands Used."""
+
+    # Amount of Idol Photo Commands Used.
+    c.execute("SELECT SUM(count) FROM stats.commands WHERE commandname LIKE 'Idol %' OR commandname LIKE 'randomidol'")
+    idol_commands_used = c.fetchone()[0]
+
+    c.execute("SELECT totalused FROM stats.sessions ORDER BY totalused DESC")
+    total_commands_used = c.fetchone()[0]
+
+    c.execute("SELECT COUNT(*) FROM stats.guilds")
+    server_count = c.fetchone()[0]
+
+    c.execute("SELECT SUM(membercount) FROM stats.guilds")
+    member_count = c.fetchone()[0]
+
+    c.execute("SELECT COUNT(*) FROM groupmembers.images")
+    idol_photo_count = c.fetchone()[0]
+
+    return {
+        'idol_commands_used': idol_commands_used,
+        'total_commands_used': total_commands_used,
+        'server_count': server_count,
+        'member_count': member_count,
+        'idol_photo_count': idol_photo_count
+    }, 200
+
+
 @app.route('/', methods=['GET'])
 def get_default_route():
     return redirect("https://irenebot.com/api", code=308)

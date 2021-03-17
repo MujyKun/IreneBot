@@ -11,6 +11,8 @@ import os.path
 
 app = Flask(__name__)
 
+bot_invite_url = "https://discord.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=1609956823"
+
 
 @app.after_request
 def add_header(response):
@@ -206,6 +208,12 @@ def get_idol_commands_used():
     """Get the Amount of Idol Photo Commands Used."""
     c.execute("SELECT SUM(count) FROM stats.commands WHERE commandname LIKE 'Idol %' OR commandname LIKE 'randomidol'")
     return {'idol_commands_used': c.fetchone()[0]}, 200
+
+
+@app.route('/invite/', methods=['GET'])
+def redirect_to_invite_bot():
+    """"""
+    return redirect(bot_invite_url, code=308)
 
 
 @app.route('/', methods=['GET'])

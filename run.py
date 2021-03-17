@@ -71,7 +71,7 @@ class Irene:
         ex.u_cache.send_cache_data_to_data_dog.start()
         # after intents was pushed in place, d.py cache loaded a lot slower and patrons are not added properly.
         # therefore patron cache must be looped instead.
-        ex.u_cache.update_patron_cache.start()
+        ex.u_cache.update_patron_and_guild_cache.start()
         # Send Packets to localhost:5123 to show Irene is alive. This is meant for auto restarting Irene
         # This feature is essential in case of any overload or crashes by external sources.
         # This also avoids having to manually restart Irene.

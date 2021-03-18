@@ -12,7 +12,7 @@ import os.path
 app = Flask(__name__)
 
 bot_invite_url = "https://discord.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=1609956823"
-
+patreon_url = "https://www.patreon.com/mujykun"
 
 @app.after_request
 def add_header(response):
@@ -212,8 +212,14 @@ def get_idol_commands_used():
 
 @app.route('/invite/', methods=['GET'])
 def redirect_to_invite_bot():
-    """"""
+    """Redirect to invite the bot to a server."""
     return redirect(bot_invite_url, code=308)
+
+
+@app.route('/patreon/', methods=['GET'])
+def redirect_to_patreon():
+    """Redirect to patreon page."""
+    return redirect(patreon_url, code=308)
 
 
 @app.route('/', methods=['GET'])

@@ -8,7 +8,7 @@ import os
 import random
 import time
 from module.keys import reload_emoji, dead_emoji, owner_id, mods_list, check_emoji, idol_no_vote_send_limit,\
-    trash_emoji, next_emoji, translate_private_key, idol_post_send_limit, patreon_link, bot_id
+    trash_emoji, next_emoji, translate_private_key, idol_post_send_limit, patreon_link, bot_id, api_port
 
 
 # noinspection PyBroadException,PyPep8
@@ -687,14 +687,17 @@ class GroupMembers:
         if not api_url:
             try:
                 find_post = True
-
+                """
+                Cloudflare has been considering IreneBot as a malicious attack since we do not rate-limit
+                the requests.
+                More than 480k requests were blobked within the span of 6 hours. 
+                Resort to localhost to not go through cloudflare.
+                """
                 data = {'allow_group_photos': int(not guessing_game)}
                 headers = {'Authorization': translate_private_key}
-                # end_point = f"http://127.0.0.1:{api_port}/photos/{idol.id}"
-                # if ex.test_bot:
-                #     end_point = f"https://api.irenebot.com/photos/{idol.id}"
-                # attempt to access link directly instead of from localhost.
-                end_point = f"https://api.irenebot.com/photos/{idol.id}"
+                end_point = f"http://127.0.0.1:{api_port}/photos/{idol.id}"
+                if ex.test_bot:
+                    end_point = f"https://api.irenebot.com/photos/{idol.id}"
                 while find_post:  # guarantee we get a post sent to the user.
                     async with ex.session.post(end_point, headers=headers, data=data) as r:
                         ex.cache.bot_api_idol_calls += 1

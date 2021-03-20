@@ -66,4 +66,29 @@ class Wolfram(commands.Cog):
                             pass
                 if not results:
                     return await ctx.send(f"> **{ctx.author.display_name}, I could not find an answer to that.**")
-                return await ctx.send("\n".join(results))
+                final_result = "\n".join(results)
+
+                # if the result is less than 1500 chars, just send it as a body with no embed.
+                if len(final_result) < 1500:
+                    return await ctx.send(final_result)
+                embed_msg = ""
+                embed_list = []
+                page_number = 1
+                for result in results:
+                    if len(embed_msg) > 1500:
+                        embed_list.append(
+                            await ex.create_embed(title=f"Wolfram Request Page: {page_number} (FULL) ", title_desc=embed_msg))
+                        embed_msg = ""
+                        page_number += 1
+                    embed_msg += f"{result}\n"
+
+                if embed_msg:
+                    embed_list.append(
+                        await ex.create_embed(title=f"Wolfram Request Page: {page_number} (FULL)", title_desc=embed_msg))
+
+                msg = await ctx.send(embed=embed_list[0])
+                await ex.check_left_or_right_reaction_embed(msg, embed_list)
+
+
+
+

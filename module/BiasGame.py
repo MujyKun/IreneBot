@@ -9,6 +9,7 @@ from math import log2
 
 # noinspection PyPep8
 class BiasGame(commands.Cog):
+    @commands.check(ex.check_user_in_support_server)
     @commands.command(aliases=['bg'])
     async def biasgame(self, ctx, gender="all", bracket_size=8):
         """Start a bias game in the current channel. The host of the game can use `stopbg` to stop playing.

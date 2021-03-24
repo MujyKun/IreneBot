@@ -44,6 +44,9 @@ class Utility:
         self.weverse_client = WeverseAsync(authorization=keys.weverse_auth_token, web_session=self.session,
                                            verbose=True, loop=asyncio.get_event_loop())
 
+        self.join_support_server_msg = f"**In order to use this feature of Irene, " \
+            f"you must first join the Support Server at <{keys.bot_support_server_link}>**"
+
         self.exceptions = exceptions  # custom error handling
         self.twitch_token = None  # access tokens are set everytime the token is refreshed.
 
@@ -277,6 +280,21 @@ class Utility:
         for game in games:
             if game.channel == channel:
                 return game
+
+    async def check_user_in_support_server(self, ctx):
+        """Checks if a user is in the support server.
+        If the support server is not in cache, it will count as if the user is in the server.
+        d.py cache must be fully loaded before this is properly checked.
+        """
+        if not self.discord_cache_loaded:
+            return True
+
+        support_server = self.client.get_guild(keys.bot_support_server_id)
+        if not support_server:
+            return True
+        if support_server.get_member(ctx.author.id):
+            return True
+        await ctx.send(self.join_support_server_msg)
 
 
 resources = Utility()

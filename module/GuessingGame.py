@@ -39,6 +39,7 @@ class GuessingGame(commands.Cog):
             log.console(e)
             return await ctx.send(f"> You may not understand this error. Please report it -> {e}")
 
+    @commands.check(ex.check_user_in_support_server)
     @commands.command(aliases=['gg'])
     async def guessinggame(self, ctx, gender="all", difficulty="medium", rounds=20, timeout=20):
         """Start an idol guessing game in the current channel. The host of the game can use `stop`/`end` to end the game or `skip` to skip the current round without affecting the round number.

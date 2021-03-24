@@ -37,7 +37,7 @@ mods_list = []
 for mod in mods_list_split:
     mods_list.append(int(mod))
 bot_invite_link = os.getenv("BOT_INVITE_LINK")
-bot_support_server_id = os.getenv("SUPPORT_SERVER_ID")
+bot_support_server_id = make_int(os.getenv("SUPPORT_SERVER_ID"))
 bot_support_server_link = os.getenv("SUPPORT_SERVER_LINK")
 bot_prefix = os.getenv("BOT_PREFIX")
 bot_website = os.getenv("BOT_WEBSITE") or "https://www.youtube.com/watch?v=dQw4w9WgXcQ"

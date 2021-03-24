@@ -690,7 +690,7 @@ class GroupMembers:
                 """
                 Cloudflare has been considering IreneBot as a malicious attack since we do not rate-limit
                 the requests.
-                More than 480k requests were blobked within the span of 6 hours. 
+                More than 480k requests were blocked within the span of 6 hours. 
                 Resort to localhost to not go through cloudflare.
                 """
                 data = {'allow_group_photos': int(not guessing_game)}
@@ -800,7 +800,8 @@ class GroupMembers:
 
     async def idol_post(self, channel, idol, photo_link=None, group_id=None, special_message=None, user_id=None,
                         guessing_game=False, scores=None):
-        """The main process for posting an idol's photo."""
+        """The main process for posting an idol's photo.
+        """
         msg, api_url = None, None
         post_success = False
         post_attempts = 0

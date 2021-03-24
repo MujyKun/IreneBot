@@ -73,7 +73,6 @@ class GuessingGame(commands.Cog):
             log.console(f"Ending Guessing Game in {ctx.channel.id}")
             ex.cache.guessing_games.remove(game)
 
-
     # @stopgg.before_invoke
     # @guessinggame.before_invoke
     # @ggleaderboard.before_invoke

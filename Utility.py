@@ -39,7 +39,7 @@ class Utility:
         self.loop_count = 0
         self.recursion_limit = 10000
         self.api_issues = 0  # api issues in a given minute
-        self.max_idol_post_attempts = 100
+        self.max_idol_post_attempts = 10  # 100 was too much
         self.twitch_guild_follow_limit = 2
         self.weverse_client = WeverseAsync(authorization=keys.weverse_auth_token, web_session=self.session,
                                            verbose=True, loop=asyncio.get_event_loop())

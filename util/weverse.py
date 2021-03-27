@@ -1,6 +1,7 @@
 from Utility import resources as ex
 import aiofiles
 from module.keys import weverse_image_folder
+from module import logger as log
 
 
 # noinspection PyBroadException,PyPep8
@@ -158,7 +159,9 @@ class Weverse:
                     if role_id:
                         message_text = f"<@&{role_id}>\n{message_text}"
                     await channel.send(message_text)
-            except:
+                    log.console(f"Weverse Post for {community_name} sent to {channel_id}.")
+            except Exception as e:
+                log.console(f"Weverse Post Failed to {channel_id} for {community_name} -> {e}")
                 # no permission to post
                 return
 

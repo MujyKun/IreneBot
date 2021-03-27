@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from module import logger as log, keys
 from Utility import resources as ex
+from Weverse.weverseasync import WeverseAsync
 import aiofiles
 
 
@@ -48,7 +49,7 @@ class BotMod(commands.Cog):
         [Format %weverseauth <token>]
         """
         keys.weverse_auth_token = token
-        ex.weverse_client = ex.WeverseAsync(authorization=keys.weverse_auth_token, web_session=ex.session,
+        ex.weverse_client = WeverseAsync(authorization=keys.weverse_auth_token, web_session=ex.session,
                                             verbose=True, loop=ex.asyncio.get_event_loop())
         await ctx.send("> Token and Weverse client has been updated.")
         await ex.weverse_client.start()

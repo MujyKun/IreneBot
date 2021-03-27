@@ -10,14 +10,15 @@ class Weverse(commands.Cog):
     def __init__(self):
         self.current_notification_id = 0
         self.notifications_already_posted = {}  # channel_id : [notification ids]
-        self.available_choices = "[TXT, BTS, GFRIEND, SEVENTEEN, ENHYPEN, NU'EST, CL, P1Harmony, Weeekly, SUNMI, HENRY, Dreamcatcher]"
+        self.available_choices = "[TXT, BTS, GFRIEND, SEVENTEEN, ENHYPEN, NU'EST, CL, P1Harmony, Weeekly, SUNMI," \
+                                 " HENRY, Dreamcatcher, Cherry Bullet, MIRAE]"
 
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
     async def updates(self, ctx, community_name, role: discord.Role = None):
         """Receive Weverse Updates of a specific Weverse community in the current text channel. Use again to disable for a specific community.
         Available Communities ->
-        [TXT, BTS, GFRIEND, SEVENTEEN, ENHYPEN, NU'EST, CL, P1Harmony, Weeekly, SUNMI, HENRY, Dreamcatcher]
+        [TXT, BTS, GFRIEND, SEVENTEEN, ENHYPEN, NU'EST, CL, P1Harmony, Weeekly, SUNMI, HENRY, Dreamcatcher, Cherry Bullet, MIRAE]
         [Format: %updates <community name> [role to notify]]
         """
         try:

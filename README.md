@@ -272,7 +272,7 @@ To find out more, look at the `GroupMembers` category.
 #### Weverse:
 | Command     | Description                          | Format                 | Aliases           |
 |-------------|--------------------------------------|------------------------|-------------------|
-| updates | Receive Weverse Updates of a specific Weverse community in the current text channel. Use again to disable for a specific community. Available Communities -> [TXT, BTS, GFRIEND, SEVENTEEN, ENHYPEN, NU'EST, CL, P1Harmony, Weeekly, SUNMI, HENRY, Dreamcatcher] | %updates (community name) [role to notify] |  |
+| updates | Receive Weverse Updates of a specific Weverse community in the current text channel. Use again to disable for a specific community. Available Communities -> [TXT, BTS, GFRIEND, SEVENTEEN, ENHYPEN, NU'EST, CL, P1Harmony, Weeekly, SUNMI, HENRY, Dreamcatcher, CherryBullet, MIRAE] | %updates (community name) [role to notify] |  |
 | disablecomments | Disable updates for comments on a community. | %disablecomments (community name) |  |
 
 #### SelfAssignRoles:

@@ -44,6 +44,10 @@ class Weverse:
         await ex.conn.execute("DELETE FROM weverse.channels WHERE channelid = $1 AND communityname = $2", channel_id,
                               community_name)
         channels = await self.get_weverse_channels(community_name)
+
+        if not channels:
+            return
+
         for channel in channels:
             if channel[0] == channel_id:
                 if channels:

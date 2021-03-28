@@ -17,7 +17,7 @@ class Group:
         self.tiktok = kwargs.get('tiktok')
         self.aliases = []
         self.local_aliases = {}  # server_id: [aliases]
-        self.members = []
+        self.members = []  # idol ids, not idol objects.
         self.fandom = kwargs.get('fandom')
         self.company = kwargs.get('company')
         self.website = kwargs.get('website')

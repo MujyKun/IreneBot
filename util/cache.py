@@ -50,11 +50,33 @@ class Cache:
         await self.process_cache_time(self.create_timezone_cache, "Timezones")
         await self.process_cache_time(self.create_guessing_game_cache, "Guessing Game Scores")
         await self.process_cache_time(self.create_twitch_cache, "Twitch Channels")
+        await self.process_cache_time(self.create_gg_filter_cache, "Guessing Game Filter")
         if not ex.test_bot and not ex.weverse_client.cache_loaded:
             # noinspection PyUnusedLocal
             task = asyncio.create_task(self.process_cache_time(ex.weverse_client.start, "Weverse"))
         log.console(f"Cache Completely Created in {await ex.u_miscellaneous.get_cooldown_time(time.time() - past_time)}.")
         ex.irene_cache_loaded = True
+
+    @staticmethod
+    async def create_gg_filter_cache():
+        users_filter_enabled = await ex.conn.fetch("SELECT userid from gg.filterenabled")
+        users_filtered_groups = await ex.conn.fetch("SELECT userid, groupid FROM gg.filteredgroups")
+
+        for user_info in users_filter_enabled:
+            user_id = user_info[0]
+            user = await ex.get_user(user_id)
+            user.gg_filter = True
+
+        # reset cache for filtered groups
+        for user in ex.cache.users.values():
+            user.gg_groups = []
+
+        # go through all filtered groups regardless if it is enabled
+        # so we do not have to change during filter toggle.
+        for user_id, group_id in users_filtered_groups:
+            user = await ex.get_user(user_id)
+            group = await ex.u_group_members.get_group(group_id)
+            user.gg_groups.append(group)
 
     @staticmethod
     async def create_twitch_cache():

@@ -32,3 +32,13 @@ class ShouldNotBeHere(Exception):
     def __init__(self, msg):
         super(ShouldNotBeHere, self).__init__(f"Code was reached when it shouldn't have been - {msg}")
         log.console(msg)
+
+
+class InvalidParamsPassed(Exception):
+    """
+    Raised when IDs are invalid for an add/remove method.
+    """
+    def __init__(self, msg):
+        super(InvalidParamsPassed, self).__init__(f" -> {msg}")
+        log.console(msg)
+

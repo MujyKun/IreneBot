@@ -122,6 +122,8 @@ To find out more, look at the `GroupMembers` category.
 | Command          | Description                                                                                                                          | Format                          | Aliases        |
 |------------------|--------------------------------------------------------------------------------------------------------------------------------------|---------------------------------|----------------|
 | guessinggame | Start an idol guessing game in the current channel. The host of the game can use `stop` to end the game or `skip` to skip the current round without affecting the round number. | %guessinggame (Male/Female/All) (easy/medium/hard) (# of rounds - default 20) (timeout for each round - default 20s) | gg |
+| ggfilter | Add a filter for your guessing game. Only the groups you select will appear on the guessing game. Use the command with no group ids to enable/disable the filter. Filtered idols do not count for a real score. | %ggfilter [group_id_one, group_id_two, ...] | |
+| ggfilteredlist | View the current groups you currently have filtered. | %ggfilteredlist | ggfilterlist, filterlist |
 | ggleaderboard | Shows global leaderboards for guessing game. | %ggleaderboard (easy/medium/hard) (server/global)| ggl, gglb |
 | stopgg | Force-end a guessing game if you are a moderator or host of the game. This command is meant for any issues or if a game happens to be stuck. Must be game host or access to manage messages. | %stopgg | ★/Host|
 

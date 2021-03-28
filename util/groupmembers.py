@@ -155,9 +155,9 @@ class GroupMembers:
         if group:
             if obj.members:
                 try:
-                    value = f"{' | '.join([f'{(await self.get_member(idol_id)).stage_name} [{idol_id}]' for idol_id in obj.members])}\n"
+                    value = await self.get_member_names_as_string(obj)
                 except:
-                    value = "This group has an Idol that doesn't exist. Please report it.\n"
+                    value = f"The group ({obj.id}) has an Idol that doesn't exist. Please report it.\n"
                 embed.add_field(name="Members", value=value, inline=False)
         else:
             if obj.groups:
@@ -921,3 +921,6 @@ class GroupMembers:
             idol = random.choice(new_members)
         return idol
 
+    async def get_member_names_as_string(self, group):
+        """Get the member names split by a | ."""
+        return f"{' | '.join([f'{(await self.get_member(idol_id)).stage_name} [{idol_id}]' for idol_id in group.members])}\n"

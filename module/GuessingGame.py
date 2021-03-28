@@ -58,6 +58,83 @@ class GuessingGame(commands.Cog):
         # task = asyncio.create_task(self.start_game(ctx, rounds, timeout, gender, difficulty))
 
     @commands.command()
+    async def ggfilter(self, ctx, *, group_ids=None):
+        """Add a filter for your guessing game. Only the groups you select will appear on the guessing game.
+        Use the command with no group ids to enable/disable the filter. Split group ids with commas.
+        [Format: %ggfilter [group_id_one, group_id_two, ...]]"""
+        user = await ex.get_user(ctx.author.id)
+        if not group_ids:
+            # toggle guessing game filter.
+            await ex.u_guessinggame.toggle_filter(user.id)
+            return await ctx.send(f"> Your Guessing Game Filter is now {'enabled' if user.gg_filter else 'disabled'}")
+
+        group_ids = group_ids.replace(' ', '')
+        group_ids = group_ids.split(',')
+
+        # remove duplicate inputs
+        group_ids = list(dict.fromkeys(group_ids))
+
+        invalid_group_ids = []
+        added_group_ids = []
+        removed_group_ids = []
+
+        for group_id in group_ids:
+            # check for empty input
+            if not group_id:
+                continue
+
+            try:
+                added_group = await ex.u_guessinggame.filter_auto_add_remove_group(user_or_id=user, group_or_id=group_id)
+                if added_group:
+                    added_group_ids.append(group_id)
+                else:
+                    removed_group_ids.append(group_id)
+            except ex.exceptions.InvalidParamsPassed:
+                invalid_group_ids.append(group_id)
+
+        final_message = f"<@{user.id}>"
+        if invalid_group_ids:
+            final_message += f"\nThe following groups entered do not exist: **{', '.join(invalid_group_ids)}**"
+        if added_group_ids:
+            final_message += f"\nThe following groups entered were added: **{', '.join(added_group_ids)}**"
+        if removed_group_ids:
+            final_message += f"\nThe following groups entered were removed: **{', '.join(removed_group_ids)}**"
+
+        await ctx.send(final_message)
+
+    @commands.command(aliases=["ggfilterlist", "filterlist"])
+    async def ggfilteredlist(self, ctx):
+        """View the current groups you currently have filtered.
+        [Format: %ggfilteredlist]"""
+        user = await ex.get_user(ctx.author.id)
+        toggled_message = f"<@{user.id}>, your filter is currently {'enabled' if user.gg_filter else 'disabled'}.\n"
+        title = f"{ctx.author.display_name}'s  Filtered Guessing Game List"
+        page_number = 1
+        embed_list = []
+        embed = await ex.create_embed(title=f"{title} (Page {page_number})", title_desc=toggled_message)
+        for count, group in enumerate(user.gg_groups, 1):
+            name = f"{group.name} [{group.id}]"
+            if count % 15 == 0:  # max embed length is 25 fields, limit to 15 to avoid visual spam.
+                embed_list.append(embed)
+                page_number += 1
+                embed = await ex.create_embed(title=f"{title} (Page {page_number})", title_desc=toggled_message)
+
+            if group.members:
+                try:
+                    value = await ex.u_group_members.get_member_names_as_string(group)
+                except:
+                    value = f"The group ({group.id}) has an Idol that doesn't exist. Please report it.\n"
+                embed.add_field(name=name, value=value, inline=True)
+            else:
+                embed.add_field(name=name, value="None", inline=True)
+
+        if embed not in embed_list:
+            embed_list.append(embed)
+
+        msg = await ctx.send(embed=embed_list[0])
+        await ex.check_left_or_right_reaction_embed(msg, embed_list)
+
+    @commands.command()
     async def stopgg(self, ctx):
         """Force-end a guessing game if you are a moderator or host of the game. This command is meant for any issues or if a game happens to be stuck.
         [Format: %stopgg]"""
@@ -74,13 +151,6 @@ class GuessingGame(commands.Cog):
             log.console(f"Ending Guessing Game in {ctx.channel.id}")
             ex.cache.guessing_games.remove(game)
 
-    # @stopgg.before_invoke
-    # @guessinggame.before_invoke
-    # @ggleaderboard.before_invoke
-    # async def disabled_weverse(self, ctx):
-    #     await ctx.send(f"""**Guessing Game will be disabled until we find out Irene's API issue.**""")
-    #     raise Exception
-
 
 # noinspection PyBroadException,PyPep8
 class Game:
@@ -88,6 +158,7 @@ class Game:
         self.photo_link = None
         self.host_ctx = ctx
         self.host = ctx.author.id
+        self.host_user = None  # Utility user object
         # user_id : score
         self.players = {}
         self.rounds = 0
@@ -112,10 +183,7 @@ class Game:
         else:
             self.difficulty = "medium"
 
-        # create the game's idol pool.
-        idol_gender_set = ex.cache.gender_selection.get(self.gender)
-        idol_difficulty_set = ex.cache.difficulty_selection.get(self.difficulty)
-        self.idol_set = list(idol_gender_set & idol_difficulty_set)
+        self.idol_set: list = None
 
     async def credit_user(self, user_id):
         """Increment a user's score"""
@@ -184,10 +252,10 @@ class Game:
                 self.idol = random.choice(self.idol_set)
 
                 # Create acceptable answers
+                await self.create_acceptable_answers()
+
+                # Create list of idol group names.
                 self.group_names = [(await ex.u_group_members.get_group(group_id)).name for group_id in self.idol.groups]
-                self.correct_answers = [alias.lower() for alias in self.idol.aliases]
-                self.correct_answers.append(self.idol.full_name.lower())
-                self.correct_answers.append(self.idol.stage_name.lower())
 
                 # Skip this idol if it is taking too long
                 async with async_timeout.timeout(self.post_attempt_timeout) as posting:
@@ -218,7 +286,9 @@ class Game:
         await self.channel.send(f"The current game has now ended.")
         self.force_ended = True
         self.rounds = self.max_rounds
-        await self.update_scores()
+        if not self.host_user.gg_filter:
+            # only update scores when there is no group filter on.
+            await self.update_scores()
         await self.display_winners()
 
     async def update_scores(self):
@@ -241,14 +311,36 @@ class Game:
         except Exception as e:
             log.console(e)
 
+    async def create_acceptable_answers(self):
+        """Create acceptable answers."""
+        self.correct_answers = [alias.lower() for alias in self.idol.aliases]
+        self.correct_answers.append(self.idol.full_name.lower())
+        self.correct_answers.append(self.idol.stage_name.lower())
+
+    async def create_idol_pool(self):
+        """Create the game's idol pool."""
+        idol_gender_set = ex.cache.gender_selection.get(self.gender)
+        idol_difficulty_set = ex.cache.difficulty_selection.get(self.difficulty)
+        idol_filtered_set = set()
+        ex.cache.idols_female.update({idol for idol in ex.cache.idols if idol.gender == 'f' and idol.photo_count})
+        if self.host_user.gg_filter:
+            for group in self.host_user.gg_groups:
+                idol_filtered_set.update({await ex.u_group_members.get_member(idol_id) for idol_id in group.members})
+            self.idol_set = list(idol_gender_set & idol_difficulty_set & idol_filtered_set)
+        else:
+            self.idol_set = list(idol_gender_set & idol_difficulty_set)
+
     async def process_game(self):
         """Ignores errors and continuously makes new questions until the game should end."""
+        self.host_user = await ex.get_user(self.host)
+        await self.create_idol_pool()
         try:
             while self.rounds < self.max_rounds and not self.force_ended:
                 try:
                     await self.create_new_question()
                 except LookupError as e:
-                    await self.channel.send(f"The gender and difficulty settings selected have no idols.")
+                    await self.channel.send(f"The gender, difficulty, and filtered settings selected have no idols. "
+                                            f"Ending Game.")
                     log.console(e)
                     return
                 await self.check_message()

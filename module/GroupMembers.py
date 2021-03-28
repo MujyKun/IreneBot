@@ -167,7 +167,7 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
 
             group_name = group_json.get("Group Name")
 
-            # for security purposes, do not simplify the structure.
+            # for security purposes, do not simplify the structure as any json field can be entered.
             await ex.conn.execute("INSERT INTO groupmembers.unregisteredgroups(groupname, debutdate, disbanddate, "
                                   "description, twitter, youtube, melon, instagram, vlive, spotify, fancafe, "
                                   "facebook, tiktok, fandom, company, website, thumbnail, banner, gender, tags, "

@@ -91,14 +91,12 @@ class Weverse:
     @staticmethod
     async def set_comment_embed(notification, embed_title):
         """Set Comment Embed for Weverse."""
-        artist_comments = await ex.weverse_client.fetch_artist_comments(notification.community_id,
-                                                                        notification.contents_id)
-        if not artist_comments:
+        comment_body = await ex.weverse_client.fetch_comment_body(notification.community_id, notification.contents_id)
+        if not comment_body:
             return
-        comment = artist_comments[0]
         embed_description = f"**{notification.message}**\n\n" \
-                            f"Content: **{comment.body}**\n" \
-                            f"Translated Content: **{await ex.weverse_client.translate(comment.id, is_comment=True, p_obj=comment, community_id=notification.community_id)}**"
+                            f"Content: **{comment_body}**\n" \
+                            f"Translated Content: **{await ex.weverse_client.translate(notification.contents_id, is_comment=True, community_id=notification.community_id)}**"
         embed = await ex.create_embed(title=embed_title, title_desc=embed_description)
         return embed
 

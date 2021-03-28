@@ -72,10 +72,15 @@ class Weverse(commands.Cog):
                     return
                 is_comment = False
                 latest_notification = user_notifications[0]
+
                 community_name = latest_notification.community_name or latest_notification.bold_element
                 if not community_name:
                     return
                 channels = await ex.u_weverse.get_weverse_channels(community_name.lower())
+                if not channels:
+                    log.console("WARNING: There were no channels to post the Weverse notification to.")
+                    return
+
                 noti_type = ex.weverse_client.determine_notification_type(latest_notification.message)
                 embed_title = f"New {community_name} Notification!"
                 message_text = None
@@ -90,6 +95,7 @@ class Weverse(commands.Cog):
                     return None  # not keeping track of announcements ATM
                 else:
                     return None
+
                 for channel_info in channels:
                     # sleep for 5 seconds per channel because of rate-limiting issues on the bot.
                     await asyncio.sleep(5)

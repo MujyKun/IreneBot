@@ -142,6 +142,7 @@ class GuessingGame(commands.Cog):
 
     @staticmethod
     async def start_game(ctx, rounds, timeout, gender, difficulty):
+        """Officially starts the guessing game."""
         game = Game(ctx, max_rounds=rounds, timeout=timeout, gender=gender, difficulty=difficulty)
         ex.cache.guessing_games.append(game)
         await ctx.send(f"> Starting a guessing game for `{game.gender if game.gender != 'all' else 'both male and female'}` idols"
@@ -184,6 +185,7 @@ class Game:
             self.difficulty = "medium"
 
         self.idol_set: list = None
+        self.results_posted = False
 
     async def credit_user(self, user_id):
         """Increment a user's score"""
@@ -283,6 +285,9 @@ class Game:
 
     async def end_game(self):
         """Ends a guessing game."""
+        if self.results_posted:
+            return
+
         await self.channel.send(f"The current game has now ended.")
         self.force_ended = True
         self.rounds = self.max_rounds
@@ -290,6 +295,7 @@ class Game:
             # only update scores when there is no group filter on.
             await self.update_scores()
         await self.display_winners()
+        self.results_posted = True
 
     async def update_scores(self):
         """Updates all player scores"""

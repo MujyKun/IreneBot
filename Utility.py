@@ -267,7 +267,6 @@ class Utility:
         game = self.find_game(ctx.channel, games)
         if game:
             if ctx.author.id == game.host or is_moderator:
-                # these are passed by reference, so can directly remove from them.
                 games.remove(game)
                 return await game.end_game()
             else:

@@ -166,7 +166,7 @@ Remaining Idols: {self.number_of_idols_left}
         self.current_bracket_teams = self.secondary_bracket_teams
         self.secondary_bracket_teams = []
 
-    async def end_game(self):
+    async def end_game(self, force_ended=False):
         """End the game"""
         if not self.force_ended:
             await self.channel.send(f"The current game has now ended due to not responding in time or it was force closed.")

@@ -132,7 +132,8 @@ class GuessingGame(commands.Cog):
             embed_list.append(embed)
 
         msg = await ctx.send(embed=embed_list[0])
-        await ex.check_left_or_right_reaction_embed(msg, embed_list)
+        if len(embed_list) > 1:
+            await ex.check_left_or_right_reaction_embed(msg, embed_list)
 
     @commands.command()
     async def stopgg(self, ctx):

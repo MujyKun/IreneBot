@@ -765,6 +765,14 @@ class GroupMembers:
                 # do not kill api anymore after the api was recoded. Needs to be tested.
                 # await ex.kill_api()
                 ex.api_issues = 0
+            if guessing_game:
+                existing_game = ex.find_game(channel, ex.cache.guessing_games)
+                if existing_game:
+                    existing_game.api_issues += 1
+                    if existing_game.api_issues > 30:
+                        await existing_game.end_game()
+                return None, None  # no longer have an api error msg send for guessing game.
+
             await channel.send(
                 f"> An API issue has occurred. If this is constantly occurring, please join our support server.")
             log.console(

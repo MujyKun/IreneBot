@@ -187,6 +187,7 @@ class Game:
 
         self.idol_set: list = None
         self.results_posted = False
+        self.api_issues = 0
 
     async def credit_user(self, user_id):
         """Increment a user's score"""

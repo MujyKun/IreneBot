@@ -17,7 +17,7 @@ db_conn = psycopg2.connect(**postgres_options)
 c = db_conn.cursor()
 
 
-private_keys = ((os.getenv("PRIVATE_KEYS")).split(','))
+private_keys: list = ((os.getenv("PRIVATE_KEYS")).split(','))
 
 idol_folder = os.getenv("FOLDER_LOCATION")
 

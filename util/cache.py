@@ -6,6 +6,7 @@ import time
 import asyncio
 import datetime
 import json
+import re
 
 
 # noinspection PyBroadException,PyPep8
@@ -70,8 +71,7 @@ class Cache:
             user = await ex.get_user(user_id)
             user.user_language = language
 
-    @staticmethod
-    async def load_language_packs():
+    async def load_language_packs(self):
         """Create cache for language packs.
 
         CAUTION: This function will block the main thread.
@@ -82,6 +82,30 @@ class Cache:
         for file_name in file_names:
             with open(f"languages/{file_name}.json") as file:
                 ex.cache.languages[file_name] = json.load(file)
+
+        # make the content of all curly braces bolded in all available languages.
+        for language in ex.cache.languages.values():
+            for module in language.values():
+                for message_name in module.keys():
+                    module[message_name] = await self.apply_bold_to_braces(module[message_name])
+
+    @staticmethod
+    async def apply_bold_to_braces(text) -> str:
+        """Applys bold markdown in between braces.
+
+        CAUTION: this function blocks the main thread.
+        """
+        open_cbrace_locations = [message.start() for message in re.finditer("{", text)]
+        for num, brace in enumerate(open_cbrace_locations):
+            brace = brace + (2 * num)
+            text = text[:brace] + "**" + text[brace:]
+
+        close_cbrace_locations = [message.start() for message in re.finditer("}", text)]
+        for num, brace in enumerate(close_cbrace_locations):
+            brace = brace + (2 * num)
+            text = text[:brace + 1] + "**" + text[brace + 1:]
+
+        return text
 
     @staticmethod
     async def create_levels_cache():

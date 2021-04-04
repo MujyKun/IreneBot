@@ -22,6 +22,7 @@ def info():
 
 
 def print_to_console(message):
+    message = message.replace("**", "")  # getting rid of bold in markdown
     print(message)
     with open(f"Logs/{datetime.date.today()}-console.log", "a+", encoding='utf-8') as file:
         output = f"{datetime.datetime.now()} -- {message}\n"

@@ -357,6 +357,6 @@ def process_image(link_info, redirect_user=True, guessing_game=False):
 
 
 #  should be run through gunicorn
-app.run(port=5454)
+#  app.run(port=5454)
 
 

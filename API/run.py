@@ -54,6 +54,18 @@ def get_all_members():
     return all_members
 
 
+@app.route('/members_with_photos/', methods=['GET'])
+def get_all_members_with_photos():
+    """Gets all full names and stage names of idols with photos"""
+    c.execute("""SELECT DISTINCT(m.id), fullname, stagename 
+FROM groupmembers.member as m, groupmembers.imagelinks as i 
+WHERE m.id = i.memberid""")
+    all_members = {}
+    for idol_id, full_name, stage_name in c.fetchall():
+        all_members[idol_id] = {'full_name': full_name, 'stage_name': stage_name}
+    return all_members
+
+
 @app.route('/members/<idol_id>/', methods=['GET'])
 def get_member(idol_id):
     """Get full name and stage name of an idol by it's id."""
@@ -96,7 +108,7 @@ def get_image_ids(idol_id):
 
 # noinspection PyBroadException
 @app.route('/photos/<idol_id>/', methods=['POST'])
-def get_idol_photo(idol_id, redirect_user=True, auth=True):
+def get_idol_photo(idol_id, redirect_user=True, auth=True, guessing_game=False):
     """Download an idol's photo and redirect the user to the image link."""
     # check authorization
     if not check_auth_key(request.headers.get('Authorization')) and auth:
@@ -130,6 +142,10 @@ def get_idol_photo(idol_id, redirect_user=True, auth=True):
             # idol has no photos
             return Response(status=404)
         random_link = random.choice(all_links)
+        if guessing_game:
+            image_host_url = process_image(random_link, redirect_user=redirect_user, guessing_game=True)
+            return image_host_url
+
         return process_image(random_link, redirect_user=redirect_user)
 
     except Exception as e:
@@ -159,6 +175,34 @@ def get_image(image_id):
 def random_image():
     random_idol_id = get_random_idol_id_with_photo()
     return get_idol_photo(random_idol_id, redirect_user=False, auth=False)
+
+
+@app.route('/photos/guessing_game/', methods=['POST'])
+def random_gg_image():
+    random_idol_id = get_random_idol_id_with_photo()
+    c.execute("SELECT fullname, stagename FROM groupmembers.member WHERE id = %s", (random_idol_id,))
+
+    info = c.fetchone()
+    full_name = info[0]
+    stage_name = info[1]
+    c.execute("SELECT alias FROM groupmembers.aliases WHERE objectid = %s AND isgroup = 0 AND serverid IS NULL",
+              (random_idol_id,))
+    aliases = c.fetchall()
+    aliases = [alias[0] for alias in aliases]
+    photo_link = ".mp4"
+
+    # confirm the client does not receive a video.
+    while ".mp4" in photo_link or ".webm" in photo_link:
+        photo_link = get_idol_photo(random_idol_id, redirect_user=False, auth=True, guessing_game=True)
+
+    idol_info_json = {
+        'id': random_idol_id,
+        'full_name': full_name,
+        'stage_name': stage_name,
+        'image_url': photo_link,
+        'aliases': aliases
+    }
+    return idol_info_json
 
 
 @app.route('/downloaded/', methods=['GET'])
@@ -279,7 +323,7 @@ def get_random_idol_id_with_photo():
     return random.choice(c.fetchall())[0]
 
 
-def process_image(link_info, redirect_user=True):
+def process_image(link_info, redirect_user=True, guessing_game=False):
     # get information about the file from google drive
     file_db_id = link_info[0]
     file_url = link_info[1]
@@ -298,6 +342,10 @@ def process_image(link_info, redirect_user=True):
         # download the file
         download_media(google_drive_id, file_location)
 
+    # we only need the media downloaded for guessing game, so this is our return point.
+    if guessing_game:
+        return image_host_url
+
     if '.mp4' in file_type or '.webm' in file_type:
         # return a json of the video info
         return file_data, 415
@@ -309,6 +357,6 @@ def process_image(link_info, redirect_user=True):
 
 
 #  should be run through gunicorn
-#  app.run(port=5454)
+app.run(port=5454)
 
 

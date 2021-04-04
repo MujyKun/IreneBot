@@ -2,7 +2,8 @@
 <br><br>
 <h2>GroupMembers:</h2><br>
 <p class="api_info">
-    <strong>https://api.irenebot.com/members</strong>   (GET)-> View minimal information about all members<br>
+    <strong>https://api.irenebot.com/members</strong>   (GET)-> View minimal information about ALL members<br>
+    <strong>https://api.irenebot.com/members_with_photos</strong>   (GET)-> View minimal information about ALL members WITH photos.<br>
     <strong>https://api.irenebot.com/members/:id</strong>   (GET)-> View minimal information about a specific idol.<br>
     <strong>https://api.irenebot.com/groups</strong>   (GET)-> View information about all groups.<br>
     <strong>https://api.irenebot.com/groups/:id</strong>   (GET)-> View information about a specific group from their group id.<br>
@@ -58,6 +59,24 @@
         'file_name': '3132image.jpeg'<br>
     }
     </blockquote>
+
+<p class="api_info">
+    <strong>Pass in Private Keys as an Authorization Bearer Token in the header.</strong><br><br><br>
+    <strong>https://api.irenebot.com/photos/guessing_game/ </strong>  (POST)-> Pass in 'allow_group_photos' as 1 to get any photos, or 0 to not get group photos. <br>
+        Status 500 -> Server Issue<br>
+        Status 200 -> Will receive a json containing Idol Information along with the image url.<br>
+    Example:
+    <br>
+</p>
+    <blockquote>
+    {<br>
+        'member_id': 1,<br>
+        'full_name': "Bae Joo Hyun",<br>
+        'stage_name': "Irene",<br>
+        'image_url': 'https://www.images.irenebot.com/idol/3132image.jpeg',<br>
+    }
+    </blockquote>
+
 
 <p class="api_info">
     <strong>https://api.irenebot.com/file/:imageID</strong>   (POST)-> Get redirected to an image of a file id.<br>

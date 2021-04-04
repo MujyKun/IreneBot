@@ -29,7 +29,7 @@ def log_info():
         c.execute("SELECT called FROM stats.apiusage WHERE endpoint = %s AND keyused = %s", (request.base_url, index))
         called_amount = c.fetchone()
         if called_amount:
-            c.execute("UPDATE stats.apiusage SET called = %s", (called_amount[0] + 1,))
+            c.execute("UPDATE stats.apiusage SET called = %s WHERE endpoint = %s AND keyused = %s", (called_amount[0] + 1, request.base_url, index))
         else:
             c.execute("INSERT INTO stats.apiusage(endpoint, keyused, called) VALUES(%s, %s, %s)", (request.base_url,
                                                                                                    index, 1))

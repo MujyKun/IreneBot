@@ -18,21 +18,24 @@ patreon_url = "https://www.patreon.com/mujykun"
 @app.before_request
 def log_info():
     """Log minimal request information to know amount of calls along with key usage."""
-    key = request.headers.get('Authorization') or "None"
-    # keys are always appended to the end in order, so we can use the index to differentiate between keys.
     try:
-        index = private_keys.index(key)
+        key = request.headers.get('Authorization') or "None"
+        # keys are always appended to the end in order, so we can use the index to differentiate between keys.
+        try:
+            index = private_keys.index(key)
+        except:
+            index = -1
+        # c.execute("INSERT INTO ")
+        c.execute("SELECT called FROM stats.apiusage WHERE endpoint = %s AND keyused = %s", (request.base_url, index))
+        called_amount = c.fetchone()
+        if called_amount:
+            c.execute("UPDATE stats.apiusage SET called = %s", (called_amount[0] + 1,))
+        else:
+            c.execute("INSERT INTO stats.apiusage(endpoint, keyused, called) VALUES(%s, %s, %s)", (request.base_url,
+                                                                                                   index, 1))
+        db_conn.commit()
     except:
-        index = -1
-    # c.execute("INSERT INTO ")
-    c.execute("SELECT called FROM stats.apiusage WHERE endpoint = %s AND keyused = %s", (request.base_url, index))
-    called_amount = c.fetchone()
-    if called_amount:
-        c.execute("UPDATE stats.apiusage SET called = %s", (called_amount[0] + 1,))
-    else:
-        c.execute("INSERT INTO stats.apiusage(endpoint, keyused, called) VALUES(%s, %s, %s)", (request.base_url,
-                                                                                               index, 1))
-    db_conn.commit()
+        pass
 
 
 @app.after_request

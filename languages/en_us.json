@@ -1,6 +1,6 @@
 {
   "currency": {
-    "daily_msg": "{name}, you have been given {daily_amount}."
+    "daily_msg": "{name}, you have been given {daily_amount}.",
     "balance_msg": "{name} currently has {balance}."
   },
   "miscellaneous": {

@@ -80,13 +80,13 @@ class Cache:
 
         file_names = ["en_us"]
         for file_name in file_names:
-            with open(f"{file_name}.json") as file:
+            with open(f"languages/{file_name}.json") as file:
                 ex.cache.languages[file_name] = json.load(file)
 
     @staticmethod
     async def create_levels_cache():
         """Create the cache for user levels."""
-        levels = await ex.conn.fetch("SELECT userid, rob, daily, beg, profile")
+        levels = await ex.conn.fetch("SELECT userid, rob, daily, beg, profile FROM currency.levels")
         for user_id, rob, daily, beg, profile_level in levels:
             user = await ex.get_user(user_id)
             if rob:

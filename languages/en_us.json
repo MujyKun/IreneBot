@@ -1,9 +1,10 @@
 {
   "currency": {
-    "daily_msg": "{name}, you have been given ${balance}."
+    "daily_msg": "{name}, you have been given {daily_amount}."
+    "balance_msg": "{name} currently has {balance}."
   },
   "miscellaneous": {
-    "set_language_fail": "{name}, that is not an available language. Use one of the following: {languages}",
+    "set_language_fail": "{name}, that is not an available language. Use one of the following: {languages}.",
     "set_language_success": "{name}, your language is now set to {language}."
   }
 }

@@ -188,7 +188,7 @@ class Cache(commands.Cog):
         # mod mail user and channel {user_id: channel_id}
         self.mod_mail = {}
 
-        self.languages = {}
+        self.languages = {}  # language packs
 
         # bracket position for bias game stored due to annoyance when using previous x and y values.
         # counting starts from left to right, bottom to top

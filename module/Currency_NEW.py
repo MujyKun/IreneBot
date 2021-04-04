@@ -9,7 +9,6 @@ from Utility import resources as ex
 
 # noinspection PyBroadException,PyPep8
 class Currency(commands.Cog):
-    @ex.u_currency.register_user
     @commands.command()
     @commands.cooldown(1, 86400, BucketType.user)
     async def daily(self, ctx):
@@ -18,18 +17,26 @@ class Currency(commands.Cog):
         daily_amount = await user.get_daily_amount()
         await user.update_balance(add=daily_amount)
         msg_str = ex.cache.languages[user.user_language]['currency']['daily_msg']
-        msg_str = msg_str.replace("{name}", ctx.author.display_name)
-        msg_str = msg_str.replace("{balance}", user.money)
+        msg_str = msg_str.replace("{name}", f"**{ctx.author.display_name}**")
+        msg_str = msg_str.replace("{daily_amount}", f"**{daily_amount}**")
 
         return await ctx.send(msg_str)
 
-    @ex.u_currency.register_user
     @commands.command(aliases=['b', 'bal', '$'])
-    async def balance(self, ctx, *, user: discord.Member = discord.Member):
+    async def balance(self, ctx, *, member: discord.Member = None):
         """View your balance [Format: %balance (@user)][Aliases: b,bal,$]"""
-        pass
+        if not member:
+            member = ctx.author
 
-    @ex.u_currency.register_user
+        user = await ex.get_user(member.id)
+        await user.register_currency()
+
+        msg_str = ex.cache.languages[user.user_language]['currency']['balance_msg']
+        msg_str = msg_str.replace("{name}", f"**{member.display_name}**")
+        msg_str = msg_str.replace("{balance}", f"**{await user.get_shortened_balance()}**")
+
+        return await ctx.send(msg_str)
+
     @commands.command()
     async def bet(self, ctx, *, balance="1"):
         """Bet your money [Format: %bet (amount)]"""
@@ -40,34 +47,29 @@ class Currency(commands.Cog):
         """Shows Top 10 Users server/global wide [Format: %leaderboard (global/server)][Aliases: leaderboards, lb]"""
         pass
 
-    @ex.u_currency.register_user
     @commands.command()
     @commands.cooldown(1, 5, BucketType.user)
     async def beg(self, ctx):
         """Beg a homeless man for money [Format: %beg]"""
         pass
 
-    @ex.u_currency.register_user
     @commands.command(aliases=["levelup"])
     @commands.cooldown(1, 61, BucketType.user)
     async def upgrade(self, ctx, command=""):
         """Upgrade a command to the next level with your money. [Format: %upgrade rob/daily/beg]"""
         pass
 
-    @ex.u_currency.register_user
     @commands.command()
     @commands.cooldown(1, 3600, BucketType.user)
     async def rob(self, ctx, *, user: discord.Member = discord.Member):
         """Rob a user [Format: %rob @user]"""
         pass
 
-    @ex.u_currency.register_user
     @commands.command()
     async def give(self, ctx, mentioned_user: discord.Member = discord.Member, amount="0"):
         """Give a user money [Format: %give (@user) (amount)]"""
         pass
 
-    @ex.u_currency.register_user
     @commands.command(aliases=['rockpaperscissors'])
     async def rps(self, ctx, rps_choice='', amount="0"):
         """Play Rock Paper Scissors for Money [Format: %rps (r/p/s)(amount)][Aliases: rockpaperscissors]"""

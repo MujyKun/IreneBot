@@ -300,14 +300,27 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
                 await game.channel.send(message)
             except:
                 pass
+
         for game in ex.cache.guessing_games:
             try:
                 await game.channel.send(message)
             except:
                 pass
-        await ex.conn.terminate()  # close all db connections.
-        await ex.session.close()  # close the aiohttp client session.
-        await ex.client.logout()
+
+        try:
+            await ex.conn.terminate()  # close all db connections.
+        except:
+            pass
+
+        try:
+            await ex.session.close()  # close the aiohttp client session.
+        except:
+            pass
+
+        try:
+            await ex.client.logout()
+        except:
+            pass
 
     @commands.command()
     @commands.check(ex.check_if_mod)

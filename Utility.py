@@ -53,10 +53,8 @@ class Utility:
         # SubClass Objects -- Instances given in run.py
         self.u_database: util.database.DataBase = None
         self.u_cache: util.cache.Cache = None
-        self.u_currency: util.currency.Currency = None
         self.u_miscellaneous: util.miscellaneous.Miscellaneous = None
         self.u_blackjack: util.blackjack.BlackJack = None
-        self.u_levels: util.levels.Levels = None
         self.u_group_members: util.groupmembers.GroupMembers = None
         self.u_logging: util.logging.Logging = None
         self.u_twitter: util.twitter.Twitter = None

@@ -179,6 +179,7 @@ To find out more, look at the `GroupMembers` category.
 | servercount      | Shows how many servers Irene is on.                            | %servercount                    |                |
 | serverinfo      | View information about the current server.                            | %serverinfo                   |                |
 | servers          | Displays which servers Irene is in.  | %servers                        | ♥              |
+| setlanguage          | Changes language of Irene. Available Choices: en_us  | %setlanguage (language choice)                         |               |
 | speak            | Owner to Bot TTS                                               | %speak (message)                | ♥              |
 | suggest          | Suggest a feature for Irene                                    | %suggest (feature)              |               |
 | support          | Support Discord Server for Irene                               | %support                        |                |

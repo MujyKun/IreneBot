@@ -5,6 +5,7 @@ from module.keys import dead_image_channel_id
 import time
 import asyncio
 import datetime
+import json
 
 
 # noinspection PyBroadException,PyPep8
@@ -24,6 +25,7 @@ class Cache:
         past_time = time.time()
         # reset custom user cache
         ex.cache.users = {}
+        await self.process_cache_time(self.load_language_packs, "Language Packs")
         await self.process_cache_time(self.update_idols, "Idol Photo Count")
         await self.process_cache_time(self.update_groups, "Group Photo Count")
         await self.process_cache_time(self.update_user_notifications, "User Notifications")
@@ -51,6 +53,9 @@ class Cache:
         await self.process_cache_time(self.create_guessing_game_cache, "Guessing Game Scores")
         await self.process_cache_time(self.create_twitch_cache, "Twitch Channels")
         await self.process_cache_time(self.create_gg_filter_cache, "Guessing Game Filter")
+        await self.process_cache_time(self.create_currency_cache, "Currency")
+        await self.process_cache_time(self.create_levels_cache, "Levels")
+        await self.process_cache_time(self.create_langauge_cache, "User Language")
         if not ex.test_bot and not ex.weverse_client.cache_loaded:
             # noinspection PyUnusedLocal
             task = asyncio.create_task(self.process_cache_time(ex.weverse_client.start, "Weverse"))
@@ -58,7 +63,52 @@ class Cache:
         ex.irene_cache_loaded = True
 
     @staticmethod
+    async def create_langauge_cache():
+        """Create cache for user languages."""
+        lang_info = await ex.conn.fetch("SELECT userid, language FROM general.languages")
+        for user_id, language in lang_info:
+            user = await ex.get_user(user_id)
+            user.user_language = language
+
+    @staticmethod
+    async def load_language_packs():
+        """Create cache for language packs.
+
+        CAUTION: This function will block the main thread.
+        """
+        ex.cache.languages = {}
+
+        file_names = ["en_us"]
+        for file_name in file_names:
+            with open(f"{file_name}.json") as file:
+                ex.cache.languages[file_name] = json.load(file)
+
+    @staticmethod
+    async def create_levels_cache():
+        """Create the cache for user levels."""
+        levels = await ex.conn.fetch("SELECT userid, rob, daily, beg, profile")
+        for user_id, rob, daily, beg, profile_level in levels:
+            user = await ex.get_user(user_id)
+            if rob:
+                user.rob_level = rob
+            if daily:
+                user.daily_level = daily
+            if beg:
+                user.beg_level = beg
+            if profile_level:
+                user.profile_level = profile_level
+
+    @staticmethod
+    async def create_currency_cache():
+        """Create cache for currency"""
+        currency = await ex.conn.fetch("SELECT userid, money FROM currency.currency")
+        for user_id, money in currency:
+            user = await ex.get_user(user_id)
+            user.money = int(money)
+
+    @staticmethod
     async def create_gg_filter_cache():
+        """Create filtering of guessing game cache."""
         users_filter_enabled = await ex.conn.fetch("SELECT userid from gg.filterenabled")
         users_filtered_groups = await ex.conn.fetch("SELECT userid, groupid FROM gg.filteredgroups")
 
@@ -80,6 +130,7 @@ class Cache:
 
     @staticmethod
     async def create_twitch_cache():
+        """Create cache for twitch followings"""
         ex.cache.twitch_channels = {}
         ex.cache.twitch_guild_to_channels = {}
         ex.cache.twitch_guild_to_roles = {}
@@ -99,6 +150,7 @@ class Cache:
 
     @staticmethod
     async def create_guessing_game_cache():
+        """Create cache for guessing game scores"""
         ex.cache.guessing_game_counter = {}
         all_scores = await ex.conn.fetch("SELECT userid, easy, medium, hard FROM stats.guessinggame")
         for user_id, easy_score, medium_score, hard_score in all_scores:
@@ -106,6 +158,7 @@ class Cache:
 
     @staticmethod
     async def create_timezone_cache():
+        """Create cache for timezones"""
         timezones = await ex.u_reminder.get_all_timezones_from_db()
         for user_id, timezone in timezones:
             user = await ex.get_user(user_id)

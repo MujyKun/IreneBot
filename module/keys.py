@@ -138,6 +138,8 @@ postgres_options = {
     "password": os.getenv("POSTGRES_PASSWORD")
     }
 
+db_conn: asyncpg.pool.Pool = None  # to be directly imported from files without access to the Utility object.
+
 
 async def connect_to_db():
     """Create a pool to the postgres database using asyncpg"""
@@ -147,7 +149,9 @@ async def connect_to_db():
     # instead of acquiring a connection from the pool, we just let the pool select a connection for us and
     # execute directly that way. this limits the amount of methods we have access to,
     # but in the case those methods are needed, just acquire the connection and use that instead.
-    return await asyncpg.create_pool(**postgres_options, command_timeout=60)
+    global db_conn
+    db_conn = await asyncpg.create_pool(**postgres_options, command_timeout=60)
+    return db_conn
 
 # papago translation keys - not needed - https://developers.naver.com/docs/papago/
 papago_client_id = os.getenv("PAPAGO_CLIENT_ID")

@@ -126,10 +126,8 @@ class Irene:
         The Utility object serves as a client for Irene and is managed by the following objects"""
         ex.u_database = util.database.DataBase()
         ex.u_cache = util.cache.Cache()
-        ex.u_currency = util.currency.Currency()
         ex.u_miscellaneous = util.miscellaneous.Miscellaneous()
         ex.u_blackjack = util.blackjack.BlackJack()
-        ex.u_levels = util.levels.Levels()
         ex.u_group_members = util.groupmembers.GroupMembers()
         ex.u_logging = util.logging.Logging()
         ex.u_twitter = util.twitter.Twitter()

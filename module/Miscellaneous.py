@@ -43,6 +43,23 @@ Message Author: {message.author}
             pass
 
     @commands.command()
+    async def setlanguage(self, ctx, language_choice):
+        """Changes language of Irene. Available Choices: en_us"""
+        user = await ex.get_user(ctx.author.id)
+        language_choice = language_choice.lower()
+        if language_choice in ex.cache.languages.keys():
+            await user.set_user_language(language_choice)
+            msg_str = ex.cache.languages[language_choice]['miscellaneous']['set_language_success']
+        else:
+            msg_str = ex.cache.languages[language_choice]['miscellaneous']['set_language_fail']
+
+        msg_str.replace("{name}", ctx.author.display_name)
+        msg_str.replace("{language}", user.user_language)
+        msg_str.replace("{languages}", ", ".join(ex.cache.languages.keys()))
+
+        return await ctx.send(msg_str)
+
+    @commands.command()
     async def vote(self, ctx):
         """Link to Voting for Irene on Top.gg
         [Format: %vote]"""

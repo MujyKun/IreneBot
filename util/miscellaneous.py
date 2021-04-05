@@ -74,7 +74,8 @@ class Miscellaneous:
         interactions = ','.join(interactions)
         if not interactions:
             return await ex.conn.execute("DELETE FROM general.disabledinteractions WHERE serverid = $1", server_id)
-        await ex.conn.execute("UPDATE general.disabledinteractions SET interactions = $1 WHERE serverid = $2", interactions, server_id)
+        await ex.conn.execute("UPDATE general.disabledinteractions SET interactions = $1 WHERE serverid = $2",
+                              interactions, server_id)
 
     @staticmethod
     async def interact_with_user(ctx, user, interaction, interaction_type, self_interaction=False):
@@ -82,7 +83,8 @@ class Miscellaneous:
         try:
             if user == discord.Member:
                 user = ctx.author
-            list_of_links = await ex.conn.fetch("SELECT url FROM general.interactions WHERE interaction = $1", interaction_type)
+            list_of_links = await ex.conn.fetch("SELECT url FROM general.interactions WHERE interaction = $1",
+                                                interaction_type)
             if not self_interaction and ctx.author.id == user.id:
                 ctx.command.reset_cooldown(ctx)
                 return await ctx.send(f"> **{ctx.author.display_name}, you cannot perform this interaction on yourself.**")

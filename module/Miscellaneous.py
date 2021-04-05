@@ -53,7 +53,7 @@ Message Author: {message.author}
         else:
             msg_str = ex.cache.languages[language_choice]['miscellaneous']['set_language_fail']
 
-        msg_str = ex.replace(msg_str, [["name", ctx.author.display_name], ["language", user.language],
+        msg_str = await ex.replace(msg_str, [["name", ctx.author.display_name], ["language", user.language],
                                        ["languages", ", ".join(ex.cache.languages.keys())]])
 
         return await ctx.send(msg_str)

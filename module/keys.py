@@ -48,6 +48,8 @@ dead_image_channel_id = make_int(os.getenv("DEAD_IMAGE_CHANNEL_ID"))
 add_idol_channel_id = make_int(os.getenv("ADD_IDOL_CHANNEL_ID"))
 add_group_channel_id = make_int(os.getenv("ADD_GROUP_CHANNEL_ID"))
 idol_post_send_limit = make_int(os.getenv("IDOL_POST_LIMIT"))
+# the amount normal users can use if the guild owner is a super patron.
+owner_super_patron_benefit = idol_post_send_limit * 2
 idol_no_vote_send_limit = make_int(os.getenv("IDOL_NO_VOTE_LIMIT"))  # amount of votes that can be sent without voting.
 reminder_limit = make_int(os.getenv("REMINDER_LIMIT"))
 

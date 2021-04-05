@@ -13,13 +13,15 @@ class Irene:
 
     def run(self):
         """Start the bot."""
+        # should define properties before anything else.
+        ex.define_properties(module.keys, module.events.Events)  # define the needed client-sided properties of Utility.
+
         self.create_util_objects()  # create sub-classes for Utility
         ex.u_data_dog.initialize_data_dog()  # initialize the class for DataDog metrics
+
         # all active blackjack games are also deleted on db start, current session stats refreshed.
         # cache is reset in the on_ready event.
         ex.u_database.set_start_up_connection.start()
-
-        ex.define_properties(module.keys, module.events.Events)  # define the needed client-sided properties of Utility.
 
         # start the connection to the bot
         if ex.test_bot:

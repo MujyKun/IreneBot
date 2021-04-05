@@ -36,6 +36,7 @@ class Utility:
         self.running_loop = None  # current asyncio running loop
         self.thread_pool = None  # ThreadPoolExecutor for operations that block the event loop.
         self.keys = None  # access to keys file
+        self.sql: util.sql.SQL = None  # abstract class hidden as concrete sql class -> manages queries
 
         self.api: tweepy.API = None
         self.loop_count = 0
@@ -319,8 +320,8 @@ class Utility:
         if support_server.get_member(ctx.author.id):
             return True
         user = await self.get_user(ctx.author.id)
-        msg = self.replace(self.cache.languages[user.language]['utility']['join_support_server_feature'],
-                           [['bot_name', ], ['support_server_link', ]])
+        msg = await self.replace(self.cache.languages[user.language]['utility']['join_support_server_feature'],
+                           [['bot_name', self.keys.bot_name], ['support_server_link', self.keys.bot_support_server_link]])
         await ctx.send(msg)
 
     @staticmethod
@@ -343,7 +344,6 @@ class Utility:
             text = text.replace("{" + keyword + "}", custom_input)
 
         return text
-
 
 
 resources = Utility()

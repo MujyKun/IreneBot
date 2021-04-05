@@ -9,6 +9,8 @@
   },
   "utility": {
     "join_support_server_feature": "In order to use this feature of {bot_name}, you must first join the Support Server at <{support_server_link}>"
-
+  },
+  "groupmembers": {
+    "patron_msg": "As of September 23rd 2020, non-Patrons can only send {idol_post_send_limit} photos a day maximum, as the current host can not reliably handle additional traffic.\nYou may become a patron for as little as $3 per month in order to send unlimited photos; every Patron contributes to upgrading and maintaining the host.\nIf the guild owner is a super patron, All guild members (non-patrons) get {owner_super_patron_benefit} photos a day.\nPlease support <@{bot_id}>'s development at {patreon_link}.\nThank You."
   }
 }

@@ -11,17 +11,6 @@ import time
 
 # noinspection PyBroadException,PyPep8
 class GroupMembers:
-    def __init__(self):
-        # the amount normal users can use if the guild owner is a super patron.
-        self.owner_super_patron_benefit = ex.keys.idol_post_send_limit * 2
-
-        self.patron_message = f"""
-        As of September 23rd 2020, non-Patrons can only send {ex.keys.idol_post_send_limit} photos a day maximum, as the current host can not reliably handle additional traffic.
-        You may become a patron for as little as $3 per month in order to send unlimited photos; every Patron contributes to upgrading and maintaining the host.
-        If the guild owner is a super patron, All guild members (non-patrons) get {self.owner_super_patron_benefit} photos a day.
-        Please support <@{ex.keys.bot_id}>'s development at {ex.keys.patreon_link}.
-        Thank You."""
-
     @staticmethod
     async def get_if_user_voted(user_id):
         time_stamp = ex.first_result(
@@ -860,21 +849,30 @@ class GroupMembers:
             ex.cache.commands_used[message_sender.id] = [ex.cache.commands_used[message_sender.id][0] + 1, time.time()]
 
     # noinspection PyPep8
-    async def check_user_limit(self, message_sender, message_channel, no_vote_limit=False):
+    @staticmethod
+    async def check_user_limit(message_sender, message_channel, no_vote_limit=False):
+        user = await ex.get_user(message_sender)
+        patron_message = ex.cache.languages[user.language]['groupmembers']['patron_msg']
+        patron_message = await ex.replace(patron_message, [
+            ['idol_post_send_limit', ex.keys.idol_post_send_limit],
+            ['owner_super_patron_benefit', ex.keys.owner_super_patron_benefit],
+            ['bot_id', ex.keys.bot_id],
+            ['patreon_link', ex.keys.patreon_link]
+        ])
         limit = ex.keys.idol_post_send_limit
         if no_vote_limit:
             # amount of votes that can be sent without voting.
             limit = ex.keys.idol_no_vote_send_limit
         if message_sender.id not in ex.cache.commands_used:
             return
-        if not await ex.u_patreon.check_if_patreon(message_sender.id) and ex.cache.commands_used[message_sender.id][
-            0] > limit:
+        if not await ex.u_patreon.check_if_patreon(message_sender.id) and \
+                ex.cache.commands_used[message_sender.id][0] > limit:
             # noinspection PyPep8
             if not await ex.u_patreon.check_if_patreon(message_channel.guild.owner.id,
                                                        super_patron=True) and not no_vote_limit:
-                return await message_channel.send(self.patron_message)
-            elif ex.cache.commands_used[message_sender.id][0] > self.owner_super_patron_benefit and not no_vote_limit:
-                return await message_channel.send(self.patron_message)
+                return await message_channel.send(patron_message)
+            elif ex.cache.commands_used[message_sender.id][0] > ex.keys.owner_super_patron_benefit and not no_vote_limit:
+                return await message_channel.send(patron_message)
             else:
                 return True
 

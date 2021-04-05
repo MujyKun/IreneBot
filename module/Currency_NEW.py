@@ -1,9 +1,6 @@
 from discord.ext import commands
 from discord.ext.commands.cooldowns import BucketType
-from random import *
 import discord
-from module import logger as log
-from module.keys import bot_website
 from Utility import resources as ex
 
 
@@ -16,7 +13,7 @@ class Currency(commands.Cog):
         user = await ex.get_user(ctx.author.id)
         daily_amount = await user.get_daily_amount()
         await user.update_balance(add=daily_amount)
-        msg_str = ex.cache.languages[user.user_language]['currency']['daily_msg']
+        msg_str = ex.cache.languages[user.language]['currency']['daily_msg']
         msg_str = ex.replace(msg_str, [["name", ctx.author.display_name], ["daily_amount", daily_amount]])
 
         return await ctx.send(msg_str)
@@ -30,7 +27,7 @@ class Currency(commands.Cog):
         user = await ex.get_user(member.id)
         await user.register_currency()
 
-        msg_str = ex.cache.languages[user.user_language]['currency']['balance_msg']
+        msg_str = ex.cache.languages[user.language]['currency']['balance_msg']
         msg_str = ex.replace(msg_str, [["name", member.display_name], ["balance", await user.get_shortened_balance()]])
 
         return await ctx.send(msg_str)

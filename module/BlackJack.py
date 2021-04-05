@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from random import *
-from module import logger as log
+from util import logger as log
 from module.keys import bot_id
 from Utility import resources as ex
 

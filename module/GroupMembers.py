@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from module import logger as log
+from util import logger as log
 from module import keys
 from Utility import resources as ex
 import time

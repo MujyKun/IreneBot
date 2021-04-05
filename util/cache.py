@@ -1,7 +1,6 @@
 from Utility import resources as ex
 from discord.ext import tasks
-from module import logger as log
-from module.keys import dead_image_channel_id
+from util import logger as log
 import time
 import asyncio
 import datetime
@@ -69,7 +68,7 @@ class Cache:
         lang_info = await ex.conn.fetch("SELECT userid, language FROM general.languages")
         for user_id, language in lang_info:
             user = await ex.get_user(user_id)
-            user.user_language = language
+            user.language = language
 
     async def load_language_packs(self):
         """Create cache for language packs.
@@ -271,7 +270,7 @@ class Cache:
         """Creates Dead Link Cache"""
         ex.cache.dead_image_cache = {}
         try:
-            ex.cache.dead_image_channel = await ex.client.fetch_channel(dead_image_channel_id)
+            ex.cache.dead_image_channel = await ex.client.fetch_channel(ex.keys.dead_image_channel_id)
         except:
             pass
         dead_images = await ex.conn.fetch("SELECT deadlink, userid, messageid, idolid, guessinggame FROM groupmembers.deadlinkfromuser")

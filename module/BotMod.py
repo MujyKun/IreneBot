@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
-from module import logger as log, keys
+from module import keys
+from util import logger as log
 from Utility import resources as ex
 from Weverse.weverseasync import WeverseAsync
 import aiofiles

@@ -1,8 +1,7 @@
 from Utility import resources as ex
-from module import logger as log
+from util import logger as log
 from discord.ext import tasks
 from concurrent.futures import ThreadPoolExecutor
-from module.keys import connect_to_db
 import sys
 import asyncio
 
@@ -39,4 +38,4 @@ class DataBase:
     @staticmethod
     async def get_db_connection():
         """Retrieve Database Connection"""
-        return await connect_to_db()
+        return await ex.keys.connect_to_db()

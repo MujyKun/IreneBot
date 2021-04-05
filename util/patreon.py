@@ -1,5 +1,4 @@
 from Utility import resources as ex
-from module.keys import bot_support_server_id, patreon_role_id, patreon_super_role_id
 
 
 # noinspection PyBroadException,PyPep8
@@ -12,12 +11,12 @@ class Patreon:
     @staticmethod
     async def get_patreon_role_members(super_patron=False):
         """Get the members in the patreon roles."""
-        support_guild = ex.client.get_guild(int(bot_support_server_id))
+        support_guild = ex.client.get_guild(int(ex.keys.bot_support_server_id))
         # API call will not show role.members
         if not super_patron:
-            patreon_role = support_guild.get_role(int(patreon_role_id))
+            patreon_role = support_guild.get_role(int(ex.keys.patreon_role_id))
         else:
-            patreon_role = support_guild.get_role(int(patreon_super_role_id))
+            patreon_role = support_guild.get_role(int(ex.keys.patreon_super_role_id))
         return patreon_role.members
 
     @staticmethod

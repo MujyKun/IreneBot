@@ -1,7 +1,5 @@
-from module import logger as log
+from util import logger as log
 from Utility import resources as ex
-from module.keys import bot_prefix, bot_support_server_link, site_port, bot_id, bot_name, translate_private_key, \
-    api_port
 import discord
 import random
 import json
@@ -132,14 +130,14 @@ class Miscellaneous:
                 f"Type `{server_prefix}help` for information on commands.")
         if len(message_content) <= len(server_prefix):
             return
-        changing_prefix = [bot_prefix + 'setprefix', bot_prefix + 'checkprefix']
+        changing_prefix = [ex.keys.bot_prefix + 'setprefix', ex.keys.bot_prefix + 'checkprefix']
         if message.content[0:len(server_prefix)].lower() != server_prefix.lower() and message.content.lower() not in changing_prefix:
             return
         msg_without_prefix = message.content[len(server_prefix):len(message.content)]
         # only replace the prefix portion back to the default prefix if it is not %setprefix or %checkprefix
         if message.content.lower() not in changing_prefix:
             # change message.content so all on_message listeners have a bot prefix
-            message.content = bot_prefix + msg_without_prefix
+            message.content = ex.keys.bot_prefix + msg_without_prefix
         # if a user is banned from the bot.
         if await self.check_if_bot_banned(message_sender.id):
             guild_id = await ex.get_server_id(message)
@@ -155,13 +153,13 @@ class Miscellaneous:
             if ex.cache.maintenance_reason:
                 reason = f"\nREASON: {ex.cache.maintenance_reason}"
             await channel.send(
-                f">>> **A maintenance is currently in progress. Join the support server for more information. <{bot_support_server_link}>{reason}**")
+                f">>> **A maintenance is currently in progress. Join the support server for more information. <{ex.keys.bot_support_server_link}>{reason}**")
         except:
             pass
 
     @staticmethod
     async def get_api_status():
-        end_point = f"http://127.0.0.1:{api_port}"
+        end_point = f"http://127.0.0.1:{ex.keys.api_port}"
         try:
             async with ex.session.get(end_point) as r:
                 return r.status == 200
@@ -195,7 +193,7 @@ class Miscellaneous:
     @staticmethod
     async def check_for_bot_mentions(message):
         """Returns true if the message is only a bot mention and nothing else."""
-        return message.content == f"<@!{bot_id}>"
+        return message.content == f"<@!{ex.keys.bot_id}>"
 
     @staticmethod
     async def check_message_is_command(message, is_command_name=False):
@@ -210,7 +208,7 @@ class Miscellaneous:
     async def send_ban_message(channel):
         """A message to send for a user that is banned from the bot."""
         await channel.send(
-            f"> **You are banned from using {bot_name}. Join <{bot_support_server_link}>**")
+            f"> **You are banned from using {ex.keys.bot_name}. Join <{ex.keys.bot_support_server_link}>**")
 
     @staticmethod
     async def ban_user_from_bot(user_id):
@@ -273,8 +271,8 @@ class Miscellaneous:
                 'src_lang': await self.get_language_code(src_lang),
                 'target_lang': await self.get_language_code(target_lang),
             }
-            headers = {"Authorization": translate_private_key}
-            end_point = f"http://127.0.0.1:{site_port}/translate"
+            headers = {"Authorization": ex.keys.translate_private_key}
+            end_point = f"http://127.0.0.1:{ex.keys.site_port}/translate"
             if ex.test_bot:
                 end_point = f"https://irenebot.com/translate"
             async with ex.session.post(end_point, headers=headers, data=data) as r:

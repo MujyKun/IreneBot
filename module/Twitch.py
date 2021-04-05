@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands, tasks
 from Utility import resources as ex
-from module import logger as log
+from util import logger as log
 from module.keys import twitch_client_id
 import asyncio
 import json

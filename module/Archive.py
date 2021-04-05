@@ -3,7 +3,7 @@ import os
 from discord.ext import commands
 import aiofiles
 import asyncio
-from module import logger as log
+from util import logger as log
 from random import *
 from module.keys import owner_id, bot_website
 from datetime import datetime

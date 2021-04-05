@@ -1,7 +1,6 @@
 from Utility import resources as ex
 import aiofiles
-from module.keys import weverse_image_folder
-from module import logger as log
+from util import logger as log
 
 
 # noinspection PyBroadException,PyPep8
@@ -123,7 +122,7 @@ class Weverse:
     async def download_weverse_post(url, file_name):
         """Downloads an image url and returns image host url."""
         async with ex.session.get(url) as resp:
-            fd = await aiofiles.open(weverse_image_folder + file_name, mode='wb')
+            fd = await aiofiles.open(ex.keys.weverse_image_folder + file_name, mode='wb')
             await fd.write(await resp.read())
         return f"https://images.irenebot.com/weverse/{file_name}"
 

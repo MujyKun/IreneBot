@@ -26,7 +26,7 @@ class User:
         self.beg_level: int = 0
         self.rob_level: int = 0
         self.daily_level: int = 0
-        self.user_language: str = "en_us"
+        self.language: str = "en_us"
 
     async def set_profile_level(self, level):
         """Set the profile level."""
@@ -145,13 +145,13 @@ class User:
         base_daily = 50
         return base_daily if not self.daily_level else base_daily * self.daily_level
 
-    async def set_user_language(self, language):
+    async def set_language(self, language):
         """Sets the user's language."""
-        self.user_language = language
+        self.language = language
         await conn.execute("DELETE FROM general.languages WHERE userid = $1", self.id)
 
         # user language is en_us by default. We do not want it in the db.
-        if self.user_language == 'en_us':
+        if self.language == 'en_us':
             return
 
         await conn.execute("INSERT INTO general.languages(userid, language) VALUES ($1, $2)", self.id, language)

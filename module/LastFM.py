@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
-from module import events, logger as log
+from module import events
+from util import logger as log
 from Utility import resources as ex
 import typing
 

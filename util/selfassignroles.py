@@ -1,5 +1,5 @@
 from Utility import resources as ex
-from module import logger as log
+from util import logger as log
 import discord
 
 

@@ -1,6 +1,5 @@
 from Utility import resources as ex
-from module.keys import twitch_client_id, twitch_client_secret
-from module import logger as log
+from util import logger as log
 import json
 
 
@@ -89,8 +88,8 @@ class Twitch:
     @staticmethod
     async def reset_twitch_token():
         """Get/and reset twitch access token to use on the twitch api."""
-        end_point = f"https://id.twitch.tv/oauth2/token?client_id={twitch_client_id}&client_secret=" \
-            f"{twitch_client_secret}&grant_type=client_credentials"
+        end_point = f"https://id.twitch.tv/oauth2/token?client_id={ex.keys.twitch_client_id}&client_secret=" \
+            f"{ex.keys.twitch_client_secret}&grant_type=client_credentials"
         async with ex.session.post(end_point) as r:
             if r.status == 200:
                 body = await r.text()

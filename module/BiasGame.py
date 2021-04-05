@@ -1,7 +1,8 @@
 import discord
 from Utility import resources as ex
 from discord.ext import commands
-from module import keys, logger as log
+from module import keys
+from util import logger as log
 import random
 import asyncio
 from math import log2

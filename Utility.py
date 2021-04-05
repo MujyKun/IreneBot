@@ -1,16 +1,16 @@
-from module import keys, logger as log, cache, exceptions
-from Weverse.weverseasync import WeverseAsync
+from util import exceptions, logger as log, local_cache
 from typing import TYPE_CHECKING
 import discord
 import random
 import asyncio
 import os
 import tweepy
+from Weverse.weverseasync import WeverseAsync
 
 # do not import in runtime. This is used for type-hints.
 if TYPE_CHECKING:
     import util
-
+    from aiohttp import ClientSession
 
 """
 Utility.py
@@ -23,34 +23,37 @@ All categorized utility methods will be placed as objects prefixed with u_ as a 
 # noinspection PyBroadException,PyPep8
 class Utility:
     def __init__(self):
-        self.test_bot = None  # this is changed in run.py
-        self.client = keys.client  # discord.py client
-        self.session = keys.client_session  # aiohttp client session
+        # A lot of these properties may be created via client side
+        # in order to make Utility more portable when needed and client friendly.
+        self.test_bot = None  # this is changed on the client side in run.py
+        self.client: discord.AutoShardedClient = None  # discord.py client
+        self.session: ClientSession = None  # aiohttp client session
         self.conn = None  # db connection
         self.discord_cache_loaded = False  # d.py library cache finished loading
         self.irene_cache_loaded = False  # IreneBot cache finished loading
-        self.cache = cache.Cache()  # instance for loaded cache
+        self.cache = local_cache.Cache()  # instance for loaded cache
         self.temp_patrons_loaded = False
         self.running_loop = None  # current asyncio running loop
         self.thread_pool = None  # ThreadPoolExecutor for operations that block the event loop.
-        auth = tweepy.OAuthHandler(keys.CONSUMER_KEY, keys.CONSUMER_SECRET)
-        auth.set_access_token(keys.ACCESS_KEY, keys.ACCESS_SECRET)
-        self.api = tweepy.API(auth)
+        self.keys = None  # access to keys file
+
+        self.api: tweepy.API = None
         self.loop_count = 0
         self.recursion_limit = 10000
         self.api_issues = 0  # api issues in a given minute
         self.max_idol_post_attempts = 10  # 100 was too much
         self.twitch_guild_follow_limit = 2
-        self.weverse_client = WeverseAsync(authorization=keys.weverse_auth_token, web_session=self.session,
-                                           verbose=True, loop=asyncio.get_event_loop())
-
-        self.join_support_server_msg = f"**In order to use this feature of Irene, " \
-            f"you must first join the Support Server at <{keys.bot_support_server_link}>**"
+        self.weverse_client: WeverseAsync = None
 
         self.exceptions = exceptions  # custom error handling
         self.twitch_token = None  # access tokens are set everytime the token is refreshed.
 
-        # SubClass Objects -- Instances given in run.py
+        self.events = None  # Client-Sided Events class
+        """
+        IMPORTANT: This design implementation is a hack for circular imports.
+        The intended use is to allow a singular object to manage the entire Utility.
+        """
+        # SubClass Objects -- Instances given in client's run.py
         self.u_database: util.database.DataBase = None
         self.u_cache: util.cache.Cache = None
         self.u_miscellaneous: util.miscellaneous.Miscellaneous = None
@@ -73,6 +76,29 @@ class Utility:
 
         # Util Directory that contains needed objects as attributes.
         self.u_objects: util.objects = None
+
+    def define_properties(self, keys, events):
+        """
+        Define client-sided properties in Utility.
+
+        :param keys: Access to the keys file.
+        :param events: Access to the client-sided events class
+        """
+        self.keys = keys
+
+        self.client = keys.client  # set discord client
+
+        self.session = keys.client_session  # set aiohttp client session
+
+        # set weverse client
+        self.weverse_client = WeverseAsync(authorization=keys.weverse_auth_token, web_session=self.session,
+                                           verbose=True, loop=asyncio.get_event_loop())
+
+        # create twitter auth
+        auth = tweepy.OAuthHandler(keys.CONSUMER_KEY, keys.CONSUMER_SECRET)
+        auth.set_access_token(keys.ACCESS_KEY, keys.ACCESS_SECRET)
+        self.api = tweepy.API(auth)
+        self.events = events
 
     async def get_user(self, user_id):
         """Creates a user if not created and adds it to the cache, then returns the user object.
@@ -145,14 +171,13 @@ class Utility:
             return False
         return True
 
-    @staticmethod
-    def check_if_mod(ctx, mode=0):  # as mode = 1, ctx is the author id.
+    def check_if_mod(self, ctx, mode=0):  # as mode = 1, ctx is the author id.
         """Check if the user is a bot mod/owner."""
         if not mode:
             user_id = ctx.author.id
-            return user_id in keys.mods_list or user_id == keys.owner_id
+            return user_id in self.keys.mods_list or user_id == self.keys.owner_id
         else:
-            return ctx in keys.mods_list or ctx == keys.owner_id
+            return ctx in self.keys.mods_list or ctx == self.keys.owner_id
 
     def get_ping(self):
         """Get the client's ping."""
@@ -172,7 +197,7 @@ class Utility:
             embed = discord.Embed(title=title, color=color)
         else:
             embed = discord.Embed(title=title, color=color, description=title_desc)
-        embed.set_author(name="Irene", url=keys.bot_website,
+        embed.set_author(name="Irene", url=self.keys.bot_website,
                          icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
         embed.set_footer(text=footer_desc, icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
         return embed
@@ -190,8 +215,19 @@ class Utility:
             await msg.delete()
             return False
 
-    async def check_left_or_right_reaction_embed(self, msg, embed_lists, original_page_number=0, reaction1=keys.previous_emoji, reaction2=keys.next_emoji):
+    async def set_embed_author_and_footer(self, embed, footer_message):
+        """Sets the author and footer of an embed."""
+        embed.set_author(name="Irene", url=self.keys.bot_website,
+                         icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
+        embed.set_footer(text=footer_message,
+                         icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
+        return embed
+
+    async def check_left_or_right_reaction_embed(self, msg, embed_lists, original_page_number=0, reaction1=None,
+                                                 reaction2=None):
         """This method is used for going between pages of embeds."""
+        reaction1 = self.keys.previous_emoji
+        reaction2 = self.keys.next_emoji
         await msg.add_reaction(reaction1)  # left arrow by default
         await msg.add_reaction(reaction2)  # right arrow by default
 
@@ -230,20 +266,11 @@ class Utility:
                 await change_page(c_page)
         await change_page(original_page_number)
 
-    @staticmethod
-    async def set_embed_author_and_footer(embed, footer_message):
-        """Sets the author and footer of an embed."""
-        embed.set_author(name="Irene", url=keys.bot_website,
-                         icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
-        embed.set_footer(text=footer_message,
-                         icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
-        return embed
-
     async def get_server_prefix(self, server_id):
         """Gets the prefix of a server by the server ID."""
         prefix = self.cache.server_prefixes.get(server_id)
         if not prefix:
-            return keys.bot_prefix
+            return self.keys.bot_prefix
         else:
             return prefix
 
@@ -253,7 +280,7 @@ class Utility:
             prefix = await self.get_server_prefix(ctx.guild.id)
             return prefix
         except:
-            return keys.bot_prefix
+            return self.keys.bot_prefix
 
     @staticmethod
     def check_file_exists(file_name):
@@ -286,12 +313,15 @@ class Utility:
         if not self.discord_cache_loaded:
             return True
 
-        support_server = self.client.get_guild(keys.bot_support_server_id)
+        support_server = self.client.get_guild(self.keys.bot_support_server_id)
         if not support_server:
             return True
         if support_server.get_member(ctx.author.id):
             return True
-        await ctx.send(self.join_support_server_msg)
+        user = await self.get_user(ctx.author.id)
+        msg = self.replace(self.cache.languages[user.language]['utility']['join_support_server_feature'],
+                           [['bot_name', ], ['support_server_link', ]])
+        await ctx.send(msg)
 
     @staticmethod
     async def replace(text: str, inputs_to_change: list) -> str:
@@ -313,6 +343,7 @@ class Utility:
             text = text.replace("{" + keyword + "}", custom_input)
 
         return text
+
 
 
 resources = Utility()

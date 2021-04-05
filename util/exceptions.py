@@ -1,4 +1,4 @@
-from module import logger as log
+from util import logger as log
 
 
 class TooLarge(Exception):

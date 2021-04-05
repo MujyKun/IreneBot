@@ -3,7 +3,7 @@ import datetime
 import pytz
 from discord.ext import commands
 from Utility import resources as ex
-from module import logger as log
+from util import logger as log
 
 
 # noinspection PyBroadException,PyPep8

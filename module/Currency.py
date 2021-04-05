@@ -2,7 +2,7 @@ from discord.ext import commands
 from discord.ext.commands.cooldowns import BucketType
 from random import *
 import discord
-from module import logger as log
+from util import logger as log
 from module.keys import bot_website
 from Utility import resources as ex
 

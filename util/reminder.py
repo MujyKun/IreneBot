@@ -1,5 +1,5 @@
 from Utility import resources as ex
-from module import logger as log, exceptions
+from util import logger as log
 import re
 import pytz
 import parsedatetime
@@ -66,7 +66,7 @@ class Reminder:
 
         all_aliases = [alias for time_unit in time_units for alias in time_unit[0]]
         if not any(alias in input_elements for alias in all_aliases):
-            raise exceptions.ImproperFormat
+            raise ex.exceptions.ImproperFormat
 
         for time_element in input_elements:
             try:

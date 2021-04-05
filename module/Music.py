@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands, tasks
-from module import keys, logger as log
+from module import keys
+from util import logger as log
 import asyncio
 import youtube_dl
 from Utility import resources as ex

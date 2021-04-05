@@ -1,7 +1,7 @@
 from discord.ext import commands, tasks
 from datetime import *
 import asyncio
-from module import logger as log
+from util import logger as log
 from Utility import resources as ex
 
 

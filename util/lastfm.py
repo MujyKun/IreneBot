@@ -1,6 +1,5 @@
 from Utility import resources as ex
-from module.keys import last_fm_api_key, last_fm_root_url, last_fm_headers
-from module import logger as log
+from util import logger as log
 
 
 # noinspection PyPep8
@@ -9,7 +8,7 @@ class LastFM:
     def create_fm_payload(method, user=None, limit=None, time_period=None):
         """Creates the payload to be sent to Last FM"""
         payload = {
-            'api_key': last_fm_api_key,
+            'api_key': ex.keys.last_fm_api_key,
             'method': method,
             'format': 'json'
         }
@@ -23,7 +22,8 @@ class LastFM:
 
     async def get_fm_response(self, method, user=None, limit=None, time_period=None):
         """Receives the response from Last FM"""
-        async with ex.session.get(last_fm_root_url, headers=last_fm_headers, params=self.create_fm_payload(method, user, limit, time_period)) as response:
+        async with ex.session.get(ex.keys.last_fm_root_url, headers=ex.keys.last_fm_headers,
+                                  params=self.create_fm_payload(method, user, limit, time_period)) as response:
             return await response.json()
 
     @staticmethod

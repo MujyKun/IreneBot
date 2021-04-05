@@ -2,7 +2,7 @@ import discord
 from random import *
 from discord.ext import commands
 from module import keys
-from module import logger as log
+from util import logger as log
 from Utility import resources as ex
 import datetime
 
@@ -48,12 +48,12 @@ Message Author: {message.author}
         user = await ex.get_user(ctx.author.id)
         language_choice = language_choice.lower()
         if language_choice in ex.cache.languages.keys():
-            await user.set_user_language(language_choice)
+            await user.set_language(language_choice)
             msg_str = ex.cache.languages[language_choice]['miscellaneous']['set_language_success']
         else:
             msg_str = ex.cache.languages[language_choice]['miscellaneous']['set_language_fail']
 
-        msg_str = ex.replace(msg_str, [["name", ctx.author.display_name], ["language", user.user_language],
+        msg_str = ex.replace(msg_str, [["name", ctx.author.display_name], ["language", user.language],
                                        ["languages", ", ".join(ex.cache.languages.keys())]])
 
         return await ctx.send(msg_str)

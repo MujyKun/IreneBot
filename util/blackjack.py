@@ -1,6 +1,5 @@
 from Utility import resources as ex
-from module.keys import bot_id
-from module import logger as log
+from util import logger as log
 import random
 import discord
 
@@ -139,7 +138,7 @@ class BlackJack:
 
     def check_if_bot(self, user_id):
         """Check if the player is a bot. (The bot would be Irene)"""
-        return str(self.get_int_index(bot_id, 9)) in str(user_id)
+        return str(self.get_int_index(ex.keys.bot_id, 9)) in str(user_id)
 
     async def add_card(self, user_id):
         """Check status of a game, it's player, manages the bot that plays, and then adds a card."""
@@ -287,16 +286,16 @@ class BlackJack:
     async def announce_winner(self, channel, winner, loser, winner_points, loser_points, win_amount):
         """Send a message to the channel of who won the game."""
         if self.check_if_bot(winner):
-            await channel.send(f"> **<@{bot_id}> has won ${int(win_amount):,} with {winner_points} points against <@{loser}> with {loser_points}.**")
+            await channel.send(f"> **<@{ex.keys.bot_id}> has won ${int(win_amount):,} with {winner_points} points against <@{loser}> with {loser_points}.**")
         elif self.check_if_bot(loser):
-            await channel.send(f"> **<@{winner}> has won ${int(win_amount):,} with {winner_points} points against <@{bot_id}> with {loser_points}.**")
+            await channel.send(f"> **<@{winner}> has won ${int(win_amount):,} with {winner_points} points against <@{ex.keys.bot_id}> with {loser_points}.**")
         else:
             await channel.send(f"> **<@{winner}> has won ${int(win_amount):,} with {winner_points} points against <@{loser}> with {loser_points}.**")
 
     async def announce_tie(self, channel, player1, player2, tied_points):
         """Send a message to the channel of a tie."""
         if self.check_if_bot(player1) or self.check_if_bot(player2):
-            await channel.send(f"> **<@{player1}> and <@{bot_id}> have tied with {tied_points}**")
+            await channel.send(f"> **<@{player1}> and <@{ex.keys.bot_id}> have tied with {tied_points}**")
         else:
             await channel.send(f"> **<@{player1}> and <@{player2}> have tied with {tied_points}**")
 

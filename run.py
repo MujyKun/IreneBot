@@ -1,6 +1,7 @@
 import module
 import util
 import util.objects
+import util.logger as log
 import dbl
 from Utility import resources as ex
 
@@ -17,6 +18,10 @@ class Irene:
         # all active blackjack games are also deleted on db start, current session stats refreshed.
         # cache is reset in the on_ready event.
         ex.u_database.set_start_up_connection.start()
+
+        ex.define_properties(module.keys, module.events.Events)  # define the needed client-sided properties of Utility.
+
+        # start the connection to the bot
         if ex.test_bot:
             self.run_test_bot()
         else:
@@ -34,7 +39,7 @@ class Irene:
         self.start_up()
         # background loops are optional with test bot.
         self.start_loops(run_weverse=False)
-        module.log.console("--TEST BOT--")
+        log.console("--TEST BOT--")
         ex.client.run(module.keys.test_client_token)
 
     def start_up(self):
@@ -44,7 +49,7 @@ class Irene:
         self.add_listeners()
         # Start logging to console and file
         # For INFO Logging
-        module.log.info()
+        log.info()
         # For Debugging
         # module.log.debug()
 
@@ -110,7 +115,7 @@ class Irene:
         ex.client.add_cog(module.LastFM.LastFM())
         ex.client.add_cog(module.Interactions.Interactions())
         ex.client.add_cog(module.Wolfram.Wolfram())
-        ex.client.add_cog(module.cache.Cache())
+        ex.client.add_cog(util.local_cache.Cache())
         ex.client.add_cog(module.GuessingGame.GuessingGame())
         ex.client.add_cog(module.CustomCommands.CustomCommands())
         ex.client.add_cog(module.BiasGame.BiasGame())
@@ -123,7 +128,12 @@ class Irene:
     @staticmethod
     def create_util_objects():
         """Create SubClass Objects to attach to Utility object for easier management and sharing between siblings.
-        The Utility object serves as a client for Irene and is managed by the following objects"""
+        The Utility object serves as a client for Irene and is managed by the following objects
+
+
+        IMPORTANT: This design implementation is a hack for circular imports.
+        The intended use is to allow a singular object to manage the entire Utility.
+        """
         ex.u_database = util.database.DataBase()
         ex.u_cache = util.cache.Cache()
         ex.u_miscellaneous = util.miscellaneous.Miscellaneous()

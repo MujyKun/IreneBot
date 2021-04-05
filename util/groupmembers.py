@@ -1,29 +1,26 @@
 from Utility import resources as ex
 import datetime
 import discord
-from module import logger as log, events
+from util import logger as log
 import asyncio
 import json
-import os
+from os.path import getsize
 import random
 import time
-from module.keys import reload_emoji, dead_emoji, owner_id, mods_list, check_emoji, idol_no_vote_send_limit,\
-    trash_emoji, next_emoji, translate_private_key, idol_post_send_limit, patreon_link, bot_id, api_port
 
 
 # noinspection PyBroadException,PyPep8
 class GroupMembers:
     def __init__(self):
         # the amount normal users can use if the guild owner is a super patron.
-        self.owner_super_patron_benefit = idol_post_send_limit * 2
+        self.owner_super_patron_benefit = ex.keys.idol_post_send_limit * 2
 
         self.patron_message = f"""
-        As of September 23rd 2020, non-Patrons can only send {idol_post_send_limit} photos a day maximum, as the current host can not reliably handle additional traffic.
+        As of September 23rd 2020, non-Patrons can only send {ex.keys.idol_post_send_limit} photos a day maximum, as the current host can not reliably handle additional traffic.
         You may become a patron for as little as $3 per month in order to send unlimited photos; every Patron contributes to upgrading and maintaining the host.
         If the guild owner is a super patron, All guild members (non-patrons) get {self.owner_super_patron_benefit} photos a day.
-        Please support <@{bot_id}>'s development at {patreon_link}.
+        Please support <@{ex.keys.bot_id}>'s development at {ex.keys.patreon_link}.
         Thank You."""
-
 
     @staticmethod
     async def get_if_user_voted(user_id):
@@ -439,8 +436,8 @@ class GroupMembers:
         """Check the reactions on an idol post or guessing game."""
         try:
             if message is not None:
-                reload_image_emoji = reload_emoji
-                dead_link_emoji = dead_emoji
+                reload_image_emoji = ex.keys.reload_emoji
+                dead_link_emoji = ex.keys.dead_emoji
                 if not guessing_game:
                     await message.add_reaction(reload_image_emoji)
                 await message.add_reaction(dead_link_emoji)
@@ -449,7 +446,7 @@ class GroupMembers:
                 def image_check(user_reaction, reaction_user):
                     """check the user that reacted to it and which emoji it was."""
                     user_check = (reaction_user == user_msg.author) or (
-                                reaction_user.id == owner_id) or reaction_user.id in mods_list
+                                reaction_user.id == ex.keys.owner_id) or reaction_user.id in ex.keys.mods_list
                     dead_link_check = str(user_reaction.emoji) == dead_link_emoji
                     reload_image_check = str(user_reaction.emoji) == reload_image_emoji
                     guessing_game_check = user_check and dead_link_check and user_reaction.message.id == message.id
@@ -521,9 +518,9 @@ class GroupMembers:
             await ex.conn.execute(
                 "INSERT INTO groupmembers.deadlinkfromuser(deadlink, userid, messageid, idolid, guessinggame) VALUES($1, $2, $3, $4, $5)",
                 str(link), user.id, msg.id, idol.id, is_guessing_game)
-            await msg.add_reaction(check_emoji)
-            await msg.add_reaction(trash_emoji)
-            await msg.add_reaction(next_emoji)
+            await msg.add_reaction(ex.keys.check_emoji)
+            await msg.add_reaction(ex.keys.trash_emoji)
+            await msg.add_reaction(ex.keys.next_emoji)
         except Exception as e:
             log.console(f"Send Dead Image - {e}")
 
@@ -694,8 +691,8 @@ class GroupMembers:
                 Resort to localhost to not go through cloudflare.
                 """
                 data = {'allow_group_photos': int(not guessing_game)}
-                headers = {'Authorization': translate_private_key}
-                end_point = f"http://127.0.0.1:{api_port}/photos/{idol.id}"
+                headers = {'Authorization': ex.keys.translate_private_key}
+                end_point = f"http://127.0.0.1:{ex.keys.api_port}/photos/{idol.id}"
                 if ex.test_bot:
                     end_point = f"https://api.irenebot.com/photos/{idol.id}"
                 while find_post:  # guarantee we get a post sent to the user.
@@ -714,7 +711,7 @@ class GroupMembers:
                             api_url = url_data.get('final_image_link')
                             file_location = url_data.get('location')
                             file_name = url_data.get('file_name')
-                            file_size = os.path.getsize(file_location)
+                            file_size = getsize(file_location)
                             if file_size < 8388608:  # 8 MB
                                 file = discord.File(file_location, file_name)
                                 find_post = False
@@ -864,10 +861,10 @@ class GroupMembers:
 
     # noinspection PyPep8
     async def check_user_limit(self, message_sender, message_channel, no_vote_limit=False):
-        limit = idol_post_send_limit
+        limit = ex.keys.idol_post_send_limit
         if no_vote_limit:
             # amount of votes that can be sent without voting.
-            limit = idol_no_vote_send_limit
+            limit = ex.keys.idol_no_vote_send_limit
         if message_sender.id not in ex.cache.commands_used:
             return
         if not await ex.u_patreon.check_if_patreon(message_sender.id) and ex.cache.commands_used[message_sender.id][
@@ -894,7 +891,7 @@ class GroupMembers:
                 except Exception as e:
                     log.console(e)
                 if not await self.check_user_limit(message.author, channel):
-                    if not await events.Events.check_maintenance(message):
+                    if not await ex.events.check_maintenance(message):
                         return await ex.u_miscellaneous.send_maintenance_message(channel)
                     photo_msg, api_url = await self.idol_post(channel, idol, user_id=message.author.id)
                     posted = True

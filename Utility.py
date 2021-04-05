@@ -293,5 +293,26 @@ class Utility:
             return True
         await ctx.send(self.join_support_server_msg)
 
+    @staticmethod
+    async def replace(text: str, inputs_to_change: list) -> str:
+        """
+        Replace custom text from language packs for several keywords at once.
+        :param text: The text that requires replacing.
+        :param inputs_to_change: A list of lists with the 0th index as the keyword to replace, and the 1st index
+        as the content.
+        :return:
+        """
+        # custom input is always surrounded by curly braces {}
+        for input_list in inputs_to_change:
+            # make sure braces do not already exist in the input
+            keyword = input_list[0]
+            custom_input = input_list[1]
+
+            keyword = keyword.replace("{", "")
+            keyword = keyword.replace("}", "")
+            text = text.replace("{" + keyword + "}", custom_input)
+
+        return text
+
 
 resources = Utility()

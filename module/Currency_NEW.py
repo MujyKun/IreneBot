@@ -17,8 +17,7 @@ class Currency(commands.Cog):
         daily_amount = await user.get_daily_amount()
         await user.update_balance(add=daily_amount)
         msg_str = ex.cache.languages[user.user_language]['currency']['daily_msg']
-        msg_str = msg_str.replace("{name}", ctx.author.display_name)
-        msg_str = msg_str.replace("{daily_amount}", daily_amount)
+        msg_str = ex.replace(msg_str, [["name", ctx.author.display_name], ["daily_amount", daily_amount]])
 
         return await ctx.send(msg_str)
 
@@ -32,8 +31,7 @@ class Currency(commands.Cog):
         await user.register_currency()
 
         msg_str = ex.cache.languages[user.user_language]['currency']['balance_msg']
-        msg_str = msg_str.replace("{name}", member.display_name)
-        msg_str = msg_str.replace("{balance}", await user.get_shortened_balance())
+        msg_str = ex.replace(msg_str, [["name", member.display_name], ["balance", await user.get_shortened_balance()]])
 
         return await ctx.send(msg_str)
 

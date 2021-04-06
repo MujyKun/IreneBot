@@ -17,19 +17,24 @@ class Twitch(commands.Cog):
         try:
             guild_id = await ex.get_server_id(ctx)
             if not guild_id:
-                return await ctx.send("> You can not use this command in DMs.")
+                return await ctx.send(await ex.get_msg(ctx.author.id, "general", "no_dm"))
             if not await ex.u_twitch.check_guild_limit(guild_id):
-                return await ctx.send(f"> You are only allowed to have {ex.twitch_guild_follow_limit} "
-                                      f"channels followed.")
+                msg = await ex.get_msg(ctx.author.id, "twitch", "follow_limit")
+                msg = await ex.replace(msg, ["follow_limit", ex.twitch_guild_follow_limit])
+                return await ctx.send(msg)
             if await ex.u_twitch.check_channel_followed(twitch_username, guild_id):
-                return await ctx.send("> That twitch channel is already being followed.")
+                return await ctx.send(await ex.get_msg(ctx.author.id, "twitch", "already_followed"))
 
             await ex.u_twitch.add_channel(twitch_username, guild_id)
             log.console(f"{guild_id} is now receiving twitch notifications for {twitch_username}.")
-            return await ctx.send(f"> This server will now receive notifications for {twitch_username}.")
+            msg = await ex.get_msg(ctx.author.id, "twitch", "now_following")
+            msg = await ex.replace(msg, ['twitch_username', twitch_username])
+            return await ctx.send(msg)
         except Exception as e:
             log.console(e)
-            return await ctx.send(f"> An error occurred -> Please report it on the support server.\n Error MSG: {e}")
+            msg = await ex.get_msg(ctx.author.id, "general", "error")
+            msg = await ex.replace(msg, "e", e)
+            return await ctx.send(msg)
 
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
@@ -40,13 +45,15 @@ class Twitch(commands.Cog):
         try:
             guild_id = await ex.get_server_id(ctx)
             if not guild_id:
-                return await ctx.send("> You can not use this command in DMs.")
+                return await ctx.send(await ex.get_msg(ctx.author.id, "general", "no_dm"))
             await ex.u_twitch.remove_channel(twitch_username, guild_id)
             log.console(f"{guild_id} is no longer receiving twitch notifications for {twitch_username}.")
-            return await ctx.send(f"> If this server was following that twitch channel, it was removed.")
+            return await ctx.send(await ex.get_msg(ctx.author.id, "twitch", "stop_following"))
         except Exception as e:
             log.console(e)
-            return await ctx.send(f"> An error occurred -> Please report it on the support server.\n Error MSG: {e}")
+            msg = await ex.get_msg(ctx.author.id, "general", "error")
+            msg = await ex.replace(msg, "e", e)
+            return await ctx.send(msg)
 
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
@@ -55,13 +62,15 @@ class Twitch(commands.Cog):
         [Format: %settwitchchannel #discord-channel]"""
         guild_id = await ex.get_server_id(ctx)
         if not guild_id:
-            return await ctx.send("> You can not use this command in DMs.")
+            return await ctx.send(await ex.get_msg(ctx.author.id, "general", "no_dm"))
         if not text_channel:
             text_channel = ctx.channel
 
         await ex.u_twitch.set_discord_channel(guild_id, text_channel.id)
         log.console(f"{guild_id} now has their discord channel set to {text_channel.id} for twitch updates.")
-        await ctx.send(f"> Twitch announcements wil now be sent to {text_channel}.")
+        msg = await ex.get_msg(ctx.author.id, "twitch", "announcement_channel")
+        msg = await ex.replace(msg, ['text_channel', text_channel])
+        await ctx.send(msg)
 
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
@@ -71,15 +80,15 @@ class Twitch(commands.Cog):
         [Format: %settwitchrole @role]"""
         guild_id = await ex.get_server_id(ctx)
         if not guild_id:
-            return await ctx.send("> You can not use this command in DMs.")
+            return await ctx.send(await ex.get_msg(ctx.author.id, "general", "no_dm"))
 
         if not role:
             await ex.u_twitch.delete_twitch_role(guild_id)
-            return await ctx.send("> Everyone will be tagged when there is a twitch announcement.")
+            return await ctx.send(await ex.get_msg(ctx.author.id, "twitch", "no_role"))
 
         await ex.u_twitch.change_twitch_role(guild_id, role.id)
         log.console(f"{guild_id} will now mention {role.id} on twitch announcements.")
-        return await ctx.send("> That role will be tagged when there is a twitch announcement.")
+        return await ctx.send(await ex.get_msg(ctx.author.id, "twitch", "role"))
 
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
@@ -88,9 +97,11 @@ class Twitch(commands.Cog):
         [Format: %listtwitch]"""
         guild_id = await ex.get_server_id(ctx)
         if not guild_id:
-            return await ctx.send("> You can not use this command in DMs.")
+            return await ctx.send(await ex.get_msg(ctx.author.id, "general", "no_dm"))
         channels_followed = await ex.u_twitch.get_channels_followed(guild_id)
-        await ctx.send(f"> This server is following these channels: **{', '.join(channels_followed)}**")
+        msg = await ex.get_msg(ctx.author.id, "twitch", "following")
+        msg = await ex.replace(msg, ["channels_followed", ', '.join(channels_followed)])
+        await ctx.send(msg)
 
     # we now check every minute instead of 30 seconds since Irene was at times posting twice.
     # instead of keeping track of which channels it was sent to, increasing the check time uses less resources

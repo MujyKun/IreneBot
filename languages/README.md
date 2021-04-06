@@ -9,7 +9,9 @@ Do not surround phrases by `` as it will be negated when bolded.
 **Bot ID:** `{bot_id}`
 **Bot Owner ID:** `{owner_id}`
 **Bot Prefix:** `{bot_prefix}`
-**Server Prefix:** `{server_prefix}`
+**Server Prefix:** `{server_prefix}`  
+**Guild/Server ID:** `{server_id}`  
+**Text Channel Name:** `{text_channel}`  
 
 **Support Server Link:** `{support_server_link}`
 **Patreon Link:** `{patreon_link}`
@@ -29,8 +31,12 @@ Do not surround phrases by `` as it will be negated when bolded.
 **Bias Game Bracket Size:** `{bracket_size}`
 **Gender:** `{gender}`  
 
-
 **Amount of tweets:** `{tweet_amount}`  
 **List of Recent Tweets:** `{tweets}`  
 **Tweet URL:** `{tweet_url}`  
 **Tweet ID:** `{tweet_id}`  
+**Twitch Follow Limit:** `{follow_limit}`  
+**Twitch username:** `{twitch_username}`  
+**Twitch Channels Followed:** `{channels_followed}`  
+
+**Error to Print Out:** `{e}`  

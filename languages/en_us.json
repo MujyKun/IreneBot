@@ -43,5 +43,20 @@
     "tweet_success": "Your Tweet has been successfully uploaded to {tweet_url}",
     "delete_success": "The Tweet ID {tweet_id} has been successfully deleted.",
     "recent_tweets": "Here are the past {tweet_amount} tweets:\n{tweets}"
+  },
+  "general": {
+    "no_dm": "You can not use this command in DMs.",
+    "error": "An error occurred -> Please report it on the support server.\nError MSG: {e}"
+
+  },
+  "twitch": {
+    "follow_limit": "You are only allowed to have {follow_limit} channels followed.",
+    "already_followed": "That twitch channel is already being followed.",
+    "now_following": "This server will now receive notifications for {twitch_username}",
+    "stop_following": "If this server was following that twitch channel, it was removed.",
+    "announcement_channel": "Twitch announcements will now be sent to {text_channel}",
+    "no_role": "Everyone will be tagged when there is a twitch announcement.",
+    "role": "That role will be tagged when there is a twitch announcement.",
+    "following": "This server is following these channels: {channels_followed}"
   }
 }

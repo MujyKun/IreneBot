@@ -13,7 +13,7 @@ class Currency(commands.Cog):
         user = await ex.get_user(ctx.author.id)
         daily_amount = await user.get_daily_amount()
         await user.update_balance(add=daily_amount)
-        msg_str = ex.cache.languages[user.language]['currency']['daily_msg']
+        msg_str = await ex.get_msg(user, 'currency', 'daily_msg')
         msg_str = await ex.replace(msg_str, [["name", ctx.author.display_name], ["daily_amount", daily_amount]])
 
         return await ctx.send(msg_str)
@@ -27,14 +27,14 @@ class Currency(commands.Cog):
         user = await ex.get_user(member.id)
         await user.register_currency()
 
-        msg_str = ex.cache.languages[user.language]['currency']['balance_msg']
+        msg_str = await ex.get_msg(user, 'currency', 'balance_msg')
         msg_str = await ex.replace(msg_str, [["name", member.display_name],
                                              ["balance", await user.get_shortened_balance()]])
 
         return await ctx.send(msg_str)
 
     @commands.command()
-    async def bet(self, ctx, *, balance="1"):
+    async def bet(self, ctx, *, amount_to_bet: str):
         """Bet your money [Format: %bet (amount)]"""
         pass
 
@@ -51,18 +51,18 @@ class Currency(commands.Cog):
 
     @commands.command(aliases=["levelup"])
     @commands.cooldown(1, 61, BucketType.user)
-    async def upgrade(self, ctx, command=""):
+    async def upgrade(self, ctx, command=None):
         """Upgrade a command to the next level with your money. [Format: %upgrade rob/daily/beg]"""
         pass
 
     @commands.command()
     @commands.cooldown(1, 3600, BucketType.user)
-    async def rob(self, ctx, *, user: discord.Member = discord.Member):
+    async def rob(self, ctx, *, person_to_rob: discord.Member):
         """Rob a user [Format: %rob @user]"""
         pass
 
     @commands.command()
-    async def give(self, ctx, mentioned_user: discord.Member = discord.Member, amount="0"):
+    async def give(self, ctx, person_to_give: discord.Member, amount_to_give: int):
         """Give a user money [Format: %give (@user) (amount)]"""
         pass
 

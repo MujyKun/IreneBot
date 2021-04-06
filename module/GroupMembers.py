@@ -244,7 +244,7 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
             if len(embed_list) > 1:
                 await ex.check_left_or_right_reaction_embed(msg, embed_list)
         else:
-            return await ctx.send(f"> I could not find any information regarding {name}.")
+            return await ctx.send(f"> I could not find any information on that idol/group.")
 
     @commands.has_guild_permissions(manage_messages=True)
     @commands.command()

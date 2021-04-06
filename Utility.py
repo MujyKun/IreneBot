@@ -333,6 +333,10 @@ class Utility:
         as the content.
         :return:
         """
+        # convert the input to a list of lists if it is not already.
+        if not isinstance(inputs_to_change[0], list):
+            inputs_to_change = [[inputs_to_change[0], inputs_to_change[1]]]
+
         # custom input is always surrounded by curly braces {}
         for input_list in inputs_to_change:
             # make sure braces do not already exist in the input
@@ -344,6 +348,14 @@ class Utility:
             text = text.replace("{" + keyword + "}", custom_input)
 
         return text
+
+    async def get_msg(self, user, module, keyword) -> str:
+        """Get a msg from a user's language."""
+        # allow user id as input to the user.
+        if not isinstance(user, self.u_objects.User):
+            user = await self.get_user(user)
+
+        return self.cache.languages[user.language][module][keyword]
 
 
 resources = Utility()

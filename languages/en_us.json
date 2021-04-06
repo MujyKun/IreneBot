@@ -1,4 +1,30 @@
 {
+  "archive": {
+    "talk_to_owner": "{name}, In order to start archiving your channels, you must talk to the bot owner: <@{owner_id}>.",
+    "waiting_confirmation": "Awaiting confirmation from bot owner...",
+    "no_confirmation": "The bot owner did not confirm in time.",
+    "url_being_used": "{g_drive_url} is already being used.",
+    "being_archived": "This channel is already being archived.",
+    "not_archived": "This channel is not currently being archived.",
+    "archive_success": "This channel is now being archived under {g_drive_url}.",
+    "not_found": "{g_drive_url} does not exist.",
+    "no_access": "I do not have access to {g_drive_url}.",
+    "unknown_issue": "Something weng wrong with {g_drive_url}.",
+    "main_error": "There was an error that caused this command to fail.",
+    "no_channels": "There are no archived channels on this server.",
+    "removed_archive": "This channel is no longer being archived.",
+    "history_start": "Starting to check history... to prevent bot lag, an external program uploads them every 60 seconds.",
+    "history_success": "Successfully added history of this text channel. They will be uploaded shortly."
+  },
+  "biasgame": {
+    "no_dm": "You are not allowed to play bias game in DMs.",
+    "in_progress": "A bias game is currently in progress in this channel.\nOnly 1 Bias Game can run in a channel at once.\nIf this is a mistake, use {server_prefix}stopbg.",
+    "start_game": "Starting a {bracket_size} bracket bias game for {gender} idols.",
+    "unexpected_error": "An error has occurred and the game has ended. Please report this.",
+    "force_closed": "The current game has now ended due to not responding in time or it was force closed.",
+    "no_wins": "There are no bias game wins for {name}.",
+    "lb_title": "Bias Game Leaderboard for {name}:\n"
+  },
   "currency": {
     "daily_msg": "{name}, you have been given {daily_amount}.",
     "balance_msg": "{name} currently has {balance}."

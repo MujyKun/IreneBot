@@ -64,45 +64,51 @@ class Archive(commands.Cog):
     @commands.command()
     async def addchannel(self, ctx, drive_folder_id, name="NULL", owner_present=0):
         """REQUIRES BOT OWNER PRESENCE -- Make the current channel start archiving images to google drive [Format: %addchannel <drive folder id> <optional - name>]"""
+        user = await ex.get_user(ctx.author.id)
         try:
             if not owner_present:
-                return await ctx.send(
-                    f"> **In order to start archiving your channels, you must talk to the bot owner <@{owner_id}>**")
+                return await ctx.send(await ex.replace(
+                    await ex.get_msg(user, 'archive', 'talk_to_owner'), [['name', ctx.author.display_name],
+                                                                         ['owner_id', ex.keys.owner_id]]))
 
-            await ctx.send("> **Awaiting confirmation**")
+            await ctx.send(await ex.get_msg(user, 'archive', 'waiting_confirmation'))
             if not await self.on_message(ctx, is_owner=True):
-                return await ctx.send("> **The bot owner did not confirm in time.**")
+
+                return await ctx.send(await ex.get_msg(user, 'archive', 'no_confirmation'))
 
             drive_id_in_db = ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) FROM archive.channellist WHERE driveid = $1", drive_folder_id))
             if not drive_id_in_db:
                 url = f"https://drive.google.com/drive/folders/{drive_folder_id}"
-                return await ctx.send(f"> **{url} is already being used.**")
+                return await ctx.send(await ex.replace(
+                    await ex.get_msg(user, 'archive', 'url_being_used'), ['g_drive_url', url]))
 
             channel_id_in_db = ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) FROM archive.channellist WHERE channelid = $1", ctx.channel.id))
             if not channel_id_in_db:
-                await ctx.send("> **This channel is already being archived**")
+                await ctx.send(await ex.get_msg(user, 'archive', 'being_archived'))
 
             url = f"https://drive.google.com/drive/folders/{drive_folder_id}"
             async with ex.session.get(url) as r:
                 if r.status == 200:
                     await ex.conn.execute("INSERT INTO archive.ChannelList VALUES($1,$2,$3,$4)", ctx.channel.id, ctx.guild.id, drive_folder_id, name)
-                    await ctx.send(f"> **This channel is now being archived under {url}**")
+                    msg = await ex.get_msg(user, 'archive', 'archive_success')
                 elif r.status == 404:
-                    await ctx.send(f"> **{url} does not exist.**")
+                    msg = await ex.get_msg(user, 'archive', 'not_found')
                 elif r.status == 403:
-                    await ctx.send(f"> **I do not have access to {url}.**")
+                    msg = await ex.get_msg(user, 'archive', 'no_access')
                 else:
-                    await ctx.send(f"> **Something went wrong with {url}")
+                    msg = await ex.get_msg(user, 'archive', 'unknown_issue')
+                await ctx.send(await ex.replace(msg, ["g_drive_url", url]))
 
         except Exception as e:
             log.console(e)
-            await ctx.send("> **There was an error.**")
+            await ctx.send(await ex.get_msg(user, 'archive', 'main_error'))
 
     # noinspection PyBroadException
     @commands.has_guild_permissions(manage_messages=True)
     @commands.command()
     async def listchannels(self, ctx):
         """List the channels in your server that are being archived. [Format: %listchannels]"""
+        user = await ex.get_user(ctx.author.id)
         all_channels = await ex.conn.fetch("SELECT id, channelid, guildid, driveid, name FROM archive.ChannelList")
         guild_name = ctx.guild.name
         embed = discord.Embed(title=f"Archived {guild_name} Channels", color=0x87CEEB)
@@ -116,7 +122,6 @@ class Archive(commands.Cog):
                 if ctx.guild.id == guild_id:
                     check = True
                     embed.insert_field_at(0, name=list_channel, value=f"https://drive.google.com/drive/folders/{drive_id} | {name}", inline=False)
-                    pass
             except:
                 # Error would occur on test bot if the client does not have access to a certain channel id
                 # this try-except will also be useful if a server removed the bot.
@@ -124,22 +129,23 @@ class Archive(commands.Cog):
         if check:
             await ctx.send(embed=embed)
         else:
-            await ctx.send("> **There are no archived channels on this server.**")
+            await ctx.send(await ex.get_msg(user, 'archive', 'no_channels'))
 
     @commands.has_guild_permissions(manage_messages=True)
     @commands.command()
     async def deletechannel(self, ctx):
         """Stop the current channel from being archived [Format: %deletechannel]"""
+        user = await ex.get_user(ctx.author.id)
         try:
             channel_id_in_db = ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) FROM archive.ChannelList WHERE ChannelID = $1", ctx.channel.id))
             if not channel_id_in_db:
-                return await ctx.send("> **This channel is not currently being archived.**")
+                return await ctx.send(await ex.get_msg(user, 'archive', 'not_archived'))
             else:
                 await ex.conn.execute("DELETE FROM archive.channellist WHERE ChannelID = $1", ctx.channel.id)
-                await ctx.send("> **This channel is no longer being archived**")
+                await ctx.send(await ex.get_msg(user, 'archive', 'removed_archive'))
         except Exception as e:
             log.console(e)
-            await ctx.send("> **There was an error.**")
+            await ctx.send(await ex.get_msg(user, 'archive', 'main_error'))
 
     @staticmethod
     async def download_url(url, drive_id, channel_id):
@@ -191,6 +197,7 @@ class Archive(commands.Cog):
     @commands.command()
     async def addhistory(self, ctx, year: int = None, month: int = None, day: int = None):
         """Add all of the previous images from a text channel to google drive."""
+        user = await ex.get_user(ctx.author.id)
         if year and month and day:
             after = datetime(year, month, day)
         else:
@@ -231,12 +238,13 @@ class Archive(commands.Cog):
         for channel_id, guild_id, drive_id in channels:
             if ctx.channel.id == channel_id:
                 check = True
-                await ctx.send("> **Starting to check history... to prevent bot lag, an external program uploads them every 60 seconds.**")
+                await ctx.send(await ex.get_msg(user, 'archive', 'history_start'))
                 await history()
                 await self.deletephotos()
-                await ctx.send("> **Successfully added history of this text channel. They will be uploaded shortly.**")
+                await ctx.send(await ex.get_msg(user, 'archive', 'history_success'))
         if not check:
-            await ctx.send("> **This channel is not currently being archived.**")
+            await ex.get_msg(user, 'archive', 'not_archived')
+            await ctx.send(await ex.get_msg(user, 'archive', 'not_archived'))
 
 
 ins = Archive()

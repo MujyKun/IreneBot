@@ -235,7 +235,9 @@ class Miscellaneous:
     def check_nword(message_content):
         """Check if a message contains the NWord."""
         message_split = message_content.lower().split()
-        return 'nigga' in message_split or 'nigger' in message_split and ':' not in message_split
+        for n_word in ex.keys.n_word_list:
+            if n_word in message_split and ':' not in message_split:
+                return True
 
     @staticmethod
     def get_int_index(number, index):

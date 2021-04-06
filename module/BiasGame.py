@@ -15,17 +15,22 @@ class BiasGame(commands.Cog):
     async def biasgame(self, ctx, gender="all", bracket_size=8):
         """Start a bias game in the current channel. The host of the game can use `stopbg` to stop playing.
         [Format: %biasgame (Male/Female/All) (bracket size (4,8,16,32))]"""
+        user = await ex.get_user(ctx.author.id)
         if not ctx.guild:
-            return await ctx.send("> You are not allowed to play bias game in DMs.")
+            return await ctx.send(await ex.get_msg(user, 'biasgame', 'no_dm'))
         if ex.find_game(ctx.channel, ex.cache.bias_games):
             server_prefix = await ex.get_server_prefix_by_context(ctx)
-            return await ctx.send(f"> **A bias game is currently in progress in this channel. "
-                                  f"Only 1 Bias Game can run in a channel at once. "
-                                  f"If this is a mistake, use `{server_prefix}stopbg`.**")
+            return await ctx.send(await ex.replace(
+                await ex.get_msg(user, 'biasgame', 'in_progress'), [['server_prefix', server_prefix]]))
         game = Game(ctx, bracket_size, gender)
         ex.cache.bias_games.append(game)
-        await ctx.send(f"> Starting a {game.bracket_size} bracket bias game for "
-                       f"`{game.gender if game.gender != 'all' else 'both male and female'}` idols.")
+
+        msg = await ex.replace(
+            await ex.get_msg(user, 'biasgame', 'start_game'),
+            [["bracket_size", str(game.bracket_size)],
+             ["gender", f"{game.gender if game.gender != 'all' else 'both male and female'}"]])
+
+        await ctx.send(msg)
         await game.process_game()
         if game in ex.cache.bias_games:
             log.console(f"Ending Bias Game in {ctx.channel.id}")
@@ -45,22 +50,18 @@ class BiasGame(commands.Cog):
             user = ctx.author
         user_wins = await ex.conn.fetch("SELECT idolid, wins FROM biasgame.winners WHERE userid = $1 ORDER BY WINS DESC LIMIT $2", user.id, 15)
         if user_wins:
-            msg_string = f"**Bias Game Leaderboard for {user.display_name}**:\n"
+            msg_string = await ex.get_msg(user.id, 'biasgame', 'lb_title')
+            msg_string = await ex.replace(msg_string, ['name', user.display_name])
+
             counter = 1
             for idol_id, wins in user_wins:
                 member = await ex.u_group_members.get_member(idol_id)
                 msg_string += f"{counter}) {member.full_name} ({member.stage_name}) -> {wins} Win(s).\n"
                 counter += 1
         else:
-            msg_string = f"> **There are no bias game wins for {user.display_name}.**"
+            msg_string = await ex.get_msg(user.id, 'biasgame', 'no_wins')
+            msg_string = await ex.replace(msg_string, ['name', user.display_name])
         await ctx.send(msg_string)
-
-    # @biasgame.before_invoke
-    # @stopbg.before_invoke
-    # @listbg.before_invoke
-    # async def disabled_weverse(self, ctx):
-    #     await ctx.send(f"""**Bias Game will be disabled until we find out Irene's cause for a memory leak.**""")
-    #     raise Exception
 
 
 # noinspection PyBroadException,PyPep8
@@ -167,10 +168,10 @@ Remaining Idols: {self.number_of_idols_left}
         self.current_bracket_teams = self.secondary_bracket_teams
         self.secondary_bracket_teams = []
 
-    async def end_game(self, force_ended=False):
+    async def end_game(self):
         """End the game"""
         if not self.force_ended:
-            await self.channel.send(f"The current game has now ended due to not responding in time or it was force closed.")
+            await self.channel.send(await ex.get_msg(self.host, 'biasgame', 'force_closed'))
         self.force_ended = True
 
     async def print_winner(self):
@@ -195,7 +196,9 @@ Remaining Idols: {self.number_of_idols_left}
             while self.number_of_idols_left > 1 and not self.force_ended:
                 try:
                     await self.run_current_bracket()
-                except:
+                except Exception as e:
+                    # this would usually error if the file location set is incorrect.
+                    log.console(e)
                     raise RuntimeError
             if self.force_ended:
                 return
@@ -203,5 +206,5 @@ Remaining Idols: {self.number_of_idols_left}
             await self.print_winner()
             await self.update_user_wins()
         except Exception as e:
-            await self.channel.send(f"An error has occurred and the game has ended. Please report this.")
+            await self.channel.send(await ex.get_msg(self.host, 'biasgame', 'unexpected_error'))
             log.console(e)

@@ -53,6 +53,11 @@ owner_super_patron_benefit = idol_post_send_limit * 2
 idol_no_vote_send_limit = make_int(os.getenv("IDOL_NO_VOTE_LIMIT"))  # amount of votes that can be sent without voting.
 reminder_limit = make_int(os.getenv("REMINDER_LIMIT"))
 
+try:
+    n_word_list = (os.getenv("NWORD_LIST")).split(',')
+except Exception as e:
+    n_word_list = []
+
 interaction_list = [
     'slap',
     'kiss',

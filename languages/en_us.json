@@ -38,5 +38,10 @@
   },
   "groupmembers": {
     "patron_msg": "As of September 23rd 2020, non-Patrons can only send {idol_post_send_limit} photos a day maximum, as the current host can not reliably handle additional traffic.\nYou may become a patron for as little as $3 per month in order to send unlimited photos; every Patron contributes to upgrading and maintaining the host.\nIf the guild owner is a super patron, All guild members (non-patrons) get {owner_super_patron_benefit} photos a day.\nPlease support <@{bot_id}>'s development at {patreon_link}.\nThank You."
+  },
+  "twitter": {
+    "tweet_success": "Your Tweet has been successfully uploaded to {tweet_url}",
+    "delete_success": "The Tweet ID {tweet_id} has been successfully deleted.",
+    "recent_tweets": "Here are the past {tweet_amount} tweets:\n{tweets}"
   }
 }

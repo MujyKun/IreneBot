@@ -341,7 +341,7 @@ class Utility:
         for input_list in inputs_to_change:
             # make sure braces do not already exist in the input
             keyword = input_list[0]
-            custom_input = input_list[1]
+            custom_input = str(input_list[1])
 
             keyword = keyword.replace("{", "")
             keyword = keyword.replace("}", "")

@@ -28,3 +28,9 @@ Do not surround phrases by `` as it will be negated when bolded.
 
 **Bias Game Bracket Size:** `{bracket_size}`
 **Gender:** `{gender}`  
+
+
+**Amount of tweets:** `{tweet_amount}`  
+**List of Recent Tweets:** `{tweets}`  
+**Tweet URL:** `{tweet_url}`  
+**Tweet ID:** `{tweet_id}`  

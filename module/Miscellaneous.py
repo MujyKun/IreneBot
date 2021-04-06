@@ -145,24 +145,6 @@ Message Author: {message.author}
         await ctx.send(f"**Please support <@{keys.bot_id}>'s development at {keys.patreon_link}.**")
 
     @commands.command()
-    @commands.is_owner()
-    async def addpatreon(self, ctx, *, users):
-        """Adds a patreon. [Format: %addpatreon (userid,userid,userid)]"""
-        users = users.split(",")
-        for user in users:
-            await ex.u_patreon.add_to_patreon(user)
-        await ctx.send(f">>> **Added {users} to Patreon.**")
-
-    @commands.command()
-    @commands.is_owner()
-    async def removepatreon(self, ctx, *, users):
-        """Removes a patreon. [Format: %removepatreon (userid,userid,userid)]"""
-        users = users.split(",")
-        for user in users:
-            await ex.u_patreon.remove_from_patreon(user)
-        await ctx.send(f">>> **Removed {users} from Patreon.**")
-
-    @commands.command()
     async def botinfo(self, ctx):
         """Get information about the bot."""
         maintenance_status = api_status = db_status = images_status = weverse_status = d_py_status = irene_cache_status \
@@ -319,20 +301,6 @@ Maintenance Status: {maintenance_status}
         else:
             await ctx.send(f"> **<@{user.id}> has said the N-Word {current_amount} time(s)!**")
 
-    @commands.is_owner()
-    @commands.command()
-    async def clearnword(self, ctx, user: discord.Member = None):
-        """Clear A User's Nword Counter [Format: %clearnword @user]"""
-        if not user:
-            return await ctx.send("> **Please @ a user**")
-
-        if not (await ex.get_user(user.id)).n_word:
-            return await ctx.send(f"> **<@{user.id}> has not said the N-Word a single time!**")
-
-        await ex.conn.execute("DELETE FROM general.nword where userid = $1", user.id)
-        (await ex.get_user(user.id)).n_word = 0
-        await ctx.send("**> Cleared.**")
-
     @commands.command(aliases=["nwl"])
     async def nwordleaderboard(self, ctx, mode="server"):
         """Shows leaderboards for how many times the nword has been said. [Format: %nwl (server/global)]"""
@@ -442,18 +410,6 @@ Maintenance Status: {maintenance_status}
                 log.console(e)
 
     @commands.command()
-    @commands.is_owner()
-    async def send(self, ctx, channel_id, *, new_message):
-        """Send a message to a text channel."""
-        try:
-            channel = await ex.client.fetch_channel(channel_id)  # 403 forbidden on tests.
-            await channel.send(new_message)
-            await ctx.send("> **Message Sent.**")
-        except Exception as e:
-            log.console(e)
-            await ctx.send(f"> **ERROR: {e}**")
-
-    @commands.command()
     async def servercount(self, ctx):
         """Shows how many servers the bot has [Format: %servercount]"""
         await ctx.send(f"> **I am connected to {ex.u_miscellaneous.get_server_count()} servers.**")
@@ -484,49 +440,6 @@ Maintenance Status: {maintenance_status}
             log.console(e)
             await ctx.send("> This server has not yet been loaded into my cache (takes about an hour from restart).")
 
-    @commands.command()
-    @commands.is_owner()
-    async def servers(self, ctx):
-        """Displays which servers Irene is in."""
-        guilds = ex.client.guilds
-        count = 1
-        page_number = 1
-        embed = discord.Embed(title=f"{len(guilds)} Servers - Page {page_number}", color=0xffb6c1)
-        embed.set_author(name="Irene", url=keys.bot_website,
-                         icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
-        embed.set_footer(text="Thanks for using Irene.",
-                         icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
-        guilds_ordered = [[guild.id, guild.member_count] for guild in guilds]
-        guilds_ordered.sort(key=lambda server_info: server_info[1])
-        guild_ids_sorted = [guild[0] for guild in guilds_ordered]
-        embed_list = []
-        try:
-            for main_guild_id in guild_ids_sorted:
-                # need to do a nested loop due to fetch_guild not containing attributes needed.
-                for guild in guilds:
-                    if guild.id != main_guild_id:
-                        continue
-                    member_count = f"Member Count: {guild.member_count}\n"
-                    owner = f"Guild Owner: {guild.owner} ({guild.owner.id})\n"
-                    desc = member_count + owner
-                    embed.add_field(name=f"{guild.name} ({guild.id})", value=desc, inline=False)
-                    if count == 25:
-                        count = 0
-                        embed_list.append(embed)
-                        page_number += 1
-                        embed = discord.Embed(title=f"{len(guilds)} Servers - Page {page_number}", color=0xffb6c1)
-                        embed.set_author(name="Irene", url=keys.bot_website,
-                                         icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
-                        embed.set_footer(text="Thanks for using Irene.",
-                                         icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
-                    count += 1
-        except Exception as e:
-            log.console(e)
-        if count:
-            embed_list.append(embed)
-        msg = await ctx.send(embed=embed_list[0])
-        await ex.check_left_or_right_reaction_embed(msg, embed_list)
-
     @commands.command(name="8ball", aliases=['8'])
     async def _8ball(self, ctx, *, question=None):
         """Asks the 8ball a question. [Format: %8ball Question]"""
@@ -534,12 +447,6 @@ Maintenance Status: {maintenance_status}
             await ctx.send(f">>> **Question: {question} \nAnswer: {choice(ex.cache.eight_ball_responses)}**")
         else:
             await ctx.send("> **Please enter an 8ball prompt.**")
-
-    @commands.command()
-    @commands.is_owner()
-    async def speak(self, ctx, *, message):
-        """Owner to Bot TTS"""
-        await ctx.send(f">>> {message}", tts=True, delete_after=10)
 
     @commands.command(aliases=['pong'])
     async def ping(self, ctx):

@@ -125,6 +125,7 @@ class Irene:
         ex.client.add_cog(module.SelfAssignRoles.SelfAssignRoles())
         ex.client.add_cog(module.Reminder.Reminder())
         ex.client.add_cog(module.Twitch.Twitch())
+        ex.client.add_cog(module.BotOwner.BotOwner())
         # ex.client.add_cog(module.Gacha.Gacha())
 
     @staticmethod

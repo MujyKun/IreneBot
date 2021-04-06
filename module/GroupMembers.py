@@ -439,29 +439,3 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
                 idol = await ex.u_group_members.get_member(member_id)
                 embed.add_field(name=f"{count_loop}) {idol.full_name} ({idol.stage_name})", value=count)
         await ctx.send(embed=embed)
-
-    @commands.is_owner()
-    @commands.command()
-    async def scandrive(self, ctx, name="NULL", member_id=0):
-        """Scan DriveIDs Table and update other tables."""
-        try:
-            all_links = await ex.conn.fetch("SELECT id, linkid, name FROM archive.DriveIDs")
-            for p_id, link_id, link_name in all_links:
-                try:
-                    new_link = f"https://drive.google.com/uc?export=view&id={link_id}"
-                    all_names = await ex.conn.fetch("SELECT Name FROM archive.ChannelList")
-                    if name == "NULL" and member_id == 0:
-                        for idol_name in all_names:
-                            idol_name = idol_name[0]
-                            if idol_name == link_name and (idol_name != "Group" or idol_name != "MDG Group"):
-                                member_id1 = ex.first_result(await ex.conn.fetchrow("SELECT ID FROM groupmembers.Member WHERE StageName = $1", idol_name))
-                                await ex.conn.execute("INSERT INTO groupmembers.uploadimagelinks VALUES($1,$2)", new_link, member_id1)
-                                await ex.conn.execute("DELETE FROM archive.DriveIDs WHERE ID = $1", p_id)
-                    elif link_name.lower() == name.lower():
-                        await ex.conn.execute("DELETE FROM archive.DriveIDs WHERE ID = $1", p_id)
-                        await ex.conn.execute("INSERT INTO groupmembers.uploadimagelinks VALUES($1,$2)", new_link, member_id)
-                except Exception as e:
-                    log.console(e)
-            await ctx.send(f"> **Completed Scan**")
-        except Exception as e:
-            log.console(e)

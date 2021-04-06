@@ -60,26 +60,6 @@ class BlackJack(commands.Cog):
             log.console(e)
 
     @commands.command()
-    @commands.is_owner()
-    async def addcards(self, ctx):
-        """Fill The CardValues Table with Cards [Format: %addcards]"""
-        await ex.conn.execute("DELETE FROM blackjack.cards")
-        suit_names = ("Hearts", "Diamonds", "Spades", "Clubs")
-        rank_names = ("Ace", "Two", "Three", "Four", "Five", "Six", "Seven",
-                    "Eight", "Nine", "Ten", "Jack", "Queen", "King")
-        card_values = [11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11, 2, 3,
-                      4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
-        cards = []
-        for suit in suit_names[0:4]:
-            for rank in rank_names[0:13]:
-                cards += [("{} of {}".format(rank, suit))]
-        count_x = -1
-        for card in cards:
-            count_x += 1
-            await ex.conn.execute("INSERT INTO blackjack.cards (id, name, value) VALUES ($3, $1, $2)", card, card_values[count_x], count_x+1)
-        await ctx.send("> **All cards have been added into the table.**", delete_after=40)
-
-    @commands.command()
     async def hit(self, ctx):
         """Pick A Card [Format: %hit]"""
         try:

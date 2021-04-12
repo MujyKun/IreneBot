@@ -52,15 +52,13 @@ class GroupMembers(commands.Cog):
                 members = await ex.u_group_members.get_idol_where_member_matches_name(message_content, server_id=server_id)
                 groups = await ex.u_group_members.get_group_where_group_matches_name(message_content, server_id=server_id)
                 photo_msg = None
-                if members:
-                    random_member = await ex.u_group_members.choose_random_member(members=members)
-                    if random_member:
-                        photo_msg, api_url, posted = await ex.u_group_members.request_image_post(message, random_member, channel)
-                elif groups:
-                    random_member = await ex.u_group_members.choose_random_member(groups=groups)
+                if members or groups:
+                    # check if it is an individual idol or group name.
+                    random_member = await ex.u_group_members.choose_random_member(members=members, groups=groups)
                     if random_member:
                         photo_msg, api_url, posted = await ex.u_group_members.request_image_post(message, random_member, channel)
                 else:
+                    # check if it is a message calling an idol from a specific group.
                     members = await ex.u_group_members.check_group_and_idol(message_content, server_id=server_id)
                     if members:
                         random_member = await ex.u_group_members.choose_random_member(members=members)

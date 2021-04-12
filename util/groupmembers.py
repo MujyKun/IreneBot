@@ -899,6 +899,7 @@ class GroupMembers:
         """Choose a random member object from a member or group list given."""
 
         async def check_photo_count(t_member_ids):
+            """chooses a random idol and returns one that has photos."""
             t_member_id = random.choice(t_member_ids)
             t_member = await self.get_member(t_member_id)
             if not t_member.photo_count:
@@ -906,14 +907,16 @@ class GroupMembers:
             return t_member
 
         idol = None
-        new_groups = []
+        group_idol = None
+        groups_with_photos = []
+
         if groups:
             for group in groups:
                 if group.photo_count:
-                    new_groups.append(group)
-        if new_groups:
-            member_ids = (random.choice(new_groups)).members
-            idol = await check_photo_count(member_ids)
+                    groups_with_photos.append(group)
+        if groups_with_photos:
+            member_ids = (random.choice(groups_with_photos)).members
+            group_idol = await check_photo_count(member_ids)
 
         new_members = []
         if members:
@@ -922,6 +925,10 @@ class GroupMembers:
                     new_members.append(member)
         if new_members:
             idol = random.choice(new_members)
+
+        # This is checking for the case an idol and group have the same name.
+        if idol and group_idol:
+            return random.choice([idol, group_idol])
         return idol
 
     async def get_member_names_as_string(self, group):

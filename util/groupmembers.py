@@ -929,7 +929,8 @@ class GroupMembers:
         # This is checking for the case an idol and group have the same name.
         if idol and group_idol:
             return random.choice([idol, group_idol])
-        return idol
+
+        return idol or group_idol
 
     async def get_member_names_as_string(self, group):
         """Get the member names split by a | ."""

@@ -29,6 +29,13 @@
     "daily_msg": "{name}, you have been given {daily_amount}.",
     "balance_msg": "{name} currently has {balance}."
   },
+  "customcommands": {
+    "bot_command_exists": "{command_name} is already a bot command and can not be added.",
+    "custom_command_exists": "{command_name} is already a custom command and can not be added.",
+    "custom_command_added": "{command_name} has been added as a command.",
+    "custom_command_deleted": "{command_name} has been removed if it existed.",
+    "no_custom_commands": "There are no custom commands for your server."
+  },
   "miscellaneous": {
     "set_language_fail": "{name}, that is not an available language. Use one of the following: {languages}.",
     "set_language_success": "{name}, your language is now set to {language}."

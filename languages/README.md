@@ -4,6 +4,7 @@ All custom input must be surrounded by curly braces `{ }`.
 All content inside the curly braces are automatically made bold when the files are loaded.  
 To keep more human-readable logging, Irene will remove `**` from the messages when logging.  
 Do not surround phrases by `` as it will be negated when bolded.  
+All module names (keys) should be entirely lowercase.  
 
 **Bot Name:** `{bot_name}`  
 **Bot ID:** `{bot_id}`
@@ -12,6 +13,8 @@ Do not surround phrases by `` as it will be negated when bolded.
 **Server Prefix:** `{server_prefix}`  
 **Guild/Server ID:** `{server_id}`  
 **Text Channel Name:** `{text_channel}`  
+**Command Name:** `{command_name}`  
+
 
 **Support Server Link:** `{support_server_link}`
 **Patreon Link:** `{patreon_link}`
@@ -47,3 +50,4 @@ Do not surround phrases by `` as it will be negated when bolded.
 **Idol IDs:** `{idol_ids}`
 **Group ID:** `{group_id}`
 **Group IDs:** `{group_ids}`
+

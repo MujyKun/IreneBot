@@ -8,7 +8,10 @@ from Utility import resources as ex
 class CustomCommands(commands.Cog):
     @staticmethod
     async def process_custom_commands(message):
-        # custom server commands
+        """Process a custom server command.
+
+        This is a listener (on_message) event.
+        """
         if not message.content or message.author.bot:
             return
 
@@ -20,7 +23,8 @@ class CustomCommands(commands.Cog):
         if current_message_prefix == keys.bot_prefix:
             message_without_prefix = message.content[len(keys.bot_prefix):len(message.content)].lower()
             if await ex.u_custom_commands.check_custom_command_name_exists(guild_id, message_without_prefix):
-                await message.channel.send(await ex.u_custom_commands.get_custom_command(guild_id, message_without_prefix))
+                await message.channel.send(await ex.u_custom_commands.get_custom_command(guild_id,
+                                                                                         message_without_prefix))
 
     @commands.command(aliases=['addcommand'])
     @commands.has_guild_permissions(manage_messages=True)
@@ -30,15 +34,23 @@ class CustomCommands(commands.Cog):
             command_name = command_name.lower()
             msg_is_cmd = await ex.u_miscellaneous.check_message_is_command(command_name, is_command_name=True)
             if msg_is_cmd:
-                return await ctx.send(f"> {command_name} is already a bot command and can not be added.")
+                msg = await ex.get_msg(ctx, "customcommands", "bot_command_exists")
+                msg = await ex.replace(msg, ["command_name", command_name])
+                return await ctx.send(msg)
             if await ex.u_custom_commands.check_custom_command_name_exists(ctx.guild.id, command_name):
-                return await ctx.send(f"> {command_name} is already a custom command and can not be added.")
+                msg = await ex.get_msg(ctx, "customcommands", "custom_command_exists")
+                msg = await ex.replace(msg, ["command_name", command_name])
+                return await ctx.send(msg)
             else:
                 await ex.u_custom_commands.add_custom_command(ctx.guild.id, command_name, message)
-                return await ctx.send(f"> {command_name} has been added as a command.")
+                msg = await ex.get_msg(ctx, "customcommands", "custom_command_added")
+                msg = await ex.replace(msg, ["command_name", command_name])
+                return await ctx.send(msg)
         except Exception as e:
-            await ctx.send(f"> An unexpected error occurred -> {e}. Please {await ex.get_server_prefix_by_context(ctx)}report it.")
             log.console(e)
+            msg = await ex.get_msg(ctx, "general", "error")
+            msg = await ex.replace(msg, ["e", e])
+            return await ctx.send(msg)
 
     @commands.command(aliases=['removecommand'])
     @commands.has_guild_permissions(manage_messages=True)
@@ -46,10 +58,14 @@ class CustomCommands(commands.Cog):
         """Delete a custom command. [Format: %deletecommand (command name)]"""
         try:
             await ex.u_custom_commands.remove_custom_command(ctx.guild.id, command_name.lower())
-            return await ctx.send(f"> If the `{command_name}` exists, it was removed.")
+            msg = await ex.get_msg(ctx, "customcommands", "custom_command_deleted")
+            msg = await ex.replace(msg, ["command_name", command_name])
+            return await ctx.send(msg)
         except Exception as e:
-            await ctx.send(f"> An unexpected error occurred -> {e}. Please {await ex.get_server_prefix_by_context(ctx)}report it.")
             log.console(e)
+            msg = await ex.get_msg(ctx, "general", "error")
+            msg = await ex.replace(msg, ["e", e])
+            return await ctx.send(msg)
 
     @commands.command()
     async def listcommands(self, ctx):
@@ -63,7 +79,8 @@ class CustomCommands(commands.Cog):
             embed_message = ""
 
             if not custom_commands:
-                return await ctx.send("> There are no custom commands for your server.")
+                msg = await ex.get_msg(ctx, "customcommands", "no_custom_commands")
+                return await ctx.send(msg)
 
             for command in custom_commands:
                 added_to_list = False
@@ -85,6 +102,8 @@ class CustomCommands(commands.Cog):
                     await ex.check_left_or_right_reaction_embed(msg, embed_list)
 
         except Exception as e:
-            await ctx.send(f"> An unexpected error occurred -> {e}. Please {await ex.get_server_prefix_by_context(ctx)}report it.")
             log.console(e)
+            msg = await ex.get_msg(ctx, "general", "error")
+            msg = await ex.replace(msg, ["e", e])
+            return await ctx.send(msg)
 

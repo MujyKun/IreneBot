@@ -151,11 +151,10 @@ class Miscellaneous:
     @staticmethod
     async def send_maintenance_message(channel):
         try:
-            reason = ""
-            if ex.cache.maintenance_reason:
-                reason = f"\nREASON: {ex.cache.maintenance_reason}"
-            await channel.send(
-                f">>> **A maintenance is currently in progress. Join the support server for more information. <{ex.keys.bot_support_server_link}>{reason}**")
+            msg = await ex.get_msg(ex.keys.bot_id, "general", "maintenance")
+            msg = await ex.replace(msg, [["support_server_link", ex.keys.bot_support_server_link],
+                                         ['reason', ex.cache.maintenance_reason]])
+            await channel.send(msg)
         except:
             pass
 

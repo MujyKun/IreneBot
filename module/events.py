@@ -72,8 +72,10 @@ class Events(commands.Cog):
             ex.cache.errors_per_minute += 1
 
         elif isinstance(error, commands.errors.CommandOnCooldown):
-            await Events.error(ctx, f"You are on cooldown. Try again in {await ex.u_miscellaneous.get_cooldown_time(error.retry_after)}.")
-            log.console(f"{error}")
+            msg = await ex.get_msg(ctx, "general", "cooldown")
+            msg = await ex.replace(msg, ["time", await ex.u_miscellaneous.get_cooldown_time(error.retry_after)])
+            await Events.error(ctx, msg)
+            log.console(error)
         elif isinstance(error, commands.errors.BadArgument):
             await Events.error(ctx, error)
             ctx.command.reset_cooldown(ctx)
@@ -85,7 +87,10 @@ class Events(commands.Cog):
     async def on_guild_join(guild):
         try:
             if guild.system_channel:
-                await guild.system_channel.send(f">>> Hello!\nMy prefix for this server is set to {await ex.get_server_prefix(guild.id)}.\nIf you have any questions or concerns, you may join the support server ({await ex.get_server_prefix(guild.id)}support).")
+                msg = await ex.get_msg(ex.keys.bot_id, "general", "on_guild_join")
+                server_prefix = await ex.get_server_prefix(guild.id)
+                msg = await ex.replace(msg, ["server_prefix", server_prefix])
+                await guild.system_channel.send(msg)
         except:
             pass
         log.console(f"{guild.name} ({guild.id}) has invited Irene.")
@@ -216,18 +221,18 @@ class Events(commands.Cog):
     @client.event
     async def on_member_join(member):
         guild = member.guild
-        server = ex.cache.welcome_messages.get(guild.id)
-        if server:
-            if server.get('enabled'):
-                channel = guild.get_channel(server.get('channel_id'))
-                if channel:
-                    message = server.get("message")
-                    message = message.replace("%user", f"<@{member.id}>")
-                    message = message.replace("%guild_name", guild.name)
-                    try:
-                        await channel.send(message)
-                    except:
-                        pass
+        server = ex.cache.welcome_messages.get(guild.id) or {}
+
+        if server.get('enabled'):
+            channel = guild.get_channel(server.get('channel_id'))
+            if channel:
+                message = server.get("message")
+                message = message.replace("%user", f"<@{member.id}>")
+                message = message.replace("%guild_name", guild.name)
+                try:
+                    await channel.send(message)
+                except:
+                    pass
 
     @staticmethod
     @client.event

@@ -56,8 +56,10 @@
     "error": "An error occurred -> Please report it on the support server.\nError MSG: {e}",
     "error_no_support": "Error MSG: {e}",
     "no_n_word": "That user has not said the N-Word a single time!",
-    "self_no_n_word": "You have not said the N-Word a single time!"
-
+    "self_no_n_word": "You have not said the N-Word a single time!",
+    "cooldown": "You are on cooldown. Try again in {await ex.u_miscellaneous.get_cooldown_time(error.retry_after)}",
+    "on_guild_join": "Hello!\nMy prefix for this server is set to {server_prefix}.\nIf you have any questions or concerns, you may join the support server ({server_prefix}support).",
+    "maintenance": "A maintenance is currently in progress. Join the support server for more information. <{support_server_link}>\nREASON: {reason}"
   },
   "twitch": {
     "follow_limit": "You are only allowed to have {follow_limit} channels followed.",

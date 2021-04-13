@@ -31,7 +31,7 @@ def print_to_console(message):
 
 def console(message):
     # run in a separate thread to avoid blocking.
-    (thread_pool.submit(print_to_console, message)).result()
+    (thread_pool.submit(print_to_console, f"{message}")).result()
 
 
 def logfile(message):

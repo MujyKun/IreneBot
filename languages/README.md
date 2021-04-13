@@ -11,6 +11,7 @@ All module names (keys) should be entirely lowercase.
 **Bot Owner ID:** `{owner_id}`
 **Bot Prefix:** `{bot_prefix}`
 **Server Prefix:** `{server_prefix}`  
+**Support Server Link:** `{support_server_link}`  
 **Guild/Server ID:** `{server_id}`  
 **Text Channel Name:** `{text_channel}`  
 **Command Name:** `{command_name}`  
@@ -45,9 +46,11 @@ All module names (keys) should be entirely lowercase.
 
 **Error to Print Out:** `{e}`  
 
-**Query ID:** `{query_id}`  
-**Idol ID:** `{idol_id}`
-**Idol IDs:** `{idol_ids}`
-**Group ID:** `{group_id}`
-**Group IDs:** `{group_ids}`
+**Query ID:** `{query_id}`    
+**Idol ID:** `{idol_id}`  
+**Idol IDs:** `{idol_ids}`  
+**Group ID:** `{group_id}`  
+**Group IDs:** `{group_ids}`  
 
+**Amount of Time**: `{time}`  
+**A Specific Reason:** `{reason}`  

@@ -360,6 +360,7 @@ class Utility:
         :param keyword: Key attached to the string
         :return: message string from language pack.
         """
+
         # allow ctx as input to the user
         if isinstance(user, Context):
             user = user.author.id

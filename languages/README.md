@@ -9,9 +9,9 @@ All module names (keys) should be entirely lowercase.
 **PLEASE NOTE THAT INPUT COULD BE GENERALIZED HERE, BUT IT IS BETTER TO BE SPECIFIC.**  
 
 **Bot Name:** `{bot_name}`  
-**Bot ID:** `{bot_id}`
-**Bot Owner ID:** `{owner_id}`
-**Bot Prefix:** `{bot_prefix}`
+**Bot ID:** `{bot_id}`  
+**Bot Owner ID:** `{owner_id}`  
+**Bot Prefix:** `{bot_prefix}`  
 **Server Prefix:** `{server_prefix}`  
 **Support Server Link:** `{support_server_link}`  
 **Guild/Server ID:** `{server_id}`  
@@ -19,7 +19,7 @@ All module names (keys) should be entirely lowercase.
 **Command Name:** `{command_name}`  
 
 
-**Support Server Link:** `{support_server_link}`
+**Support Server Link:** `{support_server_link}`  
 **Patreon Link:** `{patreon_link}`
 
 **User's Name:** `{name)`  
@@ -36,7 +36,7 @@ All module names (keys) should be entirely lowercase.
 
 **Google Drive URL:** `{g_drive_url}`  
 
-**Bias Game Bracket Size:** `{bracket_size}`
+**Bias Game Bracket Size:** `{bracket_size}`  
 **Gender:** `{gender}`  
 
 **Amount of tweets:** `{tweet_amount}`  

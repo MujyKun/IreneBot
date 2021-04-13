@@ -87,16 +87,22 @@ class Miscellaneous:
                                                 interaction_type)
             if not self_interaction and ctx.author.id == user.id:
                 ctx.command.reset_cooldown(ctx)
-                return await ctx.send(f"> **{ctx.author.display_name}, you cannot perform this interaction on yourself.**")
+                msg = await ex.get_msg(ctx, "interactions", "no_self_use")
+                msg = await ex.replace(msg, ['name', ctx.author.display_name])
+                return await ctx.send(msg)
             link = random.choice(list_of_links)
             embed = discord.Embed(title=f"**{ctx.author.display_name}** {interaction} **{user.display_name}**", color=ex.get_random_color())
             if not await ex.u_patreon.check_if_patreon(ctx.author.id):
-                embed.set_footer(text=f"Become a {await ex.get_server_prefix_by_context(ctx)}patreon to get rid of interaction cooldowns!")
+                msg = await ex.get_msg(ctx, "interactions", "patreon_footer")
+                msg = await ex.replace(msg, ['server_prefix', await ex.get_server_prefix_by_context(ctx)])
+                embed.set_footer(text=msg)
             embed.set_image(url=link[0])
             return await ctx.send(embed=embed)
         except Exception as e:
             log.console(e)
-            return await ctx.send(f"> **{ctx.author.display_name}, there are no links saved for this interaction yet.**")
+            msg = await ex.get_msg(ctx, "interactions")
+            msg = await ex.replace(msg, ['name', ctx.author.display_name])
+            return await ctx.send(msg)
 
     @staticmethod
     async def add_command_count(command_name):

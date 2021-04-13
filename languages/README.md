@@ -31,6 +31,7 @@ All module names (keys) should be entirely lowercase.
 **Languages Available:** `{languages}`  
 
 **Idol Post Send Limit:** `{idol_post_send_limit}`  
+**Reminder Limit:** `{reminder_limit}`  
 **Guild Owner As Super Patron Limit:** `{owner_super_patron_benefit}`  
 
 **Google Drive URL:** `{g_drive_url}`  
@@ -63,3 +64,6 @@ All module names (keys) should be entirely lowercase.
 
 **Amount of Time**: `{time}`  
 **A Specific Reason:** `{reason}`  
+**An index:** `{index}`  
+**Specific Format:** `{format}`  
+**Location or Timezone:** `{tz}`  

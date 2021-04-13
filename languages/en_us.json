@@ -87,6 +87,29 @@
     "role": "That role will be tagged when there is a twitch announcement.",
     "following": "This server is following these channels: {channels_followed}"
   },
+  "interactions": {
+    "no_self_use": "{name}, you cannot perform this interaction on yourself.",
+    "patreon_footer": "Become a {server_prefix}patreon to get rid of interaction cooldowns!",
+    "no_interactions": "{name}, there are no links saved for this interaction yet."
+  },
+  "reminder": {
+    "no_reminders": "{name}, you have no reminders.",
+    "remove_reminder": "{name}, I will not remind you to {reason} on {time}.",
+    "index_not_found": "{name}, I could not find index {index}.",
+    "max_reminders": "{name}, You have reached the maximum limit ({reminder_limit}) for reminders you can have.",
+    "incorrect_format": "{name}, that is not a proper reminder format. Use {server_prefix}help remindme for help with the acceptable format.",
+    "incorrect_time_format": "{name}, you did not enter the correct time format.",
+    "incorrect_tz_input": "Your input was not a user or a valid timezone.",
+    "too_long": "{name}, the time for a reminder can not be greater than 2 years.",
+    "no_timezone": "{name} does not not have a timezone set. Please use {server_prefix}{format}.",
+    "will_remind": "{name}, I will remind you to {reason} on {time}.",
+    "current_time": "{name}, The current time in {tz} is {time}.",
+    "user_time": "{name}'s current time is {time} in the timezone {tz}.",
+    "remind_dm": "This is a reminder to {reason}.",
+    "remove_tz": "{name}, if your timezone was set, it was removed.",
+    "invalid_tz": "{name}, that is not a valid timezone. Please use {server_prefix}{format}.",
+    "add_tz": "{name}, your timezone has been set to {tz}, where it is currently {time}."
+  },
   "botowner": {
     "cache_reset": "The cache is resetting.",
     "scan_drive_complete": "Completed Scan.",

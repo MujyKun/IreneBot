@@ -919,13 +919,13 @@ class GroupMembers:
             member_ids = (random.choice(groups_with_photos)).members
             group_idol = await check_photo_count(member_ids)
 
-        new_members = []
         if members:
+            new_members = []
             for member in members:
                 if member.photo_count:
                     new_members.append(member)
-        if new_members:
-            idol = random.choice(new_members)
+            if new_members:
+                idol = random.choice(new_members)
 
         # This is checking for the case an idol and group have the same name.
         if idol and group_idol:

@@ -44,7 +44,23 @@
     "join_support_server_feature": "In order to use this feature of {bot_name}, you must first join the Support Server at <{support_server_link}>"
   },
   "groupmembers": {
-    "patron_msg": "As of September 23rd 2020, non-Patrons can only send {idol_post_send_limit} photos a day maximum, as the current host can not reliably handle additional traffic.\nYou may become a patron for as little as $3 per month in order to send unlimited photos; every Patron contributes to upgrading and maintaining the host.\nIf the guild owner is a super patron, All guild members (non-patrons) get {owner_super_patron_benefit} photos a day.\nPlease support <@{bot_id}>'s development at {patreon_link}.\nThank You."
+    "patron_msg": "As of September 23rd 2020, non-Patrons can only send {idol_post_send_limit} photos a day maximum, as the current host can not reliably handle additional traffic.\nYou may become a patron for as little as $3 per month in order to send unlimited photos; every Patron contributes to upgrading and maintaining the host.\nIf the guild owner is a super patron, All guild members (non-patrons) get {owner_super_patron_benefit} photos a day.\nPlease support <@{bot_id}>'s development at {patreon_link}.\nThank You.",
+    "add_idol_sent": "{name}, your request for adding this Idol has been successfully sent. The Idol's query ID is {query_id}.",
+    "add_group_sent": "{name}, your request for adding this Group has been successfully sent. The Group's query ID is {query_id}.",
+    "no_card_info": "I could not find any information on that idol/group.",
+    "stop_images_disable": "{text_channel} can no longer send or receive idol photos.",
+    "stop_images_enable": "{text_channel} can now send and receive idol photos.",
+    "stop_images_fail": "{text_channel} is currently being used with {server_prefix}sendimages and can not be restricted.",
+    "send_images_disable": "{text_channel} will no longer send all idol photo commands.",
+    "send_images_enable": "{text_channel} will now receive and send all idol photo commands coming from this server.",
+    "send_images_fail": "{text_channel} is currently restricted from idol photos with {server_prefix}stopimages.",
+    "group_not_found": "I could not find a group with that name.",
+    "idol_not_found": "I could not find an idol with that name.",
+    "photo_count": "There are {photo_count} images for {object_name}.",
+    "no_aliases": "No results were found. Please specify whether you want member or group aliases, or enter a name of an idol/group.\n{server_prefix}help aliases",
+    "all_idol_count": "All Idols have been called a total of {called} times.",
+    "not_called": "{idol_name} has not been called by a user yet.",
+    "called_and_rank": "{idol_name} has been called {called} times at rank {rank}."
   },
   "twitter": {
     "tweet_success": "Your Tweet has been successfully uploaded to {tweet_url}",

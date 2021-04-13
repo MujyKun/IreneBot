@@ -6,6 +6,8 @@ To keep more human-readable logging, Irene will remove `**` from the messages wh
 Do not surround phrases by `` as it will be negated when bolded.  
 All module names (keys) should be entirely lowercase.  
 
+**PLEASE NOTE THAT INPUT COULD BE GENERALIZED HERE, BUT IT IS BETTER TO BE SPECIFIC.**  
+
 **Bot Name:** `{bot_name}`  
 **Bot ID:** `{bot_id}`
 **Bot Owner ID:** `{owner_id}`
@@ -51,6 +53,13 @@ All module names (keys) should be entirely lowercase.
 **Idol IDs:** `{idol_ids}`  
 **Group ID:** `{group_id}`  
 **Group IDs:** `{group_ids}`  
+
+**Idol Name:** `{idol_name}`  
+**Group Name:** `{idol_name}`  
+**Generalized Name for either Idol or Group:** `{object_name}`  
+**Amount of times an Idol has been called:** `{called}`  
+**Generalized Rank:** `{rank}`  
+**Photo Count:** `{photo_count}`  
 
 **Amount of Time**: `{time}`  
 **A Specific Reason:** `{reason}`  

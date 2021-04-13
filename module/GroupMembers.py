@@ -16,8 +16,7 @@ class GroupMembers(commands.Cog):
         """
         This method detects messages that are meant to be idol posts and sends them.
 
-        :param message:
-        :return:
+        This is a listener (on_message) event
         """
         # create modifiable var without altering original
         channel = message.channel
@@ -49,21 +48,25 @@ class GroupMembers(commands.Cog):
                     return
                 message_content = message.content[len(keys.bot_prefix):len(message.content)]
                 server_id = await ex.get_server_id(message)
-                members = await ex.u_group_members.get_idol_where_member_matches_name(message_content, server_id=server_id)
-                groups = await ex.u_group_members.get_group_where_group_matches_name(message_content, server_id=server_id)
+                members = await ex.u_group_members.get_idol_where_member_matches_name(message_content,
+                                                                                      server_id=server_id)
+                groups = await ex.u_group_members.get_group_where_group_matches_name(message_content,
+                                                                                     server_id=server_id)
                 photo_msg = None
                 if members or groups:
                     # check if it is an individual idol or group name.
                     random_member = await ex.u_group_members.choose_random_member(members=members, groups=groups)
                     if random_member:
-                        photo_msg, api_url, posted = await ex.u_group_members.request_image_post(message, random_member, channel)
+                        photo_msg, api_url, posted = await ex.u_group_members.request_image_post(
+                            message, random_member, channel)
                 else:
                     # check if it is a message calling an idol from a specific group.
                     members = await ex.u_group_members.check_group_and_idol(message_content, server_id=server_id)
                     if members:
                         random_member = await ex.u_group_members.choose_random_member(members=members)
                         if random_member:
-                            photo_msg, api_url, posted = await ex.u_group_members.request_image_post(message, random_member, channel)
+                            photo_msg, api_url, posted = await ex.u_group_members.request_image_post(
+                                message, random_member, channel)
                 if posted:
                     ex.u_group_members.log_idol_command(message)
                     await ex.u_miscellaneous.add_command_count(f"Idol {random_member.id}")
@@ -136,11 +139,14 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
             msg = await channel.send(embed=embed)
             await msg.add_reaction(keys.check_emoji)
             await msg.add_reaction(keys.trash_emoji)
-            await ctx.send(f"{ctx.author.display_name}, your request for adding this Idol has been successfully sent."
-                           f"The Idol's query ID is {query_id}.")
+            msg = await ex.get_msg(ctx, "groupmembers", "add_idol_sent")
+            msg = await ex.replace(msg, [["name", ctx.author.display_name], ['query_id', query_id]])
+            await ctx.send(msg)
         except Exception as e:
             log.console(e)
-            await ctx.send(f"Something Went Wrong. You may not understand the following error. Please report it.-> {e}")
+            msg = await ex.get_msg(ctx, "general", "error")
+            msg = await ex.replace(msg, ["e", e])
+            await ctx.send(msg)
 
     @commands.command()
     async def addgroup(self, ctx, *, group_json):
@@ -202,11 +208,14 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
             msg = await channel.send(embed=embed)
             await msg.add_reaction(keys.check_emoji)
             await msg.add_reaction(keys.trash_emoji)
-            await ctx.send(f"{ctx.author.display_name}, your request for adding this Group has been successfully sent."
-                           f" The Group's query ID is {query_id}.")
+            msg = await ex.get_msg(ctx, "groupmembers", "add_group_sent")
+            msg = await ex.replace(msg, [["name", ctx.author.display_name], ['query_id', query_id]])
+            await ctx.send(msg)
         except Exception as e:
             log.console(e)
-            await ctx.send(f"Something Went Wrong. You may not understand the following error. Please report it.-> {e}")
+            msg = await ex.get_msg(ctx, "general", "error")
+            msg = await ex.replace(msg, ["e", e])
+            await ctx.send(msg)
 
     @commands.command()
     async def card(self, ctx, *, name):
@@ -242,7 +251,7 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
             if len(embed_list) > 1:
                 await ex.check_left_or_right_reaction_embed(msg, embed_list)
         else:
-            return await ctx.send(f"> I could not find any information on that idol/group.")
+            return await ctx.send(await ex.get_msg(ctx, "groupmembers", "no_card_info"))
 
     @commands.has_guild_permissions(manage_messages=True)
     @commands.command()
@@ -255,13 +264,20 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
             try:
                 await ex.conn.execute("INSERT INTO groupmembers.restricted(channelid, serverid, sendhere) VALUES($1, $2, $3)", text_channel.id, ctx.guild.id, 0)
                 ex.cache.restricted_channels[text_channel.id] = [ctx.guild.id, 0]
-                await ctx.send(f"> **{text_channel.name} can no longer send idol photos.**")
+                msg = await ex.get_msg(ctx, "groupmembers", "stop_images_disable")
+                msg = await ex.replace(msg, ['text_channel', text_channel.name])
+                await ctx.send(msg)
             except:
-                await ctx.send(f"> **{text_channel.name} is currently being used with {await ex.get_server_prefix_by_context(ctx)}sendimages and can not be restricted.**")
+                msg = await ex.get_msg(ctx, "groupmembers", "stop_images_fail")
+                msg = await ex.replace(msg, [['text_channel', text_channel.name],
+                                             ['server_prefix', await ex.get_server_prefix_by_context(ctx)]])
+                await ctx.send(msg)
         else:
             await ex.conn.execute("DELETE FROM groupmembers.restricted WHERE channelid = $1 AND sendhere = $2", text_channel.id, 0)
             await ex.u_group_members.delete_restricted_channel_from_cache(text_channel.id, 0)
-            await ctx.send(f"> **{text_channel.name} can now send idol photos.**")
+            msg = await ex.get_msg(ctx, "groupmembers", "stop_images_enable")
+            msg = await ex.replace(msg, ['text_channel', text_channel.name])
+            await ctx.send(msg)
 
     @commands.has_guild_permissions(manage_messages=True)
     @commands.command()
@@ -277,7 +293,9 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
                     if old_channel.id == text_channel.id:
                         await ex.conn.execute("DELETE FROM groupmembers.restricted WHERE channelid = $1 AND serverid = $2 AND sendhere = $3", text_channel.id, ctx.guild.id, 1)
                         await ex.u_group_members.delete_restricted_channel_from_cache(text_channel.id, 1)
-                        return await ctx.send(f"> **{text_channel.name} will no longer send all idol photo commands.**")
+                        msg = await ex.get_msg(ctx, "groupmembers", "send_images_disable")
+                        msg = await ex.replace(msg, ['text_channel', text_channel.name])
+                        return await ctx.send(msg)
                 else:
                     delete_channel_id = None
                     await ex.conn.execute("UPDATE groupmembers.restricted SET channelid = $1 WHERE serverid = $2 AND sendhere = $3", text_channel.id, ctx.guild.id, 1)
@@ -292,9 +310,14 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
             else:
                 await ex.conn.execute("INSERT INTO groupmembers.restricted(channelid, serverid, sendhere) VALUES ($1, $2, $3)", text_channel.id, ctx.guild.id, 1)
                 ex.cache.restricted_channels[text_channel.id] = [ctx.guild.id, 1]
-            await ctx.send(f"> **{text_channel.name} will now receive and send all idol photo commands coming from this server.**")
+            msg = await ex.get_msg(ctx, "groupmembers", "send_images_enable")
+            msg = await ex.replace(msg, ['text_channel', text_channel.name])
+            await ctx.send(msg)
         else:
-            await ctx.send(f"> **{text_channel.name} is currently restricted from idol photos with {await ex.get_server_prefix_by_context(ctx)}stopimages.**")
+            msg = await ex.get_msg(ctx, "groupmembers", "send_images_fail")
+            msg = await ex.replace(msg, [['text_channel', text_channel.name],
+                                         ['server_prefix', await ex.get_server_prefix_by_context(ctx)]])
+            await ctx.send(msg)
 
     @commands.command(aliases=['%'])
     async def randomidol(self, ctx):
@@ -319,9 +342,12 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
         server_id = await ex.get_server_id(ctx)
         groups = await ex.u_group_members.get_group_where_group_matches_name(group_name, server_id=server_id)
         if not groups:
-            return await ctx.send(f"> **I could not find a group named {group_name}.**")
+            msg = await ex.get_msg(ctx, "groupmembers", "group_not_found")
+            return await ctx.send(msg)
         for group in groups:
-            await ctx.send(f"> **There are {group.photo_count} images for {group.name}.**")
+            msg = await ex.get_msg(ctx, "groupmembers" "photo_count")
+            msg = await ex.replace(msg, [["photo_count", group.photo_count], ["object_name", group.name]])
+            await ctx.send(msg)
 
     @commands.command()
     async def countmember(self, ctx, *, member_name):
@@ -331,9 +357,13 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
         server_id = await ex.get_server_id(ctx)
         members = await ex.u_group_members.get_idol_where_member_matches_name(member_name, server_id=server_id)
         if not members:
-            return await ctx.send(f"> **I could not find an idol named {member_name}.**")
+            msg = await ex.get_msg(ctx, "groupmembers", "idol_not_found")
+            return await ctx.send(msg)
         for member in members:
-            await ctx.send(f"> **There are {member.photo_count} images for {member.full_name} ({member.stage_name}).**")
+            msg = await ex.get_msg(ctx, "groupmembers" "photo_count")
+            msg = await ex.replace(msg, [["photo_count", member.photo_count],
+                                         ["object_name", f"{member.full_name} ({member.stage_name})"]])
+            await ctx.send(msg)
 
     @commands.command(aliases=['fullname'])
     async def fullnames(self, ctx, *, page_number_or_group: typing.Union[int, str] = 1):
@@ -386,7 +416,9 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
                 elif 'group' in mode.lower():
                     embed_list = await ex.u_group_members.set_embed_with_all_aliases("Group", server_id=server_id)
                 else:
-                    return await ctx.send(f">>> **No results were found. Please specify whether you want member or group aliases, or enter a name of an idol/group.\n`{await ex.get_server_prefix_by_context(ctx)}help aliases`**")
+                    msg = await ex.get_msg(ctx, "groupmembers", "no_aliases")
+                    msg = await ex.replace(msg, ["server_prefix", await ex.get_server_prefix_by_context(ctx)])
+                    return await ctx.send(msg)
             if len(embed_list) < page_number or page_number < 1:
                 page_number = 1
             msg = await ctx.send(embed=embed_list[page_number-1])
@@ -394,7 +426,9 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
                 await ex.check_left_or_right_reaction_embed(msg, embed_list, page_number - 1)
         except Exception as e:
             log.console(e)
-            await ctx.send(f"> **Error - {e}**")
+            msg = await ex.get_msg(ctx, "general", "error_no_support")
+            msg = await ex.replace(msg, ["e", e])
+            await ctx.send(msg)
 
     @commands.command()
     async def count(self, ctx, *, name=None):
@@ -403,25 +437,36 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
             if name == 'all' or not name:
                 idol_called = 0
                 for member in ex.cache.idols:
+                    if not member.called:
+                        continue
                     idol_called += member.called
-                return await ctx.send(f"> **All Idols have been called a total of {idol_called} times.**")
+                msg = await ex.get_msg(ctx, "groupmembers", "all_idol_count")
+                msg = await ex.replace(msg, ["called", idol_called])
+                return await ctx.send(msg)
             server_id = await ex.get_server_id(ctx)
             members = await ex.u_group_members.get_idol_where_member_matches_name(name, server_id=server_id)
             if not members:
-                return await ctx.send(f"> **{name} could not be found.**")
+                return await ctx.send(await ex.get_msg(ctx, "groupmembers", "idol_not_found"))
             for member in members:
                 if not member.called:
-                    await ctx.send(f"> **{member.full_name} ({member.stage_name}) has not been called by a user yet.**")
+                    msg = await ex.get_msg(ctx, "groupmembers", "not_called")
+                    msg = await ex.replace(msg, ['idol_name', f"{member.full_name} ({member.stage_name})"])
+                    await ctx.send(msg)
                 else:
                     rank_list = await ex.conn.fetch("SELECT memberid FROM groupmembers.count ORDER BY Count DESC")
                     for count, rank_row in enumerate(rank_list):
                         mem_id = rank_row[0]
                         if mem_id == member.id:
                             final_rank = count + 1
-                            await ctx.send(f"> **{member.full_name} ({member.stage_name}) has been called {member.called} times at rank {final_rank}.**")
+                            msg = await ex.get_msg(ctx, "groupmembers", "called_and_rank")
+                            msg = await ex.replace(msg, [["idol_name", f"{member.full_name} ({member.stage_name})"],
+                                                         ["called", member.called], ['rank', final_rank]])
+                            await ctx.send(msg)
         except Exception as e:
-            await ctx.send(f"> **ERROR: {e}**")
             log.console(e)
+            msg = await ex.get_msg(ctx, "general", "error_no_support")
+            msg = await ex.replace(msg, ["e", e])
+            await ctx.send(msg)
 
     @commands.command(aliases=["highestcount", "cb", "clb"])
     async def countleaderboard(self, ctx):

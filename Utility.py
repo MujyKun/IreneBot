@@ -1,11 +1,14 @@
 from util import exceptions, logger as log, local_cache
 from typing import TYPE_CHECKING
+from discord.ext.commands import Context
+from Weverse.weverseasync import WeverseAsync
 import discord
 import random
 import asyncio
 import os
 import tweepy
-from Weverse.weverseasync import WeverseAsync
+
+
 
 # do not import in runtime. This is used for type-hints.
 if TYPE_CHECKING:
@@ -350,7 +353,17 @@ class Utility:
         return text
 
     async def get_msg(self, user, module, keyword) -> str:
-        """Get a msg from a user's language."""
+        """Get a msg from a user's language.
+
+        :param user: User ID, Irene User object, or Context object
+        :param module: Module name (Case Sensitive)
+        :param keyword: Key attached to the string
+        :return: message string from language pack.
+        """
+        # allow ctx as input to the user
+        if isinstance(user, Context):
+            user = user.author.id
+
         # allow user id as input to the user.
         if not isinstance(user, self.u_objects.User):
             user = await self.get_user(user)

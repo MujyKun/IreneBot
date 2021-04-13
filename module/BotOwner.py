@@ -8,6 +8,13 @@ from util import logger as log
 class BotOwner(commands.Cog):
     @commands.is_owner()
     @commands.command()
+    async def resetcache(self, ctx):
+        """Reset the cache."""
+        await ex.u_cache.create_cache(on_boot_up=False)
+        await ctx.send(await ex.get_msg(ctx, 'botowner', 'cache_reset'))
+
+    @commands.is_owner()
+    @commands.command()
     async def scandrive(self, ctx, name="NULL", member_id=0):
         """Scan DriveIDs Table and update other tables."""
         try:
@@ -28,7 +35,7 @@ class BotOwner(commands.Cog):
                         await ex.conn.execute("INSERT INTO groupmembers.uploadimagelinks VALUES($1,$2)", new_link, member_id)
                 except Exception as e:
                     log.console(e)
-            await ctx.send(f"> **Completed Scan**")
+            await ctx.send(await ex.get_msg(ctx, 'botowner', 'scan_drive_complete'))
         except Exception as e:
             log.console(e)
 
@@ -50,94 +57,54 @@ class BotOwner(commands.Cog):
         for card in cards:
             count_x += 1
             await ex.conn.execute("INSERT INTO blackjack.cards (id, name, value) VALUES ($3, $1, $2)", card, card_values[count_x], count_x+1)
-        await ctx.send("> **All cards have been added into the table.**", delete_after=40)
+        await ctx.send(await ex.get_msg(ctx, 'botowner', 'cards_added'), delete_after=40)
 
     @commands.command()
     @commands.is_owner()
     async def addpatreon(self, ctx, *, users):
         """Adds a patreon. [Format: %addpatreon (userid,userid,userid)]"""
         users = users.split(",")
-        for user in users:
-            await ex.u_patreon.add_to_patreon(user)
-        await ctx.send(f">>> **Added {users} to Patreon.**")
+        for user_id in users:
+            await ex.u_patreon.add_to_patreon(user_id)
+        msg = await ex.get_msg(ctx, 'botowner', 'patrons_added')
+        msg = await ex.replace(msg, ['users', users])
+        await ctx.send(msg)
 
     @commands.command()
     @commands.is_owner()
     async def removepatreon(self, ctx, *, users):
         """Removes a patreon. [Format: %removepatreon (userid,userid,userid)]"""
         users = users.split(",")
-        for user in users:
-            await ex.u_patreon.remove_from_patreon(user)
-        await ctx.send(f">>> **Removed {users} from Patreon.**")
+        for user_id in users:
+            await ex.u_patreon.remove_from_patreon(user_id)
+        msg = await ex.get_msg(ctx, 'botowner', 'patrons_removed')
+        msg = await ex.replace(msg, ['users', users])
+        await ctx.send(msg)
 
     @commands.is_owner()
     @commands.command()
-    async def clearnword(self, ctx, user: discord.Member = None):
+    async def clearnword(self, ctx, user: discord.Member):
         """Clear A User's Nword Counter [Format: %clearnword @user]"""
-        if not user:
-            return await ctx.send("> **Please @ a user**")
-
         if not (await ex.get_user(user.id)).n_word:
-            return await ctx.send(f"> **<@{user.id}> has not said the N-Word a single time!**")
+            return await ctx.send(await ex.get_msg(ctx, 'general', 'no_n_word'))
 
         await ex.conn.execute("DELETE FROM general.nword where userid = $1", user.id)
         (await ex.get_user(user.id)).n_word = 0
-        await ctx.send("**> Cleared.**")
+        await ctx.send(await ex.get_msg(ctx, 'botowner', 'cleared'))
 
     @commands.command()
     @commands.is_owner()
-    async def send(self, ctx, channel_id, *, new_message):
+    async def send(self, ctx, channel_id, *, message_to_send):
         """Send a message to a text channel."""
         try:
             channel = await ex.client.fetch_channel(channel_id)  # 403 forbidden on tests.
-            await channel.send(new_message)
-            await ctx.send("> **Message Sent.**")
+            await channel.send(message_to_send)
+            await ctx.send(await ex.get_msg(ctx, 'botowner', 'message_sent'))
         except Exception as e:
             log.console(e)
-            await ctx.send(f"> **ERROR: {e}**")
-
-    @commands.command()
-    @commands.is_owner()
-    async def servers(self, ctx):
-        """Displays which servers Irene is in."""
-        guilds = ex.client.guilds
-        count = 1
-        page_number = 1
-        embed = discord.Embed(title=f"{len(guilds)} Servers - Page {page_number}", color=0xffb6c1)
-        embed.set_author(name="Irene", url=ex.keys.bot_website,
-                         icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
-        embed.set_footer(text="Thanks for using Irene.",
-                         icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
-        guilds_ordered = [[guild.id, guild.member_count] for guild in guilds]
-        guilds_ordered.sort(key=lambda server_info: server_info[1])
-        guild_ids_sorted = [guild[0] for guild in guilds_ordered]
-        embed_list = []
-        try:
-            for main_guild_id in guild_ids_sorted:
-                # need to do a nested loop due to fetch_guild not containing attributes needed.
-                for guild in guilds:
-                    if guild.id != main_guild_id:
-                        continue
-                    member_count = f"Member Count: {guild.member_count}\n"
-                    owner = f"Guild Owner: {guild.owner} ({guild.owner.id})\n"
-                    desc = member_count + owner
-                    embed.add_field(name=f"{guild.name} ({guild.id})", value=desc, inline=False)
-                    if count == 25:
-                        count = 0
-                        embed_list.append(embed)
-                        page_number += 1
-                        embed = discord.Embed(title=f"{len(guilds)} Servers - Page {page_number}", color=0xffb6c1)
-                        embed.set_author(name="Irene", url=ex.keys.bot_website,
-                                         icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
-                        embed.set_footer(text="Thanks for using Irene.",
-                                         icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
-                    count += 1
-        except Exception as e:
-            log.console(e)
-        if count:
-            embed_list.append(embed)
-        msg = await ctx.send(embed=embed_list[0])
-        await ex.check_left_or_right_reaction_embed(msg, embed_list)
+            msg = await ex.get_msg(ctx, 'general', 'error_no_support')
+            msg = await ex.replace(msg, ['e', e])
+            await ctx.send(msg)
 
     @commands.command()
     @commands.is_owner()
@@ -166,8 +133,9 @@ class BotOwner(commands.Cog):
             groupname = $1 ORDER BY groupid DESC""", group.get("groupname")))
 
             # send message to the approver.
-            await ctx.send(f"> Added Query ID {query_id} as a Group ({group_id}). "
-                           f"The cache is now refreshing.")
+            msg = await ex.get_msg(ctx, 'botowner', 'group_query_approved')
+            msg = await ex.replace(msg, [['query_id', query_id], ['group_id', group_id]])
+            await ctx.send(msg)
 
         if mode == "idol":
             # get the query
@@ -213,12 +181,14 @@ class BotOwner(commands.Cog):
                     VALUES($1, $2)""", idol_id, group_id)
                 except Exception as e:
                     log.console(e)
-                    await ctx.send(f"> Failed to add Group {group_id}. Proceeding to add idol.")
+                    msg = await ex.get_msg(ctx, 'botowner', 'group_fail')
+                    msg = await ex.replace(msg, ['group_id', group_id])
+                    await ctx.send(msg)
 
             # send message to the approver.
-            await ctx.send(f"> Added Query ID {query_id} as an Idol ({idol_id}). "
-                           f"This idol has been added to the following groups: {group_ids}."
-                           f" The cache is now refreshing.")
+            msg = await ex.get_msg(ctx, 'botowner', 'idol_query_approved')
+            msg = await ex.replace(msg, [['query_id', query_id], ['idol_id', idol_id], ['group_ids', group_ids]])
+            await ctx.send(msg)
 
         # reset cache for idols/groups.
         await ex.u_cache.create_group_cache()

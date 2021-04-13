@@ -2,9 +2,14 @@ from util.sql import SQL
 
 """
 asyncpg.py (Concrete Class)
+
+
+DESIGN FLAW:
+This file will end up incredibly large and not spread across many files, but it will be the sacrifice for easier
+swapping of DB libraries as a child of the SQL class.
 """
 
-sql: SQL = None  # set to the same instance the Utility is working with ( but the concrete type )
+sql: SQL = None  # set to the same instance the Utility is working with ( but set to the abstract type )
 
 
 class Asyncpg(SQL):

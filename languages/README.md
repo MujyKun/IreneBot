@@ -20,6 +20,7 @@ Do not surround phrases by `` as it will be negated when bolded.
 **User's Balance:** `{balance}`  
 **Current User Language:** `{language}`  
 **Daily Currency Amount:** `{daily_amount}`  
+**List of users** `{users}`  
 
 **Languages Available:** `{languages}`  
 
@@ -40,3 +41,9 @@ Do not surround phrases by `` as it will be negated when bolded.
 **Twitch Channels Followed:** `{channels_followed}`  
 
 **Error to Print Out:** `{e}`  
+
+**Query ID:** `{query_id}`  
+**Idol ID:** `{idol_id}`
+**Idol IDs:** `{idol_ids}`
+**Group ID:** `{group_id}`
+**Group IDs:** `{group_ids}`

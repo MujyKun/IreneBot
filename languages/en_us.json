@@ -46,7 +46,10 @@
   },
   "general": {
     "no_dm": "You can not use this command in DMs.",
-    "error": "An error occurred -> Please report it on the support server.\nError MSG: {e}"
+    "error": "An error occurred -> Please report it on the support server.\nError MSG: {e}",
+    "error_no_support": "Error MSG: {e}",
+    "no_n_word": "That user has not said the N-Word a single time!",
+    "self_no_n_word": "You have not said the N-Word a single time!"
 
   },
   "twitch": {
@@ -58,5 +61,17 @@
     "no_role": "Everyone will be tagged when there is a twitch announcement.",
     "role": "That role will be tagged when there is a twitch announcement.",
     "following": "This server is following these channels: {channels_followed}"
+  },
+  "botowner": {
+    "cache_reset": "The cache is resetting.",
+    "scan_drive_complete": "Completed Scan.",
+    "cards_added": "All cards have been added into the table.",
+    "patrons_added": "Added {users} as a patron!",
+    "patrons_removed": "Removed {users} as a patron!",
+    "cleared": "Cleared.",
+    "message_sent": "Message Sent.",
+    "group_fail": "Failed to add Group {group_id}. Proceeding to add idol.",
+    "idol_query_approved": "Added Query ID {query_id} as an Idol ({idol_id}).\nThis idol has been added to the following groups: {group_ids}.\nThe cache is now refreshing.",
+    "group_query_approved": "Added Query ID {query_id} as a Group ({group_id}).\nThe cache is now refreshing."
   }
 }

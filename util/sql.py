@@ -4,6 +4,10 @@ sql.py
 Abstract Class (Do Not Create An Instance)
 
 Useful for different sql libraries.
+
+DESIGN FLAW:
+This file will end up incredibly large and not spread across many files, but it will be the sacrifice for easier
+swapping of DB libraries.
 """
 
 

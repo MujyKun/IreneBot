@@ -302,7 +302,7 @@ To find out more, look at the `GroupMembers` category.
 | approve       | Approve a query id for an unregistered group or idol. | %approve (query id) ('idol' or 'group') |    |
 | clearnword       | Clear A User's Nword Counter                                   | %clearnword @user               |               |
 | removepatreon         | Removes a patreon.                           | %removepatreon (userid,userid,userid)             |               |
+| resetcache          | Reset the cache.  | %resetcache                        |              |
 | scandrive        | Scan DriveIDs Table and update other tables.                                       | %scandrive (name=NULL) (member_id=0)                                                                           |                       |
 | send              | Send a message to a text channel.                                             | %send (channelid) (message)                  |               |
-| servers          | Displays which servers Irene is in.  | %servers                        |              |
 | speak            | Owner to Bot TTS                                               | %speak (message)                |              |

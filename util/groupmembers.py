@@ -234,14 +234,15 @@ class GroupMembers:
         return await ex.conn.fetch("""SELECT id, fullname, stagename, formerfullname, formerstagename, birthdate,
             birthcountry, birthcity, gender, description, height, twitter, youtube, melon, instagram, vlive, spotify,
             fancafe, facebook, tiktok, zodiac, thumbnail, banner, bloodtype, tags, difficulty
-             FROM groupmembers.Member ORDER BY id""")
+            FROM groupmembers.Member ORDER BY id""")
 
     @staticmethod
     async def get_all_groups():
         """Get all groups."""
         return await ex.conn.fetch("""SELECT groupid, groupname, debutdate, disbanddate, description, twitter, youtube,
-                                         melon, instagram, vlive, spotify, fancafe, facebook, tiktok, fandom, company,
-                                          website, thumbnail, banner, gender, tags FROM groupmembers.groups ORDER BY groupname""")
+            melon, instagram, vlive, spotify, fancafe, facebook, tiktok, fandom, company,
+            website, thumbnail, banner, gender, tags FROM groupmembers.groups 
+            ORDER BY groupname""")
 
     @staticmethod
     async def get_db_members_in_group(group_name=None, group_id=None):

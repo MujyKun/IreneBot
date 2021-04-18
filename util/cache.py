@@ -20,7 +20,7 @@ class Cache:
             log.console(f"Cache for {name} Created in {await ex.u_miscellaneous.get_cooldown_time(time.time() - past_time)}.")
         return result
 
-    async def create_cache(self, on_boot_up = True):
+    async def create_cache(self, on_boot_up=True):
         """Create the general cache on startup"""
         past_time = time.time()
         # reset custom user cache
@@ -56,6 +56,12 @@ class Cache:
         await self.process_cache_time(self.create_currency_cache, "Currency")
         await self.process_cache_time(self.create_levels_cache, "Levels")
         await self.process_cache_time(self.create_langauge_cache, "User Language")
+
+        # if the discord cache is loaded, make sure to update the patreon cache since our user objects are reset.
+        # every time this function is called.
+        if ex.discord_cache_loaded:
+            await self.process_cache_time(self.update_patreons, "Reload Patreon Cache")
+
         # do not load weverse cache if the bot has already been running.
         if not ex.test_bot and not ex.weverse_client.cache_loaded and on_boot_up:
             # noinspection PyUnusedLocal

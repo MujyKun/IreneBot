@@ -23,6 +23,10 @@ class BlackJack:
 
     async def process_bj_game(self, ctx, amount, user_id):
         """pre requisites for joining a blackjack game."""
+
+        """
+        Currency is currently disabled.
+        
         if amount >= 0:
             if not await self.check_in_game(user_id, ctx):
                 if amount > await ex.u_currency.get_balance(user_id):
@@ -31,6 +35,8 @@ class BlackJack:
                     return True
         else:
             await ctx.send(f"> **{ctx.author}, you can not bet a negative number.**")
+        """
+        return True
 
     @staticmethod
     async def get_game_by_player(player_id):
@@ -285,12 +291,13 @@ class BlackJack:
 
     async def announce_winner(self, channel, winner, loser, winner_points, loser_points, win_amount):
         """Send a message to the channel of who won the game."""
+        win_amount = 0
         if self.check_if_bot(winner):
-            await channel.send(f"> **<@{ex.keys.bot_id}> has won ${int(win_amount):,} with {winner_points} points against <@{loser}> with {loser_points}.**")
+            await channel.send(f"> **<@{ex.keys.bot_id}> has won ${int(win_amount):,} (CURRENCY DISABLED) with {winner_points} points against <@{loser}> with {loser_points}.**")
         elif self.check_if_bot(loser):
-            await channel.send(f"> **<@{winner}> has won ${int(win_amount):,} with {winner_points} points against <@{ex.keys.bot_id}> with {loser_points}.**")
+            await channel.send(f"> **<@{winner}> has won ${int(win_amount):,} (CURRENCY DISABLED) with {winner_points} points against <@{ex.keys.bot_id}> with {loser_points}.**")
         else:
-            await channel.send(f"> **<@{winner}> has won ${int(win_amount):,} with {winner_points} points against <@{loser}> with {loser_points}.**")
+            await channel.send(f"> **<@{winner}> has won ${int(win_amount):,} (CURRENCY DISABLED) with {winner_points} points against <@{loser}> with {loser_points}.**")
 
     async def announce_tie(self, channel, player1, player2, tied_points):
         """Send a message to the channel of a tie."""
@@ -308,17 +315,21 @@ class BlackJack:
             await self.add_card(game[2])
         else:
             winner = self.determine_winner(player1_score, player2_score)
-            player1_current_bal = await ex.u_currency.get_balance(game[1])
-            player2_current_bal = await ex.u_currency.get_balance(game[2])
+            # player1_current_bal = await ex.u_currency.get_balance(game[1])
+            # player2_current_bal = await ex.u_currency.get_balance(game[2])
+            player1_current_bal = 0
+            player2_current_bal = 0
             if winner == 'player1':
-                await ex.u_currency.update_balance(game[1], player1_current_bal + int(game[4]))
+                # await ex.u_currency.update_balance(game[1], player1_current_bal + int(game[4]))
                 if not self.check_if_bot(game[2]):
-                    await ex.u_currency.update_balance(game[2], player2_current_bal - int(game[4]))
+                    pass
+                    # await ex.u_currency.update_balance(game[2], player2_current_bal - int(game[4]))
                 await self.announce_winner(channel, game[1], game[2], player1_score, player2_score, game[4])
             elif winner == 'player2':
                 if not self.check_if_bot(game[2]):
-                    await ex.u_currency.update_balance(game[2], player2_current_bal + int(game[3]))
-                await ex.u_currency.update_balance(game[1], player1_current_bal - int(game[3]))
+                    pass
+                    # await ex.u_currency.update_balance(game[2], player2_current_bal + int(game[3]))
+                # await ex.u_currency.update_balance(game[1], player1_current_bal - int(game[3]))
                 await self.announce_winner(channel, game[2], game[1], player2_score, player1_score, game[3])
             elif winner == 'tie':
                 await self.announce_tie(channel, game[1], game[2], player1_score)

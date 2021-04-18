@@ -369,3 +369,17 @@ class Currency(commands.Cog):
                 await ctx.message.delete(delay=15)
         except Exception as e:
             log.console(e)
+
+    @daily.before_invoke
+    @balance.before_invoke
+    @bet.before_invoke
+    @leaderboard.before_invoke
+    @beg.before_invoke
+    @upgrade.before_invoke
+    @rob.before_invoke
+    @give.before_invoke
+    @rps.before_invoke
+    async def disabled_mode(self, ctx):
+        await ctx.send(
+            "Currency is currently being recoded and will not be available until the new version is out.")
+        raise commands.CommandError(f"Currency Maintenance.")

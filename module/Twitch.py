@@ -130,6 +130,10 @@ class Twitch(commands.Cog):
                                 if streamer.get('display_name').lower() == twitch_username.lower():
                                     was_live = ex.cache.twitch_channels_is_live.get(twitch_username)
                                     is_live = streamer.get('is_live')
+
+                                    if not is_live:
+                                        await ex.sql.delete_twitch_posted(twitch_username.lower())
+
                                     if (not was_live) and is_live:
                                         await ex.u_twitch.send_twitch_announcement(twitch_username)
                                     ex.cache.twitch_channels_is_live[twitch_username] = is_live

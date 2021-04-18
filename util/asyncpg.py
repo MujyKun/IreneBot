@@ -46,8 +46,16 @@ class Asyncpg(SQL):
     async def get_profile_xp(self, user_id: int) -> int:
         return (await self.conn.fetchrow("SELECT profilexp FROM currency.levels WHERE userid = $1", user_id))[0]
 
+    async def check_twitch_already_posted(self, twitch_username, channel_id) -> bool:
+        return ((await self.conn.fetchrow("SELECT COUNT(*) FROM twitch.alreadyposted WHERE username = $1 AND "
+                                          "channelid = $2", twitch_username, channel_id))[0]) >= 1
 
+    async def set_twitch_posted(self, twitch_username, channel_id):
+        await self.conn.execute("INSERT INTO twitch.alreadyposted(username, channelid) VALUES ($1, $2)",
+                                twitch_username, channel_id)
 
+    async def delete_twitch_posted(self, twitch_username):
+        await self.conn.execute("DELETE FROM twitch.alreadyposted WHERE username = $1", twitch_username)
 
 
 

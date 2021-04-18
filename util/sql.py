@@ -67,4 +67,26 @@ class SQL:
         :param user_id: Discord User ID
         """
 
+    async def set_twitch_posted(self, twitch_username, channel_id):
+        """
+        Set a discord text channel to have already been sent a message from twitch announcements.
+        :param twitch_username: Twitch username
+        :param channel_id: Text Channel ID
+        """
+
+    async def delete_twitch_posted(self, twitch_username):
+        """
+        Delete the text channels from a table that have received messages for a twitch username.
+        :param twitch_username: Twitch username
+        """
+
+    async def check_twitch_already_posted(self, twitch_username, channel_id) -> bool:
+        """
+        Check if a twitch channel being live was already posted to a text cahnnel.
+
+        :param twitch_username: Twitch username
+        :param channel_id: Text Channel ID
+        :return: True if the live announcement was already posted.
+        """
+
 

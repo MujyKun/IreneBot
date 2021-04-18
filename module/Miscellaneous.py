@@ -451,6 +451,9 @@ Maintenance Status: {maintenance_status}
     @commands.command(aliases=['pong'])
     async def ping(self, ctx):
         """Shows Latency to Discord [Format: %ping]"""
-        await ctx.send(f"> **My ping is currently {ex.get_ping()}ms.**")
+        try:
+            await ctx.send(f"> **My ping is currently {ex.get_ping()}ms.**")
+        except:
+            await ctx.send("> Cannot determine ping at this time.")
 
 

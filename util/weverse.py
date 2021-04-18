@@ -96,7 +96,12 @@ class Weverse:
         """Set Comment Embed for Weverse."""
         comment_body = await ex.weverse_client.fetch_comment_body(notification.community_id, notification.contents_id)
         if not comment_body:
-            return
+            artist_comments = await ex.weverse_client.fetch_artist_comments(notification.community_id,
+                                                                            notification.contents_id)
+            if artist_comments:
+                comment_body = (artist_comments[0]).body
+            else:
+                return
         embed_description = f"**{notification.message}**\n\n" \
                             f"Content: **{comment_body}**\n" \
                             f"Translated Content: **{await ex.weverse_client.translate(notification.contents_id, is_comment=True, community_id=notification.community_id)}**"

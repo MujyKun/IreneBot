@@ -98,6 +98,13 @@ class Weverse(commands.Cog):
                 else:
                     return None
 
+                if not embed:
+                    log.console(f"WARNING: Could not receive Weverse information for {community_name}. "
+                                f"Noti ID:{latest_notification.id} - "
+                                f"Contents ID: {latest_notification.contents_id} - "
+                                f"Noti Type: {latest_notification.contents_type}")
+                    return  # we do not want constant attempts to send a message.
+
                 for channel_info in channels:
                     # sleep for 5 seconds per channel because of rate-limiting issues on the bot.
                     await asyncio.sleep(5)

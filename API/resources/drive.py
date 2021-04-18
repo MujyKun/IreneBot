@@ -16,7 +16,10 @@ def get_drive_connection():
     cred = None
     if os.path.exists(f'token.pickle'):
         with open(f'token.pickle', 'rb') as token:
-            cred = pickle.load(token)
+            try:
+                cred = pickle.load(token)
+            except Exception as e:
+                print(e)
     # If there are no (valid) credentials available, let the user log in.
     if not cred or not cred.valid:
         if cred and cred.expired and cred.refresh_token:

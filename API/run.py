@@ -34,8 +34,8 @@ def log_info():
             c.execute("INSERT INTO stats.apiusage(endpoint, keyused, called) VALUES(%s, %s, %s)", (request.base_url,
                                                                                                    index, 1))
         db_conn.commit()
-    except:
-        pass
+    except Exception as e:
+        print(f"{e} - log_info")
 
 
 @app.after_request
@@ -115,15 +115,21 @@ def get_idol_photo(idol_id, redirect_user=True, auth=True, guessing_game=False):
         # Invalid API Key
         return Response(status=403)
 
+    """
+    should not be deleting files in the endpoint. several workers may end up trying to remove the same file
+    and this request would take forever to get executed.
+    
+
     # delete files after a certain amount exist in the directory.
     currently_existing_photos = os.listdir(idol_folder)
     if len(currently_existing_photos) > 150000:
         # noinspection PyPep8
         try:
             for file in currently_existing_photos:
-                os.remove(file)
-        except:
-            pass
+                os.remove(f"{idol_folder}{file}")
+        except Exception as e:
+            print(f"{e} - get_idol_photo")
+    """
 
     try:
         allow_group_photos = request.args.get('allow_group_photos')
@@ -149,7 +155,7 @@ def get_idol_photo(idol_id, redirect_user=True, auth=True, guessing_game=False):
         return process_image(random_link, redirect_user=redirect_user)
 
     except Exception as e:
-        print(e)
+        print(f"{e} - get_idol_photo 2")
         return Response(status=500)
 
 
@@ -324,39 +330,44 @@ def get_random_idol_id_with_photo():
 
 
 def process_image(link_info, redirect_user=True, guessing_game=False):
-    # get information about the file from google drive
-    file_db_id = link_info[0]
-    file_url = link_info[1]
-    google_drive_id = get_google_drive_id(file_url)
-    file_type = get_file_type(google_drive_id)
-    file_location = f"{idol_folder}{file_db_id}{file_type}"
-    image_host_url = f"https://images.irenebot.com/idol/{file_db_id}{file_type}"
-    print(f"Processing {image_host_url}.")
-    file_data = {
-        'final_image_link': image_host_url,
-        'location': file_location,
-        'file_name': f"{file_db_id}{file_type}"
-    }
-    # check if the file is already downloaded
-    if not check_file_exists(file_location):
-        # download the file
-        download_media(google_drive_id, file_location)
+    try:
+        # get information about the file from google drive
+        file_db_id = link_info[0]
+        file_url = link_info[1]
+        google_drive_id = get_google_drive_id(file_url)
+        file_type = get_file_type(google_drive_id)
+        file_location = f"{idol_folder}{file_db_id}{file_type}"
+        image_host_url = f"https://images.irenebot.com/idol/{file_db_id}{file_type}"
+        print(f"Processing {image_host_url}.")
+        file_data = {
+            'final_image_link': image_host_url,
+            'location': file_location,
+            'file_name': f"{file_db_id}{file_type}"
+        }
+        # check if the file is already downloaded
+        if not check_file_exists(file_location):
+            # download the file
+            download_media(google_drive_id, file_location)
 
-    # we only need the media downloaded for guessing game, so this is our return point.
-    if guessing_game:
-        return image_host_url
+        # we only need the media downloaded for guessing game, so this is our return point.
+        if guessing_game:
+            return image_host_url
 
-    if '.mp4' in file_type or '.webm' in file_type:
-        # return a json of the video info
-        return file_data, 415
+        if '.mp4' in file_type or '.webm' in file_type:
+            # return a json of the video info
+            return file_data, 415
 
-    if not redirect_user:
-        return file_data, 200
+        if not redirect_user:
+            return file_data, 200
 
-    return redirect(image_host_url, code=308)
+        return redirect(image_host_url, code=308)
+    except Exception as e:
+        print(f"{e} - process_image")
+        raise Exception
 
 
 #  should be run through gunicorn
 #  app.run(port=5454)
 
-
+if __name__ == "__main__":
+    app.run()

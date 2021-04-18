@@ -907,6 +907,7 @@ class GroupMembers:
                     raise ex.exceptions.Pass
 
         except ex.exceptions.Pass:
+            # an image should be posted without going through further checcks.
             pass
 
         except Exception as e:

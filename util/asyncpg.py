@@ -43,7 +43,8 @@ class Asyncpg(SQL):
     async def update_user_balance(self, user_id: int, money: str):
         await self.conn.execute("UPDATE currency.currency SET money = $1::text WHERE userid = $2", money, user_id)
 
-
+    async def get_profile_xp(self, user_id: int) -> int:
+        return (await self.conn.fetchrow("SELECT profilexp FROM currency.levels WHERE userid = $1", user_id))[0]
 
 
 

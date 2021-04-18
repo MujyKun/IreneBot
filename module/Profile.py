@@ -9,7 +9,7 @@ from util import logger as log
 # noinspection PyBroadException,PyPep8
 class Profile(commands.Cog):
     def __init__(self):
-        ex.client.add_listener(self.profile_level, 'on_message')
+        ex.client.add_listener(self.increase_profile_level, 'on_message')
 
     @commands.command()
     async def avatar(self, ctx, user: discord.Member = None):
@@ -40,6 +40,8 @@ class Profile(commands.Cog):
             else:
                 user_bot = "No"
 
+            irene_user = await ex.get_user(user_id)
+
             count = 0
             roles = ""
             for role in roles_list:
@@ -48,15 +50,19 @@ class Profile(commands.Cog):
                 if count == (len(roles_list)-1):
                     roles += role.name
                 count += 1
+
             if len(roles) > 500:
                 roles = f"{roles[0:498]}...."
-            user_level = await ex.u_levels.get_level(user_id, "profile")
-            shortened_money = await ex.u_currency.shorten_balance(str(await ex.u_currency.get_balance(user_id)))
-            rob_beg_daily_level = f"{await ex.u_levels.get_level(user_id, 'rob')}/{await ex.u_levels.get_level(user_id, 'beg')}/{await ex.u_levels.get_level(user_id, 'daily')}"
+
+            user_level = irene_user.profile_level
+            shortened_money = await irene_user.get_shortened_balance()
+            rob_beg_daily_level = f"{irene_user.rob_level}/{irene_user.beg_level}/{irene_user.daily_level}"
+
             user_scores = f"{await ex.u_guessinggame.get_user_score('easy', user_id)}/" \
                 f"{await ex.u_guessinggame.get_user_score('medium', user_id)}/" \
                 f"{await ex.u_guessinggame.get_user_score('hard', user_id)}"
             user_timezone = await ex.u_reminder.get_user_timezone(user_id)
+
             try:
                 timezone_utc = datetime.datetime.now(pytz.timezone(user_timezone)).strftime('%Z, UTC%z')
             except:
@@ -67,26 +73,33 @@ class Profile(commands.Cog):
             else:
                 embed = discord.Embed(title=f"{user.name} ({user_id})", color=0x90ee90, url=f"{user.avatar_url}")
             embed = await ex.set_embed_author_and_footer(embed, "Thanks for using Irene!")
+
             try:
                 user_activity = user.activity.name
             except:
                 user_activity = None
+
             embed.set_thumbnail(url=user.avatar_url)
             embed.add_field(name="Profile Level", value=user_level, inline=True)
             embed.add_field(name="Money", value=f"${shortened_money}", inline=True)
+
             if type(user) == discord.Member:
                 embed.add_field(name="Status", value=f"{user.status}", inline=True)
                 embed.add_field(name="Server Nickname", value=user.nick, inline=True)
                 embed.add_field(name="Server Join Date", value=user.joined_at, inline=True)
                 if roles:
                     embed.add_field(name="Roles", value=roles, inline=False)
+
             embed.add_field(name="Rob/Beg/Daily Level", value=rob_beg_daily_level, inline=True)
             embed.add_field(name="Account Join Date", value=user.created_at, inline=True)
             embed.add_field(name="Bot", value=user_bot, inline=True)
+
             if user_activity:
                 embed.add_field(name="Activity", value=user_activity, inline=True)
+
             if user_timezone:
                 embed.add_field(name="Timezone", value=f"{user_timezone} ({timezone_utc})", inline=True)
+
             embed.add_field(name="GuessingGame [Easy/Medium/Hard]", value=user_scores, inline=True)
 
             await ctx.send(embed=embed)
@@ -97,19 +110,19 @@ class Profile(commands.Cog):
             log.console(e)
 
     @staticmethod
-    async def profile_level(msg):
+    async def increase_profile_level(msg):
+        """Increase the profile level appropriately after every message."""
         try:
+            user = await ex.get_user(msg.author.id)
             xp_per_message = 10
-            user_id = msg.author.id
-            current_level = await ex.u_levels.get_level(user_id, "profile")
-            current_xp = await ex.u_levels.get_level(user_id, "profilexp")
-            xp_needed_for_level = await ex.u_levels.get_xp(current_level, "profile")
+            current_level = user.profile_level
+            current_xp = await user.get_profile_xp()
+            xp_needed_for_level = await user.get_xp_needed(current_level, "profile")
 
             if current_xp + xp_per_message < xp_needed_for_level:
-                await ex.u_levels.set_level(user_id, current_xp + xp_per_message, "profilexp")
-            else:
-                await ex.u_levels.set_level(user_id, 1, "profilexp")
-                await ex.u_levels.set_level(user_id, current_level+1, "profile")
-        except:
-            pass
+                return await user.set_profile_xp(current_xp + xp_per_message)
+            await user.set_profile_xp(1)
+            await user.set_profile_level(current_level + 1)
+        except Exception:
             # log.console(e)
+            pass

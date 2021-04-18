@@ -36,6 +36,16 @@ class User:
             from util.asyncpg import sql as t_sql
             sql = t_sql
 
+    async def get_profile_xp(self):
+        """Get the user's profile xp."""
+        await self.ensure_level()
+        return await sql.get_profile_xp(self.id)
+
+    async def set_profile_xp(self, xp_amount):
+        """Set the user's profile xp."""
+        await self.ensure_level()
+        return await self.update_level_in_db("profilexp", xp_amount)
+
     async def set_profile_level(self, level):
         """Set the profile level."""
         await self.ensure_level()
@@ -69,7 +79,7 @@ class User:
 
     async def update_level_in_db(self, column_name, level):
         """Update the level for the user."""
-        allowed_columns = ['profile', 'beg', 'rob', 'daily']
+        allowed_columns = ['profile', 'beg', 'rob', 'daily', 'profilexp']
         if column_name in allowed_columns:
             await sql.update_level(self.id, column_name, level)
 

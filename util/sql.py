@@ -60,3 +60,11 @@ class SQL:
         :param money: Balance to update to
         """
 
+    async def get_profile_xp(self, user_id: int) -> int:
+        """
+        Get a user's profile xp.
+
+        :param user_id: Discord User ID
+        """
+
+

@@ -879,21 +879,43 @@ class GroupMembers:
 
     # noinspection PyPep8
     async def request_image_post(self, message, idol, channel):
+        """Checks if the user can post an image, then posts it."""
         photo_msg, api_url, posted = None, None, False
-        if not await ex.u_miscellaneous.check_if_bot_banned(message.author.id):
+
+        try:
             async with channel.typing():
-                try:
-                    if await self.check_user_limit(message.author, message.channel, no_vote_limit=True):
-                        if not await self.get_if_user_voted(
-                                message.author.id) and not await ex.u_patreon.check_if_patreon(message.author.id):
-                            return await self.send_vote_message(message)
-                except Exception as e:
-                    log.console(e)
+                # check if there is a maintenance *checks if user also has perms during a maintenance*
+                if not await ex.events.check_maintenance(message):
+                    await ex.u_miscellaneous.send_maintenance_message(channel)
+                    return photo_msg, api_url, posted
+
+                # if the user is banned
+                if await ex.u_miscellaneous.check_if_bot_banned(message.author.id):
+                    return photo_msg, api_url, posted
+
+                # if the user is a patron
+                if await ex.u_patreon.check_if_patreon(message.author.id):
+                    raise ex.exceptions.Pass
+
+                # If the user has not voted and they have passed the no vote limit.
+                if await self.check_user_limit(message.author, message.channel, no_vote_limit=True):
+                    if not await self.get_if_user_voted(message.author.id):
+                        return await self.send_vote_message(message)
+
+                # finds out the user's current post limit and if it has been surpassed.
                 if not await self.check_user_limit(message.author, channel):
-                    if not await ex.events.check_maintenance(message):
-                        return await ex.u_miscellaneous.send_maintenance_message(channel)
-                    photo_msg, api_url = await self.idol_post(channel, idol, user_id=message.author.id)
-                    posted = True
+                    raise ex.exceptions.Pass
+
+        except ex.exceptions.Pass:
+            pass
+
+        except Exception as e:
+            log.console(e)
+
+        # post the image.
+        photo_msg, api_url = await self.idol_post(channel, idol, user_id=message.author.id)
+        posted = True
+
         return photo_msg, api_url, posted
 
     async def choose_random_member(self, members=None, groups=None):

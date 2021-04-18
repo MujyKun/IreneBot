@@ -42,3 +42,13 @@ class InvalidParamsPassed(Exception):
         super(InvalidParamsPassed, self).__init__(f" -> {msg}")
         log.console(msg)
 
+
+class Pass(Exception):
+    """
+    A hack exception. This exception was meant to occur in order to jump to a part in code.
+    Indicates something went right instead of wrong.
+    """
+    def __init__(self):
+        pass
+
+

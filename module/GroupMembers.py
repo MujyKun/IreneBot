@@ -360,7 +360,7 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
             msg = await ex.get_msg(ctx, "groupmembers", "idol_not_found")
             return await ctx.send(msg)
         for member in members:
-            msg = await ex.get_msg(ctx, "groupmembers" "photo_count")
+            msg = await ex.get_msg(ctx, "groupmembers", "photo_count")
             msg = await ex.replace(msg, [["photo_count", member.photo_count],
                                          ["object_name", f"{member.full_name} ({member.stage_name})"]])
             await ctx.send(msg)

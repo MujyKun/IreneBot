@@ -36,11 +36,6 @@ class Miscellaneous:
         """Check if a channel is a temp channel"""
         return ex.cache.temp_channels.get(channel_id) is not None  # do not change structure
 
-    @staticmethod
-    async def get_temp_channels():
-        """Get all temporary channels in the DB."""
-        return await ex.conn.fetch("SELECT chanid, delay FROM general.tempchannels")
-
     async def delete_temp_messages(self, message):
         """Delete messages that are temp channels"""
         if await self.check_if_temp_channel(message.channel.id):
@@ -94,7 +89,7 @@ class Miscellaneous:
             embed = discord.Embed(title=f"**{ctx.author.display_name}** {interaction} **{user.display_name}**", color=ex.get_random_color())
             if not await ex.u_patreon.check_if_patreon(ctx.author.id):
                 msg = await ex.get_msg(ctx, "interactions", "patreon_footer")
-                msg = await ex.replace(msg, ['server_prefix', await ex.get_server_prefix_by_context(ctx)])
+                msg = await ex.replace(msg, ['server_prefix', await ex.get_server_prefix(ctx)])
                 embed.set_footer(text=msg)
             embed.set_image(url=link[0])
             return await ctx.send(embed=embed)
@@ -131,7 +126,7 @@ class Miscellaneous:
             return
         message_content = message.clean_content
         message_channel = message.channel
-        server_prefix = await ex.get_server_prefix_by_context(message)
+        server_prefix = await ex.get_server_prefix(message)
         # check if the user mentioned the bot and send them a help message.
         if await self.check_for_bot_mentions(message):
             await message.channel.send(

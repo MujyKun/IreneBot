@@ -270,7 +270,7 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
             except:
                 msg = await ex.get_msg(ctx, "groupmembers", "stop_images_fail")
                 msg = await ex.replace(msg, [['text_channel', text_channel.name],
-                                             ['server_prefix', await ex.get_server_prefix_by_context(ctx)]])
+                                             ['server_prefix', await ex.get_server_prefix(ctx)]])
                 await ctx.send(msg)
         else:
             await ex.conn.execute("DELETE FROM groupmembers.restricted WHERE channelid = $1 AND sendhere = $2", text_channel.id, 0)
@@ -316,7 +316,7 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
         else:
             msg = await ex.get_msg(ctx, "groupmembers", "send_images_fail")
             msg = await ex.replace(msg, [['text_channel', text_channel.name],
-                                         ['server_prefix', await ex.get_server_prefix_by_context(ctx)]])
+                                         ['server_prefix', await ex.get_server_prefix(ctx)]])
             await ctx.send(msg)
 
     @commands.command(aliases=['%'])
@@ -417,7 +417,7 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
                     embed_list = await ex.u_group_members.set_embed_with_all_aliases("Group", server_id=server_id)
                 else:
                     msg = await ex.get_msg(ctx, "groupmembers", "no_aliases")
-                    msg = await ex.replace(msg, ["server_prefix", await ex.get_server_prefix_by_context(ctx)])
+                    msg = await ex.replace(msg, ["server_prefix", await ex.get_server_prefix(ctx)])
                     return await ctx.send(msg)
             if len(embed_list) < page_number or page_number < 1:
                 page_number = 1
@@ -473,7 +473,7 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
         """Shows leaderboards for how many times an idol has been called. [Format: %clb]"""
         embed = discord.Embed(title=f"Idol Leaderboard", color=0xffb6c1)
         embed.set_author(name="Irene", url=keys.bot_website, icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
-        embed.set_footer(text=f"Type {await ex.get_server_prefix_by_context(ctx)}count (idol name) to view their individual stats.", icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
+        embed.set_footer(text=f"Type {await ex.get_server_prefix(ctx)}count (idol name) to view their individual stats.", icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
         all_members = await ex.conn.fetch("SELECT MemberID, Count FROM groupmembers.Count ORDER BY Count DESC")
         count_loop = 0
         for member_id, count in all_members:

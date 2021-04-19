@@ -7,41 +7,23 @@ class Cache(commands.Cog):
     def __init__(self):
         # dict of discord (util) User objects -> not from d.py. Stored as a dict for easier searching.
         self.users = {}  # {user_id: User_object}
-        # maintenance mode
-        self.maintenance_mode = False
-        # maintenance reason
-        self.maintenance_reason = None
-        # current session
-        self.session_id = None
-        # current session commands used
-        self.current_session = 0
-        # total amount of commands used
-        self.total_used = None
-        # time format of current session for comparison
-        self.session_time_format = None
-        # API Calls made directly from the bot for Translations per minute
-        self.bot_api_translation_calls = 0
-        # API Calls made directly from the bot for Idols per minute
-        self.bot_api_idol_calls = 0
-        # N Words per minute
-        self.n_words_per_minute = 0
-        # commands used in the current minute
-        self.commands_per_minute = 0
-        # messages received per minute
-        self.messages_received_per_minute = 0
-        # errors per minute
-        self.errors_per_minute = 0
-        # wolfram calls per minute
-        self.wolfram_per_minute = 0
-        # Urban dictionary calls per minute
-        self.urban_per_minute = 0
-        """
-        Command Counter
-        {
-        command_name : amount_of_times_used
-        }
-        """
-        self.command_counter = {}
+        self.maintenance_mode = False  # maintenance mode enabled
+        self.maintenance_reason = None  # maintenance reason
+        self.session_id = None  # current session id
+        self.current_session = 0  # current session commands used
+        self.total_used = None  # total amount of commands used
+        self.session_time_format = None  # time format of current session for comparison
+        self.bot_api_translation_calls = 0  # API Calls made directly from the bot for Translations per minute
+        self.bot_api_idol_calls = 0  # API Calls made directly from the bot for Idols per minute
+        self.n_words_per_minute = 0  # N Words per minute
+        self.commands_per_minute = 0  # commands used in the current minute
+        self.messages_received_per_minute = 0  # messages received per minute
+        self.errors_per_minute = 0  # errors per minute
+        self.wolfram_per_minute = 0  # wolfram calls per minute
+        self.urban_per_minute = 0  # Urban dictionary calls per minute
+
+        # Amount of times a command has been used.
+        self.command_counter = {}  # { command_name : amount_of_times_used }
         # Photo Count of groups
         self.group_photos = {}  # { group_id: photo_count }
         # Photo Count of idols
@@ -90,33 +72,33 @@ class Cache(commands.Cog):
         """
         self.temp_channels = {}
 
+        # TODO: convert to dict based on their idol/group id
         # list of idol objects
         self.idols = []
         # list of group objects
         self.groups = []
+
         # dict of restricted idol photo channels
-        """
-        channelid : [server_id, sendall]
-        """
-        self.restricted_channels = {}
-        """
-        messageid : [dead_link, userid, idolid, is_guessing_game]
-        """
-        self.dead_image_cache = {}
-        # Channel for all dead images to be sent to.
-        self.dead_image_channel = None
+        self.restricted_channels = {}  # {channelid : [server_id, sendall]}
+        # contains all of the reported dead images
+        self.dead_image_cache = {}  # {messageid : [dead_link, userid, idolid, is_guessing_game]}
+
+        self.dead_image_channel = None  # Channel for all dead images to be sent to.
         self.bot_statuses = []
-        """
-        server_id: {command_name:info, command_name:info}  
-        """
-        self.custom_commands = {}
+
+        # custom server commands
+        self.custom_commands = {}  # {server_id: {command_name:info, command_name:info}}
 
         # Guessing Game Objects
-        self.guessing_games = []
+        self.guessing_games = {}  # {channelid: Game}
         # Bias Game Objects
-        self.bias_games = []
+        self.bias_games = {}  # {channelid: Game}
+
         # Text channels to send Weverse updates to.
         self.weverse_channels = {}  # { community_name: [ [channel_id, role_id, comments_disabled] ] }
+
+        # languages available, also the file names
+        self.languages_available = ["en_us"]
 
         # Guessing Game User Scores
         self.guessing_game_counter = {}

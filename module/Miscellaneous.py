@@ -111,7 +111,7 @@ Message Author: {message.author}
             await ctx.send(f"> **{ctx.author.display_name}, if you were receiving notifications for that phrase, it has been removed.**")
         except Exception as e:
             log.console(e)
-            await ctx.send(f"> **Something Went Wrong, please {await ex.get_server_prefix_by_context(ctx)}report it.**")
+            await ctx.send(f"> **Something Went Wrong, please {await ex.get_server_prefix(ctx)}report it.**")
 
     @commands.command()
     async def listnoti(self, ctx):
@@ -137,7 +137,7 @@ Message Author: {message.author}
                 f"> **{ctx.author.display_name}, You do not have any notification phrases on this server.**")
         except Exception as e:
             log.console(e)
-            await ctx.send(f"> **Something Went Wrong, please {await ex.get_server_prefix_by_context(ctx)}report it.**")
+            await ctx.send(f"> **Something Went Wrong, please {await ex.get_server_prefix(ctx)}report it.**")
 
     @commands.command(aliases=['patron'])
     async def patreon(self, ctx):
@@ -306,7 +306,7 @@ Maintenance Status: {maintenance_status}
         """Shows leaderboards for how many times the nword has been said. [Format: %nwl (server/global)]"""
         embed = discord.Embed(title=f"NWord Leaderboard", color=0xffb6c1)
         embed.set_author(name="Irene", url=keys.bot_website, icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
-        embed.set_footer(text=f"Type {await ex.get_server_prefix_by_context(ctx)}nword (user) to view their individual stats.", icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
+        embed.set_footer(text=f"Type {await ex.get_server_prefix(ctx)}nword (user) to view their individual stats.", icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
 
         guild_id = await ex.get_server_id(ctx)
         if not guild_id:
@@ -358,7 +358,7 @@ Maintenance Status: {maintenance_status}
         """Search a term through UrbanDictionary. Underscores are spaces.
         [Format: %urban (term) (definition number)][Aliases: define,u]"""
         if not ctx.channel.is_nsfw() and not override == 1:
-            server_prefix = await ex.get_server_prefix_by_context(ctx)
+            server_prefix = await ex.get_server_prefix(ctx)
             return await ctx.send(f">>> **This text channel must be NSFW to use {server_prefix}"
                            f"urban (Guidelines set by top.gg).**\nTo override this, You may add a **1** after the "
                            f"definition number.\nExample: {server_prefix}urban hello (definition number) **1**.")

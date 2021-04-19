@@ -30,7 +30,7 @@ class GroupMembers:
     @staticmethod
     async def send_vote_message(message):
         """Send the vote message to a user."""
-        server_prefix = await ex.get_server_prefix_by_context(message)
+        server_prefix = await ex.get_server_prefix(message)
         vote_message = f"> **To call more idol photos for the next 24 hours," \
                        f" please support Irene by voting or becoming a patron through the links at " \
                        f"`{server_prefix}vote` or `{server_prefix}patreon`!**"
@@ -229,39 +229,35 @@ class GroupMembers:
         return idol
 
     @staticmethod
-    async def get_db_all_members():
-        """Get all idols from the database."""
-        return await ex.conn.fetch("""SELECT id, fullname, stagename, formerfullname, formerstagename, birthdate,
-            birthcountry, birthcity, gender, description, height, twitter, youtube, melon, instagram, vlive, spotify,
-            fancafe, facebook, tiktok, zodiac, thumbnail, banner, bloodtype, tags, difficulty
-            FROM groupmembers.Member ORDER BY id""")
-
-    @staticmethod
     async def get_all_groups():
         """Get all groups."""
-        return await ex.conn.fetch("""SELECT groupid, groupname, debutdate, disbanddate, description, twitter, youtube,
-            melon, instagram, vlive, spotify, fancafe, facebook, tiktok, fandom, company,
-            website, thumbnail, banner, gender, tags FROM groupmembers.groups 
-            ORDER BY groupname""")
 
     @staticmethod
-    async def get_db_members_in_group(group_name=None, group_id=None):
-        """Get the members in a specific group from database."""
-        if group_id is None:
-            group_id = ex.first_result(
-                await ex.conn.fetchrow(f"SELECT groupid FROM groupmembers.groups WHERE groupname = $1", group_name))
-        members = await ex.conn.fetch("SELECT idolid FROM groupmembers.idoltogroup WHERE groupid = $1", group_id)
-        return [member[0] for member in members]
+    async def get_db_members_in_group(group_id):
+        """Get the members in a specific group from the database."""
+        async def get_member_ids_in_group():
+            try:
+                for idol_id in ex.sql.fetch_members_in_group(group_id):
+                    yield idol_id
+            except:
+                return
+
+        return [idol[0] async for idol in get_member_ids_in_group()] or []
 
     @staticmethod
     async def get_db_aliases(object_id, group=False):
         """Get the aliases of an idol or group from the database."""
-        aliases = await ex.conn.fetch(
-            "SELECT alias, serverid FROM groupmembers.aliases WHERE objectid = $1 AND isgroup = $2", object_id,
-            int(group))
         global_aliases = []
         local_aliases = {}
-        for alias, server_id in aliases:
+
+        async def get_aliases():
+            try:
+                for t_alias, t_server_id in await ex.sql.fetch_aliases(object_id, group):
+                    yield t_alias, t_server_id
+            except:
+                return
+
+        async for alias, server_id in get_aliases():
             if server_id:
                 server_list = local_aliases.get(server_id)
                 if server_list:
@@ -290,7 +286,7 @@ class GroupMembers:
 
     async def send_names(self, ctx, mode, user_page_number=1, group_ids=None):
         """Send the names of all idols in an embed with many pages."""
-        server_prefix = await ex.get_server_prefix_by_context(ctx)
+        server_prefix = await ex.get_server_prefix(ctx)
 
         async def check_mode(embed_temp):
             """Check if it is grabbing their full names or stage names."""
@@ -461,7 +457,7 @@ class GroupMembers:
                                 await message.delete()
                             else:
                                 await message.clear_reactions()
-                                server_prefix = await ex.get_server_prefix_by_context(message)
+                                server_prefix = await ex.get_server_prefix(message)
                                 warning_msg = f"Report images as dead links (2nd reaction) ONLY if the image does not load or it's not a photo of the idol.\nYou can have this message removed by becoming a {server_prefix}patreon"
                                 if guessing_game:
                                     warning_msg = f"This image has been reported as a dead image, not a photo of the idol, or a photo with several idols.\nYou can have this message removed by becoming a {server_prefix}patreon"
@@ -753,7 +749,7 @@ class GroupMembers:
                 # await ex.kill_api()
                 ex.api_issues = 0
             if guessing_game:
-                existing_game = ex.find_game(channel, ex.cache.guessing_games)
+                existing_game = ex.cache.guessing_games.get(channel.id)
                 if existing_game:
                     existing_game.api_issues += 1
                     if existing_game.api_issues > 30:

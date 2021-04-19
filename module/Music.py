@@ -255,7 +255,7 @@ class Music(commands.Cog):
             await ctx.send(f"> **There are no songs queued in this server.**")
         except Exception as e:
             log.console(e)
-            await ctx.send(f"> **Something went wrong.. Please {await ex.get_server_prefix_by_context(ctx)}report it.**")
+            await ctx.send(f"> **Something went wrong.. Please {await ex.get_server_prefix(ctx)}report it.**")
 
     @commands.command()
     async def join(self, ctx):

@@ -27,7 +27,11 @@
   },
   "currency": {
     "daily_msg": "{name}, you have been given {daily_amount}.",
-    "balance_msg": "{name} currently has {balance}."
+    "balance_msg": "{name} currently has {balance} {currency_name}(s).",
+    "nothing_to_bet": "{name}, you cannot bet less than 1 {currency_name}.",
+    "in_game": "{name}, you cannot use Currency while you are in a game. Please type {server_prefix}endgame.",
+    "not_enough": "{name}, you do not have enough {currency_name}s. You have {balance}.",
+    "bet_result": "{name}, you {result} {integer}! Your updated balance is {balance}."
   },
   "customcommands": {
     "bot_command_exists": "{command_name} is already a bot command and can not be added.",

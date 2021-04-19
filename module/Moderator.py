@@ -78,7 +78,7 @@ class Moderator(commands.Cog):
         try:
             channel_id = ctx.channel.id
             guild_id = ctx.guild.id
-            server_prefix = await ex.get_server_prefix_by_context(ctx)
+            server_prefix = await ex.get_server_prefix(ctx)
             server = ex.cache.welcome_messages.get(guild_id)
             welcome_new_users = f"> This server will now welcome new users. More info can be found with `{server_prefix}help welcome`"
             if not message:

@@ -86,7 +86,7 @@ class Reminder(commands.Cog):
                 msg = await ex.get_msg(ctx, "reminder", "max_reminders")
                 msg = await ex.replace(msg, [["name", ctx.author.display_name], ["reminder_limit", reminder_limit]])
                 return await ctx.send(msg)
-        server_prefix = await ex.get_server_prefix_by_context(ctx)
+        server_prefix = await ex.get_server_prefix(ctx)
         # msgs are repeated numerous times. setting the values beforehand.
         incorrect_format_msg = await ex.get_msg(ctx, "reminder", "incorrect_format")
         incorrect_format_msg = await ex.replace(incorrect_format_msg, [["name", ctx.author.display_name],
@@ -125,7 +125,7 @@ class Reminder(commands.Cog):
     async def gettimezone(self, ctx, user_input: typing.Union[discord.Member, str] = None):
         """Get your current set timezone.
         [Format: %gettimezone]"""
-        server_prefix = await ex.get_server_prefix_by_context(ctx)
+        server_prefix = await ex.get_server_prefix(ctx)
 
         if isinstance(user_input, str):
             try:
@@ -172,7 +172,7 @@ class Reminder(commands.Cog):
             msg = await ex.replace(msg, ["name", ctx.author.display_name])
             return await ctx.send(msg)
 
-        server_prefix = await ex.get_server_prefix_by_context(ctx)
+        server_prefix = await ex.get_server_prefix(ctx)
         user_timezone = await ex.u_reminder.process_timezone_input(timezone_name, country_code)
         if not user_timezone:
             msg = await ex.get_msg(ctx, "reminder", "invalid_tz")

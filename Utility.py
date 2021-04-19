@@ -8,8 +8,6 @@ import asyncio
 import os
 import tweepy
 
-
-
 # do not import in runtime. This is used for type-hints.
 if TYPE_CHECKING:
     import util
@@ -122,9 +120,22 @@ class Utility:
             return record[0]
 
     @staticmethod
-    def remove_commas(amount):
+    def remove_commas(amount) -> int:
         """Remove all commas from a string and make it an integer."""
-        return int(amount.replace(',', ''))
+        try:
+            balance = int(amount.replace(',', ''))
+        except:
+            balance = 0
+        return balance
+
+    @staticmethod
+    def add_commas(amount: int) -> str:
+        """Add commas to an integer and converts it to a string.
+
+        :param amount: A value.
+        :return: A string with the integer separated by commas.
+        """
+        return f"{amount:,}"
 
     async def kill_api(self):
         """restart the api"""
@@ -270,44 +281,48 @@ class Utility:
                 await change_page(c_page)
         await change_page(original_page_number)
 
-    async def get_server_prefix(self, server_id):
-        """Gets the prefix of a server by the server ID."""
-        prefix = self.cache.server_prefixes.get(server_id)
-        if not prefix:
-            return self.keys.bot_prefix
-        else:
-            return prefix
+    async def get_server_prefix(self, id_ctx_message):
+        """Gets the prefix of a server by the server ID, Context, or Message.
 
-    async def get_server_prefix_by_context(self, ctx):  # this can also be passed in as a message
-        """Gets the prefix of a server by the context."""
+        :param id_ctx_message: Context, Message, or server id.
+        :return: Server Prefix
+        """
         try:
-            prefix = await self.get_server_prefix(ctx.guild.id)
+            if isinstance(id_ctx_message, Context) or isinstance(id_ctx_message, discord.Message):
+                server_id = id_ctx_message.guild.id
+            elif isinstance(id_ctx_message, int):
+                server_id = id_ctx_message
+            else:
+                return self.keys.bot_prefix
+
+            prefix = self.cache.server_prefixes.get(server_id) or self.keys.bot_prefix
             return prefix
         except:
             return self.keys.bot_prefix
 
     @staticmethod
-    def check_file_exists(file_name):
-        return os.path.isfile(file_name)
+    def check_file_exists(file_path):
+        """Check if a file path exists."""
+        return os.path.isfile(file_path)
 
-    async def stop_game(self, ctx, games):
-        """Delete an ongoing game."""
+    async def stop_game(self, ctx, games: dict):
+        """Delete an ongoing game.
+
+        :param ctx: Context object
+        :param games: Dict of Games
+        :return: False if no game was found
+        """
         is_moderator = await self.u_miscellaneous.check_if_moderator(ctx)
-        game = self.find_game(ctx.channel, games)
+        try:
+            game = games.pop(ctx.channel.id)
+        except KeyError:
+            return False
+
         if game:
             if ctx.author.id == game.host or is_moderator:
-                games.remove(game)
                 return await game.end_game()
             else:
                 return await ctx.send("> You must be a moderator or the host of the game in order to end the game.")
-        return await ctx.send("> No game is currently in session.")
-
-    @staticmethod
-    def find_game(channel, games):
-        """Return a game from a list of game objects if it exists in the channel."""
-        for game in games:
-            if game.channel == channel:
-                return game
 
     async def check_user_in_support_server(self, ctx):
         """Checks if a user is in the support server.
@@ -324,7 +339,8 @@ class Utility:
             return True
         user = await self.get_user(ctx.author.id)
         msg = await self.replace(self.cache.languages[user.language]['utility']['join_support_server_feature'],
-                           [['bot_name', self.keys.bot_name], ['support_server_link', self.keys.bot_support_server_link]])
+                                 [['bot_name', self.keys.bot_name],
+                                  ['support_server_link', self.keys.bot_support_server_link]])
         await ctx.send(msg)
 
     @staticmethod
@@ -334,14 +350,18 @@ class Utility:
         :param text: The text that requires replacing.
         :param inputs_to_change: A list of lists with the 0th index as the keyword to replace, and the 1st index
         as the content.
-        :return:
+        :return: string with proper input.
         """
         # convert the input to a list of lists if it is not already.
         if not isinstance(inputs_to_change[0], list):
             inputs_to_change = [[inputs_to_change[0], inputs_to_change[1]]]
 
+        async def get_inputs_to_change():
+            for in_list in inputs_to_change:
+                yield in_list
+
         # custom input is always surrounded by curly braces {}
-        for input_list in inputs_to_change:
+        async for input_list in get_inputs_to_change():
             # make sure braces do not already exist in the input
             keyword = input_list[0]
             custom_input = str(input_list[1])

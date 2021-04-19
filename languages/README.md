@@ -17,6 +17,7 @@ All module names (keys) should be entirely lowercase.
 **Guild/Server ID:** `{server_id}`  
 **Text Channel Name:** `{text_channel}`  
 **Command Name:** `{command_name}`  
+**Currency Name:** `{currency_name}`  
 
 
 **Support Server Link:** `{support_server_link}`  
@@ -67,3 +68,5 @@ All module names (keys) should be entirely lowercase.
 **An index:** `{index}`  
 **Specific Format:** `{format}`  
 **Location or Timezone:** `{tz}`  
+**An Amount of Anything (integer):** `{integer}`  
+**Any type of result (string):** `{result}`  

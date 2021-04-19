@@ -18,12 +18,12 @@ class BiasGame(commands.Cog):
         user = await ex.get_user(ctx.author.id)
         if not ctx.guild:
             return await ctx.send(await ex.get_msg(user, 'biasgame', 'no_dm'))
-        if ex.find_game(ctx.channel, ex.cache.bias_games):
-            server_prefix = await ex.get_server_prefix_by_context(ctx)
+        if ex.cache.bias_games.get(ctx.channel.id):
+            server_prefix = await ex.get_server_prefix(ctx)
             return await ctx.send(await ex.replace(
                 await ex.get_msg(user, 'biasgame', 'in_progress'), [['server_prefix', server_prefix]]))
         game = Game(ctx, bracket_size, gender)
-        ex.cache.bias_games.append(game)
+        ex.cache.bias_games[ctx.channel.id] = game
 
         msg = await ex.replace(
             await ex.get_msg(user, 'biasgame', 'start_game'),
@@ -31,16 +31,18 @@ class BiasGame(commands.Cog):
              ["gender", f"{game.gender if game.gender != 'all' else 'both male and female'}"]])
 
         await ctx.send(msg)
-        await game.process_game()
-        if game in ex.cache.bias_games:
-            log.console(f"Ending Bias Game in {ctx.channel.id}")
-            ex.cache.bias_games.remove(game)
+        await game.process_game()  # start the game
+        await ex.stop_game(ctx, ex.cache.bias_games)  # remove the game.
+        log.console(f"Ended Bias Game in {ctx.channel.id}")
 
     @commands.command()
     async def stopbg(self, ctx):
-        """Force-end a bias game if you are a moderator or host of the game. This command is meant for any issues or if a game happens to be stuck.
+        """Force-end a bias game if you are a moderator or host of the game. This command is meant for any issues or
+        if a game happens to be stuck.
         [Format: %stopbg]"""
-        await ex.stop_game(ctx, ex.cache.bias_games)
+        if not await ex.stop_game(ctx, ex.cache.bias_games):
+            return await ctx.send("> No game is currently in session.")
+        log.console(f"Force-Ended Bias Game in {ctx.channel.id}")
 
     @commands.command()
     async def listbg(self, ctx, user: discord.Member = None):

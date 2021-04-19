@@ -237,13 +237,3 @@ class Reminder:
         except Exception as e:
             log.console(e)
         await ex.conn.execute("DELETE FROM reminders.reminders WHERE id = $1", reminder_id)
-
-    @staticmethod
-    async def get_all_reminders_from_db():
-        """Get all reminders from the db (all users)"""
-        return await ex.conn.fetch("SELECT id, userid, reason, timestamp FROM reminders.reminders")
-
-    @staticmethod
-    async def get_all_timezones_from_db():
-        """Get all timezones from the db (all users)"""
-        return await ex.conn.fetch("SELECT userid, timezone FROM reminders.timezones")

@@ -11,7 +11,7 @@ class User:
     """Represents a discord user."""
     def __init__(self, user_id: int):
         self.id = user_id
-        self.mod_mail_channel_id: int = None
+        self.mod_mail_channel_id: int = 0
         self.bot_banned: bool = False
         self.idol_cards: list = []
         self.gacha_albums: list = []
@@ -19,16 +19,17 @@ class User:
         self.super_patron: bool = False
         self.notifications: list = []  # [ [guild_id, phrase], ... ]
         self.reminders: list = []  # [ [remind_id, remind_reason, remind_time], ... ]
-        self.timezone: str = None
+        self.timezone: str = ""
         self.n_word: int = 0  # amount of times the user has said the N-Word.
         self.gg_filter: bool = False
         self.gg_groups: list = []
-        self.money: int = -1
+        self.balance: int = -1
         self.profile_level: int = 0
         self.beg_level: int = 0
         self.rob_level: int = 0
         self.daily_level: int = 0
         self.language: str = "en_us"
+        self.in_currency_game: bool = False
 
         # On initial imports, sql is not defined, so it is better to do it upon user construction.
         global sql
@@ -99,46 +100,54 @@ class User:
 
     async def register_currency(self):
         """Registers the user to the currency system."""
-        if self.money == -1:
-            self.money = 100
-            await sql.register_currency(self.id, self.money)
+        if self.balance == -1:
+            self.balance = 100
+            await sql.register_currency(self.id, self.balance)
 
     async def update_balance(self, balance: int = None, add: int = None, remove: int = None):
-        """Set balance of user in db and object."""
-        if self.money == -1:
+        """Set balance of user in db and object.
+
+        :param balance: The amount to set the balance to.
+        :param add: The amount to add to the current balance.
+        :param remove: The amount to remove from the current balance.
+        """
+        if self.balance == -1:
             await self.register_currency()
             # accounting for new registered users receiving 100 when updating balance.
             if balance:
-                self.money = balance + self.money
+                self.balance = balance + self.balance
         else:
             if balance:
-                self.money = balance
+                self.balance = balance
 
         if add:
-            self.money += add
+            self.balance += add
 
         if remove:
-            self.money -= remove
+            self.balance -= remove
 
         # make sure money can never be negative.
-        if self.money < -1:
-            self.money = 0
+        if self.balance < -1:
+            self.balance = 0
 
-        await sql.update_user_balance(self.id, str(self.money))
+        await sql.update_user_balance(self.id, str(self.balance))
 
     async def get_shortened_balance(self) -> str:
         """Shorten an amount of money to its value places."""
-        place_names = ['', 'Thousand', 'Million', 'Billion', 'Trillion', 'Quadrillion', 'Quintillion', 'Sextillion', 'Septillion', 'Octillion', 'Nonillion', 'Decillion', 'Undecillion', 'Duodecillion', 'Tredecillion', 'Quatturodecillion', 'Quindecillion', 'Sexdecillion', 'Septendecillion', 'Octodecillion', 'Novemdecillion', 'Vigintillion', 'Centillion']
+        place_names = ['', 'Thousand', 'Million', 'Billion', 'Trillion', 'Quadrillion', 'Quintillion', 'Sextillion',
+                       'Septillion', 'Octillion', 'Nonillion', 'Decillion', 'Undecillion', 'Duodecillion',
+                       'Tredecillion', 'Quatturodecillion', 'Quindecillion', 'Sexdecillion', 'Septendecillion',
+                       'Octodecillion', 'Novemdecillion', 'Vigintillion', 'Centillion']
         try:
-            place_values = int(log10(self.money) // 3)
+            place_values = int(log10(self.balance) // 3)
         except:
             # This will have a math domain error when the balance is 0.
             return "0"
         try:
-            return f"{self.money // (10 ** (3 * place_values))} {place_names[place_values]}"
+            return f"{self.balance // (10 ** (3 * place_values))} {place_names[place_values]}"
         except:
             # user has money outside of the value places. resort to scientific notation.
-            return f"{Decimal(self.money):.2E}"
+            return f"{Decimal(self.balance):.2E}"
 
     async def get_rob_amount(self, money):
         """
@@ -173,6 +182,3 @@ class User:
             return
 
         await sql.set_user_language(self.id, language)
-
-
-

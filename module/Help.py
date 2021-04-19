@@ -14,7 +14,7 @@ class Help(commands.Cog):
     # noinspection PyPep8
     class SubHelp(commands.MinimalHelpCommand):
         async def get_server_prefix(self):
-            return await ex.get_server_prefix_by_context(self.context)
+            return await ex.get_server_prefix(self.context)
 
         async def send_pages(self):
             channel = self.get_destination()
@@ -67,7 +67,7 @@ class Help(commands.Cog):
 
         async def get_opening_note(self):
             """Was changed to async. Gets the opening message of a help command."""
-            server_prefix = await ex.get_server_prefix_by_context(self.context)
+            server_prefix = await ex.get_server_prefix(self.context)
             return f"Use ``{server_prefix}help [command]`` for more info on a command.\nYou can also use " \
                 f"``{server_prefix}help [category]`` (CASE-SENSITIVE) for more info on a category.\nTo reset a " \
                 f"server prefix, you may type ``{bot_prefix}setprefix``.\n\n " \

@@ -177,11 +177,6 @@ class BotMod(commands.Cog):
     async def killapi(self, ctx):
         """Restarts the API. [Format: %killapi]"""
         await ctx.send("> Restarting the API.")
-        message = f"Irene is restarting. All games will be stopped."
-        for game in ex.cache.bias_games:
-            await game.channel.send(message)
-        for game in ex.cache.guessing_games:
-            await game.channel.send(message)
         await ex.kill_api()
 
     @commands.command()
@@ -217,37 +212,48 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
         """Kills the bot [Format: %kill]"""
         await ctx.send("> **The bot is now offline.**")
         message = "Irene is restarting... All games in this channel will force-end."
-        for game in ex.cache.bias_games:
-            try:
-                await game.channel.send(message)
-            except:
-                pass
 
-        for game in ex.cache.guessing_games:
+        async def get_games():
+            for existing_game in ex.cache.guessing_games.values():
+                yield existing_game
+            for existing_game in ex.cache.bias_games.values():
+                yield existing_game
+
+        async for game in get_games():
             try:
+                await game.end_game()
+                log.console(f"Closed the game in {game.channel.id}.")
                 await game.channel.send(message)
             except:
+                log.console(f"Failed to close the game in {game.channel.id}")
                 pass
 
         try:
             await ex.conn.terminate()  # close all db connections.
+            log.console("Closed all DB Connections.")
         except:
+            log.console("Failed to close all DB Connections.")
             pass
 
         try:
             await ex.session.close()  # close the aiohttp client session.
+            log.console("Closed the aiohttp session")
         except:
+            log.console("Failed to cose the aiohttp Client Session.")
             pass
 
         try:
-            await ex.client.logout()
+            await ex.client.logout()  # log out of bot.
+            log.console("Logged out of the bot.")
         except:
+            log.console("Failed to log out of the bot.")
             pass
 
     @commands.command()
     @commands.check(ex.check_if_mod)
     async def addinteraction(self, ctx, interaction_type, *, links):
-        """Add a gif/photo to an interaction (ex: slap,kiss,lick,hug) [Format: %addinteraction (interaction) (url,url)"""
+        """Add a gif/photo to an interaction (ex: slap,kiss,lick,hug)
+        [Format: %addinteraction (interaction) (url,url)"""
         links = links.split(',')
         try:
             if interaction_type.lower() in keys.interaction_list:
@@ -422,7 +428,7 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
             if not dm_channel:
                 return await ctx.send("> **There are no DMs set up in this channel.**")
             user = await ex.get_user(user_id)
-            user.mod_mail_channel_id = None
+            user.mod_mail_channel_id = 0
             ex.cache.mod_mail.pop(user_id, None)  # full list
             await ex.conn.execute("DELETE FROM general.modmail WHERE userid = $1 and channelid = $2", user_id, ctx.channel.id)
             await ctx.send(f"> The DM with {user_id} has been deleted successfully.")

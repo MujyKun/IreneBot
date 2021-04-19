@@ -129,7 +129,7 @@ class LastFM(commands.Cog):
             await events.Events.error(ctx, self.user_not_found)
         except Exception as e:
             log.console(e)
-            await ctx.send(f"> **Something went wrong.. Please {await ex.get_server_prefix_by_context(ctx)}report it.**")
+            await ctx.send(f"> **Something went wrong.. Please {await ex.get_server_prefix(ctx)}report it.**")
 
     @commands.command()
     async def setfm(self, ctx, username):
@@ -143,7 +143,7 @@ class LastFM(commands.Cog):
                 await events.Events.error(ctx, response)
         except Exception as e:
             log.console(e)
-            await ctx.send(f"> **Something went wrong.. Please {await ex.get_server_prefix_by_context(ctx)}report it.**")
+            await ctx.send(f"> **Something went wrong.. Please {await ex.get_server_prefix(ctx)}report it.**")
 
     @commands.command(aliases=['recents', 'rt'])
     async def recenttracks(self, ctx, user: typing.Union[discord.User, str] = None):
@@ -157,7 +157,7 @@ class LastFM(commands.Cog):
             await events.Events.error(ctx, self.user_not_found)
         except Exception as e:
             log.console(e)
-            await ctx.send(f"> **Something went wrong.. Please {await ex.get_server_prefix_by_context(ctx)}report it.**")
+            await ctx.send(f"> **Something went wrong.. Please {await ex.get_server_prefix(ctx)}report it.**")
 
     @commands.command()
     async def recent(self, ctx, user: typing.Union[discord.User, str] = None):
@@ -175,7 +175,7 @@ class LastFM(commands.Cog):
             await events.Events.error(ctx, self.user_not_found)
         except Exception as e:
             log.console(e)
-            await ctx.send(f"> **Something went wrong.. Please {await ex.get_server_prefix_by_context(ctx)}report it.**")
+            await ctx.send(f"> **Something went wrong.. Please {await ex.get_server_prefix(ctx)}report it.**")
 
     @commands.command(aliases=['ta'])
     async def topartists(self, ctx, user: typing.Union[discord.User, str] = None, time_period: typing.Union[discord.User, str] = None):
@@ -198,7 +198,7 @@ class LastFM(commands.Cog):
             await events.Events.error(ctx, self.user_not_found)
         except Exception as e:
             log.console(e)
-            await ctx.send(f"> **Something went wrong.. Please {await ex.get_server_prefix_by_context(ctx)}report it.**")
+            await ctx.send(f"> **Something went wrong.. Please {await ex.get_server_prefix(ctx)}report it.**")
 
     @commands.command(aliases=['tt'])
     async def toptracks(self, ctx, user: typing.Union[discord.User, str] = None, time_period: typing.Union[discord.User, str] = None):
@@ -223,7 +223,7 @@ class LastFM(commands.Cog):
         except Exception as e:
             log.console(e)
             await ctx.send(
-                f"> **Something went wrong.. Please {await ex.get_server_prefix_by_context(ctx)}report it.**")
+                f"> **Something went wrong.. Please {await ex.get_server_prefix(ctx)}report it.**")
 
     @commands.command(aliases=["tal"])
     async def topalbums(self, ctx, user: typing.Union[discord.User, str] = None, time_period: typing.Union[discord.User, str] = None):
@@ -248,4 +248,4 @@ class LastFM(commands.Cog):
         except Exception as e:
             log.console(e)
             await ctx.send(
-                f"> **Something went wrong.. Please {await ex.get_server_prefix_by_context(ctx)}report it.**")
+                f"> **Something went wrong.. Please {await ex.get_server_prefix(ctx)}report it.**")

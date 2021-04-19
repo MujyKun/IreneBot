@@ -47,8 +47,8 @@ class GuessingGame(commands.Cog):
         [Format: %guessinggame (Male/Female/All) (easy/medium/hard) (# of rounds - default 20) (timeout for each round - default 20s)]"""
         if not ctx.guild:
             return await ctx.send("> You are not allowed to play guessing game in DMs.")
-        if ex.find_game(ctx.channel, ex.cache.guessing_games):
-            server_prefix = await ex.get_server_prefix_by_context(ctx)
+        if ex.cache.guessing_games.get(ctx.channel.id):
+            server_prefix = await ex.get_server_prefix(ctx)
             return await ctx.send(f"> **A guessing game is currently in progress in this channel. If this is a mistake, use `{server_prefix}stopgg`.**")
         if rounds > 60 or timeout > 60:
             return await ctx.send("> **ERROR -> The max rounds is 60 and the max timeout is 60s.**")
@@ -140,19 +140,20 @@ class GuessingGame(commands.Cog):
     async def stopgg(self, ctx):
         """Force-end a guessing game if you are a moderator or host of the game. This command is meant for any issues or if a game happens to be stuck.
         [Format: %stopgg]"""
-        await ex.stop_game(ctx, ex.cache.guessing_games)
+        if not await ex.stop_game(ctx, ex.cache.guessing_games):
+            return await ctx.send("> No guessing game is currently in session.")
+        log.console(f"Force-Ended Guessing Game in {ctx.channel.id}")
 
     @staticmethod
     async def start_game(ctx, rounds, timeout, gender, difficulty):
         """Officially starts the guessing game."""
         game = Game(ctx, max_rounds=rounds, timeout=timeout, gender=gender, difficulty=difficulty)
-        ex.cache.guessing_games.append(game)
+        ex.cache.guessing_games[ctx.channel.id] = game
         await ctx.send(f"> Starting a guessing game for `{game.gender if game.gender != 'all' else 'both male and female'}` idols"
                        f" with `{game.difficulty}` difficulty, `{rounds}` rounds, and `{timeout}s` of guessing time.")
         await game.process_game()
-        if game in ex.cache.guessing_games:
-            log.console(f"Ending Guessing Game in {ctx.channel.id}")
-            ex.cache.guessing_games.remove(game)
+        await ex.stop_game(ctx, ex.cache.guessing_games)
+        log.console(f"Ended Guessing Game in {ctx.channel.id}")
 
 
 # noinspection PyBroadException,PyPep8

@@ -3,9 +3,9 @@ from discord.ext import tasks
 from util import logger as log
 import time
 import asyncio
+import aiofiles
 import datetime
 import json
-import re
 
 
 # noinspection PyBroadException,PyPep8
@@ -17,7 +17,8 @@ class Cache:
         past_time = time.time()
         result = await method()
         if result is None or result:  # expecting False on methods that fail to load, do not simplify None.
-            log.console(f"Cache for {name} Created in {await ex.u_miscellaneous.get_cooldown_time(time.time() - past_time)}.")
+            log.console(
+                f"Cache for {name} Created in {await ex.u_miscellaneous.get_cooldown_time(time.time() - past_time)}.")
         return result
 
     async def create_cache(self, on_boot_up=True):
@@ -66,58 +67,70 @@ class Cache:
         if not ex.test_bot and not ex.weverse_client.cache_loaded and on_boot_up:
             # noinspection PyUnusedLocal
             task = asyncio.create_task(self.process_cache_time(ex.weverse_client.start, "Weverse"))
-        log.console(f"Cache Completely Created in {await ex.u_miscellaneous.get_cooldown_time(time.time() - past_time)}.")
+        log.console(
+            f"Cache Completely Created in {await ex.u_miscellaneous.get_cooldown_time(time.time() - past_time)}.")
         ex.irene_cache_loaded = True
 
     @staticmethod
     async def create_langauge_cache():
         """Create cache for user languages."""
-        lang_info = await ex.conn.fetch("SELECT userid, language FROM general.languages")
-        for user_id, language in lang_info:
+
+        async def get_lang_info():
+            try:
+                for t_user_id, t_language in await ex.sql.fetch_languages():
+                    yield t_user_id, t_language
+            except:
+                return
+
+        async for user_id, language in get_lang_info():
             user = await ex.get_user(user_id)
             user.language = language
 
     async def load_language_packs(self):
-        """Create cache for language packs.
-
-        CAUTION: This function will block the main thread.
-        """
+        """Create cache for language packs."""
         ex.cache.languages = {}
 
-        file_names = ["en_us"]
-        for file_name in file_names:
-            with open(f"languages/{file_name}.json") as file:
-                ex.cache.languages[file_name] = json.load(file)
+        async def get_file_names():
+            # get the file names available
+            for t_file_name in ex.cache.languages_available:
+                yield t_file_name
+
+        async def get_language_module_and_message():
+            # get the modules and messages for each language
+            for t_language in ex.cache.languages.values():
+                for t_module in t_language.values():
+                    for t_message_name in t_module.keys():
+                        yield t_module, t_message_name
+
+        # load the json for every language to cache
+        async for file_name in get_file_names():
+            async with aiofiles.open(f"languages/{file_name}.json") as file:
+                ex.cache.languages[file_name] = json.loads(await file.read())
 
         # make the content of all curly braces bolded in all available languages.
-        for language in ex.cache.languages.values():
-            for module in language.values():
-                for message_name in module.keys():
-                    module[message_name] = await self.apply_bold_to_braces(module[message_name])
+        async for module, message_name in get_language_module_and_message():
+            module[message_name] = self.apply_bold_to_braces(module[message_name])
 
     @staticmethod
-    async def apply_bold_to_braces(text) -> str:
-        """Applys bold markdown in between braces.
-
-        CAUTION: this function blocks the main thread.
-        """
-        open_cbrace_locations = [message.start() for message in re.finditer("{", text)]
-        for num, brace in enumerate(open_cbrace_locations):
-            brace = brace + (2 * num)
-            text = text[:brace] + "**" + text[brace:]
-
-        close_cbrace_locations = [message.start() for message in re.finditer("}", text)]
-        for num, brace in enumerate(close_cbrace_locations):
-            brace = brace + (2 * num)
-            text = text[:brace + 1] + "**" + text[brace + 1:]
-
+    def apply_bold_to_braces(text: str) -> str:
+        """Applys bold markdown in between braces."""
+        text = text.replace("{", "**{")
+        text = text.replace("}", "}**")
         return text
 
     @staticmethod
     async def create_levels_cache():
         """Create the cache for user levels."""
-        levels = await ex.conn.fetch("SELECT userid, rob, daily, beg, profile FROM currency.levels")
-        for user_id, rob, daily, beg, profile_level in levels:
+
+        async def get_levels():
+            # get rob, daily, beg, and profile levels of all users
+            try:
+                for t_user_id, t_rob, t_daily, t_beg, t_profile_level in await ex.sql.fetch_levels():
+                    yield t_user_id, t_rob, t_daily, t_beg, t_profile_level
+            except:
+                return
+
+        async for user_id, rob, daily, beg, profile_level in get_levels():
             user = await ex.get_user(user_id)
             if rob:
                 user.rob_level = rob
@@ -131,29 +144,54 @@ class Cache:
     @staticmethod
     async def create_currency_cache():
         """Create cache for currency"""
-        currency = await ex.conn.fetch("SELECT userid, money FROM currency.currency")
-        for user_id, money in currency:
+        async def get_currency():
+            # get all user id and their balance
+            try:
+                for t_user_id, t_money in await ex.sql.fetch_currency():
+                    yield t_user_id, t_money
+            except:
+                return
+
+        async for user_id, money in get_currency():
             user = await ex.get_user(user_id)
-            user.money = int(money)
+            user.balance = int(money)
 
     @staticmethod
     async def create_gg_filter_cache():
         """Create filtering of guessing game cache."""
-        users_filter_enabled = await ex.conn.fetch("SELECT userid from gg.filterenabled")
-        users_filtered_groups = await ex.conn.fetch("SELECT userid, groupid FROM gg.filteredgroups")
+        async def get_users_filtered():
+            # get all users with their guessing game filter enabled
+            try:
+                for t_user_info in await ex.sql.fetch_filter_enabled():
+                    yield t_user_info
+            except:
+                return
 
-        for user_info in users_filter_enabled:
+        async def get_users():
+            # get all users
+            for t_user in ex.cache.users.values():
+                yield t_user
+
+        async def get_user_group_filters():
+            # get the groups users have filtered.
+            try:
+                for t_user_id, t_group_id in await ex.sql.fetch_filtered_groups():
+                    yield t_user_id, t_group_id
+            except:
+                return
+
+        async for user_info in get_users_filtered():
             user_id = user_info[0]
             user = await ex.get_user(user_id)
             user.gg_filter = True
 
         # reset cache for filtered groups
-        for user in ex.cache.users.values():
+        async for user in get_users():
             user.gg_groups = []
 
         # go through all filtered groups regardless if it is enabled
         # so we do not have to change during filter toggle.
-        for user_id, group_id in users_filtered_groups:
+        async for user_id, group_id in get_user_group_filters():
             user = await ex.get_user(user_id)
             group = await ex.u_group_members.get_group(group_id)
             user.gg_groups.append(group)
@@ -164,14 +202,28 @@ class Cache:
         ex.cache.twitch_channels = {}
         ex.cache.twitch_guild_to_channels = {}
         ex.cache.twitch_guild_to_roles = {}
-        guilds_and_channels = await ex.conn.fetch("SELECT guildid, channelid, roleid FROM twitch.guilds")
-        for guild_id, channel_id, role_id in guilds_and_channels:
+
+        async def get_twitch_guilds():
+            # get guild id, channel id, and role id for followings on twitch.
+            try:
+                for t_guild_id, t_channel_id, t_role_id in await ex.sql.fetch_twitch_guilds():
+                    yield t_guild_id, t_channel_id, t_role_id
+            except:
+                return
+
+        async def get_twitch_notis():
+            # get the twitch username and guild id that is following them.
+            try:
+                for t_username, t_guild_id in await ex.sql.fetch_twitch_notifications():
+                    yield t_username, t_guild_id
+            except:
+                return
+
+        async for guild_id, channel_id, role_id in get_twitch_guilds():
             ex.cache.twitch_guild_to_channels[guild_id] = channel_id
             ex.cache.twitch_guild_to_roles[guild_id] = role_id
 
-        twitch_channels = await ex.conn.fetch("SELECT username, guildid FROM twitch.channels")
-
-        for username, guild_id in twitch_channels:
+        async for username, guild_id in get_twitch_notis():
             guilds_in_channel = ex.cache.twitch_channels.get(username)
             if guilds_in_channel:
                 guilds_in_channel.append(username)
@@ -182,23 +234,45 @@ class Cache:
     async def create_guessing_game_cache():
         """Create cache for guessing game scores"""
         ex.cache.guessing_game_counter = {}
-        all_scores = await ex.conn.fetch("SELECT userid, easy, medium, hard FROM stats.guessinggame")
-        for user_id, easy_score, medium_score, hard_score in all_scores:
+
+        async def get_gg_stats():
+            # get all gg stats from all users
+            try:
+                for t_user_id, t_easy, t_medium, t_hard in await ex.sql.fetch_gg_stats():
+                    yield t_user_id, t_easy, t_medium, t_hard
+            except:
+                return
+
+        async for user_id, easy_score, medium_score, hard_score in get_gg_stats():
             ex.cache.guessing_game_counter[user_id] = {"easy": easy_score, "medium": medium_score, "hard": hard_score}
 
     @staticmethod
     async def create_timezone_cache():
         """Create cache for timezones"""
-        timezones = await ex.u_reminder.get_all_timezones_from_db()
-        for user_id, timezone in timezones:
+        async def get_timezones():
+            # get all timezones
+            try:
+                for t_user_id, t_timezone in await ex.sql.fetch_timezones():
+                    yield t_user_id, t_timezone
+            except:
+                return
+
+        async for user_id, timezone in get_timezones():
             user = await ex.get_user(user_id)
             user.timezone = timezone
 
     @staticmethod
     async def create_reminder_cache():
         """Create cache for reminders"""
-        all_reminders = await ex.u_reminder.get_all_reminders_from_db()
-        for reason_id, user_id, reason, time_stamp in all_reminders:
+        async def get_reminders():
+            # get all reminders
+            try:
+                for t_reason_id, t_user_id, t_reason, t_time_stamp in await ex.sql.fetch_reminders():
+                    yield t_reason_id, t_user_id, t_reason, t_time_stamp
+            except:
+                return
+
+        async for reason_id, user_id, reason, time_stamp in get_reminders():
             user = await ex.get_user(user_id)
             reason_list = [reason_id, reason, time_stamp]
             if user.reminders:
@@ -210,9 +284,24 @@ class Cache:
     async def create_self_assignable_role_cache():
         """Create cache for self assignable roles"""
         ex.cache.assignable_roles = {}
-        all_roles = await ex.conn.fetch("SELECT roleid, rolename, serverid FROM selfassignroles.roles")
-        all_channels = await ex.conn.fetch("SELECT channelid, serverid FROM selfassignroles.channels")
-        for role_id, role_name, server_id in all_roles:
+
+        async def get_all_roles():
+            # get all self assignable roles
+            try:
+                for t_role_id, t_role_name, t_server_id in await ex.sql.fetch_all_self_assign_roles():
+                    yield t_role_id, t_role_name, t_server_id
+            except:
+                return
+
+        async def get_all_channels():
+            # get all channels and server ids that have self assignable roles
+            try:
+                for t_channel_id, t_server_id in await ex.sql.fetch_all_self_assign_channels():
+                    yield t_channel_id, t_server_id
+            except:
+                return
+
+        async for role_id, role_name, server_id in get_all_roles():
             cache_info = ex.cache.assignable_roles.get(server_id)
             if not cache_info:
                 ex.cache.assignable_roles[server_id] = {}
@@ -221,7 +310,8 @@ class Cache:
                 cache_info['roles'] = [[role_id, role_name]]
             else:
                 cache_info['roles'].append([role_id, role_name])
-        for channel_id, server_id in all_channels:
+
+        async for channel_id, server_id in get_all_channels():
             cache_info = ex.cache.assignable_roles.get(server_id)
             if cache_info:
                 cache_info['channel_id'] = channel_id
@@ -232,8 +322,16 @@ class Cache:
     async def create_weverse_channel_cache():
         """Create cache for channels that are following a community on weverse."""
         ex.cache.weverse_channels = {}
-        all_channels = await ex.conn.fetch("SELECT channelid, communityname, roleid, commentsdisabled FROM weverse.channels")
-        for channel_id, community_name, role_id, comments_disabled in all_channels:
+
+        async def get_weverse():
+            # get all weverse subscriptions
+            try:
+                for t_channel_id, t_community_name, t_role_id, t_comments_disabled in await ex.sql.fetch_weverse():
+                    yield t_channel_id, t_community_name, t_role_id, t_comments_disabled
+            except:
+                return
+
+        async for channel_id, community_name, role_id, comments_disabled in get_weverse():
             await ex.u_weverse.add_weverse_channel_to_cache(channel_id, community_name)
             await ex.u_weverse.add_weverse_role(channel_id, community_name, role_id)
             await ex.u_weverse.change_weverse_comment_status(channel_id, community_name, comments_disabled)
@@ -242,25 +340,47 @@ class Cache:
         """Updates Cache for command counter and sessions"""
         ex.cache.command_counter = {}
         session_id = await self.get_session_id()
-        all_commands = await ex.conn.fetch("SELECT commandname, count FROM stats.commands WHERE sessionid = $1", session_id)
-        for command_name, count in all_commands:
+
+        async def get_commands():
+            # gets all commands and their usage amount
+            try:
+                for t_command_name, t_count in await ex.sql.fetch_command(session_id):
+                    yield t_command_name, t_count
+            except:
+                return
+
+        async for command_name, count in get_commands():
             ex.cache.command_counter[command_name] = count
-        ex.cache.current_session = ex.first_result(
-            await ex.conn.fetchrow("SELECT session FROM stats.sessions WHERE date = $1", datetime.date.today()))
+
+        ex.cache.current_session = ex.first_result(await ex.sql.fetch_session_usage(datetime.date.today()))
 
     @staticmethod
     async def create_restricted_channel_cache():
         """Create restricted idol channel cache"""
-        restricted_channels = await ex.conn.fetch("SELECT channelid, serverid, sendhere FROM groupmembers.restricted")
-        for channel_id, server_id, send_here in restricted_channels:
+        async def get_restricted_channels():
+            # gets all restricted idol photo channels
+            try:
+                for t_channel_id, t_server_id, t_send_here in await ex.sql.fetch_restricted_channels():
+                    yield t_channel_id, t_server_id, t_send_here
+            except:
+                return
+
+        async for channel_id, server_id, send_here in get_restricted_channels():
             ex.cache.restricted_channels[channel_id] = [server_id, send_here]
 
     @staticmethod
     async def create_bot_command_cache():
         """Create custom command cache"""
-        server_commands = await ex.conn.fetch("SELECT serverid, commandname, message FROM general.customcommands")
         ex.cache.custom_commands = {}
-        for server_id, command_name, message in server_commands:
+
+        async def get_custom_commands():
+            try:
+                for t_server_id, t_command_name, t_message in await ex.sql.fetch_custom_commands():
+                    yield t_server_id, t_command_name, t_message
+            except:
+                return
+
+        async for server_id, command_name, message in get_custom_commands():
             cache_info = ex.cache.custom_commands.get(server_id)
             if cache_info:
                 cache_info[command_name] = message
@@ -269,8 +389,18 @@ class Cache:
 
     @staticmethod
     async def create_bot_status_cache():
-        statuses = await ex.conn.fetch("SELECT status FROM general.botstatus")
-        ex.cache.bot_statuses = [status[0] for status in statuses] or None
+        ex.cache.bot_statuses = []
+
+        async def get_statuses():
+            # get all bot statuses
+            try:
+                for t_status in await ex.sql.fetch_bot_statuses():
+                    yield t_status
+            except:
+                return
+
+        async for status in get_statuses():
+            ex.cache.bot_statuses.append(status[0])
 
     @staticmethod
     async def create_dead_link_cache():
@@ -280,22 +410,21 @@ class Cache:
             ex.cache.dead_image_channel = await ex.client.fetch_channel(ex.keys.dead_image_channel_id)
         except:
             pass
-        dead_images = await ex.conn.fetch("SELECT deadlink, userid, messageid, idolid, guessinggame FROM groupmembers.deadlinkfromuser")
-        for dead_link, user_id, message_id, idol_id, guessing_game in dead_images:
+
+        async def get_dead_links():
+            try:
+                for t_dead_link, t_user_id, t_message_id, t_idol_id, t_guessing_game in await ex.sql.fetch_dead_links():
+                    yield t_dead_link, t_user_id, t_message_id, t_idol_id, t_guessing_game
+            except:
+                return
+
+        async for dead_link, user_id, message_id, idol_id, guessing_game in get_dead_links():
             ex.cache.dead_image_cache[message_id] = [dead_link, user_id, idol_id, guessing_game]
 
     @staticmethod
     async def create_idol_cache():
         """Create Idol Objects and store them as cache."""
         ex.cache.idols = []
-        for idol in await ex.u_group_members.get_db_all_members():
-            idol_obj = ex.u_objects.Idol(**idol)
-            idol_obj.aliases, idol_obj.local_aliases = await ex.u_group_members.get_db_aliases(idol_obj.id)
-            # add all group ids and remove potential duplicates
-            idol_obj.groups = list(dict.fromkeys(await ex.u_group_members.get_db_groups_from_member(idol_obj.id)))
-            idol_obj.called = await ex.u_group_members.get_db_idol_called(idol_obj.id)
-            idol_obj.photo_count = ex.cache.idol_photos.get(idol_obj.id) or 0
-            ex.cache.idols.append(idol_obj)
         # Clear and update these cache values to prevent breaking the memory reference made by
         # ex.cache.difficulty_selection and ex.cache.gender_selection
         ex.cache.idols_female.clear()
@@ -303,22 +432,60 @@ class Cache:
         ex.cache.idols_easy.clear()
         ex.cache.idols_medium.clear()
         ex.cache.idols_hard.clear()
-        ex.cache.idols_female.update({idol for idol in ex.cache.idols if idol.gender == 'f' and idol.photo_count})
-        ex.cache.idols_male.update({idol for idol in ex.cache.idols if idol.gender == 'm' and idol.photo_count})
-        ex.cache.idols_easy.update({idol for idol in ex.cache.idols if idol.difficulty == 'easy' and idol.photo_count})
-        ex.cache.idols_medium.update({idol for idol in ex.cache.idols if idol.difficulty in ['easy', 'medium'] and idol.photo_count})
-        ex.cache.idols_hard.update({idol for idol in ex.cache.idols if idol.difficulty in ['easy', 'medium', 'hard'] and idol.photo_count})
+
+        async def get_idols():
+            # get all idols
+            try:
+                for t_idol in await ex.sql.fetch_all_idols():
+                    yield t_idol
+            except:
+                return
+
+        async for idol in get_idols():
+            idol_obj = ex.u_objects.Idol(**idol)
+            idol_obj.aliases, idol_obj.local_aliases = await ex.u_group_members.get_db_aliases(idol_obj.id)
+            # add all group ids and remove potential duplicates
+            idol_obj.groups = list(dict.fromkeys(await ex.u_group_members.get_db_groups_from_member(idol_obj.id)))
+            idol_obj.called = await ex.u_group_members.get_db_idol_called(idol_obj.id)
+            idol_obj.photo_count = ex.cache.idol_photos.get(idol_obj.id) or 0
+            ex.cache.idols.append(idol_obj)
+
+            if not idol_obj.photo_count:
+                continue
+
+            # all of the below conditions must be idols with photos.
+            if idol_obj.gender == 'f':
+                ex.cache.idols_female.add(idol_obj)
+            if idol_obj.gender == 'm':
+                ex.cache.idols_male.add(idol_obj)
+            # add all idols to the easy difficulty
+            ex.cache.idols_easy.add(idol_obj)
+            if idol_obj.difficulty == 'medium':
+                ex.cache.idols_medium.add(idol_obj)
+            if idol_obj.difficulty == 'hard':
+                ex.cache.idols_hard.add(idol_obj)
+
         ex.cache.gender_selection['all'] = set(ex.cache.idols)
 
     @staticmethod
     async def create_group_cache():
         """Create Group Objects and store them as cache"""
         ex.cache.groups = []
-        for group in await ex.u_group_members.get_all_groups():
+
+        async def get_groups():
+            try:
+                for t_group in await ex.sql.fetch_all_groups():
+                    yield t_group
+            except:
+                return
+
+        async for group in get_groups():
             group_obj = ex.u_objects.Group(**group)
-            group_obj.aliases, group_obj.local_aliases = await ex.u_group_members.get_db_aliases(group_obj.id, group=True)
+            group_obj.aliases, group_obj.local_aliases = await ex.u_group_members.get_db_aliases(group_obj.id,
+                                                                                                 group=True)
             # add all idol ids and remove potential duplicates
-            group_obj.members = list(dict.fromkeys(await ex.u_group_members.get_db_members_in_group(group_id=group_obj.id)))
+            group_obj.members = list(
+                dict.fromkeys(await ex.u_group_members.get_db_members_in_group(group_obj.id)))
             group_obj.photo_count = ex.cache.group_photos.get(group_obj.id) or 0
             ex.cache.groups.append(group_obj)
 
@@ -327,13 +494,13 @@ class Cache:
         current_time_format = datetime.date.today()
         if ex.cache.session_id is None:
             if ex.cache.total_used is None:
-                ex.cache.total_used = (ex.first_result(await ex.conn.fetchrow("SELECT totalused FROM stats.sessions ORDER BY totalused DESC"))) or 0
+                ex.cache.total_used = (ex.first_result(await ex.sql.fetch_total_session_usage())) or 0
             try:
-                await ex.conn.execute("INSERT INTO stats.sessions(totalused, session, date) VALUES ($1, $2, $3)", ex.cache.total_used, 0, current_time_format)
+                await ex.sql.add_new_session(ex.cache.total_used, 0, current_time_format)
             except:
                 # session for today already exists.
                 pass
-            ex.cache.session_id = ex.first_result(await ex.conn.fetchrow("SELECT sessionid FROM stats.sessions WHERE date = $1", current_time_format))
+            ex.cache.session_id = ex.first_result(await ex.sql.fetch_session_id(datetime.date.today()))
             ex.cache.session_time_format = current_time_format
         else:
             # check that the date is correct, and if not, call get_session_id to get the new session id.
@@ -350,8 +517,15 @@ class Cache:
     @staticmethod
     async def update_n_word_counter():
         """Update NWord Cache"""
-        user_info = await ex.conn.fetch("SELECT userid, nword FROM general.nword")
-        for user_id, n_word_counter in user_info:
+        async def get_n_word():
+            # get all users n word count
+            try:
+                for t_user_id, t_n_word_counter in await ex.sql.fetch_n_word():
+                    yield t_user_id, t_n_word_counter
+            except:
+                return
+
+        async for user_id, n_word_counter in get_n_word():
             user = await ex.get_user(user_id)
             user.n_word = n_word_counter
 
@@ -359,8 +533,16 @@ class Cache:
     async def update_temp_channels():
         """Create the cache for temp channels."""
         ex.cache.temp_channels = {}
-        channels = await ex.u_miscellaneous.get_temp_channels()
-        for channel_id, delay in channels:
+
+        async def get_temp_channels():
+            # get all temp channels
+            try:
+                for t_channel_id, t_delay in await ex.sql.fetch_temp_channels():
+                    yield t_channel_id, t_delay
+            except:
+                return
+
+        async for channel_id, delay in get_temp_channels():
             removal_time = delay
             if removal_time < 60:
                 removal_time = 60
@@ -370,16 +552,32 @@ class Cache:
     async def update_welcome_message_cache():
         """Create the cache for welcome messages."""
         ex.cache.welcome_messages = {}
-        info = await ex.conn.fetch("SELECT channelid, serverid, message, enabled FROM general.welcome")
-        for channel_id, server_id, message_id, enabled in info:
+
+        async def get_welcome_messages():
+            # get all welcome messages
+            try:
+                for t_channel_id, t_server_id, t_message_id, t_enabled in await ex.sql.fetch_welcome_messages():
+                    yield t_channel_id, t_server_id, t_message_id, t_enabled
+            except:
+                return
+
+        async for channel_id, server_id, message_id, enabled in get_welcome_messages():
             ex.cache.welcome_messages[server_id] = {"channel_id": channel_id, "message": message_id, "enabled": enabled}
 
     @staticmethod
     async def update_server_prefixes():
         """Create the cache for server prefixes."""
         ex.cache.server_prefixes = {}
-        info = await ex.conn.fetch("SELECT serverid, prefix FROM general.serverprefix")
-        for server_id, prefix in info:
+
+        async def get_server_prefixes():
+            # get all server prefixes
+            try:
+                for t_server_id, t_prefix in await ex.sql.fetch_server_prefixes():
+                    yield t_server_id, t_prefix
+            except:
+                return
+
+        async for server_id, prefix in get_server_prefixes():
             ex.cache.server_prefixes[server_id] = prefix
 
     @staticmethod
@@ -387,22 +585,46 @@ class Cache:
         """Create the cache for logged servers and channels."""
         ex.cache.logged_channels = {}
         ex.cache.list_of_logged_channels = []
-        logged_servers = await ex.conn.fetch("SELECT id, serverid, channelid, sendall FROM logging.servers WHERE status = $1", 1)
-        for p_id, server_id, channel_id, send_all in logged_servers:
-            channels = await ex.conn.fetch("SELECT channelid FROM logging.channels WHERE server = $1", p_id)
-            for channel in channels:
+
+        async def get_logged_servers():
+            # get all logged servers
+            try:
+                for t_p_id, t_server_id, t_channel_id, t_send_all in await ex.sql.fetch_logged_servers():
+                    yield t_p_id, t_server_id, t_channel_id, t_send_all
+            except:
+                return
+
+        async def get_logged_channels(primary_key):
+            # get all logged channels
+            try:
+                for t_channel_id in await ex.sql.fetch_logged_channels(primary_key):
+                    yield t_channel_id
+            except:
+                return
+
+        async for p_id, server_id, channel_id, send_all in get_logged_servers():
+            channel_ids = []
+            async for channel in get_logged_channels(p_id):
                 ex.cache.list_of_logged_channels.append(channel[0])
+                channel_ids.append(channel[0])
             ex.cache.logged_channels[server_id] = {
                 "send_all": send_all,
                 "logging_channel": channel_id,
-                "channels": [channel[0] for channel in channels]
+                "channels": channel_ids
             }
 
     @staticmethod
     async def update_bot_bans():
         """Create the cache for banned users from the bot."""
-        banned_users = await ex.conn.fetch("SELECT userid FROM general.blacklisted")
-        for user in banned_users:
+        async def get_bot_banned_users():
+            # get bot banned users
+            try:
+                for t_user_id in await ex.sql.fetch_bot_bans():
+                    yield t_user_id
+            except:
+                return
+
+        async for user in get_bot_banned_users():
             user_id = user[0]
             user_obj = await ex.get_user(user_id)
             user_obj.bot_banned = True
@@ -411,8 +633,16 @@ class Cache:
     async def update_mod_mail():
         """Create the cache for existing mod mail"""
         ex.cache.mod_mail = {}
-        mod_mail = await ex.conn.fetch("SELECT userid, channelid FROM general.modmail")
-        for user_id, channel_id in mod_mail:
+
+        async def get_mod_mail():
+            # get mod mail users and channels
+            try:
+                for t_user_id, t_channel_id in await ex.sql.fetch_mod_mail():
+                    yield t_user_id, t_channel_id
+            except:
+                return
+
+        async for user_id, channel_id in get_mod_mail():
             user = await ex.get_user(user_id)
             user.mod_mail_channel_id = channel_id
             ex.cache.mod_mail[user_id] = [channel_id]  # full list
@@ -423,6 +653,7 @@ class Cache:
         try:
             permanent_patrons = await ex.u_patreon.get_patreon_users()
             # normal patrons contains super patrons as well
+            # TODO: remove function dependency on these 3 variables
             normal_patrons = [patron.id for patron in await ex.u_patreon.get_patreon_role_members(super_patron=False)]
             super_patrons = [patron.id for patron in await ex.u_patreon.get_patreon_role_members(super_patron=True)]
 
@@ -431,34 +662,57 @@ class Cache:
             # access the roles after 20 minutes on boot.
             # this is an alternative to get patreons instantly and later modifying the cache after the cache loads.
             # remove any patrons from db set cache that should not exist or should be modified.
-            cached_patrons = await ex.conn.fetch("SELECT userid, super FROM patreon.cache")
-            for user_id, super_patron in cached_patrons:
+            async def get_cached_patrons():
+                # get cached patrons
+                try:
+                    for t_user_id, t_super_patron in await ex.sql.fetch_cached_patrons():
+                        yield t_user_id, t_super_patron
+                except:
+                    return
+
+            async def get_patrons(t_super_patron: bool = False):
+                try:
+                    for t_patron in await ex.u_patreon.get_patreon_role_members(super_patron=t_super_patron):
+                        yield t_patron
+                except:
+                    return
+
+            async def get_permanent_patrons():
+                try:
+                    for t_patron in await ex.u_patreon.get_patreon_users():
+                        yield t_patron
+                except:
+                    return
+
+            cached_patrons = []  # list of user ids removing patron status.
+            async for user_id, super_patron in get_cached_patrons():
+                cached_patrons.append(user_id)
                 if user_id not in normal_patrons:
                     # they are not a patron at all, so remove them from db cache
-                    await ex.conn.execute("DELETE FROM patreon.cache WHERE userid = $1", user_id)
+                    await ex.sql.delete_patron(user_id)
                 elif user_id in super_patrons and not super_patron:
                     # if they are a super patron but their db is cache is a normal patron
-                    await ex.conn.execute("UPDATE patreon.cache SET super = $1 WHERE userid = $2", 1, user_id)
+                    await ex.sql.update_patron(user_id, 1)
                 elif user_id not in super_patrons and super_patron:
                     # if they are not a super patron, but the db cache says they are.
-                    await ex.conn.execute("UPDATE patreon.cache SET super = $1 WHERE userid = $2", 0, user_id)
-            cached_patrons = [patron[0] for patron in cached_patrons]  # list of user ids removing patron status.
+                    await ex.sql.update_patron(user_id, 0)
 
             # fix db cache and live Irene cache
-            for patron in normal_patrons:
+            async for patron in get_patrons():
                 if patron not in cached_patrons:
                     # patron includes both normal and super patrons.
-                    await ex.conn.execute("INSERT INTO patreon.cache(userid, super) VALUES($1, $2)", patron, 0)
+                    await ex.sql.add_patron(patron, 0)
                 user = await ex.get_user(patron)
                 user.patron = True
 
-            for patron in super_patrons:
+            async for patron in get_patrons(t_super_patron=True):
                 if patron not in cached_patrons:
-                    await ex.conn.execute("UPDATE patreon.cache SET super = $1 WHERE userid = $2", 1, patron)
+                    await ex.sql.update_patron(patron, 1)
                 user = await ex.get_user(patron)
                 user.patron = True
                 user.super_patron = True
-            for patron in permanent_patrons:
+
+            async for patron in get_permanent_patrons():
                 user = await ex.get_user(patron[0])
                 user.patron = True
                 user.super_patron = True
@@ -480,7 +734,8 @@ class Cache:
     async def update_groups():
         """Set cache for group photo count"""
         ex.cache.group_photos = {}
-        all_group_counts = await ex.conn.fetch("SELECT g.groupid, g.groupname, COUNT(f.link) FROM groupmembers.groups g, groupmembers.member m, groupmembers.idoltogroup l, groupmembers.imagelinks f WHERE m.id = l.idolid AND g.groupid = l.groupid AND f.memberid = m.id GROUP BY g.groupid ORDER BY g.groupname")
+        all_group_counts = await ex.conn.fetch(
+            "SELECT g.groupid, g.groupname, COUNT(f.link) FROM groupmembers.groups g, groupmembers.member m, groupmembers.idoltogroup l, groupmembers.imagelinks f WHERE m.id = l.idolid AND g.groupid = l.groupid AND f.memberid = m.id GROUP BY g.groupid ORDER BY g.groupname")
         for group in all_group_counts:
             ex.cache.group_photos[group[0]] = group[2]
 
@@ -495,7 +750,8 @@ class Cache:
             guild_data = []
             for guild in ex.client.guilds:
                 guild_data.append(
-                    (guild.id, guild.name, len(guild.emojis), f"{guild.region}", guild.afk_timeout, guild.icon, guild.owner_id,
+                    (guild.id, guild.name, len(guild.emojis), f"{guild.region}", guild.afk_timeout, guild.icon,
+                     guild.owner_id,
                      guild.banner, guild.description, guild.mfa_level, guild.splash,
                      guild.premium_tier, guild.premium_subscription_count, len(guild.text_channels),
                      len(guild.voice_channels), len(guild.categories), guild.emoji_limit, guild.member_count,
@@ -511,7 +767,8 @@ class Cache:
     async def update_idols():
         """Set cache for idol photo count"""
         ex.cache.idol_photos = {}
-        all_idol_counts = await ex.conn.fetch("SELECT memberid, COUNT(link) FROM groupmembers.imagelinks GROUP BY memberid")
+        all_idol_counts = await ex.conn.fetch(
+            "SELECT memberid, COUNT(link) FROM groupmembers.imagelinks GROUP BY memberid")
         for idol_id, count in all_idol_counts:
             ex.cache.idol_photos[idol_id] = count
 
@@ -599,7 +856,8 @@ class Cache:
                     'banned_from_bot': bot_banned,
                     'logged_servers': len(ex.cache.logged_channels),
                     # server count is based on discord.py guild cache which takes a large amount of time to load fully.
-                    # There may be inaccurate data points on a new instance of the bot due to the amount of time it takes.
+                    # There may be inaccurate data points on a new instance of the bot due to the amount of
+                    # time that it takes.
                     'server_count': len(ex.client.guilds),
                     'welcome_messages': len(ex.cache.welcome_messages),
                     'temp_channels': len(ex.cache.temp_channels),

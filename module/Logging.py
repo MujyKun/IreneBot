@@ -39,7 +39,7 @@ class Logging(commands.Cog):
 
         if not await ex.u_logging.check_if_logged(server_id=ctx.guild.id):
             return await ctx.send(
-                f"> **The server must be logged in order to log a channel. ({await ex.get_server_prefix_by_context(ctx)}startlogging)**")
+                f"> **The server must be logged in order to log a channel. ({await ex.get_server_prefix(ctx)}startlogging)**")
         if await ex.u_logging.check_if_logged(channel_id=text_channel.id):
             return await ctx.send(f"> **{text_channel.name} is already being logged.**")
 

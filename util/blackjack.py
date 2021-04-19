@@ -11,7 +11,7 @@ class BlackJack:
         """Check if a user is in a game."""
         check = ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) From blackjack.games WHERE player1 = $1 OR player2 = $1", user_id))
         if check:
-            await ctx.send(f"> **{ctx.author}, you are already in a pending/active game. Please type {await ex.get_server_prefix_by_context(ctx)}endgame.**")
+            await ctx.send(f"> **{ctx.author}, you are already in a pending/active game. Please type {await ex.get_server_prefix(ctx)}endgame.**")
             return True
 
     async def add_bj_game(self, user_id, bid, ctx, mode):
@@ -19,7 +19,7 @@ class BlackJack:
         await ex.conn.execute("INSERT INTO blackjack.games (player1, bid1, channelid) VALUES ($1, $2, $3)", user_id, str(bid), ctx.channel.id)
         game_id = await self.get_game_by_player(user_id)
         if mode != "bot":
-            await ctx.send(f"> **There are currently 1/2 members signed up for BlackJack. To join the game, please type {await ex.get_server_prefix_by_context(ctx)}joingame {game_id} (bid)** ")
+            await ctx.send(f"> **There are currently 1/2 members signed up for BlackJack. To join the game, please type {await ex.get_server_prefix(ctx)}joingame {game_id} (bid)** ")
 
     async def process_bj_game(self, ctx, amount, user_id):
         """pre requisites for joining a blackjack game."""

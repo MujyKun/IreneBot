@@ -105,7 +105,7 @@ class Profile(commands.Cog):
             await ctx.send(embed=embed)
 
         except Exception as e:
-            server_prefix = await ex.get_server_prefix_by_context(ctx)
+            server_prefix = await ex.get_server_prefix(ctx)
             await ctx.send(f"> **There was an error. Please {server_prefix}report it**")
             log.console(e)
 

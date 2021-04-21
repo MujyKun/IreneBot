@@ -79,3 +79,6 @@ class BiasGame:
                 idol_image = idol_image.resize(idol_info.get('img_size'))
                 bracket.paste(idol_image, idol_info.get('pos'))
                 bracket.save(f"{ex.keys.bias_game_location}{user_id}.png")
+
+
+ex.u_bias_game = BiasGame()

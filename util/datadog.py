@@ -27,3 +27,6 @@ class DataDog:
             metric_name = 'irene_' + metric_name
         api.Metric.send(metric=metric_name, points=[(time.time(), value)])
 
+
+ex.u_data_dog = DataDog()
+ex.u_data_dog.initialize_data_dog()  # initialize the class for DataDog metrics

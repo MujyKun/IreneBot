@@ -35,3 +35,6 @@ class CustomCommands:
     async def get_custom_command(server_id, command_name):
         commands = ex.cache.custom_commands.get(server_id)
         return commands.get(command_name)
+
+
+ex.u_custom_commands = CustomCommands()

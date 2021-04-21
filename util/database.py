@@ -15,13 +15,16 @@ class DataBase:
         """
         if ex.client.loop.is_running():
             try:
+                # to avoid circular import, set the Utility objects here.
+                from util import objects
+                ex.u_objects = objects
+
                 ex.conn = await self.get_db_connection()
                 # Delete all active blackjack games
                 await ex.u_blackjack.delete_all_games()
                 ex.running_loop = asyncio.get_running_loop()
                 await self.create_thread_pool()
                 sys.setrecursionlimit(ex.recursion_limit)
-
                 ex.sql = Asyncpg(ex.conn)
             except Exception as e:
                 log.console(e)
@@ -42,3 +45,12 @@ class DataBase:
     async def get_db_connection():
         """Retrieve Database Connection"""
         return await ex.keys.connect_to_db()
+
+
+ex.u_database = DataBase()
+# all active blackjack games are also deleted on db start, current session stats refreshed.
+# cache is reset in the on_ready event.
+ex.u_database.set_start_up_connection.start()
+
+
+

@@ -157,4 +157,4 @@ class SelfAssignRoles:
             await message.delete()  # remove the message if it exists in a self-assignable role channel
 
 
-
+ex.u_self_assign_roles = SelfAssignRoles()

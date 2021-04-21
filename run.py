@@ -16,13 +16,6 @@ class Irene:
         # should define properties before anything else.
         ex.define_properties(module.keys, module.events.Events)  # define the needed client-sided properties of Utility.
 
-        self.create_util_objects()  # create sub-classes for Utility
-        ex.u_data_dog.initialize_data_dog()  # initialize the class for DataDog metrics
-
-        # all active blackjack games are also deleted on db start, current session stats refreshed.
-        # cache is reset in the on_ready event.
-        ex.u_database.set_start_up_connection.start()
-
         # start the connection to the bot
         if ex.test_bot:
             self.run_test_bot()
@@ -127,37 +120,6 @@ class Irene:
         ex.client.add_cog(module.Twitch.Twitch())
         ex.client.add_cog(module.BotOwner.BotOwner())
         # ex.client.add_cog(module.Gacha.Gacha())
-
-    @staticmethod
-    def create_util_objects():
-        """Create SubClass Objects to attach to Utility object for easier management and sharing between siblings.
-        The Utility object serves as a client for Irene and is managed by the following objects
-
-
-        IMPORTANT: This design implementation is a hack for circular imports.
-        The intended use is to allow a singular object to manage the entire Utility.
-        """
-        ex.u_database = util.database.DataBase()
-        ex.u_cache = util.cache.Cache()
-        ex.u_miscellaneous = util.miscellaneous.Miscellaneous()
-        ex.u_blackjack = util.blackjack.BlackJack()
-        ex.u_group_members = util.groupmembers.GroupMembers()
-        ex.u_logging = util.logging.Logging()
-        ex.u_twitter = util.twitter.Twitter()
-        ex.u_last_fm = util.lastfm.LastFM()
-        ex.u_patreon = util.patreon.Patreon()
-        ex.u_moderator = util.moderator.Moderator()
-        ex.u_custom_commands = util.customcommands.CustomCommands()
-        ex.u_bias_game = util.biasgame.BiasGame()
-        ex.u_data_dog = util.datadog.DataDog()
-        ex.u_weverse = util.weverse.Weverse()
-        ex.u_self_assign_roles = util.selfassignroles.SelfAssignRoles()
-        ex.u_reminder = util.reminder.Reminder()
-        ex.u_guessinggame = util.guessinggame.GuessingGame()
-        ex.u_twitch = util.twitch.Twitch()
-        # ex.u_gacha = util.gacha.Gacha()
-        
-        ex.u_objects = util.objects  # util directory that has the objects directly imported
 
 
 if __name__ == '__main__':

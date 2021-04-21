@@ -101,3 +101,4 @@ class Logging:
         return ex.client.get_channel((ex.cache.logged_channels.get(message.guild.id))['logging_channel'])
 
 
+ex.u_logging = Logging()

@@ -42,3 +42,6 @@ class LastFM:
         except Exception as e:
             log.console(e)
             return e
+
+
+ex.u_last_fm = LastFM()

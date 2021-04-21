@@ -455,5 +455,3 @@ Maintenance Status: {maintenance_status}
             await ctx.send(f"> **My ping is currently {ex.get_ping()}ms.**")
         except:
             await ctx.send("> Cannot determine ping at this time.")
-
-

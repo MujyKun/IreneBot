@@ -62,8 +62,9 @@ class Cache:
         # every time this function is called.
         if ex.discord_cache_loaded:
             await self.process_cache_time(self.update_patreons, "Reload Patreon Cache")
+            await self.process_cache_time(self.update_guild_cache, "DB Guild")
 
-        # do not load weverse cache if the bot has already been running.
+    # do not load weverse cache if the bot has already been running.
         if not ex.test_bot and not ex.weverse_client.cache_loaded and on_boot_up:
             # noinspection PyUnusedLocal
             task = asyncio.create_task(self.process_cache_time(ex.weverse_client.start, "Weverse"))
@@ -806,8 +807,6 @@ class Cache:
                     log.console("Cache for Temporary Patrons has been created.")
                 while not ex.discord_cache_loaded:
                     await asyncio.sleep(60)  # check every minute if discord cache has loaded.
-                # update guild cache
-                await self.process_cache_time(self.update_guild_cache, "DB Guild")
 
                 # update patron cache
                 if await self.process_cache_time(self.update_patreons, "Patrons"):
@@ -921,3 +920,6 @@ class Cache:
             # loop appears to stop working after a while and no errors were recognized in log file
             # adding this try except to see if issue continues.
             log.console(e)
+
+
+ex.u_cache = Cache()

@@ -345,7 +345,7 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
             msg = await ex.get_msg(ctx, "groupmembers", "group_not_found")
             return await ctx.send(msg)
         for group in groups:
-            msg = await ex.get_msg(ctx, "groupmembers" "photo_count")
+            msg = await ex.get_msg(ctx, "groupmembers", "photo_count")
             msg = await ex.replace(msg, [["photo_count", group.photo_count], ["object_name", group.name]])
             await ctx.send(msg)
 

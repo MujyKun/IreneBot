@@ -237,7 +237,7 @@ class GroupMembers:
         """Get the members in a specific group from the database."""
         async def get_member_ids_in_group():
             try:
-                for idol_id in ex.sql.fetch_members_in_group(group_id):
+                for idol_id in await ex.sql.fetch_members_in_group(group_id):
                     yield idol_id
             except:
                 return
@@ -955,3 +955,6 @@ class GroupMembers:
     async def get_member_names_as_string(self, group):
         """Get the member names split by a | ."""
         return f"{' | '.join([f'{(await self.get_member(idol_id)).stage_name} [{idol_id}]' for idol_id in group.members])}\n"
+
+
+ex.u_group_members = GroupMembers()

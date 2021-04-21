@@ -237,3 +237,6 @@ class Reminder:
         except Exception as e:
             log.console(e)
         await ex.conn.execute("DELETE FROM reminders.reminders WHERE id = $1", reminder_id)
+
+
+ex.u_reminder = Reminder()

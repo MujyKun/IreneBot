@@ -171,3 +171,5 @@ class Weverse:
                 # no permission to post
                 return
 
+
+ex.u_weverse = Weverse()

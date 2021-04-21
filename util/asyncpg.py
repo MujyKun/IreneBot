@@ -122,8 +122,8 @@ class Asyncpg(SQL):
             FROM groupmembers.Member ORDER BY id""")
 
     async def fetch_all_groups(self):
-        return await self.conn.fetch("""SELECT groupid, groupname, debutdate, disbanddate, description, twitter, youtube,
-            melon, instagram, vlive, spotify, fancafe, facebook, tiktok, fandom, company,
+        return await self.conn.fetch("""SELECT groupid, groupname, debutdate, disbanddate, description, twitter, 
+            youtube, melon, instagram, vlive, spotify, fancafe, facebook, tiktok, fandom, company,
             website, thumbnail, banner, gender, tags FROM groupmembers.groups 
             ORDER BY groupname""")
 
@@ -180,4 +180,3 @@ class Asyncpg(SQL):
 
     async def add_patron(self, user_id, super_patron: int):
         await self.conn.execute("INSERT INTO patreon.cache(userid, super) VALUES($1, $2)", user_id, super_patron)
-

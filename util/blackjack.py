@@ -360,3 +360,6 @@ class BlackJack:
                 entire_selection += value
             counter += 1
         return int(entire_selection)
+
+
+ex.u_blackjack = BlackJack()

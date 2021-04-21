@@ -107,3 +107,4 @@ class GuessingGame:
                               user.id, group.id)
 
 
+ex.u_guessinggame = GuessingGame()

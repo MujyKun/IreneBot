@@ -31,3 +31,6 @@ class Moderator:
     async def update_welcome_message(server_id, message):
         await ex.conn.execute("UPDATE general.welcome SET message = $1 WHERE serverid = $2", message, server_id)
         ex.cache.welcome_messages[server_id]['message'] = message
+
+
+ex.u_moderator = Moderator()

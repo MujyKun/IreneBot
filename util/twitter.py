@@ -20,3 +20,5 @@ class Twitter:
             final_tweet += f"> **Tweet ID:** {tweet.id} | **Tweet:** {tweet.text}\n"
         return final_tweet
 
+
+ex.u_twitter = Twitter()

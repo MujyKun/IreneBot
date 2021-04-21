@@ -137,8 +137,4 @@ class Twitch:
                 log.console(f"Failed to send twitch announcement to Guild ID: {guild_id}- {e}")
 
 
-
-
-
-
-
+ex.u_twitch = Twitch()

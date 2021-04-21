@@ -319,3 +319,6 @@ class Miscellaneous:
     def get_voice_channel_count():
         """Returns the voice channel count from all the guilds the bot is connected to."""
         return sum([len(guild.voice_channels) for guild in ex.client.guilds])
+
+
+ex.u_miscellaneous = Miscellaneous()

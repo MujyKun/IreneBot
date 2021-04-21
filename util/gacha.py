@@ -51,3 +51,6 @@ class Gacha:
         all_skills = [0, 0, 0]
         all_skills[skill_types.get(idol_skill_type)] = await Gacha.random_skill_score(card_rarity)
         return all_skills
+
+
+ex.u_gacha = Gacha()

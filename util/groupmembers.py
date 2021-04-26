@@ -237,7 +237,7 @@ class GroupMembers:
         """Get the members in a specific group from the database."""
         async def get_member_ids_in_group():
             try:
-                for idol_id in await ex.sql.fetch_members_in_group(group_id):
+                for idol_id in await ex.sql.s_groupmembers.fetch_members_in_group(group_id):
                     yield idol_id
             except:
                 return
@@ -252,7 +252,7 @@ class GroupMembers:
 
         async def get_aliases():
             try:
-                for t_alias, t_server_id in await ex.sql.fetch_aliases(object_id, group):
+                for t_alias, t_server_id in await ex.sql.s_groupmembers.fetch_aliases(object_id, group):
                     yield t_alias, t_server_id
             except:
                 return

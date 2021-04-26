@@ -1,8 +1,9 @@
 from Utility import resources as ex
 from util import logger as log
-from util.asyncpg import Asyncpg
+# from util.asyncpg import Asyncpg
 from discord.ext import tasks
 from concurrent.futures import ThreadPoolExecutor
+import util.s_sql
 import sys
 import asyncio
 
@@ -25,7 +26,9 @@ class DataBase:
                 ex.running_loop = asyncio.get_running_loop()
                 await self.create_thread_pool()
                 sys.setrecursionlimit(ex.recursion_limit)
-                ex.sql = Asyncpg(ex.conn)
+                # ex.sql = Asyncpg(ex.conn)
+                ex.sql = util.s_sql
+                util.s_sql.conn = ex.conn
             except Exception as e:
                 log.console(e)
             self.set_start_up_connection.stop()

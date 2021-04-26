@@ -6,8 +6,8 @@ import time
 class DataDog:
     @staticmethod
     def initialize_data_dog():
-        """Initialize The DataDog Class"""
-        initialize()
+        """Initialize The DataDog Class for metrics."""
+        initialize(api_key=ex.keys.datadog_api_key, app_key=ex.keys.datadog_app_key)
 
     @staticmethod
     def send_metric(metric_name, value):
@@ -29,4 +29,3 @@ class DataDog:
 
 
 ex.u_data_dog = DataDog()
-ex.u_data_dog.initialize_data_dog()  # initialize the class for DataDog metrics

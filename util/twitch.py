@@ -110,11 +110,11 @@ class Twitch:
                     continue
 
                 # confirm the channel has not already received a post for this streamer.
-                if await ex.sql.check_twitch_already_posted(twitch_username, channel_id):
+                if await ex.sql.s_twitch.check_twitch_already_posted(twitch_username, channel_id):
                     continue
 
                 # set the channel id as already posted.
-                await ex.sql.set_twitch_posted(twitch_username, channel_id)
+                await ex.sql.s_twitch.set_twitch_posted(twitch_username, channel_id)
 
                 role_id = ex.cache.twitch_guild_to_roles.get(guild_id)
 

@@ -32,7 +32,7 @@ class GuessingGame:
     @staticmethod
     async def get_guessing_game_top_ten(difficulty, members=None):
         """Get the top ten of a certain guessing game difficulty"""
-        # make sure it is actually a difficulty in case of sql-injection. (condition created in case of future changes)
+        # make sure it is actually a difficulty in case of s_sql-injection. (condition created in case of future changes)
         if difficulty.lower() not in ex.cache.difficulty_levels:
             raise ValueError("invalid difficulty given to get_guessing_game_top_ten()")
         if members:

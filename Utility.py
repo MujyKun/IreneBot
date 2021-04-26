@@ -37,7 +37,6 @@ class Utility:
         self.running_loop = None  # current asyncio running loop
         self.thread_pool = None  # ThreadPoolExecutor for operations that block the event loop.
         self.keys = None  # access to keys file
-        self.sql: util.sql.SQL = None  # abstract class hidden as concrete sql class -> manages queries
 
         self.api: tweepy.API = None
         self.loop_count = 0
@@ -77,16 +76,23 @@ class Utility:
         self.u_gacha: util.gacha.Gacha = None
 
         # Util Directory that contains needed objects as attributes.
-        self.u_objects: util.objects = None
+        self.u_objects: util.objects = None  # this can not be pre-defined due to a circular import in the objects.
+
+        # Util Directory that contains sql methods
+        self.sql: util.s_sql = None
 
     def define_properties(self, keys, events):
         """
         Define client-sided properties in Utility.
 
+        :param self:
         :param keys: Access to the keys file.
         :param events: Access to the client-sided events class
         """
-        self.keys = keys
+        self.keys = keys  # set the keys
+
+        # only initialize datadog class after the keys have been set.
+        self.u_data_dog.initialize_data_dog()  # initialize the class for DataDog metrics
 
         self.client = keys.client  # set discord client
 

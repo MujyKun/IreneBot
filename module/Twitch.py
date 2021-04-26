@@ -132,7 +132,7 @@ class Twitch(commands.Cog):
                                     is_live = streamer.get('is_live')
 
                                     if not is_live:
-                                        await ex.sql.delete_twitch_posted(twitch_username.lower())
+                                        await ex.sql.s_twitch.delete_twitch_posted(twitch_username.lower())
 
                                     if (not was_live) and is_live:
                                         await ex.u_twitch.send_twitch_announcement(twitch_username)

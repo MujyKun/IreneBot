@@ -1,9 +1,7 @@
 from decimal import Decimal
 from math import log10
 from random import randint
-from util.sql import SQL
-
-sql: SQL = None
+import util.s_sql as sql
 
 
 # noinspection PyBroadException
@@ -31,16 +29,10 @@ class User:
         self.language: str = "en_us"
         self.in_currency_game: bool = False
 
-        # On initial imports, sql is not defined, so it is better to do it upon user construction.
-        global sql
-        if not sql:
-            from util.asyncpg import sql as t_sql
-            sql = t_sql
-
     async def get_profile_xp(self):
         """Get the user's profile xp."""
         await self.ensure_level()
-        return await sql.get_profile_xp(self.id)
+        return await sql.s_levels.get_profile_xp(self.id)
 
     async def set_profile_xp(self, xp_amount):
         """Set the user's profile xp."""
@@ -76,13 +68,13 @@ class User:
         if self.profile_level or self.beg_level or self.rob_level or self.daily_level:
             return
         else:
-            await sql.create_level_row(self.id)
+            await sql.s_levels.create_level_row(self.id)
 
     async def update_level_in_db(self, column_name, level):
         """Update the level for the user."""
         allowed_columns = ['profile', 'beg', 'rob', 'daily', 'profilexp']
         if column_name in allowed_columns:
-            await sql.update_level(self.id, column_name, level)
+            await sql.s_levels.update_level(self.id, column_name, level)
 
     @staticmethod
     async def get_xp_needed(level: int, column_name: str):
@@ -102,7 +94,7 @@ class User:
         """Registers the user to the currency system."""
         if self.balance == -1:
             self.balance = 100
-            await sql.register_currency(self.id, self.balance)
+            await sql.s_currency.register_currency(self.id, self.balance)
 
     async def update_balance(self, balance: int = None, add: int = None, remove: int = None):
         """Set balance of user in db and object.
@@ -130,7 +122,7 @@ class User:
         if self.balance < -1:
             self.balance = 0
 
-        await sql.update_user_balance(self.id, str(self.balance))
+        await sql.s_currency.update_user_balance(self.id, str(self.balance))
 
     async def get_shortened_balance(self) -> str:
         """Shorten an amount of money to its value places."""
@@ -175,10 +167,10 @@ class User:
     async def set_language(self, language):
         """Sets the user's language."""
         self.language = language
-        await sql.delete_user_language(self.id)
+        await sql.s_user.delete_user_language(self.id)
 
         # user language is en_us by default. We do not want it in the db.
         if self.language == 'en_us':
             return
 
-        await sql.set_user_language(self.id, language)
+        await sql.s_user.set_user_language(self.id, language)

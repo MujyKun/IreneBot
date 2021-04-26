@@ -78,7 +78,7 @@ class Cache:
 
         async def get_lang_info():
             try:
-                for t_user_id, t_language in await ex.sql.fetch_languages():
+                for t_user_id, t_language in await ex.sql.s_user.fetch_languages():
                     yield t_user_id, t_language
             except:
                 return
@@ -126,7 +126,7 @@ class Cache:
         async def get_levels():
             # get rob, daily, beg, and profile levels of all users
             try:
-                for t_user_id, t_rob, t_daily, t_beg, t_profile_level in await ex.sql.fetch_levels():
+                for t_user_id, t_rob, t_daily, t_beg, t_profile_level in await ex.sql.s_levels.fetch_levels():
                     yield t_user_id, t_rob, t_daily, t_beg, t_profile_level
             except:
                 return
@@ -148,7 +148,7 @@ class Cache:
         async def get_currency():
             # get all user id and their balance
             try:
-                for t_user_id, t_money in await ex.sql.fetch_currency():
+                for t_user_id, t_money in await ex.sql.s_currency.fetch_currency():
                     yield t_user_id, t_money
             except:
                 return
@@ -163,7 +163,7 @@ class Cache:
         async def get_users_filtered():
             # get all users with their guessing game filter enabled
             try:
-                for t_user_info in await ex.sql.fetch_filter_enabled():
+                for t_user_info in await ex.sql.s_guessinggame.fetch_filter_enabled():
                     yield t_user_info
             except:
                 return
@@ -176,7 +176,7 @@ class Cache:
         async def get_user_group_filters():
             # get the groups users have filtered.
             try:
-                for t_user_id, t_group_id in await ex.sql.fetch_filtered_groups():
+                for t_user_id, t_group_id in await ex.sql.s_groupmembers.fetch_filtered_groups():
                     yield t_user_id, t_group_id
             except:
                 return
@@ -207,7 +207,7 @@ class Cache:
         async def get_twitch_guilds():
             # get guild id, channel id, and role id for followings on twitch.
             try:
-                for t_guild_id, t_channel_id, t_role_id in await ex.sql.fetch_twitch_guilds():
+                for t_guild_id, t_channel_id, t_role_id in await ex.sql.s_twitch.fetch_twitch_guilds():
                     yield t_guild_id, t_channel_id, t_role_id
             except:
                 return
@@ -215,7 +215,7 @@ class Cache:
         async def get_twitch_notis():
             # get the twitch username and guild id that is following them.
             try:
-                for t_username, t_guild_id in await ex.sql.fetch_twitch_notifications():
+                for t_username, t_guild_id in await ex.sql.s_twitch.fetch_twitch_notifications():
                     yield t_username, t_guild_id
             except:
                 return
@@ -239,7 +239,7 @@ class Cache:
         async def get_gg_stats():
             # get all gg stats from all users
             try:
-                for t_user_id, t_easy, t_medium, t_hard in await ex.sql.fetch_gg_stats():
+                for t_user_id, t_easy, t_medium, t_hard in await ex.sql.s_guessinggame.fetch_gg_stats():
                     yield t_user_id, t_easy, t_medium, t_hard
             except:
                 return
@@ -253,7 +253,7 @@ class Cache:
         async def get_timezones():
             # get all timezones
             try:
-                for t_user_id, t_timezone in await ex.sql.fetch_timezones():
+                for t_user_id, t_timezone in await ex.sql.s_user.fetch_timezones():
                     yield t_user_id, t_timezone
             except:
                 return
@@ -268,7 +268,7 @@ class Cache:
         async def get_reminders():
             # get all reminders
             try:
-                for t_reason_id, t_user_id, t_reason, t_time_stamp in await ex.sql.fetch_reminders():
+                for t_reason_id, t_user_id, t_reason, t_time_stamp in await ex.sql.s_reminder.fetch_reminders():
                     yield t_reason_id, t_user_id, t_reason, t_time_stamp
             except:
                 return
@@ -289,7 +289,7 @@ class Cache:
         async def get_all_roles():
             # get all self assignable roles
             try:
-                for t_role_id, t_role_name, t_server_id in await ex.sql.fetch_all_self_assign_roles():
+                for t_role_id, t_role_name, t_server_id in await ex.sql.s_selfassignroles.fetch_all_self_assign_roles():
                     yield t_role_id, t_role_name, t_server_id
             except:
                 return
@@ -297,7 +297,7 @@ class Cache:
         async def get_all_channels():
             # get all channels and server ids that have self assignable roles
             try:
-                for t_channel_id, t_server_id in await ex.sql.fetch_all_self_assign_channels():
+                for t_channel_id, t_server_id in await ex.sql.s_selfassignroles.fetch_all_self_assign_channels():
                     yield t_channel_id, t_server_id
             except:
                 return
@@ -327,7 +327,8 @@ class Cache:
         async def get_weverse():
             # get all weverse subscriptions
             try:
-                for t_channel_id, t_community_name, t_role_id, t_comments_disabled in await ex.sql.fetch_weverse():
+                for t_channel_id, t_community_name, t_role_id, t_comments_disabled in \
+                        await ex.sql.s_weverse.fetch_weverse():
                     yield t_channel_id, t_community_name, t_role_id, t_comments_disabled
             except:
                 return
@@ -345,7 +346,7 @@ class Cache:
         async def get_commands():
             # gets all commands and their usage amount
             try:
-                for t_command_name, t_count in await ex.sql.fetch_command(session_id):
+                for t_command_name, t_count in await ex.sql.s_session.fetch_command(session_id):
                     yield t_command_name, t_count
             except:
                 return
@@ -353,7 +354,7 @@ class Cache:
         async for command_name, count in get_commands():
             ex.cache.command_counter[command_name] = count
 
-        ex.cache.current_session = ex.first_result(await ex.sql.fetch_session_usage(datetime.date.today()))
+        ex.cache.current_session = ex.first_result(await ex.sql.s_session.fetch_session_usage(datetime.date.today()))
 
     @staticmethod
     async def create_restricted_channel_cache():
@@ -361,7 +362,7 @@ class Cache:
         async def get_restricted_channels():
             # gets all restricted idol photo channels
             try:
-                for t_channel_id, t_server_id, t_send_here in await ex.sql.fetch_restricted_channels():
+                for t_channel_id, t_server_id, t_send_here in await ex.sql.s_groupmembers.fetch_restricted_channels():
                     yield t_channel_id, t_server_id, t_send_here
             except:
                 return
@@ -376,7 +377,7 @@ class Cache:
 
         async def get_custom_commands():
             try:
-                for t_server_id, t_command_name, t_message in await ex.sql.fetch_custom_commands():
+                for t_server_id, t_command_name, t_message in await ex.sql.s_customcommands.fetch_custom_commands():
                     yield t_server_id, t_command_name, t_message
             except:
                 return
@@ -395,7 +396,7 @@ class Cache:
         async def get_statuses():
             # get all bot statuses
             try:
-                for t_status in await ex.sql.fetch_bot_statuses():
+                for t_status in await ex.sql.s_general.fetch_bot_statuses():
                     yield t_status
             except:
                 return
@@ -414,7 +415,8 @@ class Cache:
 
         async def get_dead_links():
             try:
-                for t_dead_link, t_user_id, t_message_id, t_idol_id, t_guessing_game in await ex.sql.fetch_dead_links():
+                for t_dead_link, t_user_id, t_message_id, t_idol_id, t_guessing_game in \
+                        await ex.sql.s_groupmembers.fetch_dead_links():
                     yield t_dead_link, t_user_id, t_message_id, t_idol_id, t_guessing_game
             except:
                 return
@@ -437,7 +439,7 @@ class Cache:
         async def get_idols():
             # get all idols
             try:
-                for t_idol in await ex.sql.fetch_all_idols():
+                for t_idol in await ex.sql.s_groupmembers.fetch_all_idols():
                     yield t_idol
             except:
                 return
@@ -475,7 +477,7 @@ class Cache:
 
         async def get_groups():
             try:
-                for t_group in await ex.sql.fetch_all_groups():
+                for t_group in await ex.sql.s_groupmembers.fetch_all_groups():
                     yield t_group
             except:
                 return
@@ -495,13 +497,13 @@ class Cache:
         current_time_format = datetime.date.today()
         if ex.cache.session_id is None:
             if ex.cache.total_used is None:
-                ex.cache.total_used = (ex.first_result(await ex.sql.fetch_total_session_usage())) or 0
+                ex.cache.total_used = (ex.first_result(await ex.sql.s_session.fetch_total_session_usage())) or 0
             try:
-                await ex.sql.add_new_session(ex.cache.total_used, 0, current_time_format)
+                await ex.sql.s_session.add_new_session(ex.cache.total_used, 0, current_time_format)
             except:
                 # session for today already exists.
                 pass
-            ex.cache.session_id = ex.first_result(await ex.sql.fetch_session_id(datetime.date.today()))
+            ex.cache.session_id = ex.first_result(await ex.sql.s_session.fetch_session_id(datetime.date.today()))
             ex.cache.session_time_format = current_time_format
         else:
             # check that the date is correct, and if not, call get_session_id to get the new session id.
@@ -521,7 +523,7 @@ class Cache:
         async def get_n_word():
             # get all users n word count
             try:
-                for t_user_id, t_n_word_counter in await ex.sql.fetch_n_word():
+                for t_user_id, t_n_word_counter in await ex.sql.s_general.fetch_n_word():
                     yield t_user_id, t_n_word_counter
             except:
                 return
@@ -538,7 +540,7 @@ class Cache:
         async def get_temp_channels():
             # get all temp channels
             try:
-                for t_channel_id, t_delay in await ex.sql.fetch_temp_channels():
+                for t_channel_id, t_delay in await ex.sql.s_general.fetch_temp_channels():
                     yield t_channel_id, t_delay
             except:
                 return
@@ -557,7 +559,8 @@ class Cache:
         async def get_welcome_messages():
             # get all welcome messages
             try:
-                for t_channel_id, t_server_id, t_message_id, t_enabled in await ex.sql.fetch_welcome_messages():
+                for t_channel_id, t_server_id, t_message_id, t_enabled in \
+                        await ex.sql.s_general.fetch_welcome_messages():
                     yield t_channel_id, t_server_id, t_message_id, t_enabled
             except:
                 return
@@ -573,7 +576,7 @@ class Cache:
         async def get_server_prefixes():
             # get all server prefixes
             try:
-                for t_server_id, t_prefix in await ex.sql.fetch_server_prefixes():
+                for t_server_id, t_prefix in await ex.sql.s_general.fetch_server_prefixes():
                     yield t_server_id, t_prefix
             except:
                 return
@@ -590,7 +593,7 @@ class Cache:
         async def get_logged_servers():
             # get all logged servers
             try:
-                for t_p_id, t_server_id, t_channel_id, t_send_all in await ex.sql.fetch_logged_servers():
+                for t_p_id, t_server_id, t_channel_id, t_send_all in await ex.sql.s_logging.fetch_logged_servers():
                     yield t_p_id, t_server_id, t_channel_id, t_send_all
             except:
                 return
@@ -598,7 +601,7 @@ class Cache:
         async def get_logged_channels(primary_key):
             # get all logged channels
             try:
-                for t_channel_id in await ex.sql.fetch_logged_channels(primary_key):
+                for t_channel_id in await ex.sql.s_logging.fetch_logged_channels(primary_key):
                     yield t_channel_id
             except:
                 return
@@ -620,7 +623,7 @@ class Cache:
         async def get_bot_banned_users():
             # get bot banned users
             try:
-                for t_user_id in await ex.sql.fetch_bot_bans():
+                for t_user_id in await ex.sql.s_general.fetch_bot_bans():
                     yield t_user_id
             except:
                 return
@@ -638,7 +641,7 @@ class Cache:
         async def get_mod_mail():
             # get mod mail users and channels
             try:
-                for t_user_id, t_channel_id in await ex.sql.fetch_mod_mail():
+                for t_user_id, t_channel_id in await ex.sql.s_general.fetch_mod_mail():
                     yield t_user_id, t_channel_id
             except:
                 return
@@ -666,7 +669,7 @@ class Cache:
             async def get_cached_patrons():
                 # get cached patrons
                 try:
-                    for t_user_id, t_super_patron in await ex.sql.fetch_cached_patrons():
+                    for t_user_id, t_super_patron in await ex.sql.s_patreon.fetch_cached_patrons():
                         yield t_user_id, t_super_patron
                 except:
                     return
@@ -690,25 +693,25 @@ class Cache:
                 cached_patrons.append(user_id)
                 if user_id not in normal_patrons:
                     # they are not a patron at all, so remove them from db cache
-                    await ex.sql.delete_patron(user_id)
+                    await ex.sql.s_patreon.delete_patron(user_id)
                 elif user_id in super_patrons and not super_patron:
                     # if they are a super patron but their db is cache is a normal patron
-                    await ex.sql.update_patron(user_id, 1)
+                    await ex.sql.s_patreon.update_patron(user_id, 1)
                 elif user_id not in super_patrons and super_patron:
                     # if they are not a super patron, but the db cache says they are.
-                    await ex.sql.update_patron(user_id, 0)
+                    await ex.sql.s_patreon.update_patron(user_id, 0)
 
             # fix db cache and live Irene cache
             async for patron in get_patrons():
                 if patron not in cached_patrons:
                     # patron includes both normal and super patrons.
-                    await ex.sql.add_patron(patron, 0)
+                    await ex.sql.s_patreon.add_patron(patron, 0)
                 user = await ex.get_user(patron)
                 user.patron = True
 
             async for patron in get_patrons(t_super_patron=True):
                 if patron not in cached_patrons:
-                    await ex.sql.update_patron(patron, 1)
+                    await ex.sql.s_patreon.update_patron(patron, 1)
                 user = await ex.get_user(patron)
                 user.patron = True
                 user.super_patron = True

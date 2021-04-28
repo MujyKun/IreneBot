@@ -1,3 +1,4 @@
+import module
 from util import exceptions, logger as log, local_cache
 from typing import TYPE_CHECKING
 from discord.ext.commands import Context
@@ -210,17 +211,18 @@ class Utility:
         r = lambda: random.randint(0, 255)
         return int(('%02X%02X%02X' % (r(), r(), r())), 16)  # must be specified to base 16 since 0x is not present
 
-    async def create_embed(self, title="Irene", color=None, title_desc=None, footer_desc="Thanks for using Irene!"):
+    async def create_embed(self, title="Irene", color=None, title_desc=None, footer_desc="Thanks for using Irene!",
+                           icon_url=None, footer_url=None):
         """Create a discord Embed."""
-        if not color:
-            color = self.get_random_color()
-        if not title_desc:
-            embed = discord.Embed(title=title, color=color)
-        else:
-            embed = discord.Embed(title=title, color=color, description=title_desc)
+        icon_url = self.keys.icon_url if not icon_url else icon_url
+        footer_url = self.keys.footer_url if not footer_url else footer_url
+        color = self.get_random_color() if not color else color
+        embed = discord.Embed(title=title, color=color) if not title_desc \
+            else discord.Embed(title=title, color=color, description=title_desc)
+
         embed.set_author(name="Irene", url=self.keys.bot_website,
-                         icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
-        embed.set_footer(text=footer_desc, icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
+                         icon_url=icon_url)
+        embed.set_footer(text=footer_desc, icon_url=footer_url)
         return embed
 
     async def wait_for_reaction(self, msg, user_id, reaction_needed):
@@ -367,7 +369,8 @@ class Utility:
                 yield in_list
 
         # custom input is always surrounded by curly braces {}
-        async for input_list in get_inputs_to_change():
+        for input_list in inputs_to_change:
+            await asyncio.sleep(0)  # bare yield to not block main thread
             # make sure braces do not already exist in the input
             keyword = input_list[0]
             custom_input = str(input_list[1])

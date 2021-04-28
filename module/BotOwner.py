@@ -10,8 +10,8 @@ class BotOwner(commands.Cog):
     @commands.command()
     async def resetcache(self, ctx):
         """Reset the cache."""
-        await ex.u_cache.create_cache(on_boot_up=False)
         await ctx.send(await ex.get_msg(ctx, 'botowner', 'cache_reset'))
+        await ex.u_cache.create_cache(on_boot_up=False)
 
     @commands.is_owner()
     @commands.command()

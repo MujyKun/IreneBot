@@ -224,30 +224,30 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
                 await game.end_game()
                 log.console(f"Closed the game in {game.channel.id}.")
                 await game.channel.send(message)
-            except:
+            except Exception as e:
                 log.console(f"Failed to close the game in {game.channel.id}")
-                pass
+                log.useless(f"{e} - Failed to close game - BotMod.kill")
 
         try:
             await ex.conn.terminate()  # close all db connections.
             log.console("Closed all DB Connections.")
-        except:
+        except Exception as e:
             log.console("Failed to close all DB Connections.")
-            pass
+            log.useless(f"{e} - Failed to close DB Connections - BotMod.kill")
 
         try:
             await ex.session.close()  # close the aiohttp client session.
             log.console("Closed the aiohttp session")
-        except:
+        except Exception as e:
             log.console("Failed to cose the aiohttp Client Session.")
-            pass
+            log.useless(f"{e} - Failed to close Web Session - BotMod.kill")
 
         try:
             await ex.client.logout()  # log out of bot.
             log.console("Logged out of the bot.")
-        except:
+        except Exception as e:
             log.console("Failed to log out of the bot.")
-            pass
+            log.useless(f"{e} - Failed to log out of bot. - BotMod.kill")
 
     @commands.command()
     @commands.check(ex.check_if_mod)
@@ -281,9 +281,9 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
                 url = url.replace('\n', '')
                 await ex.conn.execute("DELETE FROM general.interactions WHERE url = $1", url)
                 await ctx.send(f"Removed <{url}>")
-            except:
-                pass
-        await ctx.send("Finished.")
+            except Exception as e:
+                log.useless(f"{e} - Failed to delete interaction. - BotMod.deleteinteraction")
+        await ctx.send("Finished removing urls.")
 
     @commands.command()
     @commands.check(ex.check_if_mod)

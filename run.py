@@ -80,7 +80,7 @@ class Irene:
     @staticmethod
     def add_listeners():
         """Add Listener Events."""
-        module.keys.client.add_listener(module.GroupMembers.GroupMembers.on_message2, 'on_message')
+        module.keys.client.add_listener(module.GroupMembers.GroupMembers.idol_photo_on_message, 'on_message')
         module.keys.client.add_listener(module.Archive.Archive.on_message, 'on_message')
         module.keys.client.add_listener(module.Logging.Logging.on_message_log, 'on_message')
         module.keys.client.add_listener(module.Logging.Logging.logging_on_message_edit, 'on_message_edit')

@@ -168,8 +168,8 @@ class Moderator(commands.Cog):
                 for channel in guild_channels:
                     try:
                         await channel.set_permissions(mute_role, send_messages=False)
-                    except:
-                        pass
+                    except Exception as e:
+                        log.useless(f"{e} - Failed to set channel mute permissions. - Moderator.mute")
             muted = await self.check_if_muted(user.id, mute_role)
             if muted:
                 return await ctx.send(f"**<@{user.id}> is already muted.**")

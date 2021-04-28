@@ -3,6 +3,7 @@ from discord.ext import tasks
 from module.keys import bot_prefix
 import random
 from Utility import resources as ex
+from util import logger as log
 
 
 # noinspection PyBroadException,PyPep8
@@ -30,5 +31,5 @@ class Status:
                 final_status = f"{bot_prefix}help"
             activity = discord.Activity(name=final_status, type=discord.ActivityType.listening)
             await ex.client.change_presence(status=discord.Status.online, activity=activity)
-        except:
-            pass
+        except Exception as e:
+            log.useless(f"{e} - Failed to change status presence of bot. - Status.change_bot_status_loop")

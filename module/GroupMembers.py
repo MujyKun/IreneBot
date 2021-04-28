@@ -12,7 +12,7 @@ import datetime
 # noinspection PyBroadException,PyPep8
 class GroupMembers(commands.Cog):
     @staticmethod
-    async def on_message2(message):
+    async def idol_photo_on_message(message):
         """
         This method detects messages that are meant to be idol posts and sends them.
 
@@ -20,13 +20,16 @@ class GroupMembers(commands.Cog):
         """
         # create modifiable var without altering original
         channel = message.channel
-        if message.author.bot or not await ex.u_group_members.check_channel_sending_photos(channel.id) or await ex.u_miscellaneous.check_if_temp_channel(channel.id):
+        if message.author.bot or not await ex.u_group_members.check_channel_sending_photos(channel.id) or \
+                await ex.u_miscellaneous.check_if_temp_channel(channel.id):
             return
         try:
             if await ex.u_group_members.check_server_sending_photos(message.guild.id):
                 channel = await ex.u_group_members.get_channel_sending_photos(message.guild.id)
-        except:
-            pass  # error is guild not found, likely being accessed from DMs
+        except Exception as e:
+            # error is guild not found, likely being accessed from DMs
+            log.useless(f"{e} - Unable to get guild - GroupMembers.idol_photo_on_message")
+
         posted = False
         api_url = None
         try:
@@ -44,7 +47,8 @@ class GroupMembers(commands.Cog):
                 # we just need to make sure it has the bot's default prefix
                 # however this means if a user changes the prefix and uses the bot's default prefix
                 # it will still process idol photos, but not regular commands.
-                if message.content[0:len(keys.bot_prefix)] != keys.bot_prefix or message.content.lower() == f"{keys.bot_prefix}null":
+                if message.content[0:len(keys.bot_prefix)] != keys.bot_prefix or message.content.lower() == \
+                        f"{keys.bot_prefix}null":
                     return
                 message_content = message.content[len(keys.bot_prefix):len(message.content)]
                 server_id = await ex.get_server_id(message)
@@ -74,8 +78,8 @@ class GroupMembers(commands.Cog):
                     ex.u_group_members.add_user_limit(message.author)
                     if api_url:
                         await ex.u_group_members.check_idol_post_reactions(photo_msg, message, random_member, api_url)
-        except:
-            pass
+        except Exception as e:
+            log.useless(f"{e} - Processing Idol Photo Message Issue - GroupMembers.idol_photo_on_message")
 
     @commands.command()
     async def addidol(self, ctx, *, idol_json):
@@ -327,8 +331,9 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
             try:
                 if await ex.u_group_members.check_server_sending_photos(ctx.guild.id):
                     channel = await ex.u_group_members.get_channel_sending_photos(ctx.guild.id)
-            except:
-                pass  # error is guild not found, likely being accessed from DMs
+            except Exception as e:
+                # error is guild not found, likely being accessed from DMs
+                log.useless(f"{e} - Likely guild not found - GroupMembers.randomidol")
             idol = await ex.u_group_members.get_random_idol()
             photo_msg, api_url, posted = await ex.u_group_members.request_image_post(ctx.message, idol, channel)
             if posted:

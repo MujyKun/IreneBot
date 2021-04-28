@@ -248,9 +248,9 @@ class Game:
                 if self.idol_post_msg:
                     try:
                         await self.idol_post_msg.delete()
-                    except:
+                    except Exception as e:
                         # message does not exist.
-                        pass
+                        log.useless(f"{e} - Likely message doesn't exist - GuessingGame.Game.create_new_question")
 
                 # Create random idol selection
                 if not self.idol_set:

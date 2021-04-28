@@ -38,3 +38,17 @@ def logfile(message):
     with open(f"Logs/{datetime.date.today()}-info.log", "a+", encoding='utf-8') as file:
         output = f"{datetime.datetime.now()} -- {message}\n"
         file.write(output)
+
+
+def useless(message):
+    """Submits Loggings Try-Except-Passes to Thread Pool."""
+    (thread_pool.submit(loguseless, f"{message}")).result()
+
+
+def loguseless(message):
+    """Logs Try-Except-Passes. This will put the exceptions into a log file specifically for cases with no
+    exception needed."""
+    with open(f"Logs/{datetime.date.today()}-useless.log", "a+", encoding='utf-8') as file:
+        output = f"{datetime.datetime.now()} -- {message}\n"
+        file.write(output)
+

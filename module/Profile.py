@@ -123,6 +123,5 @@ class Profile(commands.Cog):
                 return await user.set_profile_xp(current_xp + xp_per_message)
             await user.set_profile_xp(1)
             await user.set_profile_level(current_level + 1)
-        except Exception:
-            # log.console(e)
-            pass
+        except Exception as e:
+            log.useless(f"{e} - failed to increase profile level. - Profile.increase_profile_level")

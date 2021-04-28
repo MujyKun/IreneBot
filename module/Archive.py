@@ -57,8 +57,8 @@ class Archive(commands.Cog):
                             await Archive.download_url(url, drive_id, message.channel.id)
                         # quickstart.Drive.checker()
                 await Archive.deletephotos()
-        except:
-            pass
+        except Exception as e:
+            log.useless(f"{e} - Archive.on_message")
 
     @commands.has_guild_permissions(manage_messages=True)
     @commands.command()
@@ -122,10 +122,10 @@ class Archive(commands.Cog):
                 if ctx.guild.id == guild_id:
                     check = True
                     embed.insert_field_at(0, name=list_channel, value=f"https://drive.google.com/drive/folders/{drive_id} | {name}", inline=False)
-            except:
+            except Exception as e:
                 # Error would occur on test bot if the client does not have access to a certain channel id
                 # this try-except will also be useful if a server removed the bot.
-                pass
+                log.useless(f"{e} - Archive.listchannels")
         if check:
             await ctx.send(embed=embed)
         else:
@@ -190,8 +190,8 @@ class Archive(commands.Cog):
             if photo != "placeholder.txt" and photo not in file_list:
                 try:
                     os.unlink('Photos/{}'.format(photo))
-                except:
-                    pass
+                except Exception as e:
+                    log.useless(f"{e} - Failed to unlink photo - Archive.deletephotos")
 
     @commands.has_guild_permissions(manage_messages=True)
     @commands.command()

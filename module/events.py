@@ -45,8 +45,8 @@ class Events(commands.Cog):
             log.console(f"{error}")
             # increment general error count per minute -> Does not include unable to send messages to people.
             ex.cache.errors_per_minute += 1
-        except:
-            pass
+        except Exception as e:
+            log.useless(f"{e} - Failed to process error - Events.error")
 
     @staticmethod
     @client.event
@@ -66,7 +66,7 @@ class Events(commands.Cog):
                 if error.original.status == 403:
                     return
             except AttributeError:
-                pass
+                pass  # do not need to log as useless
 
             log.console(f"Command Invoke Error -- {error} -- {ctx.command.name}")
             ex.cache.errors_per_minute += 1
@@ -91,8 +91,9 @@ class Events(commands.Cog):
                 server_prefix = await ex.get_server_prefix(guild.id)
                 msg = await ex.replace(msg, ["server_prefix", server_prefix])
                 await guild.system_channel.send(msg)
-        except:
-            pass
+        except Exception as e:
+            log.useless(f"{e} - Unable to send message on guild join. - Events.on_guild_join")
+
         log.console(f"{guild.name} ({guild.id}) has invited Irene.")
 
     @staticmethod
@@ -231,8 +232,8 @@ class Events(commands.Cog):
                 message = message.replace("%guild_name", guild.name)
                 try:
                     await channel.send(message)
-                except:
-                    pass
+                except Exception as e:
+                    log.useless(f"{e} - Unable to send message to new user in guild. - Events.on_member_join")
 
     @staticmethod
     @client.event

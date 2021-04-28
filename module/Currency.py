@@ -72,7 +72,6 @@ class Currency(commands.Cog):
         if (user_is_even and comp_is_even) or (not user_is_even and not comp_is_even):
             # if the user and comp random number are either both odd or both even -> win
             multiplier = (100 + user_random_number) / 100  # percentage converted to decimal
-            pass
         else:
             # loss
             multiplier = (comp_random_number / 100)  # percentage converted to decimal

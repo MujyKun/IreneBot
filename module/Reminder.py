@@ -1,4 +1,5 @@
 from module.keys import reminder_limit
+from util import logger as log
 from discord.ext import commands, tasks
 from Utility import resources as ex
 import datetime
@@ -207,8 +208,10 @@ class Reminder(commands.Cog):
                             embed = await ex.create_embed(title="Reminder", title_desc=title_desc)
                             await dm_channel.send(embed=embed)
                             await ex.u_reminder.remove_user_reminder(user.id, remind_id)
-                    except:
-                        pass  # likely forbidden error -> do not have access to dm user
-        except:
-            pass  # dictionary changed size during iteration -> Next Loop instance will take care of this loop.
+                    except Exception as e:
+                        # likely forbidden error -> do not have access to dm user
+                        log.useless(f"{e} - Likely do not have access to dm user - Reminder.reminder_loop")
 
+        except Exception as e:
+            # dictionary changed size during iteration -> Next Loop instance will take care of this loop.
+            log.useless(f"{e} - Likely dictionary changed size during iteration. - Reminder.reminder_loop")

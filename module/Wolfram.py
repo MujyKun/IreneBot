@@ -3,6 +3,7 @@ from Utility import resources as ex
 from module.keys import wolfram_app_id, patreon_link
 import xmltodict
 import urllib.parse
+from util import logger as log
 
 
 # noinspection PyBroadException,PyPep8
@@ -62,8 +63,9 @@ class Wolfram(commands.Cog):
                                 if pod.get('@primary'):
                                     sub_pod_result = f"**{sub_pod_result}**"
                                 results.append(sub_pod_result)
-                        except:
-                            pass
+                        except Exception as e:
+                            log.useless(f"{e} - Failed to go through a weverse pod - Wolfram.w")
+
                 if not results:
                     return await ctx.send(f"> **{ctx.author.display_name}, I could not find an answer to that.**")
                 final_result = "\n".join(results)

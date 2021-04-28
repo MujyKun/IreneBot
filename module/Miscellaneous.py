@@ -39,8 +39,8 @@ Message Author: {message.author}
 """
                 embed = await ex.create_embed(title="Phrase Found", color=ex.get_random_color(), title_desc=title_desc)
                 await dm_channel.send(embed=embed)
-        except:
-            pass
+        except Exception as e:
+            log.useless(f"{e} - User Phrase - Miscellaneous.on_message_user_notifications")
 
     @commands.command()
     async def setlanguage(self, ctx, language_choice):
@@ -81,10 +81,13 @@ Message Author: {message.author}
     async def addnoti(self, ctx, *, phrase):
         """Receive a DM whenever a phrase or word is said in the current server. [Format: %addnoti (phrase/word)]"""
         try:
-            check_exists = ex.first_result(await ex.conn.fetchrow("SELECT COUNT(*) FROM general.notifications WHERE guildid = $1 AND userid = $2 AND phrase = $3", ctx.guild.id, ctx.author.id, phrase.lower()))
+            check_exists = ex.first_result(
+                await ex.conn.fetchrow("SELECT COUNT(*) FROM general.notifications WHERE guildid = $1 AND "
+                                       "userid = $2 AND phrase = $3", ctx.guild.id, ctx.author.id, phrase.lower()))
             if check_exists:
                 raise Exception
-            await ex.conn.execute("INSERT INTO general.notifications(guildid,userid,phrase) VALUES($1, $2, $3)", ctx.guild.id, ctx.author.id, phrase.lower())
+            await ex.conn.execute("INSERT INTO general.notifications(guildid,userid,phrase) VALUES($1, $2, $3)",
+                                  ctx.guild.id, ctx.author.id, phrase.lower())
             user = await ex.get_user(ctx.author.id)
             user.notifications.append([ctx.guild.id, phrase.lower()])
             ex.cache.user_notifications.append([ctx.guild.id, ctx.author.id, phrase.lower()])  # full list
@@ -98,7 +101,8 @@ Message Author: {message.author}
     async def removenoti(self, ctx, *, phrase):
         """Remove a phrase/word when it said in the current server. [Format: %removenoti (phrase/word)]"""
         try:
-            await ex.conn.execute("DELETE FROM general.notifications WHERE guildid=$1 AND userid=$2 AND phrase=$3", ctx.guild.id, ctx.author.id, phrase.lower())
+            await ex.conn.execute("DELETE FROM general.notifications WHERE guildid=$1 AND userid=$2 AND phrase=$3",
+                                  ctx.guild.id, ctx.author.id, phrase.lower())
             try:
                 user = await ex.get_user(ctx.author.id)
                 user.notifications.remove([ctx.guild.id, phrase.lower()])
@@ -106,9 +110,10 @@ Message Author: {message.author}
             except AttributeError:
                 return await ctx.send(
                     f"> **{ctx.author.display_name}, You are not allowed to use this command in DMs.**")
-            except:
-                pass
-            await ctx.send(f"> **{ctx.author.display_name}, if you were receiving notifications for that phrase, it has been removed.**")
+            except Exception as e:
+                log.useless(f"{e} - Failed to remove user phrase - Miscellaneous.removenoti")
+            await ctx.send(f"> **{ctx.author.display_name}, if you were receiving notifications for that phrase, "
+                           f"it has been removed.**")
         except Exception as e:
             log.console(e)
             await ctx.send(f"> **Something Went Wrong, please {await ex.get_server_prefix(ctx)}report it.**")

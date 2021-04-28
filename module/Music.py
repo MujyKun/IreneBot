@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands, tasks
-from module import keys
 from util import logger as log
 import asyncio
 import youtube_dl
@@ -38,18 +37,15 @@ async def download_video(video):
 def check_live(video):
     # return None = video is downloaded
     # return a message = video is ignored
-    try:
-        if video['duration'] > 14400:
+    video_duration = video.get("duration")
+    if video_duration:
+        if video_duration > 14400:
             return 'too_long'
-    except:
-        pass
-    try:
-        if not video['is_live']:
-            return
-        else:
-            return 'live_video'
-    except:
-        return  # this error occurs from is_live not being found.
+
+    if not video.get("is_live"):
+        return
+    else:
+        return "live_video"
 
 
 # https://github.com/ytdl-org/youtube-dl/blob/2391941f283a1107b01f9df76a8b0e521a5abe3b/youtube_dl/YoutubeDL.py#L143
@@ -92,13 +88,14 @@ class Music(commands.Cog):
                 if voice_client.is_connected() and voice_client.channel.members == 1:
                     if voice_client.is_playing():
                         try:
-                            songs_queued = queued[voice_client.guild.id]
+                            songs_queued = queued.get(voice_client.guild.id)
                             if songs_queued:
                                 channel = songs_queued[0][1]
                                 msg = f"> **There are no users in this voice channel. Resetting queue and leaving.**"
                                 await channel.send(msg)
-                        except:
-                            pass
+                        except Exception as e:
+                            log.useless(f"{e} - Failed to send message to channel - Music.check_voice_clients")
+
                         self.reset_queue_for_guild(voice_client.guild.id)
                         voice_client.stop()
                     await voice_client.disconnect()
@@ -112,8 +109,8 @@ class Music(commands.Cog):
                     continue
                 try:
                     os.remove(file_location)
-                except:
-                    pass
+                except Exception as e:
+                    log.useless(f"{e} - Failed to remove local file for Music. - Music.check_voice_clients")
         except Exception as e:
             log.console(e)
 
@@ -131,31 +128,34 @@ class Music(commands.Cog):
     @staticmethod
     def reset_queue_for_guild(guild_id):
         try:
-            if not queued[guild_id]:
+            queued_songs = queued.get(guild_id)
+            if not queued_songs:
                 return
-            for song in queued[guild_id]:
+
+            for song in queued_songs:
                 player = song[0]
                 file_name = song[2]
                 if check_if_player(player):
                     player.cleanup()
                 try:
                     os.remove(file_name)
-                except:
-                    pass
+                except Exception as e:
+                    log.useless(f"{e} - Failed to remove local music for file. - Music.reset_queue_for_guild")
             queued.pop(guild_id, None)
-        except:
-            pass
+        except Exception as e:
+            log.useless(f"{e} - Failed to reset queue for guild - Music.reset_queue_for_guild")
 
     @commands.command()
     async def lyrics(self, ctx, *, song_query):
         """Get the lyrics of a song (From https://api.ksoft.si)
         [Format: %lyrics (song)]"""
-        if not keys.lyric_client:
+        if not ex.keys.lyric_client:
             log.console(f"There is no API Key currently set for the Lyrics and the Developer is working on it.")
-            return await ctx.send("> **There is no API Key currently set for the Lyrics and the Developer is working on it.**")
+            return await ctx.send("> **There is no API Key currently set for the Lyrics and the Developer is "
+                                  "working on it.**")
         try:
-            results = await keys.lyric_client.music.lyrics(song_query)
-        except keys.ksoftapi.NoResults:
+            results = await ex.keys.lyric_client.music.lyrics(song_query)
+        except ex.keys.ksoftapi.NoResults:
             log.console(f"No lyrics were found for {song_query}.")
             return await ctx.send(f"> **No lyrics were found for {song_query}.**")
         except Exception as e:
@@ -198,7 +198,10 @@ class Music(commands.Cog):
         """Shows Current Queue [Format: %queue]"""
         try:
             embed_page_number = 1
-            current_songs = queued[ctx.guild.id]
+            current_songs = queued.get(ctx.guild.id)
+            if not current_songs:
+                await ctx.send(f"> **There are no songs queued in this server.**")
+
             embed_list = []
             counter = 1
             set_of_songs = ""
@@ -220,15 +223,17 @@ class Music(commands.Cog):
                 try:
                     try:
                         total_amount_of_time += duration
-                    except:
-                        pass
+                    except Exception as e:
+                        log.useless(f"{e} - Unable to increment the total amount of time - Music.queue")
                     duration = await ex.u_miscellaneous.get_cooldown_time(duration)
                 except:
                     duration = "N/A"
                 if counter == 1:
-                    song_desc = f"[{counter}] **NOW PLAYING:** [{youtube_channel} - {song_name}]({song_link}) - {duration} - Requested by <@{author_id}> \n\n"
+                    song_desc = f"[{counter}] **NOW PLAYING:** [{youtube_channel} - {song_name}]({song_link}) - " \
+                                f"{duration} - Requested by <@{author_id}> \n\n"
                 else:
-                    song_desc = f"[{counter}] [{youtube_channel} - {song_name}]({song_link}) - {duration} - Requested by <@{author_id}>\n\n"
+                    song_desc = f"[{counter}] [{youtube_channel} - {song_name}]({song_link}) - " \
+                                f"{duration} - Requested by <@{author_id}>\n\n"
                 set_of_songs += song_desc
                 if counter % 10 == 0:
                     embed = discord.Embed(title=f"{ctx.guild.name}'s Music Playlist Page {embed_page_number}",
@@ -251,8 +256,7 @@ class Music(commands.Cog):
             msg = await ctx.send(embed=embed_list[page_number - 1])
             if len(embed_list) > 1:
                 await ex.check_left_or_right_reaction_embed(msg, embed_list, page_number - 1)
-        except KeyError:
-            await ctx.send(f"> **There are no songs queued in this server.**")
+
         except Exception as e:
             log.console(e)
             await ctx.send(f"> **Something went wrong.. Please {await ex.get_server_prefix(ctx)}report it.**")
@@ -313,8 +317,8 @@ class Music(commands.Cog):
                 await ctx.send(f"> **{title} will now be the next song to play.**")
             except:
                 await ctx.send(f"> **That song number was not found. Could not move it.**")
-        except:
-            pass
+        except Exception as e:
+            log.useless(f"{e} - Failed to move song - Music.move")
 
     # noinspection PyBroadException
     @commands.command()
@@ -330,8 +334,8 @@ class Music(commands.Cog):
                 await ctx.send(f"> **Removed {title} from the queue.**")
             except:
                 await ctx.send(f"> **That song number was not found. Could not remove it.**")
-        except:
-            pass
+        except Exception as e:
+            log.useless(f"{e} - Failed to remove song - Music.remove")
 
     @commands.command()
     async def skip(self, ctx):
@@ -343,27 +347,26 @@ class Music(commands.Cog):
             player = queued[ctx.guild.id][0][0]
             title = get_video_title(player)
             await ctx.send(f"> **Skipped {title}**")
-        except:
-            pass
+        except Exception as e:
+            log.useless(f"{e} - Failed to skip song - Music.skip")
 
     def remove_song_in_queue(self, client_guild_id):
-        try:
-            if len(queued[client_guild_id]) == 1:  # do not shorten code. Checks if it's exactly 1 song left.
+        songs = queued.get(client_guild_id)
+        if songs:
+            if len(songs) == 1:  # checks for exactly 1 song left, do not shorten.
                 return self.reset_queue_for_guild(client_guild_id)
-        except KeyError:
-            pass
+        else:
+            return  # no songs in queue. ( this should never occur if called properly )
         try:
-            try:
-                (queued[client_guild_id][0][0]).cleanup()
-            except:
-                pass
-            try:
-                os.remove(queued[client_guild_id][0][2])
-            except:
-                pass
-            return queued[client_guild_id].pop(0)
-        except KeyError:
-            return
+            songs[0][0].cleanup()
+        except Exception as e:
+            log.useless(f"{e} - Failed to cleanup song. - Music.remove_song_in_queue")
+
+        try:
+            os.remove(songs[0][2])
+        except Exception as e:
+            log.useless(f"{e} - Failed to remove local music file - Music.remove_song_in_queue")
+            return songs.pop(0)
 
     @commands.command(aliases=['p'])
     async def play(self, ctx, *, url=None):
@@ -407,7 +410,7 @@ class Music(commands.Cog):
                         await ctx.send(f"> **Added {len(videos)} songs to the queue.**")
                 await msg.delete()
         except IndexError:
-            pass
+            pass  # no need to log useless
         except Exception as e:
             log.console(e)
 
@@ -506,8 +509,8 @@ class Music(commands.Cog):
         if await ex.u_patreon.check_if_patreon(ctx.author.id, super_patron=True) or await ex.u_patreon.check_if_patreon(ctx.guild.owner.id, super_patron=True):
             await self.ensure_voice(ctx)
         else:
-            await ctx.send(f"""**Music is only available to $5 Patreons that support <@{keys.bot_id}>.
-Become a Patron at {keys.patreon_link}.**""")
+            await ctx.send(f"""**Music is only available to $5 Patreons that support <@{ex.keys.bot_id}>.
+Become a Patron at {ex.keys.patreon_link}.**""")
             raise commands.CommandError(f"{ctx.author.name} ({ctx.author.id}) is not a Patron.")
 
 

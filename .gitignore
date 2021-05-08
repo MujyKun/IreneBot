@@ -9,3 +9,5 @@ venv/
 *credentials.json
 *.pickle
 API/
+bias_game/
+idol/

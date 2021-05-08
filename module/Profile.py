@@ -2,14 +2,13 @@ import discord
 import datetime
 import pytz
 from discord.ext import commands
-from Utility import resources as ex
-from util import logger as log
+from IreneUtility.util import u_logger as log
 
 
 # noinspection PyBroadException,PyPep8
 class Profile(commands.Cog):
-    def __init__(self):
-        ex.client.add_listener(self.increase_profile_level, 'on_message')
+    def __init__(self, ex):
+        self.ex = ex
 
     @commands.command()
     async def avatar(self, ctx, user: discord.Member = None):
@@ -19,7 +18,7 @@ class Profile(commands.Cog):
                 user = ctx.author
             else:
                 user_id = user.id
-            embed = await ex.create_embed(title=f"{user.display_name}'s Avatar   ({user_id})")
+            embed = await self.ex.create_embed(title=f"{user.display_name}'s Avatar   ({user_id})")
             embed.set_image(url=user.avatar_url)
             await ctx.send(embed=embed)
         except Exception as e:
@@ -40,7 +39,7 @@ class Profile(commands.Cog):
             else:
                 user_bot = "No"
 
-            irene_user = await ex.get_user(user_id)
+            irene_user = await self.ex.get_user(user_id)
 
             count = 0
             roles = ""
@@ -58,21 +57,21 @@ class Profile(commands.Cog):
             shortened_money = await irene_user.get_shortened_balance()
             rob_beg_daily_level = f"{irene_user.rob_level}/{irene_user.beg_level}/{irene_user.daily_level}"
 
-            user_scores = f"{await ex.u_guessinggame.get_user_score('easy', user_id)}/" \
-                f"{await ex.u_guessinggame.get_user_score('medium', user_id)}/" \
-                f"{await ex.u_guessinggame.get_user_score('hard', user_id)}"
-            user_timezone = await ex.u_reminder.get_user_timezone(user_id)
+            user_scores = f"{await self.ex.u_guessinggame.get_user_score('easy', user_id)}/" \
+                f"{await self.ex.u_guessinggame.get_user_score('medium', user_id)}/" \
+                f"{await self.ex.u_guessinggame.get_user_score('hard', user_id)}"
+            user_timezone = await self.ex.u_reminder.get_user_timezone(user_id)
 
             try:
                 timezone_utc = datetime.datetime.now(pytz.timezone(user_timezone)).strftime('%Z, UTC%z')
             except:
                 timezone_utc = None
 
-            if await ex.u_patreon.check_if_patreon(user_id):
+            if await self.ex.u_patreon.check_if_patreon(user_id):
                 embed = discord.Embed(title=f"{user.name} ({user_id})", color=0x90ee90, url=f"{user.avatar_url}", description=f"**{user.name} is supporting Irene on Patreon!**")
             else:
                 embed = discord.Embed(title=f"{user.name} ({user_id})", color=0x90ee90, url=f"{user.avatar_url}")
-            embed = await ex.set_embed_author_and_footer(embed, "Thanks for using Irene!")
+            embed = await self.ex.set_embed_author_and_footer(embed, "Thanks for using Irene!")
 
             try:
                 user_activity = user.activity.name
@@ -105,15 +104,14 @@ class Profile(commands.Cog):
             await ctx.send(embed=embed)
 
         except Exception as e:
-            server_prefix = await ex.get_server_prefix(ctx)
+            server_prefix = await self.ex.get_server_prefix(ctx)
             await ctx.send(f"> **There was an error. Please {server_prefix}report it**")
             log.console(e)
 
-    @staticmethod
-    async def increase_profile_level(msg):
+    async def increase_profile_level(self, msg):
         """Increase the profile level appropriately after every message."""
         try:
-            user = await ex.get_user(msg.author.id)
+            user = await self.ex.get_user(msg.author.id)
             xp_per_message = 10
             current_level = user.profile_level
             current_xp = await user.get_profile_xp()

@@ -1,9 +1,8 @@
 import discord
 from discord.ext import commands, tasks
-from util import logger as log
 import asyncio
+from IreneUtility.util import u_logger as log
 import youtube_dl
-from Utility import resources as ex
 import random
 import os
 
@@ -77,13 +76,16 @@ queued = {}
 
 # noinspection PyBroadException,PyPep8
 class Music(commands.Cog):
+    def __init__(self, ex):
+        self.ex = ex
+
     # noinspection PyBroadException
     @tasks.loop(seconds=30, minutes=1, hours=0, reconnect=True)
     async def check_voice_clients(self):
-        if not ex.client.loop.is_running():
+        if not self.ex.client.loop.is_running():
             return
         try:
-            for voice_client in ex.client.voice_clients:
+            for voice_client in self.ex.client.voice_clients:
                 # members in vc must be equal to 1 to stop playing (includes the bot)
                 if voice_client.is_connected() and voice_client.channel.members == 1:
                     if voice_client.is_playing():
@@ -149,13 +151,13 @@ class Music(commands.Cog):
     async def lyrics(self, ctx, *, song_query):
         """Get the lyrics of a song (From https://api.ksoft.si)
         [Format: %lyrics (song)]"""
-        if not ex.keys.lyric_client:
+        if not self.ex.keys.lyric_client:
             log.console(f"There is no API Key currently set for the Lyrics and the Developer is working on it.")
             return await ctx.send("> **There is no API Key currently set for the Lyrics and the Developer is "
                                   "working on it.**")
         try:
-            results = await ex.keys.lyric_client.music.lyrics(song_query)
-        except ex.keys.ksoftapi.NoResults:
+            results = await self.ex.keys.lyric_client.music.lyrics(song_query)
+        except self.ex.keys.ksoftapi.NoResults:
             log.console(f"No lyrics were found for {song_query}.")
             return await ctx.send(f"> **No lyrics were found for {song_query}.**")
         except Exception as e:
@@ -166,13 +168,13 @@ class Music(commands.Cog):
             if len(song.lyrics) >= 1500:
                 first_page = song.lyrics[0:1500]
                 second_page = song.lyrics[1500:len(song.lyrics)]
-                embed = await ex.create_embed(title=f"{song.name} by {song.artist}", color=ex.get_random_color(),
+                embed = await self.ex.create_embed(title=f"{song.name} by {song.artist}", color=self.ex.get_random_color(),
                                               title_desc=first_page,
                                               footer_desc="Thanks for using Irene! Lyrics API is from ksoft.si.")
-                embed2 = await ex.create_embed(title=f"{song.name} by {song.artist}", color=ex.get_random_color(), title_desc=second_page, footer_desc="Thanks for using Irene! Lyrics API is from ksoft.si.")
+                embed2 = await self.ex.create_embed(title=f"{song.name} by {song.artist}", color=self.ex.get_random_color(), title_desc=second_page, footer_desc="Thanks for using Irene! Lyrics API is from ksoft.si.")
                 msg = await ctx.send(embed=embed)
-                return await ex.check_left_or_right_reaction_embed(msg, [embed, embed2])
-            embed = await ex.create_embed(title=f"{song.name} by {song.artist}", color=ex.get_random_color(), title_desc=song.lyrics, footer_desc="Thanks for using Irene! Lyrics API is from ksoft.si.")
+                return await self.ex.check_left_or_right_reaction_embed(msg, [embed, embed2])
+            embed = await self.ex.create_embed(title=f"{song.name} by {song.artist}", color=self.ex.get_random_color(), title_desc=song.lyrics, footer_desc="Thanks for using Irene! Lyrics API is from ksoft.si.")
             await ctx.send(embed=embed)
 
     @commands.command()
@@ -225,7 +227,7 @@ class Music(commands.Cog):
                         total_amount_of_time += duration
                     except Exception as e:
                         log.useless(f"{e} - Unable to increment the total amount of time - Music.queue")
-                    duration = await ex.u_miscellaneous.get_cooldown_time(duration)
+                    duration = await self.ex.u_miscellaneous.get_cooldown_time(duration)
                 except:
                     duration = "N/A"
                 if counter == 1:
@@ -237,29 +239,29 @@ class Music(commands.Cog):
                 set_of_songs += song_desc
                 if counter % 10 == 0:
                     embed = discord.Embed(title=f"{ctx.guild.name}'s Music Playlist Page {embed_page_number}",
-                                          description=set_of_songs, color=ex.get_random_color())
-                    embed = await ex.set_embed_author_and_footer(embed, footer_message="Thanks for using Irene.")
+                                          description=set_of_songs, color=self.ex.get_random_color())
+                    embed = await self.ex.set_embed_author_and_footer(embed, footer_message="Thanks for using Irene.")
                     set_of_songs = ""
                     embed_list.append(embed)
                     embed_page_number += 1
                 counter += 1
             # if there are not more than 10 songs in queue.
             embed = discord.Embed(title=f"{ctx.guild.name}'s Music Playlist Page {embed_page_number}",
-                                  description=set_of_songs, color=ex.get_random_color())
-            embed = await ex.set_embed_author_and_footer(embed, footer_message="Thanks for using Irene.")
+                                  description=set_of_songs, color=self.ex.get_random_color())
+            embed = await self.ex.set_embed_author_and_footer(embed, footer_message="Thanks for using Irene.")
             embed_list.append(embed)
             if page_number > len(embed_list):
                 page_number = 1
             elif page_number <= 0:
                 page_number = 1
-            await ex.set_embed_author_and_footer(embed_list[page_number -1], footer_message=f"Total time of songs queued: {await ex.u_miscellaneous.get_cooldown_time(total_amount_of_time)}")
+            await self.ex.set_embed_author_and_footer(embed_list[page_number -1], footer_message=f"Total time of songs queued: {await self.ex.u_miscellaneous.get_cooldown_time(total_amount_of_time)}")
             msg = await ctx.send(embed=embed_list[page_number - 1])
             if len(embed_list) > 1:
-                await ex.check_left_or_right_reaction_embed(msg, embed_list, page_number - 1)
+                await self.ex.check_left_or_right_reaction_embed(msg, embed_list, page_number - 1)
 
         except Exception as e:
             log.console(e)
-            await ctx.send(f"> **Something went wrong.. Please {await ex.get_server_prefix(ctx)}report it.**")
+            await ctx.send(f"> **Something went wrong.. Please {await self.ex.get_server_prefix(ctx)}report it.**")
 
     @commands.command()
     async def join(self, ctx):
@@ -381,7 +383,7 @@ class Music(commands.Cog):
                 return await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
             async with ctx.typing():
                 msg = await ctx.send(f"> **Gathering information about the video/playlist, this may take a few minutes if it is a long playlist.**")
-                videos, first_video_live = await YTDLSource.from_url(url, loop=ex.client.loop, stream=False, guild_id=ctx.guild.id, channel=ctx.channel, author_id=ctx.author.id)
+                videos, first_video_live = await YTDLSource.from_url(url, loop=self.ex.client.loop, stream=False, guild_id=ctx.guild.id, channel=ctx.channel, author_id=ctx.author.id)
                 if not ctx.voice_client.is_playing():
                     if not first_video_live:
                         player = await download_video(videos[0])
@@ -417,7 +419,7 @@ class Music(commands.Cog):
     def start_next_song(self, error):
         if error:
             return
-        all_voice_clients = ex.client.voice_clients
+        all_voice_clients = self.ex.client.voice_clients
         for voice_client in all_voice_clients:
             if voice_client.is_playing() or voice_client.is_paused():
                 continue
@@ -430,7 +432,7 @@ class Music(commands.Cog):
                 try:
                     if not live:  # we know it's video information and not a player because it is not live.
                         download_a_video = download_video(player)
-                        player = asyncio.run_coroutine_threadsafe(download_a_video, ex.client.loop)
+                        player = asyncio.run_coroutine_threadsafe(download_a_video, self.ex.client.loop)
                         try:
                             player = player.result()
                             queued[client_guild_id][0][0] = player  # making front of queue a player
@@ -442,7 +444,7 @@ class Music(commands.Cog):
                 send_channel_song = channel.send(f'> **Now playing: **{player.title}', delete_after=240)  # 4min
                 # used because async function cannot be used.
                 # https://discordpy.readthedocs.io/en/latest/faq.html#how-do-i-pass-a-coroutine-to-the-player-s-after-function
-                send_channel = asyncio.run_coroutine_threadsafe(send_channel_song, ex.client.loop)
+                send_channel = asyncio.run_coroutine_threadsafe(send_channel_song, self.ex.client.loop)
                 try:
                     send_channel.result()
                 except Exception as e:
@@ -506,11 +508,11 @@ class Music(commands.Cog):
     @queue.before_invoke
     @shuffle.before_invoke
     async def check_patreon(self, ctx):
-        if await ex.u_patreon.check_if_patreon(ctx.author.id, super_patron=True) or await ex.u_patreon.check_if_patreon(ctx.guild.owner.id, super_patron=True):
+        if await self.ex.u_patreon.check_if_patreon(ctx.author.id, super_patron=True) or await self.ex.u_patreon.check_if_patreon(ctx.guild.owner.id, super_patron=True):
             await self.ensure_voice(ctx)
         else:
-            await ctx.send(f"""**Music is only available to $5 Patreons that support <@{ex.keys.bot_id}>.
-Become a Patron at {ex.keys.patreon_link}.**""")
+            await ctx.send(f"""**Music is only available to $5 Patreons that support <@{self.ex.keys.bot_id}>.
+Become a Patron at {self.ex.keys.patreon_link}.**""")
             raise commands.CommandError(f"{ctx.author.name} ({ctx.author.id}) is not a Patron.")
 
 

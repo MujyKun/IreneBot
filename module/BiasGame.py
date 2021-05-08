@@ -1,15 +1,23 @@
 import discord
-from Utility import resources as ex
 from discord.ext import commands
 from module import keys
-from util import logger as log
 import random
 import asyncio
 from math import log2
+from IreneUtility.util import u_logger as log
+from IreneUtility.Utility import Utility
+from IreneUtility.models import base_util
+
+# main or temporary Utility object until main one is set. Important for decorator checking.
+ex: Utility = base_util.ex or Utility()
 
 
 # noinspection PyPep8
 class BiasGame(commands.Cog):
+    def __init__(self, t_ex):
+        global ex
+        ex = t_ex
+
     @commands.check(ex.check_user_in_support_server)
     @commands.command(aliases=['bg'])
     async def biasgame(self, ctx, gender="all", bracket_size=8):

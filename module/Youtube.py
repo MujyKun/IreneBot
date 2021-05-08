@@ -2,12 +2,13 @@ from discord.ext import commands, tasks
 from datetime import *
 import asyncio
 from IreneUtility.util import u_logger as log
+from IreneUtility.Utility import Utility
 
 
 # noinspection PyBroadException,PyPep8
 class Youtube(commands.Cog):
     def __init__(self, ex):
-        self.ex = ex
+        self.ex: Utility = ex
         self.current_yt_loop_instance = None
 
     @commands.command()

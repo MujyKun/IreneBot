@@ -3,12 +3,13 @@ from discord.ext import commands
 from module import events
 from IreneUtility.util import u_logger as log
 import typing
+from IreneUtility.Utility import Utility
 
 
 # noinspection PyBroadException,PyPep8
 class LastFM(commands.Cog):
     def __init__(self, ex):
-        self.ex = ex
+        self.ex: Utility = ex
         self.user_not_found = "That user was not found. Refer to `setfm` to link an account."
         self.user_does_not_exist = "That discord user does not have a Last FM account attached. Refer to `setfm`."
 

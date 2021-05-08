@@ -5,6 +5,7 @@ from IreneUtility.util import u_logger as log
 import youtube_dl
 import random
 import os
+from IreneUtility.Utility import Utility
 
 
 youtube_dl.utils.bug_reports_message = lambda: ''
@@ -77,7 +78,7 @@ queued = {}
 # noinspection PyBroadException,PyPep8
 class Music(commands.Cog):
     def __init__(self, ex):
-        self.ex = ex
+        self.ex: Utility = ex
 
     # noinspection PyBroadException
     @tasks.loop(seconds=30, minutes=1, hours=0, reconnect=True)

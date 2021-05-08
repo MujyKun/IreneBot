@@ -2,12 +2,13 @@ import discord
 from discord.ext import commands
 from random import *
 from IreneUtility.util import u_logger as log
+from IreneUtility.Utility import Utility
 
 
 # noinspection PyPep8
 class BlackJack(commands.Cog):
     def __init__(self, ex):
-        self.ex = ex
+        self.ex: Utility = ex
 
     @commands.command(aliases=['bj'])
     async def blackjack(self, ctx, amount="0", versus="player"):

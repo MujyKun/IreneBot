@@ -1,13 +1,14 @@
 import discord
 from discord.ext import commands, tasks
 from IreneUtility.util import u_logger as log
+from IreneUtility.Utility import Utility
 import asyncio
 import json
 
 
 class Twitch(commands.Cog):
     def __init__(self, ex):
-        self.ex = ex
+        self.ex: Utility = ex
 
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)

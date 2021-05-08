@@ -5,13 +5,14 @@ import aiofiles
 import asyncio
 from random import *
 from datetime import datetime
+from IreneUtility.Utility import Utility
 from IreneUtility.util import u_logger as log
 
 
 # noinspection PyBroadException,PyPep8
 class Archive(commands.Cog):
     def __init__(self, ex):
-        self.ex = ex
+        self.ex: Utility = ex
 
     async def on_message(self, message, is_owner=False):
         if message.author.bot:

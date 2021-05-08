@@ -1,14 +1,15 @@
 import discord
 from discord.ext import commands
 import itertools
-import IreneUtility.Utility
+from IreneUtility.Utility import Utility
 
-ex: IreneUtility.Utility
+
+ex: Utility
 
 
 class Help(commands.Cog):
     def __init__(self, t_ex):
-        self.ex = t_ex
+        self.ex: Utility = t_ex
         global ex
         ex = self.ex
 

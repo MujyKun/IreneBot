@@ -1,12 +1,13 @@
 import discord
 from discord.ext import commands
 from IreneUtility.util import u_logger as log
+from IreneUtility.Utility import Utility
 
 
 # noinspection PyPep8
 class BotOwner(commands.Cog):
     def __init__(self, ex):
-        self.ex = ex
+        self.ex: Utility = ex
 
     @commands.is_owner()
     @commands.command()

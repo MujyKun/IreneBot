@@ -4,12 +4,13 @@ from discord.ext import commands
 from module import keys
 from IreneUtility.util import u_logger as log
 import datetime
+from IreneUtility.Utility import Utility
 
 
 # noinspection PyBroadException,PyPep8
 class Miscellaneous(commands.Cog):
     def __init__(self, ex):
-        self.ex = ex
+        self.ex: Utility = ex
 
     async def on_message_user_notifications(self, message):
         # user phrase notifications

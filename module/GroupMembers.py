@@ -6,12 +6,13 @@ import time
 import typing
 import json
 import datetime
+from IreneUtility.Utility import Utility
 
 
 # noinspection PyBroadException,PyPep8
 class GroupMembers(commands.Cog):
     def __init__(self, ex):
-        self.ex = ex
+        self.ex: Utility = ex
 
     async def idol_photo_on_message(self, message):
         """

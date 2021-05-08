@@ -15,6 +15,7 @@ ex: Utility = base_util.ex or Utility()
 class GuessingGame(commands.Cog):
     def __init__(self, t_ex):
         global ex
+        self.ex: Utility = t_ex
         ex = t_ex
 
     @commands.command(aliases=['ggl', 'gglb'])

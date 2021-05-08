@@ -2,7 +2,7 @@ from module.keys import client
 from IreneUtility.util import u_logger as log
 from discord.ext import commands
 import discord
-import IreneUtility.Utility
+from IreneUtility.Utility import Utility
 
 """
 events.py
@@ -10,13 +10,14 @@ events.py
 Manages d.py events 
 """
 
-ex: IreneUtility.Utility
+ex: Utility
 
 
 # noinspection PyBroadException,PyPep8
 class Events(commands.Cog):
     def __init__(self, t_ex):
         global ex
+        self.ex: Utility = t_ex
         ex = t_ex
 
     @staticmethod

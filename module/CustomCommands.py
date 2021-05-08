@@ -1,12 +1,13 @@
 from discord.ext import commands
 from module import keys
 from IreneUtility.util import u_logger as log
+from IreneUtility.Utility import Utility
 
 
 # noinspection PyPep8
 class CustomCommands(commands.Cog):
     def __init__(self, ex):
-        self.ex = ex
+        self.ex: Utility = ex
 
     async def process_custom_commands(self, message):
         """Process a custom server command.

@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands
-from module import keys
 from IreneUtility.util import u_logger as log
 from Weverse.weverseasync import WeverseAsync
 import aiofiles
@@ -14,7 +13,7 @@ ex: Utility = base_util.ex or Utility()
 # noinspection PyBroadException,PyPep8
 class BotMod(commands.Cog):
     def __init__(self, t_ex):
-        self.ex = t_ex
+        self.ex: Utility = t_ex
         global ex
         ex = self.ex
 
@@ -24,7 +23,7 @@ class BotMod(commands.Cog):
             message_sender = message.author
             message_channel = message.channel
             message_content = message.content
-            if message_sender.id == keys.bot_id:
+            if message_sender.id == self.ex.keys.bot_id:
                 return
             if 'closedm' in message_content or 'createdm' in message_content:
                 return

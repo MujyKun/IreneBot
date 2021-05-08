@@ -3,12 +3,13 @@ import datetime
 import pytz
 from discord.ext import commands
 from IreneUtility.util import u_logger as log
+from IreneUtility.Utility import Utility
 
 
 # noinspection PyBroadException,PyPep8
 class Profile(commands.Cog):
     def __init__(self, ex):
-        self.ex = ex
+        self.ex: Utility = ex
 
     @commands.command()
     async def avatar(self, ctx, user: discord.Member = None):

@@ -2,12 +2,13 @@ from discord.ext import commands
 import xmltodict
 import urllib.parse
 from IreneUtility.util import u_logger as log
+from IreneUtility.Utility import Utility
 
 
 # noinspection PyBroadException,PyPep8
 class Wolfram(commands.Cog):
     def __init__(self, ex):
-        self.ex = ex
+        self.ex: Utility = ex
         self.division_by_zero = "It is not possible to divide by zero."
         self.patreon_msg = f">>> **You must be a patron in order to use the WolframAlpha API due to the " \
             f"limited amount of requests. Any small math requests can be done " \

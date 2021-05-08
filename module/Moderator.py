@@ -5,12 +5,13 @@ from module.keys import bot_prefix
 import typing
 import json
 import aiohttp
+from IreneUtility.Utility import Utility
 
 
 # noinspection PyBroadException,PyPep8
 class Moderator(commands.Cog):
     def __init__(self, ex):
-        self.ex = ex
+        self.ex: Utility = ex
         
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)

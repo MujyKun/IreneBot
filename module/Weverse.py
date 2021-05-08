@@ -2,12 +2,13 @@ import discord
 import asyncio
 from discord.ext import commands, tasks
 from IreneUtility.util import u_logger as log
+from IreneUtility.Utility import Utility
 
 
 # noinspection PyPep8
 class Weverse(commands.Cog):
     def __init__(self, ex):
-        self.ex = ex
+        self.ex: Utility = ex
         self.current_notification_id = 0
         self.notifications_already_posted = {}  # channel_id : [notification ids]
         self.available_choices = "[TXT, BTS, GFRIEND, SEVENTEEN, ENHYPEN, NU'EST, CL, P1Harmony, Weeekly, SUNMI," \

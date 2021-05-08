@@ -16,6 +16,7 @@ ex: Utility = base_util.ex or Utility()
 class BiasGame(commands.Cog):
     def __init__(self, t_ex):
         global ex
+        self.ex: Utility = t_ex
         ex = t_ex
 
     @commands.check(ex.check_user_in_support_server)

@@ -1,11 +1,12 @@
 import discord
 from discord.ext import commands
 from IreneUtility.util import u_logger as log
+from IreneUtility.Utility import Utility
 
 
 class SelfAssignRoles(commands.Cog):
     def __init__(self, ex):
-        self.ex = ex
+        self.ex: Utility = ex
         self.error_msg = f"> An error has occurred. Please report it."
 
     @commands.command()

@@ -1,9 +1,10 @@
 from discord.ext import commands
+from IreneUtility.Utility import Utility
 
 
 class Twitter(commands.Cog):
     def __init__(self, ex):
-        self.ex = ex
+        self.ex: Utility = ex
 
     @commands.command()
     @commands.is_owner()

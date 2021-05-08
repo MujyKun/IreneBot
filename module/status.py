@@ -3,12 +3,13 @@ from discord.ext import tasks
 from module.keys import bot_prefix
 import random
 from IreneUtility.util import u_logger as log
+from IreneUtility.Utility import Utility
 
 
 # noinspection PyBroadException,PyPep8
 class Status:
     def __init__(self, ex):
-        self.ex = ex
+        self.ex: Utility = ex
 
     @tasks.loop(seconds=30, minutes=0, hours=0, reconnect=True)
     async def change_bot_status_loop(self):

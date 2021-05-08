@@ -2,12 +2,13 @@ from discord.ext import commands
 from discord.ext.commands.cooldowns import BucketType
 import discord
 from random import randint
+from IreneUtility.Utility import Utility
 
 
 # noinspection PyBroadException,PyPep8
 class Currency(commands.Cog):
     def __init__(self, ex):
-        self.ex = ex
+        self.ex: Utility = ex
 
     @commands.command()
     @commands.cooldown(1, 86400, BucketType.user)

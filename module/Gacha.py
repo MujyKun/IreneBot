@@ -2,12 +2,13 @@ import discord
 from discord.ext import commands, tasks
 from IreneUtility.util import u_logger as log
 import datetime
+from IreneUtility.Utility import Utility
 
 
 # noinspection PyPep8
 class Gacha(commands.Cog):
     def __init__(self, ex):
-        self.ex = ex
+        self.ex: Utility = ex
         
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)

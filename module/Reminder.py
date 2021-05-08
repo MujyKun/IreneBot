@@ -4,12 +4,13 @@ import datetime
 import pytz
 import discord
 import typing
+from IreneUtility.Utility import Utility
 
 
 # noinspection PyBroadException,PyPep8
 class Reminder(commands.Cog):
     def __init__(self, ex):
-        self.ex = ex
+        self.ex: Utility = ex
         self.set_timezone_format = "settimezone (timezone abbreviation) (country code)"
 
     # TODO: add remindlater command or reacts to the reminder

@@ -1,8 +1,7 @@
 import discord
 from discord.ext import commands
-from util import logger as log
+from IreneUtility.util import u_logger as log
 from module.keys import bot_prefix, interaction_list
-from Utility import resources as ex
 import typing
 import json
 import aiohttp
@@ -10,6 +9,9 @@ import aiohttp
 
 # noinspection PyBroadException,PyPep8
 class Moderator(commands.Cog):
+    def __init__(self, ex):
+        self.ex = ex
+        
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
     async def addalias(self, ctx, alias, mem_id: int, mode="idol"):
@@ -17,10 +19,10 @@ class Moderator(commands.Cog):
         [Format: %addalias (alias) (ID of idol/group) ('idol' or 'group']"""
         alias = alias.replace("_", " ")
         if mode.lower() in ["idol", "member", "members", "idols"]:
-            obj = await ex.u_group_members.get_member(mem_id)
+            obj = await self.ex.u_group_members.get_member(mem_id)
             name = f"{obj.full_name} ({obj.stage_name}) [{obj.id}]"
         elif mode.lower() in ["group", "groups"]:
-            obj = await ex.u_group_members.get_group(mem_id)
+            obj = await self.ex.u_group_members.get_group(mem_id)
             name = f"{obj.name} [{obj.id}]"
         else:
             return await ctx.send("> Please select whether you want to add an idol or group alias.")
@@ -28,15 +30,15 @@ class Moderator(commands.Cog):
             return await ctx.send(f"> {mem_id} is not associated with an idol or group.")
         if alias in obj.aliases:
             return await ctx.send(f"> {alias} is already a global alias for {name}.")
-        if ex.check_if_mod(ctx):  # checks if the user is a bot mod.
-            await ex.u_group_members.set_global_alias(obj, alias.lower())
+        if self.ex.check_if_mod(ctx):  # checks if the user is a bot mod.
+            await self.ex.u_group_members.set_global_alias(obj, alias.lower())
             return await ctx.send(f"> {alias} has been added as a global alias for {mode} {mem_id}")
         else:
             server_aliases = obj.local_aliases.get(ctx.guild.id)
             if server_aliases:
                 if alias.lower() in server_aliases:
                     return await ctx.send(f"> {alias} is already a server alias for {name}.")
-            await ex.u_group_members.set_local_alias(obj, alias.lower(), ctx.guild.id)
+            await self.ex.u_group_members.set_local_alias(obj, alias.lower(), ctx.guild.id)
             return await ctx.send(f"> {alias} has been added as a server alias for {name}.")
 
     @commands.command(aliases=['removealias'])
@@ -46,26 +48,26 @@ class Moderator(commands.Cog):
         [Format: %deletealias (alias) (ID of idol/group) ('idol' or 'group')]"""
         alias = alias.replace("_", " ")
         if mode.lower() in ["idol", "member", "members", "idols"]:
-            obj = await ex.u_group_members.get_member(mem_id)
+            obj = await self.ex.u_group_members.get_member(mem_id)
             name = f"{obj.full_name} ({obj.stage_name}) [{obj.id}]"
         elif mode.lower() in ["group", "groups"]:
-            obj = await ex.u_group_members.get_group(mem_id)
+            obj = await self.ex.u_group_members.get_group(mem_id)
             name = f"{obj.name} [{obj.id}]"
         else:
             return await ctx.send("> Please select whether you want to add an idol or group alias.")
         if not obj:
             return await ctx.send(f"> {mem_id} is not associated with an idol or group.")
-        if ex.check_if_mod(ctx):  # checks if the user is a bot mod.
+        if self.ex.check_if_mod(ctx):  # checks if the user is a bot mod.
             if alias not in obj.aliases:
                 return await ctx.send(f"> {alias} is not a global alias for {name}.")
-            await ex.u_group_members.remove_global_alias(obj, alias.lower())
+            await self.ex.u_group_members.remove_global_alias(obj, alias.lower())
             return await ctx.send(f"> {alias} has been removed from the global aliases for {mode} {mem_id}")
         else:
             server_aliases = obj.local_aliases.get(ctx.guild.id)
             if server_aliases:
                 if alias.lower() not in server_aliases:
                     return await ctx.send(f"> {alias} is not a server alias for {name}.")
-            await ex.u_group_members.remove_local_alias(obj, alias.lower(), ctx.guild.id)
+            await self.ex.u_group_members.remove_local_alias(obj, alias.lower(), ctx.guild.id)
             return await ctx.send(f"> {alias} has been removed from the server aliases for {name}.")
 
     @commands.command()
@@ -78,36 +80,36 @@ class Moderator(commands.Cog):
         try:
             channel_id = ctx.channel.id
             guild_id = ctx.guild.id
-            server_prefix = await ex.get_server_prefix(ctx)
-            server = ex.cache.welcome_messages.get(guild_id)
+            server_prefix = await self.ex.get_server_prefix(ctx)
+            server = self.ex.cache.welcome_messages.get(guild_id)
             welcome_new_users = f"> This server will now welcome new users. More info can be found with `{server_prefix}help welcome`"
             if not message:
                 message = f"%user, Welcome to %guild_name."
                 if not server:
-                    await ex.u_moderator.add_welcome_message_server(channel_id, guild_id, message, 1)
+                    await self.ex.u_moderator.add_welcome_message_server(channel_id, guild_id, message, 1)
                     return await ctx.send(welcome_new_users)
                 else:
                     # this is to simplify code, and just swaps 0 and 1 no matter what it is.
                     updated_pos = int(not server.get("enabled"))
-                    await ex.u_moderator.update_welcome_message_enabled(guild_id, updated_pos)
+                    await self.ex.u_moderator.update_welcome_message_enabled(guild_id, updated_pos)
                     # check if the channel id was changed.
                     if not channel_id == server.get("channel_id"):
-                        await ex.u_moderator.update_welcome_message_channel(guild_id, channel_id)
+                        await self.ex.u_moderator.update_welcome_message_channel(guild_id, channel_id)
                     if updated_pos:
                         return await ctx.send(f"> Welcome Messages have been enabled in this channel. ")
                     else:
                         return await ctx.send(f"> Welcome Messages have been disabled in this channel. ")
             else:
                 if not server:
-                    await ex.u_moderator.add_welcome_message_server(channel_id, guild_id, message, 1)
+                    await self.ex.u_moderator.add_welcome_message_server(channel_id, guild_id, message, 1)
                     return await ctx.send(welcome_new_users)
                 else:
-                    enabled = await ex.u_moderator.check_welcome_message_enabled(guild_id)
+                    enabled = await self.ex.u_moderator.check_welcome_message_enabled(guild_id)
                     if not enabled:
-                        await ex.u_moderator.update_welcome_message_enabled(guild_id, 1)
+                        await self.ex.u_moderator.update_welcome_message_enabled(guild_id, 1)
                     if not channel_id == server.get("channel_id"):
-                        await ex.u_moderator.update_welcome_message_channel(guild_id, channel_id)
-                    await ex.u_moderator.update_welcome_message(guild_id, message)
+                        await self.ex.u_moderator.update_welcome_message_channel(guild_id, channel_id)
+                    await self.ex.u_moderator.update_welcome_message(guild_id, message)
                     return await ctx.send(welcome_new_users)
         except Exception as e:
             log.console(e)
@@ -123,18 +125,17 @@ class Moderator(commands.Cog):
         interaction = interaction.lower()
         if interaction not in interaction_list:
             return await ctx.send(f"> **That is not an interaction.**\n{interaction_msg}")
-        if not await ex.check_interaction_enabled(server_id=ctx.guild.id, interaction=interaction):
+        if not await self.ex.check_interaction_enabled(server_id=ctx.guild.id, interaction=interaction):
             # enable it
-            await ex.u_miscellaneous.enable_interaction(ctx.guild.id, interaction)
+            await self.ex.u_miscellaneous.enable_interaction(ctx.guild.id, interaction)
             await ctx.send(f"> **{interaction} has been enabled in this server.**")
         else:
             # disable it
-            await ex.u_miscellaneous.disable_interaction(ctx.guild.id, interaction)
+            await self.ex.u_miscellaneous.disable_interaction(ctx.guild.id, interaction)
             await ctx.send(f"> **{interaction} has been disabled in this server.**")
 
-    @staticmethod
-    async def get_mute_role(ctx):
-        mute_roles = await ex.conn.fetch("SELECT roleid FROM general.muteroles")
+    async def get_mute_role(self, ctx):
+        mute_roles = await self.ex.conn.fetch("SELECT roleid FROM general.muteroles")
         for role in mute_roles:
             role_id = role[0]
             role = ctx.guild.get_role(role_id)
@@ -164,7 +165,7 @@ class Moderator(commands.Cog):
             guild_channels = ctx.guild.text_channels
             if not mute_role:
                 mute_role = await ctx.guild.create_role(reason="Creating Mute Role", name="Muted")
-                await ex.conn.execute("INSERT INTO general.muteroles(roleid) VALUES($1)", mute_role.id)
+                await self.ex.conn.execute("INSERT INTO general.muteroles(roleid) VALUES($1)", mute_role.id)
                 for channel in guild_channels:
                     try:
                         await channel.set_permissions(mute_role, send_messages=False)
@@ -297,22 +298,22 @@ class Moderator(commands.Cog):
         Requires Manage Messages
         """
         prefix = prefix.lower()
-        current_server_prefix = await ex.get_server_prefix(ctx.guild.id)
+        current_server_prefix = await self.ex.get_server_prefix(ctx.guild.id)
         if len(prefix) > 8:
             await ctx.send("> **Your prefix can not be more than 8 characters.**")
         else:
             # Default prefix '%' should never be in DB.
             if current_server_prefix == "%":
                 if prefix != "%":
-                    await ex.conn.execute("INSERT INTO general.serverprefix VALUES ($1,$2)", ctx.guild.id, prefix)
-                    ex.cache.server_prefixes[ctx.guild.id] = prefix
+                    await self.ex.conn.execute("INSERT INTO general.serverprefix VALUES ($1,$2)", ctx.guild.id, prefix)
+                    self.ex.cache.server_prefixes[ctx.guild.id] = prefix
             else:
                 if prefix != "%":
-                    await ex.conn.execute("UPDATE general.serverprefix SET prefix = $1 WHERE serverid = $2", prefix, ctx.guild.id)
-                    ex.cache.server_prefixes[ctx.guild.id] = prefix
+                    await self.ex.conn.execute("UPDATE general.serverprefix SET prefix = $1 WHERE serverid = $2", prefix, ctx.guild.id)
+                    self.ex.cache.server_prefixes[ctx.guild.id] = prefix
                 else:
-                    await ex.conn.execute("DELETE FROM general.serverprefix WHERE serverid = $1", ctx.guild.id)
-                    ex.cache.server_prefixes.pop(ctx.guild.id, None)
+                    await self.ex.conn.execute("DELETE FROM general.serverprefix WHERE serverid = $1", ctx.guild.id)
+                    self.ex.cache.server_prefixes.pop(ctx.guild.id, None)
             await ctx.send(f"> **This server's prefix has been set to {prefix}.**")
 
     @commands.command(aliases=['prune', 'purge'])
@@ -416,22 +417,22 @@ class Moderator(commands.Cog):
         channel_id = ctx.channel.id
         try:
             if delay == -1:
-                await ex.conn.execute("DELETE FROM general.TempChannels WHERE chanID = $1", channel_id)
-                ex.cache.temp_channels[channel_id] = None
+                await self.ex.conn.execute("DELETE FROM general.TempChannels WHERE chanID = $1", channel_id)
+                self.ex.cache.temp_channels[channel_id] = None
                 return await ctx.send("> **If this channel was a temporary channel, it has been removed.**")
             elif delay < -1:
                 return await ctx.send("> **The delay cannot be negative.**")
             elif 0 < delay < 60:
                 return await ctx.send("> **The delay must be greater than 1 minute due to rate-limiting issues.**")
             else:
-                new_delay = await ex.u_miscellaneous.get_cooldown_time(delay)
-                temp_channel_delay = ex.cache.temp_channels.get(channel_id)
+                new_delay = await self.ex.u_miscellaneous.get_cooldown_time(delay)
+                temp_channel_delay = self.ex.cache.temp_channels.get(channel_id)
                 if temp_channel_delay:  # this channel is already a temp channel
-                    await ex.conn.execute("UPDATE general.TempChannels SET delay = $1 WHERE chanID = $2", delay, channel_id)
+                    await self.ex.conn.execute("UPDATE general.TempChannels SET delay = $1 WHERE chanID = $2", delay, channel_id)
                 else:
-                    await ex.conn.execute("INSERT INTO general.TempChannels VALUES ($1, $2)", channel_id, delay)
+                    await self.ex.conn.execute("INSERT INTO general.TempChannels VALUES ($1, $2)", channel_id, delay)
                 await ctx.send(f"> **This channel now deletes messages every {new_delay}.**")
-                ex.cache.temp_channels[channel_id] = delay
+                self.ex.cache.temp_channels[channel_id] = delay
         except Exception as e:
             await ctx.send(f"> Error - {e}")
             log.console(e)
@@ -463,10 +464,10 @@ class Moderator(commands.Cog):
                     url = f"{url.url}"
                 if len(emoji_name) < 2:
                     return await ctx.send("> **Please enter an emoji name more than two letters.**")
-                async with ex.session.get(url) as r:
+                async with self.ex.session.get(url) as r:
                     if r.status == 200:
                         await ctx.guild.create_custom_emoji(name=emoji_name, image=await r.read())
-                        emojis = ex.client.emojis
+                        emojis = self.ex.client.emojis
                         max_emoji_length = len(emojis)
                         if emoji_name in str(emojis[max_emoji_length-1]):
                             await ctx.send(emojis[max_emoji_length-1])

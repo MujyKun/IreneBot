@@ -1,14 +1,22 @@
-from Utility import resources as ex
 from discord.ext import commands
 from module import keys
-from util import logger as log
+from IreneUtility.util import u_logger as log
 import asyncio
 import random
 import async_timeout
+from IreneUtility.Utility import Utility
+from IreneUtility.models import base_util
+
+# main or temporary Utility object until main one is set. Important for decorator checking.
+ex: Utility = base_util.ex or Utility()
 
 
 # noinspection PyPep8,PyBroadException
 class GuessingGame(commands.Cog):
+    def __init__(self, t_ex):
+        global ex
+        ex = t_ex
+
     @commands.command(aliases=['ggl', 'gglb'])
     async def ggleaderboard(self, ctx, difficulty="medium", mode="server"):
         """Shows global leaderboards for guessing game

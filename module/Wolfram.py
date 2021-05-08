@@ -1,14 +1,14 @@
 from discord.ext import commands
-from Utility import resources as ex
 from module.keys import wolfram_app_id, patreon_link
 import xmltodict
 import urllib.parse
-from util import logger as log
+from IreneUtility.util import u_logger as log
 
 
 # noinspection PyBroadException,PyPep8
 class Wolfram(commands.Cog):
-    def __init__(self):
+    def __init__(self, ex):
+        self.ex = ex
         self.division_by_zero = "It is not possible to divide by zero."
         self.patreon_msg = f">>> **You must be a patron in order to use the WolframAlpha API due to the " \
             f"limited amount of requests. Any small math requests can be done " \
@@ -35,12 +35,12 @@ class Wolfram(commands.Cog):
             result = self.evalute_math(query)
             if result:
                 return await ctx.send(result)
-            if not await ex.u_patreon.check_if_patreon(ctx.author.id):
+            if not await self.ex.u_patreon.check_if_patreon(ctx.author.id):
                 return await ctx.send(self.patreon_msg)
             query = urllib.parse.quote(query)
             query_link = f"http://api.wolframalpha.com/v2/query?input={query}&appid={wolfram_app_id}"
-            async with ex.session.get(query_link) as r:
-                ex.cache.wolfram_per_minute += 1
+            async with self.ex.session.get(query_link) as r:
+                self.ex.cache.wolfram_per_minute += 1
                 xml_content = await r.content.read()
                 dict_content = (xmltodict.parse(xml_content)).get('queryresult')
                 results = []
@@ -79,18 +79,14 @@ class Wolfram(commands.Cog):
                 for result in results:
                     if len(embed_msg) > 1500:
                         embed_list.append(
-                            await ex.create_embed(title=f"Wolfram Request Page: {page_number} (FULL) ", title_desc=embed_msg))
+                            await self.ex.create_embed(title=f"Wolfram Request Page: {page_number} (FULL) ", title_desc=embed_msg))
                         embed_msg = ""
                         page_number += 1
                     embed_msg += f"{result}\n"
 
                 if embed_msg:
                     embed_list.append(
-                        await ex.create_embed(title=f"Wolfram Request Page: {page_number} (FULL)", title_desc=embed_msg))
+                        await self.ex.create_embed(title=f"Wolfram Request Page: {page_number} (FULL)", title_desc=embed_msg))
 
                 msg = await ctx.send(embed=embed_list[0])
-                await ex.check_left_or_right_reaction_embed(msg, embed_list)
-
-
-
-
+                await self.ex.check_left_or_right_reaction_embed(msg, embed_list)

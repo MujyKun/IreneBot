@@ -1,11 +1,14 @@
 import discord
 from discord.ext import commands, tasks
-from Utility import resources as ex
+from IreneUtility.util import u_logger as log
 import datetime
 
 
 # noinspection PyPep8
 class Gacha(commands.Cog):
+    def __init__(self, ex):
+        self.ex = ex
+        
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
     async def startgacha(self, ctx, text_channel: discord.TextChannel = None):
@@ -63,8 +66,8 @@ class Gacha(commands.Cog):
         [Format: %createalbum (album name) (idol 1) (idol 2) ...]"""
         idols = idols.split(' ')
         #TODO: convert idol string to idol objects
-        new_album = ex.u_objects.Album.create_album(idols)
-        albums = ex.cache.gacha_albums.get(ctx.author.id)
+        new_album = self.self.ex.u_objects.Album.create_album(idols)
+        albums = self.self.ex.cache.gacha_albums.get(ctx.author.id)
         albums.append(new_album)
         #TODO: add album to db
 
@@ -130,16 +133,16 @@ class Gacha(commands.Cog):
 
     @tasks.loop(seconds=0, minutes=5, hours=0, reconnect=True)
     async def album_loop(self):
-        for user in ex.cache.users:
+        for user in self.self.ex.cache.users:
             if not user.gacha_albums:
                 continue
             for album in user.gacha_albums:
                 current_time = datetime.datetime.now()
                 next_money_add_time = album.last_money_generated_time + datetime.timedelta(
-                                            minutes=ex.u_objects.GachaValues.album_money_generation_time_in_minutes)
+                                            minutes=self.self.ex.u_objects.GachaValues.album_money_generation_time_in_minutes)
                 if not album.active and current_time > next_money_add_time:
                     # TODO: Update user money in cache and in db
-                    album.total_generated_currency += ex.u_objects.GachaValues.album_inactive_income_rate
+                    album.total_generated_currency += self.self.ex.u_objects.GachaValues.album_inactive_income_rate
                     album.last_money_generated_time = current_time
                 elif album.active and current_time > next_money_add_time:
                     # TODO: Update user money in cache and in db

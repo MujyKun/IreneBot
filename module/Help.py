@@ -1,13 +1,20 @@
 import discord
 from discord.ext import commands
 from module.keys import bot_prefix, bot_support_server_link
-from Utility import resources as ex
 import itertools
+import IreneUtility.Utility
+
+ex: IreneUtility.Utility
 
 
 class Help(commands.Cog):
-    def __init__(self):
+    def __init__(self, t_ex):
+        self.ex = t_ex
+        global ex
+        ex = self.ex
+
         self._original_help_command = ex.client.help_command
+
         ex.client.help_command = self.SubHelp()
         ex.client.help_command.cog = self
 

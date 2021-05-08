@@ -4,7 +4,6 @@ from discord.ext import commands
 import aiofiles
 import asyncio
 from random import *
-from module.keys import owner_id, bot_website
 from datetime import datetime
 from IreneUtility.util import u_logger as log
 
@@ -20,7 +19,7 @@ class Archive(commands.Cog):
         if is_owner:
             try:
                 def check(m):
-                    return m.channel == message.channel and m.author.id == owner_id
+                    return m.channel == message.channel and m.author.id == self.ex.keys.owner_id
 
                 msg = await self.ex.client.wait_for('message', timeout=60, check=check)
                 if msg.content.lower() == "confirm" or msg.content.lower() == "confirmed":
@@ -113,7 +112,7 @@ class Archive(commands.Cog):
         all_channels = await self.ex.conn.fetch("SELECT id, channelid, guildid, driveid, name FROM archive.ChannelList")
         guild_name = ctx.guild.name
         embed = discord.Embed(title=f"Archived {guild_name} Channels", color=0x87CEEB)
-        embed.set_author(name="Irene", url=bot_website, icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
+        embed.set_author(name="Irene", url=self.ex.keys.bot_website, icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
         embed.set_footer(text="Thanks for using Irene.", icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
         check = False
         for p_id, channel_id, guild_id, drive_id, name in all_channels:

@@ -99,7 +99,7 @@ class BotMod(commands.Cog):
                 if 'images.irenebot.com' not in mem_thumbnail:
                     await download_image(mem_thumbnail)
                 if self.ex.check_file_exists(file_loc):
-                    image_url = f"https://images.irenebot.com/avatar/{file_name}"
+                    image_url = f"{ex.keys.image_host}/avatar/{file_name}"
                     await self.ex.conn.execute("UPDATE groupmembers.member SET thumbnail = $1 WHERE id = $2", image_url, mem_id)
             if mem_banner:
                 file_loc = f"{keys.idol_banner_location}{file_name}"
@@ -264,7 +264,7 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
         [Format: %addinteraction (interaction) (url,url)"""
         links = links.split(',')
         try:
-            if interaction_type.lower() in keys.interaction_list:
+            if interaction_type.lower() in self.ex.cache.interaction_list:
                 for url in links:
                     url = url.replace(' ', '')
                     url = url.replace('\n', '')

@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands, tasks
 from IreneUtility.util import u_logger as log
-from module.keys import twitch_client_id
 import asyncio
 import json
 
@@ -118,7 +117,7 @@ class Twitch(commands.Cog):
 
             headers = {
                 'Authorization': f'Bearer {self.ex.twitch_token}',
-                'client-id': twitch_client_id
+                'client-id': self.ex.keys.twitch_client_id
             }
             for twitch_username in self.ex.cache.twitch_channels.keys():
                 try:

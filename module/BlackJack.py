@@ -2,7 +2,6 @@ import discord
 from discord.ext import commands
 from random import *
 from IreneUtility.util import u_logger as log
-from module.keys import bot_id
 
 
 # noinspection PyPep8
@@ -23,7 +22,7 @@ class BlackJack(commands.Cog):
                 if await self.ex.u_blackjack.process_bj_game(ctx, amount, user_id):
                     await self.ex.u_blackjack.add_bj_game(user_id, amount, ctx, "bot")
                     game_id = await self.ex.u_blackjack.get_game_by_player(user_id)
-                    fake_bot_id = int(f"{self.ex.u_miscellaneous.get_int_index(bot_id, 9)}{randint(1,999999999)}")
+                    fake_bot_id = int(f"{self.ex.u_miscellaneous.get_int_index(self.ex.keys.bot_id, 9)}{randint(1,999999999)}")
                     await self.ex.u_blackjack.add_player_two(game_id, fake_bot_id, amount)
                     await self.ex.u_blackjack.start_game(game_id)
         except Exception as e:

@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from IreneUtility.util import u_logger as log
-from module.keys import bot_prefix, interaction_list
+from module.keys import bot_prefix
 import typing
 import json
 import aiohttp
@@ -119,11 +119,11 @@ class Moderator(commands.Cog):
     @commands.has_guild_permissions(manage_messages=True)
     async def disableinteraction(self, ctx, interaction=None):
         """Disable an interaction on your server. Redo to enable again [Format: %disableinteraction (interaction)]"""
-        interaction_msg = f"> **The available interactions are {', '.join(interaction_list)}.**"
+        interaction_msg = f"> **The available interactions are {', '.join(self.ex.cache.interaction_list)}.**"
         if not interaction:
             return await ctx.send(interaction_msg)
         interaction = interaction.lower()
-        if interaction not in interaction_list:
+        if interaction not in self.ex.cache.interaction_list:
             return await ctx.send(f"> **That is not an interaction.**\n{interaction_msg}")
         if not await self.ex.check_interaction_enabled(server_id=ctx.guild.id, interaction=interaction):
             # enable it

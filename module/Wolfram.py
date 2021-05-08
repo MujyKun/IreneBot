@@ -1,5 +1,4 @@
 from discord.ext import commands
-from module.keys import wolfram_app_id, patreon_link
 import xmltodict
 import urllib.parse
 from IreneUtility.util import u_logger as log
@@ -12,7 +11,7 @@ class Wolfram(commands.Cog):
         self.division_by_zero = "It is not possible to divide by zero."
         self.patreon_msg = f">>> **You must be a patron in order to use the WolframAlpha API due to the " \
             f"limited amount of requests. Any small math requests can be done " \
-            f"without being a patron. Become a patron at {patreon_link}.**"
+            f"without being a patron. Become a patron at {self.ex.keys.patreon_link}.**"
 
     def evalute_math(self, query):
         try:
@@ -38,7 +37,7 @@ class Wolfram(commands.Cog):
             if not await self.ex.u_patreon.check_if_patreon(ctx.author.id):
                 return await ctx.send(self.patreon_msg)
             query = urllib.parse.quote(query)
-            query_link = f"http://api.wolframalpha.com/v2/query?input={query}&appid={wolfram_app_id}"
+            query_link = f"http://api.wolframalpha.com/v2/query?input={query}&appid={self.ex.keys.wolfram_app_id}"
             async with self.ex.session.get(query_link) as r:
                 self.ex.cache.wolfram_per_minute += 1
                 xml_content = await r.content.read()

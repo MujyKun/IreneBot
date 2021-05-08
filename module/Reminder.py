@@ -1,4 +1,3 @@
-from module.keys import reminder_limit
 from discord.ext import commands, tasks
 from IreneUtility.util import u_logger as log
 import datetime
@@ -83,9 +82,9 @@ class Reminder(commands.Cog):
         reminders = await self.ex.u_reminder.get_reminders(ctx.author.id)
         user_timezone = await self.ex.u_reminder.get_user_timezone(ctx.author.id)
         if reminders:
-            if len(reminders) >= reminder_limit:
+            if len(reminders) >= self.ex.keys.reminder_limit:
                 msg = await self.ex.get_msg(ctx, "reminder", "max_reminders")
-                msg = await self.ex.replace(msg, [["name", ctx.author.display_name], ["reminder_limit", reminder_limit]])
+                msg = await self.ex.replace(msg, [["name", ctx.author.display_name], ["reminder_limit", self.ex.keys.reminder_limit]])
                 return await ctx.send(msg)
         server_prefix = await self.ex.get_server_prefix(ctx)
         # msgs are repeated numerous times. setting the values beforehand.

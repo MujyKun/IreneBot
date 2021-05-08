@@ -3,8 +3,10 @@ import dbl
 import module
 from IreneUtility.Utility import Utility
 from IreneUtility.util import u_logger as log
-ex: Utility = Utility(keys=module.keys, d_py_client=module.keys.client,
-                      aiohttp_session=module.keys.client_session)
+
+
+ex: Utility = Utility(keys=module.keys.keys_obj, d_py_client=module.keys.keys_obj.client,
+                      aiohttp_session=module.keys.keys_obj.client_session)
 
 
 class Irene:
@@ -65,10 +67,10 @@ class Irene:
 
     def run_live_bot(self):
         """Run Production Ver. of the the bot."""
-        module.keys.top_gg = dbl.DBLClient(ex.client, module.keys.top_gg_key, autopost=True)  # set top.gg client
+        module.keys.keys_obj.top_gg = dbl.DBLClient(ex.client, module.keys.keys_obj.top_gg_key, autopost=True)  # set top.gg client
         self.start_up()
         self.start_loops()
-        ex.client.run(module.keys.client_token)
+        ex.client.run(module.keys.keys_obj.client_token)
 
     def run_test_bot(self):
         """Run Test Ver. of the the bot."""
@@ -76,7 +78,7 @@ class Irene:
         # background loops are optional with test bot.
         self.start_loops(run_weverse=False)
         log.console("--TEST BOT--")
-        ex.client.run(module.keys.test_client_token)
+        ex.client.run(module.keys.keys_obj.test_client_token)
 
     def start_up(self):
         # Add all cogs
@@ -119,15 +121,15 @@ class Irene:
 
     def add_listeners(self):
         """Add Listener Events."""
-        module.keys.client.add_listener(self.groupmembers.idol_photo_on_message, 'on_message')
-        module.keys.client.add_listener(self.archive.on_message, 'on_message')
-        module.keys.client.add_listener(self.logging.on_message_log, 'on_message')
-        module.keys.client.add_listener(self.logging.logging_on_message_edit, 'on_message_edit')
-        module.keys.client.add_listener(self.logging.logging_on_message_delete, 'on_message_delete')
-        module.keys.client.add_listener(self.miscellaneous.on_message_user_notifications, 'on_message')
-        module.keys.client.add_listener(self.botmod.mod_mail_on_message, 'on_message')
-        module.keys.client.add_listener(self.customcommands.process_custom_commands, 'on_message')
-        module.keys.client.add_listener(self.profile.increase_profile_level, 'on_message')
+        module.keys.keys_obj.client.add_listener(self.groupmembers.idol_photo_on_message, 'on_message')
+        module.keys.keys_obj.client.add_listener(self.archive.on_message, 'on_message')
+        module.keys.keys_obj.client.add_listener(self.logging.on_message_log, 'on_message')
+        module.keys.keys_obj.client.add_listener(self.logging.logging_on_message_edit, 'on_message_edit')
+        module.keys.keys_obj.client.add_listener(self.logging.logging_on_message_delete, 'on_message_delete')
+        module.keys.keys_obj.client.add_listener(self.miscellaneous.on_message_user_notifications, 'on_message')
+        module.keys.keys_obj.client.add_listener(self.botmod.mod_mail_on_message, 'on_message')
+        module.keys.keys_obj.client.add_listener(self.customcommands.process_custom_commands, 'on_message')
+        module.keys.keys_obj.client.add_listener(self.profile.increase_profile_level, 'on_message')
 
     def add_cogs(self):
         """Add the cogs to the bot client."""

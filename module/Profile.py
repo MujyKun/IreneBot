@@ -9,6 +9,10 @@ from IreneUtility.Utility import Utility
 # noinspection PyBroadException,PyPep8
 class Profile(commands.Cog):
     def __init__(self, ex):
+        """
+
+        :param ex: Utility object.
+        """
         self.ex: Utility = ex
 
     @commands.command()

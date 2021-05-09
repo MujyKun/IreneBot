@@ -251,7 +251,7 @@ Maintenance Status: {maintenance_status}
         embed.add_field(name="Bot Server Links", value=bot_server_links, inline=False)
         embed.add_field(name="Suggest", value=f"Suggest a feature using `{current_server_prefix}suggest`.", inline=False)
         if patreon_url:
-            embed.add_field(name=f"Patreon", value=f"[Please Support <@{self.ex.keys.bot_id}> here.]({patreon_url})", inline=False)
+            embed.add_field(name="Patreon", value=f"[Please Support <@{self.ex.keys.bot_id}> here.]({patreon_url})", inline=False)
         await ctx.send(embed=embed)
 
     @commands.command()

@@ -9,6 +9,10 @@ ex: Utility
 
 class Help(commands.Cog):
     def __init__(self, t_ex):
+        """
+
+        :param t_ex: Utility object
+        """
         self.ex: Utility = t_ex
         global ex
         ex = self.ex
@@ -20,6 +24,9 @@ class Help(commands.Cog):
 
     # noinspection PyPep8
     class SubHelp(commands.MinimalHelpCommand):
+        """
+        Custom help command.
+        """
         async def get_server_prefix(self):
             return await ex.get_server_prefix(self.context)
 
@@ -31,7 +38,7 @@ class Help(commands.Cog):
                 await channel.send(embed=embed)
 
         async def send_command_help(self, command):
-            """%help (specific command)"""
+            """%help (specific command)."""
             channel = self.get_destination()
             cmd_format = self.get_command_signature(command)
             # change the default prefix to the server prefix
@@ -42,7 +49,7 @@ class Help(commands.Cog):
             await channel.send(embed=embed)
 
         async def send_cog_help(self, cog):
-            """%help (specific cog)"""
+            """%help (specific cog)."""
             channel = self.get_destination()
             open_msg = await self.get_opening_note()
             cog_name = cog.qualified_name
@@ -84,6 +91,7 @@ class Help(commands.Cog):
         async def send_bot_help(self, mapping):
             """
             THIS METHOD WAS COPY PASTED FROM D.PY V1.6.0
+
             THE ONLY ALTERED CODE WAS CHANGING get_opening_note to be awaited.
             get_opening_note was not originally async.
             """
@@ -120,6 +128,7 @@ class Help(commands.Cog):
         async def send_group_help(self, group):
             """
             THIS METHOD WAS COPY PASTED FROM D.PY V1.6.0
+
             THE ONLY ALTERED CODE WAS CHANGING get_opening_note to be awaited.
             get_opening_note was not originally async.
             """

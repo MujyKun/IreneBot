@@ -16,6 +16,10 @@ def check_user_in_support_server():
 # noinspection PyPep8,PyBroadException
 class GuessingGame(commands.Cog):
     def __init__(self, t_ex):
+        """
+
+        :param t_ex: Utility object
+        """
         self.ex: Utility = t_ex
 
     @commands.command(aliases=['ggl', 'gglb'])
@@ -187,6 +191,15 @@ class GuessingGame(commands.Cog):
 # noinspection PyBroadException,PyPep8
 class Game:
     def __init__(self, utility_obj, ctx, max_rounds=20, timeout=20, gender="all", difficulty="medium"):
+        """
+
+        :param utility_obj: Utility object.
+        :param ctx: Context
+        :param max_rounds: The amount of rounds to stop at.
+        :param timeout: Amount of time to guess a phoot.
+        :param gender: Male/Female/All Gender of the idols in the photos.
+        :param difficulty: Easy/Medium/Hard difficulty of the game.
+        """
         self.ex = utility_obj
         self.photo_link = None
         self.host_ctx = ctx
@@ -321,7 +334,7 @@ class Game:
         if self.results_posted:
             return
 
-        await self.channel.send(f"The current game has now ended.")
+        await self.channel.send("The current game has now ended.")
         self.force_ended = True
         self.rounds = self.max_rounds
         if not self.host_user.gg_filter:

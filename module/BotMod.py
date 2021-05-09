@@ -8,7 +8,7 @@ import asyncio
 
 
 def check_if_mod():
-    """Decorator for checking if a user is in the support server"""
+    """Decorator for checking if a user is in the support server."""
     def predicate(ctx):
         return ctx.cog.ex.check_if_mod(ctx)
     return commands.check(predicate)
@@ -17,6 +17,10 @@ def check_if_mod():
 # noinspection PyBroadException,PyPep8
 class BotMod(commands.Cog):
     def __init__(self, t_ex):
+        """
+
+        :param t_ex: Utility object
+        """
         self.ex: Utility = t_ex
 
     async def mod_mail_on_message(self, message):
@@ -307,7 +311,7 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
                     embed.set_image(url=url)
                     await ctx.send(embed=embed)
             else:
-                await ctx.send(f"> **Please choose a proper interaction.**")
+                await ctx.send("> **Please choose a proper interaction.**")
         except Exception as e:
             await ctx.send(f"**ERROR -** {e}")
             log.console(e)

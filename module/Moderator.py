@@ -106,9 +106,9 @@ class Moderator(commands.Cog):
                     if not channel_id == server.get("channel_id"):
                         await self.ex.u_moderator.update_welcome_message_channel(guild_id, channel_id)
                     if updated_pos:
-                        return await ctx.send(f"> Welcome Messages have been enabled in this channel. ")
+                        return await ctx.send("> Welcome Messages have been enabled in this channel. ")
                     else:
-                        return await ctx.send(f"> Welcome Messages have been disabled in this channel. ")
+                        return await ctx.send("> Welcome Messages have been disabled in this channel. ")
             else:
                 if not server:
                     await self.ex.u_moderator.add_welcome_message_server(channel_id, guild_id, message, 1)

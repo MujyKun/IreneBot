@@ -79,9 +79,9 @@ class Logging(commands.Cog):
         """Stop sending log messages in the current server."""
         if await self.ex.u_logging.check_if_logged(server_id=ctx.guild.id):
             await self.ex.u_logging.set_logging_status(ctx.guild.id, 0)
-            await ctx.send(f"> **This server is no longer being logged.**")
+            await ctx.send("> **This server is no longer being logged.**")
         else:
-            await ctx.send(f"> **This server is not being logged.**")
+            await ctx.send("> **This server is not being logged.**")
 
     @commands.has_guild_permissions(manage_messages=True)
     @commands.command()

@@ -153,7 +153,7 @@ class LastFM(commands.Cog):
 
     @commands.command(aliases=['recents', 'rt'])
     async def recenttracks(self, ctx, user: typing.Union[discord.User, str] = None):
-        """Get the recent tracks of a Last FM Account by a discord user or a Last FM username"""
+        """Get the recent tracks of a Last FM Account by a discord user or a Last FM username."""
         try:
             user = await self.set_user(ctx, user)
             response = await self.ex.u_last_fm.get_fm_response('user.getRecentTracks', user)
@@ -167,7 +167,7 @@ class LastFM(commands.Cog):
 
     @commands.command()
     async def recent(self, ctx, user: typing.Union[discord.User, str] = None):
-        """Get the last listened track of a Last FM Account by a discord user or a Last FM username"""
+        """Get the last listened track of a Last FM Account by a discord user or a Last FM username."""
         try:
             user = await self.set_user(ctx, user)
             response = await self.ex.u_last_fm.get_fm_response('user.getRecentTracks', user)

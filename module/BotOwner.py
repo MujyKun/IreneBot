@@ -187,7 +187,8 @@ class BotOwner(commands.Cog):
                     int(group_id_without_spaces)
                     # if it succeeds, replace the current group id with the version without spaces
                     group_id = int(group_id_without_spaces)
-                except:
+                except Exception as e:
+                    log.useless(f" {e}| {group_id} -> could not make the group id an integer, it must be a group name.")
                     # could not make the group id an integer, it must be a group name.
                     group = await self.ex.u_group_members.get_group_where_group_matches_name(group_id)
                     if group:

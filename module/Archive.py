@@ -3,7 +3,7 @@ import os
 from discord.ext import commands
 import aiofiles
 import asyncio
-from random import *
+from random import randint
 from datetime import datetime
 from IreneUtility.Utility import Utility
 from IreneUtility.util import u_logger as log
@@ -12,6 +12,10 @@ from IreneUtility.util import u_logger as log
 # noinspection PyBroadException,PyPep8
 class Archive(commands.Cog):
     def __init__(self, ex):
+        """
+
+        :param ex: Utility object.
+        """
         self.ex: Utility = ex
 
     async def on_message(self, message, is_owner=False):
@@ -29,7 +33,7 @@ class Archive(commands.Cog):
                 return False
         try:
             all_channels = await self.ex.conn.fetch("SELECT id, channelid, guildid, driveid, name FROM archive.channellist")
-            for _, channel_id, guild_id, drive_id, name in all_channels:
+            for _, channel_id, _, drive_id, name in all_channels:
                 if message.channel.id != channel_id:
                     return
                 if len(message.attachments):
@@ -124,7 +128,7 @@ class Archive(commands.Cog):
         embed.set_author(name="Irene", url=self.ex.keys.bot_website, icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
         embed.set_footer(text="Thanks for using Irene.", icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
         check = False
-        for p_id, channel_id, guild_id, drive_id, name in all_channels:
+        for _, channel_id, guild_id, drive_id, name in all_channels:
             # noinspection PyBroadException,PyBroadException,PyBroadException
             try:
                 list_channel = (self.ex.client.get_channel(channel_id)).name

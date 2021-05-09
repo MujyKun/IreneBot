@@ -98,7 +98,7 @@ class Music(commands.Cog):
                             songs_queued = queued.get(voice_client.guild.id)
                             if songs_queued:
                                 channel = songs_queued[0][1]
-                                msg = f"> **There are no users in this voice channel. Resetting queue and leaving.**"
+                                msg = "> **There are no users in this voice channel. Resetting queue and leaving.**"
                                 await channel.send(msg)
                         except Exception as e:
                             log.useless(f"{e} - Failed to send message to channel - Music.check_voice_clients")

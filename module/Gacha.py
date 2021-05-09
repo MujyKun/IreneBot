@@ -7,6 +7,10 @@ from IreneUtility.Utility import Utility
 # noinspection PyPep8
 class Gacha(commands.Cog):
     def __init__(self, ex):
+        """
+
+        :param ex: Utility object.
+        """
         self.ex: Utility = ex
 
     @commands.command()

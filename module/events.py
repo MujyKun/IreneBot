@@ -15,6 +15,10 @@ ex: Utility  # majority if not all methods here will be static since we are not 
 # noinspection PyBroadException,PyPep8
 class Events(commands.Cog):
     def __init__(self, t_ex):
+        """
+
+        :param t_ex: Utility object.
+        """
         global ex
         self.ex: Utility = t_ex
         ex = t_ex
@@ -242,7 +246,7 @@ class Events(commands.Cog):
     @staticmethod
     @client.event
     async def on_guild_post():
-        """Update the server count on Top.GG and discord boats [Every 30 minutes]"""
+        """Update the server count on Top.GG and discord boats [Every 30 minutes]."""
         log.console("Server Count Updated on Top.GG")
 
         # discord.boats

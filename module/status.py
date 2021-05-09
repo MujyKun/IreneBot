@@ -9,6 +9,10 @@ from IreneUtility.Utility import Utility
 # noinspection PyBroadException,PyPep8
 class Status:
     def __init__(self, ex):
+        """
+
+        :param ex: Utility object.
+        """
         self.ex: Utility = ex
 
     @tasks.loop(seconds=30, minutes=0, hours=0, reconnect=True)

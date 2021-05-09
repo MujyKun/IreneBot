@@ -6,6 +6,10 @@ import os
 
 class AutoRestart:
     def __init__(self):
+        """
+        Main Server to control the restarting of other servers.
+
+        """
         self.saved_time = time.time()
         self.api = None
         self.bot = None

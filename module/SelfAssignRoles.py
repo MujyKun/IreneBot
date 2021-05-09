@@ -13,8 +13,10 @@ class SelfAssignRoles(commands.Cog):
     @commands.has_guild_permissions(manage_messages=True)
     async def setrolechannel(self, ctx, text_channel: discord.TextChannel = None):
         """Set the channel for self-assignable roles to be used in. -> Will automatically delete future messages.
-        Use sendrolemessage before using this command.
-        [Format: %setrolechannel [text channel]"""
+
+        [Format: %setrolechannel [text channel]
+        Use sendrolemessage before using this command."""
+
         if not text_channel:
             text_channel = ctx.channel
         try:
@@ -32,6 +34,7 @@ class SelfAssignRoles(commands.Cog):
     @commands.has_guild_permissions(manage_messages=True)
     async def removerole(self, ctx, *, role_name):
         """Remove a self-assignable role based on the role name given.
+
         [Format: %removerole <role_name>]"""
         try:
             await self.ex.u_self_assign_roles.remove_self_role(role_name, ctx.guild.id)
@@ -44,6 +47,7 @@ class SelfAssignRoles(commands.Cog):
     @commands.has_guild_permissions(manage_messages=True)
     async def listroles(self, ctx):
         """List all the self-assignable roles in a server.
+
         [Format: %listroles]"""
         try:
             roles = await self.ex.u_self_assign_roles.get_assignable_server_roles(ctx.guild.id)
@@ -77,6 +81,7 @@ class SelfAssignRoles(commands.Cog):
     @commands.has_guild_permissions(manage_messages=True)
     async def addrole(self, ctx, role: discord.Role, *, role_name):
         """Add a role to be self-assignable.
+
         [Format: %addrole <role> <role name>]"""
         try:
             if await self.ex.u_self_assign_roles.check_self_role_exists(role.id, role_name, ctx.guild.id):

@@ -63,12 +63,14 @@ Message Author: {message.author}
     @commands.command()
     async def vote(self, ctx):
         """Link to Voting for Irene on Top.gg
+
         [Format: %vote]"""
         return await ctx.send(f"> https://top.gg/bot/{self.ex.keys.bot_id}/vote")
 
     @commands.command()
     async def choose(self, ctx, *, options):
         """Choose between a selection of options. Underscores are spaces between words. Spaces separate choices.
+
         [Format: %choose (option_1 option_2 option_3)]"""
         options = options.split(' ')
         random_choice = (choice(options)).replace('_', ' ')
@@ -76,12 +78,16 @@ Message Author: {message.author}
 
     @commands.command()
     async def displayemoji(self, ctx, emoji: discord.PartialEmoji):
-        """Display an emoji. [Format: %displayemoji :emoji:]"""
+        """Display an emoji.
+
+        [Format: %displayemoji :emoji:]"""
         return await ctx.send(emoji.url)
 
     @commands.command()
     async def addnoti(self, ctx, *, phrase):
-        """Receive a DM whenever a phrase or word is said in the current server. [Format: %addnoti (phrase/word)]"""
+        """Receive a DM whenever a phrase or word is said in the current server.
+
+        [Format: %addnoti (phrase/word)]"""
         try:
             check_exists = self.ex.first_result(
                 await self.ex.conn.fetchrow("SELECT COUNT(*) FROM general.notifications WHERE guildid = $1 AND "
@@ -101,7 +107,9 @@ Message Author: {message.author}
 
     @commands.command(aliases=["deletenoti"])
     async def removenoti(self, ctx, *, phrase):
-        """Remove a phrase/word when it said in the current server. [Format: %removenoti (phrase/word)]"""
+        """Remove a phrase/word when it said in the current server.
+
+        [Format: %removenoti (phrase/word)]"""
         try:
             await self.ex.conn.execute("DELETE FROM general.notifications WHERE guildid=$1 AND userid=$2 AND phrase=$3",
                                   ctx.guild.id, ctx.author.id, phrase.lower())
@@ -122,7 +130,9 @@ Message Author: {message.author}
 
     @commands.command()
     async def listnoti(self, ctx):
-        """list all your notification phrases that exist in the current server. [Format: %listnoti]"""
+        """list all your notification phrases that exist in the current server.
+
+        [Format: %listnoti]"""
         try:
             user = await self.ex.get_user(ctx.author.id)
             if not user.notifications:
@@ -148,7 +158,9 @@ Message Author: {message.author}
 
     @commands.command(aliases=['patron'])
     async def patreon(self, ctx):
-        """Displays Patreon Information. [Format: %patreon]"""
+        """Displays Patreon Information.
+
+        [Format: %patreon]"""
         await ctx.send(f"**Please support <@{self.ex.keys.bot_id}>'s development at {self.ex.keys.patreon_link}.**")
 
     @commands.command()
@@ -205,25 +217,25 @@ Maintenance Status: {maintenance_status}
 """
         embed = await self.ex.create_embed(title=f"I am {app_name}! ({app_id})", title_desc=title_desc)
         embed.set_thumbnail(url=app_icon_url)
-        embed.add_field(name=f"Servers Connected", value=f"{self.ex.u_miscellaneous.get_server_count()} Servers", inline=True)
-        embed.add_field(name=f"Text/Voice Channels Watched", value=f"{self.ex.u_miscellaneous.get_text_channel_count()}/{self.ex.u_miscellaneous.get_voice_channel_count()} Channels", inline=True)
-        embed.add_field(name=f"Servers/Channels Logged", value=f"{len(await self.ex.u_logging.get_servers_logged())}/{len(await self.ex.u_logging.get_channels_logged())} Logged", inline=True)
-        embed.add_field(name=f"Bot Uptime", value=bot_uptime, inline=True)
-        embed.add_field(name=f"Total Commands Used", value=f"{self.ex.cache.total_used} Commands", inline=True)
-        embed.add_field(name=f"This Session ({self.ex.cache.session_id} | {datetime.date.today()})", value=f"{self.ex.cache.current_session} Commands", inline=True)
-        embed.add_field(name=f"Playing Music", value=f"{len(self.ex.client.voice_clients)} Voice Clients", inline=True)
-        embed.add_field(name=f"Playing Guessing/Bias", value=f"{len(self.ex.cache.guessing_games)}/{len(self.ex.cache.bias_games)} Games", inline=True)
-        embed.add_field(name=f"Ping", value=f"{self.ex.get_ping()} ms", inline=True)
-        embed.add_field(name=f"Shards", value=f"{self.ex.client.shard_count}", inline=True)
-        embed.add_field(name=f"Bot Owner", value=f"<@{app_owner.id}>", inline=True)
+        embed.add_field(name="Servers Connected", value=f"{self.ex.u_miscellaneous.get_server_count()} Servers", inline=True)
+        embed.add_field(name="Text/Voice Channels Watched", value=f"{self.ex.u_miscellaneous.get_text_channel_count()}/{self.ex.u_miscellaneous.get_voice_channel_count()} Channels", inline=True)
+        embed.add_field(name="Servers/Channels Logged", value=f"{len(await self.ex.u_logging.get_servers_logged())}/{len(await self.ex.u_logging.get_channels_logged())} Logged", inline=True)
+        embed.add_field(name="Bot Uptime", value=bot_uptime, inline=True)
+        embed.add_field(name="Total Commands Used", value=f"{self.ex.cache.total_used} Commands", inline=True)
+        embed.add_field(name="This Session ({self.ex.cache.session_id} | {datetime.date.today()})", value=f"{self.ex.cache.current_session} Commands", inline=True)
+        embed.add_field(name="Playing Music", value=f"{len(self.ex.client.voice_clients)} Voice Clients", inline=True)
+        embed.add_field(name="Playing Guessing/Bias", value=f"{len(self.ex.cache.guessing_games)}/{len(self.ex.cache.bias_games)} Games", inline=True)
+        embed.add_field(name="Ping", value=f"{self.ex.get_ping()} ms", inline=True)
+        embed.add_field(name="Shards", value=f"{self.ex.client.shard_count}", inline=True)
+        embed.add_field(name="Bot Owner", value=f"<@{app_owner.id}>", inline=True)
         if mods:
-            embed.add_field(name=f"Bot Mods", value=mods, inline=True)
-        embed.add_field(name=f"Support Server", value=f"[Invite to Server]({self.ex.keys.bot_support_server_link})", inline=False)
-        embed.add_field(name=f"Website", value=self.ex.keys.bot_website, inline=False)
-        embed.add_field(name=f"Github", value=f"https://github.com/MujyKun/IreneBot", inline=False)
-        embed.add_field(name=f"Discord Invite", value=self.ex.keys.bot_invite_link, inline=False)
-        embed.add_field(name=f"Bot Server Links", value=bot_server_links, inline=False)
-        embed.add_field(name=f"Suggest", value=f"Suggest a feature using `{current_server_prefix}suggest`.", inline=False)
+            embed.add_field(name="Bot Mods", value=mods, inline=True)
+        embed.add_field(name="Support Server", value=f"[Invite to Server]({self.ex.keys.bot_support_server_link})", inline=False)
+        embed.add_field(name="Website", value=self.ex.keys.bot_website, inline=False)
+        embed.add_field(name="Github", value=f"https://github.com/MujyKun/IreneBot", inline=False)
+        embed.add_field(name="Discord Invite", value=self.ex.keys.bot_invite_link, inline=False)
+        embed.add_field(name="Bot Server Links", value=bot_server_links, inline=False)
+        embed.add_field(name="Suggest", value=f"Suggest a feature using `{current_server_prefix}suggest`.", inline=False)
         if patreon_url:
             embed.add_field(name=f"Patreon", value=f"[Please Support <@{self.ex.keys.bot_id}> here.]({patreon_url})", inline=False)
         await ctx.send(embed=embed)
@@ -239,7 +251,9 @@ Maintenance Status: {maintenance_status}
 
     @commands.command(aliases=['trans', 't'])
     async def translate(self, ctx, from_language, to_language, *, message):
-        """Translate between languages using Papago [Format: %translate English Korean this is a test phrase.]"""
+        """Translate between languages using Papago
+
+        [Format: %translate English Korean this is a test phrase.]"""
         try:
             response = await self.ex.u_miscellaneous.translate(message, from_language, to_language)
             if not response:
@@ -258,7 +272,9 @@ Maintenance Status: {maintenance_status}
 
     @commands.command()
     async def report(self, ctx, *, issue):
-        """Report an issue with Irene. Format: [%report (issue)]"""
+        """Report an issue with Irene.
+
+        Format: [%report (issue)]"""
         desc = f"**{issue}**"
         embed = discord.Embed(title="Bug Report", color=0xff00f6)
         embed.set_author(name="Irene", url=self.ex.keys.bot_website,
@@ -279,7 +295,9 @@ Maintenance Status: {maintenance_status}
 
     @commands.command()
     async def suggest(self, ctx, *, suggestion):
-        """Suggest a feature for Irene. Format: [%suggest (suggestion)]"""
+        """Suggest a feature for Irene.
+
+        Format: [%suggest (suggestion)]"""
         desc = f"**{suggestion}**"
         embed = discord.Embed(title="Suggestion", color=0xff00f6)
         embed.set_author(name="Irene", url=self.ex.keys.bot_website,
@@ -299,7 +317,9 @@ Maintenance Status: {maintenance_status}
 
     @commands.command()
     async def nword(self, ctx, user: discord.Member = None):
-        """Checks how many times a user has said the N Word [Format: %nword @user]"""
+        """Checks how many times a user has said the N Word
+
+        [Format: %nword @user]"""
         if not user:
             user = ctx.author
         current_amount = (await self.ex.get_user(user.id)).n_word
@@ -310,7 +330,9 @@ Maintenance Status: {maintenance_status}
 
     @commands.command(aliases=["nwl"])
     async def nwordleaderboard(self, ctx, mode="server"):
-        """Shows leaderboards for how many times the nword has been said. [Format: %nwl (server/global)]"""
+        """Shows leaderboards for how many times the nword has been said.
+
+        [Format: %nwl (server/global)]"""
         embed = discord.Embed(title=f"NWord Leaderboard", color=0xffb6c1)
         embed.set_author(name="Irene", url=self.ex.keys.bot_website, icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
         embed.set_footer(text=f"Type {await self.ex.get_server_prefix(ctx)}nword (user) to view their individual stats.", icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
@@ -357,13 +379,18 @@ Maintenance Status: {maintenance_status}
 
     @commands.command(aliases=['coinflip', 'f'])
     async def flip(self, ctx):
-        """Flips a coin [Format: %flip][Aliases: coinflip, f]"""
+        """Flips a coin
+
+        [Format: %flip]
+        [Aliases: coinflip, f]"""
         await ctx.send(f"> **You flipped {choice(['Heads', 'Tails'])}.**")
 
     @commands.command(aliases=['define', 'u'])
     async def urban(self, ctx, term=None, number=1, override=0):
         """Search a term through UrbanDictionary. Underscores are spaces.
-        [Format: %urban (term) (definition number)][Aliases: define,u]"""
+
+        [Format: %urban (term) (definition number)]
+        [Aliases: define,u]"""
         if not ctx.channel.is_nsfw() and not override == 1:
             server_prefix = await self.ex.get_server_prefix(ctx)
             return await ctx.send(f">>> **This text channel must be NSFW to use {server_prefix}"
@@ -400,6 +427,7 @@ Maintenance Status: {maintenance_status}
     @commands.is_owner()
     async def announce(self, ctx, *, new_message):
         """Sends a bot message to system text channels.
+
         NOTE: This should not be used if a lot of servers are using the bot."""
         desc = f"{new_message}"
         embed = discord.Embed(title=f"Announcement from {ctx.author} ({ctx.author.id})", description=desc, color=0xff00f6)
@@ -418,12 +446,16 @@ Maintenance Status: {maintenance_status}
 
     @commands.command()
     async def servercount(self, ctx):
-        """Shows how many servers the bot has [Format: %servercount]"""
+        """Shows how many servers the bot has
+
+        [Format: %servercount]"""
         await ctx.send(f"> **I am connected to {self.ex.u_miscellaneous.get_server_count()} servers.**")
 
     @commands.command()
     async def serverinfo(self, ctx):
-        """View information about the current guild. [Format: %serverinfo]"""
+        """View information about the current guild.
+
+        [Format: %serverinfo]"""
         try:
             guild = ctx.guild
             embed = discord.Embed(title=f"{guild.name} ({guild.id})", color=0xffb6c1, url=f"{guild.icon_url}")
@@ -449,7 +481,9 @@ Maintenance Status: {maintenance_status}
 
     @commands.command(name="8ball", aliases=['8'])
     async def _8ball(self, ctx, *, question=None):
-        """Asks the 8ball a question. [Format: %8ball Question]"""
+        """Asks the 8ball a question.
+
+        [Format: %8ball Question]"""
         if question:
             await ctx.send(f">>> **Question: {question} \nAnswer: {choice(self.ex.cache.eight_ball_responses)}**")
         else:
@@ -457,7 +491,9 @@ Maintenance Status: {maintenance_status}
 
     @commands.command(aliases=['pong'])
     async def ping(self, ctx):
-        """Shows Latency to Discord [Format: %ping]"""
+        """Shows Latency to Discord
+
+        [Format: %ping]"""
         try:
             await ctx.send(f"> **My ping is currently {self.ex.get_ping()}ms.**")
         except:

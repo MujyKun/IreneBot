@@ -1,5 +1,5 @@
 import discord
-from random import *
+from random import randint, choice
 from discord.ext import commands
 from discord.ext.commands.cooldowns import BucketType
 from IreneUtility.util import u_logger as log
@@ -21,84 +21,108 @@ class Interactions(commands.Cog):
     @check_interaction_enabled()
     @commands.cooldown(1, 60, BucketType.user)
     async def stepon(self, ctx, user: discord.Member = discord.Member):
-        """Step on someone [Format: %stepon @user]"""
+        """Step on someone
+
+        [Format: %stepon @user]"""
         await self.ex.u_miscellaneous.interact_with_user(ctx, user, "stepped on", "stepon")
 
     @commands.command()
     @check_interaction_enabled()
     @commands.cooldown(1, 60, BucketType.user)
     async def stab(self, ctx, user: discord.Member = discord.Member):
-        """Stab someone [Format: %stab @user]"""
+        """Stab someone
+
+        [Format: %stab @user]"""
         await self.ex.u_miscellaneous.interact_with_user(ctx, user, "stabbed", "stab")
 
     @commands.command()
     @check_interaction_enabled()
     @commands.cooldown(1, 60, BucketType.user)
     async def choke(self, ctx, user: discord.Member = discord.Member):
-        """Choke someone [Format: %choke @user]"""
+        """Choke someone
+
+        [Format: %choke @user]"""
         await self.ex.u_miscellaneous.interact_with_user(ctx, user, "choked", "choke")
 
     @commands.command()
     @check_interaction_enabled()
     @commands.cooldown(1, 60, BucketType.user)
     async def pullhair(self, ctx, user: discord.Member = discord.Member):
-        """Pull the hair of someone [Format: %pullhair @user]"""
+        """Pull the hair of someone
+
+        [Format: %pullhair @user]"""
         await self.ex.u_miscellaneous.interact_with_user(ctx, user, "is pulling the hair of", "pullhair")
 
     @commands.command()
     @check_interaction_enabled()
     @commands.cooldown(1, 60, BucketType.user)
     async def cuddle(self, ctx, user: discord.Member = discord.Member):
-        """Cuddle someone [Format: %cuddle @user]"""
+        """Cuddle someone
+
+        [Format: %cuddle @user]"""
         await self.ex.u_miscellaneous.interact_with_user(ctx, user, "is cuddling with", "cuddle")
 
     @commands.command()
     @check_interaction_enabled()
     @commands.cooldown(1, 60, BucketType.user)
     async def pat(self, ctx, user: discord.Member = discord.Member):
-        """Pat someone [Format: %pat @user]"""
+        """Pat someone
+
+        [Format: %pat @user]"""
         await self.ex.u_miscellaneous.interact_with_user(ctx, user, "patted", "pat")
 
     @commands.command()
     @check_interaction_enabled()
     @commands.cooldown(1, 60, BucketType.user)
     async def punch(self, ctx, user: discord.Member = discord.Member):
-        """Punch someone [Format: %punch @user]"""
+        """Punch someone
+
+        [Format: %punch @user]"""
         await self.ex.u_miscellaneous.interact_with_user(ctx, user, "punched", "punch")
 
     @commands.command()
     @check_interaction_enabled()
     @commands.cooldown(1, 60, BucketType.user)
     async def spit(self, ctx, user: discord.Member = discord.Member):
-        """Spit on someone [Format: %spit @user]"""
+        """Spit on someone
+
+        [Format: %spit @user]"""
         await self.ex.u_miscellaneous.interact_with_user(ctx, user, "spit on", "spit")
 
     @commands.command()
     @check_interaction_enabled()
     @commands.cooldown(1, 60, BucketType.user)
     async def lick(self, ctx, user: discord.Member = discord.Member):
-        """Lick someone [Format: %lick @user]"""
+        """Lick someone
+
+        [Format: %lick @user]"""
         await self.ex.u_miscellaneous.interact_with_user(ctx, user, "licked", "lick")
 
     @commands.command()
     @check_interaction_enabled()
     @commands.cooldown(1, 60, BucketType.user)
     async def hug(self, ctx, user: discord.Member = discord.Member):
-        """Hug someone [Format: %hug @user]"""
+        """Hug someone
+
+        [Format: %hug @user]"""
         await self.ex.u_miscellaneous.interact_with_user(ctx, user, "hugged", "hug")
 
     @commands.command()
     @check_interaction_enabled()
     @commands.cooldown(1, 60, BucketType.user)
     async def kiss(self, ctx, user: discord.Member = discord.Member):
-        """Kiss someone [Format: %kiss @user]"""
+        """Kiss someone
+
+        [Format: %kiss @user]"""
         await self.ex.u_miscellaneous.interact_with_user(ctx, user, "kissed", "kiss")
 
     @commands.command()
     @check_interaction_enabled()
     @commands.cooldown(1, 60, BucketType.user)
     async def slap(self, ctx, user: discord.Member = discord.Member):
-        """Slap someone [Format: %slap @user]"""
+        """Slap someone
+
+        [Format: %slap @user]"""
         # There are two types of slap: in an embed with a url, or with text. 50% chance to get either.
         type_of_slap = randint(0, 1)
         if not type_of_slap:

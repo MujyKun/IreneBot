@@ -180,6 +180,7 @@ class LastFM(commands.Cog):
     @commands.command(aliases=['ta'])
     async def topartists(self, ctx, user: typing.Union[discord.User, str] = None, time_period: typing.Union[discord.User, str] = None):
         """See the top artists of a Last FM Account by a discord user or a Last FM username
+
         [Format: %topartists (username) (time period)]
         Time period options are ``overall | week | month | 3month | 6month | year``. Time period defaults to overall."""
         try:

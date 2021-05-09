@@ -121,6 +121,6 @@ class Profile(commands.Cog):
             if current_xp + xp_per_message < xp_needed_for_level:
                 return await user.set_profile_xp(current_xp + xp_per_message)
             await user.set_profile_xp(1)
-            await user.set_profile_level(current_level + 1)
+            await user.set_level(current_level + 1, "profile")
         except Exception as e:
             log.useless(f"{e} - failed to increase profile level. - Profile.increase_profile_level")

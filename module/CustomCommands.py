@@ -31,7 +31,9 @@ class CustomCommands(commands.Cog):
     @commands.command(aliases=['addcommand'])
     @commands.has_guild_permissions(manage_messages=True)
     async def createcommand(self, ctx, command_name, *, message):
-        """Create a custom command. [Format: %createcommand (command name) (message)]"""
+        """Create a custom command.
+
+        [Format: %createcommand (command name) (message)]"""
         try:
             command_name = command_name.lower()
             msg_is_cmd = await self.ex.u_miscellaneous.check_message_is_command(command_name, is_command_name=True)
@@ -57,7 +59,9 @@ class CustomCommands(commands.Cog):
     @commands.command(aliases=['removecommand'])
     @commands.has_guild_permissions(manage_messages=True)
     async def deletecommand(self, ctx, command_name):
-        """Delete a custom command. [Format: %deletecommand (command name)]"""
+        """Delete a custom command.
+
+        [Format: %deletecommand (command name)]"""
         try:
             await self.ex.u_custom_commands.remove_custom_command(ctx.guild.id, command_name.lower())
             msg = await self.ex.get_msg(ctx, "customcommands", "custom_command_deleted")
@@ -71,7 +75,9 @@ class CustomCommands(commands.Cog):
 
     @commands.command()
     async def listcommands(self, ctx):
-        """List all the custom commands for this server. [Format: %listcommands]"""
+        """List all the custom commands for this server.
+
+        [Format: %listcommands]"""
         try:
             async def get_new_embed(desc):
                 return await self.ex.create_embed(f"Custom Commands for {ctx.guild.name} ({ctx.guild.id})", color=self.ex.get_random_color(),

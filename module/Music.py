@@ -6,6 +6,7 @@ import youtube_dl
 import random
 import os
 from IreneUtility.Utility import Utility
+from ksoftapi import NoResults
 
 
 youtube_dl.utils.bug_reports_message = lambda: ''
@@ -78,6 +79,9 @@ queued = {}
 # noinspection PyBroadException,PyPep8
 class Music(commands.Cog):
     def __init__(self, ex):
+        """
+        :param ex: Utility object.
+        """
         self.ex: Utility = ex
 
     # noinspection PyBroadException
@@ -151,6 +155,7 @@ class Music(commands.Cog):
     @commands.command()
     async def lyrics(self, ctx, *, song_query):
         """Get the lyrics of a song (From https://api.ksoft.si)
+
         [Format: %lyrics (song)]"""
         if not self.ex.keys.lyric_client:
             log.console(f"There is no API Key currently set for the Lyrics and the Developer is working on it.")
@@ -158,7 +163,7 @@ class Music(commands.Cog):
                                   "working on it.**")
         try:
             results = await self.ex.keys.lyric_client.music.lyrics(song_query)
-        except self.ex.keys.ksoftapi.NoResults:
+        except NoResults:
             log.console(f"No lyrics were found for {song_query}.")
             return await ctx.send(f"> **No lyrics were found for {song_query}.**")
         except Exception as e:
@@ -191,19 +196,21 @@ class Music(commands.Cog):
                 other_songs = queued[ctx.guild.id][1:number_of_songs_in_queue]
                 random.shuffle(other_songs)
                 queued[ctx.guild.id] = currently_playing + other_songs
-            await ctx.send(f"> **{ctx.author}, the current queue was shuffled.**")
+            await ctx.send("> **{ctx.author}, the current queue was shuffled.**")
         except AttributeError:
-            await ctx.send(f"> **There is no list to shuffle or I am not in a voice channel.**")
+            await ctx.send("> **There is no list to shuffle or I am not in a voice channel.**")
 
     # noinspection PyBroadException
     @commands.command(aliases=['list', 'q'])
     async def queue(self, ctx, page_number=1):
-        """Shows Current Queue [Format: %queue]"""
+        """Shows Current Queue
+
+        [Format: %queue]"""
         try:
             embed_page_number = 1
             current_songs = queued.get(ctx.guild.id)
             if not current_songs:
-                await ctx.send(f"> **There are no songs queued in this server.**")
+                await ctx.send("> **There are no songs queued in this server.**")
 
             embed_list = []
             counter = 1
@@ -266,7 +273,9 @@ class Music(commands.Cog):
 
     @commands.command()
     async def join(self, ctx):
-        """Joins a voice channel [Format: %join]"""
+        """Joins a voice channel
+
+        [Format: %join]"""
         try:
             channel = ctx.message.author.voice.channel
             await ctx.send(f"> **{ctx.author}, I joined {channel.name}.**")
@@ -280,7 +289,9 @@ class Music(commands.Cog):
 
     @commands.command()
     async def pause(self, ctx):
-        """Pauses currently playing song [Format: %pause]"""
+        """Pauses currently playing song
+
+        [Format: %pause]"""
         if not self.check_user_in_vc(ctx):
             return await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
         if ctx.voice_client.is_paused():
@@ -290,7 +301,9 @@ class Music(commands.Cog):
 
     @commands.command(aliases=['unpause'])
     async def resume(self, ctx):
-        """Resumes a paused song [Format: %resume]"""
+        """Resumes a paused song
+
+        [Format: %resume]"""
         if not self.check_user_in_vc(ctx):
             return await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
         if not ctx.voice_client.is_paused():
@@ -305,13 +318,15 @@ class Music(commands.Cog):
 
     @commands.command(aliases=['skipto'])
     async def move(self, ctx, song_number: int):
-        """Makes a song the next song to play without skipping the current song. [Format: %move (song number)] """
+        """Makes a song the next song to play without skipping the current song.
+
+         [Format: %move (song number)] """
         try:
             if not self.check_user_in_vc(ctx):
                 return await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
             song_number = song_number - 1  # account for starting from 0
             if not song_number:
-                return await ctx.send(f"> **You can not move the song currently playing.**")
+                return await ctx.send("> **You can not move the song currently playing.**")
                 # noinspection PyBroadException
             try:
                 title = get_video_title(queued[ctx.guild.id][song_number][0])
@@ -319,14 +334,16 @@ class Music(commands.Cog):
                 queued[ctx.guild.id].insert(1, queued[ctx.guild.id].pop(song_number))
                 await ctx.send(f"> **{title} will now be the next song to play.**")
             except:
-                await ctx.send(f"> **That song number was not found. Could not move it.**")
+                await ctx.send("> **That song number was not found. Could not move it.**")
         except Exception as e:
             log.useless(f"{e} - Failed to move song - Music.move")
 
     # noinspection PyBroadException
     @commands.command()
     async def remove(self, ctx, song_number: int):
-        """Remove a song from the queue. [Format: %remove (song number)] """
+        """Remove a song from the queue.
+
+        [Format: %remove (song number)] """
         try:
             if not self.check_user_in_vc(ctx):
                 return await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
@@ -336,13 +353,15 @@ class Music(commands.Cog):
                 queued[ctx.guild.id].pop(song_number)
                 await ctx.send(f"> **Removed {title} from the queue.**")
             except:
-                await ctx.send(f"> **That song number was not found. Could not remove it.**")
+                await ctx.send("> **That song number was not found. Could not remove it.**")
         except Exception as e:
             log.useless(f"{e} - Failed to remove song - Music.remove")
 
     @commands.command()
     async def skip(self, ctx):
-        """Skips the current song. [Format: %skip]"""
+        """Skips the current song.
+
+        [Format: %skip]"""
         try:
             if not self.check_user_in_vc(ctx):
                 return await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
@@ -373,17 +392,19 @@ class Music(commands.Cog):
 
     @commands.command(aliases=['p'])
     async def play(self, ctx, *, url=None):
-        """Plays audio to a voice channel. [Format: %play (title/url)]"""
+        """Plays audio to a voice channel.
+
+        [Format: %play (title/url)]"""
         if not url:
             if not ctx.voice_client.is_paused:
                 return await ctx.send("> The player is not paused. Please enter a title or link to play audio.")
             ctx.voice_client.resume()
-            return await ctx.send(f"> **The video player is now resumed**")
+            return await ctx.send("> **The video player is now resumed**")
         try:
             if not self.check_user_in_vc(ctx):
                 return await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
             async with ctx.typing():
-                msg = await ctx.send(f"> **Gathering information about the video/playlist, this may take a few minutes if it is a long playlist.**")
+                msg = await ctx.send("> **Gathering information about the video/playlist, this may take a few minutes if it is a long playlist.**")
                 videos, first_video_live = await YTDLSource.from_url(url, loop=self.ex.client.loop, stream=False, guild_id=ctx.guild.id, channel=ctx.channel, author_id=ctx.author.id)
                 if not ctx.voice_client.is_playing():
                     if not first_video_live:
@@ -457,7 +478,9 @@ class Music(commands.Cog):
 
     @commands.command()
     async def volume(self, ctx, volume: int = 10):
-        """Changes the player's volume - Songs default to 10. [Format: %volume (1-100)]"""
+        """Changes the player's volume - Songs default to 10.
+
+        [Format: %volume (1-100)]"""
         try:
             if not self.check_user_in_vc(ctx):
                 return await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
@@ -475,7 +498,9 @@ class Music(commands.Cog):
 
     @commands.command(aliases=["leave"])
     async def stop(self, ctx):
-        """Disconnects from voice channel and resets queue. [Format: %stop]"""
+        """Disconnects from voice channel and resets queue.
+
+        [Format: %stop]"""
         try:
             if not self.check_user_in_vc(ctx):
                 return await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
@@ -537,7 +562,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
                 live = False
                 status = check_live(video)
                 if status == 'too_long':
-                    await channel.send(f"> **A video will not be added because it is over 4 hours long.**")
+                    await channel.send("> **A video will not be added because it is over 4 hours long.**")
                 else:
                     if status == 'live_video':
                         live = True

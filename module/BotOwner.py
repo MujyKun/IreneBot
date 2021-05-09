@@ -45,7 +45,10 @@ class BotOwner(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def addcards(self, ctx):
-        """Fill The CardValues Table with Cards [Format: %addcards]"""
+        """Fill The CardValues Table with Cards
+
+        [Format: %addcards]
+        """
         await self.ex.conn.execute("DELETE FROM blackjack.cards")
         suit_names = ("Hearts", "Diamonds", "Spades", "Clubs")
         rank_names = ("Ace", "Two", "Three", "Four", "Five", "Six", "Seven",
@@ -65,7 +68,10 @@ class BotOwner(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def addpatreon(self, ctx, *, users):
-        """Adds a patreon. [Format: %addpatreon (userid,userid,userid)]"""
+        """Adds a patreon.
+
+        [Format: %addpatreon (userid,userid,userid)]
+        """
         users = users.split(",")
         for user_id in users:
             await self.ex.u_patreon.add_to_patreon(user_id)
@@ -76,7 +82,10 @@ class BotOwner(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def removepatreon(self, ctx, *, users):
-        """Removes a patreon. [Format: %removepatreon (userid,userid,userid)]"""
+        """Removes a patreon.
+
+        [Format: %removepatreon (userid,userid,userid)]
+        """
         users = users.split(",")
         for user_id in users:
             await self.ex.u_patreon.remove_from_patreon(user_id)
@@ -87,7 +96,10 @@ class BotOwner(commands.Cog):
     @commands.is_owner()
     @commands.command()
     async def clearnword(self, ctx, user: discord.Member):
-        """Clear A User's Nword Counter [Format: %clearnword @user]"""
+        """Clear A User's Nword Counter
+
+        [Format: %clearnword @user]
+        """
         if not (await self.ex.get_user(user.id)).n_word:
             return await ctx.send(await self.ex.get_msg(ctx, 'general', 'no_n_word'))
 

@@ -14,7 +14,9 @@ class BlackJack(commands.Cog):
     async def blackjack(self, ctx, amount="0", versus="player"):
         """Start a game of BlackJack
 
-        [Format: %blackjack (amount)] [Aliases: bj]"""
+        [Format: %blackjack (amount)]
+        [Aliases: bj]
+        """
         try:
             amount = self.ex.remove_commas(amount)
             user_id = ctx.author.id
@@ -35,7 +37,9 @@ class BlackJack(commands.Cog):
     async def joingame(self, ctx, game_id=0, amount="0"):
         """Join a game
 
-         [Format: %joingame (gameid) (bid)] [Aliases: jg]"""
+         [Format: %joingame (gameid) (bid)]
+         [Aliases: jg]
+         """
         try:
             amount = self.ex.remove_commas(amount)
             user_id = ctx.author.id
@@ -56,7 +60,9 @@ class BlackJack(commands.Cog):
     async def endgame(self, ctx):
         """End your current game
 
-        [Format: %endgame] [Aliases: eg]"""
+        [Format: %endgame]
+        [Aliases: eg]
+        """
         try:
             game_id = await self.ex.u_blackjack.get_game_by_player(ctx.author.id)
             if game_id is None:
@@ -71,7 +77,8 @@ class BlackJack(commands.Cog):
     async def hit(self, ctx):
         """Pick A Card
 
-        [Format: %hit]"""
+        [Format: %hit]
+        """
         try:
             game_id = await self.ex.u_blackjack.get_game_by_player(ctx.author.id)
             if not game_id:
@@ -90,7 +97,8 @@ class BlackJack(commands.Cog):
     async def stand(self, ctx):
         """Keep Your Cards/Stand
 
-        [Format: %stand]"""
+        [Format: %stand]
+        """
         try:
             check = False
             user_id = ctx.author.id

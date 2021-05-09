@@ -14,6 +14,7 @@ class Twitch(commands.Cog):
     @commands.has_guild_permissions(manage_messages=True)
     async def addtwitch(self, ctx, *, twitch_username):
         """Adds a Twitch username to keep track of. Maximum 2 twitch channels per server.
+
         [Format: %addtwitch (twitch username)]
         """
         try:
@@ -42,6 +43,7 @@ class Twitch(commands.Cog):
     @commands.has_guild_permissions(manage_messages=True)
     async def removetwitch(self, ctx, *, twitch_username):
         """Removes a twitch username that is being kept track of.
+
         [Format: %removetwitch (twitch username)]
         """
         try:
@@ -61,7 +63,9 @@ class Twitch(commands.Cog):
     @commands.has_guild_permissions(manage_messages=True)
     async def settwitchchannel(self, ctx, text_channel: discord.TextChannel = None):
         """Set the discord channel that the twitch announcements will be posted on.
-        [Format: %settwitchchannel #discord-channel]"""
+
+        [Format: %settwitchchannel #discord-channel]
+        """
         guild_id = await self.ex.get_server_id(ctx)
         if not guild_id:
             return await ctx.send(await self.ex.get_msg(ctx.author.id, "general", "no_dm"))
@@ -77,9 +81,12 @@ class Twitch(commands.Cog):
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
     async def settwitchrole(self, ctx, role: discord.Role = None):
-        """Set the discord role that will be mentioned on twitch announcements. If a discord role is set,
-        everyone will not be mentioned. Use the command without a role to mention everyone.
-        [Format: %settwitchrole @role]"""
+        """Set the discord role that will be mentioned on twitch announcements.
+
+        If a discord role is set, everyone will not be mentioned.
+        Use the command without a role to mention everyone.
+        [Format: %settwitchrole @role]
+        """
         guild_id = await self.ex.get_server_id(ctx)
         if not guild_id:
             return await ctx.send(await self.ex.get_msg(ctx.author.id, "general", "no_dm"))
@@ -96,7 +103,9 @@ class Twitch(commands.Cog):
     @commands.has_guild_permissions(manage_messages=True)
     async def listtwitch(self, ctx):
         """List the twitch channels the guild/server follows.
-        [Format: %listtwitch]"""
+
+        [Format: %listtwitch]
+        """
         guild_id = await self.ex.get_server_id(ctx)
         if not guild_id:
             return await ctx.send(await self.ex.get_msg(ctx.author.id, "general", "no_dm"))

@@ -33,7 +33,8 @@ class CustomCommands(commands.Cog):
     async def createcommand(self, ctx, command_name, *, message):
         """Create a custom command.
 
-        [Format: %createcommand (command name) (message)]"""
+        [Format: %createcommand (command name) (message)]
+        """
         try:
             command_name = command_name.lower()
             msg_is_cmd = await self.ex.u_miscellaneous.check_message_is_command(command_name, is_command_name=True)
@@ -61,7 +62,8 @@ class CustomCommands(commands.Cog):
     async def deletecommand(self, ctx, command_name):
         """Delete a custom command.
 
-        [Format: %deletecommand (command name)]"""
+        [Format: %deletecommand (command name)]
+        """
         try:
             await self.ex.u_custom_commands.remove_custom_command(ctx.guild.id, command_name.lower())
             msg = await self.ex.get_msg(ctx, "customcommands", "custom_command_deleted")
@@ -77,7 +79,8 @@ class CustomCommands(commands.Cog):
     async def listcommands(self, ctx):
         """List all the custom commands for this server.
 
-        [Format: %listcommands]"""
+        [Format: %listcommands]
+        """
         try:
             async def get_new_embed(desc):
                 return await self.ex.create_embed(f"Custom Commands for {ctx.guild.name} ({ctx.guild.id})", color=self.ex.get_random_color(),

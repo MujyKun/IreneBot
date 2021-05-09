@@ -64,7 +64,10 @@ class Archive(commands.Cog):
     @commands.has_guild_permissions(manage_messages=True)
     @commands.command()
     async def addchannel(self, ctx, drive_folder_id, name="NULL", owner_present=0):
-        """REQUIRES BOT OWNER PRESENCE -- Make the current channel start archiving images to google drive [Format: %addchannel <drive folder id> <optional - name>]"""
+        """REQUIRES BOT OWNER PRESENCE -- Make the current channel start archiving images to google drive
+
+        [Format: %addchannel <drive folder id> <optional - name>]
+        """
         user = await self.ex.get_user(ctx.author.id)
         try:
             if not owner_present:
@@ -108,7 +111,10 @@ class Archive(commands.Cog):
     @commands.has_guild_permissions(manage_messages=True)
     @commands.command()
     async def listchannels(self, ctx):
-        """List the channels in your server that are being archived. [Format: %listchannels]"""
+        """List the channels in your server that are being archived.
+
+        [Format: %listchannels]
+        """
         user = await self.ex.get_user(ctx.author.id)
         all_channels = await self.ex.conn.fetch("SELECT id, channelid, guildid, driveid, name FROM archive.ChannelList")
         guild_name = ctx.guild.name
@@ -135,7 +141,10 @@ class Archive(commands.Cog):
     @commands.has_guild_permissions(manage_messages=True)
     @commands.command()
     async def deletechannel(self, ctx):
-        """Stop the current channel from being archived [Format: %deletechannel]"""
+        """Stop the current channel from being archived
+
+        [Format: %deletechannel]
+        """
         user = await self.ex.get_user(ctx.author.id)
         try:
             channel_id_in_db = self.ex.first_result(await self.ex.conn.fetchrow("SELECT COUNT(*) FROM archive.ChannelList WHERE ChannelID = $1", ctx.channel.id))

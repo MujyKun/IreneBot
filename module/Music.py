@@ -156,7 +156,8 @@ class Music(commands.Cog):
     async def lyrics(self, ctx, *, song_query):
         """Get the lyrics of a song (From https://api.ksoft.si)
 
-        [Format: %lyrics (song)]"""
+        [Format: %lyrics (song)]
+        """
         if not self.ex.keys.lyric_client:
             log.console(f"There is no API Key currently set for the Lyrics and the Developer is working on it.")
             return await ctx.send("> **There is no API Key currently set for the Lyrics and the Developer is "
@@ -205,7 +206,8 @@ class Music(commands.Cog):
     async def queue(self, ctx, page_number=1):
         """Shows Current Queue
 
-        [Format: %queue]"""
+        [Format: %queue]
+        """
         try:
             embed_page_number = 1
             current_songs = queued.get(ctx.guild.id)
@@ -275,7 +277,8 @@ class Music(commands.Cog):
     async def join(self, ctx):
         """Joins a voice channel
 
-        [Format: %join]"""
+        [Format: %join]
+        """
         try:
             channel = ctx.message.author.voice.channel
             await ctx.send(f"> **{ctx.author}, I joined {channel.name}.**")
@@ -291,7 +294,8 @@ class Music(commands.Cog):
     async def pause(self, ctx):
         """Pauses currently playing song
 
-        [Format: %pause]"""
+        [Format: %pause]
+        """
         if not self.check_user_in_vc(ctx):
             return await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
         if ctx.voice_client.is_paused():
@@ -303,7 +307,8 @@ class Music(commands.Cog):
     async def resume(self, ctx):
         """Resumes a paused song
 
-        [Format: %resume]"""
+        [Format: %resume]
+        """
         if not self.check_user_in_vc(ctx):
             return await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
         if not ctx.voice_client.is_paused():
@@ -320,7 +325,8 @@ class Music(commands.Cog):
     async def move(self, ctx, song_number: int):
         """Makes a song the next song to play without skipping the current song.
 
-         [Format: %move (song number)] """
+         [Format: %move (song number)]
+         """
         try:
             if not self.check_user_in_vc(ctx):
                 return await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
@@ -343,7 +349,8 @@ class Music(commands.Cog):
     async def remove(self, ctx, song_number: int):
         """Remove a song from the queue.
 
-        [Format: %remove (song number)] """
+        [Format: %remove (song number)]
+        """
         try:
             if not self.check_user_in_vc(ctx):
                 return await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
@@ -361,7 +368,8 @@ class Music(commands.Cog):
     async def skip(self, ctx):
         """Skips the current song.
 
-        [Format: %skip]"""
+        [Format: %skip]
+        """
         try:
             if not self.check_user_in_vc(ctx):
                 return await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
@@ -394,7 +402,8 @@ class Music(commands.Cog):
     async def play(self, ctx, *, url=None):
         """Plays audio to a voice channel.
 
-        [Format: %play (title/url)]"""
+        [Format: %play (title/url)]
+        """
         if not url:
             if not ctx.voice_client.is_paused:
                 return await ctx.send("> The player is not paused. Please enter a title or link to play audio.")
@@ -480,7 +489,8 @@ class Music(commands.Cog):
     async def volume(self, ctx, volume: int = 10):
         """Changes the player's volume - Songs default to 10.
 
-        [Format: %volume (1-100)]"""
+        [Format: %volume (1-100)]
+        """
         try:
             if not self.check_user_in_vc(ctx):
                 return await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
@@ -500,7 +510,8 @@ class Music(commands.Cog):
     async def stop(self, ctx):
         """Disconnects from voice channel and resets queue.
 
-        [Format: %stop]"""
+        [Format: %stop]
+        """
         try:
             if not self.check_user_in_vc(ctx):
                 return await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")

@@ -182,7 +182,8 @@ class LastFM(commands.Cog):
         """See the top artists of a Last FM Account by a discord user or a Last FM username
 
         [Format: %topartists (username) (time period)]
-        Time period options are ``overall | week | month | 3month | 6month | year``. Time period defaults to overall."""
+        Time period options are ``overall | week | month | 3month | 6month | year``. Time period defaults to overall.
+        """
         try:
             user, time_period = await self.set_user(ctx, user, time_period), self.set_period(user, time_period)
             response = await self.ex.u_last_fm.get_fm_response('user.getTopArtists', user, limit=10, time_period=time_period)
@@ -204,9 +205,11 @@ class LastFM(commands.Cog):
     @commands.command(aliases=['tt'])
     async def toptracks(self, ctx, user: typing.Union[discord.User, str] = None, time_period: typing.Union[discord.User, str] = None):
         """See the top tracks of a Last FM Account by a discord user or a Last FM username
+
         [Format: %toptracks (username) (time period)]
         Time period options are ``overall | week | month | 3month | 6month | year``.
-        Time period defaults to overall."""
+        Time period defaults to overall.
+        """
         try:
             user, time_period = await self.set_user(ctx, user, time_period), self.set_period(user, time_period)
             response = await self.ex.u_last_fm.get_fm_response('user.getTopTracks', user, limit=10, time_period=time_period)
@@ -229,9 +232,11 @@ class LastFM(commands.Cog):
     @commands.command(aliases=["tal"])
     async def topalbums(self, ctx, user: typing.Union[discord.User, str] = None, time_period: typing.Union[discord.User, str] = None):
         """See the top albums of a Last FM Account by a discord user or a Last FM username
+
         [Format: %topalbums (username) (time period)]
         Time period options are ``overall | week | month | 3month | 6month | year``.
-        Time period defaults to overall."""
+        Time period defaults to overall.
+        """
         try:
             user, time_period = await self.set_user(ctx, user, time_period), self.set_period(user, time_period)
             response = await self.ex.u_last_fm.get_fm_response('user.getTopAlbums', user, limit=10, time_period=time_period)

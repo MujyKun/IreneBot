@@ -86,7 +86,9 @@ class GroupMembers(commands.Cog):
     @commands.command()
     async def addidol(self, ctx, *, idol_json):
         """Adds an idol using the syntax from https://irenebot.com/addidol.html
-        [Format: %addidol (json)]"""
+
+        [Format: %addidol (json)]
+        """
         try:
             # load string to json
             idol_json = json.loads(idol_json)
@@ -157,7 +159,9 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
     @commands.command()
     async def addgroup(self, ctx, *, group_json):
         """Adds a group using the syntax from https://irenebot.com/addgroup.html
-        [Format: %addgroup (json)]"""
+
+        [Format: %addgroup (json)]
+        """
         try:
             # load string to json
             group_json = json.loads(group_json)
@@ -226,7 +230,9 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
     @commands.command()
     async def card(self, ctx, *, name):
         """Displays an Idol/Group's profile card.
-        [Format: %card (idol/group name/id)]"""
+
+        [Format: %card (idol/group name/id)]
+        """
         server_id = await self.ex.get_server_id(ctx)
         members = await self.ex.u_group_members.get_idol_where_member_matches_name(name, server_id=server_id)
         groups = await self.ex.u_group_members.get_group_where_group_matches_name(name, server_id=server_id)
@@ -263,7 +269,9 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
     @commands.command()
     async def stopimages(self, ctx, text_channel: discord.TextChannel = None):
         """Stops Irene from posting/recognizing idol photos in a specific text channel. To undo, type it again.
-        [Format: %stopimages #text-channel]"""
+
+        [Format: %stopimages #text-channel]
+        """
         if not text_channel:
             text_channel = ctx.channel
         if await self.ex.u_group_members.check_channel_sending_photos(text_channel.id):
@@ -289,7 +297,9 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
     @commands.command()
     async def sendimages(self, ctx, text_channel: discord.TextChannel = None):
         """All idol photo commands from the server will post idol photos in a specific text channel. To undo, type it again.
-        [Format: %sendimages #text-channel]"""
+
+        [Format: %sendimages #text-channel]
+        """
         if not text_channel:
             text_channel = ctx.channel
         if await self.ex.u_group_members.check_channel_sending_photos(text_channel.id):
@@ -327,7 +337,10 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
 
     @commands.command(aliases=['%'])
     async def randomidol(self, ctx):
-        """Sends a photo of a random idol. [Format: %%]"""
+        """Sends a photo of a random idol.
+
+        [Format: %%]
+        """
         if await self.ex.u_group_members.check_channel_sending_photos(ctx.channel.id) and not await self.ex.u_miscellaneous.check_if_temp_channel(ctx.channel.id):
             channel = ctx.channel
             try:
@@ -345,7 +358,10 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
 
     @commands.command()
     async def countgroup(self, ctx, *, group_name):
-        """Shows how many photos of a certain group there are. [Format: %countmember <name>]"""
+        """Shows how many photos of a certain group there are.
+
+        [Format: %countmember <name>]
+        """
         server_id = await self.ex.get_server_id(ctx)
         groups = await self.ex.u_group_members.get_group_where_group_matches_name(group_name, server_id=server_id)
         if not groups:
@@ -358,7 +374,10 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
 
     @commands.command()
     async def countmember(self, ctx, *, member_name):
-        """Shows how many photos of a certain member there are. [Format: %countmember <name/all>)]"""
+        """Shows how many photos of a certain member there are.
+
+        [Format: %countmember <name/all>)]
+        """
         if member_name.lower() == "all":
             return await ctx.send(f"> **There are {await self.ex.u_group_members.get_all_images_count()} photos stored.**")
         server_id = await self.ex.get_server_id(ctx)
@@ -374,17 +393,26 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
 
     @commands.command(aliases=['fullname'])
     async def fullnames(self, ctx, *, page_number_or_group: typing.Union[int, str] = 1):
-        """Lists the full names of idols the bot has photos of [Format: %fullnames (page number/group name)]"""
+        """Lists the full names of idols the bot has photos of
+
+        [Format: %fullnames (page number/group name)]
+        """
         await self.ex.u_group_members.process_names(ctx, page_number_or_group, "fullname")
 
     @commands.command(aliases=['member'])
     async def members(self, ctx, *, page_number_or_group: typing.Union[int, str] = 1):
-        """Lists the names of idols the bot has photos of [Format: %members (page number/group name)]"""
+        """Lists the names of idols the bot has photos of
+
+        [Format: %members (page number/group name)]
+        """
         await self.ex.u_group_members.process_names(ctx, page_number_or_group, "members")
 
     @commands.command()
     async def groups(self, ctx):
-        """Lists the groups of idols the bot has photos of [Format: %groups]"""
+        """Lists the groups of idols the bot has photos of
+
+        [Format: %groups]
+        """
         is_mod = self.ex.check_if_mod(ctx)
         page_number = 1
         embed = discord.Embed(title=f"Idol Group List Page {page_number}", color=0xffb6c1)
@@ -411,7 +439,9 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
     @commands.command()
     async def aliases(self, ctx, mode="member", page_number=1):
         """Lists the aliases of idols or groups that have one. Underscores are spaces and commas are to split idol or group names
-[Format: %aliases (names of idols/groups) (page number)]"""
+
+        [Format: %aliases (names of idols/groups) (page number)]
+        """
         try:
             mode = mode.replace("_", " ")
             mode = mode.replace(",", " ")
@@ -439,7 +469,10 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
 
     @commands.command()
     async def count(self, ctx, *, name=None):
-        """Shows howmany times an idol has been called. [Format: %count (idol's name/all)]"""
+        """Shows howmany times an idol has been called.
+
+         %count (idol's name/all)]
+         """
         try:
             if name == 'all' or not name:
                 idol_called = 0
@@ -477,9 +510,12 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
 
     @commands.command(aliases=["highestcount", "cb", "clb"])
     async def countleaderboard(self, ctx):
-        """Shows leaderboards for how many times an idol has been called. [Format: %clb]"""
+        """Shows leaderboards for how many times an idol has been called.
+
+        [Format: %clb]
+        """
         embed = discord.Embed(title=f"Idol Leaderboard", color=0xffb6c1)
-        embed.set_author(name="Irene", url=keys.bot_website, icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
+        embed.set_author(name="Irene", url=self.ex.keys.bot_website, icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
         embed.set_footer(text=f"Type {await self.ex.get_server_prefix(ctx)}count (idol name) to view their individual stats.", icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
         all_members = await self.ex.conn.fetch("SELECT MemberID, Count FROM groupmembers.Count ORDER BY Count DESC")
         count_loop = 0

@@ -17,9 +17,12 @@ class Weverse(commands.Cog):
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
     async def updates(self, ctx, community_name, role: discord.Role = None):
-        """Receive Weverse Updates of a specific Weverse community in the current text channel. Use again to disable for a specific community.
+        """Receive Weverse Updates of a specific Weverse community in the current text channel.
+
+        Use again to disable for a specific community.
         Available Communities ->
-        [TXT, BTS, GFRIEND, SEVENTEEN, ENHYPEN, NU'EST, CL, P1Harmony, Weeekly, SUNMI, HENRY, Dreamcatcher, CherryBullet, MIRAE, TREASURE]
+        [TXT, BTS, GFRIEND, SEVENTEEN, ENHYPEN, NU'EST, CL, P1Harmony, Weeekly, SUNMI, HENRY, Dreamcatcher,
+        CherryBullet, MIRAE, TREASURE]
         [Format: %updates <community name> [role to notify]]
         """
         try:

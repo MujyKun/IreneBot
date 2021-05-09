@@ -14,7 +14,10 @@ class Youtube(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def addurl(self, ctx, link):
-        """Add url to youtube videos [Format: %addurl (link)]"""
+        """Add url to youtube videos
+
+        [Format: %addurl (link)]
+        """
         if 'youtube.com' in link or 'youtu.be' in link:
             try:
                 await self.ex.conn.execute("INSERT INTO youtube.links(link, channelid) VALUES($1, $2)", link, ctx.channel.id)
@@ -26,7 +29,10 @@ class Youtube(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def removeurl(self, ctx, link):
-        """Remove url from youtube videos [Format: %removeurl (link)]"""
+        """Remove url from youtube videos
+
+        [Format: %removeurl (link)]
+        """
         await self.ex.conn.execute("DELETE FROM youtube.links WHERE link = $1", link)
         await ctx.send(f"> **<{link}> has been deleted**")
 
@@ -40,7 +46,10 @@ class Youtube(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def stoploop(self, ctx):
-        """Stops scraping youtube videos (Including main loop from start up)[Format: %stoploop]"""
+        """Stops scraping youtube videos (Including main loop from start up)
+
+        [Format: %stoploop]
+        """
         if self.ex.cache.main_youtube_instance:
             self.ex.cache.main_youtube_instance.loop_youtube_videos.stop()
         if self.current_yt_loop_instance:
@@ -52,7 +61,10 @@ class Youtube(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def startloop(self, ctx, seconds=0):
-        """Starts scraping youtube videos with a new instance[Format: %startloop (seconds to start)]"""
+        """Starts scraping youtube videos with a new instance
+
+        [Format: %startloop (seconds to start)]
+        """
         try:
             if seconds >= 0:
                 self.current_yt_loop_instance = YoutubeLoop(self.ex)

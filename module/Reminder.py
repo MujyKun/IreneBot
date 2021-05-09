@@ -18,7 +18,9 @@ class Reminder(commands.Cog):
     @commands.command(aliases=["listreminds", "reminders", "reminds"])
     async def listreminders(self, ctx):
         """Lists out all of your reminders.
-        [Format: %listreminders]"""
+
+        [Format: %listreminders]
+        """
         remind_list = await self.ex.u_reminder.get_reminders(ctx.author.id)
         user_timezone = await self.ex.u_reminder.get_user_timezone(ctx.author.id)
 
@@ -51,7 +53,9 @@ class Reminder(commands.Cog):
     @commands.command(aliases=["removeremind"])
     async def removereminder(self, ctx, reminder_index: int):
         """Remove one of your reminders.
-        [Format: %removereminder (reminder index)]"""
+
+        [Format: %removereminder (reminder index)]
+        """
         reminders = await self.ex.u_reminder.get_reminders(ctx.author.id)
         user_timezone = await self.ex.u_reminder.get_user_timezone(ctx.author.id)
         if not reminders:
@@ -77,9 +81,11 @@ class Reminder(commands.Cog):
     @commands.command(aliases=["remind"])
     async def remindme(self, ctx, *, user_input):
         """Create a reminder to do a task at a certain time.
+
         [Format: %remindme to ______ at 9PM
         or
-        %remindme to ____ in 6hrs 30mins]"""
+        %remindme to ____ in 6hrs 30mins]
+        """
         reminders = await self.ex.u_reminder.get_reminders(ctx.author.id)
         user_timezone = await self.ex.u_reminder.get_user_timezone(ctx.author.id)
         if reminders:
@@ -125,7 +131,9 @@ class Reminder(commands.Cog):
     @commands.command(aliases=['gettz', 'time'])
     async def gettimezone(self, ctx, user_input: typing.Union[discord.Member, str] = None):
         """Get your current set timezone.
-        [Format: %gettimezone]"""
+
+        [Format: %gettimezone]
+        """
         server_prefix = await self.ex.get_server_prefix(ctx)
 
         if isinstance(user_input, str):
@@ -166,7 +174,9 @@ class Reminder(commands.Cog):
     @commands.command(aliases=['settz'])
     async def settimezone(self, ctx, timezone_name=None, country_code=None):
         """Set your local timezone with a timezone abbreviation and country code.
-        [Format: %settimezone (timezone name) (country code)]"""
+
+        [Format: %settimezone (timezone name) (country code)]
+        """
         if not timezone_name and not country_code:
             await self.ex.u_reminder.remove_user_timezone(ctx.author.id)
             msg = await self.ex.get_msg(ctx, "reminder", "remove_tz")

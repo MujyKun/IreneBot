@@ -23,7 +23,9 @@ class BiasGame(commands.Cog):
     @commands.command(aliases=['bg'])
     async def biasgame(self, ctx, gender="all", bracket_size=8):
         """Start a bias game in the current channel. The host of the game can use `stopbg` to stop playing.
-        [Format: %biasgame (Male/Female/All) (bracket size (4,8,16,32))]"""
+
+        [Format: %biasgame (Male/Female/All) (bracket size (4,8,16,32))]
+        """
         user = await self.ex.get_user(ctx.author.id)
         if not ctx.guild:
             return await ctx.send(await self.ex.get_msg(user, 'biasgame', 'no_dm'))
@@ -46,9 +48,11 @@ class BiasGame(commands.Cog):
 
     @commands.command()
     async def stopbg(self, ctx):
-        """Force-end a bias game if you are a moderator or host of the game. This command is meant for any issues or
-        if a game happens to be stuck.
-        [Format: %stopbg]"""
+        """Force-end a bias game if you are a moderator or host of the game.
+
+        [Format: %stopbg]
+        This command is meant for any issues or if a game happens to be stuck.
+        """
         if not await self.ex.stop_game(ctx, self.ex.cache.bias_games):
             return await ctx.send("> No game is currently in session.")
         log.console(f"Force-Ended Bias Game in {ctx.channel.id}")
@@ -56,7 +60,9 @@ class BiasGame(commands.Cog):
     @commands.command()
     async def listbg(self, ctx, user: discord.Member = None):
         """List a user's bias game leaderboards.
-        [Foramt: %listbg]"""
+
+        [Format: %listbg]
+        """
         if not user:
             user = ctx.author
         user_wins = await self.ex.conn.fetch("SELECT idolid, wins FROM biasgame.winners WHERE userid = $1 ORDER BY WINS DESC LIMIT $2", user.id, 15)

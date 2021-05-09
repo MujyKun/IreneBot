@@ -17,7 +17,9 @@ class Moderator(commands.Cog):
     @commands.has_guild_permissions(manage_messages=True)
     async def addalias(self, ctx, alias, mem_id: int, mode="idol"):
         """Add alias to an idol/group (Underscores are spaces)
-        [Format: %addalias (alias) (ID of idol/group) ('idol' or 'group']"""
+
+        [Format: %addalias (alias) (ID of idol/group) ('idol' or 'group')]
+        """
         alias = alias.replace("_", " ")
         if mode.lower() in ["idol", "member", "members", "idols"]:
             obj = await self.ex.u_group_members.get_member(mem_id)
@@ -46,7 +48,9 @@ class Moderator(commands.Cog):
     @commands.has_guild_permissions(manage_messages=True)
     async def deletealias(self, ctx, alias, mem_id: int, mode="idol"):
         """Remove alias from an idol/group (Underscores are spaces)
-        [Format: %deletealias (alias) (ID of idol/group) ('idol' or 'group')]"""
+
+        [Format: %deletealias (alias) (ID of idol/group) ('idol' or 'group')]
+        """
         alias = alias.replace("_", " ")
         if mode.lower() in ["idol", "member", "members", "idols"]:
             obj = await self.ex.u_group_members.get_member(mem_id)
@@ -75,9 +79,11 @@ class Moderator(commands.Cog):
     @commands.has_guild_permissions(manage_messages=True)
     async def welcome(self, ctx, *, message=None):
         """Set a welcome message or disable welcome in the current channel.
+
         Use %user where they should be mentioned.
         Use %guild_name if the server name should be added.
-        [Format: %welcome (Welcome %user to %guild_name!)]"""
+        [Format: %welcome (Welcome %user to %guild_name!)]
+        """
         try:
             channel_id = ctx.channel.id
             guild_id = ctx.guild.id
@@ -119,7 +125,10 @@ class Moderator(commands.Cog):
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
     async def disableinteraction(self, ctx, interaction=None):
-        """Disable an interaction on your server. Redo to enable again [Format: %disableinteraction (interaction)]"""
+        """Disable an interaction on your server. Redo to enable again
+
+        [Format: %disableinteraction (interaction)]
+        """
         interaction_msg = f"> **The available interactions are {', '.join(self.ex.cache.interaction_list)}.**"
         if not interaction:
             return await ctx.send(interaction_msg)
@@ -154,7 +163,9 @@ class Moderator(commands.Cog):
     @commands.has_guild_permissions(manage_messages=True, manage_roles=True)
     async def mute(self, ctx, user: discord.Member = None, *, reason=None):
         """Mutes a user.
-        Format: [%mute @user (reason)]"""
+
+        Format: [%mute @user (reason)]
+        """
         try:
             if not user:
                 return await ctx.send(f"> **<@{ctx.author.id}>, Please specify a user to mute.**")
@@ -189,7 +200,9 @@ class Moderator(commands.Cog):
     @commands.has_guild_permissions(manage_messages=True, manage_roles=True)
     async def unmute(self, ctx, user: discord.Member = None):
         """Unmute a user that is already muted.
-        Format: [%unmute @user (reason)]"""
+
+        Format: [%unmute @user (reason)]
+        """
         try:
             if not user:
                 return await ctx.send(f"> **<@{ctx.author.id}>, Please specify a user to unmute.**")
@@ -213,6 +226,7 @@ class Moderator(commands.Cog):
     @commands.has_guild_permissions(manage_messages=True)
     async def say(self, ctx, text_channel: typing.Union[discord.TextChannel, str] = None, *, message=None):
         """Make Irene say a message.
+
         Requires Manage Messages
         [Format: %say #text-channel message]
         """
@@ -230,6 +244,7 @@ class Moderator(commands.Cog):
     @commands.has_guild_permissions(manage_messages=True)
     async def sayembed(self, ctx, text_channel: typing.Union[discord.TextChannel, str] = None, *, embed_format=None):
         """Make Irene say an embed message.
+
         Requires Manage Messages. Follows Format from https://embedbuilder.nadekobot.me/
         [Format: %sayembed #text-channel embed_format]
         """
@@ -295,7 +310,9 @@ class Moderator(commands.Cog):
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
     async def setprefix(self, ctx, *, prefix=bot_prefix):
-        """Set the server prefix. If prefix was forgotten, type this command with the default prefix.[Format: %setprefix %]
+        """Set the server prefix. If prefix was forgotten, type this command with the default prefix.
+
+        [Format: %setprefix %]
         Requires Manage Messages
         """
         prefix = prefix.lower()
@@ -320,7 +337,10 @@ class Moderator(commands.Cog):
     @commands.command(aliases=['prune', 'purge'])
     @commands.has_guild_permissions(manage_messages=True)
     async def clear(self, ctx, amount: int, user: discord.Member = None):
-        """Prune Messages (Max 1000) [Format: %clear (amount)][Aliases: prune]
+        """Prune Messages (Max 1000)
+
+        [Format: %clear (amount)]
+        [Aliases: prune]
         Requires Manage Messages
         """
         amount += 1
@@ -354,7 +374,9 @@ class Moderator(commands.Cog):
     @commands.command()
     @commands.has_guild_permissions(ban_members=True)
     async def ban(self, ctx, user: discord.Member = None, *, reason="No Reason"):
-        """Ban A User [Format: %ban @user]
+        """Ban A User
+
+        [Format: %ban @user]
         Requires Ban Members
         """
         if not user:
@@ -372,7 +394,9 @@ class Moderator(commands.Cog):
     @commands.command()
     @commands.has_guild_permissions(ban_members=True)
     async def unban(self, ctx, user: discord.User = None, *, reason="No Reason"):
-        """Unban A User [Format: %unban @user]
+        """Unban A User
+
+        [Format: %unban @user]
         Requires Ban Members
         """
         if not user:
@@ -390,7 +414,9 @@ class Moderator(commands.Cog):
     @commands.command()
     @commands.has_guild_permissions(kick_members=True)
     async def kick(self, ctx, user: discord.Member = None, reason="No Reason"):
-        """Kick A User [Format: %kick @user]
+        """Kick A User
+
+        [Format: %kick @user]
         Requires Kick Members
         """
         if not user:
@@ -412,7 +438,10 @@ class Moderator(commands.Cog):
     @commands.command(aliases=['temp'])
     @commands.has_guild_permissions(manage_messages=True)
     async def tempchannel(self, ctx, delay=-1):
-        """Makes Current Channel a temporary channel deleting messages after a certain time period (greater than 1 minute). If delay is -1, it will remove the channel. [Format: %temp (delay)]
+        """Makes Current Channel a temporary channel deleting messages after a certain time period (greater than 1 minute).
+
+        If delay is -1, it will remove the channel.
+        [Format: %temp (delay)]
         Requires Manage Messages
         """
         channel_id = ctx.channel.id
@@ -451,8 +480,10 @@ class Moderator(commands.Cog):
     @commands.has_guild_permissions(manage_messages=True, manage_emojis=True)
     async def addemoji(self, ctx, url: str, emoji_name=None):
         """Adds an emoji to the server. Several emojis can be added if split with a comma. Emoji Name is optional.
+
         [Format: %addemoji (url/emoji) (emoji name)]
-        Requires Manage Messages & Manage Emojis"""
+        Requires Manage Messages & Manage Emojis
+        """
         org_emoji_name = emoji_name
         list_of_emojis = url.split(',')
         for emoji in list_of_emojis:

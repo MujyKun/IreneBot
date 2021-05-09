@@ -69,7 +69,8 @@ class BotMod(commands.Cog):
     async def moveto(self, ctx, idol_id, link):
         """Moves a link to another idol. (Cannot be used for adding new links)
 
-        [Format: %moveto (idol id) (link)]"""
+        [Format: %moveto (idol id) (link)]
+        """
         try:
             drive_link = self.ex.first_result(await self.ex.conn.fetchrow("SELECT driveurl FROM groupmembers.apiurl WHERE apiurl = $1", link))
             if not drive_link:
@@ -137,7 +138,8 @@ class BotMod(commands.Cog):
         CAUTION: All aliases and are moved to the original idol, idol information is left alone
         If a group ID is not in the original idol, it will be added and then the dupe idol will be deleted along with
         all of it's connections.
-        [Format: %mergeidol (original idol id) (duplicate idol id)]"""
+        [Format: %mergeidol (original idol id) (duplicate idol id)]
+        """
         # check groups
         original_idol = await self.ex.u_group_members.get_member(original_idol_id)
         duplicate_idol = await self.ex.u_group_members.get_member(duplicate_idol_id)
@@ -165,7 +167,8 @@ class BotMod(commands.Cog):
         CAUTION: All aliases and are moved to the original group, group information is left alone
         If an idol ID is not in the original group, it will be added and then this group will be deleted along with
         all of it's connections.
-        [Format: %mergegroup (original group id) (duplicate group id)]"""
+        [Format: %mergegroup (original group id) (duplicate group id)]
+        """
         original_group = await self.ex.u_group_members.get_group(original_group_id)
         duplicate_group = await self.ex.u_group_members.get_group(duplicate_group_id)
         if not duplicate_group:
@@ -190,7 +193,8 @@ class BotMod(commands.Cog):
     async def killapi(self, ctx):
         """Restarts the API.
 
-        [Format: %killapi]"""
+        [Format: %killapi]
+        """
         await ctx.send("> Restarting the API.")
         await self.ex.kill_api()
 
@@ -199,7 +203,8 @@ class BotMod(commands.Cog):
     async def maintenance(self, ctx, *, maintenance_reason=None):
         """Enable/Disable Maintenance Mode.
 
-        [Format: %maintenance (reason)]"""
+        [Format: %maintenance (reason)]
+        """
         self.ex.cache.maintenance_mode = not self.ex.cache.maintenance_mode
         self.ex.cache.maintenance_reason = maintenance_reason
 
@@ -210,7 +215,8 @@ class BotMod(commands.Cog):
     async def botwarn(self, ctx, user: discord.User, *, reason=None):
         """Warns a user from Irene's DMs
 
-        [Format: %botwarn (user id) <reason>]"""
+        [Format: %botwarn (user id) <reason>]
+        """
         message = f"""
 **You have been warned by <@{ctx.author.id}>.**
 **Please be aware that you may get banned from the bot if this behavior is repeated numerous times.**
@@ -230,7 +236,8 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
     async def kill(self, ctx):
         """Kills the bot
 
-        [Format: %kill]"""
+        [Format: %kill]
+        """
         await ctx.send("> **The bot is now offline.**")
         message = "Irene is restarting... All games in this channel will force-end."
 
@@ -275,7 +282,8 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
     async def addinteraction(self, ctx, interaction_type, *, links):
         """Add a gif/photo to an interaction (ex: slap,kiss,lick,hug)
 
-        [Format: %addinteraction (interaction) (url,url)"""
+        [Format: %addinteraction (interaction) (url,url)]
+        """
         links = links.split(',')
         try:
             if interaction_type.lower() in self.ex.cache.interaction_list:
@@ -297,7 +305,8 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
     async def deleteinteraction(self, ctx, *, url):
         """Delete a url from an interaction
 
-        [Format: %deleteinteraction (url,url)"""
+        [Format: %deleteinteraction (url,url)]
+        """
         links = url.split(',')
         for url in links:
             try:
@@ -314,7 +323,8 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
     async def botban(self, ctx, *, user: discord.User):
         """Bans a user from Irene.
 
-        [Format: %botban (user id)]"""
+        [Format: %botban (user id)]
+        """
         if not self.ex.check_if_mod(user.id, 1):
             await self.ex.u_miscellaneous.ban_user_from_bot(user.id)
             await ctx.send(f"> **<@{user.id}> has been banned from using Irene.**")
@@ -326,7 +336,8 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
     async def botunban(self, ctx, *, user: discord.User):
         """UnBans a user from Irene.
 
-        [Format: %botunban (user id)]"""
+        [Format: %botunban (user id)]
+        """
         await self.ex.u_miscellaneous.unban_user_from_bot(user.id)
         await ctx.send(f"> **If the user was banned, they are now unbanned.**")
 
@@ -335,7 +346,8 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
     async def addstatus(self, ctx, *, status: str):
         """Add a playing status to Irene.
 
-        [Format: %addstatus (status)]"""
+        [Format: %addstatus (status)]
+        """
         await self.ex.conn.execute("INSERT INTO general.botstatus (status) VALUES ($1)", status)
         self.ex.cache.bot_statuses.append(status)
         await ctx.send(f"> **{status} was added.**")
@@ -360,7 +372,8 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
     async def removestatus(self, ctx, status_index: int):
         """Remove a status based on it's indself.ex. The index can be found using %getstatuses.
 
-        [Format: %removestatus (status index)]"""
+        [Format: %removestatus (status index)]
+        """
         try:
             status = self.ex.cache.bot_statuses[status_index]
             await self.ex.conn.execute("DELETE FROM general.botstatus WHERE status = $1", status)
@@ -375,7 +388,8 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
     async def addidoltogroup(self, ctx, idol_id: int, group_id: int):
         """Adds idol to group.
 
-        [Format: %addidoltogroup (idol id) (group id)"""
+        [Format: %addidoltogroup (idol id) (group id)]
+        """
         try:
             member_name = (await self.ex.u_group_members.get_member(idol_id))[1]
             group_name = await self.ex.get_group_name(group_id)
@@ -393,7 +407,8 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
     async def deleteidolfromgroup(self, ctx, idol_id: int, group_id: int):
         """Deletes idol from group.
 
-        [Format: %deleteidolfromgroup (idol id) (group id)"""
+        [Format: %deleteidolfromgroup (idol id) (group id)]
+        """
         try:
             member_name = (await self.ex.u_group_members.get_member(idol_id))[1]
             group_name = await self.ex.get_group_name(group_id)
@@ -411,7 +426,8 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
     async def deleteidol(self, ctx, idol_id: int):
         """Deletes an idol
 
-        [Format: %deleteidol (idol id)]"""
+        [Format: %deleteidol (idol id)]
+        """
         try:
             idol_name = (await self.ex.u_group_members.get_member(idol_id))[1]
             await self.ex.conn.execute("DELETE FROM groupmembers.member WHERE id = $1", idol_id)
@@ -425,7 +441,8 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
     async def deletegroup(self, ctx, group_id: int):
         """Deletes a group
 
-        [Format: %deletegroup (group id)]"""
+        [Format: %deletegroup (group id)]
+        """
         try:
             await self.ex.conn.execute("DELETE FROM groupmembers.groups WHERE groupid = $1", group_id)
             await ctx.send(f"{await self.ex.get_group_name(group_id)} ({group_id}) deleted.")
@@ -438,7 +455,8 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
     async def createdm(self, ctx, user: discord.User):
         """Create a DM with a user with the bot as a middle man. One user per mod channel.
 
-        [Format: %createdm (user id)]"""
+        [Format: %createdm (user id)]
+        """
         try:
             dm_channel = await self.ex.get_dm_channel(user=user)
             if dm_channel:
@@ -459,7 +477,8 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
     async def closedm(self, ctx, user: discord.User = None):
         """Closes a DM either by the User ID or by the current channel.
 
-        [Format: %closedm <user id>] """
+        [Format: %closedm <user id>]
+        """
         try:
             if user:
                 user_id = user.id

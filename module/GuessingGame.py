@@ -21,7 +21,9 @@ class GuessingGame(commands.Cog):
     @commands.command(aliases=['ggl', 'gglb'])
     async def ggleaderboard(self, ctx, difficulty="medium", mode="server"):
         """Shows global leaderboards for guessing game
-        [Format: %ggleaderboard (easy/medium/hard) (server/global)]"""
+
+        [Format: %ggleaderboard (easy/medium/hard) (server/global)]
+        """
         if difficulty.lower() not in ['easy', 'medium', 'hard']:
             difficulty = "medium"
 
@@ -52,8 +54,14 @@ class GuessingGame(commands.Cog):
     @check_user_in_support_server()
     @commands.command(aliases=['gg'])
     async def guessinggame(self, ctx, gender="all", difficulty="medium", rounds=20, timeout=20):
-        """Start an idol guessing game in the current channel. The host of the game can use `stop`/`end` to end the game or `skip` to skip the current round without affecting the round number.
-        [Format: %guessinggame (Male/Female/All) (easy/medium/hard) (# of rounds - default 20) (timeout for each round - default 20s)]"""
+        """Start an idol guessing game in the current channel.
+
+        The host of the game can use `stop`/`end` to end the game or
+        `skip` to skip the current round without affecting the round number.
+
+        [Format: %guessinggame (Male/Female/All) (easy/medium/hard) (# of rounds - default 20)
+        (timeout for each round - default 20s)]
+        """
         if not ctx.guild:
             return await ctx.send("> You are not allowed to play guessing game in DMs.")
         if self.ex.cache.guessing_games.get(ctx.channel.id):
@@ -70,8 +78,10 @@ class GuessingGame(commands.Cog):
     @commands.command()
     async def ggfilter(self, ctx, *, group_ids=None):
         """Add a filter for your guessing game. Only the groups you select will appear on the guessing game.
+
         Use the command with no group ids to enable/disable the filter. Split group ids with commas.
-        [Format: %ggfilter [group_id_one, group_id_two, ...]]"""
+        [Format: %ggfilter [group_id_one, group_id_two, ...]]
+        """
         user = await self.ex.get_user(ctx.author.id)
         if not group_ids:
             # toggle guessing game filter.
@@ -115,7 +125,9 @@ class GuessingGame(commands.Cog):
     @commands.command(aliases=["ggfilterlist", "filterlist"])
     async def ggfilteredlist(self, ctx):
         """View the current groups you currently have filtered.
-        [Format: %ggfilteredlist]"""
+
+        [Format: %ggfilteredlist]
+        """
         user = await self.ex.get_user(ctx.author.id)
         toggled_message = f"<@{user.id}>, your filter is currently {'enabled' if user.gg_filter else 'disabled'}.\n"
         title = f"{ctx.author.display_name}'s  Filtered Guessing Game List"
@@ -149,7 +161,9 @@ class GuessingGame(commands.Cog):
     @commands.command()
     async def stopgg(self, ctx):
         """Force-end a guessing game if you are a moderator or host of the game. This command is meant for any issues or if a game happens to be stuck.
-        [Format: %stopgg]"""
+
+        [Format: %stopgg]
+        """
         if not await self.ex.stop_game(ctx, self.ex.cache.guessing_games):
             return await ctx.send("> No guessing game is currently in session.")
         log.console(f"Force-Ended Guessing Game in {ctx.channel.id}")

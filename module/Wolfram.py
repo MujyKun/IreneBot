@@ -34,7 +34,8 @@ class Wolfram(commands.Cog):
     async def w(self, ctx, *, query):
         """Send a request to Wolfram.
 
-        [Format: %w (query)]"""
+        [Format: %w (query)]
+        """
         async with ctx.typing():
             result = self.evalute_math(query)
             if result:

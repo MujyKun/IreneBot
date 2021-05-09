@@ -16,7 +16,8 @@ class Currency(commands.Cog):
     async def daily(self, ctx):
         """Gives a certain amount of money every 24 hours
 
-        [Format: %daily]"""
+        [Format: %daily]
+        """
         user = await self.ex.get_user(ctx.author.id)
         daily_amount = await user.get_daily_amount()
         await user.update_balance(add=daily_amount)  # will auto register.
@@ -29,7 +30,9 @@ class Currency(commands.Cog):
     async def balance(self, ctx, *, member: discord.Member = None):
         """View your balance
 
-        [Format: %balance (@user)][Aliases: b,bal,$]"""
+        [Format: %balance (@user)]
+        [Aliases: b,bal,$]
+        """
         if not member:
             member = ctx.author
 
@@ -47,7 +50,8 @@ class Currency(commands.Cog):
     async def bet(self, ctx, *, bet_amount: str):
         """Bet your money
 
-        [Format: %bet (amount)]"""
+        [Format: %bet (amount)]
+        """
         user = await self.ex.get_user(ctx.author.id)
         bet_amount: int = self.ex.remove_commas(bet_amount)  # remove all commas from the input.
         server_prefix = await self.ex.get_server_prefix(ctx)
@@ -100,7 +104,9 @@ class Currency(commands.Cog):
     async def leaderboard(self, ctx, mode="server"):
         """Shows Top 10 Users server/global wide
 
-        [Format: %leaderboard (global/server)][Aliases: leaderboards, lb]"""
+        [Format: %leaderboard (global/server)]
+        [Aliases: leaderboards, lb]
+        """
         sorted_balance = []
 
         # user may be in DMs trying to access server currency list or misspelt the mode.
@@ -135,7 +141,8 @@ class Currency(commands.Cog):
     async def beg(self, ctx):
         """Beg a homeless man for money
 
-        [Format: %beg]"""
+        [Format: %beg]
+        """
         user = await self.ex.get_user(ctx.author.id)
         beg_amount = (user.beg_level * 2) or random.randint(1, 25)  # randint > beg_amount until beg level 13
         await user.update_balance(add=beg_amount)  # will auto register
@@ -149,7 +156,8 @@ class Currency(commands.Cog):
     async def upgrade(self, ctx, command=None):
         """Upgrade a command to the next level with your money.
 
-        [Format: %upgrade rob/daily/beg]"""
+        [Format: %upgrade rob/daily/beg]
+        """
         user = await self.ex.get_user(ctx.author.id)
         server_prefix = await self.ex.get_server_prefix(ctx)
         possible_options = ["rob", "daily", "beg"]
@@ -212,19 +220,23 @@ class Currency(commands.Cog):
     async def rob(self, ctx, *, person_to_rob: discord.Member):
         """Rob a user
 
-        [Format: %rob @user]"""
+        [Format: %rob @user]
+        """
         pass
 
     @commands.command()
     async def give(self, ctx, person_to_give: discord.Member, amount_to_give: int):
         """Give a user money
 
-        [Format: %give (@user) (amount)]"""
+        [Format: %give (@user) (amount)]
+        """
         pass
 
     @commands.command(aliases=['rockpaperscissors'])
     async def rps(self, ctx, rps_choice='', amount="0"):
         """Play Rock Paper Scissors for Money
 
-        [Format: %rps (r/p/s)(amount)][Aliases: rockpaperscissors]"""
+        [Format: %rps (r/p/s)(amount)]
+        [Aliases: rockpaperscissors]
+        """
         pass

@@ -64,14 +64,16 @@ Message Author: {message.author}
     async def vote(self, ctx):
         """Link to Voting for Irene on Top.gg
 
-        [Format: %vote]"""
+        [Format: %vote]
+        """
         return await ctx.send(f"> https://top.gg/bot/{self.ex.keys.bot_id}/vote")
 
     @commands.command()
     async def choose(self, ctx, *, options):
         """Choose between a selection of options. Underscores are spaces between words. Spaces separate choices.
 
-        [Format: %choose (option_1 option_2 option_3)]"""
+        [Format: %choose (option_1 option_2 option_3)]
+        """
         options = options.split(' ')
         random_choice = (choice(options)).replace('_', ' ')
         return await ctx.send(f"{ctx.author.display_name}, your choice is {random_choice}")
@@ -80,14 +82,16 @@ Message Author: {message.author}
     async def displayemoji(self, ctx, emoji: discord.PartialEmoji):
         """Display an emoji.
 
-        [Format: %displayemoji :emoji:]"""
+        [Format: %displayemoji :emoji:]
+        """
         return await ctx.send(emoji.url)
 
     @commands.command()
     async def addnoti(self, ctx, *, phrase):
         """Receive a DM whenever a phrase or word is said in the current server.
 
-        [Format: %addnoti (phrase/word)]"""
+        [Format: %addnoti (phrase/word)]
+        """
         try:
             check_exists = self.ex.first_result(
                 await self.ex.conn.fetchrow("SELECT COUNT(*) FROM general.notifications WHERE guildid = $1 AND "
@@ -109,7 +113,8 @@ Message Author: {message.author}
     async def removenoti(self, ctx, *, phrase):
         """Remove a phrase/word when it said in the current server.
 
-        [Format: %removenoti (phrase/word)]"""
+        [Format: %removenoti (phrase/word)]
+        """
         try:
             await self.ex.conn.execute("DELETE FROM general.notifications WHERE guildid=$1 AND userid=$2 AND phrase=$3",
                                   ctx.guild.id, ctx.author.id, phrase.lower())
@@ -132,7 +137,8 @@ Message Author: {message.author}
     async def listnoti(self, ctx):
         """list all your notification phrases that exist in the current server.
 
-        [Format: %listnoti]"""
+        [Format: %listnoti]
+        """
         try:
             user = await self.ex.get_user(ctx.author.id)
             if not user.notifications:
@@ -160,7 +166,8 @@ Message Author: {message.author}
     async def patreon(self, ctx):
         """Displays Patreon Information.
 
-        [Format: %patreon]"""
+        [Format: %patreon]
+        """
         await ctx.send(f"**Please support <@{self.ex.keys.bot_id}>'s development at {self.ex.keys.patreon_link}.**")
 
     @commands.command()
@@ -253,7 +260,8 @@ Maintenance Status: {maintenance_status}
     async def translate(self, ctx, from_language, to_language, *, message):
         """Translate between languages using Papago
 
-        [Format: %translate English Korean this is a test phrase.]"""
+        [Format: %translate English Korean this is a test phrase.]
+        """
         try:
             response = await self.ex.u_miscellaneous.translate(message, from_language, to_language)
             if not response:
@@ -274,7 +282,8 @@ Maintenance Status: {maintenance_status}
     async def report(self, ctx, *, issue):
         """Report an issue with Irene.
 
-        Format: [%report (issue)]"""
+        Format: [%report (issue)]
+        """
         desc = f"**{issue}**"
         embed = discord.Embed(title="Bug Report", color=0xff00f6)
         embed.set_author(name="Irene", url=self.ex.keys.bot_website,
@@ -297,7 +306,8 @@ Maintenance Status: {maintenance_status}
     async def suggest(self, ctx, *, suggestion):
         """Suggest a feature for Irene.
 
-        Format: [%suggest (suggestion)]"""
+        Format: [%suggest (suggestion)]
+        """
         desc = f"**{suggestion}**"
         embed = discord.Embed(title="Suggestion", color=0xff00f6)
         embed.set_author(name="Irene", url=self.ex.keys.bot_website,
@@ -319,7 +329,8 @@ Maintenance Status: {maintenance_status}
     async def nword(self, ctx, user: discord.Member = None):
         """Checks how many times a user has said the N Word
 
-        [Format: %nword @user]"""
+        [Format: %nword @user]
+        """
         if not user:
             user = ctx.author
         current_amount = (await self.ex.get_user(user.id)).n_word
@@ -332,7 +343,8 @@ Maintenance Status: {maintenance_status}
     async def nwordleaderboard(self, ctx, mode="server"):
         """Shows leaderboards for how many times the nword has been said.
 
-        [Format: %nwl (server/global)]"""
+        [Format: %nwl (server/global)]
+        """
         embed = discord.Embed(title=f"NWord Leaderboard", color=0xffb6c1)
         embed.set_author(name="Irene", url=self.ex.keys.bot_website, icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
         embed.set_footer(text=f"Type {await self.ex.get_server_prefix(ctx)}nword (user) to view their individual stats.", icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
@@ -371,7 +383,7 @@ Maintenance Status: {maintenance_status}
 
     @commands.command(aliases=['rand', 'randint', 'r'])
     async def random(self, ctx, a: int, b: int):
-        """Choose a random number from a range (a,b). """
+        """Choose a random number from a range (a,b)."""
         try:
             await ctx.send(f"> **Your random number is {randint(a, b)}.**")
         except Exception as e:
@@ -382,7 +394,8 @@ Maintenance Status: {maintenance_status}
         """Flips a coin
 
         [Format: %flip]
-        [Aliases: coinflip, f]"""
+        [Aliases: coinflip, f]
+        """
         await ctx.send(f"> **You flipped {choice(['Heads', 'Tails'])}.**")
 
     @commands.command(aliases=['define', 'u'])
@@ -390,7 +403,8 @@ Maintenance Status: {maintenance_status}
         """Search a term through UrbanDictionary. Underscores are spaces.
 
         [Format: %urban (term) (definition number)]
-        [Aliases: define,u]"""
+        [Aliases: define,u]
+        """
         if not ctx.channel.is_nsfw() and not override == 1:
             server_prefix = await self.ex.get_server_prefix(ctx)
             return await ctx.send(f">>> **This text channel must be NSFW to use {server_prefix}"
@@ -448,14 +462,16 @@ Maintenance Status: {maintenance_status}
     async def servercount(self, ctx):
         """Shows how many servers the bot has
 
-        [Format: %servercount]"""
+        [Format: %servercount]
+        """
         await ctx.send(f"> **I am connected to {self.ex.u_miscellaneous.get_server_count()} servers.**")
 
     @commands.command()
     async def serverinfo(self, ctx):
         """View information about the current guild.
 
-        [Format: %serverinfo]"""
+        [Format: %serverinfo]
+        """
         try:
             guild = ctx.guild
             embed = discord.Embed(title=f"{guild.name} ({guild.id})", color=0xffb6c1, url=f"{guild.icon_url}")
@@ -483,7 +499,8 @@ Maintenance Status: {maintenance_status}
     async def _8ball(self, ctx, *, question=None):
         """Asks the 8ball a question.
 
-        [Format: %8ball Question]"""
+        [Format: %8ball Question]
+        """
         if question:
             await ctx.send(f">>> **Question: {question} \nAnswer: {choice(self.ex.cache.eight_ball_responses)}**")
         else:
@@ -493,7 +510,8 @@ Maintenance Status: {maintenance_status}
     async def ping(self, ctx):
         """Shows Latency to Discord
 
-        [Format: %ping]"""
+        [Format: %ping]
+        """
         try:
             await ctx.send(f"> **My ping is currently {self.ex.get_ping()}ms.**")
         except:

@@ -23,7 +23,8 @@ class Interactions(commands.Cog):
     async def stepon(self, ctx, user: discord.Member = discord.Member):
         """Step on someone
 
-        [Format: %stepon @user]"""
+        [Format: %stepon @user]
+        """
         await self.ex.u_miscellaneous.interact_with_user(ctx, user, "stepped on", "stepon")
 
     @commands.command()
@@ -32,7 +33,8 @@ class Interactions(commands.Cog):
     async def stab(self, ctx, user: discord.Member = discord.Member):
         """Stab someone
 
-        [Format: %stab @user]"""
+        [Format: %stab @user]
+        """
         await self.ex.u_miscellaneous.interact_with_user(ctx, user, "stabbed", "stab")
 
     @commands.command()
@@ -41,7 +43,8 @@ class Interactions(commands.Cog):
     async def choke(self, ctx, user: discord.Member = discord.Member):
         """Choke someone
 
-        [Format: %choke @user]"""
+        [Format: %choke @user]
+        """
         await self.ex.u_miscellaneous.interact_with_user(ctx, user, "choked", "choke")
 
     @commands.command()
@@ -50,7 +53,8 @@ class Interactions(commands.Cog):
     async def pullhair(self, ctx, user: discord.Member = discord.Member):
         """Pull the hair of someone
 
-        [Format: %pullhair @user]"""
+        [Format: %pullhair @user]
+        """
         await self.ex.u_miscellaneous.interact_with_user(ctx, user, "is pulling the hair of", "pullhair")
 
     @commands.command()
@@ -59,7 +63,8 @@ class Interactions(commands.Cog):
     async def cuddle(self, ctx, user: discord.Member = discord.Member):
         """Cuddle someone
 
-        [Format: %cuddle @user]"""
+        [Format: %cuddle @user]
+        """
         await self.ex.u_miscellaneous.interact_with_user(ctx, user, "is cuddling with", "cuddle")
 
     @commands.command()
@@ -68,7 +73,8 @@ class Interactions(commands.Cog):
     async def pat(self, ctx, user: discord.Member = discord.Member):
         """Pat someone
 
-        [Format: %pat @user]"""
+        [Format: %pat @user]
+        """
         await self.ex.u_miscellaneous.interact_with_user(ctx, user, "patted", "pat")
 
     @commands.command()
@@ -77,7 +83,8 @@ class Interactions(commands.Cog):
     async def punch(self, ctx, user: discord.Member = discord.Member):
         """Punch someone
 
-        [Format: %punch @user]"""
+        [Format: %punch @user]
+        """
         await self.ex.u_miscellaneous.interact_with_user(ctx, user, "punched", "punch")
 
     @commands.command()
@@ -86,7 +93,8 @@ class Interactions(commands.Cog):
     async def spit(self, ctx, user: discord.Member = discord.Member):
         """Spit on someone
 
-        [Format: %spit @user]"""
+        [Format: %spit @user]
+        """
         await self.ex.u_miscellaneous.interact_with_user(ctx, user, "spit on", "spit")
 
     @commands.command()
@@ -95,7 +103,8 @@ class Interactions(commands.Cog):
     async def lick(self, ctx, user: discord.Member = discord.Member):
         """Lick someone
 
-        [Format: %lick @user]"""
+        [Format: %lick @user]
+        """
         await self.ex.u_miscellaneous.interact_with_user(ctx, user, "licked", "lick")
 
     @commands.command()
@@ -104,7 +113,8 @@ class Interactions(commands.Cog):
     async def hug(self, ctx, user: discord.Member = discord.Member):
         """Hug someone
 
-        [Format: %hug @user]"""
+        [Format: %hug @user]
+        """
         await self.ex.u_miscellaneous.interact_with_user(ctx, user, "hugged", "hug")
 
     @commands.command()
@@ -113,7 +123,8 @@ class Interactions(commands.Cog):
     async def kiss(self, ctx, user: discord.Member = discord.Member):
         """Kiss someone
 
-        [Format: %kiss @user]"""
+        [Format: %kiss @user]
+        """
         await self.ex.u_miscellaneous.interact_with_user(ctx, user, "kissed", "kiss")
 
     @commands.command()
@@ -122,7 +133,8 @@ class Interactions(commands.Cog):
     async def slap(self, ctx, user: discord.Member = discord.Member):
         """Slap someone
 
-        [Format: %slap @user]"""
+        [Format: %slap @user]
+        """
         # There are two types of slap: in an embed with a url, or with text. 50% chance to get either.
         type_of_slap = randint(0, 1)
         if not type_of_slap:

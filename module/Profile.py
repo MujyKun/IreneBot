@@ -116,7 +116,7 @@ class Profile(commands.Cog):
             xp_per_message = 10
             current_level = user.profile_level
             current_xp = await user.get_profile_xp()
-            xp_needed_for_level = await user.get_xp_needed(current_level, "profile")
+            xp_needed_for_level = await user.get_needed_for_level(current_level, "profile")
 
             if current_xp + xp_per_message < xp_needed_for_level:
                 return await user.set_profile_xp(current_xp + xp_per_message)

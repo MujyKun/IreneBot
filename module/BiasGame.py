@@ -1,47 +1,47 @@
 import discord
 from discord.ext import commands
-from module import keys
 import random
 import asyncio
 from math import log2
 from IreneUtility.util import u_logger as log
 from IreneUtility.Utility import Utility
-from IreneUtility.models import base_util
 
-# main or temporary Utility object until main one is set. Important for decorator checking.
-ex: Utility = base_util.ex or Utility()
+
+def check_user_in_support_server():
+    """Decorator for checking if a user is in the support server"""
+    def predicate(ctx):
+        return ctx.cog.ex.check_user_in_support_server(ctx)
+    return commands.check(predicate)
 
 
 # noinspection PyPep8
 class BiasGame(commands.Cog):
     def __init__(self, t_ex):
-        global ex
         self.ex: Utility = t_ex
-        ex = t_ex
 
-    @commands.check(ex.check_user_in_support_server)
+    @check_user_in_support_server()
     @commands.command(aliases=['bg'])
     async def biasgame(self, ctx, gender="all", bracket_size=8):
         """Start a bias game in the current channel. The host of the game can use `stopbg` to stop playing.
         [Format: %biasgame (Male/Female/All) (bracket size (4,8,16,32))]"""
-        user = await ex.get_user(ctx.author.id)
+        user = await self.ex.get_user(ctx.author.id)
         if not ctx.guild:
-            return await ctx.send(await ex.get_msg(user, 'biasgame', 'no_dm'))
-        if ex.cache.bias_games.get(ctx.channel.id):
-            server_prefix = await ex.get_server_prefix(ctx)
-            return await ctx.send(await ex.replace(
-                await ex.get_msg(user, 'biasgame', 'in_progress'), [['server_prefix', server_prefix]]))
-        game = Game(ctx, bracket_size, gender)
-        ex.cache.bias_games[ctx.channel.id] = game
+            return await ctx.send(await self.ex.get_msg(user, 'biasgame', 'no_dm'))
+        if self.ex.cache.bias_games.get(ctx.channel.id):
+            server_prefix = await self.ex.get_server_prefix(ctx)
+            return await ctx.send(await self.ex.replace(
+                await self.ex.get_msg(user, 'biasgame', 'in_progress'), [['server_prefix', server_prefix]]))
+        game = Game(self.ex, ctx, bracket_size, gender)
+        self.ex.cache.bias_games[ctx.channel.id] = game
 
-        msg = await ex.replace(
-            await ex.get_msg(user, 'biasgame', 'start_game'),
+        msg = await self.ex.replace(
+            await self.ex.get_msg(user, 'biasgame', 'start_game'),
             [["bracket_size", str(game.bracket_size)],
              ["gender", f"{game.gender if game.gender != 'all' else 'both male and female'}"]])
 
         await ctx.send(msg)
         await game.process_game()  # start the game
-        await ex.stop_game(ctx, ex.cache.bias_games)  # remove the game.
+        await self.ex.stop_game(ctx, self.ex.cache.bias_games)  # remove the game.
         log.console(f"Ended Bias Game in {ctx.channel.id}")
 
     @commands.command()
@@ -49,7 +49,7 @@ class BiasGame(commands.Cog):
         """Force-end a bias game if you are a moderator or host of the game. This command is meant for any issues or
         if a game happens to be stuck.
         [Format: %stopbg]"""
-        if not await ex.stop_game(ctx, ex.cache.bias_games):
+        if not await self.ex.stop_game(ctx, self.ex.cache.bias_games):
             return await ctx.send("> No game is currently in session.")
         log.console(f"Force-Ended Bias Game in {ctx.channel.id}")
 
@@ -59,25 +59,26 @@ class BiasGame(commands.Cog):
         [Foramt: %listbg]"""
         if not user:
             user = ctx.author
-        user_wins = await ex.conn.fetch("SELECT idolid, wins FROM biasgame.winners WHERE userid = $1 ORDER BY WINS DESC LIMIT $2", user.id, 15)
+        user_wins = await self.ex.conn.fetch("SELECT idolid, wins FROM biasgame.winners WHERE userid = $1 ORDER BY WINS DESC LIMIT $2", user.id, 15)
         if user_wins:
-            msg_string = await ex.get_msg(user.id, 'biasgame', 'lb_title')
-            msg_string = await ex.replace(msg_string, ['name', user.display_name])
+            msg_string = await self.ex.get_msg(user.id, 'biasgame', 'lb_title')
+            msg_string = await self.ex.replace(msg_string, ['name', user.display_name])
 
             counter = 1
             for idol_id, wins in user_wins:
-                member = await ex.u_group_members.get_member(idol_id)
+                member = await self.ex.u_group_members.get_member(idol_id)
                 msg_string += f"{counter}) {member.full_name} ({member.stage_name}) -> {wins} Win(s).\n"
                 counter += 1
         else:
-            msg_string = await ex.get_msg(user.id, 'biasgame', 'no_wins')
-            msg_string = await ex.replace(msg_string, ['name', user.display_name])
+            msg_string = await self.ex.get_msg(user.id, 'biasgame', 'no_wins')
+            msg_string = await self.ex.replace(msg_string, ['name', user.display_name])
         await ctx.send(msg_string)
 
 
 # noinspection PyBroadException,PyPep8
 class Game:
-    def __init__(self, ctx, bracket_size=8, gender="all"):
+    def __init__(self, utility_obj, ctx, bracket_size=8, gender="all"):
+        self.ex = utility_obj
         self.host_ctx = ctx  # ctx of the host starting game
         self.host = ctx.author.id  # id of the host - realistically should be storing author here instead of id but meh
         self.channel = ctx.channel
@@ -97,9 +98,9 @@ class Game:
             bracket_size = 4
         self.bracket_size = 2**int(log2(bracket_size))  # rounds down to the closest power of 2
 
-        if gender.lower() in ex.cache.male_aliases:
+        if gender.lower() in self.ex.cache.male_aliases:
             self.gender = 'male'
-        elif gender.lower() in ex.cache.female_aliases:
+        elif gender.lower() in self.ex.cache.female_aliases:
             self.gender = 'female'
         else:
             self.gender = 'all'
@@ -120,13 +121,13 @@ class Game:
             self.secondary_bracket_teams.append([idol])
 
         try:
-            reaction, user = await ex.client.wait_for('reaction_add', check=check_response, timeout=60)
+            reaction, user = await self.ex.client.wait_for('reaction_add', check=check_response, timeout=60)
             if reaction.emoji == '⬅':
                 add_winner(first_idol)
             elif reaction.emoji == '➡':
                 add_winner(second_idol)
             else:
-                raise ex.exceptions.ShouldNotBeHere("Bias game reaction was returned from wait_for() "
+                raise self.ex.exceptions.ShouldNotBeHere("Bias game reaction was returned from wait_for() "
                                                     "when it is neither ⬅ nor ➡")
             await message.delete()
         except asyncio.TimeoutError:
@@ -135,7 +136,7 @@ class Game:
 
     async def generate_brackets(self):
         """Generates the brackets and the idols going against each other"""
-        idol_selection = ex.cache.gender_selection.get(self.gender)
+        idol_selection = self.ex.cache.gender_selection.get(self.gender)
         idol_selection = [idol for idol in idol_selection if idol.thumbnail]
         self.original_idols_in_game = random.sample(idol_selection, 2 * self.bracket_size)
 
@@ -150,11 +151,11 @@ class Game:
             if self.force_ended:
                 return
             try:
-                first_idol_group = (await ex.u_group_members.get_group(random.choice(first_idol.groups))).name
+                first_idol_group = (await self.ex.u_group_members.get_group(random.choice(first_idol.groups))).name
             except:
                 first_idol_group = first_idol.full_name
             try:
-                second_idol_group = (await ex.u_group_members.get_group(random.choice(second_idol.groups))).name
+                second_idol_group = (await self.ex.u_group_members.get_group(random.choice(second_idol.groups))).name
             except:
                 second_idol_group = second_idol.full_name
 
@@ -164,11 +165,11 @@ Remaining Idols: {self.number_of_idols_left}
 {first_idol_group} ({first_idol.stage_name}) **VS** {second_idol_group} ({second_idol.stage_name})
                         """
             display_name = f"{first_idol.stage_name} VS {second_idol.stage_name}.png"
-            file_location = await ex.u_bias_game.create_bias_game_image(first_idol.id, second_idol.id)
+            file_location = await self.ex.u_bias_game.create_bias_game_image(first_idol.id, second_idol.id)
             image_file = discord.File(fp=file_location, filename=display_name)
             msg = await self.channel.send(msg_body, file=image_file)
-            await msg.add_reaction(keys.previous_emoji)  # left arrow by default
-            await msg.add_reaction(keys.next_emoji)  # right arrow by default
+            await msg.add_reaction(self.ex.keys.previous_emoji)  # left arrow by default
+            await msg.add_reaction(self.ex.keys.next_emoji)  # right arrow by default
             await self.check_message(msg, first_idol, second_idol)
             self.number_of_idols_left -= 1
 
@@ -182,23 +183,23 @@ Remaining Idols: {self.number_of_idols_left}
     async def end_game(self):
         """End the game"""
         if not self.force_ended:
-            await self.channel.send(await ex.get_msg(self.host, 'biasgame', 'force_closed'))
+            await self.channel.send(await self.ex.get_msg(self.host, 'biasgame', 'force_closed'))
         self.force_ended = True
 
     async def print_winner(self):
         msg_body = f"> The winner is {self.bracket_winner.stage_name}."
-        file_location = await ex.u_bias_game.create_bias_game_bracket(self.all_brackets_together, self.host, self.bracket_winner)
+        file_location = await self.ex.u_bias_game.create_bias_game_bracket(self.all_brackets_together, self.host, self.bracket_winner)
 
         image_file = discord.File(fp=file_location, filename=f"{self.host}.png")
         await self.channel.send(msg_body, file=image_file)
 
     async def update_user_wins(self):
         if self.bracket_winner:
-            wins = ex.first_result(await ex.conn.fetchrow("SELECT wins FROM biasgame.winners WHERE userid = $1 AND idolid = $2", self.host, self.bracket_winner.id))
+            wins = self.ex.first_result(await self.ex.conn.fetchrow("SELECT wins FROM biasgame.winners WHERE userid = $1 AND idolid = $2", self.host, self.bracket_winner.id))
             if wins:
-                await ex.conn.execute("UPDATE biasgame.winners SET wins = $1 WHERE userid = $2 AND idolid = $3", wins + 1, self.host, self.bracket_winner.id)
+                await self.ex.conn.execute("UPDATE biasgame.winners SET wins = $1 WHERE userid = $2 AND idolid = $3", wins + 1, self.host, self.bracket_winner.id)
             else:
-                await ex.conn.execute("INSERT INTO biasgame.winners(idolid, userid, wins) VALUES ($1, $2, $3)", self.bracket_winner.id, self.host, 1)
+                await self.ex.conn.execute("INSERT INTO biasgame.winners(idolid, userid, wins) VALUES ($1, $2, $3)", self.bracket_winner.id, self.host, 1)
 
     async def process_game(self):
         """Process bias guessing game by sending messages and new questions until the game should end."""
@@ -217,5 +218,5 @@ Remaining Idols: {self.number_of_idols_left}
             await self.print_winner()
             await self.update_user_wins()
         except Exception as e:
-            await self.channel.send(await ex.get_msg(self.host, 'biasgame', 'unexpected_error'))
+            await self.channel.send(await self.ex.get_msg(self.host, 'biasgame', 'unexpected_error'))
             log.console(e)

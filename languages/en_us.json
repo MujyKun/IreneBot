@@ -27,11 +27,17 @@
   },
   "currency": {
     "daily_msg": "{name}, you have been given {daily_amount}.",
+    "beg_msg": "{name}, a homeless man has given you {integer} {currency_name}(s).",
     "balance_msg": "{name} currently has {balance} {currency_name}(s).",
     "nothing_to_bet": "{name}, you cannot bet less than 1 {currency_name}.",
     "in_game": "{name}, you cannot use Currency while you are in a game. Please type {server_prefix}endgame.",
     "not_enough": "{name}, you do not have enough {currency_name}s. You have {balance}.",
-    "bet_result": "{name}, you {result} {integer}! Your updated balance is {balance}."
+    "bet_result": "{name}, you {result} {integer}! Your updated balance is {balance}.",
+    "upgrade_msg": "{name}, you need {integer} to level up {command_name}. Press the Thumbs Up Reaction within 1 minute to confirm.",
+    "upgrade_msg_success": "{name}, congrats! your {command_name} level is now {integer}.",
+    "upgrade_not_enough": "{name}, you need at least {integer} to upgrade {command_name}. You have {balance}.",
+    "upgrade_out_of_time": "{name}, you ran out of time to upgrade {command_name}."
+
   },
   "customcommands": {
     "bot_command_exists": "{command_name} is already a bot command and can not be added.",
@@ -77,9 +83,10 @@
     "error_no_support": "Error MSG: {e}",
     "no_n_word": "That user has not said the N-Word a single time!",
     "self_no_n_word": "You have not said the N-Word a single time!",
-    "cooldown": "You are on cooldown. Try again in {await ex.u_miscellaneous.get_cooldown_time(error.retry_after)}",
+    "cooldown": "You are on cooldown. Try again in {time}.",
     "on_guild_join": "Hello!\nMy prefix for this server is set to {server_prefix}.\nIf you have any questions or concerns, you may join the support server ({server_prefix}support).",
-    "maintenance": "A maintenance is currently in progress. Join the support server for more information. <{support_server_link}>\nREASON: {reason}"
+    "maintenance": "A maintenance is currently in progress. Join the support server for more information. <{support_server_link}>\nREASON: {reason}",
+    "invalid_input": "{name}, That option is not valid. Please look into {server_prefix}help {command_name}."
   },
   "twitch": {
     "follow_limit": "You are only allowed to have {follow_limit} channels followed.",

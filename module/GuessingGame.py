@@ -1,22 +1,22 @@
 from discord.ext import commands
-from module import keys
 from IreneUtility.util import u_logger as log
 import asyncio
 import random
 import async_timeout
 from IreneUtility.Utility import Utility
-from IreneUtility.models import base_util
 
-# main or temporary Utility object until main one is set. Important for decorator checking.
-ex: Utility = base_util.ex or Utility()
+
+def check_user_in_support_server():
+    """Decorator for checking if a user is in the support server"""
+    def predicate(ctx):
+        return ctx.cog.ex.check_user_in_support_server(ctx)
+    return commands.check(predicate)
 
 
 # noinspection PyPep8,PyBroadException
 class GuessingGame(commands.Cog):
     def __init__(self, t_ex):
-        global ex
         self.ex: Utility = t_ex
-        ex = t_ex
 
     @commands.command(aliases=['ggl', 'gglb'])
     async def ggleaderboard(self, ctx, difficulty="medium", mode="server"):
@@ -29,35 +29,35 @@ class GuessingGame(commands.Cog):
             if mode.lower() not in ["server", "global"]:
                 mode = "server"
             if mode == "server":
-                server_id = await ex.get_server_id(ctx)
+                server_id = await self.ex.get_server_id(ctx)
                 if not server_id:
                     return await ctx.send("> You should not use this command in DMs.")
-                members = f"({', '.join([str(member.id) for member in ex.client.get_guild(server_id).members])})"
-                top_user_scores = await ex.u_guessinggame.get_guessing_game_top_ten(difficulty, members=members)
+                members = f"({', '.join([str(member.id) for member in self.ex.client.get_guild(server_id).members])})"
+                top_user_scores = await self.ex.u_guessinggame.get_guessing_game_top_ten(difficulty, members=members)
 
             else:
-                top_user_scores = await ex.u_guessinggame.get_guessing_game_top_ten(difficulty)
+                top_user_scores = await self.ex.u_guessinggame.get_guessing_game_top_ten(difficulty)
 
             lb_string = ""
             for user_position, (user_id, score) in enumerate(top_user_scores):
-                score = await ex.u_guessinggame.get_user_score(difficulty.lower(), user_id)
+                score = await self.ex.u_guessinggame.get_user_score(difficulty.lower(), user_id)
                 lb_string += f"**{user_position + 1})** <@{user_id}> - {score}\n"
-            m_embed = await ex.create_embed(title=f"Guessing Game Leaderboard ({difficulty.lower()}) ({mode})",
+            m_embed = await self.ex.create_embed(title=f"Guessing Game Leaderboard ({difficulty.lower()}) ({mode})",
                                             title_desc=lb_string)
             await ctx.send(embed=m_embed)
         except Exception as e:
             log.console(e)
             return await ctx.send(f"> You may not understand this error. Please report it -> {e}")
 
-    @commands.check(ex.check_user_in_support_server)
+    @check_user_in_support_server()
     @commands.command(aliases=['gg'])
     async def guessinggame(self, ctx, gender="all", difficulty="medium", rounds=20, timeout=20):
         """Start an idol guessing game in the current channel. The host of the game can use `stop`/`end` to end the game or `skip` to skip the current round without affecting the round number.
         [Format: %guessinggame (Male/Female/All) (easy/medium/hard) (# of rounds - default 20) (timeout for each round - default 20s)]"""
         if not ctx.guild:
             return await ctx.send("> You are not allowed to play guessing game in DMs.")
-        if ex.cache.guessing_games.get(ctx.channel.id):
-            server_prefix = await ex.get_server_prefix(ctx)
+        if self.ex.cache.guessing_games.get(ctx.channel.id):
+            server_prefix = await self.ex.get_server_prefix(ctx)
             return await ctx.send(f"> **A guessing game is currently in progress in this channel. If this is a mistake, use `{server_prefix}stopgg`.**")
         if rounds > 60 or timeout > 60:
             return await ctx.send("> **ERROR -> The max rounds is 60 and the max timeout is 60s.**")
@@ -72,10 +72,10 @@ class GuessingGame(commands.Cog):
         """Add a filter for your guessing game. Only the groups you select will appear on the guessing game.
         Use the command with no group ids to enable/disable the filter. Split group ids with commas.
         [Format: %ggfilter [group_id_one, group_id_two, ...]]"""
-        user = await ex.get_user(ctx.author.id)
+        user = await self.ex.get_user(ctx.author.id)
         if not group_ids:
             # toggle guessing game filter.
-            await ex.u_guessinggame.toggle_filter(user.id)
+            await self.ex.u_guessinggame.toggle_filter(user.id)
             return await ctx.send(f"> Your Guessing Game Filter is now {'enabled' if user.gg_filter else 'disabled'}")
 
         group_ids = group_ids.replace(' ', '')
@@ -94,12 +94,12 @@ class GuessingGame(commands.Cog):
                 continue
 
             try:
-                added_group = await ex.u_guessinggame.filter_auto_add_remove_group(user_or_id=user, group_or_id=group_id)
+                added_group = await self.ex.u_guessinggame.filter_auto_add_remove_group(user_or_id=user, group_or_id=group_id)
                 if added_group:
                     added_group_ids.append(group_id)
                 else:
                     removed_group_ids.append(group_id)
-            except ex.exceptions.InvalidParamsPassed:
+            except self.ex.exceptions.InvalidParamsPassed:
                 invalid_group_ids.append(group_id)
 
         final_message = f"<@{user.id}>"
@@ -116,22 +116,22 @@ class GuessingGame(commands.Cog):
     async def ggfilteredlist(self, ctx):
         """View the current groups you currently have filtered.
         [Format: %ggfilteredlist]"""
-        user = await ex.get_user(ctx.author.id)
+        user = await self.ex.get_user(ctx.author.id)
         toggled_message = f"<@{user.id}>, your filter is currently {'enabled' if user.gg_filter else 'disabled'}.\n"
         title = f"{ctx.author.display_name}'s  Filtered Guessing Game List"
         page_number = 1
         embed_list = []
-        embed = await ex.create_embed(title=f"{title} (Page {page_number})", title_desc=toggled_message)
+        embed = await self.ex.create_embed(title=f"{title} (Page {page_number})", title_desc=toggled_message)
         for count, group in enumerate(user.gg_groups, 1):
             name = f"{group.name} [{group.id}]"
             if count % 15 == 0:  # max embed length is 25 fields, limit to 15 to avoid visual spam.
                 embed_list.append(embed)
                 page_number += 1
-                embed = await ex.create_embed(title=f"{title} (Page {page_number})", title_desc=toggled_message)
+                embed = await self.ex.create_embed(title=f"{title} (Page {page_number})", title_desc=toggled_message)
 
             if group.members:
                 try:
-                    value = await ex.u_group_members.get_member_names_as_string(group)
+                    value = await self.ex.u_group_members.get_member_names_as_string(group)
                 except:
                     value = f"The group ({group.id}) has an Idol that doesn't exist. Please report it.\n"
                 embed.add_field(name=name, value=value, inline=True)
@@ -143,31 +143,31 @@ class GuessingGame(commands.Cog):
 
         msg = await ctx.send(embed=embed_list[0])
         if len(embed_list) > 1:
-            await ex.check_left_or_right_reaction_embed(msg, embed_list)
+            await self.ex.check_left_or_right_reaction_embed(msg, embed_list)
 
     @commands.command()
     async def stopgg(self, ctx):
         """Force-end a guessing game if you are a moderator or host of the game. This command is meant for any issues or if a game happens to be stuck.
         [Format: %stopgg]"""
-        if not await ex.stop_game(ctx, ex.cache.guessing_games):
+        if not await self.ex.stop_game(ctx, self.ex.cache.guessing_games):
             return await ctx.send("> No guessing game is currently in session.")
         log.console(f"Force-Ended Guessing Game in {ctx.channel.id}")
 
-    @staticmethod
-    async def start_game(ctx, rounds, timeout, gender, difficulty):
+    async def start_game(self, ctx, rounds, timeout, gender, difficulty):
         """Officially starts the guessing game."""
-        game = Game(ctx, max_rounds=rounds, timeout=timeout, gender=gender, difficulty=difficulty)
-        ex.cache.guessing_games[ctx.channel.id] = game
+        game = Game(self.ex, ctx, max_rounds=rounds, timeout=timeout, gender=gender, difficulty=difficulty)
+        self.ex.cache.guessing_games[ctx.channel.id] = game
         await ctx.send(f"> Starting a guessing game for `{game.gender if game.gender != 'all' else 'both male and female'}` idols"
                        f" with `{game.difficulty}` difficulty, `{rounds}` rounds, and `{timeout}s` of guessing time.")
         await game.process_game()
-        await ex.stop_game(ctx, ex.cache.guessing_games)
+        await self.ex.stop_game(ctx, self.ex.cache.guessing_games)
         log.console(f"Ended Guessing Game in {ctx.channel.id}")
 
 
 # noinspection PyBroadException,PyPep8
 class Game:
-    def __init__(self, ctx, max_rounds=20, timeout=20, gender="all", difficulty="medium"):
+    def __init__(self, utility_obj, ctx, max_rounds=20, timeout=20, gender="all", difficulty="medium"):
+        self.ex = utility_obj
         self.photo_link = None
         self.host_ctx = ctx
         self.host = ctx.author.id
@@ -185,13 +185,13 @@ class Game:
         self.idol_post_msg = None
         self.gender = None
         self.post_attempt_timeout = 10
-        if gender.lower() in ex.cache.male_aliases:
+        if gender.lower() in self.ex.cache.male_aliases:
             self.gender = 'male'
-        elif gender.lower() in ex.cache.female_aliases:
+        elif gender.lower() in self.ex.cache.female_aliases:
             self.gender = 'female'
         else:
             self.gender = "all"
-        if difficulty in ex.cache.difficulty_selection.keys():
+        if difficulty in self.ex.cache.difficulty_selection.keys():
             self.difficulty = difficulty
         else:
             self.difficulty = "medium"
@@ -226,8 +226,8 @@ class Game:
                 return message.content.lower() == 'skip' or message.content.lower() in stop_phrases
 
         try:
-            msg = await ex.client.wait_for('message', check=check_correct_answer, timeout=self.timeout)
-            await msg.add_reaction(keys.check_emoji)
+            msg = await self.ex.client.wait_for('message', check=check_correct_answer, timeout=self.timeout)
+            await msg.add_reaction(self.ex.keys.check_emoji)
             if msg.content.lower() == 'skip':
                 await self.print_answer(question_skipped=True)
                 return
@@ -270,11 +270,11 @@ class Game:
                 await self.create_acceptable_answers()
 
                 # Create list of idol group names.
-                self.group_names = [(await ex.u_group_members.get_group(group_id)).name for group_id in self.idol.groups]
+                self.group_names = [(await self.ex.u_group_members.get_group(group_id)).name for group_id in self.idol.groups]
 
                 # Skip this idol if it is taking too long
                 async with async_timeout.timeout(self.post_attempt_timeout) as posting:
-                    self.idol_post_msg, self.photo_link = await ex.u_group_members.idol_post(self.channel, self.idol, user_id=self.host, guessing_game=True, scores=self.players)
+                    self.idol_post_msg, self.photo_link = await self.ex.u_group_members.idol_post(self.channel, self.idol, user_id=self.host, guessing_game=True, scores=self.players)
                     log.console(f'{", ".join(self.correct_answers)} - {self.channel.id}')
 
                 if posting.expired:
@@ -313,7 +313,7 @@ class Game:
     async def update_scores(self):
         """Updates all player scores"""
         for user_id in self.players:
-            await ex.u_guessinggame.update_user_guessing_game_score(self.difficulty, user_id=user_id,
+            await self.ex.u_guessinggame.update_user_guessing_game_score(self.difficulty, user_id=user_id,
                                                                     score=self.players.get(user_id))
 
     async def print_answer(self, question_skipped=False):
@@ -326,7 +326,8 @@ class Game:
         # create_task should not be awaited because this is meant to run in the background to check for reactions.
         try:
             # noinspection PyUnusedLocal
-            task = asyncio.create_task(ex.u_group_members.check_idol_post_reactions(msg, self.host_ctx.message, self.idol, self.photo_link, guessing_game=True))
+            task = asyncio.create_task(self.ex.u_group_members.check_idol_post_reactions(
+                msg, self.host_ctx.message, self.idol, self.photo_link, guessing_game=True))
         except Exception as e:
             log.console(e)
 
@@ -338,20 +339,20 @@ class Game:
 
     async def create_idol_pool(self):
         """Create the game's idol pool."""
-        idol_gender_set = ex.cache.gender_selection.get(self.gender)
-        idol_difficulty_set = ex.cache.difficulty_selection.get(self.difficulty)
+        idol_gender_set = self.ex.cache.gender_selection.get(self.gender)
+        idol_difficulty_set = self.ex.cache.difficulty_selection.get(self.difficulty)
         idol_filtered_set = set()
-        ex.cache.idols_female.update({idol for idol in ex.cache.idols if idol.gender == 'f' and idol.photo_count})
+        self.ex.cache.idols_female.update({idol for idol in self.ex.cache.idols if idol.gender == 'f' and idol.photo_count})
         if self.host_user.gg_filter:
             for group in self.host_user.gg_groups:
-                idol_filtered_set.update({await ex.u_group_members.get_member(idol_id) for idol_id in group.members})
+                idol_filtered_set.update({await self.ex.u_group_members.get_member(idol_id) for idol_id in group.members})
             self.idol_set = list(idol_gender_set & idol_difficulty_set & idol_filtered_set)
         else:
             self.idol_set = list(idol_gender_set & idol_difficulty_set)
 
     async def process_game(self):
         """Ignores errors and continuously makes new questions until the game should end."""
-        self.host_user = await ex.get_user(self.host)
+        self.host_user = await self.ex.get_user(self.host)
         await self.create_idol_pool()
         try:
             while self.rounds < self.max_rounds and not self.force_ended:

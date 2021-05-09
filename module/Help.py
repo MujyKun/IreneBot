@@ -37,7 +37,7 @@ class Help(commands.Cog):
             # change the default prefix to the server prefix
             cmd_prefix = await self.get_server_prefix()
             cmd_format = cmd_prefix + cmd_format[1:len(cmd_format)]
-            cmd_brief = command.help.replace(await ex.client.get_prefix(self.context.message), cmd_prefix)
+            cmd_brief = command.help.replace(ex.keys.bot_prefix, cmd_prefix)
             embed = discord.Embed(description=f"{cmd_format}\n\n{cmd_brief}")
             await channel.send(embed=embed)
 
@@ -57,7 +57,7 @@ class Help(commands.Cog):
                     embed_empty = False
                     cmd_name = command.name
                     cmd_prefix = await self.get_server_prefix()
-                    cmd_desc = command.short_doc.replace(await ex.client.get_prefix(self.context.message), cmd_prefix)
+                    cmd_desc = command.short_doc.replace(ex.keys.bot_prefix, cmd_prefix)
                     cmd_msg = f"\n{cmd_prefix}{cmd_name} - {cmd_desc}"
                     entire_msg += cmd_msg
                     if len(entire_msg) >= 1500:
@@ -83,7 +83,7 @@ class Help(commands.Cog):
 
         async def send_bot_help(self, mapping):
             """
-            THIS METHOD WAS COPY PASTED FROM D.PY V1.3.3
+            THIS METHOD WAS COPY PASTED FROM D.PY V1.6.0
             THE ONLY ALTERED CODE WAS CHANGING get_opening_note to be awaited.
             get_opening_note was not originally async.
             """
@@ -96,18 +96,19 @@ class Help(commands.Cog):
             note = await self.get_opening_note()
             if note:
                 self.paginator.add_line(note, empty=True)
+
             no_category = '\u200b{0.no_category}'.format(self)
 
-            def get_category(command, *, no_category_t=no_category):
+            def get_category(command, *, no_category=no_category):
                 cog = command.cog
-                return cog.qualified_name if cog is not None else no_category_t
+                return cog.qualified_name if cog is not None else no_category
 
             filtered = await self.filter_commands(bot.commands, sort=True, key=get_category)
             to_iterate = itertools.groupby(filtered, key=get_category)
 
-            for category, commands_t in to_iterate:
-                commands_t = sorted(commands_t, key=lambda c: c.name) if self.sort_commands else list(commands_t)
-                self.add_bot_commands_formatting(commands_t, category)
+            for category, commands in to_iterate:
+                commands = sorted(commands, key=lambda c: c.name) if self.sort_commands else list(commands)
+                self.add_bot_commands_formatting(commands, category)
 
             note = self.get_ending_note()
             if note:
@@ -118,7 +119,7 @@ class Help(commands.Cog):
 
         async def send_group_help(self, group):
             """
-            THIS METHOD WAS COPY PASTED FROM D.PY V1.3.3
+            THIS METHOD WAS COPY PASTED FROM D.PY V1.6.0
             THE ONLY ALTERED CODE WAS CHANGING get_opening_note to be awaited.
             get_opening_note was not originally async.
             """

@@ -4,18 +4,20 @@ from IreneUtility.util import u_logger as log
 from Weverse.weverseasync import WeverseAsync
 import aiofiles
 from IreneUtility.Utility import Utility
-from IreneUtility.models import base_util
+import asyncio
 
-# main or temporary Utility object until main one is set. Important for decorator checking.
-ex: Utility = base_util.ex or Utility()
+
+def check_if_mod():
+    """Decorator for checking if a user is in the support server"""
+    def predicate(ctx):
+        return ctx.cog.ex.check_if_mod(ctx)
+    return commands.check(predicate)
 
 
 # noinspection PyBroadException,PyPep8
 class BotMod(commands.Cog):
     def __init__(self, t_ex):
         self.ex: Utility = t_ex
-        global ex
-        ex = self.ex
 
     async def mod_mail_on_message(self, message):
         # mod mail
@@ -50,20 +52,20 @@ class BotMod(commands.Cog):
             log.console(f"{e} - BotMod.mod_mail_on_message")
 
     @commands.command()
-    @commands.check(ex.check_if_mod)
+    @check_if_mod()
     async def weverseauth(self, ctx, token):
         """Updates Weverse Authentication Token without restarting bot.
         Only use this in DMs or a private channel for security purposes.
         [Format %weverseauth <token>]
         """
-        keys.weverse_auth_token = token
-        self.ex.weverse_client = WeverseAsync(authorization=keys.weverse_auth_token, web_session=self.ex.session,
-                                            verbose=True, loop=self.ex.asyncio.get_event_loop())
+        self.ex.keys.weverse_auth_token = token
+        self.ex.weverse_client = WeverseAsync(authorization=self.ex.keys.weverse_auth_token,
+                                              web_session=self.ex.session, verbose=True, loop=asyncio.get_event_loop())
         await ctx.send("> Token and Weverse client has been updated.")
         await self.ex.weverse_client.start()
 
     @commands.command()
-    @commands.check(ex.check_if_mod)
+    @check_if_mod()
     async def moveto(self, ctx, idol_id, link):
         """Moves a link to another idol. (Cannot be used for adding new links)[Format: %moveto (idol id) (link)]"""
         try:
@@ -94,14 +96,14 @@ class BotMod(commands.Cog):
         for mem_id, mem_thumbnail, mem_banner in mem_info:
             file_name = f"{mem_id}_IDOL.png"
             if mem_thumbnail:
-                file_loc = f"{keys.idol_avatar_location}{file_name}"
+                file_loc = f"{self.ex.keys.idol_avatar_location}{file_name}"
                 if 'images.irenebot.com' not in mem_thumbnail:
                     await download_image(mem_thumbnail)
                 if self.ex.check_file_exists(file_loc):
-                    image_url = f"{ex.keys.image_host}/avatar/{file_name}"
+                    image_url = f"{self.ex.keys.image_host}/avatar/{file_name}"
                     await self.ex.conn.execute("UPDATE groupmembers.member SET thumbnail = $1 WHERE id = $2", image_url, mem_id)
             if mem_banner:
-                file_loc = f"{keys.idol_banner_location}{file_name}"
+                file_loc = f"{self.ex.keys.idol_banner_location}{file_name}"
                 if 'images.irenebot.com' not in mem_banner:
                     await download_image(mem_banner)
                 image_url = f"https://images.irenebot.com/banner/{file_name}"
@@ -110,14 +112,14 @@ class BotMod(commands.Cog):
         for grp_id, grp_thumbnail, grp_banner in grp_info:
             file_name = f"{grp_id}_GROUP.png"
             if grp_thumbnail:
-                file_loc = f"{keys.idol_avatar_location}{file_name}"
+                file_loc = f"{self.ex.keys.idol_avatar_location}{file_name}"
                 if 'images.irenebot.com' not in grp_thumbnail:
                     await download_image(grp_thumbnail)
                 image_url = f"https://images.irenebot.com/avatar/{file_name}"
                 if self.ex.check_file_exists(file_loc):
                     await self.ex.conn.execute("UPDATE groupmembers.groups SET thumbnail = $1 WHERE groupid = $2", image_url, grp_id)
             if grp_banner:
-                file_loc = f"{keys.idol_banner_location}{file_name}"
+                file_loc = f"{self.ex.keys.idol_banner_location}{file_name}"
                 if 'images.irenebot.com' not in grp_banner:
                     await download_image(grp_banner)
                 image_url = f"https://images.irenebot.com/banner/{file_name}"
@@ -126,7 +128,7 @@ class BotMod(commands.Cog):
         return await ctx.send("> All images have been fixed, merged to image hosting service and have links set up for them.")
 
     @commands.command()
-    @commands.check(ex.check_if_mod)
+    @check_if_mod()
     async def mergeidol(self, ctx, original_idol_id: int, duplicate_idol_id: int):
         """Merge a duplicated idol with it's original idol.
         CAUTION: All aliases and are moved to the original idol, idol information is left alone
@@ -153,7 +155,7 @@ class BotMod(commands.Cog):
         await ctx.send(f"> Merged {duplicate_idol_id} to {original_idol_id}.")
 
     @commands.command()
-    @commands.check(ex.check_if_mod)
+    @check_if_mod()
     async def mergegroup(self, ctx, original_group_id: int, duplicate_group_id: int):
         """Merge a duplicated group with it's original group.
         CAUTION: All aliases and are moved to the original group, group information is left alone
@@ -180,14 +182,14 @@ class BotMod(commands.Cog):
         await ctx.send(f"> Merged {duplicate_group_id} to {original_group_id}.")
 
     @commands.command()
-    @commands.check(ex.check_if_mod)
+    @check_if_mod()
     async def killapi(self, ctx):
         """Restarts the API. [Format: %killapi]"""
         await ctx.send("> Restarting the API.")
         await self.ex.kill_api()
 
     @commands.command()
-    @commands.check(ex.check_if_mod)
+    @check_if_mod()
     async def maintenance(self, ctx, *, maintenance_reason=None):
         """Enable/Disable Maintenance Mode. [Format: %maintenance (reason)]"""
         self.ex.cache.maintenance_mode = not self.ex.cache.maintenance_mode
@@ -196,14 +198,14 @@ class BotMod(commands.Cog):
         return await ctx.send(f"> **Maintenance mode is set to {self.ex.cache.maintenance_mode}.**")
 
     @commands.command()
-    @commands.check(ex.check_if_mod)
+    @check_if_mod()
     async def botwarn(self, ctx, user: discord.User, *, reason=None):
         """Warns a user from Irene's DMs [Format: %botwarn (user id) <reason>]"""
         message = f"""
 **You have been warned by <@{ctx.author.id}>.**
 **Please be aware that you may get banned from the bot if this behavior is repeated numerous times.**
 **Reason:** {reason}
-Have questions? Join the support server at {keys.bot_support_server_link}."""
+Have questions? Join the support server at {self.ex.keys.bot_support_server_link}."""
         dm_channel = await self.ex.get_dm_channel(user.id)
         if not dm_channel:
             return await ctx.send(f"> Could not find <@{user.id}>'s DM channel.")
@@ -214,7 +216,7 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
             return await ctx.send(f"> I do not have permission to send a message to <@{user.id}>")
 
     @commands.command()
-    @commands.check(ex.check_if_mod)
+    @check_if_mod()
     async def kill(self, ctx):
         """Kills the bot [Format: %kill]"""
         await ctx.send("> **The bot is now offline.**")
@@ -257,7 +259,7 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
             log.useless(f"{e} - Failed to log out of bot. - BotMod.kill")
 
     @commands.command()
-    @commands.check(ex.check_if_mod)
+    @check_if_mod()
     async def addinteraction(self, ctx, interaction_type, *, links):
         """Add a gif/photo to an interaction (ex: slap,kiss,lick,hug)
         [Format: %addinteraction (interaction) (url,url)"""
@@ -278,7 +280,7 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
             log.console(e)
 
     @commands.command()
-    @commands.check(ex.check_if_mod)
+    @check_if_mod()
     async def deleteinteraction(self, ctx, *, url):
         """Delete a url from an interaction [Format: %deleteinteraction (url,url)"""
         links = url.split(',')
@@ -293,7 +295,7 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
         await ctx.send("Finished removing urls.")
 
     @commands.command()
-    @commands.check(ex.check_if_mod)
+    @check_if_mod()
     async def botban(self, ctx, *, user: discord.User):
         """Bans a user from Irene. [Format: %botban (user id)]"""
         if not self.ex.check_if_mod(user.id, 1):
@@ -303,14 +305,14 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
             await ctx.send(f"> **<@{ctx.author.id}>, you cannot ban a bot mod.**")
 
     @commands.command()
-    @commands.check(ex.check_if_mod)
+    @check_if_mod()
     async def botunban(self, ctx, *, user: discord.User):
         """UnBans a user from Irene. [Format: %botunban (user id)]"""
         await self.ex.u_miscellaneous.unban_user_from_bot(user.id)
         await ctx.send(f"> **If the user was banned, they are now unbanned.**")
 
     @commands.command()
-    @commands.check(ex.check_if_mod)
+    @check_if_mod()
     async def addstatus(self, ctx, *, status: str):
         """Add a playing status to Irene. [Format: %addstatus (status)]"""
         await self.ex.conn.execute("INSERT INTO general.botstatus (status) VALUES ($1)", status)
@@ -318,7 +320,7 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
         await ctx.send(f"> **{status} was added.**")
 
     @commands.command()
-    @commands.check(ex.check_if_mod)
+    @check_if_mod()
     async def getstatuses(self, ctx):
         """Get all statuses of Irene."""
         final_list = ""
@@ -333,7 +335,7 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
         await ctx.send(embed=embed)
 
     @commands.command()
-    @commands.check(ex.check_if_mod)
+    @check_if_mod()
     async def removestatus(self, ctx, status_index: int):
         """Remove a status based on it's indself.ex. The index can be found using %getstatuses.
         [Format: %removestatus (status index)]"""
@@ -347,7 +349,7 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
             await ctx.send(e)
 
     @commands.command()
-    @commands.check(ex.check_if_mod)
+    @check_if_mod()
     async def addidoltogroup(self, ctx, idol_id: int, group_id: int):
         """Adds idol to group. [Format: %addidoltogroup (idol id) (group id)"""
         try:
@@ -363,7 +365,7 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
             log.console(e)
 
     @commands.command(aliases=['removeidolfromgroup'])
-    @commands.check(ex.check_if_mod)
+    @check_if_mod()
     async def deleteidolfromgroup(self, ctx, idol_id: int, group_id: int):
         """Deletes idol from group. [Format: %deleteidolfromgroup (idol id) (group id)"""
         try:
@@ -379,7 +381,7 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
             log.console(e)
 
     @commands.command(aliases=['removeidol'])
-    @commands.check(ex.check_if_mod)
+    @check_if_mod()
     async def deleteidol(self, ctx, idol_id: int):
         """Deletes an idol [Format: %deleteidol (idol id)]"""
         try:
@@ -391,7 +393,7 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
             log.console(e)
 
     @commands.command(aliases=['removegroup'])
-    @commands.check(ex.check_if_mod)
+    @check_if_mod()
     async def deletegroup(self, ctx, group_id: int):
         """Deletes a group [Format: %deletegroup (group id)]"""
         try:
@@ -402,7 +404,7 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
             log.console(e)
 
     @commands.command()
-    @commands.check(ex.check_if_mod)
+    @check_if_mod()
     async def createdm(self, ctx, user: discord.User):
         """Create a DM with a user with the bot as a middle man. One user per mod channel.
         [Format: %createdm (user id)]"""
@@ -422,7 +424,7 @@ Have questions? Join the support server at {keys.bot_support_server_link}."""
             log.console(e)
 
     @commands.command()
-    @commands.check(ex.check_if_mod)
+    @check_if_mod()
     async def closedm(self, ctx, user: discord.User = None):
         """Closes a DM either by the User ID or by the current channel.
         [Format: %closedm <user id>] """

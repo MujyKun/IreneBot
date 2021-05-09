@@ -26,7 +26,7 @@ All module names (keys) should be entirely lowercase.
 **User's Name:** `{name)`  
 **User's Balance:** `{balance}`  
 **Current User Language:** `{language}`  
-**Daily Currency Amount:** `{daily_amount}`  
+**Daily Currency Amount:** `{daily_amount}`
 **List of users** `{users}`  
 
 **Languages Available:** `{languages}`  

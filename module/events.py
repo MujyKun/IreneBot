@@ -10,7 +10,7 @@ events.py
 Manages d.py events 
 """
 
-ex: Utility
+ex: Utility  # majority if not all methods here will be static since we are not subclassing AutoShardedClient.
 
 
 # noinspection PyBroadException,PyPep8
@@ -47,7 +47,7 @@ class Events(commands.Cog):
     @staticmethod
     async def error(ctx, error):
         try:
-            embed = discord.Embed(title="Error", description=f"** {error} **", color=0xff00f6)
+            embed = discord.Embed(title="Error", description=error, color=0xff00f6)
             await ctx.send(embed=embed)
             log.console(f"{error}")
             # increment general error count per minute -> Does not include unable to send messages to people.
@@ -58,9 +58,7 @@ class Events(commands.Cog):
     @staticmethod
     @client.event
     async def on_ready():
-        app = await ex.client.application_info()
-        ex.keys.bot_name = app.name
-        log.console(f'{app.name} is online')
+        log.console(f'{ex.keys.bot_name} is online')
         ex.discord_cache_loaded = True
 
     @staticmethod

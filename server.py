@@ -73,7 +73,7 @@ if __name__ == "__main__":
     restart.api.start()
     restart.bot.start()
     restart.site.start()
-    app.run(debug=True, use_reloader=False, port=5123)
+    app.run(debug=False, use_reloader=False, port=5123)
     restart.api.join()
     restart.bot.join()
     restart.site.join()

@@ -1,10 +1,10 @@
 import discord
 from random import *
 from discord.ext import commands
-from module import keys
 from IreneUtility.util import u_logger as log
 import datetime
 from IreneUtility.Utility import Utility
+from datetime import datetime
 
 
 # noinspection PyBroadException,PyPep8
@@ -64,7 +64,7 @@ Message Author: {message.author}
     async def vote(self, ctx):
         """Link to Voting for Irene on Top.gg
         [Format: %vote]"""
-        return await ctx.send(f"> https://top.gg/bot/{keys.bot_id}/vote")
+        return await ctx.send(f"> https://top.gg/bot/{self.ex.keys.bot_id}/vote")
 
     @commands.command()
     async def choose(self, ctx, *, options):
@@ -149,7 +149,7 @@ Message Author: {message.author}
     @commands.command(aliases=['patron'])
     async def patreon(self, ctx):
         """Displays Patreon Information. [Format: %patreon]"""
-        await ctx.send(f"**Please support <@{keys.bot_id}>'s development at {keys.patreon_link}.**")
+        await ctx.send(f"**Please support <@{self.ex.keys.bot_id}>'s development at {self.ex.keys.patreon_link}.**")
 
     @commands.command()
     async def botinfo(self, ctx):
@@ -176,14 +176,14 @@ Message Author: {message.author}
         try:
             current_server_prefix = await self.ex.get_server_prefix(ctx.guild.id)
         except:
-            current_server_prefix = await self.ex.client.get_prefix(ctx.message)
+            current_server_prefix = self.ex.keys.bot_prefix
         app = await self.ex.client.application_info()
         app_id = app.id
         app_name = app.name
         app_owner = app.owner
         app_icon_url = app.icon_url
-        patreon_url = keys.patreon_link
-        bot_uptime = await self.ex.u_miscellaneous.get_cooldown_time((keys.datetime.now() - keys.startup_time).total_seconds())
+        patreon_url = self.ex.keys.patreon_link
+        bot_uptime = await self.ex.u_miscellaneous.get_cooldown_time((datetime.now() - self.ex.keys.startup_time).total_seconds())
         bot_server_links = """
 [Top.gg](https://top.gg/bot/520369375325454371)
 [Discord Bots](https://discord.bots.gg/bots/520369375325454371)
@@ -191,7 +191,7 @@ Message Author: {message.author}
 [Discord Boats](https://discord.boats/bot/520369375325454371)
         """
         mods = ""
-        for bot_mod in keys.mods_list:
+        for bot_mod in self.ex.keys.mods_list:
             mods += f"<@{bot_mod}> | "
         title_desc = f"""I was made with Python using the discord.py wrapper.
 
@@ -218,14 +218,14 @@ Maintenance Status: {maintenance_status}
         embed.add_field(name=f"Bot Owner", value=f"<@{app_owner.id}>", inline=True)
         if mods:
             embed.add_field(name=f"Bot Mods", value=mods, inline=True)
-        embed.add_field(name=f"Support Server", value=f"[Invite to Server]({keys.bot_support_server_link})", inline=False)
-        embed.add_field(name=f"Website", value=keys.bot_website, inline=False)
+        embed.add_field(name=f"Support Server", value=f"[Invite to Server]({self.ex.keys.bot_support_server_link})", inline=False)
+        embed.add_field(name=f"Website", value=self.ex.keys.bot_website, inline=False)
         embed.add_field(name=f"Github", value=f"https://github.com/MujyKun/IreneBot", inline=False)
-        embed.add_field(name=f"Discord Invite", value=keys.bot_invite_link, inline=False)
+        embed.add_field(name=f"Discord Invite", value=self.ex.keys.bot_invite_link, inline=False)
         embed.add_field(name=f"Bot Server Links", value=bot_server_links, inline=False)
         embed.add_field(name=f"Suggest", value=f"Suggest a feature using `{current_server_prefix}suggest`.", inline=False)
         if patreon_url:
-            embed.add_field(name=f"Patreon", value=f"[Please Support <@{keys.bot_id}> here.]({patreon_url})", inline=False)
+            embed.add_field(name=f"Patreon", value=f"[Please Support <@{self.ex.keys.bot_id}> here.]({patreon_url})", inline=False)
         await ctx.send(embed=embed)
 
     @commands.command()
@@ -235,7 +235,7 @@ Maintenance Status: {maintenance_status}
         try:
             await ctx.send(f"> **Your current server prefix is {await self.ex.get_server_prefix(ctx.guild.id)}**")
         except:
-            await ctx.send(f"> **Your current prefix is {await self.ex.client.get_prefix(ctx.message)}")
+            await ctx.send(f"> **Your current prefix is {self.ex.keys.bot_prefix}**.")
 
     @commands.command(aliases=['trans', 't'])
     async def translate(self, ctx, from_language, to_language, *, message):
@@ -261,13 +261,13 @@ Maintenance Status: {maintenance_status}
         """Report an issue with Irene. Format: [%report (issue)]"""
         desc = f"**{issue}**"
         embed = discord.Embed(title="Bug Report", color=0xff00f6)
-        embed.set_author(name="Irene", url=keys.bot_website,
+        embed.set_author(name="Irene", url=self.ex.keys.bot_website,
                          icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
         embed.set_footer(text="Thanks for leaving a report.",
                          icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
         embed.add_field(name=f"{ctx.author.name} ({ctx.author.id})", value=desc)
         try:
-            channel = await self.ex.client.fetch_channel(keys.report_channel_id)  # 403 error ( no access ) on testing
+            channel = await self.ex.client.fetch_channel(self.ex.keys.report_channel_id)  # 403 error ( no access ) on testing
             msg = await channel.send(embed=embed)
             await ctx.send("> **Your bug report has been sent.**")
             await msg.add_reaction("\U0001f44d")  # thumbs up
@@ -282,13 +282,13 @@ Maintenance Status: {maintenance_status}
         """Suggest a feature for Irene. Format: [%suggest (suggestion)]"""
         desc = f"**{suggestion}**"
         embed = discord.Embed(title="Suggestion", color=0xff00f6)
-        embed.set_author(name="Irene", url=keys.bot_website,
+        embed.set_author(name="Irene", url=self.ex.keys.bot_website,
                          icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
         embed.set_footer(text="Thanks for leaving a suggestion.",
                          icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
         embed.add_field(name=f"{ctx.author.name} ({ctx.author.id})", value=desc)
         try:
-            channel = await self.ex.client.fetch_channel(keys.suggest_channel_id)  # 403 error on testing
+            channel = await self.ex.client.fetch_channel(self.ex.keys.suggest_channel_id)  # 403 error on testing
             msg = await channel.send(embed=embed)
             await ctx.send("> **Your suggestion has been sent.**")
             await msg.add_reaction("\U0001f44d")  # thumbs up
@@ -312,7 +312,7 @@ Maintenance Status: {maintenance_status}
     async def nwordleaderboard(self, ctx, mode="server"):
         """Shows leaderboards for how many times the nword has been said. [Format: %nwl (server/global)]"""
         embed = discord.Embed(title=f"NWord Leaderboard", color=0xffb6c1)
-        embed.set_author(name="Irene", url=keys.bot_website, icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
+        embed.set_author(name="Irene", url=self.ex.keys.bot_website, icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
         embed.set_footer(text=f"Type {await self.ex.get_server_prefix(ctx)}nword (user) to view their individual stats.", icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
 
         guild_id = await self.ex.get_server_id(ctx)
@@ -374,7 +374,7 @@ Maintenance Status: {maintenance_status}
         term = term.replace("_", " ")
         url = "https://mashape-community-urban-dictionary.p.rapidapi.com/define"
         querystring = {"term": f"{term}"}
-        async with self.ex.session.get(url, headers=keys.X_RapidAPI_headers, params=querystring) as r:
+        async with self.ex.session.get(url, headers=self.ex.keys.X_RapidAPI_headers, params=querystring) as r:
             self.ex.cache.urban_per_minute += 1
             if r.status != 200:
                 log.console(f"The connection to the UrbanDictionary API failed. -> {r.status}")
@@ -389,12 +389,12 @@ Maintenance Status: {maintenance_status}
     @commands.command()
     async def invite(self, ctx):
         """Invite Link to add Irene to a server."""
-        await ctx.send(f"> **Invite Link:** {keys.bot_invite_link}")
+        await ctx.send(f"> **Invite Link:** {self.ex.keys.bot_invite_link}")
 
     @commands.command()
     async def support(self, ctx):
         """Invite Link to Irene's Discord Server"""
-        await ctx.send(f"> **Support Server:** {keys.bot_support_server_link}")
+        await ctx.send(f"> **Support Server:** {self.ex.keys.bot_support_server_link}")
 
     @commands.command()
     @commands.is_owner()
@@ -403,7 +403,7 @@ Maintenance Status: {maintenance_status}
         NOTE: This should not be used if a lot of servers are using the bot."""
         desc = f"{new_message}"
         embed = discord.Embed(title=f"Announcement from {ctx.author} ({ctx.author.id})", description=desc, color=0xff00f6)
-        embed.set_author(name="Irene", url=keys.bot_website,
+        embed.set_author(name="Irene", url=self.ex.keys.bot_website,
                          icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
         embed.set_footer(text="Type %support for an invite to Irene's discord server.",
                          icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
@@ -427,7 +427,7 @@ Maintenance Status: {maintenance_status}
         try:
             guild = ctx.guild
             embed = discord.Embed(title=f"{guild.name} ({guild.id})", color=0xffb6c1, url=f"{guild.icon_url}")
-            embed.set_author(name="Irene", url=keys.bot_website,
+            embed.set_author(name="Irene", url=self.ex.keys.bot_website,
                              icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
             embed.set_footer(text="Thanks for using Irene.",
                              icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')

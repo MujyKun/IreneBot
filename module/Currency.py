@@ -1,8 +1,10 @@
+import random
 from discord.ext import commands
 from discord.ext.commands.cooldowns import BucketType
 import discord
 from random import randint
 from IreneUtility.Utility import Utility
+from IreneUtility.util import u_logger as log
 
 
 # noinspection PyBroadException,PyPep8
@@ -18,7 +20,7 @@ class Currency(commands.Cog):
         [Format: %daily]"""
         user = await self.ex.get_user(ctx.author.id)
         daily_amount = await user.get_daily_amount()
-        await user.update_balance(add=daily_amount)
+        await user.update_balance(add=daily_amount)  # will auto register.
         msg_str = await self.ex.get_msg(user, 'currency', 'daily_msg')
         msg_str = await self.ex.replace(msg_str, [["name", ctx.author.display_name], ["daily_amount", daily_amount]])
 
@@ -100,7 +102,6 @@ class Currency(commands.Cog):
         """Shows Top 10 Users server/global wide
 
         [Format: %leaderboard (global/server)][Aliases: leaderboards, lb]"""
-        guild_member_list = []
         sorted_balance = []
 
         # user may be in DMs trying to access server currency list or misspelt the mode.
@@ -131,12 +132,18 @@ class Currency(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command()
-    @commands.cooldown(1, 5, BucketType.user)
+    @commands.cooldown(1, 300, BucketType.user)
     async def beg(self, ctx):
         """Beg a homeless man for money
 
         [Format: %beg]"""
-        pass
+        user = await self.ex.get_user(ctx.author.id)
+        beg_amount = (user.beg_level * 2) or random.randint(1, 25)  # randint > beg_amount until beg level 13
+        await user.update_balance(add=beg_amount)  # will auto register
+        msg_str = await self.ex.get_msg(user, 'currency', 'beg_msg')
+        msg_str = await self.ex.replace(msg_str, [["name", ctx.author.display_name], ["integer", beg_amount],
+                                                  ["currency_name", self.ex.keys.currency_name]])
+        return await ctx.send(msg_str)
 
     @commands.command(aliases=["levelup"])
     @commands.cooldown(1, 61, BucketType.user)
@@ -144,7 +151,62 @@ class Currency(commands.Cog):
         """Upgrade a command to the next level with your money.
 
         [Format: %upgrade rob/daily/beg]"""
-        pass
+        user = await self.ex.get_user(ctx.author.id)
+        server_prefix = await self.ex.get_server_prefix(ctx)
+        possible_options = ["rob", "daily", "beg"]
+
+        # get rid of invalid input.
+        if not command or command.lower() not in possible_options:
+            msg_str = await self.ex.get_msg(user, 'general', 'invalid_input')
+            msg_str = await self.ex.replace(msg_str, [["name", ctx.author.display_name], ["server_prefix", server_prefix],
+                                                      ["command_name", "upgrade"]])
+            return await ctx.send(msg_str)
+
+        # set the current level of the user for the command we are trying to upgrade.
+        elif command.lower() == possible_options[0]:  # rob
+            level = user.rob_level
+        elif command.lower() == possible_options[1]:  # daily
+            level = user.daily_level
+        elif command.lower() == possible_options[2]:  # beg
+            level = user.beg_level
+
+        # Level option has no condition for a new command.
+        else:
+            raise self.ex.exceptions.ShouldNotBeHere("Possible upgrade option has no logic added. "
+                                                     "-> Currency.upgrade() ")
+
+        # check howmuch money the user needs
+        money_needed = await user.get_needed_for_level(level, command.lower())
+
+        # if the user does not have enough money
+        if user.balance < money_needed:
+            msg_str = await self.ex.get_msg(user, 'currency', 'upgrade_not_enough')
+            msg_str = await self.ex.replace(msg_str, [["name", ctx.author.display_name], ["integer", money_needed],
+                                                      ["command_name", command.lower()], ["balance", user.balance]])
+            return await ctx.send(msg_str)
+
+        # confirm the user really wants to upgrade their level.
+        msg_str = await self.ex.get_msg(user, 'currency', 'upgrade_msg')
+        msg_str = await self.ex.replace(msg_str, [["name", ctx.author.display_name], ["integer", money_needed],
+                                                  ["command_name", command.lower()], ["balance", user.balance]])
+        msg = await ctx.send(msg_str)
+        reaction = "\U0001f44d"
+        await msg.add_reaction(reaction)  # thumbs up]
+        if await self.ex.wait_for_reaction(msg, user.id, reaction):
+            # set the user's new level
+            await user.set_level(level + 1, command.lower())
+
+            # let the user know their new level.
+            msg_str = await self.ex.get_msg(user, 'currency', 'upgrade_msg_success')
+            msg_str = await self.ex.replace(msg_str, [["name", ctx.author.display_name], ["integer", level + 1],
+                                                      ["command_name", command.lower()]])
+            return await ctx.send(msg_str)
+        else:
+            # let the user know they failed to upgrade.
+            msg_str = await self.ex.get_msg(user, 'currency', 'upgrade_out_of_time')
+            msg_str = await self.ex.replace(msg_str, [["name", ctx.author.display_name],
+                                                      ["command_name", command.lower()]])
+            return await ctx.send(msg_str)
 
     @commands.command()
     @commands.cooldown(1, 3600, BucketType.user)

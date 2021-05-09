@@ -7,8 +7,7 @@ from IreneUtility.Utility import Utility
 """
 events.py
 
-Manages d.py events 
-"""
+Manages d.py events"""
 
 ex: Utility  # majority if not all methods here will be static since we are not subclassing AutoShardedClient.
 
@@ -176,7 +175,7 @@ class Events(commands.Cog):
 
             if ex.check_if_mod(user_id, mode=1):
                 if str(emoji) == ex.keys.trash_emoji:
-                    msg, link, idol_id, is_guessing_game = await get_msg_and_image()
+                    msg, link, idol_id, _ = await get_msg_and_image()
                     if link:
                         await ex.conn.execute("DELETE FROM groupmembers.imagelinks WHERE link = $1 AND memberid = $2",
                                               link, idol_id)

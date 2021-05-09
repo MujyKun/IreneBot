@@ -27,11 +27,8 @@ class Youtube(commands.Cog):
     @commands.is_owner()
     async def removeurl(self, ctx, link):
         """Remove url from youtube videos [Format: %removeurl (link)]"""
-        try:
-            await self.ex.conn.execute("DELETE FROM youtube.links WHERE link = $1", link)
-            await ctx.send(f"> **<{link}> has been deleted**")
-        except:
-            await ctx.send(f"> **<{link}> is not being tracked.**")
+        await self.ex.conn.execute("DELETE FROM youtube.links WHERE link = $1", link)
+        await ctx.send(f"> **<{link}> has been deleted**")
 
     @commands.command()
     @commands.is_owner()
@@ -64,7 +61,8 @@ class Youtube(commands.Cog):
                 await asyncio.sleep(seconds)
                 self.current_yt_loop_instance.loop_youtube_videos.start()
                 await ctx.send("> **Loop started.**")
-        except:
+        except Exception as e:
+            log.useless(f" {e} -> A youtube loop is already running.")
             await ctx.send("> **A loop is already running.**")
 
 

@@ -121,18 +121,18 @@ class BotOwner(commands.Cog):
         """Approve a query id for an unregistered group or idol."""
         if mode == "group":
             # get the query
-            group = await self.ex.conn.fetchrow("""SELECT groupname, debutdate, disbanddate, description, twitter, youtube, 
+            group = await self.ex.conn.fetchrow("""SELECT groupname, debutdate, disbanddate, description, twitter, youtube,
             melon, instagram, vlive, spotify, fancafe, facebook, tiktok, fandom, company, website, thumbnail, banner,
              gender, tags FROM groupmembers.unregisteredgroups WHERE id = $1""", query_id)
 
             # create a new group
-            await self.ex.conn.execute("""INSERT INTO groupmembers.groups(groupname, debutdate, disbanddate, description, 
+            await self.ex.conn.execute("""INSERT INTO groupmembers.groups(groupname, debutdate, disbanddate, description,
             twitter, youtube, melon, instagram, vlive, spotify, fancafe, facebook, tiktok, fandom, company, website,
              thumbnail, banner, gender, tags) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, 
              $15, $16, $17, $18, $19, $20)""", *group)
 
             # get the new group's ID
-            group_id = self.ex.first_result(await self.ex.conn.fetchrow("""SELECT groupid FROM groupmembers.groups WHERE 
+            group_id = self.ex.first_result(await self.ex.conn.fetchrow("""SELECT groupid FROM groupmembers.groups WHERE
             groupname = $1 ORDER BY groupid DESC""", group.get("groupname")))
 
             # send message to the approver.
@@ -142,7 +142,7 @@ class BotOwner(commands.Cog):
 
         if mode == "idol":
             # get the query
-            idol = await self.ex.conn.fetchrow("""SELECT fullname, stagename, formerfullname, formerstagename, birthdate, 
+            idol = await self.ex.conn.fetchrow("""SELECT fullname, stagename, formerfullname, formerstagename, birthdate,
             birthcountry, birthcity, gender, description, height, twitter, youtube, melon, instagram, vlive, spotify, 
             fancafe, facebook, tiktok, zodiac, thumbnail, banner, bloodtype, tags
             FROM groupmembers.unregisteredmembers WHERE id = $1""", query_id)
@@ -153,13 +153,13 @@ class BotOwner(commands.Cog):
                 group_ids = group_ids.split(',')
 
             # create a new idol
-            await self.ex.conn.execute("""INSERT INTO groupmembers.member(fullname, stagename, formerfullname, formerstagename, birthdate, 
+            await self.ex.conn.execute("""INSERT INTO groupmembers.member(fullname, stagename, formerfullname, formerstagename, birthdate,
             birthcountry, birthcity, gender, description, height, twitter, youtube, melon, instagram, vlive, spotify, 
-            fancafe, facebook, tiktok, zodiac, thumbnail, banner, bloodtype, tags) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, 
+            fancafe, facebook, tiktok, zodiac, thumbnail, banner, bloodtype, tags) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14,
              $15, $16, $17, $18, $19, $20, $21 ,$22, $23, $24)""", *idol)
 
             # get the new idol's ID
-            idol_id = self.ex.first_result(await self.ex.conn.fetchrow("""SELECT id FROM groupmembers.member WHERE fullname = $1 
+            idol_id = self.ex.first_result(await self.ex.conn.fetchrow("""SELECT id FROM groupmembers.member WHERE fullname = $1
             AND stagename = $2 ORDER BY id DESC""", idol.get("fullname"), idol.get("stagename")))
 
             # create the idol to group relationships.
@@ -180,7 +180,7 @@ class BotOwner(commands.Cog):
                         # will be accurate if the full group name is given.
                         group_id = group[0].id
                 try:
-                    await self.ex.conn.execute("""INSERT INTO groupmembers.idoltogroup(idolid, groupid) 
+                    await self.ex.conn.execute("""INSERT INTO groupmembers.idoltogroup(idolid, groupid)
                     VALUES($1, $2)""", idol_id, group_id)
                 except Exception as e:
                     log.console(e)

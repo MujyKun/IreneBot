@@ -4,7 +4,6 @@ from discord.ext.commands.cooldowns import BucketType
 import discord
 from random import randint
 from IreneUtility.Utility import Utility
-from IreneUtility.util import u_logger as log
 
 
 # noinspection PyBroadException,PyPep8

@@ -27,11 +27,13 @@ class Wolfram(commands.Cog):
         except SyntaxError:
             return False
         except Exception as e:
+            log.useless(f"{e} - Failed to evaluate numexpr expression {query}. Wolfram.evaluate_math()")
             return False
 
     @commands.command()
     async def w(self, ctx, *, query):
         """Send a request to Wolfram.
+
         [Format: %w (query)]"""
         async with ctx.typing():
             result = self.evalute_math(query)

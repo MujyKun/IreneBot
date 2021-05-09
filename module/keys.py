@@ -1,4 +1,3 @@
-import asyncpg
 from pypapago import Translator
 from discord.ext import commands
 import discord
@@ -16,8 +15,8 @@ def make_int(var):
     # noinspection PyBroadException,PyPep8
     try:
         return int(var)
-    except:
-        log.useless(f"Failed to turn {var} into an integer. -> module.keys.make_int()")
+    except Exception as e:
+        log.useless(f"{e} -> Failed to turn {var} into an integer. -> module.keys.make_int()")
         return None
 
 

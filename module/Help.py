@@ -97,9 +97,9 @@ class Help(commands.Cog):
             if note:
                 self.paginator.add_line(note, empty=True)
 
-            no_category = '\u200b{0.no_category}'.format(self)
+            no_category_t = f"\u200b{self.no_category}"
 
-            def get_category(command, *, no_category=no_category):
+            def get_category(command, *, no_category=no_category_t):
                 cog = command.cog
                 return cog.qualified_name if cog is not None else no_category
 

@@ -12,7 +12,7 @@ from IreneUtility.Utility import Utility
 class Moderator(commands.Cog):
     def __init__(self, ex):
         self.ex: Utility = ex
-        
+
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
     async def addalias(self, ctx, alias, mem_id: int, mode="idol"):
@@ -218,7 +218,7 @@ class Moderator(commands.Cog):
         """
         if not text_channel:
             return await ctx.send(f"> **{ctx.author.display_name}, Please specify a message to send.**")
-        if type(text_channel) == str:
+        if isinstance(text_channel, str):
             if message:
                 message = f"{text_channel} {message}"
             else:
@@ -234,8 +234,8 @@ class Moderator(commands.Cog):
         [Format: %sayembed #text-channel embed_format]
         """
         embed_creator_url = "https://embedbuilder.nadekobot.me/"
-        if type(text_channel) is str:
-            if type(embed_format) is str:
+        if isinstance(text_channel, str):
+            if isinstance(embed_format, str):
                 embed_format = text_channel + embed_format
             text_channel = ctx.channel
         try:
@@ -343,7 +343,7 @@ class Moderator(commands.Cog):
             number = (amount // 100)
             await ctx.send(
                 f"> **{amount}** messages will be deleted in 5 seconds and will be split in intervals of 100.")
-            for i in range(number):
+            for _ in range(number):
                 if not everyone:
                     await ctx.channel.purge(limit=100, check=clear_x, bulk=True)
                 elif everyone:
@@ -443,7 +443,8 @@ class Moderator(commands.Cog):
         # a simple emoji converter
         try:
             return await commands.PartialEmojiConverter().convert(ctx, emoji)
-        except:
+        except Exception as e:
+            log.useless(f"{e} -> Partial Emoji Converter failed for {emoji}.")
             return str(emoji)
 
     @commands.command(aliases=['yoink'])
@@ -457,9 +458,9 @@ class Moderator(commands.Cog):
         for emoji in list_of_emojis:
             try:
                 url = await self.make_emoji(ctx, emoji)
-                if type(url) == str:
+                if isinstance(url, str):
                     emoji_name = str(org_emoji_name)
-                if type(url) == discord.partial_emoji.PartialEmoji or type(url) == discord.PartialEmoji:
+                if isinstance(url, discord.partial_emoji.PartialEmoji) or isinstance(url, discord.PartialEmoji):
                     if not org_emoji_name or len(list_of_emojis) > 1:
                         emoji_name = f"{url.name}"
                     url = f"{url.url}"

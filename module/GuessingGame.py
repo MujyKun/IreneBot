@@ -132,7 +132,8 @@ class GuessingGame(commands.Cog):
             if group.members:
                 try:
                     value = await self.ex.u_group_members.get_member_names_as_string(group)
-                except:
+                except Exception as e:
+                    log.useless(f"{e} -> {group.id} has an idol that does not exist.")
                     value = f"The group ({group.id}) has an Idol that doesn't exist. Please report it.\n"
                 embed.add_field(name=name, value=value, inline=True)
             else:
@@ -326,7 +327,8 @@ class Game:
         # create_task should not be awaited because this is meant to run in the background to check for reactions.
         try:
             # noinspection PyUnusedLocal
-            task = asyncio.create_task(self.ex.u_group_members.check_idol_post_reactions(
+            # create task to check image reactions.
+            asyncio.create_task(self.ex.u_group_members.check_idol_post_reactions(
                 msg, self.host_ctx.message, self.idol, self.photo_link, guessing_game=True))
         except Exception as e:
             log.console(e)

@@ -29,7 +29,7 @@ class Archive(commands.Cog):
                 return False
         try:
             all_channels = await self.ex.conn.fetch("SELECT id, channelid, guildid, driveid, name FROM archive.channellist")
-            for p_id, channel_id, guild_id, drive_id, name in all_channels:
+            for _, channel_id, guild_id, drive_id, name in all_channels:
                 if message.channel.id != channel_id:
                     return
                 if len(message.attachments):
@@ -41,7 +41,7 @@ class Archive(commands.Cog):
                         if ":large" in url:
                             pos = url.find(":large")
                             url = url[0:pos]
-                        await Archive.download_url(url, drive_id, message.channel.id)
+                        await self.download_url(url, drive_id, message.channel.id)
                     # quickstart.Drive.checker()
                 if len(message.embeds):
                     for embed in message.embeds:
@@ -55,9 +55,9 @@ class Archive(commands.Cog):
                             if ":large" in url:
                                 pos = url.find(":large")
                                 url = url[0:pos]
-                            await Archive.download_url(url, drive_id, message.channel.id)
+                            await self.download_url(url, drive_id, message.channel.id)
                         # quickstart.Drive.checker()
-                await Archive.deletephotos()
+                await self.deletephotos()
         except Exception as e:
             log.useless(f"{e} - Archive.on_message")
 
@@ -234,7 +234,7 @@ class Archive(commands.Cog):
                 log.console(e)
         check = False
         channels = await self.ex.conn.fetch("SELECT channelid, guildid, driveid FROM archive.ChannelList")
-        for channel_id, guild_id, drive_id in channels:
+        for channel_id, _, drive_id in channels:
             if ctx.channel.id == channel_id:
                 check = True
                 await ctx.send(await self.ex.get_msg(user, 'archive', 'history_start'))

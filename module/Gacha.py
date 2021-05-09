@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands, tasks
-from IreneUtility.util import u_logger as log
 import datetime
 from IreneUtility.Utility import Utility
 
@@ -9,7 +8,7 @@ from IreneUtility.Utility import Utility
 class Gacha(commands.Cog):
     def __init__(self, ex):
         self.ex: Utility = ex
-        
+
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
     async def startgacha(self, ctx, text_channel: discord.TextChannel = None):

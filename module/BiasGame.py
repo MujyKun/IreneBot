@@ -121,7 +121,7 @@ class Game:
             self.secondary_bracket_teams.append([idol])
 
         try:
-            reaction, user = await self.ex.client.wait_for('reaction_add', check=check_response, timeout=60)
+            reaction, _ = await self.ex.client.wait_for('reaction_add', check=check_response, timeout=60)
             if reaction.emoji == '⬅':
                 add_winner(first_idol)
             elif reaction.emoji == '➡':
@@ -152,12 +152,14 @@ class Game:
                 return
             try:
                 first_idol_group = (await self.ex.u_group_members.get_group(random.choice(first_idol.groups))).name
-            except:
+            except Exception as e:
                 first_idol_group = first_idol.full_name
+                log.useless(f"{e} -> Using Idol Full Name instead of Group Name for {first_idol_group}")
             try:
                 second_idol_group = (await self.ex.u_group_members.get_group(random.choice(second_idol.groups))).name
-            except:
+            except Exception as e:
                 second_idol_group = second_idol.full_name
+                log.useless(f"{e} -> Using Idol Full Name instead of Group Name for {second_idol_group}")
 
             msg_body = f"""
 **@{self.host_ctx.author.display_name}**

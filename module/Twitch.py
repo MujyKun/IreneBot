@@ -13,7 +13,8 @@ class Twitch(commands.Cog):
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
     async def addtwitch(self, ctx, *, twitch_username):
-        """Adds a Twitch username to keep track of. Maximum 2 twitch channels per server.
+        """
+        Adds a Twitch username to keep track of. Maximum 2 twitch channels per server.
 
         [Format: %addtwitch (twitch username)]
         """
@@ -42,7 +43,8 @@ class Twitch(commands.Cog):
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
     async def removetwitch(self, ctx, *, twitch_username):
-        """Removes a twitch username that is being kept track of.
+        """
+        Removes a twitch username that is being kept track of.
 
         [Format: %removetwitch (twitch username)]
         """
@@ -62,7 +64,8 @@ class Twitch(commands.Cog):
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
     async def settwitchchannel(self, ctx, text_channel: discord.TextChannel = None):
-        """Set the discord channel that the twitch announcements will be posted on.
+        """
+        Set the discord channel that the twitch announcements will be posted on.
 
         [Format: %settwitchchannel #discord-channel]
         """
@@ -81,7 +84,8 @@ class Twitch(commands.Cog):
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
     async def settwitchrole(self, ctx, role: discord.Role = None):
-        """Set the discord role that will be mentioned on twitch announcements.
+        """
+        Set the discord role that will be mentioned on twitch announcements.
 
         If a discord role is set, everyone will not be mentioned.
         Use the command without a role to mention everyone.
@@ -102,7 +106,8 @@ class Twitch(commands.Cog):
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
     async def listtwitch(self, ctx):
-        """List the twitch channels the guild/server follows.
+        """
+        List the twitch channels the guild/server follows.
 
         [Format: %listtwitch]
         """

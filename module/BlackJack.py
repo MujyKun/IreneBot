@@ -12,7 +12,8 @@ class BlackJack(commands.Cog):
 
     @commands.command(aliases=['bj'])
     async def blackjack(self, ctx, amount="0", versus="player"):
-        """Start a game of BlackJack
+        """
+        Start a game of BlackJack
 
         [Format: %blackjack (amount)]
         [Aliases: bj]
@@ -35,11 +36,12 @@ class BlackJack(commands.Cog):
 
     @commands.command(aliases=['jg'])
     async def joingame(self, ctx, game_id=0, amount="0"):
-        """Join a game
+        """
+        Join a game
 
-         [Format: %joingame (gameid) (bid)]
-         [Aliases: jg]
-         """
+        [Format: %joingame (gameid) (bid)]
+        [Aliases: jg]
+        """
         try:
             amount = self.ex.remove_commas(amount)
             user_id = ctx.author.id
@@ -58,7 +60,8 @@ class BlackJack(commands.Cog):
 
     @commands.command(aliases=['eg'])
     async def endgame(self, ctx):
-        """End your current game
+        """
+        End your current game
 
         [Format: %endgame]
         [Aliases: eg]
@@ -75,7 +78,8 @@ class BlackJack(commands.Cog):
 
     @commands.command()
     async def hit(self, ctx):
-        """Pick A Card
+        """
+        Pick A Card
 
         [Format: %hit]
         """
@@ -95,7 +99,8 @@ class BlackJack(commands.Cog):
 
     @commands.command(aliases=['stay'])
     async def stand(self, ctx):
-        """Keep Your Cards/Stand
+        """
+        Keep Your Cards/Stand
 
         [Format: %stand]
         """

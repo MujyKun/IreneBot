@@ -10,7 +10,8 @@ class CustomCommands(commands.Cog):
         self.ex: Utility = ex
 
     async def process_custom_commands(self, message):
-        """Process a custom server command.
+        """
+        Process a custom server command.
 
         This is a listener (on_message) event.
         """
@@ -31,7 +32,8 @@ class CustomCommands(commands.Cog):
     @commands.command(aliases=['addcommand'])
     @commands.has_guild_permissions(manage_messages=True)
     async def createcommand(self, ctx, command_name, *, message):
-        """Create a custom command.
+        """
+        Create a custom command.
 
         [Format: %createcommand (command name) (message)]
         """
@@ -60,7 +62,8 @@ class CustomCommands(commands.Cog):
     @commands.command(aliases=['removecommand'])
     @commands.has_guild_permissions(manage_messages=True)
     async def deletecommand(self, ctx, command_name):
-        """Delete a custom command.
+        """
+        Delete a custom command.
 
         [Format: %deletecommand (command name)]
         """
@@ -77,7 +80,8 @@ class CustomCommands(commands.Cog):
 
     @commands.command()
     async def listcommands(self, ctx):
-        """List all the custom commands for this server.
+        """
+        List all the custom commands for this server.
 
         [Format: %listcommands]
         """

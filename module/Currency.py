@@ -14,7 +14,8 @@ class Currency(commands.Cog):
     @commands.command()
     @commands.cooldown(1, 86400, BucketType.user)
     async def daily(self, ctx):
-        """Gives a certain amount of money every 24 hours
+        """
+        Gives a certain amount of money every 24 hours
 
         [Format: %daily]
         """
@@ -28,7 +29,8 @@ class Currency(commands.Cog):
 
     @commands.command(aliases=['b', 'bal', '$'])
     async def balance(self, ctx, *, member: discord.Member = None):
-        """View your balance
+        """
+        View your balance
 
         [Format: %balance (@user)]
         [Aliases: b,bal,$]
@@ -48,7 +50,8 @@ class Currency(commands.Cog):
 
     @commands.command()
     async def bet(self, ctx, *, bet_amount: str):
-        """Bet your money
+        """
+        Bet your money
 
         [Format: %bet (amount)]
         """
@@ -102,7 +105,8 @@ class Currency(commands.Cog):
 
     @commands.command(aliases=['leaderboards', 'lb'])
     async def leaderboard(self, ctx, mode="server"):
-        """Shows Top 10 Users server/global wide
+        """
+        Shows Top 10 Users server/global wide
 
         [Format: %leaderboard (global/server)]
         [Aliases: leaderboards, lb]
@@ -139,7 +143,8 @@ class Currency(commands.Cog):
     @commands.command()
     @commands.cooldown(1, 300, BucketType.user)
     async def beg(self, ctx):
-        """Beg a homeless man for money
+        """
+        Beg a homeless man for money
 
         [Format: %beg]
         """
@@ -154,7 +159,8 @@ class Currency(commands.Cog):
     @commands.command(aliases=["levelup"])
     @commands.cooldown(1, 61, BucketType.user)
     async def upgrade(self, ctx, command=None):
-        """Upgrade a command to the next level with your money.
+        """
+        Upgrade a command to the next level with your money.
 
         [Format: %upgrade rob/daily/beg]
         """
@@ -218,7 +224,8 @@ class Currency(commands.Cog):
     @commands.command()
     @commands.cooldown(1, 3600, BucketType.user)
     async def rob(self, ctx, *, person_to_rob: discord.Member):
-        """Rob a user
+        """
+        Rob a user
 
         [Format: %rob @user]
         """
@@ -226,7 +233,8 @@ class Currency(commands.Cog):
 
     @commands.command()
     async def give(self, ctx, person_to_give: discord.Member, amount_to_give: int):
-        """Give a user money
+        """
+        Give a user money
 
         [Format: %give (@user) (amount)]
         """
@@ -234,7 +242,8 @@ class Currency(commands.Cog):
 
     @commands.command(aliases=['rockpaperscissors'])
     async def rps(self, ctx, rps_choice='', amount="0"):
-        """Play Rock Paper Scissors for Money
+        """
+        Play Rock Paper Scissors for Money
 
         [Format: %rps (r/p/s)(amount)]
         [Aliases: rockpaperscissors]

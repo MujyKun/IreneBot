@@ -21,7 +21,8 @@ class Interactions(commands.Cog):
     @check_interaction_enabled()
     @commands.cooldown(1, 60, BucketType.user)
     async def stepon(self, ctx, user: discord.Member = discord.Member):
-        """Step on someone
+        """
+        Step on someone
 
         [Format: %stepon @user]
         """
@@ -31,7 +32,8 @@ class Interactions(commands.Cog):
     @check_interaction_enabled()
     @commands.cooldown(1, 60, BucketType.user)
     async def stab(self, ctx, user: discord.Member = discord.Member):
-        """Stab someone
+        """
+        Stab someone
 
         [Format: %stab @user]
         """
@@ -41,7 +43,8 @@ class Interactions(commands.Cog):
     @check_interaction_enabled()
     @commands.cooldown(1, 60, BucketType.user)
     async def choke(self, ctx, user: discord.Member = discord.Member):
-        """Choke someone
+        """
+        Choke someone
 
         [Format: %choke @user]
         """
@@ -51,7 +54,8 @@ class Interactions(commands.Cog):
     @check_interaction_enabled()
     @commands.cooldown(1, 60, BucketType.user)
     async def pullhair(self, ctx, user: discord.Member = discord.Member):
-        """Pull the hair of someone
+        """
+        Pull the hair of someone
 
         [Format: %pullhair @user]
         """
@@ -61,7 +65,8 @@ class Interactions(commands.Cog):
     @check_interaction_enabled()
     @commands.cooldown(1, 60, BucketType.user)
     async def cuddle(self, ctx, user: discord.Member = discord.Member):
-        """Cuddle someone
+        """
+        Cuddle someone
 
         [Format: %cuddle @user]
         """
@@ -71,7 +76,8 @@ class Interactions(commands.Cog):
     @check_interaction_enabled()
     @commands.cooldown(1, 60, BucketType.user)
     async def pat(self, ctx, user: discord.Member = discord.Member):
-        """Pat someone
+        """
+        Pat someone
 
         [Format: %pat @user]
         """
@@ -81,7 +87,8 @@ class Interactions(commands.Cog):
     @check_interaction_enabled()
     @commands.cooldown(1, 60, BucketType.user)
     async def punch(self, ctx, user: discord.Member = discord.Member):
-        """Punch someone
+        """
+        Punch someone
 
         [Format: %punch @user]
         """
@@ -91,7 +98,8 @@ class Interactions(commands.Cog):
     @check_interaction_enabled()
     @commands.cooldown(1, 60, BucketType.user)
     async def spit(self, ctx, user: discord.Member = discord.Member):
-        """Spit on someone
+        """
+        Spit on someone
 
         [Format: %spit @user]
         """
@@ -101,7 +109,8 @@ class Interactions(commands.Cog):
     @check_interaction_enabled()
     @commands.cooldown(1, 60, BucketType.user)
     async def lick(self, ctx, user: discord.Member = discord.Member):
-        """Lick someone
+        """
+        Lick someone
 
         [Format: %lick @user]
         """
@@ -111,7 +120,8 @@ class Interactions(commands.Cog):
     @check_interaction_enabled()
     @commands.cooldown(1, 60, BucketType.user)
     async def hug(self, ctx, user: discord.Member = discord.Member):
-        """Hug someone
+        """
+        Hug someone
 
         [Format: %hug @user]
         """
@@ -121,7 +131,8 @@ class Interactions(commands.Cog):
     @check_interaction_enabled()
     @commands.cooldown(1, 60, BucketType.user)
     async def kiss(self, ctx, user: discord.Member = discord.Member):
-        """Kiss someone
+        """
+        Kiss someone
 
         [Format: %kiss @user]
         """
@@ -131,7 +142,8 @@ class Interactions(commands.Cog):
     @check_interaction_enabled()
     @commands.cooldown(1, 60, BucketType.user)
     async def slap(self, ctx, user: discord.Member = discord.Member):
-        """Slap someone
+        """
+        Slap someone
 
         [Format: %slap @user]
         """

@@ -32,7 +32,8 @@ class Wolfram(commands.Cog):
 
     @commands.command()
     async def w(self, ctx, *, query):
-        """Send a request to Wolfram.
+        """
+        Send a request to Wolfram.
 
         [Format: %w (query)]
         """

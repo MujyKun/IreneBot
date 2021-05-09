@@ -99,8 +99,11 @@ class LastFM(commands.Cog):
 
     @commands.command()
     async def fm(self, ctx, user: typing.Union[discord.User, str] = None):
-        """Get information about a Last FM account by a discord user or a Last FM username.
-        [Format: %fm @user]."""
+        """
+        Get information about a Last FM account by a discord user or a Last FM username.
+
+        [Format: %fm @user].
+        """
         try:
             user = await self.set_user(ctx, user)
             if not user:
@@ -133,8 +136,11 @@ class LastFM(commands.Cog):
 
     @commands.command()
     async def setfm(self, ctx, username):
-        """Attach a Last FM username to your Discord Account.
-        [Format: %setfm username]."""
+        """
+        Attach a Last FM username to your Discord Account.
+
+        [Format: %setfm username].
+        """
         try:
             response = await self.ex.u_last_fm.set_fm_username(ctx.author.id, username)  # can be an Exception or True
             if response:
@@ -179,7 +185,8 @@ class LastFM(commands.Cog):
 
     @commands.command(aliases=['ta'])
     async def topartists(self, ctx, user: typing.Union[discord.User, str] = None, time_period: typing.Union[discord.User, str] = None):
-        """See the top artists of a Last FM Account by a discord user or a Last FM username
+        """
+        See the top artists of a Last FM Account by a discord user or a Last FM username
 
         [Format: %topartists (username) (time period)]
         Time period options are ``overall | week | month | 3month | 6month | year``. Time period defaults to overall.
@@ -204,7 +211,8 @@ class LastFM(commands.Cog):
 
     @commands.command(aliases=['tt'])
     async def toptracks(self, ctx, user: typing.Union[discord.User, str] = None, time_period: typing.Union[discord.User, str] = None):
-        """See the top tracks of a Last FM Account by a discord user or a Last FM username
+        """
+        See the top tracks of a Last FM Account by a discord user or a Last FM username
 
         [Format: %toptracks (username) (time period)]
         Time period options are ``overall | week | month | 3month | 6month | year``.
@@ -231,7 +239,8 @@ class LastFM(commands.Cog):
 
     @commands.command(aliases=["tal"])
     async def topalbums(self, ctx, user: typing.Union[discord.User, str] = None, time_period: typing.Union[discord.User, str] = None):
-        """See the top albums of a Last FM Account by a discord user or a Last FM username
+        """
+        See the top albums of a Last FM Account by a discord user or a Last FM username
 
         [Format: %topalbums (username) (time period)]
         Time period options are ``overall | week | month | 3month | 6month | year``.

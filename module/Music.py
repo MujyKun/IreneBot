@@ -154,7 +154,8 @@ class Music(commands.Cog):
 
     @commands.command()
     async def lyrics(self, ctx, *, song_query):
-        """Get the lyrics of a song (From https://api.ksoft.si)
+        """
+        Get the lyrics of a song (From https://api.ksoft.si)
 
         [Format: %lyrics (song)]
         """
@@ -204,7 +205,8 @@ class Music(commands.Cog):
     # noinspection PyBroadException
     @commands.command(aliases=['list', 'q'])
     async def queue(self, ctx, page_number=1):
-        """Shows Current Queue
+        """
+        Shows Current Queue
 
         [Format: %queue]
         """
@@ -275,7 +277,8 @@ class Music(commands.Cog):
 
     @commands.command()
     async def join(self, ctx):
-        """Joins a voice channel
+        """
+        Joins a voice channel
 
         [Format: %join]
         """
@@ -292,7 +295,8 @@ class Music(commands.Cog):
 
     @commands.command()
     async def pause(self, ctx):
-        """Pauses currently playing song
+        """
+        Pauses currently playing song
 
         [Format: %pause]
         """
@@ -305,7 +309,8 @@ class Music(commands.Cog):
 
     @commands.command(aliases=['unpause'])
     async def resume(self, ctx):
-        """Resumes a paused song
+        """
+        Resumes a paused song
 
         [Format: %resume]
         """
@@ -323,10 +328,11 @@ class Music(commands.Cog):
 
     @commands.command(aliases=['skipto'])
     async def move(self, ctx, song_number: int):
-        """Makes a song the next song to play without skipping the current song.
+        """
+        Makes a song the next song to play without skipping the current song.
 
-         [Format: %move (song number)]
-         """
+        [Format: %move (song number)]
+        """
         try:
             if not self.check_user_in_vc(ctx):
                 return await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
@@ -347,7 +353,8 @@ class Music(commands.Cog):
     # noinspection PyBroadException
     @commands.command()
     async def remove(self, ctx, song_number: int):
-        """Remove a song from the queue.
+        """
+        Remove a song from the queue.
 
         [Format: %remove (song number)]
         """
@@ -366,7 +373,8 @@ class Music(commands.Cog):
 
     @commands.command()
     async def skip(self, ctx):
-        """Skips the current song.
+        """
+        Skips the current song.
 
         [Format: %skip]
         """
@@ -400,7 +408,8 @@ class Music(commands.Cog):
 
     @commands.command(aliases=['p'])
     async def play(self, ctx, *, url=None):
-        """Plays audio to a voice channel.
+        """
+        Plays audio to a voice channel.
 
         [Format: %play (title/url)]
         """
@@ -487,7 +496,8 @@ class Music(commands.Cog):
 
     @commands.command()
     async def volume(self, ctx, volume: int = 10):
-        """Changes the player's volume - Songs default to 10.
+        """
+        Changes the player's volume - Songs default to 10.
 
         [Format: %volume (1-100)]
         """
@@ -508,7 +518,8 @@ class Music(commands.Cog):
 
     @commands.command(aliases=["leave"])
     async def stop(self, ctx):
-        """Disconnects from voice channel and resets queue.
+        """
+        Disconnects from voice channel and resets queue.
 
         [Format: %stop]
         """

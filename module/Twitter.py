@@ -9,7 +9,8 @@ class Twitter(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def tweet(self, ctx, *, tweet):
-        """Tweets a status update on Twitter
+        """
+        Tweets a status update on Twitter
 
         [Format: %tweet (status)]
         """
@@ -21,7 +22,8 @@ class Twitter(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def deletetweet(self, ctx, *, tweet_id):
-        """Delete a Tweet by it's ID
+        """
+        Delete a Tweet by it's ID
 
         [Format: %deletetweet (id)]
         """
@@ -33,7 +35,8 @@ class Twitter(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def recenttweets(self, ctx, *, amount_of_tweets=20):
-        """Show Most Recents Tweets
+        """
+        Show Most Recents Tweets
 
         [Format: %recenttweets (amount)]
         """

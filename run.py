@@ -10,7 +10,9 @@ ex: Utility = Utility(keys=module.keys.keys_obj, d_py_client=module.keys.keys_ob
 
 
 class Irene:
-    """Startup Client for Irene.
+    """
+    Startup Client for Irene.
+
     We are not subclassing an AutoShardedClient, but will rather define it directly in keys.
     """
     def __init__(self):

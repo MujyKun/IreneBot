@@ -64,7 +64,8 @@ class Archive(commands.Cog):
     @commands.has_guild_permissions(manage_messages=True)
     @commands.command()
     async def addchannel(self, ctx, drive_folder_id, name="NULL", owner_present=0):
-        """REQUIRES BOT OWNER PRESENCE -- Make the current channel start archiving images to google drive
+        """
+        REQUIRES BOT OWNER PRESENCE -- Make the current channel start archiving images to google drive
 
         [Format: %addchannel <drive folder id> <optional - name>]
         """
@@ -111,7 +112,8 @@ class Archive(commands.Cog):
     @commands.has_guild_permissions(manage_messages=True)
     @commands.command()
     async def listchannels(self, ctx):
-        """List the channels in your server that are being archived.
+        """
+        List the channels in your server that are being archived.
 
         [Format: %listchannels]
         """
@@ -141,7 +143,8 @@ class Archive(commands.Cog):
     @commands.has_guild_permissions(manage_messages=True)
     @commands.command()
     async def deletechannel(self, ctx):
-        """Stop the current channel from being archived
+        """
+        Stop the current channel from being archived
 
         [Format: %deletechannel]
         """

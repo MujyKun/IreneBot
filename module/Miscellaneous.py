@@ -62,7 +62,8 @@ Message Author: {message.author}
 
     @commands.command()
     async def vote(self, ctx):
-        """Link to Voting for Irene on Top.gg
+        """
+        Link to Voting for Irene on Top.gg
 
         [Format: %vote]
         """
@@ -70,7 +71,8 @@ Message Author: {message.author}
 
     @commands.command()
     async def choose(self, ctx, *, options):
-        """Choose between a selection of options. Underscores are spaces between words. Spaces separate choices.
+        """
+        Choose between a selection of options. Underscores are spaces between words. Spaces separate choices.
 
         [Format: %choose (option_1 option_2 option_3)]
         """
@@ -80,7 +82,8 @@ Message Author: {message.author}
 
     @commands.command()
     async def displayemoji(self, ctx, emoji: discord.PartialEmoji):
-        """Display an emoji.
+        """
+        Display an emoji.
 
         [Format: %displayemoji :emoji:]
         """
@@ -88,7 +91,8 @@ Message Author: {message.author}
 
     @commands.command()
     async def addnoti(self, ctx, *, phrase):
-        """Receive a DM whenever a phrase or word is said in the current server.
+        """
+        Receive a DM whenever a phrase or word is said in the current server.
 
         [Format: %addnoti (phrase/word)]
         """
@@ -111,7 +115,8 @@ Message Author: {message.author}
 
     @commands.command(aliases=["deletenoti"])
     async def removenoti(self, ctx, *, phrase):
-        """Remove a phrase/word when it said in the current server.
+        """
+        Remove a phrase/word when it said in the current server.
 
         [Format: %removenoti (phrase/word)]
         """
@@ -135,7 +140,8 @@ Message Author: {message.author}
 
     @commands.command()
     async def listnoti(self, ctx):
-        """list all your notification phrases that exist in the current server.
+        """
+        list all your notification phrases that exist in the current server.
 
         [Format: %listnoti]
         """
@@ -164,7 +170,8 @@ Message Author: {message.author}
 
     @commands.command(aliases=['patron'])
     async def patreon(self, ctx):
-        """Displays Patreon Information.
+        """
+        Displays Patreon Information.
 
         [Format: %patreon]
         """
@@ -258,7 +265,8 @@ Maintenance Status: {maintenance_status}
 
     @commands.command(aliases=['trans', 't'])
     async def translate(self, ctx, from_language, to_language, *, message):
-        """Translate between languages using Papago
+        """
+        Translate between languages using Papago
 
         [Format: %translate English Korean this is a test phrase.]
         """
@@ -280,7 +288,8 @@ Maintenance Status: {maintenance_status}
 
     @commands.command()
     async def report(self, ctx, *, issue):
-        """Report an issue with Irene.
+        """
+        Report an issue with Irene.
 
         Format: [%report (issue)]
         """
@@ -304,7 +313,8 @@ Maintenance Status: {maintenance_status}
 
     @commands.command()
     async def suggest(self, ctx, *, suggestion):
-        """Suggest a feature for Irene.
+        """
+        Suggest a feature for Irene.
 
         Format: [%suggest (suggestion)]
         """
@@ -327,7 +337,8 @@ Maintenance Status: {maintenance_status}
 
     @commands.command()
     async def nword(self, ctx, user: discord.Member = None):
-        """Checks how many times a user has said the N Word
+        """
+        Checks how many times a user has said the N Word
 
         [Format: %nword @user]
         """
@@ -341,7 +352,8 @@ Maintenance Status: {maintenance_status}
 
     @commands.command(aliases=["nwl"])
     async def nwordleaderboard(self, ctx, mode="server"):
-        """Shows leaderboards for how many times the nword has been said.
+        """
+        Shows leaderboards for how many times the nword has been said.
 
         [Format: %nwl (server/global)]
         """
@@ -391,7 +403,8 @@ Maintenance Status: {maintenance_status}
 
     @commands.command(aliases=['coinflip', 'f'])
     async def flip(self, ctx):
-        """Flips a coin
+        """
+        Flips a coin
 
         [Format: %flip]
         [Aliases: coinflip, f]
@@ -400,7 +413,8 @@ Maintenance Status: {maintenance_status}
 
     @commands.command(aliases=['define', 'u'])
     async def urban(self, ctx, term=None, number=1, override=0):
-        """Search a term through UrbanDictionary. Underscores are spaces.
+        """
+        Search a term through UrbanDictionary. Underscores are spaces.
 
         [Format: %urban (term) (definition number)]
         [Aliases: define,u]
@@ -440,9 +454,11 @@ Maintenance Status: {maintenance_status}
     @commands.command()
     @commands.is_owner()
     async def announce(self, ctx, *, new_message):
-        """Sends a bot message to system text channels.
+        """
+        Sends a bot message to system text channels.
 
-        NOTE: This should not be used if a lot of servers are using the bot."""
+        NOTE: This should not be used if a lot of servers are using the bot.
+        """
         desc = f"{new_message}"
         embed = discord.Embed(title=f"Announcement from {ctx.author} ({ctx.author.id})", description=desc, color=0xff00f6)
         embed.set_author(name="Irene", url=self.ex.keys.bot_website,
@@ -460,7 +476,8 @@ Maintenance Status: {maintenance_status}
 
     @commands.command()
     async def servercount(self, ctx):
-        """Shows how many servers the bot has
+        """
+        Shows how many servers the bot has
 
         [Format: %servercount]
         """
@@ -468,7 +485,8 @@ Maintenance Status: {maintenance_status}
 
     @commands.command()
     async def serverinfo(self, ctx):
-        """View information about the current guild.
+        """
+        View information about the current guild.
 
         [Format: %serverinfo]
         """
@@ -497,7 +515,8 @@ Maintenance Status: {maintenance_status}
 
     @commands.command(name="8ball", aliases=['8'])
     async def _8ball(self, ctx, *, question=None):
-        """Asks the 8ball a question.
+        """
+        Asks the 8ball a question.
 
         [Format: %8ball Question]
         """
@@ -508,7 +527,8 @@ Maintenance Status: {maintenance_status}
 
     @commands.command(aliases=['pong'])
     async def ping(self, ctx):
-        """Shows Latency to Discord
+        """
+        Shows Latency to Discord
 
         [Format: %ping]
         """

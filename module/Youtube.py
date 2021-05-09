@@ -14,7 +14,8 @@ class Youtube(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def addurl(self, ctx, link):
-        """Add url to youtube videos
+        """
+        Add url to youtube videos
 
         [Format: %addurl (link)]
         """
@@ -29,7 +30,8 @@ class Youtube(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def removeurl(self, ctx, link):
-        """Remove url from youtube videos
+        """
+        Remove url from youtube videos
 
         [Format: %removeurl (link)]
         """
@@ -46,7 +48,8 @@ class Youtube(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def stoploop(self, ctx):
-        """Stops scraping youtube videos (Including main loop from start up)
+        """
+        Stops scraping youtube videos (Including main loop from start up)
 
         [Format: %stoploop]
         """
@@ -61,7 +64,8 @@ class Youtube(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def startloop(self, ctx, seconds=0):
-        """Starts scraping youtube videos with a new instance
+        """
+        Starts scraping youtube videos with a new instance
 
         [Format: %startloop (seconds to start)]
         """

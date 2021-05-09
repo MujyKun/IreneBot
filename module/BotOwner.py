@@ -45,7 +45,8 @@ class BotOwner(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def addcards(self, ctx):
-        """Fill The CardValues Table with Cards
+        """
+        Fill The CardValues Table with Cards
 
         [Format: %addcards]
         """
@@ -68,7 +69,8 @@ class BotOwner(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def addpatreon(self, ctx, *, users):
-        """Adds a patreon.
+        """
+        Adds a patreon.
 
         [Format: %addpatreon (userid,userid,userid)]
         """
@@ -82,7 +84,8 @@ class BotOwner(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def removepatreon(self, ctx, *, users):
-        """Removes a patreon.
+        """
+        Removes a patreon.
 
         [Format: %removepatreon (userid,userid,userid)]
         """
@@ -96,7 +99,8 @@ class BotOwner(commands.Cog):
     @commands.is_owner()
     @commands.command()
     async def clearnword(self, ctx, user: discord.Member):
-        """Clear A User's Nword Counter
+        """
+        Clear A User's Nword Counter
 
         [Format: %clearnword @user]
         """

@@ -12,7 +12,8 @@ class SelfAssignRoles(commands.Cog):
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
     async def setrolechannel(self, ctx, text_channel: discord.TextChannel = None):
-        """Set the channel for self-assignable roles to be used in. -> Will automatically delete future messages.
+        """
+        Set the channel for self-assignable roles to be used in. -> Will automatically delete future messages.
 
         [Format: %setrolechannel [text channel]
         Use sendrolemessage before using this command.
@@ -34,7 +35,8 @@ class SelfAssignRoles(commands.Cog):
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
     async def removerole(self, ctx, *, role_name):
-        """Remove a self-assignable role based on the role name given.
+        """
+        Remove a self-assignable role based on the role name given.
 
         [Format: %removerole <role_name>]
         """
@@ -48,7 +50,8 @@ class SelfAssignRoles(commands.Cog):
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
     async def listroles(self, ctx):
-        """List all the self-assignable roles in a server.
+        """
+        List all the self-assignable roles in a server.
 
         [Format: %listroles]
         """
@@ -83,7 +86,8 @@ class SelfAssignRoles(commands.Cog):
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
     async def addrole(self, ctx, role: discord.Role, *, role_name):
-        """Add a role to be self-assignable.
+        """
+        Add a role to be self-assignable.
 
         [Format: %addrole <role> <role name>]
         """

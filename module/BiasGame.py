@@ -22,7 +22,8 @@ class BiasGame(commands.Cog):
     @check_user_in_support_server()
     @commands.command(aliases=['bg'])
     async def biasgame(self, ctx, gender="all", bracket_size=8):
-        """Start a bias game in the current channel. The host of the game can use `stopbg` to stop playing.
+        """
+        Start a bias game in the current channel. The host of the game can use `stopbg` to stop playing.
 
         [Format: %biasgame (Male/Female/All) (bracket size (4,8,16,32))]
         """
@@ -48,7 +49,8 @@ class BiasGame(commands.Cog):
 
     @commands.command()
     async def stopbg(self, ctx):
-        """Force-end a bias game if you are a moderator or host of the game.
+        """
+        Force-end a bias game if you are a moderator or host of the game.
 
         [Format: %stopbg]
         This command is meant for any issues or if a game happens to be stuck.
@@ -59,7 +61,8 @@ class BiasGame(commands.Cog):
 
     @commands.command()
     async def listbg(self, ctx, user: discord.Member = None):
-        """List a user's bias game leaderboards.
+        """
+        List a user's bias game leaderboards.
 
         [Format: %listbg]
         """

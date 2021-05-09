@@ -229,7 +229,8 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
 
     @commands.command()
     async def card(self, ctx, *, name):
-        """Displays an Idol/Group's profile card.
+        """
+        Displays an Idol/Group's profile card.
 
         [Format: %card (idol/group name/id)]
         """
@@ -268,7 +269,8 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
     @commands.has_guild_permissions(manage_messages=True)
     @commands.command()
     async def stopimages(self, ctx, text_channel: discord.TextChannel = None):
-        """Stops Irene from posting/recognizing idol photos in a specific text channel. To undo, type it again.
+        """
+        Stops Irene from posting/recognizing idol photos in a specific text channel. To undo, type it again.
 
         [Format: %stopimages #text-channel]
         """
@@ -296,7 +298,8 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
     @commands.has_guild_permissions(manage_messages=True)
     @commands.command()
     async def sendimages(self, ctx, text_channel: discord.TextChannel = None):
-        """All idol photo commands from the server will post idol photos in a specific text channel. To undo, type it again.
+        """
+        All idol photo commands from the server will post idol photos in a specific text channel. To undo, type it again.
 
         [Format: %sendimages #text-channel]
         """
@@ -337,7 +340,8 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
 
     @commands.command(aliases=['%'])
     async def randomidol(self, ctx):
-        """Sends a photo of a random idol.
+        """
+        Sends a photo of a random idol.
 
         [Format: %%]
         """
@@ -358,7 +362,8 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
 
     @commands.command()
     async def countgroup(self, ctx, *, group_name):
-        """Shows how many photos of a certain group there are.
+        """
+        Shows how many photos of a certain group there are.
 
         [Format: %countmember <name>]
         """
@@ -374,7 +379,8 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
 
     @commands.command()
     async def countmember(self, ctx, *, member_name):
-        """Shows how many photos of a certain member there are.
+        """
+        Shows how many photos of a certain member there are.
 
         [Format: %countmember <name/all>)]
         """
@@ -393,7 +399,8 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
 
     @commands.command(aliases=['fullname'])
     async def fullnames(self, ctx, *, page_number_or_group: typing.Union[int, str] = 1):
-        """Lists the full names of idols the bot has photos of
+        """
+        Lists the full names of idols the bot has photos of
 
         [Format: %fullnames (page number/group name)]
         """
@@ -401,7 +408,8 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
 
     @commands.command(aliases=['member'])
     async def members(self, ctx, *, page_number_or_group: typing.Union[int, str] = 1):
-        """Lists the names of idols the bot has photos of
+        """
+        Lists the names of idols the bot has photos of
 
         [Format: %members (page number/group name)]
         """
@@ -409,7 +417,8 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
 
     @commands.command()
     async def groups(self, ctx):
-        """Lists the groups of idols the bot has photos of
+        """
+        Lists the groups of idols the bot has photos of
 
         [Format: %groups]
         """
@@ -438,7 +447,8 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
 
     @commands.command()
     async def aliases(self, ctx, mode="member", page_number=1):
-        """Lists the aliases of idols or groups that have one. Underscores are spaces and commas are to split idol or group names
+        """
+        Lists the aliases of idols or groups that have one. Underscores are spaces and commas are to split idol or group names
 
         [Format: %aliases (names of idols/groups) (page number)]
         """
@@ -469,7 +479,8 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
 
     @commands.command()
     async def count(self, ctx, *, name=None):
-        """Shows howmany times an idol has been called.
+        """
+        Shows howmany times an idol has been called.
 
          %count (idol's name/all)]
          """
@@ -510,7 +521,8 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
 
     @commands.command(aliases=["highestcount", "cb", "clb"])
     async def countleaderboard(self, ctx):
-        """Shows leaderboards for how many times an idol has been called.
+        """
+        Shows leaderboards for how many times an idol has been called.
 
         [Format: %clb]
         """

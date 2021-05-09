@@ -17,7 +17,8 @@ class Reminder(commands.Cog):
 
     @commands.command(aliases=["listreminds", "reminders", "reminds"])
     async def listreminders(self, ctx):
-        """Lists out all of your reminders.
+        """
+        Lists out all of your reminders.
 
         [Format: %listreminders]
         """
@@ -52,7 +53,8 @@ class Reminder(commands.Cog):
 
     @commands.command(aliases=["removeremind"])
     async def removereminder(self, ctx, reminder_index: int):
-        """Remove one of your reminders.
+        """
+        Remove one of your reminders.
 
         [Format: %removereminder (reminder index)]
         """
@@ -80,7 +82,8 @@ class Reminder(commands.Cog):
 
     @commands.command(aliases=["remind"])
     async def remindme(self, ctx, *, user_input):
-        """Create a reminder to do a task at a certain time.
+        """
+        Create a reminder to do a task at a certain time.
 
         [Format: %remindme to ______ at 9PM
         or
@@ -130,7 +133,8 @@ class Reminder(commands.Cog):
 
     @commands.command(aliases=['gettz', 'time'])
     async def gettimezone(self, ctx, user_input: typing.Union[discord.Member, str] = None):
-        """Get your current set timezone.
+        """
+        Get your current set timezone.
 
         [Format: %gettimezone]
         """
@@ -173,7 +177,8 @@ class Reminder(commands.Cog):
 
     @commands.command(aliases=['settz'])
     async def settimezone(self, ctx, timezone_name=None, country_code=None):
-        """Set your local timezone with a timezone abbreviation and country code.
+        """
+        Set your local timezone with a timezone abbreviation and country code.
 
         [Format: %settimezone (timezone name) (country code)]
         """

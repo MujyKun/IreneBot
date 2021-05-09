@@ -34,7 +34,8 @@ class Logging(commands.Cog):
     @commands.has_guild_permissions(manage_messages=True)
     @commands.command()
     async def logadd(self, ctx, text_channel: discord.TextChannel = None):
-        """Start logging a text channel.
+        """
+        Start logging a text channel.
 
         [Format:  %logadd #text-channel]
         """
@@ -58,7 +59,8 @@ class Logging(commands.Cog):
     @commands.has_guild_permissions(manage_messages=True)
     @commands.command()
     async def logremove(self, ctx, text_channel: discord.TextChannel = None):
-        """Stop logging a text channel.
+        """
+        Stop logging a text channel.
 
         [Format: %logremove #text-channel]
         """

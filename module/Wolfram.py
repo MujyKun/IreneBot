@@ -3,6 +3,7 @@ import xmltodict
 import urllib.parse
 from IreneUtility.util import u_logger as log
 from IreneUtility.Utility import Utility
+import numexpr
 
 
 # noinspection PyBroadException,PyPep8
@@ -18,13 +19,14 @@ class Wolfram(commands.Cog):
         try:
             # do not allow user input to use any python functions.
             query = query.replace("^", '**')
-            result = eval(query, {'__builtins__': None})
+            # switched to third party library for simpler evaluations.
+            result = numexpr.evaluate(query).item()
             return float(result)
         except ZeroDivisionError:
             return self.division_by_zero
         except SyntaxError:
             return False
-        except:
+        except Exception as e:
             return False
 
     @commands.command()

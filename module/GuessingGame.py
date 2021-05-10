@@ -1,3 +1,4 @@
+import IreneUtility.models
 from discord.ext import commands
 from IreneUtility.util import u_logger as log
 import asyncio
@@ -193,8 +194,8 @@ class GuessingGame(commands.Cog):
 
 
 # noinspection PyBroadException,PyPep8
-class Game:
-    def __init__(self, utility_obj, ctx, max_rounds=20, timeout=20, gender="all", difficulty="medium"):
+class Game(IreneUtility.models.Game):
+    def __init__(self, *args, max_rounds=20, timeout=20, gender="all", difficulty="medium"):
         """
 
         :param utility_obj: Utility object.
@@ -204,15 +205,12 @@ class Game:
         :param gender: Male/Female/All Gender of the idols in the photos.
         :param difficulty: Easy/Medium/Hard difficulty of the game.
         """
-        self.ex = utility_obj
+        super().__init__(*args)
         self.photo_link = None
-        self.host_ctx = ctx
-        self.host = ctx.author.id
         self.host_user = None  # Utility user object
         # user_id : score
         self.players = {}
         self.rounds = 0
-        self.channel = ctx.channel
         self.idol = None
         self.group_names = None
         self.correct_answers = []
@@ -259,7 +257,7 @@ class Game:
                 return False
             if message.content.lower() in self.correct_answers:
                 return True
-            if message.author.id == self.host:
+            if message.author.id == self.host_id:
                 return message.content.lower() == 'skip' or message.content.lower() in stop_phrases
 
         try:
@@ -313,7 +311,7 @@ class Game:
                 # Skip this idol if it is taking too long
                 async with async_timeout.timeout(self.post_attempt_timeout) as posting:
                     self.idol_post_msg, self.photo_link = await self.ex.u_group_members.idol_post(
-                        self.channel, self.idol, user_id=self.host, guessing_game=True, scores=self.players)
+                        self.channel, self.idol, user_id=self.host_id, guessing_game=True, scores=self.players)
                     log.console(f'{", ".join(self.correct_answers)} - {self.channel.id}')
 
                 if posting.expired:
@@ -338,9 +336,8 @@ class Game:
     async def end_game(self):
         """Ends a guessing game."""
         if self.results_posted:
-            return
+            return True
 
-        await self.channel.send("The current game has now ended.")
         self.force_ended = True
         self.rounds = self.max_rounds
         if not self.host_user.gg_filter:
@@ -348,6 +345,7 @@ class Game:
             await self.update_scores()
         await self.display_winners()
         self.results_posted = True
+        return True
 
     async def update_scores(self):
         """Updates all player scores"""
@@ -395,7 +393,7 @@ class Game:
 
     async def process_game(self):
         """Ignores errors and continuously makes new questions until the game should end."""
-        self.host_user = await self.ex.get_user(self.host)
+        self.host_user = await self.ex.get_user(self.host_id)
         await self.create_idol_pool()
         try:
             while self.rounds < self.max_rounds and not self.force_ended:

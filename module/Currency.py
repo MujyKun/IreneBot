@@ -311,10 +311,12 @@ class Currency(commands.Cog):
         [Format: %rps (r/p/s) (amount)]
         [Aliases: rockpaperscissors]
         """
+        user = await self.ex.get_user(ctx.author.id)
+        await user.register_currency()
+
         # we do not know the format the user sent input in, so we will just remove all commas and adjust to our case.
         amount_to_bet = self.ex.remove_commas(amount_to_bet)
 
-        user = await self.ex.get_user(ctx.author.id)
         if user.balance < amount_to_bet:
             return await ctx.send(await self.ex.get_msg(ctx, "currency", "not_enough",
                                                         [["name", ctx.author.display_name],

@@ -1,3 +1,4 @@
+import IreneUtility.models
 import discord
 from discord.ext import commands
 import random
@@ -83,12 +84,9 @@ class BiasGame(commands.Cog):
 
 
 # noinspection PyBroadException,PyPep8
-class Game:
-    def __init__(self, utility_obj, ctx, bracket_size=8, gender="all"):
-        self.ex = utility_obj
-        self.host_ctx = ctx  # ctx of the host starting game
-        self.host = ctx.author.id  # id of the host - realistically should be storing author here instead of id but meh
-        self.channel = ctx.channel
+class Game(IreneUtility.models.Game):
+    def __init__(self, *args, bracket_size=8, gender="all"):
+        super().__init__(*args)
         self.force_ended = False
         self.current_bracket_teams = []
         # secondary is the next teams up the bracket and is a temporary holder to be moved into current bracket teams.
@@ -116,7 +114,7 @@ class Game:
         """Check the reactions of the message and process results"""
         def check_response(user_reaction, reaction_user):
             return user_reaction.emoji in ['➡', '⬅'] and reaction_user != message.author\
-                   and user_reaction.message.id == message.id and reaction_user.id == self.host
+                   and user_reaction.message.id == message.id and reaction_user.id == self.host_id
 
         def add_winner(idol):
             """Add the winner to the next bracket and have them face the previous idol that won."""
@@ -192,30 +190,31 @@ Remaining Idols: {self.number_of_idols_left}
     async def end_game(self):
         """End the game"""
         if not self.force_ended:
-            await self.channel.send(await self.ex.get_msg(self.host, 'biasgame', 'force_closed'))
+            await self.channel.send(await self.ex.get_msg(self.host_id, 'biasgame', 'force_closed'))
         self.force_ended = True
+        return True
 
     async def print_winner(self):
         msg_body = f"> The winner is {self.bracket_winner.stage_name}."
         file_location = await self.ex.u_bias_game.create_bias_game_bracket(
-            self.all_brackets_together, self.host, self.bracket_winner)
+            self.all_brackets_together, self.host_id, self.bracket_winner)
 
-        image_file = discord.File(fp=file_location, filename=f"{self.host}.png")
+        image_file = discord.File(fp=file_location, filename=f"{self.host_id}.png")
         await self.channel.send(msg_body, file=image_file)
 
     async def update_user_wins(self):
         if self.bracket_winner:
             wins = self.ex.first_result(await self.ex.conn.fetchrow(
                 "SELECT wins FROM biasgame.winners WHERE userid = $1 AND idolid = $2",
-                self.host, self.bracket_winner.id))
+                self.host_id, self.bracket_winner.id))
             if wins:
                 await self.ex.conn.execute(
                     "UPDATE biasgame.winners SET wins = $1 WHERE userid = $2 AND idolid = $3",
-                    wins + 1, self.host, self.bracket_winner.id)
+                    wins + 1, self.host_id, self.bracket_winner.id)
             else:
                 await self.ex.conn.execute(
                     "INSERT INTO biasgame.winners(idolid, userid, wins) VALUES ($1, $2, $3)",
-                    self.bracket_winner.id, self.host, 1)
+                    self.bracket_winner.id, self.host_id, 1)
 
     async def process_game(self):
         """Process bias guessing game by sending messages and new questions until the game should end."""
@@ -234,5 +233,5 @@ Remaining Idols: {self.number_of_idols_left}
             await self.print_winner()
             await self.update_user_wins()
         except Exception as e:
-            await self.channel.send(await self.ex.get_msg(self.host, 'biasgame', 'unexpected_error'))
+            await self.channel.send(await self.ex.get_msg(self.host_id, 'biasgame', 'unexpected_error'))
             log.console(e)

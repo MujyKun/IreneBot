@@ -286,8 +286,8 @@ Maintenance Status: {maintenance_status}
             response = await self.ex.u_miscellaneous.translate(message, from_language, to_language)
             if not response:
                 return await ctx.send(
-                    f"**My Papago Translation Service is currently turned off and cannot process requests "
-                    f"OR you did not enter the right format.**")
+                    "**My Papago Translation Service is currently turned off and cannot process requests "
+                    "OR you did not enter the right format.**")
             code = response['code']
             if code != 0:
                 return await ctx.send("> **Something went wrong and I did not receive a proper response from Papago.**")

@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from random import *
+from random import randint
 from IreneUtility.util import u_logger as log
 from IreneUtility.Utility import Utility
 

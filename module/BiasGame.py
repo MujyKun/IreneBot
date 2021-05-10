@@ -32,15 +32,14 @@ class BiasGame(commands.Cog):
             return await ctx.send(await self.ex.get_msg(user, 'biasgame', 'no_dm'))
         if self.ex.cache.bias_games.get(ctx.channel.id):
             server_prefix = await self.ex.get_server_prefix(ctx)
-            return await ctx.send(await self.ex.replace(
-                await self.ex.get_msg(user, 'biasgame', 'in_progress'), [['server_prefix', server_prefix]]))
+            return await ctx.send(
+                await self.ex.get_msg(user, 'biasgame', 'in_progress', [['server_prefix', server_prefix]]))
         game = Game(self.ex, ctx, bracket_size, gender)
         self.ex.cache.bias_games[ctx.channel.id] = game
 
-        msg = await self.ex.replace(
-            await self.ex.get_msg(user, 'biasgame', 'start_game'),
-            [["bracket_size", str(game.bracket_size)],
-             ["gender", f"{game.gender if game.gender != 'all' else 'both male and female'}"]])
+        msg = await self.ex.get_msg(user, 'biasgame', 'start_game',
+                                    [["bracket_size", str(game.bracket_size)],
+                                     ["gender", f"{game.gender if game.gender != 'all' else 'both male and female'}"]])
 
         await ctx.send(msg)
         await game.process_game()  # start the game
@@ -71,8 +70,7 @@ class BiasGame(commands.Cog):
         user_wins = await self.ex.conn.fetch(
             "SELECT idolid, wins FROM biasgame.winners WHERE userid = $1 ORDER BY WINS DESC LIMIT $2", user.id, 15)
         if user_wins:
-            msg_string = await self.ex.get_msg(user.id, 'biasgame', 'lb_title')
-            msg_string = await self.ex.replace(msg_string, ['name', user.display_name])
+            msg_string = await self.ex.get_msg(user.id, 'biasgame', 'lb_title', ['name', user.display_name])
 
             counter = 1
             for idol_id, wins in user_wins:
@@ -80,8 +78,7 @@ class BiasGame(commands.Cog):
                 msg_string += f"{counter}) {member.full_name} ({member.stage_name}) -> {wins} Win(s).\n"
                 counter += 1
         else:
-            msg_string = await self.ex.get_msg(user.id, 'biasgame', 'no_wins')
-            msg_string = await self.ex.replace(msg_string, ['name', user.display_name])
+            msg_string = await self.ex.get_msg(user.id, 'biasgame', 'no_wins', ['name', user.display_name])
         await ctx.send(msg_string)
 
 

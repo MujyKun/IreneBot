@@ -9,6 +9,10 @@ from IreneUtility.Utility import Utility
 # noinspection PyBroadException,PyPep8
 class Currency(commands.Cog):
     def __init__(self, ex):
+        """
+
+        :param ex: Utility object
+        """
         self.ex: Utility = ex
 
     @commands.command()
@@ -22,9 +26,8 @@ class Currency(commands.Cog):
         user = await self.ex.get_user(ctx.author.id)
         daily_amount = await user.get_daily_amount()
         await user.update_balance(add=daily_amount)  # will auto register.
-        msg_str = await self.ex.get_msg(user, 'currency', 'daily_msg')
-        msg_str = await self.ex.replace(msg_str, [["name", ctx.author.display_name], ["daily_amount", daily_amount]])
-
+        msg_str = await self.ex.get_msg(user, 'currency', 'daily_msg',
+                                        [["name", ctx.author.display_name], ["daily_amount", daily_amount]])
         return await ctx.send(msg_str)
 
     @commands.command(aliases=['b', 'bal', '$'])
@@ -41,11 +44,10 @@ class Currency(commands.Cog):
         user = await self.ex.get_user(member.id)
         await user.register_currency()
 
-        msg_str = await self.ex.get_msg(user, 'currency', 'balance_msg')
-        msg_str = await self.ex.replace(msg_str, [["name", member.display_name],
-                                                  ["balance", (self.ex.add_commas(user.balance))],
-                                                  ["currency_name", self.ex.keys.currency_name]])
-
+        msg_str = await self.ex.get_msg(user, 'currency', 'balance_msg',
+                                        [["name", member.display_name],
+                                         ["balance", (self.ex.add_commas(user.balance))],
+                                         ["currency_name", self.ex.keys.currency_name]])
         return await ctx.send(msg_str)
 
     @commands.command()
@@ -61,22 +63,21 @@ class Currency(commands.Cog):
         await user.register_currency()  # confirm the user is registered.
 
         if user.in_currency_game:  # in a game that affects currency (such as blackjack).
-            msg = await self.ex.get_msg(user, "currency", "in_game")
-            msg = await self.ex.replace(msg, [["name", ctx.author.display_name],
-                                              ["server_prefix", server_prefix]])
+            msg = await self.ex.get_msg(user, "currency", "in_game", [["name", ctx.author.display_name],
+                                                                      ["server_prefix", server_prefix]])
             return await ctx.send(msg)
 
         if bet_amount <= 0:  # input is wrong or they are trying to bet nothing.
-            msg = await self.ex.get_msg(user, "currency", "nothing_to_bet")
-            msg = await self.ex.replace(msg, [["name", ctx.author.display_name],
-                                              ["currency_name", self.ex.keys.currency_name]])
+            msg = await self.ex.get_msg(user, "currency", "nothing_to_bet",
+                                        [["name", ctx.author.display_name],
+                                         ["currency_name", self.ex.keys.currency_name]])
             return await ctx.send(msg)
 
         if bet_amount > user.balance:  # user does not have enough.
-            msg = await self.ex.get_msg(user, "currency", "not_enough")
-            msg = await self.ex.replace(msg, [["name", ctx.author.display_name],
-                                              ["currency_name", self.ex.keys.currency_name],
-                                              ["balance", (self.ex.add_commas(user.balance))]])
+            msg = await self.ex.get_msg(user, "currency", "not_enough",
+                                        [["name", ctx.author.display_name],
+                                         ["currency_name", self.ex.keys.currency_name],
+                                         ["balance", (self.ex.add_commas(user.balance))]])
             return await ctx.send(msg)
 
         user_random_number = randint(1, 100)  # served as comparator and is also the win percentage.
@@ -96,11 +97,11 @@ class Currency(commands.Cog):
         bet_result = int((multiplier * bet_amount) - bet_amount)  # the amount to add or remove from the bet amount.
         result = "LOST" if bet_result < 0 else "WON"
         await user.update_balance(add=bet_result)
-        msg = await self.ex.get_msg(user, "currency", "bet_result")
-        msg = await self.ex.replace(msg, [["name", ctx.author.display_name],
-                                          ["result", result],
-                                          ["integer", -bet_result if bet_result < 0 else bet_result],
-                                          ["balance", self.ex.add_commas(user.balance)]])
+        msg = await self.ex.get_msg(user, "currency", "bet_result",
+                                    [["name", ctx.author.display_name],
+                                     ["result", result],
+                                     ["integer", -bet_result if bet_result < 0 else bet_result],
+                                     ["balance", self.ex.add_commas(user.balance)]])
         await ctx.send(msg)
 
     @commands.command(aliases=['leaderboards', 'lb'])
@@ -151,9 +152,9 @@ class Currency(commands.Cog):
         user = await self.ex.get_user(ctx.author.id)
         beg_amount = (user.beg_level * 2) or random.randint(1, 25)  # randint > beg_amount until beg level 13
         await user.update_balance(add=beg_amount)  # will auto register
-        msg_str = await self.ex.get_msg(user, 'currency', 'beg_msg')
-        msg_str = await self.ex.replace(msg_str, [["name", ctx.author.display_name], ["integer", beg_amount],
-                                                  ["currency_name", self.ex.keys.currency_name]])
+        msg_str = await self.ex.get_msg(user, 'currency', 'beg_msg', [["name", ctx.author.display_name],
+                                                                      ["integer", beg_amount],
+                                                                      ["currency_name", self.ex.keys.currency_name]])
         return await ctx.send(msg_str)
 
     @commands.command(aliases=["levelup"])
@@ -170,10 +171,9 @@ class Currency(commands.Cog):
 
         # get rid of invalid input.
         if not command or command.lower() not in possible_options:
-            msg_str = await self.ex.get_msg(user, 'general', 'invalid_input')
-            msg_str = await self.ex.replace(msg_str, [["name", ctx.author.display_name],
-                                                      ["server_prefix", server_prefix],
-                                                      ["command_name", "upgrade"]])
+            msg_str = await self.ex.get_msg(user, 'general', 'invalid_input', [["name", ctx.author.display_name],
+                                                                               ["server_prefix", server_prefix],
+                                                                               ["command_name", "upgrade"]])
             return await ctx.send(msg_str)
 
         # set the current level of the user for the command we are trying to upgrade.
@@ -194,15 +194,17 @@ class Currency(commands.Cog):
 
         # if the user does not have enough money
         if user.balance < money_needed:
-            msg_str = await self.ex.get_msg(user, 'currency', 'upgrade_not_enough')
-            msg_str = await self.ex.replace(msg_str, [["name", ctx.author.display_name], ["integer", money_needed],
-                                                      ["command_name", command.lower()], ["balance", user.balance]])
+            msg_str = await self.ex.get_msg(user, 'currency', 'upgrade_not_enough', [["name", ctx.author.display_name],
+                                                                                     ["integer", money_needed],
+                                                                                     ["command_name", command.lower()],
+                                                                                     ["balance", user.balance]])
             return await ctx.send(msg_str)
 
         # confirm the user really wants to upgrade their level.
-        msg_str = await self.ex.get_msg(user, 'currency', 'upgrade_msg')
-        msg_str = await self.ex.replace(msg_str, [["name", ctx.author.display_name], ["integer", money_needed],
-                                                  ["command_name", command.lower()], ["balance", user.balance]])
+        msg_str = await self.ex.get_msg(user, 'currency', 'upgrade_msg', [["name", ctx.author.display_name],
+                                                                          ["integer", money_needed],
+                                                                          ["command_name", command.lower()],
+                                                                          ["balance", user.balance]])
         msg = await ctx.send(msg_str)
         reaction = "\U0001f44d"
         await msg.add_reaction(reaction)  # thumbs up]
@@ -211,15 +213,16 @@ class Currency(commands.Cog):
             await user.set_level(level + 1, command.lower())
 
             # let the user know their new level.
-            msg_str = await self.ex.get_msg(user, 'currency', 'upgrade_msg_success')
-            msg_str = await self.ex.replace(msg_str, [["name", ctx.author.display_name], ["integer", level + 1],
-                                                      ["command_name", command.lower()]])
+            msg_str = await self.ex.get_msg(user, 'currency', 'upgrade_msg_success',
+                                            [["name", ctx.author.display_name],
+                                             ["integer", level + 1],
+                                             ["command_name", command.lower()]])
             return await ctx.send(msg_str)
         else:
             # let the user know they failed to upgrade.
-            msg_str = await self.ex.get_msg(user, 'currency', 'upgrade_out_of_time')
-            msg_str = await self.ex.replace(msg_str, [["name", ctx.author.display_name],
-                                                      ["command_name", command.lower()]])
+            msg_str = await self.ex.get_msg(user, 'currency', 'upgrade_out_of_time',
+                                            [["name", ctx.author.display_name],
+                                             ["command_name", command.lower()]])
             return await ctx.send(msg_str)
 
     @commands.command()
@@ -230,6 +233,7 @@ class Currency(commands.Cog):
 
         [Format: %rob @user]
         """
+
         pass
 
     @commands.command()

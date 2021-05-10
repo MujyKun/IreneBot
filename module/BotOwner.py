@@ -82,8 +82,7 @@ class BotOwner(commands.Cog):
         users = users.split(",")
         for user_id in users:
             await self.ex.u_patreon.add_to_patreon(user_id)
-        msg = await self.ex.get_msg(ctx, 'botowner', 'patrons_added')
-        msg = await self.ex.replace(msg, ['users', users])
+        msg = await self.ex.get_msg(ctx, 'botowner', 'patrons_added', ['users', users])
         await ctx.send(msg)
 
     @commands.command()
@@ -97,8 +96,7 @@ class BotOwner(commands.Cog):
         users = users.split(",")
         for user_id in users:
             await self.ex.u_patreon.remove_from_patreon(user_id)
-        msg = await self.ex.get_msg(ctx, 'botowner', 'patrons_removed')
-        msg = await self.ex.replace(msg, ['users', users])
+        msg = await self.ex.get_msg(ctx, 'botowner', 'patrons_removed', ['users', users])
         await ctx.send(msg)
 
     @commands.is_owner()
@@ -126,8 +124,7 @@ class BotOwner(commands.Cog):
             await ctx.send(await self.ex.get_msg(ctx, 'botowner', 'message_sent'))
         except Exception as e:
             log.console(e)
-            msg = await self.ex.get_msg(ctx, 'general', 'error_no_support')
-            msg = await self.ex.replace(msg, ['e', e])
+            msg = await self.ex.get_msg(ctx, 'general', 'error_no_support', ['e', e])
             await ctx.send(msg)
 
     @commands.command()
@@ -159,8 +156,8 @@ class BotOwner(commands.Cog):
             groupname = $1 ORDER BY groupid DESC""", group.get("groupname")))
 
             # send message to the approver.
-            msg = await self.ex.get_msg(ctx, 'botowner', 'group_query_approved')
-            msg = await self.ex.replace(msg, [['query_id', query_id], ['group_id', group_id]])
+            msg = await self.ex.get_msg(ctx, 'botowner', 'group_query_approved', [['query_id', query_id],
+                                                                                  ['group_id', group_id]])
             await ctx.send(msg)
 
         if mode == "idol":
@@ -213,13 +210,12 @@ class BotOwner(commands.Cog):
                     VALUES($1, $2)""", idol_id, group_id)
                 except Exception as e:
                     log.console(e)
-                    msg = await self.ex.get_msg(ctx, 'botowner', 'group_fail')
-                    msg = await self.ex.replace(msg, ['group_id', group_id])
+                    msg = await self.ex.get_msg(ctx, 'botowner', 'group_fail', ['group_id', group_id])
                     await ctx.send(msg)
 
             # send message to the approver.
-            msg = await self.ex.get_msg(ctx, 'botowner', 'idol_query_approved')
-            msg = await self.ex.replace(msg, [['query_id', query_id], ['idol_id', idol_id], ['group_ids', group_ids]])
+            msg = await self.ex.get_msg(ctx, 'botowner', 'idol_query_approved',
+                                        [['query_id', query_id], ['idol_id', idol_id], ['group_ids', group_ids]])
             await ctx.send(msg)
 
         # reset cache for idols/groups.

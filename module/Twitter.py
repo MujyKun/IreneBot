@@ -15,8 +15,7 @@ class Twitter(commands.Cog):
         [Format: %tweet (status)]
         """
         tweet_url = await self.ex.u_twitter.update_status(tweet)
-        msg = await self.ex.get_msg(ctx.author.id, "twitter", "tweet_success")
-        msg = await self.ex.replace(msg, ['tweet_url', tweet_url])
+        msg = await self.ex.get_msg(ctx.author.id, "twitter", "tweet_success", ['tweet_url', tweet_url])
         await ctx.send(msg)
 
     @commands.command()
@@ -28,8 +27,7 @@ class Twitter(commands.Cog):
         [Format: %deletetweet (id)]
         """
         await self.ex.u_twitter.delete_status(tweet_id)
-        msg = await self.ex.get_msg(ctx.author.id, "twitter", "delete_success")
-        msg = await self.ex.replace(msg, ['tweet_id', tweet_id])
+        msg = await self.ex.get_msg(ctx.author.id, "twitter", "delete_success", ['tweet_id', tweet_id])
         await ctx.send(msg)
 
     @commands.command()
@@ -41,6 +39,6 @@ class Twitter(commands.Cog):
         [Format: %recenttweets (amount)]
         """
         tweets = await self.ex.u_twitter.recent_tweets(amount_of_tweets)
-        msg = await self.ex.get_msg(ctx.author.id, "twitter", "recent_tweets")
-        msg = await self.ex.replace(msg, [['tweet_amount', amount_of_tweets], ['tweets', tweets]])
+        msg = await self.ex.get_msg(ctx.author.id, "twitter", "recent_tweets",
+                                    [['tweet_amount', amount_of_tweets], ['tweets', tweets]])
         await ctx.send(msg)

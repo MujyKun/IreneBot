@@ -80,8 +80,8 @@ class Events(commands.Cog):
             ex.cache.errors_per_minute += 1
 
         elif isinstance(error, commands.errors.CommandOnCooldown):
-            msg = await ex.get_msg(ctx, "general", "cooldown")
-            msg = await ex.replace(msg, ["time", await ex.u_miscellaneous.get_cooldown_time(error.retry_after)])
+            msg = await ex.get_msg(ctx, "general", "cooldown",
+                                   ["time", await ex.u_miscellaneous.get_cooldown_time(error.retry_after)])
             await Events.error(ctx, msg)
             log.console(error)
         elif isinstance(error, commands.errors.BadArgument):
@@ -95,13 +95,11 @@ class Events(commands.Cog):
     async def on_guild_join(guild):
         try:
             if guild.system_channel:
-                msg = await ex.get_msg(ex.keys.bot_id, "general", "on_guild_join")
                 server_prefix = await ex.get_server_prefix(guild.id)
-                msg = await ex.replace(msg, ["server_prefix", server_prefix])
+                msg = await ex.get_msg(ex.keys.bot_id, "general", "on_guild_join", ["server_prefix", server_prefix])
                 await guild.system_channel.send(msg)
         except Exception as e:
             log.useless(f"{e} - Unable to send message on guild join. - Events.on_guild_join")
-
         log.console(f"{guild.name} ({guild.id}) has invited Irene.")
 
     @staticmethod

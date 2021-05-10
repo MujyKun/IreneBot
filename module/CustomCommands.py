@@ -42,21 +42,17 @@ class CustomCommands(commands.Cog):
             msg_is_cmd = await self.ex.u_miscellaneous.check_message_is_command(command_name, is_command_name=True)
             if msg_is_cmd:
                 msg = await self.ex.get_msg(ctx, "customcommands", "bot_command_exists")
-                msg = await self.ex.replace(msg, ["command_name", command_name])
-                return await ctx.send(msg)
-            if await self.ex.u_custom_commands.check_custom_command_name_exists(ctx.guild.id, command_name):
+            elif await self.ex.u_custom_commands.check_custom_command_name_exists(ctx.guild.id, command_name):
                 msg = await self.ex.get_msg(ctx, "customcommands", "custom_command_exists")
-                msg = await self.ex.replace(msg, ["command_name", command_name])
-                return await ctx.send(msg)
             else:
                 await self.ex.u_custom_commands.add_custom_command(ctx.guild.id, command_name, message)
                 msg = await self.ex.get_msg(ctx, "customcommands", "custom_command_added")
-                msg = await self.ex.replace(msg, ["command_name", command_name])
-                return await ctx.send(msg)
+            msg = await self.ex.replace(msg, ["command_name", command_name])
+            return await ctx.send(msg)
+
         except Exception as e:
             log.console(e)
-            msg = await self.ex.get_msg(ctx, "general", "error")
-            msg = await self.ex.replace(msg, ["e", e])
+            msg = await self.ex.get_msg(ctx, "general", "error", ["e", e])
             return await ctx.send(msg)
 
     @commands.command(aliases=['removecommand'])
@@ -69,13 +65,11 @@ class CustomCommands(commands.Cog):
         """
         try:
             await self.ex.u_custom_commands.remove_custom_command(ctx.guild.id, command_name.lower())
-            msg = await self.ex.get_msg(ctx, "customcommands", "custom_command_deleted")
-            msg = await self.ex.replace(msg, ["command_name", command_name])
+            msg = await self.ex.get_msg(ctx, "customcommands", "custom_command_deleted", ["command_name", command_name])
             return await ctx.send(msg)
         except Exception as e:
             log.console(e)
-            msg = await self.ex.get_msg(ctx, "general", "error")
-            msg = await self.ex.replace(msg, ["e", e])
+            msg = await self.ex.get_msg(ctx, "general", "error", ["e", e])
             return await ctx.send(msg)
 
     @commands.command()
@@ -119,6 +113,5 @@ class CustomCommands(commands.Cog):
 
         except Exception as e:
             log.console(e)
-            msg = await self.ex.get_msg(ctx, "general", "error")
-            msg = await self.ex.replace(msg, ["e", e])
+            msg = await self.ex.get_msg(ctx, "general", "error", ["e", e])
             return await ctx.send(msg)

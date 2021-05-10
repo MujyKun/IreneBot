@@ -77,9 +77,9 @@ class Archive(commands.Cog):
         user = await self.ex.get_user(ctx.author.id)
         try:
             if not owner_present:
-                return await ctx.send(await self.ex.replace(
-                    await self.ex.get_msg(user, 'archive', 'talk_to_owner'), [['name', ctx.author.display_name],
-                                                                              ['owner_id', self.ex.keys.owner_id]]))
+                return await ctx.send(
+                    await self.ex.get_msg(user, 'archive', 'talk_to_owner', [['name', ctx.author.display_name],
+                                                                             ['owner_id', self.ex.keys.owner_id]]))
 
             await ctx.send(await self.ex.get_msg(user, 'archive', 'waiting_confirmation'))
             if not await self.on_message(ctx, is_owner=True):
@@ -90,8 +90,7 @@ class Archive(commands.Cog):
                 "SELECT COUNT(*) FROM archive.channellist WHERE driveid = $1", drive_folder_id))
             if not drive_id_in_db:
                 url = f"https://drive.google.com/drive/folders/{drive_folder_id}"
-                return await ctx.send(await self.ex.replace(
-                    await self.ex.get_msg(user, 'archive', 'url_being_used'), ['g_drive_url', url]))
+                return await ctx.send(await self.ex.get_msg(user, 'archive', 'url_being_used', ['g_drive_url', url]))
 
             channel_id_in_db = self.ex.first_result(await self.ex.conn.fetchrow(
                 "SELECT COUNT(*) FROM archive.channellist WHERE channelid = $1", ctx.channel.id))

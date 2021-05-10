@@ -151,13 +151,12 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
             msg = await channel.send(embed=embed)
             await msg.add_reaction(self.ex.keys.check_emoji)
             await msg.add_reaction(self.ex.keys.trash_emoji)
-            msg = await self.ex.get_msg(ctx, "groupmembers", "add_idol_sent")
-            msg = await self.ex.replace(msg, [["name", ctx.author.display_name], ['query_id', query_id]])
+            msg = await self.ex.get_msg(ctx, "groupmembers", "add_idol_sent",
+                                        [["name", ctx.author.display_name], ['query_id', query_id]])
             await ctx.send(msg)
         except Exception as e:
             log.console(e)
-            msg = await self.ex.get_msg(ctx, "general", "error")
-            msg = await self.ex.replace(msg, ["e", e])
+            msg = await self.ex.get_msg(ctx, "general", "error", ["e", e])
             await ctx.send(msg)
 
     @commands.command()
@@ -223,13 +222,12 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
             msg = await channel.send(embed=embed)
             await msg.add_reaction(self.ex.keys.check_emoji)
             await msg.add_reaction(self.ex.keys.trash_emoji)
-            msg = await self.ex.get_msg(ctx, "groupmembers", "add_group_sent")
-            msg = await self.ex.replace(msg, [["name", ctx.author.display_name], ['query_id', query_id]])
+            msg = await self.ex.get_msg(ctx, "groupmembers", "add_group_sent",
+                                        [["name", ctx.author.display_name], ['query_id', query_id]])
             await ctx.send(msg)
         except Exception as e:
             log.console(e)
-            msg = await self.ex.get_msg(ctx, "general", "error")
-            msg = await self.ex.replace(msg, ["e", e])
+            msg = await self.ex.get_msg(ctx, "general", "error", ["e", e])
             await ctx.send(msg)
 
     @commands.command()
@@ -286,20 +284,19 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
                 await self.ex.conn.execute("INSERT INTO groupmembers.restricted(channelid, serverid, sendhere) "
                                            "VALUES($1, $2, $3)", text_channel.id, ctx.guild.id, 0)
                 self.ex.cache.restricted_channels[text_channel.id] = [ctx.guild.id, 0]
-                msg = await self.ex.get_msg(ctx, "groupmembers", "stop_images_disable")
-                msg = await self.ex.replace(msg, ['text_channel', text_channel.name])
+                msg = await self.ex.get_msg(ctx, "groupmembers", "stop_images_disable",
+                                            ['text_channel', text_channel.name])
                 await ctx.send(msg)
             except:
-                msg = await self.ex.get_msg(ctx, "groupmembers", "stop_images_fail")
-                msg = await self.ex.replace(msg, [['text_channel', text_channel.name],
-                                                  ['server_prefix', await self.ex.get_server_prefix(ctx)]])
+                msg = await self.ex.get_msg(ctx, "groupmembers", "stop_images_fail",
+                                            [['text_channel', text_channel.name],
+                                             ['server_prefix', await self.ex.get_server_prefix(ctx)]])
                 await ctx.send(msg)
         else:
             await self.ex.conn.execute("DELETE FROM groupmembers.restricted WHERE channelid = $1 AND sendhere = $2",
                                        text_channel.id, 0)
             await self.ex.u_group_members.delete_restricted_channel_from_cache(text_channel.id, 0)
-            msg = await self.ex.get_msg(ctx, "groupmembers", "stop_images_enable")
-            msg = await self.ex.replace(msg, ['text_channel', text_channel.name])
+            msg = await self.ex.get_msg(ctx, "groupmembers", "stop_images_enable", ['text_channel', text_channel.name])
             await ctx.send(msg)
 
     @commands.has_guild_permissions(manage_messages=True)
@@ -321,8 +318,8 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
                         await self.ex.conn.execute("DELETE FROM groupmembers.restricted WHERE channelid = $1 AND"
                                                    " serverid = $2 AND sendhere = $3", text_channel.id, ctx.guild.id, 1)
                         await self.ex.u_group_members.delete_restricted_channel_from_cache(text_channel.id, 1)
-                        msg = await self.ex.get_msg(ctx, "groupmembers", "send_images_disable")
-                        msg = await self.ex.replace(msg, ['text_channel', text_channel.name])
+                        msg = await self.ex.get_msg(ctx, "groupmembers", "send_images_disable",
+                                                    ['text_channel', text_channel.name])
                         return await ctx.send(msg)
                 else:
                     delete_channel_id = None
@@ -340,13 +337,12 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
                 await self.ex.conn.execute("INSERT INTO groupmembers.restricted(channelid, serverid, sendhere) "
                                            "VALUES ($1, $2, $3)", text_channel.id, ctx.guild.id, 1)
                 self.ex.cache.restricted_channels[text_channel.id] = [ctx.guild.id, 1]
-            msg = await self.ex.get_msg(ctx, "groupmembers", "send_images_enable")
-            msg = await self.ex.replace(msg, ['text_channel', text_channel.name])
+            msg = await self.ex.get_msg(ctx, "groupmembers", "send_images_enable",  ['text_channel', text_channel.name])
             await ctx.send(msg)
         else:
-            msg = await self.ex.get_msg(ctx, "groupmembers", "send_images_fail")
-            msg = await self.ex.replace(msg, [['text_channel', text_channel.name],
-                                              ['server_prefix', await self.ex.get_server_prefix(ctx)]])
+            msg = await self.ex.get_msg(ctx, "groupmembers", "send_images_fail",
+                                        [['text_channel', text_channel.name],
+                                         ['server_prefix', await self.ex.get_server_prefix(ctx)]])
             await ctx.send(msg)
 
     @commands.command(aliases=['%'])
@@ -385,8 +381,8 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
             msg = await self.ex.get_msg(ctx, "groupmembers", "group_not_found")
             return await ctx.send(msg)
         for group in groups:
-            msg = await self.ex.get_msg(ctx, "groupmembers", "photo_count")
-            msg = await self.ex.replace(msg, [["photo_count", group.photo_count], ["object_name", group.name]])
+            msg = await self.ex.get_msg(ctx, "groupmembers", "photo_count",
+                                        [["photo_count", group.photo_count], ["object_name", group.name]])
             await ctx.send(msg)
 
     @commands.command()
@@ -405,9 +401,9 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
             msg = await self.ex.get_msg(ctx, "groupmembers", "idol_not_found")
             return await ctx.send(msg)
         for member in members:
-            msg = await self.ex.get_msg(ctx, "groupmembers", "photo_count")
-            msg = await self.ex.replace(msg, [["photo_count", member.photo_count],
-                                              ["object_name", f"{member.full_name} ({member.stage_name})"]])
+            msg = await self.ex.get_msg(ctx, "groupmembers", "photo_count",
+                                        [["photo_count", member.photo_count],
+                                         ["object_name", f"{member.full_name} ({member.stage_name})"]])
             await ctx.send(msg)
 
     @commands.command(aliases=['fullname'])
@@ -479,8 +475,8 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
                 elif 'group' in mode.lower():
                     embed_list = await self.ex.u_group_members.set_embed_with_all_aliases("Group", server_id=server_id)
                 else:
-                    msg = await self.ex.get_msg(ctx, "groupmembers", "no_aliases")
-                    msg = await self.ex.replace(msg, ["server_prefix", await self.ex.get_server_prefix(ctx)])
+                    msg = await self.ex.get_msg(ctx, "groupmembers", "no_aliases",
+                                                ["server_prefix", await self.ex.get_server_prefix(ctx)])
                     return await ctx.send(msg)
             if len(embed_list) < page_number or page_number < 1:
                 page_number = 1
@@ -489,8 +485,7 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
                 await self.ex.check_left_or_right_reaction_embed(msg, embed_list, page_number - 1)
         except Exception as e:
             log.console(e)
-            msg = await self.ex.get_msg(ctx, "general", "error_no_support")
-            msg = await self.ex.replace(msg, ["e", e])
+            msg = await self.ex.get_msg(ctx, "general", "error_no_support", ["e", e])
             await ctx.send(msg)
 
     @commands.command()
@@ -507,8 +502,7 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
                     if not member.called:
                         continue
                     idol_called += member.called
-                msg = await self.ex.get_msg(ctx, "groupmembers", "all_idol_count")
-                msg = await self.ex.replace(msg, ["called", idol_called])
+                msg = await self.ex.get_msg(ctx, "groupmembers", "all_idol_count", ["called", idol_called])
                 return await ctx.send(msg)
             server_id = await self.ex.get_server_id(ctx)
             members = await self.ex.u_group_members.get_idol_where_member_matches_name(name, server_id=server_id)
@@ -516,8 +510,8 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
                 return await ctx.send(await self.ex.get_msg(ctx, "groupmembers", "idol_not_found"))
             for member in members:
                 if not member.called:
-                    msg = await self.ex.get_msg(ctx, "groupmembers", "not_called")
-                    msg = await self.ex.replace(msg, ['idol_name', f"{member.full_name} ({member.stage_name})"])
+                    msg = await self.ex.get_msg(ctx, "groupmembers", "not_called",
+                                                ['idol_name', f"{member.full_name} ({member.stage_name})"])
                     await ctx.send(msg)
                 else:
                     rank_list = await self.ex.conn.fetch("SELECT memberid FROM groupmembers.count ORDER BY Count DESC")
@@ -525,15 +519,14 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
                         mem_id = rank_row[0]
                         if mem_id == member.id:
                             final_rank = count + 1
-                            msg = await self.ex.get_msg(ctx, "groupmembers", "called_and_rank")
-                            msg = await self.ex.replace(msg, [["idol_name", f"{member.full_name} "
-                                                                            f"({member.stage_name})"],
-                                                              ["called", member.called], ['rank', final_rank]])
+                            msg = await self.ex.get_msg(ctx, "groupmembers", "called_and_rank",
+                                                        [["idol_name", f"{member.full_name} "
+                                                                       f"({member.stage_name})"],
+                                                         ["called", member.called], ['rank', final_rank]])
                             await ctx.send(msg)
         except Exception as e:
             log.console(e)
-            msg = await self.ex.get_msg(ctx, "general", "error_no_support")
-            msg = await self.ex.replace(msg, ["e", e])
+            msg = await self.ex.get_msg(ctx, "general", "error_no_support", ["e", e])
             await ctx.send(msg)
 
     @commands.command(aliases=["highestcount", "cb", "clb"])

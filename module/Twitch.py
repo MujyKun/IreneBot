@@ -23,21 +23,19 @@ class Twitch(commands.Cog):
             if not guild_id:
                 return await ctx.send(await self.ex.get_msg(ctx.author.id, "general", "no_dm"))
             if not await self.ex.u_twitch.check_guild_limit(guild_id):
-                msg = await self.ex.get_msg(ctx.author.id, "twitch", "follow_limit")
-                msg = await self.ex.replace(msg, ["follow_limit", self.ex.twitch_guild_follow_limit])
+                msg = await self.ex.get_msg(ctx.author.id, "twitch", "follow_limit",
+                                            ["follow_limit", self.ex.twitch_guild_follow_limit])
                 return await ctx.send(msg)
             if await self.ex.u_twitch.check_channel_followed(twitch_username, guild_id):
                 return await ctx.send(await self.ex.get_msg(ctx.author.id, "twitch", "already_followed"))
 
             await self.ex.u_twitch.add_channel(twitch_username, guild_id)
             log.console(f"{guild_id} is now receiving twitch notifications for {twitch_username}.")
-            msg = await self.ex.get_msg(ctx.author.id, "twitch", "now_following")
-            msg = await self.ex.replace(msg, ['twitch_username', twitch_username])
+            msg = await self.ex.get_msg(ctx.author.id, "twitch", "now_following", ['twitch_username', twitch_username])
             return await ctx.send(msg)
         except Exception as e:
             log.console(e)
-            msg = await self.ex.get_msg(ctx.author.id, "general", "error")
-            msg = await self.ex.replace(msg, ["e", e])
+            msg = await self.ex.get_msg(ctx.author.id, "general", "error", ["e", e])
             return await ctx.send(msg)
 
     @commands.command()
@@ -57,8 +55,7 @@ class Twitch(commands.Cog):
             return await ctx.send(await self.ex.get_msg(ctx.author.id, "twitch", "stop_following"))
         except Exception as e:
             log.console(e)
-            msg = await self.ex.get_msg(ctx.author.id, "general", "error")
-            msg = await self.ex.replace(msg, ["e", e])
+            msg = await self.ex.get_msg(ctx.author.id, "general", "error", ["e", e])
             return await ctx.send(msg)
 
     @commands.command()
@@ -77,8 +74,7 @@ class Twitch(commands.Cog):
 
         await self.ex.u_twitch.set_discord_channel(guild_id, text_channel.id)
         log.console(f"{guild_id} now has their discord channel set to {text_channel.id} for twitch updates.")
-        msg = await self.ex.get_msg(ctx.author.id, "twitch", "announcement_channel")
-        msg = await self.ex.replace(msg, ['text_channel', text_channel])
+        msg = await self.ex.get_msg(ctx.author.id, "twitch", "announcement_channel", ['text_channel', text_channel])
         await ctx.send(msg)
 
     @commands.command()
@@ -115,8 +111,8 @@ class Twitch(commands.Cog):
         if not guild_id:
             return await ctx.send(await self.ex.get_msg(ctx.author.id, "general", "no_dm"))
         channels_followed = await self.ex.u_twitch.get_channels_followed(guild_id)
-        msg = await self.ex.get_msg(ctx.author.id, "twitch", "following")
-        msg = await self.ex.replace(msg, ["channels_followed", ', '.join(channels_followed)])
+        msg = await self.ex.get_msg(ctx.author.id, "twitch", "following",
+                                    ["channels_followed", ', '.join(channels_followed)])
         await ctx.send(msg)
 
     # we now check every minute instead of 30 seconds since Irene was at times posting twice.

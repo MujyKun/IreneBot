@@ -194,17 +194,19 @@ class Currency(commands.Cog):
 
         # if the user does not have enough money
         if user.balance < money_needed:
-            msg_str = await self.ex.get_msg(user, 'currency', 'upgrade_not_enough', [["name", ctx.author.display_name],
-                                                                                     ["integer", money_needed],
-                                                                                     ["command_name", command.lower()],
-                                                                                     ["balance", user.balance]])
+            msg_str = await self.ex.get_msg(user, 'currency', 'upgrade_not_enough', [
+                ["name", ctx.author.display_name],
+                ["integer", money_needed],
+                ["command_name", command.lower()],
+                ["balance", self.ex.add_commas(user.balance)]])
             return await ctx.send(msg_str)
 
         # confirm the user really wants to upgrade their level.
-        msg_str = await self.ex.get_msg(user, 'currency', 'upgrade_msg', [["name", ctx.author.display_name],
-                                                                          ["integer", money_needed],
-                                                                          ["command_name", command.lower()],
-                                                                          ["balance", user.balance]])
+        msg_str = await self.ex.get_msg(user, 'currency', 'upgrade_msg', [
+            ["name", ctx.author.display_name],
+            ["integer", money_needed],
+            ["command_name", command.lower()],
+            ["balance", self.ex.add_commas(user.balance)]])
         msg = await ctx.send(msg_str)
         reaction = "\U0001f44d"
         await msg.add_reaction(reaction)  # thumbs up]
@@ -290,7 +292,7 @@ class Currency(commands.Cog):
             return await ctx.send(await self.ex.get_msg(ctx, "currency", "not_enough",
                                                         [["name", ctx.author.display_name],
                                                          ["currency_name", self.ex.keys.currency_name],
-                                                         ["balance", user.balance]]))
+                                                         ["balance", self.ex.add_commas(user.balance)]]))
         else:
             # transfer the money
             await user.update_balance(remove=amount_to_give)  # will auto register user
@@ -302,11 +304,71 @@ class Currency(commands.Cog):
                 ["mention", f"<@{user_to_give.id}>"]]))
 
     @commands.command(aliases=['rockpaperscissors'])
-    async def rps(self, ctx, rps_choice='', amount="0"):
+    async def rps(self, ctx, rps_choice, amount_to_bet="0"):
         """
         Play Rock Paper Scissors for Money
 
-        [Format: %rps (r/p/s)(amount)]
+        [Format: %rps (r/p/s) (amount)]
         [Aliases: rockpaperscissors]
         """
-        pass
+        # we do not know the format the user sent input in, so we will just remove all commas and adjust to our case.
+        amount_to_bet = self.ex.remove_commas(amount_to_bet)
+
+        user = await self.ex.get_user(ctx.author.id)
+        if user.balance < amount_to_bet:
+            return await ctx.send(await self.ex.get_msg(ctx, "currency", "not_enough",
+                                                        [["name", ctx.author.display_name],
+                                                         ["currency_name", self.ex.keys.currency_name],
+                                                         ["balance", self.ex.add_commas(user.balance)]]))
+        rock = ["rock", "r"]
+        paper = ["paper", "p"]
+        scissors = ["scissors", "scissor", "s"]
+        computer_choice = random.choice([rock[0], paper[0], scissors[0]])
+        rps_choice = rps_choice.lower()
+        if rps_choice in rock:
+            rps_choice = rock[0]
+        elif rps_choice in paper:
+            rps_choice = paper[0]
+        elif rps_choice in scissors:
+            rps_choice = scissors[0]
+        else:
+            # choose an option for the user.
+            rps_choice = random.choice([rock[0], paper[0], scissors[0]])
+
+        win_cases = {
+            rock[0]: scissors[0],
+            paper[0]: rock[0],
+            scissors[0]: paper[0]
+        }
+
+        loss_cases = {
+            rock[0]: paper[0],
+            paper[0]: scissors[0],
+            scissors[0]: rock[0]
+        }
+
+        if win_cases[rps_choice] == computer_choice:
+            # won
+            msg = await self.ex.get_msg(ctx, "currency", "rps_win_loss", [
+                ["name", ctx.author.display_name],
+                ["result", "WON"],
+                ["integer", self.ex.add_commas(amount_to_bet)],
+                ["currency_name", self.ex.keys.currency_name],
+                ["string", computer_choice],
+                ["string2", rps_choice]])
+            await user.update_balance(add=amount_to_bet)
+        elif loss_cases[rps_choice] == computer_choice:
+            # loss
+            msg = await self.ex.get_msg(ctx, "currency", "rps_win_loss", [
+                ["name", ctx.author.display_name],
+                ["result", "LOST"],
+                ["integer", self.ex.add_commas(amount_to_bet)],
+                ["currency_name", self.ex.keys.currency_name],
+                ["string", computer_choice],
+                ["string2", rps_choice]])
+            await user.update_balance(remove=amount_to_bet)
+        else:
+            # tie
+            msg = await self.ex.get_msg(ctx, "currency", "rps_tie", [["name", ctx.author.display_name],
+                                                                     ["string", computer_choice]])
+        return await ctx.send(msg)

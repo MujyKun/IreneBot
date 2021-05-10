@@ -5,6 +5,7 @@ All content inside the curly braces are automatically made bold when the files a
 To keep more human-readable logging, Irene will remove `**` from the messages when logging.  
 Do not surround phrases by `` as it will be negated when bolded.  
 All module names (keys) should be entirely lowercase.  
+When you are adding several input with the same needed keyword, you may number them. ex: `{string}, {string2}`.  
 
 **PLEASE NOTE THAT INPUT COULD BE GENERALIZED HERE, BUT IT IS BETTER TO BE SPECIFIC.**  
 
@@ -69,6 +70,6 @@ All module names (keys) should be entirely lowercase.
 **Specific Format:** `{format}`  
 **Location or Timezone:** `{tz}`  
 **An Amount of Anything (integer):** `{integer}`  
-**Any type of result (string):** `{result}`  
+**Any type of result (string):** `{result}` or `{string}`  
 
 **Mention a User:** `{mention}` -> Please be aware that this requires the full syntax when replacing (<@user_id>).  

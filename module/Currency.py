@@ -237,10 +237,12 @@ class Currency(commands.Cog):
             ctx.command.reset_cooldown(ctx)
             return await ctx.send(await self.ex.get_msg(ctx, "currency", "cannot_rob_self",
                                                         ["name", ctx.author.display_name]))
+        """
         if person_to_rob.bot:
             ctx.command.reset_cooldown(ctx)
             return await ctx.send(await self.ex.get_msg(ctx, "currency", "no_bots",
                                                         ["name", ctx.author.display_name]))
+        """
         user = await self.ex.get_user(ctx.author.id)
         user_to_rob = await self.ex.get_user(person_to_rob.id)
 
@@ -269,20 +271,37 @@ class Currency(commands.Cog):
                                                          ["mention", f"<@{user_to_rob.id}>"]]))
 
     @commands.command()
-    async def give(self, ctx, person_to_give: discord.Member, amount_to_give: int):
+    async def give(self, ctx, person_to_give: discord.Member, amount_to_give: str):
         """
         Give a user money
 
         [Format: %give (@user) (amount)]
         """
+        # TODO: take a fee from the user?
         if person_to_give == ctx.author:
             return await ctx.send(await self.ex.get_msg(ctx, "currency", "cannot_give_self",
                                                         ["name", ctx.author.display_name]))
         if person_to_give.bot:
             return await ctx.send(await self.ex.get_msg(ctx, "currency", "no_bots",
                                                         ["name", ctx.author.display_name]))
-
-        pass
+        user = await self.ex.get_user(ctx.author.id)
+        user_to_give = await self.ex.get_user(person_to_give.id)
+        amount_to_give: int = self.ex.remove_commas(amount_to_give)  # remove all commas from the input.
+        # not enough currency
+        if user.balance < amount_to_give:
+            return await ctx.send(await self.ex.get_msg(ctx, "currency", "not_enough",
+                                                        [["name", ctx.author.display_name],
+                                                         ["currency_name", self.ex.keys.currency_name],
+                                                         ["balance", user.balance]]))
+        else:
+            # transfer the money
+            await user.update_balance(remove=amount_to_give)  # will auto register user
+            await user_to_give.update_balance(add=amount_to_give)  # will auto register user
+            return await ctx.send(await self.ex.get_msg(ctx, "currency", "give_success", [
+                ["name", ctx.author.display_name],
+                ["integer", f"{amount_to_give:,}"],
+                ["currency_name", self.ex.keys.currency_name],
+                ["mention", f"<@{user_to_give.id}>"]]))
 
     @commands.command(aliases=['rockpaperscissors'])
     async def rps(self, ctx, rps_choice='', amount="0"):

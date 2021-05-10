@@ -41,7 +41,8 @@
     "cannot_give_self": "{name}, you cannot give yourself money!",
     "no_bots": "{name}, you cannot perform that action on a bot!",
     "failed_to_rob": "{name}, you failed to rob {mention}!",
-    "rob_success": "{name}, you stole {integer} {currency_name}(s) from {mention}!"
+    "rob_success": "{name}, you stole {integer} {currency_name}(s) from {mention}!",
+    "give_success": "{name}, you gave {integer} {currency_name}(s) to {mention}."
 
   },
   "customcommands": {

@@ -237,12 +237,10 @@ class Currency(commands.Cog):
             ctx.command.reset_cooldown(ctx)
             return await ctx.send(await self.ex.get_msg(ctx, "currency", "cannot_rob_self",
                                                         ["name", ctx.author.display_name]))
-        """
         if person_to_rob.bot:
             ctx.command.reset_cooldown(ctx)
             return await ctx.send(await self.ex.get_msg(ctx, "currency", "no_bots",
                                                         ["name", ctx.author.display_name]))
-        """
         user = await self.ex.get_user(ctx.author.id)
         user_to_rob = await self.ex.get_user(person_to_rob.id)
 

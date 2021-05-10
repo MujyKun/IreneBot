@@ -256,7 +256,6 @@ class Currency(commands.Cog):
                                                          ["mention", f"<@{user_to_rob.id}>"]]))
         else:
             # succeeded in robbing user
-            rob_amount = 0
             # 2% if user has more than 100 currency, else 5%
             rob_amount = int((0.02 * user_to_rob.balance) if user_to_rob.balance > 100
                              else (0.05 * user_to_rob.balance))

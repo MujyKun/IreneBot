@@ -233,8 +233,41 @@ class Currency(commands.Cog):
 
         [Format: %rob @user]
         """
+        if person_to_rob == ctx.author:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(await self.ex.get_msg(ctx, "currency", "cannot_rob_self",
+                                                        ["name", ctx.author.display_name]))
+        if person_to_rob.bot:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(await self.ex.get_msg(ctx, "currency", "no_bots",
+                                                        ["name", ctx.author.display_name]))
+        user = await self.ex.get_user(ctx.author.id)
+        user_to_rob = await self.ex.get_user(person_to_rob.id)
 
-        pass
+        # ensure both users are registered
+        await user.register_currency()
+        await user_to_rob.register_currency()
+
+        robbed = await user.try_to_rob_user(user_to_rob)
+        if not robbed:
+            # failed to rob user.
+            return await ctx.send(await self.ex.get_msg(ctx, "currency", "failed_to_rob",
+                                                        [["name", ctx.author.display_name],
+                                                         ["mention", f"<@{user_to_rob.id}>"]]))
+        else:
+            # succeeded in robbing user
+            rob_amount = 0
+            # 2% if user has more than 100 currency, else 5%
+            rob_amount = int((0.02 * user_to_rob.balance) if user_to_rob.balance > 100
+                             else (0.05 * user_to_rob.balance))
+            # note that the final rob amount can still be 0.
+            await user.update_balance(add=rob_amount)
+            await user_to_rob.update_balance(remove=rob_amount)
+            return await ctx.send(await self.ex.get_msg(ctx, "currency", "rob_success",
+                                                        [["name", ctx.author.display_name],
+                                                         ["integer", f"{rob_amount:,}"],
+                                                         ["currency_name", self.ex.keys.currency_name],
+                                                         ["mention", f"<@{user_to_rob.id}>"]]))
 
     @commands.command()
     async def give(self, ctx, person_to_give: discord.Member, amount_to_give: int):
@@ -243,6 +276,13 @@ class Currency(commands.Cog):
 
         [Format: %give (@user) (amount)]
         """
+        if person_to_give == ctx.author:
+            return await ctx.send(await self.ex.get_msg(ctx, "currency", "cannot_give_self",
+                                                        ["name", ctx.author.display_name]))
+        if person_to_give.bot:
+            return await ctx.send(await self.ex.get_msg(ctx, "currency", "no_bots",
+                                                        ["name", ctx.author.display_name]))
+
         pass
 
     @commands.command(aliases=['rockpaperscissors'])

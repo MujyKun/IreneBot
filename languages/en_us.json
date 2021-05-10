@@ -36,7 +36,12 @@
     "upgrade_msg": "{name}, you need {integer} to level up {command_name}. Press the Thumbs Up Reaction within 1 minute to confirm.",
     "upgrade_msg_success": "{name}, congrats! your {command_name} level is now {integer}.",
     "upgrade_not_enough": "{name}, you need at least {integer} to upgrade {command_name}. You have {balance}.",
-    "upgrade_out_of_time": "{name}, you ran out of time to upgrade {command_name}."
+    "upgrade_out_of_time": "{name}, you ran out of time to upgrade {command_name}.",
+    "cannot_rob_self": "{name}, you cannot rob yourself!",
+    "cannot_give_self": "{name}, you cannot give yourself money!",
+    "no_bots": "{name}, you cannot perform that action on a bot!",
+    "failed_to_rob": "{name}, you failed to rob {mention}!",
+    "rob_success": "{name}, you stole {integer} {currency_name}(s) from {mention}!"
 
   },
   "customcommands": {

@@ -70,3 +70,5 @@ All module names (keys) should be entirely lowercase.
 **Location or Timezone:** `{tz}`  
 **An Amount of Anything (integer):** `{integer}`  
 **Any type of result (string):** `{result}`  
+
+**Mention a User:** `{mention}` -> Please be aware that this requires the full syntax when replacing (<@user_id>).  

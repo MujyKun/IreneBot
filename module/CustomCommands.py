@@ -26,8 +26,8 @@ class CustomCommands(commands.Cog):
         if current_message_prefix == keys.bot_prefix:
             message_without_prefix = message.content[len(keys.bot_prefix):len(message.content)].lower()
             if await self.ex.u_custom_commands.check_custom_command_name_exists(guild_id, message_without_prefix):
-                await message.channel.send(await self.ex.u_custom_commands.get_custom_command(guild_id,
-                                                                                         message_without_prefix))
+                await message.channel.send(await self.ex.u_custom_commands.get_custom_command(
+                    guild_id, message_without_prefix))
 
     @commands.command(aliases=['addcommand'])
     @commands.has_guild_permissions(manage_messages=True)
@@ -87,8 +87,9 @@ class CustomCommands(commands.Cog):
         """
         try:
             async def get_new_embed(desc):
-                return await self.ex.create_embed(f"Custom Commands for {ctx.guild.name} ({ctx.guild.id})", color=self.ex.get_random_color(),
-                                             title_desc=desc)
+                return await self.ex.create_embed(
+                    f"Custom Commands for {ctx.guild.name} ({ctx.guild.id})", color=self.ex.get_random_color(),
+                    title_desc=desc)
             custom_commands = self.ex.cache.custom_commands.get(ctx.guild.id)
             embed_list = []
             embed_message = ""

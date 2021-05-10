@@ -37,7 +37,7 @@ class Twitch(commands.Cog):
         except Exception as e:
             log.console(e)
             msg = await self.ex.get_msg(ctx.author.id, "general", "error")
-            msg = await self.ex.replace(msg, "e", e)
+            msg = await self.ex.replace(msg, ["e", e])
             return await ctx.send(msg)
 
     @commands.command()
@@ -58,7 +58,7 @@ class Twitch(commands.Cog):
         except Exception as e:
             log.console(e)
             msg = await self.ex.get_msg(ctx.author.id, "general", "error")
-            msg = await self.ex.replace(msg, "e", e)
+            msg = await self.ex.replace(msg, ["e", e])
             return await ctx.send(msg)
 
     @commands.command()

@@ -39,7 +39,8 @@ Message Author: {message.author}
 **Message:** {new_message_content}
 [Click to go to the Message]({message.jump_url})
 """
-                embed = await self.ex.create_embed(title="Phrase Found", color=self.ex.get_random_color(), title_desc=title_desc)
+                embed = await self.ex.create_embed(title="Phrase Found", color=self.ex.get_random_color(),
+                                                   title_desc=title_desc)
                 await dm_channel.send(embed=embed)
         except Exception as e:
             log.useless(f"{e} - User Phrase - Miscellaneous.on_message_user_notifications")
@@ -56,7 +57,7 @@ Message Author: {message.author}
             msg_str = self.ex.cache.languages[language_choice]['miscellaneous']['set_language_fail']
 
         msg_str = await self.ex.replace(msg_str, [["name", ctx.author.display_name], ["language", user.language],
-                                       ["languages", ", ".join(self.ex.cache.languages.keys())]])
+                                                  ["languages", ", ".join(self.ex.cache.languages.keys())]])
 
         return await ctx.send(msg_str)
 
@@ -99,11 +100,11 @@ Message Author: {message.author}
         try:
             check_exists = self.ex.first_result(
                 await self.ex.conn.fetchrow("SELECT COUNT(*) FROM general.notifications WHERE guildid = $1 AND "
-                                       "userid = $2 AND phrase = $3", ctx.guild.id, ctx.author.id, phrase.lower()))
+                                            "userid = $2 AND phrase = $3", ctx.guild.id, ctx.author.id, phrase.lower()))
             if check_exists:
                 raise Exception
             await self.ex.conn.execute("INSERT INTO general.notifications(guildid,userid,phrase) VALUES($1, $2, $3)",
-                                  ctx.guild.id, ctx.author.id, phrase.lower())
+                                       ctx.guild.id, ctx.author.id, phrase.lower())
             user = await self.ex.get_user(ctx.author.id)
             user.notifications.append([ctx.guild.id, phrase.lower()])
             self.ex.cache.user_notifications.append([ctx.guild.id, ctx.author.id, phrase.lower()])  # full list
@@ -122,7 +123,7 @@ Message Author: {message.author}
         """
         try:
             await self.ex.conn.execute("DELETE FROM general.notifications WHERE guildid=$1 AND userid=$2 AND phrase=$3",
-                                  ctx.guild.id, ctx.author.id, phrase.lower())
+                                       ctx.guild.id, ctx.author.id, phrase.lower())
             try:
                 user = await self.ex.get_user(ctx.author.id)
                 user.notifications.remove([ctx.guild.id, phrase.lower()])
@@ -180,8 +181,8 @@ Message Author: {message.author}
     @commands.command()
     async def botinfo(self, ctx):
         """Get information about the bot."""
-        maintenance_status = api_status = db_status = images_status = weverse_status = d_py_status = irene_cache_status \
-            = ":red_circle:"
+        maintenance_status = api_status = db_status = images_status = weverse_status = d_py_status = \
+            irene_cache_status = ":red_circle:"
 
         working = ":green_circle:"
         if await self.ex.u_miscellaneous.get_api_status():
@@ -209,7 +210,8 @@ Message Author: {message.author}
         app_owner = app.owner
         app_icon_url = app.icon_url
         patreon_url = self.ex.keys.patreon_link
-        bot_uptime = await self.ex.u_miscellaneous.get_cooldown_time((datetime.now() - self.ex.keys.startup_time).total_seconds())
+        bot_uptime = await self.ex.u_miscellaneous.get_cooldown_time((datetime.now() -
+                                                                      self.ex.keys.startup_time).total_seconds())
         bot_server_links = """
 [Top.gg](https://top.gg/bot/520369375325454371)
 [Discord Bots](https://discord.bots.gg/bots/520369375325454371)
@@ -231,27 +233,37 @@ Maintenance Status: {maintenance_status}
 """
         embed = await self.ex.create_embed(title=f"I am {app_name}! ({app_id})", title_desc=title_desc)
         embed.set_thumbnail(url=app_icon_url)
-        embed.add_field(name="Servers Connected", value=f"{self.ex.u_miscellaneous.get_server_count()} Servers", inline=True)
-        embed.add_field(name="Text/Voice Channels Watched", value=f"{self.ex.u_miscellaneous.get_text_channel_count()}/{self.ex.u_miscellaneous.get_voice_channel_count()} Channels", inline=True)
-        embed.add_field(name="Servers/Channels Logged", value=f"{len(await self.ex.u_logging.get_servers_logged())}/{len(await self.ex.u_logging.get_channels_logged())} Logged", inline=True)
+        embed.add_field(name="Servers Connected", value=f"{self.ex.u_miscellaneous.get_server_count()} Servers",
+                        inline=True)
+        embed.add_field(name="Text/Voice Channels Watched",
+                        value=f"{self.ex.u_miscellaneous.get_text_channel_count()}/"
+                              f"{self.ex.u_miscellaneous.get_voice_channel_count()} Channels", inline=True)
+        embed.add_field(name="Servers/Channels Logged",
+                        value=f"{len(await self.ex.u_logging.get_servers_logged())}"
+                              f"/{len(await self.ex.u_logging.get_channels_logged())} Logged", inline=True)
         embed.add_field(name="Bot Uptime", value=bot_uptime, inline=True)
         embed.add_field(name="Total Commands Used", value=f"{self.ex.cache.total_used} Commands", inline=True)
-        embed.add_field(name="This Session ({self.ex.cache.session_id} | {datetime.date.today()})", value=f"{self.ex.cache.current_session} Commands", inline=True)
+        embed.add_field(name="This Session ({self.ex.cache.session_id} | {datetime.date.today()})",
+                        value=f"{self.ex.cache.current_session} Commands", inline=True)
         embed.add_field(name="Playing Music", value=f"{len(self.ex.client.voice_clients)} Voice Clients", inline=True)
-        embed.add_field(name="Playing Guessing/Bias", value=f"{len(self.ex.cache.guessing_games)}/{len(self.ex.cache.bias_games)} Games", inline=True)
+        embed.add_field(name="Playing Guessing/Bias",
+                        value=f"{len(self.ex.cache.guessing_games)}/{len(self.ex.cache.bias_games)} Games", inline=True)
         embed.add_field(name="Ping", value=f"{self.ex.get_ping()} ms", inline=True)
         embed.add_field(name="Shards", value=f"{self.ex.client.shard_count}", inline=True)
         embed.add_field(name="Bot Owner", value=f"<@{app_owner.id}>", inline=True)
         if mods:
             embed.add_field(name="Bot Mods", value=mods, inline=True)
-        embed.add_field(name="Support Server", value=f"[Invite to Server]({self.ex.keys.bot_support_server_link})", inline=False)
+        embed.add_field(name="Support Server", value=f"[Invite to Server]({self.ex.keys.bot_support_server_link})",
+                        inline=False)
         embed.add_field(name="Website", value=self.ex.keys.bot_website, inline=False)
         embed.add_field(name="Github", value=f"https://github.com/MujyKun/IreneBot", inline=False)
         embed.add_field(name="Discord Invite", value=self.ex.keys.bot_invite_link, inline=False)
         embed.add_field(name="Bot Server Links", value=bot_server_links, inline=False)
-        embed.add_field(name="Suggest", value=f"Suggest a feature using `{current_server_prefix}suggest`.", inline=False)
+        embed.add_field(name="Suggest", value=f"Suggest a feature using `{current_server_prefix}suggest`.",
+                        inline=False)
         if patreon_url:
-            embed.add_field(name="Patreon", value=f"[Please Support <@{self.ex.keys.bot_id}> here.]({patreon_url})", inline=False)
+            embed.add_field(name="Patreon", value=f"[Please Support <@{self.ex.keys.bot_id}> here.]({patreon_url})",
+                            inline=False)
         await ctx.send(embed=embed)
 
     @commands.command()
@@ -274,7 +286,8 @@ Maintenance Status: {maintenance_status}
             response = await self.ex.u_miscellaneous.translate(message, from_language, to_language)
             if not response:
                 return await ctx.send(
-                    f"**My Papago Translation Service is currently turned off and cannot process requests OR you did not enter the right format.**")
+                    f"**My Papago Translation Service is currently turned off and cannot process requests "
+                    f"OR you did not enter the right format.**")
             code = response['code']
             if code != 0:
                 return await ctx.send("> **Something went wrong and I did not receive a proper response from Papago.**")
@@ -301,7 +314,8 @@ Maintenance Status: {maintenance_status}
                          icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
         embed.add_field(name=f"{ctx.author.name} ({ctx.author.id})", value=desc)
         try:
-            channel = await self.ex.client.fetch_channel(self.ex.keys.report_channel_id)  # 403 error ( no access ) on testing
+            # 403 error ( no access ) on testing
+            channel = await self.ex.client.fetch_channel(self.ex.keys.report_channel_id)
             msg = await channel.send(embed=embed)
             await ctx.send("> **Your bug report has been sent.**")
             await msg.add_reaction("\U0001f44d")  # thumbs up
@@ -358,8 +372,10 @@ Maintenance Status: {maintenance_status}
         [Format: %nwl (server/global)]
         """
         embed = discord.Embed(title=f"NWord Leaderboard", color=0xffb6c1)
-        embed.set_author(name="Irene", url=self.ex.keys.bot_website, icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
-        embed.set_footer(text=f"Type {await self.ex.get_server_prefix(ctx)}nword (user) to view their individual stats.", icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
+        embed.set_author(name="Irene", url=self.ex.keys.bot_website, icon_url=self.ex.keys.icon_url)
+        embed.set_footer(
+            text=f"Type {await self.ex.get_server_prefix(ctx)}nword (user) to view their individual stats.",
+            icon_url=self.ex.keys.footer_url)
 
         guild_id = await self.ex.get_server_id(ctx)
         if not guild_id:
@@ -378,7 +394,8 @@ Maintenance Status: {maintenance_status}
                 if user.id in member_list:
                     n_word_list[user.id] = user.n_word
 
-        sorted_n_word = {key: value for key, value in sorted(n_word_list.items(), key=lambda item: item[1], reverse=True)}
+        sorted_n_word = {key: value for key, value in sorted(n_word_list.items(), key=lambda item: item[1],
+                                                             reverse=True)}
         for count, user_id in enumerate(sorted_n_word):
             value = sorted_n_word.get(user_id)
             if not value:
@@ -422,8 +439,9 @@ Maintenance Status: {maintenance_status}
         if not ctx.channel.is_nsfw() and not override == 1:
             server_prefix = await self.ex.get_server_prefix(ctx)
             return await ctx.send(f">>> **This text channel must be NSFW to use {server_prefix}"
-                           f"urban (Guidelines set by top.gg).**\nTo override this, You may add a **1** after the "
-                           f"definition number.\nExample: {server_prefix}urban hello (definition number) **1**.")
+                                  f"urban (Guidelines set by top.gg).**\nTo override this, You may add a **1** "
+                                  f"after the definition number.\nExample: {server_prefix}urban hello "
+                                  f"(definition number) **1**.")
         if not term:
             return await ctx.send("> **Please enter a word for me to define**")
         term = term.replace("_", " ")
@@ -438,7 +456,8 @@ Maintenance Status: {maintenance_status}
             try:
                 first_result = (result['list'])[number-1]
             except:
-                return await ctx.send(f"> **It is not possible to find definition number `{number}` for the word: `{term}`.**")
+                return await ctx.send(f"> **It is not possible to find definition number `{number}` for the word: "
+                                      f"`{term}`.**")
             await ctx.send(f">>> **`Word: {term}`\n`Definition Number: {number}`\n{first_result['definition']}**")
 
     @commands.command()
@@ -460,7 +479,8 @@ Maintenance Status: {maintenance_status}
         NOTE: This should not be used if a lot of servers are using the bot.
         """
         desc = f"{new_message}"
-        embed = discord.Embed(title=f"Announcement from {ctx.author} ({ctx.author.id})", description=desc, color=0xff00f6)
+        embed = discord.Embed(title=f"Announcement from {ctx.author} ({ctx.author.id})", description=desc,
+                              color=0xff00f6)
         embed.set_author(name="Irene", url=self.ex.keys.bot_website,
                          icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
         embed.set_footer(text="Type %support for an invite to Irene's discord server.",

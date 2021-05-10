@@ -21,7 +21,8 @@ class Youtube(commands.Cog):
         """
         if 'youtube.com' in link or 'youtu.be' in link:
             try:
-                await self.ex.conn.execute("INSERT INTO youtube.links(link, channelid) VALUES($1, $2)", link, ctx.channel.id)
+                await self.ex.conn.execute("INSERT INTO youtube.links(link, channelid) VALUES($1, $2)", link,
+                                           ctx.channel.id)
                 await ctx.send(f"> **<{link}> is now being tracked.**")
             except Exception as e:
                 log.console(e)
@@ -112,9 +113,9 @@ class YoutubeLoop:
                     view_count = f"{int(raw_view_count):,} views"
                     current_date = datetime.now()
                     await self.ex.conn.execute("INSERT INTO youtube.views(linkid, views, date) VALUES ($1,$2,$3)",
-                                          link_id, view_count, str(current_date))
+                                               link_id, view_count, str(current_date))
                     await self.send_channel(channel_id,
-                                                   f"> **UPDATE FOR <{url}>: {view_count} -- {current_date}**")
+                                            f"> **UPDATE FOR <{url}>: {view_count} -- {current_date}**")
             except Exception as e:
                 log.console(e)
         log.console("Updated Video Views Tracker")

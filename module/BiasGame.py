@@ -68,7 +68,8 @@ class BiasGame(commands.Cog):
         """
         if not user:
             user = ctx.author
-        user_wins = await self.ex.conn.fetch("SELECT idolid, wins FROM biasgame.winners WHERE userid = $1 ORDER BY WINS DESC LIMIT $2", user.id, 15)
+        user_wins = await self.ex.conn.fetch(
+            "SELECT idolid, wins FROM biasgame.winners WHERE userid = $1 ORDER BY WINS DESC LIMIT $2", user.id, 15)
         if user_wins:
             msg_string = await self.ex.get_msg(user.id, 'biasgame', 'lb_title')
             msg_string = await self.ex.replace(msg_string, ['name', user.display_name])
@@ -137,7 +138,7 @@ class Game:
                 add_winner(second_idol)
             else:
                 raise self.ex.exceptions.ShouldNotBeHere("Bias game reaction was returned from wait_for() "
-                                                    "when it is neither ⬅ nor ➡")
+                                                         "when it is neither ⬅ nor ➡")
             await message.delete()
         except asyncio.TimeoutError:
             await message.delete()
@@ -199,18 +200,25 @@ Remaining Idols: {self.number_of_idols_left}
 
     async def print_winner(self):
         msg_body = f"> The winner is {self.bracket_winner.stage_name}."
-        file_location = await self.ex.u_bias_game.create_bias_game_bracket(self.all_brackets_together, self.host, self.bracket_winner)
+        file_location = await self.ex.u_bias_game.create_bias_game_bracket(
+            self.all_brackets_together, self.host, self.bracket_winner)
 
         image_file = discord.File(fp=file_location, filename=f"{self.host}.png")
         await self.channel.send(msg_body, file=image_file)
 
     async def update_user_wins(self):
         if self.bracket_winner:
-            wins = self.ex.first_result(await self.ex.conn.fetchrow("SELECT wins FROM biasgame.winners WHERE userid = $1 AND idolid = $2", self.host, self.bracket_winner.id))
+            wins = self.ex.first_result(await self.ex.conn.fetchrow(
+                "SELECT wins FROM biasgame.winners WHERE userid = $1 AND idolid = $2",
+                self.host, self.bracket_winner.id))
             if wins:
-                await self.ex.conn.execute("UPDATE biasgame.winners SET wins = $1 WHERE userid = $2 AND idolid = $3", wins + 1, self.host, self.bracket_winner.id)
+                await self.ex.conn.execute(
+                    "UPDATE biasgame.winners SET wins = $1 WHERE userid = $2 AND idolid = $3",
+                    wins + 1, self.host, self.bracket_winner.id)
             else:
-                await self.ex.conn.execute("INSERT INTO biasgame.winners(idolid, userid, wins) VALUES ($1, $2, $3)", self.bracket_winner.id, self.host, 1)
+                await self.ex.conn.execute(
+                    "INSERT INTO biasgame.winners(idolid, userid, wins) VALUES ($1, $2, $3)",
+                    self.bracket_winner.id, self.host, 1)
 
     async def process_game(self):
         """Process bias guessing game by sending messages and new questions until the game should end."""

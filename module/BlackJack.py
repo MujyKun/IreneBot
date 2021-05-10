@@ -28,7 +28,8 @@ class BlackJack(commands.Cog):
                 if await self.ex.u_blackjack.process_bj_game(ctx, amount, user_id):
                     await self.ex.u_blackjack.add_bj_game(user_id, amount, ctx, "bot")
                     game_id = await self.ex.u_blackjack.get_game_by_player(user_id)
-                    fake_bot_id = int(f"{self.ex.u_miscellaneous.get_int_index(self.ex.keys.bot_id, 9)}{randint(1,999999999)}")
+                    fake_bot_id = int(
+                        f"{self.ex.u_miscellaneous.get_int_index(self.ex.keys.bot_id, 9)}{randint(1,999999999)}")
                     await self.ex.u_blackjack.add_player_two(game_id, fake_bot_id, amount)
                     await self.ex.u_blackjack.start_game(game_id)
         except Exception as e:
@@ -54,7 +55,8 @@ class BlackJack(commands.Cog):
                         await self.ex.u_blackjack.add_player_two(game_id, user_id, amount)
                         await self.ex.u_blackjack.start_game(game_id)
                     else:
-                        await ctx.send(f"> **{ctx.author}, that game ({game_id}) is not available in this text channel.**")
+                        await ctx.send(
+                            f"> **{ctx.author}, that game ({game_id}) is not available in this text channel.**")
         except Exception as e:
             log.console(e)
 
@@ -124,7 +126,8 @@ class BlackJack(commands.Cog):
                     if not check:
                         total_score = str(await self.ex.u_blackjack.get_player_total(user_id))
                         if len(total_score) == 1:
-                            total_score = '0' + total_score  # this is to prevent being able to detect the number of digits by the spoiler
+                            # prevent being able to detect the number of digits by the spoiler
+                            total_score = '0' + total_score
                         if not self.ex.u_blackjack.check_if_bot(game[2]):
                             await ctx.send(f"> **{ctx.author} finalized their deck with ||{total_score}|| points.**")
                         if await self.ex.u_blackjack.check_game_over(game_id):
@@ -152,8 +155,6 @@ class BlackJack(commands.Cog):
         Betting with the bot will either double your bet or lose all of it.**
         """
         embed = discord.Embed(title="BlackJack Rules", description=msg)
-        embed = await self.ex.set_embed_author_and_footer(embed, f"{server_prefix}help BlackJack for the available commands.")
+        embed = await self.ex.set_embed_author_and_footer(
+            embed, f"{server_prefix}help BlackJack for the available commands.")
         await ctx.send(embed=embed)
-
-
-

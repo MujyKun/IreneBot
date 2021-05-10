@@ -176,13 +176,19 @@ class Music(commands.Cog):
             if len(song.lyrics) >= 1500:
                 first_page = song.lyrics[0:1500]
                 second_page = song.lyrics[1500:len(song.lyrics)]
-                embed = await self.ex.create_embed(title=f"{song.name} by {song.artist}", color=self.ex.get_random_color(),
-                                              title_desc=first_page,
-                                              footer_desc="Thanks for using Irene! Lyrics API is from ksoft.si.")
-                embed2 = await self.ex.create_embed(title=f"{song.name} by {song.artist}", color=self.ex.get_random_color(), title_desc=second_page, footer_desc="Thanks for using Irene! Lyrics API is from ksoft.si.")
+                embed = await self.ex.create_embed(title=f"{song.name} by {song.artist}",
+                                                   color=self.ex.get_random_color(),
+                                                   title_desc=first_page,
+                                                   footer_desc="Thanks for using Irene! Lyrics API is from ksoft.si.")
+                embed2 = await self.ex.create_embed(title=f"{song.name} by {song.artist}",
+                                                    color=self.ex.get_random_color(),
+                                                    title_desc=second_page,
+                                                    footer_desc="Thanks for using Irene! Lyrics API is from ksoft.si.")
                 msg = await ctx.send(embed=embed)
                 return await self.ex.check_left_or_right_reaction_embed(msg, [embed, embed2])
-            embed = await self.ex.create_embed(title=f"{song.name} by {song.artist}", color=self.ex.get_random_color(), title_desc=song.lyrics, footer_desc="Thanks for using Irene! Lyrics API is from ksoft.si.")
+            embed = await self.ex.create_embed(title=f"{song.name} by {song.artist}", color=self.ex.get_random_color(),
+                                               title_desc=song.lyrics,
+                                               footer_desc="Thanks for using Irene! Lyrics API is from ksoft.si.")
             await ctx.send(embed=embed)
 
     @commands.command()
@@ -266,7 +272,10 @@ class Music(commands.Cog):
                 page_number = 1
             elif page_number <= 0:
                 page_number = 1
-            await self.ex.set_embed_author_and_footer(embed_list[page_number -1], footer_message=f"Total time of songs queued: {await self.ex.u_miscellaneous.get_cooldown_time(total_amount_of_time)}")
+            await self.ex.set_embed_author_and_footer(
+                embed_list[page_number - 1],
+                footer_message=f"Total time of songs queued: "
+                               f"{await self.ex.u_miscellaneous.get_cooldown_time(total_amount_of_time)}")
             msg = await ctx.send(embed=embed_list[page_number - 1])
             if len(embed_list) > 1:
                 await self.ex.check_left_or_right_reaction_embed(msg, embed_list, page_number - 1)
@@ -422,8 +431,12 @@ class Music(commands.Cog):
             if not self.check_user_in_vc(ctx):
                 return await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
             async with ctx.typing():
-                msg = await ctx.send("> **Gathering information about the video/playlist, this may take a few minutes if it is a long playlist.**")
-                videos, first_video_live = await YTDLSource.from_url(url, loop=self.ex.client.loop, stream=False, guild_id=ctx.guild.id, channel=ctx.channel, author_id=ctx.author.id)
+                msg = await ctx.send(
+                    "> **Gathering information about the video/playlist, this may take a few minutes if it "
+                    "is a long playlist.**")
+                videos, first_video_live = await YTDLSource.from_url(url, loop=self.ex.client.loop,
+                                                                     stream=False, guild_id=ctx.guild.id,
+                                                                     channel=ctx.channel, author_id=ctx.author.id)
                 if not ctx.voice_client.is_playing():
                     if not first_video_live:
                         player = await download_video(videos[0])
@@ -556,7 +569,8 @@ class Music(commands.Cog):
     @queue.before_invoke
     @shuffle.before_invoke
     async def check_patreon(self, ctx):
-        if await self.ex.u_patreon.check_if_patreon(ctx.author.id, super_patron=True) or await self.ex.u_patreon.check_if_patreon(ctx.guild.owner.id, super_patron=True):
+        if await self.ex.u_patreon.check_if_patreon(ctx.author.id, super_patron=True) or \
+                await self.ex.u_patreon.check_if_patreon(ctx.guild.owner.id, super_patron=True):
             await self.ensure_voice(ctx)
         else:
             await ctx.send(f"""**Music is only available to $5 Patreons that support <@{self.ex.keys.bot_id}>.

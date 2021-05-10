@@ -28,7 +28,8 @@ class Weverse(commands.Cog):
         """
         try:
             if not self.ex.weverse_client.cache_loaded:
-                return await ctx.send(f"> {ctx.author.display_name}, Weverse cache is being updated. Please try again in a minute or two.")
+                return await ctx.send(f"> {ctx.author.display_name}, "
+                                      f"Weverse cache is being updated. Please try again in a minute or two.")
 
             channel_id = ctx.channel.id
             community_name = community_name.lower()
@@ -37,7 +38,8 @@ class Weverse(commands.Cog):
             if await self.ex.u_weverse.check_weverse_channel(channel_id, community_name):
                 if not role:
                     await self.ex.u_weverse.delete_weverse_channel(channel_id, community_name)
-                    return await ctx.send(f"> {ctx.author.display_name}, You will no longer receive updates for {community_name}.")
+                    return await ctx.send(f"> {ctx.author.display_name}, You will no longer receive updates for "
+                                          f"{community_name}.")
             for community in self.ex.weverse_client.communities:
                 if community.name.lower() == community_name:
                     # delete any existing before adding a new one.
@@ -46,8 +48,10 @@ class Weverse(commands.Cog):
                     # add role to weverse subscription after channel is added to db.
                     if role:
                         await self.ex.u_weverse.add_weverse_role(channel_id, community_name, role.id)
-                    return await ctx.send(f"> {ctx.author.display_name}, You will now receive weverse updates for {community.name} in this channel.")
-            return await ctx.send(f"> {ctx.author.display_name},I could not find {community_name}. Available choices are:\n{self.available_choices}")
+                    return await ctx.send(f"> {ctx.author.display_name}, You will now receive weverse updates for"
+                                          f" {community.name} in this channel.")
+            return await ctx.send(f"> {ctx.author.display_name},I could not find {community_name}. "
+                                  f"Available choices are:\n{self.available_choices}")
         except Exception as e:
             msg = "An error has occurred trying to subscribe to a weverse community."
             log.console(f"{msg} - {e}")
@@ -63,7 +67,8 @@ class Weverse(commands.Cog):
         for channel in await self.ex.u_weverse.get_weverse_channels(community_name):
             if channel[0] != channel_id:
                 continue
-            await self.ex.u_weverse.change_weverse_comment_status(channel_id, community_name, not channel[2], updated=True)
+            await self.ex.u_weverse.change_weverse_comment_status(channel_id, community_name, not channel[2],
+                                                                  updated=True)
             if channel[2]:
                 return await ctx.send(f"> This channel will no longer receive comments from {community_name}.")
             return await ctx.send(f"> This channel will now receive comments from {community_name}.")
@@ -116,9 +121,11 @@ class Weverse(commands.Cog):
                     channel_id = channel_info[0]
                     notification_ids = self.notifications_already_posted.get(channel_id)
                     if not notification_ids:
-                        await self.ex.u_weverse.send_weverse_to_channel(channel_info, message_text, embed, is_comment, community_name)
+                        await self.ex.u_weverse.send_weverse_to_channel(channel_info, message_text, embed, is_comment,
+                                                                        community_name)
                         self.notifications_already_posted[channel_id] = [latest_notification.id]
                     else:
                         if latest_notification.id not in notification_ids:
                             self.notifications_already_posted[channel_id].append(latest_notification.id)
-                            await self.ex.u_weverse.send_weverse_to_channel(channel_info, message_text, embed, is_comment, community_name)
+                            await self.ex.u_weverse.send_weverse_to_channel(channel_info, message_text, embed,
+                                                                            is_comment, community_name)

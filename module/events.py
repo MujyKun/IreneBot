@@ -252,7 +252,8 @@ class Events(commands.Cog):
         # discord.boats
         try:
             if ex.u_miscellaneous.get_server_count():
-                await ex.keys.discord_boats.post_stats(botid=ex.keys.bot_id, server_count=ex.u_miscellaneous.get_server_count())
+                await ex.keys.discord_boats.post_stats(botid=ex.keys.bot_id,
+                                                       server_count=ex.u_miscellaneous.get_server_count())
                 log.console("Server Count Updated on discord.boats")
         except Exception as e:
             log.console(f"Server Count Update FAILED on discord.boats - {e}")

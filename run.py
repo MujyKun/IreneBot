@@ -72,7 +72,8 @@ class Irene:
 
     def run_live_bot(self):
         """Run Production Ver. of the the bot."""
-        module.keys.keys_obj.top_gg = dbl.DBLClient(ex.client, module.keys.keys_obj.top_gg_key, autopost=True)  # set top.gg client
+        # set top.gg client
+        module.keys.keys_obj.top_gg = dbl.DBLClient(ex.client, module.keys.keys_obj.top_gg_key, autopost=True)
         self.start_up()
         self.start_loops()
         ex.client.run(module.keys.keys_obj.client_token)

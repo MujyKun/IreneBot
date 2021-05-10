@@ -50,7 +50,7 @@ class GuessingGame(commands.Cog):
                 score = await self.ex.u_guessinggame.get_user_score(difficulty.lower(), user_id)
                 lb_string += f"**{user_position + 1})** <@{user_id}> - {score}\n"
             m_embed = await self.ex.create_embed(title=f"Guessing Game Leaderboard ({difficulty.lower()}) ({mode})",
-                                            title_desc=lb_string)
+                                                 title_desc=lb_string)
             await ctx.send(embed=m_embed)
         except Exception as e:
             log.console(e)
@@ -72,7 +72,8 @@ class GuessingGame(commands.Cog):
             return await ctx.send("> You are not allowed to play guessing game in DMs.")
         if self.ex.cache.guessing_games.get(ctx.channel.id):
             server_prefix = await self.ex.get_server_prefix(ctx)
-            return await ctx.send(f"> **A guessing game is currently in progress in this channel. If this is a mistake, use `{server_prefix}stopgg`.**")
+            return await ctx.send(f"> **A guessing game is currently in progress in this channel. "
+                                  f"If this is a mistake, use `{server_prefix}stopgg`.**")
         if rounds > 60 or timeout > 60:
             return await ctx.send("> **ERROR -> The max rounds is 60 and the max timeout is 60s.**")
         elif rounds < 1 or timeout < 3:
@@ -111,7 +112,8 @@ class GuessingGame(commands.Cog):
                 continue
 
             try:
-                added_group = await self.ex.u_guessinggame.filter_auto_add_remove_group(user_or_id=user, group_or_id=group_id)
+                added_group = await self.ex.u_guessinggame.filter_auto_add_remove_group(
+                    user_or_id=user, group_or_id=group_id)
                 if added_group:
                     added_group_ids.append(group_id)
                 else:
@@ -169,8 +171,9 @@ class GuessingGame(commands.Cog):
     @commands.command()
     async def stopgg(self, ctx):
         """
-        Force-end a guessing game if you are a moderator or host of the game. This command is meant for any issues or if a game happens to be stuck.
+        Force-end a guessing game if you are a moderator or host of the game.
 
+        This command is meant for any issues or if a game happens to be stuck.
         [Format: %stopgg]
         """
         if not await self.ex.stop_game(ctx, self.ex.cache.guessing_games):
@@ -181,7 +184,8 @@ class GuessingGame(commands.Cog):
         """Officially starts the guessing game."""
         game = Game(self.ex, ctx, max_rounds=rounds, timeout=timeout, gender=gender, difficulty=difficulty)
         self.ex.cache.guessing_games[ctx.channel.id] = game
-        await ctx.send(f"> Starting a guessing game for `{game.gender if game.gender != 'all' else 'both male and female'}` idols"
+        await ctx.send(f"> Starting a guessing game for "
+                       f"`{game.gender if game.gender != 'all' else 'both male and female'}` idols"
                        f" with `{game.difficulty}` difficulty, `{rounds}` rounds, and `{timeout}s` of guessing time.")
         await game.process_game()
         await self.ex.stop_game(ctx, self.ex.cache.guessing_games)
@@ -229,7 +233,7 @@ class Game:
         else:
             self.difficulty = "medium"
 
-        self.idol_set: list = None
+        self.idol_set: list = []
         self.results_posted = False
         self.api_issues = 0
 
@@ -303,11 +307,13 @@ class Game:
                 await self.create_acceptable_answers()
 
                 # Create list of idol group names.
-                self.group_names = [(await self.ex.u_group_members.get_group(group_id)).name for group_id in self.idol.groups]
+                self.group_names = [(await self.ex.u_group_members.get_group(group_id)).name
+                                    for group_id in self.idol.groups]
 
                 # Skip this idol if it is taking too long
                 async with async_timeout.timeout(self.post_attempt_timeout) as posting:
-                    self.idol_post_msg, self.photo_link = await self.ex.u_group_members.idol_post(self.channel, self.idol, user_id=self.host, guessing_game=True, scores=self.players)
+                    self.idol_post_msg, self.photo_link = await self.ex.u_group_members.idol_post(
+                        self.channel, self.idol, user_id=self.host, guessing_game=True, scores=self.players)
                     log.console(f'{", ".join(self.correct_answers)} - {self.channel.id}')
 
                 if posting.expired:
@@ -347,14 +353,15 @@ class Game:
         """Updates all player scores"""
         for user_id in self.players:
             await self.ex.u_guessinggame.update_user_guessing_game_score(self.difficulty, user_id=user_id,
-                                                                    score=self.players.get(user_id))
+                                                                         score=self.players.get(user_id))
 
     async def print_answer(self, question_skipped=False):
         """Prints the current round's answer."""
         skipped = ""
         if question_skipped:
             skipped = "Question Skipped. "
-        msg = await self.channel.send(f"{skipped}The correct answer was `{self.idol.full_name} ({self.idol.stage_name})`"
+        msg = await self.channel.send(f"{skipped}The correct answer was "
+                                      f"`{self.idol.full_name} ({self.idol.stage_name})`"
                                       f" from the following group(s): `{', '.join(self.group_names)}`", delete_after=15)
         # create_task should not be awaited because this is meant to run in the background to check for reactions.
         try:
@@ -376,10 +383,12 @@ class Game:
         idol_gender_set = self.ex.cache.gender_selection.get(self.gender)
         idol_difficulty_set = self.ex.cache.difficulty_selection.get(self.difficulty)
         idol_filtered_set = set()
-        self.ex.cache.idols_female.update({idol for idol in self.ex.cache.idols if idol.gender == 'f' and idol.photo_count})
+        self.ex.cache.idols_female.update({idol for idol in self.ex.cache.idols if idol.gender == 'f'
+                                           and idol.photo_count})
         if self.host_user.gg_filter:
             for group in self.host_user.gg_groups:
-                idol_filtered_set.update({await self.ex.u_group_members.get_member(idol_id) for idol_id in group.members})
+                idol_filtered_set.update(
+                    {await self.ex.u_group_members.get_member(idol_id) for idol_id in group.members})
             self.idol_set = list(idol_gender_set & idol_difficulty_set & idol_filtered_set)
         else:
             self.idol_set = list(idol_gender_set & idol_difficulty_set)

@@ -92,7 +92,8 @@ class Moderator(commands.Cog):
             guild_id = ctx.guild.id
             server_prefix = await self.ex.get_server_prefix(ctx)
             server = self.ex.cache.welcome_messages.get(guild_id)
-            welcome_new_users = f"> This server will now welcome new users. More info can be found with `{server_prefix}help welcome`"
+            welcome_new_users = f"> This server will now welcome new users. More info can be found with " \
+                                f"`{server_prefix}help welcome`"
             if not message:
                 message = f"%user, Welcome to %guild_name."
                 if not server:
@@ -192,7 +193,8 @@ class Moderator(commands.Cog):
             if muted:
                 return await ctx.send(f"**<@{user.id}> is already muted.**")
             else:
-                await user.add_roles(mute_role, reason=f"Muting User - Requested by {ctx.author.display_name} ({user.id}) - Reason: {reason}.")
+                await user.add_roles(mute_role, reason=f"Muting User - Requested by {ctx.author.display_name} "
+                                                       f"({user.id}) - Reason: {reason}.")
                 return await ctx.send(f"> **Muted <@{user.id}>. Reason: {reason}**")
         except discord.Forbidden as e:
             log.console(e)
@@ -217,7 +219,9 @@ class Moderator(commands.Cog):
             mute_role = await self.get_mute_role(ctx)
             muted = await self.check_if_muted(user.id, mute_role)
             if not mute_role:
-                return await ctx.send(">**This user was not muted by me as the mute role could not be found. In order for me to create a custom mute role, I need to mute someone first.**")
+                return await ctx.send(
+                    ">**This user was not muted by me as the mute role could not be found. In order for me to create a "
+                    "custom mute role, I need to mute someone first.**")
             if muted:
                 await user.remove_roles(mute_role,
                                         reason=f"UnMuting User - Requested by {ctx.author.display_name} ({user.id})")
@@ -336,7 +340,8 @@ class Moderator(commands.Cog):
                     self.ex.cache.server_prefixes[ctx.guild.id] = prefix
             else:
                 if prefix != "%":
-                    await self.ex.conn.execute("UPDATE general.serverprefix SET prefix = $1 WHERE serverid = $2", prefix, ctx.guild.id)
+                    await self.ex.conn.execute("UPDATE general.serverprefix SET prefix = $1 WHERE serverid = $2",
+                                               prefix, ctx.guild.id)
                     self.ex.cache.server_prefixes[ctx.guild.id] = prefix
                 else:
                     await self.ex.conn.execute("DELETE FROM general.serverprefix WHERE serverid = $1", ctx.guild.id)
@@ -397,9 +402,13 @@ class Moderator(commands.Cog):
                 return await ctx.send(f"> **{ctx.author.display_name}, you can not ban yourself!**")
             try:
                 await ctx.guild.ban(user=user, reason=reason, delete_message_days=0)
-                embed = discord.Embed(title="User Banned!", description=f"> **<@{user.id}> was banned by <@{ctx.author.id}> for {reason}**!", color=0xff00f6)
+                embed = discord.Embed(title="User Banned!", description=f"> **<@{user.id}> was banned by "
+                                                                        f"<@{ctx.author.id}> for {reason}**!",
+                                      color=0xff00f6)
             except Exception as e:
-                embed = discord.Embed(title="Error", description=f"**<@{user.id}> was not able to be banned by <@{ctx.author.id}> successfully. \n {e}**!", color=0xff00f6)
+                embed = discord.Embed(title="Error", description=f"**<@{user.id}> was not able to be banned by "
+                                                                 f"<@{ctx.author.id}> successfully. \n {e}**!",
+                                      color=0xff00f6)
             await ctx.send(embed=embed)
 
     @commands.command()
@@ -418,9 +427,13 @@ class Moderator(commands.Cog):
                 if user.id == ctx.author.id:
                     return await ctx.send(f"> **{ctx.author.display_name}, you can not ban yourself!**")
                 await ctx.guild.unban(user=user, reason=reason)
-                embed = discord.Embed(title="User Unbanned!", description=f"> **<@{user.id}> was unbanned by <@{ctx.author.id}> for {reason}**!", color=0xff00f6)
+                embed = discord.Embed(title="User Unbanned!", description=f"> **<@{user.id}> was unbanned by "
+                                                                          f"<@{ctx.author.id}> for {reason}**!",
+                                      color=0xff00f6)
             except Exception as e:
-                embed = discord.Embed(title="Error", description=f"**<@{user.id}> could not be unbanned by <@{ctx.author.id}> \n {e}**!", color=0xff00f6)
+                embed = discord.Embed(title="Error", description=f"**<@{user.id}> could not be unbanned by "
+                                                                 f"<@{ctx.author.id}> \n {e}**!",
+                                      color=0xff00f6)
             await ctx.send(embed=embed)
 
     @commands.command()
@@ -472,7 +485,8 @@ class Moderator(commands.Cog):
                 new_delay = await self.ex.u_miscellaneous.get_cooldown_time(delay)
                 temp_channel_delay = self.ex.cache.temp_channels.get(channel_id)
                 if temp_channel_delay:  # this channel is already a temp channel
-                    await self.ex.conn.execute("UPDATE general.TempChannels SET delay = $1 WHERE chanID = $2", delay, channel_id)
+                    await self.ex.conn.execute("UPDATE general.TempChannels SET delay = $1 WHERE chanID = $2", delay,
+                                               channel_id)
                 else:
                     await self.ex.conn.execute("INSERT INTO general.TempChannels VALUES ($1, $2)", channel_id, delay)
                 await ctx.send(f"> **This channel now deletes messages every {new_delay}.**")

@@ -114,9 +114,9 @@ class Help(commands.Cog):
             filtered = await self.filter_commands(bot.commands, sort=True, key=get_category)
             to_iterate = itertools.groupby(filtered, key=get_category)
 
-            for category, commands in to_iterate:
-                commands = sorted(commands, key=lambda c: c.name) if self.sort_commands else list(commands)
-                self.add_bot_commands_formatting(commands, category)
+            for category, t_commands in to_iterate:
+                commands_list = sorted(t_commands, key=lambda c: c.name) if self.sort_commands else list(t_commands)
+                self.add_bot_commands_formatting(commands_list, category)
 
             note = self.get_ending_note()
             if note:

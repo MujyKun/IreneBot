@@ -131,4 +131,3 @@ Available Roles: {', '.join(role_names)}
         if not server_id:
             await ctx.send("> You cannot use this command in DMs.")
             raise commands.CommandError(f"{ctx.author.id} attempted to use Self-Assignable Roles in DMs.")
-

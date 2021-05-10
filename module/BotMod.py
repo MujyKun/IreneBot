@@ -79,10 +79,12 @@ class BotMod(commands.Cog):
         [Format: %moveto (idol id) (link)]
         """
         try:
-            drive_link = self.ex.first_result(await self.ex.conn.fetchrow("SELECT driveurl FROM groupmembers.apiurl WHERE apiurl = $1", link))
+            drive_link = self.ex.first_result(await self.ex.conn.fetchrow(
+                "SELECT driveurl FROM groupmembers.apiurl WHERE apiurl = $1", link))
             if not drive_link:
                 return await ctx.send(f"> **{link} does not have a connection to a google drive link.**")
-            await self.ex.conn.execute("UPDATE groupmembers.imagelinks SET memberid = $1 WHERE link = $2", int(idol_id), drive_link)
+            await self.ex.conn.execute("UPDATE groupmembers.imagelinks SET memberid = $1 WHERE link = $2", int(idol_id),
+                                       drive_link)
             await ctx.send(f"> **Moved {link} to {idol_id} if it existed.**")
         except Exception as e:
             log.console(e)
@@ -113,14 +115,16 @@ class BotMod(commands.Cog):
                     await download_image(mem_thumbnail)
                 if self.ex.check_file_exists(file_loc):
                     image_url = f"{self.ex.keys.image_host}/avatar/{file_name}"
-                    await self.ex.conn.execute("UPDATE groupmembers.member SET thumbnail = $1 WHERE id = $2", image_url, mem_id)
+                    await self.ex.conn.execute(
+                        "UPDATE groupmembers.member SET thumbnail = $1 WHERE id = $2", image_url, mem_id)
             if mem_banner:
                 file_loc = f"{self.ex.keys.idol_banner_location}{file_name}"
                 if 'images.irenebot.com' not in mem_banner:
                     await download_image(mem_banner)
                 image_url = f"https://images.irenebot.com/banner/{file_name}"
                 if self.ex.check_file_exists(file_loc):
-                    await self.ex.conn.execute("UPDATE groupmembers.member SET banner = $1 WHERE id = $2", image_url, mem_id)
+                    await self.ex.conn.execute(
+                        "UPDATE groupmembers.member SET banner = $1 WHERE id = $2", image_url, mem_id)
         for grp_id, grp_thumbnail, grp_banner in grp_info:
             file_name = f"{grp_id}_GROUP.png"
             if grp_thumbnail:
@@ -129,15 +133,18 @@ class BotMod(commands.Cog):
                     await download_image(grp_thumbnail)
                 image_url = f"https://images.irenebot.com/avatar/{file_name}"
                 if self.ex.check_file_exists(file_loc):
-                    await self.ex.conn.execute("UPDATE groupmembers.groups SET thumbnail = $1 WHERE groupid = $2", image_url, grp_id)
+                    await self.ex.conn.execute(
+                        "UPDATE groupmembers.groups SET thumbnail = $1 WHERE groupid = $2", image_url, grp_id)
             if grp_banner:
                 file_loc = f"{self.ex.keys.idol_banner_location}{file_name}"
                 if 'images.irenebot.com' not in grp_banner:
                     await download_image(grp_banner)
                 image_url = f"https://images.irenebot.com/banner/{file_name}"
                 if self.ex.check_file_exists(file_loc):
-                    await self.ex.conn.execute("UPDATE groupmembers.groups SET banner = $1 WHERE groupid = $2", image_url, grp_id)
-        return await ctx.send("> All images have been fixed, merged to image hosting service and have links set up for them.")
+                    await self.ex.conn.execute(
+                        "UPDATE groupmembers.groups SET banner = $1 WHERE groupid = $2", image_url, grp_id)
+        return await ctx.send(
+            "> All images have been fixed, merged to image hosting service and have links set up for them.")
 
     @commands.command()
     @check_if_mod()
@@ -161,7 +168,9 @@ class BotMod(commands.Cog):
         for group_id in duplicate_idol.groups:
             if group_id not in original_idol.groups:
                 # add groups from dupe to original.
-                await self.ex.conn.execute("UPDATE groupmembers.idoltogroup SET idolid = $1 WHERE groupid = $2 AND idolid = $3", original_idol.id, group_id, duplicate_idol.id)
+                await self.ex.conn.execute(
+                    "UPDATE groupmembers.idoltogroup SET idolid = $1 WHERE groupid = $2 AND idolid = $3",
+                    original_idol.id, group_id, duplicate_idol.id)
         # delete idol
         await self.ex.conn.execute("DELETE FROM groupmembers.member WHERE id = $1", duplicate_idol.id)
         # recreate cache
@@ -187,11 +196,15 @@ class BotMod(commands.Cog):
         if not original_group:
             return await ctx.send(f"> {original_group} could not find a Group.")
         # move aliases
-        await self.ex.conn.execute("UPDATE groupmembers.aliases SET objectid = $1 WHERE isgroup = $2 AND objectid = $3", original_group.id, 1, duplicate_group.id)
+        await self.ex.conn.execute(
+            "UPDATE groupmembers.aliases SET objectid = $1 WHERE isgroup = $2 AND objectid = $3",
+            original_group.id, 1, duplicate_group.id)
         for member_id in duplicate_group.members:
             if member_id not in original_group.members:
                 # update the member location to the original group
-                await self.ex.conn.execute("UPDATE groupmembers.idoltogroup SET groupid = $1 WHERE idolid = $2 AND groupid = $3", original_group.id, member_id, duplicate_group.id)
+                await self.ex.conn.execute(
+                    "UPDATE groupmembers.idoltogroup SET groupid = $1 WHERE idolid = $2 AND groupid = $3",
+                    original_group.id, member_id, duplicate_group.id)
         # delete group
         await self.ex.conn.execute("DELETE FROM groupmembers.groups WHERE groupid = $1", duplicate_group.id)
         # recreate cache
@@ -306,8 +319,11 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
                 for url in links:
                     url = url.replace(' ', '')
                     url = url.replace('\n', '')
-                    await self.ex.conn.execute("INSERT INTO general.interactions(url, interaction) VALUES ($1, $2)", url, interaction_type.lower())
-                    embed = discord.Embed(title=f"**Added {url} to {interaction_type.lower()}**", color=self.ex.get_random_color())
+                    await self.ex.conn.execute(
+                        "INSERT INTO general.interactions(url, interaction) VALUES ($1, $2)",
+                        url, interaction_type.lower())
+                    embed = discord.Embed(
+                        title=f"**Added {url} to {interaction_type.lower()}**", color=self.ex.get_random_color())
                     embed.set_image(url=url)
                     await ctx.send(embed=embed)
             else:
@@ -413,13 +429,13 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
         [Format: %addidoltogroup (idol id) (group id)]
         """
         try:
-            member_name = (await self.ex.u_group_members.get_member(idol_id))[1]
-            group_name = await self.ex.get_group_name(group_id)
-            if await self.ex.check_member_in_group(idol_id, group_id):
-                return await ctx.send(f'> **{member_name} ({idol_id}) is already in {group_name} ({group_id}).**')
+            member = await self.ex.u_group_members.get_member(idol_id)
+            group = await self.ex.u_group_members.get_group(group_id)
+            if member.id in group.members:
+                return await ctx.send(f'> **{member.stage_name} ({idol_id}) is already in {group.name} ({group_id}).**')
             else:
                 await self.ex.u_group_members.add_idol_to_group(idol_id, group_id)
-                await ctx.send(f"**Added {member_name} ({idol_id}) to {group_name} ({group_id}).**")
+                await ctx.send(f"**Added {member.stage_name} ({idol_id}) to {group.name} ({group_id}).**")
         except Exception as e:
             await ctx.send(f"Something went wrong - {e}")
             log.console(e)
@@ -433,13 +449,14 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
         [Format: %deleteidolfromgroup (idol id) (group id)]
         """
         try:
-            member_name = (await self.ex.u_group_members.get_member(idol_id))[1]
-            group_name = await self.ex.get_group_name(group_id)
-            if not await self.ex.check_member_in_group(idol_id, group_id):
-                await ctx.send(f"> **{member_name} ({idol_id}) is not in {group_name} ({group_id}).**")
+            member = await self.ex.u_group_members.get_member(idol_id)
+            group = await self.ex.u_group_members.get_group(group_id)
+
+            if member.id not in group.members:
+                await ctx.send(f"> **{member.stage_name} ({idol_id}) is not in {group.name} ({group_id}).**")
             else:
                 await self.ex.u_group_members.remove_idol_from_group(idol_id, group_id)
-                await ctx.send(f"**Removed {member_name} ({idol_id}) from {group_name} ({group_id}).**")
+                await ctx.send(f"**Removed {member.stage_name} ({idol_id}) from {group.name} ({group_id}).**")
         except Exception as e:
             await ctx.send(f"Something went wrong - {e}")
             log.console(e)
@@ -470,7 +487,7 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
         """
         try:
             await self.ex.conn.execute("DELETE FROM groupmembers.groups WHERE groupid = $1", group_id)
-            await ctx.send(f"{await self.ex.get_group_name(group_id)} ({group_id}) deleted.")
+            await ctx.send(f"{(await self.ex.u_group_members.get_group(group_id)).name} ({group_id}) deleted.")
         except Exception as e:
             await ctx.send(f"Something went wrong - {e}")
             log.console(e)
@@ -489,9 +506,14 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
                 user = await self.ex.get_user(user.id)
                 user.mod_mail_channel_id = ctx.channel.id
                 self.ex.cache.mod_mail[user.id] = ctx.channel.id  # full list
-                await self.ex.conn.execute("INSERT INTO general.modmail(userid, channelid) VALUES ($1, $2)", user.id, ctx.channel.id)
-                await dm_channel.send(f"> {ctx.author.display_name} ({ctx.author.id}) has created a DM with you. All messages sent here will be sent to them.")
-                await ctx.send(f"> A DM has been created with {user.id}. All messages you type in this channel will be sent to the user.")
+                await self.ex.conn.execute(
+                    "INSERT INTO general.modmail(userid, channelid) VALUES ($1, $2)", user.id, ctx.channel.id)
+                await dm_channel.send(
+                    f"> {ctx.author.display_name} ({ctx.author.id}) has created a DM with you. "
+                    f"All messages sent here will be sent to them.")
+                await ctx.send(
+                    f"> A DM has been created with {user.id}. "
+                    f"All messages you type in this channel will be sent to the user.")
             else:
                 await ctx.send("> I was not able to create a DM with that user.")
         except Exception as e:
@@ -510,20 +532,20 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
             if user:
                 user_id = user.id
             else:
-                user_id = self.ex.first_result(await self.ex.conn.fetchrow("SELECT userid FROM general.modmail WHERE channelid = $1", ctx.channel.id))
+                user_id = self.ex.first_result(await self.ex.conn.fetchrow(
+                    "SELECT userid FROM general.modmail WHERE channelid = $1", ctx.channel.id))
             dm_channel = await self.ex.get_dm_channel(user_id)
             if not dm_channel:
                 return await ctx.send("> **There are no DMs set up in this channel.**")
             user = await self.ex.get_user(user_id)
             user.mod_mail_channel_id = 0
             self.ex.cache.mod_mail.pop(user_id, None)  # full list
-            await self.ex.conn.execute("DELETE FROM general.modmail WHERE userid = $1 and channelid = $2", user_id, ctx.channel.id)
+            await self.ex.conn.execute(
+                "DELETE FROM general.modmail WHERE userid = $1 and channelid = $2", user_id, ctx.channel.id)
             await ctx.send(f"> The DM with {user_id} has been deleted successfully.")
-            await dm_channel.send(f"> {ctx.author.display_name} ({ctx.author.id}) has closed the DM with you. Your messages will no longer be sent to them.")
+            await dm_channel.send(
+                f"> {ctx.author.display_name} ({ctx.author.id}) has closed the DM with you. "
+                f"Your messages will no longer be sent to them.")
         except Exception as e:
             await ctx.send(f"ERROR - {e}")
             log.console(e)
-
-
-
-

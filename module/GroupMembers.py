@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands
 from IreneUtility.util import u_logger as log
-from module import keys
 import time
 import typing
 import json
@@ -49,15 +48,15 @@ class GroupMembers(commands.Cog):
                 # we just need to make sure it has the bot's default prefix
                 # however this means if a user changes the prefix and attempts to use the bot's default prefix
                 # it will still process idol photos, but not regular commands.
-                if message.content[0:len(keys.bot_prefix)] != keys.bot_prefix or message.content.lower() == \
-                        f"{keys.bot_prefix}null":
+                if message.content[0:len(self.ex.keys.bot_prefix)] != self.ex.keys.bot_prefix or \
+                        message.content.lower() == f"{self.ex.keys.bot_prefix}null":
                     return
-                message_content = message.content[len(keys.bot_prefix):len(message.content)]
+                message_content = message.content[len(self.ex.keys.bot_prefix):len(message.content)]
                 server_id = await self.ex.get_server_id(message)
-                members = await self.ex.u_group_members.get_idol_where_member_matches_name(message_content,
-                                                                                      server_id=server_id)
-                groups = await self.ex.u_group_members.get_group_where_group_matches_name(message_content,
-                                                                                     server_id=server_id)
+                members = await self.ex.u_group_members.get_idol_where_member_matches_name(
+                    message_content, server_id=server_id)
+                groups = await self.ex.u_group_members.get_group_where_group_matches_name(
+                    message_content, server_id=server_id)
                 photo_msg = None
                 if members or groups:
                     # check if it is an individual idol or group name.
@@ -79,7 +78,8 @@ class GroupMembers(commands.Cog):
                     await self.ex.u_miscellaneous.add_session_count()
                     self.ex.u_group_members.add_user_limit(message.author)
                     if api_url:
-                        await self.ex.u_group_members.check_idol_post_reactions(photo_msg, message, random_member, api_url)
+                        await self.ex.u_group_members.check_idol_post_reactions(photo_msg, message, random_member,
+                                                                                api_url)
         except Exception as e:
             log.useless(f"{e} - Processing Idol Photo Message Issue - GroupMembers.idol_photo_on_message")
 
@@ -109,29 +109,33 @@ class GroupMembers(commands.Cog):
                 height = int(height)
 
             # for security purposes, do not simplify the structure.
-            await self.ex.conn.execute("INSERT INTO groupmembers.unregisteredmembers(fullname, stagename, formerfullname, "
-                                  "formerstagename, birthdate, birthcountry, birthcity, gender, description, height, "
-                                  "twitter, youtube, melon, instagram, vlive, spotify, fancafe, facebook, tiktok, zodiac,"
-                                  " thumbnail, banner, bloodtype, tags, groupids, notes) VALUES ($1, $2, $3, $4, $5, $6, "
-                                  "$7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, "
-                                  "$25, $26)", full_name, stage_name, idol_json.get("Former Full Name"),
-                                  idol_json.get("Former Stage Name"), birth_date, idol_json.get("Birth Country"),
-                                  idol_json.get("Birth City"), idol_json.get("Gender"), idol_json.get("Description"),
-                                  height, idol_json.get("Twitter"), idol_json.get("Youtube"),
-                                  idol_json.get("Melon"), idol_json.get("Instagram"), idol_json.get("VLive"),
-                                  idol_json.get("Spotify"), idol_json.get("Fancafe"), idol_json.get("Facebook"),
-                                  idol_json.get("TikTok"), idol_json.get("Zodiac"), idol_json.get("Avatar"),
-                                  idol_json.get("Banner"), idol_json.get("BloodType"), idol_json.get("Tags"),
-                                  idol_json.get("Group IDs"), idol_json.get("Approver Notes"))
+            await self.ex.conn.execute("INSERT INTO groupmembers.unregisteredmembers(fullname, stagename, "
+                                       "formerfullname, formerstagename, birthdate, birthcountry, birthcity, gender, "
+                                       "description, height, twitter, youtube, melon, instagram, vlive, spotify, "
+                                       "fancafe, facebook, tiktok, zodiac, thumbnail, banner, bloodtype, tags,"
+                                       " groupids, notes) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, "
+                                       "$12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, "
+                                       "$26)", full_name, stage_name, idol_json.get("Former Full Name"),
+                                       idol_json.get("Former Stage Name"), birth_date, idol_json.get("Birth Country"),
+                                       idol_json.get("Birth City"), idol_json.get("Gender"),
+                                       idol_json.get("Description"), height, idol_json.get("Twitter"),
+                                       idol_json.get("Youtube"), idol_json.get("Melon"), idol_json.get("Instagram"),
+                                       idol_json.get("VLive"), idol_json.get("Spotify"), idol_json.get("Fancafe"),
+                                       idol_json.get("Facebook"), idol_json.get("TikTok"), idol_json.get("Zodiac"),
+                                       idol_json.get("Avatar"), idol_json.get("Banner"),
+                                       idol_json.get("BloodType"), idol_json.get("Tags"),
+                                       idol_json.get("Group IDs"), idol_json.get("Approver Notes"))
 
             # get the id of the data that was just added to db.
-            query_id = self.ex.first_result(await self.ex.conn.fetchrow("SELECT id FROM groupmembers.unregisteredmembers WHERE fullname = $1 AND stagename = $2 ORDER BY id DESC", full_name, stage_name))
+            query_id = self.ex.first_result(await self.ex.conn.fetchrow(
+                "SELECT id FROM groupmembers.unregisteredmembers WHERE fullname = $1 AND stagename = $2 ORDER BY "
+                "id DESC", full_name, stage_name))
 
             # get the channel to send idol information to.
-            channel = self.ex.client.get_channel(keys.add_idol_channel_id)
+            channel = self.ex.client.get_channel(self.ex.keys.add_idol_channel_id)
             # fetch if discord.py cache is not loaded.
             if not channel:
-                channel = await self.ex.client.fetch_channel(keys.add_idol_channel_id)
+                channel = await self.ex.client.fetch_channel(self.ex.keys.add_idol_channel_id)
             title_description = f"""
 ==================
 Query ID: {query_id} 
@@ -145,8 +149,8 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
             # send embed to approval/deny channel
             embed = await self.ex.create_embed(title="New Unregistered Idol", title_desc=title_description)
             msg = await channel.send(embed=embed)
-            await msg.add_reaction(keys.check_emoji)
-            await msg.add_reaction(keys.trash_emoji)
+            await msg.add_reaction(self.ex.keys.check_emoji)
+            await msg.add_reaction(self.ex.keys.trash_emoji)
             msg = await self.ex.get_msg(ctx, "groupmembers", "add_idol_sent")
             msg = await self.ex.replace(msg, [["name", ctx.author.display_name], ['query_id', query_id]])
             await ctx.send(msg)
@@ -182,27 +186,28 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
             group_name = group_json.get("Group Name")
 
             # for security purposes, do not simplify the structure as any json field can be entered.
-            await self.ex.conn.execute("INSERT INTO groupmembers.unregisteredgroups(groupname, debutdate, disbanddate, "
-                                  "description, twitter, youtube, melon, instagram, vlive, spotify, fancafe, "
-                                  "facebook, tiktok, fandom, company, website, thumbnail, banner, gender, tags, "
-                                  "notes) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, "
-                                  "$16, $17, $18, $19, $20, $21)", group_name, debut_date, disband_date,
-                                  group_json.get("Description"), group_json.get("Twitter"), group_json.get("Youtube"),
-                                  group_json.get("Melon"), group_json.get("Instagram"), group_json.get("VLive"),
-                                  group_json.get("Spotify"), group_json.get("Fancafe"), group_json.get("Facebook"),
-                                  group_json.get("TikTok"), group_json.get("Fandom"), group_json.get("Company"),
-                                  group_json.get("Website"), group_json.get("Avatar"), group_json.get("Banner"),
-                                  group_json.get("Gender"), group_json.get("Tags"), group_json.get("Approver Notes"))
+            await self.ex.conn.execute("INSERT INTO groupmembers.unregisteredgroups(groupname, debutdate, disbanddate,"
+                                       " description, twitter, youtube, melon, instagram, vlive, spotify, "
+                                       "fancafe, facebook, tiktok, fandom, company, website, thumbnail, banner, "
+                                       "gender, tags, notes) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12,"
+                                       " $13, $14, $15, $16, $17, $18, $19, $20, $21)", group_name, debut_date,
+                                       disband_date, group_json.get("Description"), group_json.get("Twitter"),
+                                       group_json.get("Youtube"), group_json.get("Melon"), group_json.get("Instagram"),
+                                       group_json.get("VLive"), group_json.get("Spotify"), group_json.get("Fancafe"),
+                                       group_json.get("Facebook"), group_json.get("TikTok"), group_json.get("Fandom"),
+                                       group_json.get("Company"), group_json.get("Website"), group_json.get("Avatar"),
+                                       group_json.get("Banner"), group_json.get("Gender"), group_json.get("Tags"),
+                                       group_json.get("Approver Notes"))
 
             # get the id of the data that was just added to db.
             query_id = self.ex.first_result(await self.ex.conn.fetchrow(
                 "SELECT id FROM groupmembers.unregisteredgroups WHERE groupname = $1 ORDER BY id DESC", group_name))
 
             # get the channel to send idol information to.
-            channel = self.ex.client.get_channel(keys.add_group_channel_id)
+            channel = self.ex.client.get_channel(self.ex.keys.add_group_channel_id)
             # fetch if discord.py cache is not loaded.
             if not channel:
-                channel = await self.ex.client.fetch_channel(keys.add_group_channel_id)
+                channel = await self.ex.client.fetch_channel(self.ex.keys.add_group_channel_id)
             title_description = f"""
 ==================
 Query ID: {query_id} 
@@ -216,8 +221,8 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
             # send embed to approval/deny channel
             embed = await self.ex.create_embed(title="New Unregistered Group", title_desc=title_description)
             msg = await channel.send(embed=embed)
-            await msg.add_reaction(keys.check_emoji)
-            await msg.add_reaction(keys.trash_emoji)
+            await msg.add_reaction(self.ex.keys.check_emoji)
+            await msg.add_reaction(self.ex.keys.trash_emoji)
             msg = await self.ex.get_msg(ctx, "groupmembers", "add_group_sent")
             msg = await self.ex.replace(msg, [["name", ctx.author.display_name], ['query_id', query_id]])
             await ctx.send(msg)
@@ -278,7 +283,8 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
             text_channel = ctx.channel
         if await self.ex.u_group_members.check_channel_sending_photos(text_channel.id):
             try:
-                await self.ex.conn.execute("INSERT INTO groupmembers.restricted(channelid, serverid, sendhere) VALUES($1, $2, $3)", text_channel.id, ctx.guild.id, 0)
+                await self.ex.conn.execute("INSERT INTO groupmembers.restricted(channelid, serverid, sendhere) "
+                                           "VALUES($1, $2, $3)", text_channel.id, ctx.guild.id, 0)
                 self.ex.cache.restricted_channels[text_channel.id] = [ctx.guild.id, 0]
                 msg = await self.ex.get_msg(ctx, "groupmembers", "stop_images_disable")
                 msg = await self.ex.replace(msg, ['text_channel', text_channel.name])
@@ -286,10 +292,11 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
             except:
                 msg = await self.ex.get_msg(ctx, "groupmembers", "stop_images_fail")
                 msg = await self.ex.replace(msg, [['text_channel', text_channel.name],
-                                             ['server_prefix', await self.ex.get_server_prefix(ctx)]])
+                                                  ['server_prefix', await self.ex.get_server_prefix(ctx)]])
                 await ctx.send(msg)
         else:
-            await self.ex.conn.execute("DELETE FROM groupmembers.restricted WHERE channelid = $1 AND sendhere = $2", text_channel.id, 0)
+            await self.ex.conn.execute("DELETE FROM groupmembers.restricted WHERE channelid = $1 AND sendhere = $2",
+                                       text_channel.id, 0)
             await self.ex.u_group_members.delete_restricted_channel_from_cache(text_channel.id, 0)
             msg = await self.ex.get_msg(ctx, "groupmembers", "stop_images_enable")
             msg = await self.ex.replace(msg, ['text_channel', text_channel.name])
@@ -299,8 +306,9 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
     @commands.command()
     async def sendimages(self, ctx, text_channel: discord.TextChannel = None):
         """
-        All idol photo commands from the server will post idol photos in a specific text channel. To undo, type it again.
+        All idol photo commands from the server will post idol photos in a specific text channel.
 
+        To undo, type it again.
         [Format: %sendimages #text-channel]
         """
         if not text_channel:
@@ -310,14 +318,16 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
                 old_channel = await self.ex.u_group_members.get_channel_sending_photos(ctx.guild.id)
                 if old_channel:
                     if old_channel.id == text_channel.id:
-                        await self.ex.conn.execute("DELETE FROM groupmembers.restricted WHERE channelid = $1 AND serverid = $2 AND sendhere = $3", text_channel.id, ctx.guild.id, 1)
+                        await self.ex.conn.execute("DELETE FROM groupmembers.restricted WHERE channelid = $1 AND"
+                                                   " serverid = $2 AND sendhere = $3", text_channel.id, ctx.guild.id, 1)
                         await self.ex.u_group_members.delete_restricted_channel_from_cache(text_channel.id, 1)
                         msg = await self.ex.get_msg(ctx, "groupmembers", "send_images_disable")
                         msg = await self.ex.replace(msg, ['text_channel', text_channel.name])
                         return await ctx.send(msg)
                 else:
                     delete_channel_id = None
-                    await self.ex.conn.execute("UPDATE groupmembers.restricted SET channelid = $1 WHERE serverid = $2 AND sendhere = $3", text_channel.id, ctx.guild.id, 1)
+                    await self.ex.conn.execute("UPDATE groupmembers.restricted SET channelid = $1 WHERE serverid = $2"
+                                               " AND sendhere = $3", text_channel.id, ctx.guild.id, 1)
                     for channel_id in self.ex.cache.restricted_channels:
                         channel_info = self.ex.cache.restricted_channels.get(channel_id)
                         if channel_info[0] == ctx.guild.id and channel_info[1] == 1:
@@ -327,7 +337,8 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
                         self.ex.cache.restricted_channels.pop(delete_channel_id)
                         self.ex.cache.restricted_channels[text_channel.id] = [ctx.guild.id, 1]
             else:
-                await self.ex.conn.execute("INSERT INTO groupmembers.restricted(channelid, serverid, sendhere) VALUES ($1, $2, $3)", text_channel.id, ctx.guild.id, 1)
+                await self.ex.conn.execute("INSERT INTO groupmembers.restricted(channelid, serverid, sendhere) "
+                                           "VALUES ($1, $2, $3)", text_channel.id, ctx.guild.id, 1)
                 self.ex.cache.restricted_channels[text_channel.id] = [ctx.guild.id, 1]
             msg = await self.ex.get_msg(ctx, "groupmembers", "send_images_enable")
             msg = await self.ex.replace(msg, ['text_channel', text_channel.name])
@@ -335,7 +346,7 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
         else:
             msg = await self.ex.get_msg(ctx, "groupmembers", "send_images_fail")
             msg = await self.ex.replace(msg, [['text_channel', text_channel.name],
-                                         ['server_prefix', await self.ex.get_server_prefix(ctx)]])
+                                              ['server_prefix', await self.ex.get_server_prefix(ctx)]])
             await ctx.send(msg)
 
     @commands.command(aliases=['%'])
@@ -345,7 +356,8 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
 
         [Format: %%]
         """
-        if await self.ex.u_group_members.check_channel_sending_photos(ctx.channel.id) and not await self.ex.u_miscellaneous.check_if_temp_channel(ctx.channel.id):
+        if await self.ex.u_group_members.check_channel_sending_photos(ctx.channel.id) and not \
+                await self.ex.u_miscellaneous.check_if_temp_channel(ctx.channel.id):
             channel = ctx.channel
             try:
                 if await self.ex.u_group_members.check_server_sending_photos(ctx.guild.id):
@@ -385,7 +397,8 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
         [Format: %countmember <name/all>)]
         """
         if member_name.lower() == "all":
-            return await ctx.send(f"> **There are {await self.ex.u_group_members.get_all_images_count()} photos stored.**")
+            return await ctx.send(f"> **There are {await self.ex.u_group_members.get_all_images_count()}"
+                                  f" photos stored.**")
         server_id = await self.ex.get_server_id(ctx)
         members = await self.ex.u_group_members.get_idol_where_member_matches_name(member_name, server_id=server_id)
         if not members:
@@ -394,7 +407,7 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
         for member in members:
             msg = await self.ex.get_msg(ctx, "groupmembers", "photo_count")
             msg = await self.ex.replace(msg, [["photo_count", member.photo_count],
-                                         ["object_name", f"{member.full_name} ({member.stage_name})"]])
+                                              ["object_name", f"{member.full_name} ({member.stage_name})"]])
             await ctx.send(msg)
 
     @commands.command(aliases=['fullname'])
@@ -431,9 +444,11 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
             if group.name == "NULL" and not is_mod:
                 continue
             if is_mod:
-                embed.insert_field_at(counter, name=f"{group.name} ({group.id})", value=f"{group.photo_count} Photos", inline=True)
+                embed.insert_field_at(counter, name=f"{group.name} ({group.id})", value=f"{group.photo_count} Photos",
+                                      inline=True)
             else:
-                embed.insert_field_at(counter, name=f"{group.name}", value=f"{group.photo_count} Photos", inline=True)
+                embed.insert_field_at(counter, name=f"{group.name}", value=f"{group.photo_count} Photos",
+                                      inline=True)
             if counter == 25:
                 counter = 0
                 embed_list.append(embed)
@@ -448,8 +463,9 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
     @commands.command()
     async def aliases(self, ctx, mode="member", page_number=1):
         """
-        Lists the aliases of idols or groups that have one. Underscores are spaces and commas are to split idol or group names
+        Lists the aliases of idols or groups that have one.
 
+        Underscores are spaces and commas are to split idol or group names
         [Format: %aliases (names of idols/groups) (page number)]
         """
         try:
@@ -510,8 +526,9 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
                         if mem_id == member.id:
                             final_rank = count + 1
                             msg = await self.ex.get_msg(ctx, "groupmembers", "called_and_rank")
-                            msg = await self.ex.replace(msg, [["idol_name", f"{member.full_name} ({member.stage_name})"],
-                                                         ["called", member.called], ['rank', final_rank]])
+                            msg = await self.ex.replace(msg, [["idol_name", f"{member.full_name} "
+                                                                            f"({member.stage_name})"],
+                                                              ["called", member.called], ['rank', final_rank]])
                             await ctx.send(msg)
         except Exception as e:
             log.console(e)
@@ -527,8 +544,9 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
         [Format: %clb]
         """
         embed = discord.Embed(title=f"Idol Leaderboard", color=0xffb6c1)
-        embed.set_author(name="Irene", url=self.ex.keys.bot_website, icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
-        embed.set_footer(text=f"Type {await self.ex.get_server_prefix(ctx)}count (idol name) to view their individual stats.", icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
+        embed.set_author(name="Irene", url=self.ex.keys.bot_website, icon_url=self.ex.keys.icon_url)
+        embed.set_footer(text=f"Type {await self.ex.get_server_prefix(ctx)}count (idol name) to view "
+                              f"their individual stats.", icon_url=self.ex.keys.footer_url)
         all_members = await self.ex.conn.fetch("SELECT MemberID, Count FROM groupmembers.Count ORDER BY Count DESC")
         count_loop = 0
         for member_id, count in all_members:

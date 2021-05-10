@@ -15,7 +15,9 @@ class Logging(commands.Cog):
                 if await self.ex.u_logging.get_send_all(message.guild.id):
                     logging_channel = await self.ex.u_logging.get_log_channel_id(message)
                     files = await self.ex.u_logging.get_attachments(message)
-                    embed_message = f"**{message.author} ({message.author.id})\nMessage: **{message.content}**\nFrom {message.guild} in {message.channel}\nCreated at {message.created_at}\n<{message.jump_url}>**"
+                    embed_message = f"**{message.author} ({message.author.id})\nMessage: **{message.content}**\nFrom " \
+                                    f"{message.guild} in {message.channel}\n" \
+                                    f"Created at {message.created_at}\n<{message.jump_url}>**"
                     embed = discord.Embed(title="Message Sent", description=embed_message, color=0xffffff)
                     await logging_channel.send(embed=embed, files=files)
             except Exception as e:
@@ -44,15 +46,18 @@ class Logging(commands.Cog):
 
         if not await self.ex.u_logging.check_if_logged(server_id=ctx.guild.id):
             return await ctx.send(
-                f"> **The server must be logged in order to log a channel. ({await self.ex.get_server_prefix(ctx)}startlogging)**")
+                f"> **The server must be logged in order to log a channel. "
+                f"({await self.ex.get_server_prefix(ctx)}startlogging)**")
         if await self.ex.u_logging.check_if_logged(channel_id=text_channel.id):
             return await ctx.send(f"> **{text_channel.name} is already being logged.**")
 
-        is_logging_channel = self.ex.first_result(await self.ex.conn.fetchrow("SELECT COUNT(*) FROM logging.servers WHERE channelid = $1", text_channel.id))
+        is_logging_channel = self.ex.first_result(await self.ex.conn.fetchrow(
+            "SELECT COUNT(*) FROM logging.servers WHERE channelid = $1", text_channel.id))
         if is_logging_channel:
             return await ctx.send(f"> **{text_channel.name} can not be logged since log messages are sent here.**")
         logging_id = await self.ex.u_logging.get_logging_id(ctx.guild.id)
-        await self.ex.conn.execute("INSERT INTO logging.channels (channelid, server) VALUES($1, $2)", text_channel.id, logging_id)
+        await self.ex.conn.execute("INSERT INTO logging.channels (channelid, server) VALUES($1, $2)",
+                                   text_channel.id, logging_id)
         self.ex.cache.list_of_logged_channels.append(text_channel.id)
         await ctx.send(f"> **{text_channel.name} is now being logged.**")
 
@@ -103,7 +108,9 @@ class Logging(commands.Cog):
             if await self.ex.u_logging.check_logging_requirements(message):
                 logging_channel = await self.ex.u_logging.get_log_channel_id(message)
                 files = await self.ex.u_logging.get_attachments(message)
-                embed_message = f"**{message.author} ({message.author.id})\nOld Message: **{msg_before.content}**\nNew Message: **{message.content}**\nFrom {message.guild} in {message.channel}\nCreated at {message.created_at}\n<{message.jump_url}>**"
+                embed_message = f"**{message.author} ({message.author.id})\nOld Message: **{msg_before.content}" \
+                                f"**\nNew Message: **{message.content}**\nFrom {message.guild} in {message.channel}\n" \
+                                f"Created at {message.created_at}\n<{message.jump_url}>**"
                 embed = discord.Embed(title="Message Edited", description=embed_message, color=0x00ff00)
                 await logging_channel.send(embed=embed, files=files)
         except Exception as e:
@@ -114,7 +121,8 @@ class Logging(commands.Cog):
             if await self.ex.u_logging.check_logging_requirements(message):
                 logging_channel = await self.ex.u_logging.get_log_channel_id(message)
                 files = await self.ex.u_logging.get_attachments(message)
-                embed_message = f"**{message.author} ({message.author.id})\nMessage: **{message.content}**\nFrom {message.guild} in {message.channel}\nCreated at {message.created_at}**"
+                embed_message = f"**{message.author} ({message.author.id})\nMessage: **{message.content}**\nFrom" \
+                                f" {message.guild} in {message.channel}\nCreated at {message.created_at}**"
                 embed = discord.Embed(title="Message Deleted", description=embed_message, color=0xff0000)
                 await logging_channel.send(embed=embed, files=files)
         except Exception as e:

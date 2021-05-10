@@ -158,7 +158,8 @@ class LastFM(commands.Cog):
             user = await self.set_user(ctx, user)
             response = await self.ex.u_last_fm.get_fm_response('user.getRecentTracks', user)
             tracks_and_titles = self.get_recent_tracks(response, limit=10)
-            await ctx.send(embed=await self.create_fm_embed(f"{user} **Recent Tracks **", tracks_and_titles, inline=True))
+            await ctx.send(embed=await self.create_fm_embed(f"{user} **Recent Tracks **", tracks_and_titles,
+                                                            inline=True))
         except KeyError:
             await events.Events.error(ctx, self.user_not_found)
         except Exception as e:
@@ -184,7 +185,8 @@ class LastFM(commands.Cog):
             await ctx.send(f"> **Something went wrong.. Please {await self.ex.get_server_prefix(ctx)}report it.**")
 
     @commands.command(aliases=['ta'])
-    async def topartists(self, ctx, user: typing.Union[discord.User, str] = None, time_period: typing.Union[discord.User, str] = None):
+    async def topartists(self, ctx, user: typing.Union[discord.User, str] = None,
+                         time_period: typing.Union[discord.User, str] = None):
         """
         See the top artists of a Last FM Account by a discord user or a Last FM username
 
@@ -193,7 +195,8 @@ class LastFM(commands.Cog):
         """
         try:
             user, time_period = await self.set_user(ctx, user, time_period), self.set_period(user, time_period)
-            response = await self.ex.u_last_fm.get_fm_response('user.getTopArtists', user, limit=10, time_period=time_period)
+            response = await self.ex.u_last_fm.get_fm_response('user.getTopArtists', user, limit=10,
+                                                               time_period=time_period)
             list_of_artists = response['topartists']['artist']
             counter = 0
             artist_and_titles = []
@@ -202,7 +205,8 @@ class LastFM(commands.Cog):
                 title = f"**#{counter} ({artist['playcount']} plays)**"
                 artist_name = f"**[{artist['name']}]({artist['url']})**"
                 artist_and_titles.append([title, artist_name])
-            await ctx.send(embed=await self.create_fm_embed(f"{user} **Top Artists ({time_period})**", artist_and_titles))
+            await ctx.send(embed=await self.create_fm_embed(f"{user} **Top Artists ({time_period})**",
+                                                            artist_and_titles))
         except KeyError:
             await events.Events.error(ctx, self.user_not_found)
         except Exception as e:
@@ -210,7 +214,8 @@ class LastFM(commands.Cog):
             await ctx.send(f"> **Something went wrong.. Please {await self.ex.get_server_prefix(ctx)}report it.**")
 
     @commands.command(aliases=['tt'])
-    async def toptracks(self, ctx, user: typing.Union[discord.User, str] = None, time_period: typing.Union[discord.User, str] = None):
+    async def toptracks(self, ctx, user: typing.Union[discord.User, str] = None,
+                        time_period: typing.Union[discord.User, str] = None):
         """
         See the top tracks of a Last FM Account by a discord user or a Last FM username
 
@@ -220,7 +225,8 @@ class LastFM(commands.Cog):
         """
         try:
             user, time_period = await self.set_user(ctx, user, time_period), self.set_period(user, time_period)
-            response = await self.ex.u_last_fm.get_fm_response('user.getTopTracks', user, limit=10, time_period=time_period)
+            response = await self.ex.u_last_fm.get_fm_response('user.getTopTracks', user, limit=10,
+                                                               time_period=time_period)
             list_of_tracks = response['toptracks']['track']
             counter = 0
             tracks_and_titles = []
@@ -229,7 +235,8 @@ class LastFM(commands.Cog):
                 title = f"**#{counter} ({track['playcount']} plays)**"
                 artist_name = f"**[{track['name']} by {track['artist']['name']}]({track['url']})**"
                 tracks_and_titles.append([title, artist_name])
-            await ctx.send(embed=await self.create_fm_embed(f"{user} **Top Tracks ({time_period})**", tracks_and_titles))
+            await ctx.send(embed=await self.create_fm_embed(f"{user} **Top Tracks ({time_period})**",
+                                                            tracks_and_titles))
         except KeyError:
             await events.Events.error(ctx, self.user_not_found)
         except Exception as e:
@@ -238,7 +245,8 @@ class LastFM(commands.Cog):
                 f"> **Something went wrong.. Please {await self.ex.get_server_prefix(ctx)}report it.**")
 
     @commands.command(aliases=["tal"])
-    async def topalbums(self, ctx, user: typing.Union[discord.User, str] = None, time_period: typing.Union[discord.User, str] = None):
+    async def topalbums(self, ctx, user: typing.Union[discord.User, str] = None,
+                        time_period: typing.Union[discord.User, str] = None):
         """
         See the top albums of a Last FM Account by a discord user or a Last FM username
 
@@ -248,7 +256,8 @@ class LastFM(commands.Cog):
         """
         try:
             user, time_period = await self.set_user(ctx, user, time_period), self.set_period(user, time_period)
-            response = await self.ex.u_last_fm.get_fm_response('user.getTopAlbums', user, limit=10, time_period=time_period)
+            response = await self.ex.u_last_fm.get_fm_response('user.getTopAlbums', user, limit=10,
+                                                               time_period=time_period)
             list_of_albums = response['topalbums']['album']
             counter = 0
             tracks_and_titles = []
@@ -257,7 +266,8 @@ class LastFM(commands.Cog):
                 title = f"**#{counter} ({album['playcount']} plays)**"
                 artist_name = f"**[{album['name']} by {album['artist']['name']}]({album['url']})**"
                 tracks_and_titles.append([title, artist_name])
-            await ctx.send(embed=await self.create_fm_embed(f"{user} **Top Albums ({time_period})**", tracks_and_titles))
+            await ctx.send(embed=await self.create_fm_embed(f"{user} **Top Albums ({time_period})**",
+                                                            tracks_and_titles))
         except KeyError:
             await events.Events.error(ctx, self.user_not_found)
         except Exception as e:

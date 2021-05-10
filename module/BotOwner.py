@@ -30,12 +30,16 @@ class BotOwner(commands.Cog):
                         for idol_name in all_names:
                             idol_name = idol_name[0]
                             if idol_name == link_name and (idol_name != "Group" or idol_name != "MDG Group"):
-                                member_id1 = self.ex.first_result(await self.ex.conn.fetchrow("SELECT ID FROM groupmembers.Member WHERE StageName = $1", idol_name))
-                                await self.ex.conn.execute("INSERT INTO groupmembers.uploadimagelinks VALUES($1,$2)", new_link, member_id1)
+                                member_id1 = self.ex.first_result(
+                                    await self.ex.conn.fetchrow("SELECT ID FROM groupmembers.Member WHERE StageName = "
+                                                                "$1", idol_name))
+                                await self.ex.conn.execute(
+                                    "INSERT INTO groupmembers.uploadimagelinks VALUES($1,$2)", new_link, member_id1)
                                 await self.ex.conn.execute("DELETE FROM archive.DriveIDs WHERE ID = $1", p_id)
                     elif link_name.lower() == name.lower():
                         await self.ex.conn.execute("DELETE FROM archive.DriveIDs WHERE ID = $1", p_id)
-                        await self.ex.conn.execute("INSERT INTO groupmembers.uploadimagelinks VALUES($1,$2)", new_link, member_id)
+                        await self.ex.conn.execute(
+                            "INSERT INTO groupmembers.uploadimagelinks VALUES($1,$2)", new_link, member_id)
                 except Exception as e:
                     log.console(e)
             await ctx.send(await self.ex.get_msg(ctx, 'botowner', 'scan_drive_complete'))
@@ -53,9 +57,9 @@ class BotOwner(commands.Cog):
         await self.ex.conn.execute("DELETE FROM blackjack.cards")
         suit_names = ("Hearts", "Diamonds", "Spades", "Clubs")
         rank_names = ("Ace", "Two", "Three", "Four", "Five", "Six", "Seven",
-                    "Eight", "Nine", "Ten", "Jack", "Queen", "King")
-        card_values = [11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11, 2, 3,
-                      4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
+                      "Eight", "Nine", "Ten", "Jack", "Queen", "King")
+        card_values = [11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11, 2,
+                       3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
         cards = []
         for suit in suit_names[0:4]:
             for rank in rank_names[0:13]:
@@ -63,7 +67,8 @@ class BotOwner(commands.Cog):
         count_x = -1
         for card in cards:
             count_x += 1
-            await self.ex.conn.execute("INSERT INTO blackjack.cards (id, name, value) VALUES ($3, $1, $2)", card, card_values[count_x], count_x+1)
+            await self.ex.conn.execute("INSERT INTO blackjack.cards (id, name, value) VALUES ($3, $1, $2)", card,
+                                       card_values[count_x], count_x+1)
         await ctx.send(await self.ex.get_msg(ctx, 'botowner', 'cards_added'), delete_after=40)
 
     @commands.command()
@@ -137,12 +142,14 @@ class BotOwner(commands.Cog):
         """Approve a query id for an unregistered group or idol."""
         if mode == "group":
             # get the query
-            group = await self.ex.conn.fetchrow("""SELECT groupname, debutdate, disbanddate, description, twitter, youtube,
+            group = await self.ex.conn.fetchrow("""SELECT groupname, debutdate, disbanddate, description, twitter, 
+            youtube,
             melon, instagram, vlive, spotify, fancafe, facebook, tiktok, fandom, company, website, thumbnail, banner,
              gender, tags FROM groupmembers.unregisteredgroups WHERE id = $1""", query_id)
 
             # create a new group
-            await self.ex.conn.execute("""INSERT INTO groupmembers.groups(groupname, debutdate, disbanddate, description,
+            await self.ex.conn.execute("""INSERT INTO groupmembers.groups(groupname, debutdate, disbanddate, 
+            description,
             twitter, youtube, melon, instagram, vlive, spotify, fancafe, facebook, tiktok, fandom, company, website,
              thumbnail, banner, gender, tags) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, 
              $15, $16, $17, $18, $19, $20)""", *group)
@@ -158,24 +165,29 @@ class BotOwner(commands.Cog):
 
         if mode == "idol":
             # get the query
-            idol = await self.ex.conn.fetchrow("""SELECT fullname, stagename, formerfullname, formerstagename, birthdate,
+            idol = await self.ex.conn.fetchrow("""SELECT fullname, stagename, formerfullname, formerstagename, 
+            birthdate,
             birthcountry, birthcity, gender, description, height, twitter, youtube, melon, instagram, vlive, spotify, 
             fancafe, facebook, tiktok, zodiac, thumbnail, banner, bloodtype, tags
             FROM groupmembers.unregisteredmembers WHERE id = $1""", query_id)
 
             # make a separate call for group ids to separate the record later for inserting.
-            group_ids = self.ex.first_result(await self.ex.conn.fetchrow("""SELECT groupids FROM groupmembers.unregisteredmembers WHERE id = $1""", query_id))
+            group_ids = self.ex.first_result(await self.ex.conn.fetchrow(
+                "SELECT groupids FROM groupmembers.unregisteredmembers WHERE id = $1", query_id))
             if group_ids:
                 group_ids = group_ids.split(',')
 
             # create a new idol
-            await self.ex.conn.execute("""INSERT INTO groupmembers.member(fullname, stagename, formerfullname, formerstagename, birthdate,
+            await self.ex.conn.execute("""INSERT INTO groupmembers.member(fullname, stagename, formerfullname, 
+            formerstagename, birthdate,
             birthcountry, birthcity, gender, description, height, twitter, youtube, melon, instagram, vlive, spotify, 
-            fancafe, facebook, tiktok, zodiac, thumbnail, banner, bloodtype, tags) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14,
+            fancafe, facebook, tiktok, zodiac, thumbnail, banner, bloodtype, tags) VALUES($1, $2, $3, $4, $5, $6, $7, 
+            $8, $9, $10, $11, $12, $13, $14,
              $15, $16, $17, $18, $19, $20, $21 ,$22, $23, $24)""", *idol)
 
             # get the new idol's ID
-            idol_id = self.ex.first_result(await self.ex.conn.fetchrow("""SELECT id FROM groupmembers.member WHERE fullname = $1
+            idol_id = self.ex.first_result(
+                await self.ex.conn.fetchrow("""SELECT id FROM groupmembers.member WHERE fullname = $1
             AND stagename = $2 ORDER BY id DESC""", idol.get("fullname"), idol.get("stagename")))
 
             # create the idol to group relationships.
@@ -213,4 +225,3 @@ class BotOwner(commands.Cog):
         # reset cache for idols/groups.
         await self.ex.u_cache.create_group_cache()
         await self.ex.u_cache.create_idol_cache()
-

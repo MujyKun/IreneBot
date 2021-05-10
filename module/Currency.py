@@ -43,8 +43,8 @@ class Currency(commands.Cog):
 
         msg_str = await self.ex.get_msg(user, 'currency', 'balance_msg')
         msg_str = await self.ex.replace(msg_str, [["name", member.display_name],
-                                             ["balance", (self.ex.add_commas(user.balance))],
-                                             ["currency_name", self.ex.keys.currency_name]])
+                                                  ["balance", (self.ex.add_commas(user.balance))],
+                                                  ["currency_name", self.ex.keys.currency_name]])
 
         return await ctx.send(msg_str)
 
@@ -63,20 +63,20 @@ class Currency(commands.Cog):
         if user.in_currency_game:  # in a game that affects currency (such as blackjack).
             msg = await self.ex.get_msg(user, "currency", "in_game")
             msg = await self.ex.replace(msg, [["name", ctx.author.display_name],
-                                         ["server_prefix", server_prefix]])
+                                              ["server_prefix", server_prefix]])
             return await ctx.send(msg)
 
         if bet_amount <= 0:  # input is wrong or they are trying to bet nothing.
             msg = await self.ex.get_msg(user, "currency", "nothing_to_bet")
             msg = await self.ex.replace(msg, [["name", ctx.author.display_name],
-                                         ["currency_name", self.ex.keys.currency_name]])
+                                              ["currency_name", self.ex.keys.currency_name]])
             return await ctx.send(msg)
 
         if bet_amount > user.balance:  # user does not have enough.
             msg = await self.ex.get_msg(user, "currency", "not_enough")
             msg = await self.ex.replace(msg, [["name", ctx.author.display_name],
-                                         ["currency_name", self.ex.keys.currency_name],
-                                         ["balance", (self.ex.add_commas(user.balance))]])
+                                              ["currency_name", self.ex.keys.currency_name],
+                                              ["balance", (self.ex.add_commas(user.balance))]])
             return await ctx.send(msg)
 
         user_random_number = randint(1, 100)  # served as comparator and is also the win percentage.
@@ -98,9 +98,9 @@ class Currency(commands.Cog):
         await user.update_balance(add=bet_result)
         msg = await self.ex.get_msg(user, "currency", "bet_result")
         msg = await self.ex.replace(msg, [["name", ctx.author.display_name],
-                                     ["result", result],
-                                     ["integer", -bet_result if bet_result < 0 else bet_result],
-                                     ["balance", self.ex.add_commas(user.balance)]])
+                                          ["result", result],
+                                          ["integer", -bet_result if bet_result < 0 else bet_result],
+                                          ["balance", self.ex.add_commas(user.balance)]])
         await ctx.send(msg)
 
     @commands.command(aliases=['leaderboards', 'lb'])
@@ -129,7 +129,7 @@ class Currency(commands.Cog):
         sorted_balance.sort(key=lambda user_and_bal: user_and_bal[1], reverse=True)
 
         embed = await self.ex.create_embed(title=f"Currency Leaderboard ({mode.lower()})",
-                                      footer_desc="Type %bal (user) to view their balance.")
+                                           footer_desc="Type %bal (user) to view their balance.")
 
         for count, user_info in enumerate(sorted_balance, 1):
             if count > 10:
@@ -171,7 +171,8 @@ class Currency(commands.Cog):
         # get rid of invalid input.
         if not command or command.lower() not in possible_options:
             msg_str = await self.ex.get_msg(user, 'general', 'invalid_input')
-            msg_str = await self.ex.replace(msg_str, [["name", ctx.author.display_name], ["server_prefix", server_prefix],
+            msg_str = await self.ex.replace(msg_str, [["name", ctx.author.display_name],
+                                                      ["server_prefix", server_prefix],
                                                       ["command_name", "upgrade"]])
             return await ctx.send(msg_str)
 

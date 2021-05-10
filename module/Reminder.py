@@ -70,9 +70,10 @@ class Reminder(commands.Cog):
                 if user_timezone:
                     remind_time = remind_time.replace(tzinfo=pytz.utc).astimezone(pytz.timezone(user_timezone))
                 msg = await self.ex.get_msg(ctx, "reminder", "remove_reminder")
-                msg = await self.ex.replace(msg, [['name', ctx.author.display_name],
-                                             ['reason', remind_reason],
-                                             ['time', await self.ex.u_reminder.get_locale_time(remind_time,user_timezone)]])
+                msg = await self.ex.replace(
+                    msg, [['name', ctx.author.display_name],
+                          ['reason', remind_reason],
+                          ['time', await self.ex.u_reminder.get_locale_time(remind_time, user_timezone)]])
                 await ctx.send(msg)
                 await self.ex.u_reminder.remove_user_reminder(ctx.author.id, remind_id)
             except:
@@ -94,13 +95,14 @@ class Reminder(commands.Cog):
         if reminders:
             if len(reminders) >= self.ex.keys.reminder_limit:
                 msg = await self.ex.get_msg(ctx, "reminder", "max_reminders")
-                msg = await self.ex.replace(msg, [["name", ctx.author.display_name], ["reminder_limit", self.ex.keys.reminder_limit]])
+                msg = await self.ex.replace(msg, [["name", ctx.author.display_name], ["reminder_limit",
+                                                                                      self.ex.keys.reminder_limit]])
                 return await ctx.send(msg)
         server_prefix = await self.ex.get_server_prefix(ctx)
         # msgs are repeated numerous times. setting the values beforehand.
         incorrect_format_msg = await self.ex.get_msg(ctx, "reminder", "incorrect_format")
         incorrect_format_msg = await self.ex.replace(incorrect_format_msg, [["name", ctx.author.display_name],
-                                                                       ["server_prefix", server_prefix]])
+                                                                            ["server_prefix", server_prefix]])
         try:
             is_relative_time, type_index = await self.ex.u_reminder.determine_time_type(user_input)
         except self.ex.exceptions.ImproperFormat:
@@ -110,7 +112,8 @@ class Reminder(commands.Cog):
             return await ctx.send(incorrect_format_msg)
         remind_reason = await self.ex.u_reminder.process_reminder_reason(user_input, type_index)
         try:
-            remind_time = await self.ex.u_reminder.process_reminder_time(user_input, type_index, is_relative_time, ctx.author.id)
+            remind_time = await self.ex.u_reminder.process_reminder_time(user_input, type_index, is_relative_time,
+                                                                         ctx.author.id)
         except self.ex.exceptions.ImproperFormat:
             msg = await self.ex.get_msg(ctx, "reminder", "incorrect_time_format")
             msg = await self.ex.replace(msg, ["name", ctx.author.display_name])
@@ -122,13 +125,14 @@ class Reminder(commands.Cog):
         except self.ex.exceptions.NoTimeZone:
             msg = await self.ex.get_msg(ctx, "reminder", "no_timezone")
             msg = await self.ex.replace(msg, [['name', ctx.author.display_name], ['server_prefix', server_prefix],
-                                         ['format', self.set_timezone_format]])
+                                              ['format', self.set_timezone_format]])
             return await ctx.send(msg)
 
         await self.ex.u_reminder.set_reminder(remind_reason, remind_time, ctx.author.id)
         msg = await self.ex.get_msg(ctx, "reminder", "will_remind")
-        msg = await self.ex.replace(msg, [['name', ctx.author.display_name], ['reason', remind_reason],
-                                     ['time', await self.ex.u_reminder.get_locale_time(remind_time, user_timezone)]])
+        msg = await self.ex.replace(
+            msg, [['name', ctx.author.display_name], ['reason', remind_reason],
+                  ['time', await self.ex.u_reminder.get_locale_time(remind_time, user_timezone)]])
         return await ctx.send(msg)
 
     @commands.command(aliases=['gettz', 'time'])
@@ -146,7 +150,7 @@ class Reminder(commands.Cog):
                 current_time = await self.ex.u_reminder.format_time('%I:%M:%S %p', timezone_input)
                 msg = await self.ex.get_msg(ctx, "reminder", "current_time")
                 msg = await self.ex.replace(msg, [["name", ctx.author.display_name], ["tz", timezone_input],
-                                             ["time", current_time]])
+                                                  ["time", current_time]])
                 return await ctx.send(msg)
             except:
                 msg = await self.ex.get_msg(ctx, "reminder", "incorrect_tz_input")
@@ -165,14 +169,14 @@ class Reminder(commands.Cog):
         if not user_timezone:
             msg = await self.ex.get_msg(ctx, "reminder", "no_timezone")
             msg = await self.ex.replace(msg, [['name', user.display_name], ['server_prefix', server_prefix],
-                                         ['format', self.set_timezone_format]])
+                                              ['format', self.set_timezone_format]])
             return await ctx.send(msg)
 
         current_time = await self.ex.u_reminder.format_time('%I:%M:%S %p', user_timezone)
         timezone_abbrev = await self.ex.u_reminder.format_time('UTC%z', user_timezone)
         msg = await self.ex.get_msg(ctx, "reminder", "user_time")
         msg = await self.ex.replace(msg, [["name", user.display_name], ["time", current_time],
-                                     ["tz", f"{user_timezone} {timezone_abbrev}"]])
+                                          ["tz", f"{user_timezone} {timezone_abbrev}"]])
         return await ctx.send(msg)
 
     @commands.command(aliases=['settz'])
@@ -193,7 +197,7 @@ class Reminder(commands.Cog):
         if not user_timezone:
             msg = await self.ex.get_msg(ctx, "reminder", "invalid_tz")
             msg = await self.ex.replace(msg, [["name", ctx.author.display_name], ["server_prefix", server_prefix],
-                                         ["format", self.set_timezone_format]])
+                                              ["format", self.set_timezone_format]])
             return await ctx.send(msg)
 
         timezone_utc = await self.ex.u_reminder.format_time('UTC%z', user_timezone)
@@ -201,7 +205,7 @@ class Reminder(commands.Cog):
         await self.ex.u_reminder.set_user_timezone(ctx.author.id, user_timezone)
         msg = await self.ex.get_msg(ctx, "reminder", "add_tz")
         msg = await self.ex.replace(msg, [["name", ctx.author.display_name], ["tz", f"{user_timezone} {timezone_utc}"],
-                                     ["time", native_time]])
+                                          ["time", native_time]])
         return await ctx.send(msg)
 
     @tasks.loop(seconds=5, minutes=0, hours=0, reconnect=True)

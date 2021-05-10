@@ -85,14 +85,16 @@ class Wolfram(commands.Cog):
                 for result in results:
                     if len(embed_msg) > 1500:
                         embed_list.append(
-                            await self.ex.create_embed(title=f"Wolfram Request Page: {page_number} (FULL) ", title_desc=embed_msg))
+                            await self.ex.create_embed(title=f"Wolfram Request Page: {page_number} (FULL) ",
+                                                       title_desc=embed_msg))
                         embed_msg = ""
                         page_number += 1
                     embed_msg += f"{result}\n"
 
                 if embed_msg:
                     embed_list.append(
-                        await self.ex.create_embed(title=f"Wolfram Request Page: {page_number} (FULL)", title_desc=embed_msg))
+                        await self.ex.create_embed(title=f"Wolfram Request Page: {page_number} (FULL)",
+                                                   title_desc=embed_msg))
 
                 msg = await ctx.send(embed=embed_list[0])
                 await self.ex.check_left_or_right_reaction_embed(msg, embed_list)

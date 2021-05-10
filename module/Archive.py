@@ -32,7 +32,8 @@ class Archive(commands.Cog):
             except asyncio.TimeoutError:
                 return False
         try:
-            all_channels = await self.ex.conn.fetch("SELECT id, channelid, guildid, driveid, name FROM archive.channellist")
+            all_channels = await self.ex.conn.fetch(
+                "SELECT id, channelid, guildid, driveid, name FROM archive.channellist")
             for _, channel_id, _, drive_id, name in all_channels:
                 if message.channel.id != channel_id:
                     return
@@ -78,27 +79,31 @@ class Archive(commands.Cog):
             if not owner_present:
                 return await ctx.send(await self.ex.replace(
                     await self.ex.get_msg(user, 'archive', 'talk_to_owner'), [['name', ctx.author.display_name],
-                                                                         ['owner_id', self.ex.keys.owner_id]]))
+                                                                              ['owner_id', self.ex.keys.owner_id]]))
 
             await ctx.send(await self.ex.get_msg(user, 'archive', 'waiting_confirmation'))
             if not await self.on_message(ctx, is_owner=True):
 
                 return await ctx.send(await self.ex.get_msg(user, 'archive', 'no_confirmation'))
 
-            drive_id_in_db = self.ex.first_result(await self.ex.conn.fetchrow("SELECT COUNT(*) FROM archive.channellist WHERE driveid = $1", drive_folder_id))
+            drive_id_in_db = self.ex.first_result(await self.ex.conn.fetchrow(
+                "SELECT COUNT(*) FROM archive.channellist WHERE driveid = $1", drive_folder_id))
             if not drive_id_in_db:
                 url = f"https://drive.google.com/drive/folders/{drive_folder_id}"
                 return await ctx.send(await self.ex.replace(
                     await self.ex.get_msg(user, 'archive', 'url_being_used'), ['g_drive_url', url]))
 
-            channel_id_in_db = self.ex.first_result(await self.ex.conn.fetchrow("SELECT COUNT(*) FROM archive.channellist WHERE channelid = $1", ctx.channel.id))
+            channel_id_in_db = self.ex.first_result(await self.ex.conn.fetchrow(
+                "SELECT COUNT(*) FROM archive.channellist WHERE channelid = $1", ctx.channel.id))
             if not channel_id_in_db:
                 await ctx.send(await self.ex.get_msg(user, 'archive', 'being_archived'))
 
             url = f"https://drive.google.com/drive/folders/{drive_folder_id}"
             async with self.ex.session.get(url) as r:
                 if r.status == 200:
-                    await self.ex.conn.execute("INSERT INTO archive.ChannelList VALUES($1,$2,$3,$4)", ctx.channel.id, ctx.guild.id, drive_folder_id, name)
+                    await self.ex.conn.execute(
+                        "INSERT INTO archive.ChannelList VALUES($1,$2,$3,$4)",
+                        ctx.channel.id, ctx.guild.id, drive_folder_id, name)
                     msg = await self.ex.get_msg(user, 'archive', 'archive_success')
                 elif r.status == 404:
                     msg = await self.ex.get_msg(user, 'archive', 'not_found')
@@ -125,8 +130,8 @@ class Archive(commands.Cog):
         all_channels = await self.ex.conn.fetch("SELECT id, channelid, guildid, driveid, name FROM archive.ChannelList")
         guild_name = ctx.guild.name
         embed = discord.Embed(title=f"Archived {guild_name} Channels", color=0x87CEEB)
-        embed.set_author(name="Irene", url=self.ex.keys.bot_website, icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
-        embed.set_footer(text="Thanks for using Irene.", icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
+        embed.set_author(name="Irene", url=self.ex.keys.bot_website, icon_url=self.ex.keys.icon_url)
+        embed.set_footer(text="Thanks for using Irene.", icon_url=self.ex.keys.footer_url)
         check = False
         for _, channel_id, guild_id, drive_id, name in all_channels:
             # noinspection PyBroadException,PyBroadException,PyBroadException
@@ -134,7 +139,8 @@ class Archive(commands.Cog):
                 list_channel = (self.ex.client.get_channel(channel_id)).name
                 if ctx.guild.id == guild_id:
                     check = True
-                    embed.insert_field_at(0, name=list_channel, value=f"https://drive.google.com/drive/folders/{drive_id} | {name}", inline=False)
+                    embed.insert_field_at(0, name=list_channel, value=f"https://drive.google.com/drive/"
+                                                                      f"folders/{drive_id} | {name}", inline=False)
             except Exception as e:
                 # Error would occur on test bot if the client does not have access to a certain channel id
                 # this try-except will also be useful if a server removed the bot.
@@ -154,7 +160,9 @@ class Archive(commands.Cog):
         """
         user = await self.ex.get_user(ctx.author.id)
         try:
-            channel_id_in_db = self.ex.first_result(await self.ex.conn.fetchrow("SELECT COUNT(*) FROM archive.ChannelList WHERE ChannelID = $1", ctx.channel.id))
+            channel_id_in_db = self.ex.first_result(
+                await self.ex.conn.fetchrow(
+                    "SELECT COUNT(*) FROM archive.ChannelList WHERE ChannelID = $1", ctx.channel.id))
             if not channel_id_in_db:
                 return await ctx.send(await self.ex.get_msg(user, 'archive', 'not_archived'))
             else:
@@ -191,7 +199,9 @@ class Archive(commands.Cog):
                         'Photos/{}'.format(file_name), mode='wb')
                     await fd.write(await r.read())
                     await fd.close()
-                    await self.ex.conn.execute("INSERT INTO archive.ArchivedChannels VALUES($1,$2,$3,$4)", file_name, src, drive_id, channel_id)
+                    await self.ex.conn.execute(
+                        "INSERT INTO archive.ArchivedChannels VALUES($1,$2,$3,$4)",
+                        file_name, src, drive_id, channel_id)
                     # quickstart.Drive.checker()
         except Exception as e:
             log.console(e)

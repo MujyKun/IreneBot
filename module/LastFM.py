@@ -23,7 +23,6 @@ class LastFM(commands.Cog):
         list_of_tracks = response['recenttracks']['track']
         tracks_and_titles = []
         for counter, track in enumerate(list_of_tracks):
-            await asyncio.sleep(0)
             if counter + 1 <= limit:
                 title = f"**#{counter + 1} **"
                 try:

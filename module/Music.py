@@ -143,7 +143,6 @@ class Music(commands.Cog):
                 return
 
             for song in queued_songs:
-                await asyncio.sleep(0)
                 player = song[0]
                 file_name = song[2]
                 if check_if_player(player):
@@ -479,7 +478,6 @@ class Music(commands.Cog):
             return
         all_voice_clients = self.ex.client.voice_clients
         for voice_client in all_voice_clients:
-            await asyncio.sleep(0)
             if voice_client.is_playing() or voice_client.is_paused():
                 continue
             client_guild_id = voice_client.guild.id

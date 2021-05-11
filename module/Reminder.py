@@ -132,7 +132,9 @@ class Reminder(commands.Cog):
                                                                      ['reason', remind_reason],
                                                                      ['time', await self.ex.u_reminder.get_locale_time(
                                                                          remind_time, user_timezone)]])
-        return await ctx.send(msg)
+        # we should put the msg in an embed to avoid custom inputing mentioning @everyone.
+        embed = await self.ex.create_embed(title="Reminder", title_desc=msg)
+        return await ctx.send(embed=embed)
 
     @commands.command(aliases=['gettz', 'time'])
     async def gettimezone(self, ctx, user_input: typing.Union[discord.Member, str] = None):

@@ -129,8 +129,10 @@ class GuessingGame(commands.Cog):
             final_message += f"\nThe following groups entered were added: **{', '.join(added_group_ids)}**"
         if removed_group_ids:
             final_message += f"\nThe following groups entered were removed: **{', '.join(removed_group_ids)}**"
+        embed = await self.ex.create_embed(title="GuessingGame Filter", title_desc=final_message)
+        # we should put the msg in an embed to avoid custom inputing mentioning @everyone.
 
-        await ctx.send(final_message)
+        await ctx.send(embed=embed)
 
     @commands.command(aliases=["ggfilterlist", "filterlist"])
     async def ggfilteredlist(self, ctx):

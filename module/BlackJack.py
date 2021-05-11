@@ -107,7 +107,7 @@ class BlackJack(commands.Cog):
     async def rules(self, ctx):
         """View the rules of BlackJack."""
         server_prefix = await self.ex.get_server_prefix(ctx)
-        msg = f"""**Each Player gets 2 cards at the start.\n
+        msg = f"""Each Player gets 2 cards at the start.\n
         In order to get blackjack, your final value must equal 21.\n
         If Player1 exceeds 21 and Player2 does not, Player1 busts and Player2 wins the game.\n
         You will have two options.\n

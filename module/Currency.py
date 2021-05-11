@@ -171,6 +171,7 @@ class Currency(commands.Cog):
 
         # get rid of invalid input.
         if not command or command.lower() not in possible_options:
+            ctx.command.reset_cooldown(ctx)
             msg_str = await self.ex.get_msg(user, 'general', 'invalid_input', [["name", ctx.author.display_name],
                                                                                ["server_prefix", server_prefix],
                                                                                ["command_name", "upgrade"]])
@@ -186,6 +187,7 @@ class Currency(commands.Cog):
 
         # Level option has no condition for a new command.
         else:
+            ctx.command.reset_cooldown(ctx)
             raise self.ex.exceptions.ShouldNotBeHere("Possible upgrade option has no logic added. "
                                                      "-> Currency.upgrade() ")
 
@@ -194,9 +196,10 @@ class Currency(commands.Cog):
 
         # if the user does not have enough money
         if user.balance < money_needed:
+            ctx.command.reset_cooldown(ctx)
             msg_str = await self.ex.get_msg(user, 'currency', 'upgrade_not_enough', [
                 ["name", ctx.author.display_name],
-                ["integer", money_needed],
+                ["integer", self.ex.add_commas(money_needed)],
                 ["command_name", command.lower()],
                 ["balance", self.ex.add_commas(user.balance)]])
             return await ctx.send(msg_str)
@@ -204,7 +207,7 @@ class Currency(commands.Cog):
         # confirm the user really wants to upgrade their level.
         msg_str = await self.ex.get_msg(user, 'currency', 'upgrade_msg', [
             ["name", ctx.author.display_name],
-            ["integer", money_needed],
+            ["integer", self.ex.add_commas(money_needed)],
             ["command_name", command.lower()],
             ["balance", self.ex.add_commas(user.balance)]])
         msg = await ctx.send(msg_str)
@@ -213,7 +216,7 @@ class Currency(commands.Cog):
         if await self.ex.wait_for_reaction(msg, user.id, reaction):
             # set the user's new level
             await user.set_level(level + 1, command.lower())
-
+            ctx.command.reset_cooldown(ctx)
             # let the user know their new level.
             msg_str = await self.ex.get_msg(user, 'currency', 'upgrade_msg_success',
                                             [["name", ctx.author.display_name],
@@ -222,6 +225,7 @@ class Currency(commands.Cog):
             return await ctx.send(msg_str)
         else:
             # let the user know they failed to upgrade.
+            ctx.command.reset_cooldown(ctx)
             msg_str = await self.ex.get_msg(user, 'currency', 'upgrade_out_of_time',
                                             [["name", ctx.author.display_name],
                                              ["command_name", command.lower()]])
@@ -287,6 +291,11 @@ class Currency(commands.Cog):
         user = await self.ex.get_user(ctx.author.id)
         user_to_give = await self.ex.get_user(person_to_give.id)
         amount_to_give: int = self.ex.remove_commas(amount_to_give)  # remove all commas from the input.
+
+        # do not allow negatives to be given.
+        if amount_to_give < 0:
+            amount_to_give = 0
+
         # not enough currency
         if user.balance < amount_to_give:
             return await ctx.send(await self.ex.get_msg(ctx, "currency", "not_enough",
@@ -316,6 +325,10 @@ class Currency(commands.Cog):
 
         # we do not know the format the user sent input in, so we will just remove all commas and adjust to our case.
         amount_to_bet = self.ex.remove_commas(amount_to_bet)
+
+        # do not allow negatives to be given.
+        if amount_to_bet < 0:
+            amount_to_bet = 0
 
         if user.balance < amount_to_bet:
             return await ctx.send(await self.ex.get_msg(ctx, "currency", "not_enough",

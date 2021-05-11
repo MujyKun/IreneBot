@@ -65,6 +65,16 @@ class Events(commands.Cog):
     async def on_ready():
         log.console(f'{ex.keys.bot_name} is online')
         ex.discord_cache_loaded = True
+        support_server = client.get_guild(ex.keys.bot_support_server_id)
+
+        if not support_server:
+            return
+
+        # manage our own cache of members in the support server.
+        for member in support_server.members:
+            await asyncio.sleep(0)
+            if member.id not in ex.cache.member_ids_in_support_server:
+                ex.cache.member_ids_in_support_server.append(member.id)
 
     @staticmethod
     @client.event
@@ -243,6 +253,20 @@ class Events(commands.Cog):
                     await channel.send(message)
                 except Exception as e:
                     log.useless(f"{e} - Unable to send message to new user in guild. - Events.on_member_join")
+
+        # update cache for all new members joining the support server.
+        if guild.id == ex.keys.bot_support_server_id:
+            ex.cache.member_ids_in_support_server.append(member.id)
+
+    @staticmethod
+    @client.event
+    async def on_member_remove(member):
+        # update cache for all members leaving the support server.
+        if member.guild.id == ex.keys.bot_support_server_id:
+            try:
+                ex.cache.member_ids_in_support_server.remove(member.id)
+            except Exception as e:
+                log.useless(f"{e} - {member.id} was not found in support server cache -> Events.on_member_leave()")
 
     @staticmethod
     @client.event

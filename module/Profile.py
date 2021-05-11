@@ -1,3 +1,5 @@
+import asyncio
+
 import discord
 import datetime
 import pytz
@@ -49,6 +51,7 @@ class Profile(commands.Cog):
             count = 0
             roles = ""
             for role in roles_list:
+                await asyncio.sleep(0)
                 if count and count != (len(roles_list) - 1):
                     roles += f"{role.name}, "
                 if count == (len(roles_list)-1):

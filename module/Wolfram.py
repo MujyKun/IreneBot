@@ -1,3 +1,5 @@
+import asyncio
+
 from discord.ext import commands
 import xmltodict
 import urllib.parse
@@ -56,6 +58,7 @@ class Wolfram(commands.Cog):
                     if len(pods) == 1:  # do not shorten, has to be exactly 1
                         pods = [pods]
                     for pod in pods:
+                        await asyncio.sleep(0)
                         try:
                             sub_pods = pod.get('subpod')
                             if not sub_pods:
@@ -64,6 +67,7 @@ class Wolfram(commands.Cog):
                             if pod.get('@numsubpods') == '1':
                                 sub_pods = [sub_pods]
                             for sub_pod in sub_pods:
+                                await asyncio.sleep(0)
                                 image = sub_pod.get('img')
                                 sub_pod_result = image.get('@alt')
                                 if pod.get('@primary'):
@@ -83,6 +87,7 @@ class Wolfram(commands.Cog):
                 embed_list = []
                 page_number = 1
                 for result in results:
+                    await asyncio.sleep(0)
                     if len(embed_msg) > 1500:
                         embed_list.append(
                             await self.ex.create_embed(title=f"Wolfram Request Page: {page_number} (FULL) ",

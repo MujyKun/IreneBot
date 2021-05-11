@@ -1,3 +1,5 @@
+import asyncio
+
 import discord
 from discord.ext import commands
 from IreneUtility.util import u_logger as log
@@ -71,6 +73,7 @@ class BiasGame(commands.Cog):
 
             counter = 1
             for idol_id, wins in user_wins:
+                await asyncio.sleep(0)
                 member = await self.ex.u_group_members.get_member(idol_id)
                 msg_string += f"{counter}) {member.full_name} ({member.stage_name}) -> {wins} Win(s).\n"
                 counter += 1

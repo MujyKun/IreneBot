@@ -1,3 +1,5 @@
+import asyncio
+
 import discord
 from discord.ext import commands
 import itertools
@@ -34,6 +36,7 @@ class Help(commands.Cog):
             channel = self.get_destination()
             server_prefix = await self.get_server_prefix()
             for page in self.paginator.pages:
+                await asyncio.sleep(0)
                 embed = discord.Embed(title=f"Server Prefix is {server_prefix}", description=page)
                 await channel.send(embed=embed)
 
@@ -60,6 +63,7 @@ class Help(commands.Cog):
             # filter the commands to check if the commands can be used by the user.
             cog_commands = await self.filter_commands(cog.get_commands())
             for command in cog_commands:
+                await asyncio.sleep(0)
                 if command.hidden is False:
                     embed_empty = False
                     cmd_name = command.name
@@ -115,6 +119,7 @@ class Help(commands.Cog):
             to_iterate = itertools.groupby(filtered, key=get_category)
 
             for category, t_commands in to_iterate:
+                await asyncio.sleep(0)
                 commands_list = sorted(t_commands, key=lambda c: c.name) if self.sort_commands else list(t_commands)
                 self.add_bot_commands_formatting(commands_list, category)
 
@@ -142,6 +147,7 @@ class Help(commands.Cog):
 
                 self.paginator.add_line('**%s**' % self.commands_heading)
                 for command in filtered:
+                    await asyncio.sleep(0)
                     self.add_subcommand_formatting(command)
 
                 note = self.get_ending_note()

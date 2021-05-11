@@ -1,3 +1,5 @@
+import asyncio
+
 import discord
 from discord.ext import commands, tasks
 import datetime
@@ -195,9 +197,11 @@ class Gacha(commands.Cog):
     @tasks.loop(seconds=0, minutes=5, hours=0, reconnect=True)
     async def album_loop(self):
         for user in self.ex.cache.users:
+            await asyncio.sleep(0)
             if not user.gacha_albums:
                 continue
             for album in user.gacha_albums:
+                await asyncio.sleep(0)
                 current_time = datetime.datetime.now()
                 next_money_add_time = album.last_money_generated_time + datetime.timedelta(
                     minutes=self.ex.u_objects.GachaValues.album_money_generation_time_in_minutes)

@@ -1,3 +1,5 @@
+import asyncio
+
 from discord.ext import commands
 from IreneUtility.util import u_logger as log
 from IreneUtility.Utility import Utility
@@ -44,6 +46,7 @@ class GuessingGame(commands.Cog):
 
             lb_string = ""
             for user_position, (user_id, score) in enumerate(top_user_scores):
+                await asyncio.sleep(0)
                 score = await self.ex.u_guessinggame.get_user_score(difficulty.lower(), user_id)
                 lb_string += f"**{user_position + 1})** <@{user_id}> - {score}\n"
             m_embed = await self.ex.create_embed(title=f"Guessing Game Leaderboard ({difficulty.lower()}) ({mode})",
@@ -104,6 +107,7 @@ class GuessingGame(commands.Cog):
         removed_group_ids = []
 
         for group_id in group_ids:
+            await asyncio.sleep(0)
             # check for empty input
             if not group_id:
                 continue
@@ -142,6 +146,7 @@ class GuessingGame(commands.Cog):
         embed_list = []
         embed = await self.ex.create_embed(title=f"{title} (Page {page_number})", title_desc=toggled_message)
         for count, group in enumerate(user.gg_groups, 1):
+            await asyncio.sleep(0)
             name = f"{group.name} [{group.id}]"
             if count % 15 == 0:  # max embed length is 25 fields, limit to 15 to avoid visual spam.
                 embed_list.append(embed)

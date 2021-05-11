@@ -1,3 +1,4 @@
+import asyncio
 import random
 from discord.ext import commands
 from discord.ext.commands.cooldowns import BucketType
@@ -133,6 +134,7 @@ class Currency(commands.Cog):
                                            footer_desc="Type %bal (user) to view their balance.")
 
         for count, user_info in enumerate(sorted_balance, 1):
+            await asyncio.sleep(0)
             if count > 10:
                 break
             user = user_info[0]

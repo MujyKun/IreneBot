@@ -35,6 +35,7 @@ class BotMod(commands.Cog):
                 return
 
             for user_id in self.ex.cache.mod_mail:
+                await asyncio.sleep(0)
                 try:
                     channel_id = self.ex.cache.mod_mail.get(user_id)
                     mod_channel = await self.ex.client.fetch_channel(channel_id)
@@ -108,6 +109,7 @@ class BotMod(commands.Cog):
                 await fd.write(await resp.read())
 
         for mem_id, mem_thumbnail, mem_banner in mem_info:
+            await asyncio.sleep(0)
             file_name = f"{mem_id}_IDOL.png"
             if mem_thumbnail:
                 file_loc = f"{self.ex.keys.idol_avatar_location}{file_name}"
@@ -126,6 +128,7 @@ class BotMod(commands.Cog):
                     await self.ex.conn.execute(
                         "UPDATE groupmembers.member SET banner = $1 WHERE id = $2", image_url, mem_id)
         for grp_id, grp_thumbnail, grp_banner in grp_info:
+            await asyncio.sleep(0)
             file_name = f"{grp_id}_GROUP.png"
             if grp_thumbnail:
                 file_loc = f"{self.ex.keys.idol_avatar_location}{file_name}"
@@ -166,6 +169,7 @@ class BotMod(commands.Cog):
         if not original_idol:
             return await ctx.send(f"> {original_idol} could not find an Idol.")
         for group_id in duplicate_idol.groups:
+            await asyncio.sleep(0)
             if group_id not in original_idol.groups:
                 # add groups from dupe to original.
                 await self.ex.conn.execute(
@@ -200,6 +204,7 @@ class BotMod(commands.Cog):
             "UPDATE groupmembers.aliases SET objectid = $1 WHERE isgroup = $2 AND objectid = $3",
             original_group.id, 1, duplicate_group.id)
         for member_id in duplicate_group.members:
+            await asyncio.sleep(0)
             if member_id not in original_group.members:
                 # update the member location to the original group
                 await self.ex.conn.execute(
@@ -274,6 +279,8 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
                 yield existing_game
             for existing_game in self.ex.cache.bias_games.values():
                 yield existing_game
+            for existing_game in self.ex.cache.blackjack_games:
+                yield existing_game
 
         async for game in get_games():
             try:
@@ -317,6 +324,7 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
         try:
             if interaction_type.lower() in self.ex.cache.interaction_list:
                 for url in links:
+                    await asyncio.sleep(0)
                     url = url.replace(' ', '')
                     url = url.replace('\n', '')
                     await self.ex.conn.execute(
@@ -342,6 +350,7 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
         """
         links = url.split(',')
         for url in links:
+            await asyncio.sleep(0)
             try:
                 url.replace(' ', '')
                 url = url.replace('\n', '')
@@ -396,6 +405,7 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
         if self.ex.cache.bot_statuses:
             counter = 0
             for status in self.ex.cache.bot_statuses:
+                await asyncio.sleep(0)
                 final_list += f"{counter}) {status}\n"
                 counter += 1
         else:

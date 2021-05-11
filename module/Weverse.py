@@ -41,6 +41,7 @@ class Weverse(commands.Cog):
                     return await ctx.send(f"> {ctx.author.display_name}, You will no longer receive updates for "
                                           f"{community_name}.")
             for community in self.ex.weverse_client.communities:
+                await asyncio.sleep(0)
                 if community.name.lower() == community_name:
                     # delete any existing before adding a new one.
                     await self.ex.u_weverse.delete_weverse_channel(channel_id, community_name)
@@ -65,6 +66,7 @@ class Weverse(commands.Cog):
         if not await self.ex.u_weverse.check_weverse_channel(channel_id, community_name):
             return await ctx.send(f"This channel is not subscribed to weverse updates from {community_name}.")
         for channel in await self.ex.u_weverse.get_weverse_channels(community_name):
+            await asyncio.sleep(0)
             if channel[0] != channel_id:
                 continue
             await self.ex.u_weverse.change_weverse_comment_status(channel_id, community_name, not channel[2],
@@ -116,8 +118,9 @@ class Weverse(commands.Cog):
                     return  # we do not want constant attempts to send a message.
 
                 for channel_info in channels:
+                    await asyncio.sleep(0)
                     # sleep for 5 seconds per channel because of rate-limiting issues on the bot.
-                    await asyncio.sleep(5)
+                    # await asyncio.sleep(5)
                     channel_id = channel_info[0]
                     notification_ids = self.notifications_already_posted.get(channel_id)
                     if not notification_ids:

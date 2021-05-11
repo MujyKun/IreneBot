@@ -131,6 +131,7 @@ class Twitch(commands.Cog):
                 'client-id': self.ex.keys.twitch_client_id
             }
             for twitch_username in self.ex.cache.twitch_channels.keys():
+                await asyncio.sleep(0)
                 try:
                     end_point = f"https://api.twitch.tv/helix/search/channels?query={twitch_username}"
                     async with self.ex.session.get(end_point, headers=headers) as r:
@@ -139,6 +140,7 @@ class Twitch(commands.Cog):
                             data_json = json.loads(data)
                             all_streamers = data_json.get('data')
                             for streamer in all_streamers:
+                                await asyncio.sleep(0)
                                 if streamer.get('display_name').lower() == twitch_username.lower():
                                     was_live = self.ex.cache.twitch_channels_is_live.get(twitch_username)
                                     is_live = streamer.get('is_live')

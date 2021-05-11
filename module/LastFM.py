@@ -1,3 +1,5 @@
+import asyncio
+
 import discord
 from discord.ext import commands
 from module import events
@@ -21,6 +23,7 @@ class LastFM(commands.Cog):
         list_of_tracks = response['recenttracks']['track']
         tracks_and_titles = []
         for counter, track in enumerate(list_of_tracks):
+            await asyncio.sleep(0)
             if counter + 1 <= limit:
                 title = f"**#{counter + 1} **"
                 try:
@@ -42,6 +45,7 @@ class LastFM(commands.Cog):
         """Create and return an embed that matches the format for FM tracks and artists."""
         embed = await self.ex.create_embed(title=title, color=self.ex.get_random_color())
         for info in stats_info:
+            await asyncio.sleep(0)
             # DO NOT SHORTEN FOR LOOP -> stats_info may contain less/more values to unpack than needed.
             name = info[0]
             value = info[1]
@@ -201,6 +205,7 @@ class LastFM(commands.Cog):
             counter = 0
             artist_and_titles = []
             for artist in list_of_artists:
+                await asyncio.sleep(0)
                 counter += 1
                 title = f"**#{counter} ({artist['playcount']} plays)**"
                 artist_name = f"**[{artist['name']}]({artist['url']})**"
@@ -231,6 +236,7 @@ class LastFM(commands.Cog):
             counter = 0
             tracks_and_titles = []
             for track in list_of_tracks:
+                await asyncio.sleep(0)
                 counter += 1
                 title = f"**#{counter} ({track['playcount']} plays)**"
                 artist_name = f"**[{track['name']} by {track['artist']['name']}]({track['url']})**"
@@ -262,6 +268,7 @@ class LastFM(commands.Cog):
             counter = 0
             tracks_and_titles = []
             for album in list_of_albums:
+                await asyncio.sleep(0)
                 counter += 1
                 title = f"**#{counter} ({album['playcount']} plays)**"
                 artist_name = f"**[{album['name']} by {album['artist']['name']}]({album['url']})**"

@@ -1,3 +1,5 @@
+import asyncio
+
 import discord
 from discord.ext import commands
 from IreneUtility.util import u_logger as log
@@ -23,11 +25,13 @@ class BotOwner(commands.Cog):
         try:
             all_links = await self.ex.conn.fetch("SELECT id, linkid, name FROM archive.DriveIDs")
             for p_id, link_id, link_name in all_links:
+                await asyncio.sleep(0)
                 try:
                     new_link = f"https://drive.google.com/uc?export=view&id={link_id}"
                     all_names = await self.ex.conn.fetch("SELECT Name FROM archive.ChannelList")
                     if name == "NULL" and member_id == 0:
                         for idol_name in all_names:
+                            await asyncio.sleep(0)
                             idol_name = idol_name[0]
                             if idol_name == link_name and (idol_name != "Group" or idol_name != "MDG Group"):
                                 member_id1 = self.ex.first_result(
@@ -73,19 +77,6 @@ class BotOwner(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
-    async def addwaifu(self, ctx):
-        id_list = [i+1 for i in range(52)]
-        for i in id_list:
-            try:
-                await self.ex.conn.execute("INSERT INTO blackjack.playingcards(cardvalueid, bgidolid, filename) "
-                                           "VALUES ($1, $2, $3)", i, 1, f"{i}.jpg")
-            except:
-                pass
-
-        return await ctx.send("Your Waifu has been added fag")
-
-    @commands.command()
-    @commands.is_owner()
     async def addpatreon(self, ctx, *, users):
         """
         Adds a patreon.
@@ -94,6 +85,7 @@ class BotOwner(commands.Cog):
         """
         users = users.split(",")
         for user_id in users:
+            await asyncio.sleep(0)
             await self.ex.u_patreon.add_to_patreon(user_id)
         msg = await self.ex.get_msg(ctx, 'botowner', 'patrons_added', ['users', users])
         await ctx.send(msg)
@@ -108,6 +100,7 @@ class BotOwner(commands.Cog):
         """
         users = users.split(",")
         for user_id in users:
+            await asyncio.sleep(0)
             await self.ex.u_patreon.remove_from_patreon(user_id)
         msg = await self.ex.get_msg(ctx, 'botowner', 'patrons_removed', ['users', users])
         await ctx.send(msg)
@@ -202,6 +195,7 @@ class BotOwner(commands.Cog):
 
             # create the idol to group relationships.
             for group_id in group_ids:
+                await asyncio.sleep(0)
                 try:
                     # check if the group id can be made into an integer when it doesn't have spaces.
                     # fancy way of doing .replace (the attribute doesn't exist)

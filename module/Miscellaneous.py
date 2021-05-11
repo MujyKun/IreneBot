@@ -1,3 +1,5 @@
+import asyncio
+
 import discord
 from random import *
 from discord.ext import commands
@@ -20,6 +22,7 @@ class Miscellaneous(commands.Cog):
 
             message_split = message.content.lower().split(" ")
             for guild_id, user_id, phrase in self.ex.cache.user_notifications:
+                await asyncio.sleep(0)
                 if phrase not in message_split or guild_id != message.guild.id:
                     continue
                 if message.author.id == user_id or user_id not in [member.id for member in message.channel.members]:
@@ -154,6 +157,7 @@ Message Author: {message.author}
             counter = 0
             current_guild_id = ctx.guild.id
             for guild_id, phrase in user.notifications:
+                await asyncio.sleep(0)
                 counter += 1
                 if guild_id != current_guild_id:
                     continue
@@ -220,6 +224,7 @@ Message Author: {message.author}
         """
         mods = ""
         for bot_mod in self.ex.keys.mods_list:
+            await asyncio.sleep(0)
             mods += f"<@{bot_mod}> | "
         title_desc = f"""I was made with Python using the discord.py wrapper.
 
@@ -387,6 +392,7 @@ Maintenance Status: {maintenance_status}
         n_word_list = {}  # user_id : n_word_count
 
         for user in self.ex.cache.users.values():
+            await asyncio.sleep(0)
             if mode.lower() == "global":
                 n_word_list[user.id] = user.n_word
             else:
@@ -397,6 +403,7 @@ Maintenance Status: {maintenance_status}
         sorted_n_word = {key: value for key, value in sorted(n_word_list.items(), key=lambda item: item[1],
                                                              reverse=True)}
         for count, user_id in enumerate(sorted_n_word):
+            await asyncio.sleep(0)
             value = sorted_n_word.get(user_id)
             if not value:
                 continue

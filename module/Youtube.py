@@ -98,6 +98,7 @@ class YoutubeLoop:
     async def scrape_videos(self):
         links = await self.ex.conn.fetch("SELECT link, channelid FROM youtube.links")
         for url, channel_id in links:
+            await asyncio.sleep(0)
             try:
                 link_id = self.ex.first_result(
                     await self.ex.conn.fetchrow("SELECT id FROM youtube.links WHERE link = $1", url))

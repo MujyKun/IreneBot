@@ -1,3 +1,5 @@
+import asyncio
+
 import discord
 from discord.ext import commands
 from IreneUtility.util import u_logger as log
@@ -62,6 +64,7 @@ class SelfAssignRoles(commands.Cog):
             msg_bodies = []
             msg_body = ""
             for role_id, role_name in roles:
+                await asyncio.sleep(0)
                 if len(msg_body) > 1500:
                     msg_bodies.append(msg_body)
                     msg_body = ""
@@ -73,6 +76,7 @@ class SelfAssignRoles(commands.Cog):
             embed_title = f"{ctx.guild}'s Self-Assignable Roles"
             embed_list = []
             for body in msg_bodies:
+                await asyncio.sleep(0)
                 embed = await self.ex.create_embed(title=embed_title, title_desc=body)
                 embed_list.append(embed)
             msg = await ctx.send(embed=embed_list[0])

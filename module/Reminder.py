@@ -1,3 +1,5 @@
+import asyncio
+
 from discord.ext import commands, tasks
 from IreneUtility.util import u_logger as log
 import datetime
@@ -34,6 +36,7 @@ class Reminder(commands.Cog):
         remind_number = 1
         index_number = 1
         for remind_id, remind_reason, remind_time in remind_list:
+            await asyncio.sleep(0)
             if user_timezone:
                 remind_time = remind_time.replace(tzinfo=pytz.utc).astimezone(pytz.timezone(user_timezone))
             m_embed.add_field(name=f"{index_number}) {remind_reason}",

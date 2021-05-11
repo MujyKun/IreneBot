@@ -1,3 +1,5 @@
+import asyncio
+
 from module.keys import client
 from IreneUtility.util import u_logger as log
 from discord.ext import commands
@@ -212,6 +214,7 @@ class Events(commands.Cog):
             user = await ex.get_user(member_after.id)
             if added_roles:
                 for role in added_roles:
+                    await asyncio.sleep(0)
                     if role.id == ex.keys.patreon_super_role_id:
                         user.patron = True
                         user.super_patron = True

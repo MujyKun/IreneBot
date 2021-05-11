@@ -91,6 +91,7 @@ class Music(commands.Cog):
             return
         try:
             for voice_client in self.ex.client.voice_clients:
+                await asyncio.sleep(0)
                 # members in vc must be equal to 1 to stop playing (includes the bot)
                 if voice_client.is_connected() and voice_client.channel.members == 1:
                     if voice_client.is_playing():
@@ -108,9 +109,11 @@ class Music(commands.Cog):
                     await voice_client.disconnect()
             keep_files = []
             for key in queued:
+                await asyncio.sleep(0)
                 file_name = (queued[key][0][2])
                 keep_files.append(file_name)
             for song_file_name in os.listdir("music"):
+                await asyncio.sleep(0)
                 file_location = f"music/{song_file_name}"
                 if file_location in keep_files and file_location == "music":
                     continue
@@ -140,6 +143,7 @@ class Music(commands.Cog):
                 return
 
             for song in queued_songs:
+                await asyncio.sleep(0)
                 player = song[0]
                 file_name = song[2]
                 if check_if_player(player):
@@ -227,6 +231,7 @@ class Music(commands.Cog):
             set_of_songs = ""
             total_amount_of_time = 0
             for song in current_songs:
+                await asyncio.sleep(0)
                 author_id = song[4]
                 if check_if_player(song[0]):
                     player = song[0]
@@ -474,6 +479,7 @@ class Music(commands.Cog):
             return
         all_voice_clients = self.ex.client.voice_clients
         for voice_client in all_voice_clients:
+            await asyncio.sleep(0)
             if voice_client.is_playing() or voice_client.is_paused():
                 continue
             client_guild_id = voice_client.guild.id
@@ -626,6 +632,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         if 'entries' in data:  # several videos
             counter = 0
             for video_entry in data['entries']:
+                await asyncio.sleep(0)
                 if counter == 0:
                     first_video_live = await add_video(video_entry)
                 else:

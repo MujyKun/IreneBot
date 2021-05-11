@@ -1,3 +1,5 @@
+import asyncio
+
 from discord.ext import commands
 from module import keys
 from IreneUtility.util import u_logger as log
@@ -93,6 +95,7 @@ class CustomCommands(commands.Cog):
                 return await ctx.send(msg)
 
             for command in custom_commands:
+                await asyncio.sleep(0)
                 added_to_list = False
                 message = f"**{command}** -> {custom_commands.get(command)}\n"
                 if len(message) > 1000:

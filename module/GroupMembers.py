@@ -1,3 +1,5 @@
+import asyncio
+
 import discord
 from discord.ext import commands
 from IreneUtility.util import u_logger as log
@@ -95,6 +97,7 @@ class GroupMembers(commands.Cog):
 
             # set empty strings to NoneType
             for key in idol_json:
+                await asyncio.sleep(0)
                 if not idol_json.get(key):
                     idol_json[key] = None
 
@@ -144,6 +147,7 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
 """
             # Add all the key values to the title description
             for key in idol_json:
+                await asyncio.sleep(0)
                 title_description += f"\n{key}: {idol_json.get(key)}"
 
             # send embed to approval/deny channel
@@ -171,6 +175,7 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
 
             # set empty strings to NoneType
             for key in group_json:
+                await asyncio.sleep(0)
                 if not group_json.get(key):
                     group_json[key] = None
 
@@ -215,6 +220,7 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
 """
             # Add all the key values to the title description
             for key in group_json:
+                await asyncio.sleep(0)
                 title_description += f"\n{key}: {group_json.get(key)}"
 
             # send embed to approval/deny channel
@@ -257,9 +263,11 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
 
         embed_list = []
         for member in members:
+            await asyncio.sleep(0)
             embed = await self.ex.u_group_members.set_embed_card_info(member, server_id=server_id)
             embed_list.append(embed)
         for group in groups:
+            await asyncio.sleep(0)
             embed = await self.ex.u_group_members.set_embed_card_info(group, group=True, server_id=server_id)
             embed_list.append(embed)
         if embed_list:
@@ -326,6 +334,7 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
                     await self.ex.conn.execute("UPDATE groupmembers.restricted SET channelid = $1 WHERE serverid = $2"
                                                " AND sendhere = $3", text_channel.id, ctx.guild.id, 1)
                     for channel_id in self.ex.cache.restricted_channels:
+                        await asyncio.sleep(0)
                         channel_info = self.ex.cache.restricted_channels.get(channel_id)
                         if channel_info[0] == ctx.guild.id and channel_info[1] == 1:
                             delete_channel_id = channel_id
@@ -381,6 +390,7 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
             msg = await self.ex.get_msg(ctx, "groupmembers", "group_not_found")
             return await ctx.send(msg)
         for group in groups:
+            await asyncio.sleep(0)
             msg = await self.ex.get_msg(ctx, "groupmembers", "photo_count",
                                         [["photo_count", group.photo_count], ["object_name", group.name]])
             await ctx.send(msg)
@@ -401,6 +411,7 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
             msg = await self.ex.get_msg(ctx, "groupmembers", "idol_not_found")
             return await ctx.send(msg)
         for member in members:
+            await asyncio.sleep(0)
             msg = await self.ex.get_msg(ctx, "groupmembers", "photo_count",
                                         [["photo_count", member.photo_count],
                                          ["object_name", f"{member.full_name} ({member.stage_name})"]])
@@ -437,6 +448,7 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
         embed_list = []
         counter = 1
         for group in self.ex.cache.groups:
+            await asyncio.sleep(0)
             if group.name == "NULL" and not is_mod:
                 continue
             if is_mod:
@@ -499,6 +511,7 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
             if name == 'all' or not name:
                 idol_called = 0
                 for member in self.ex.cache.idols:
+                    await asyncio.sleep(0)
                     if not member.called:
                         continue
                     idol_called += member.called
@@ -509,6 +522,7 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
             if not members:
                 return await ctx.send(await self.ex.get_msg(ctx, "groupmembers", "idol_not_found"))
             for member in members:
+                await asyncio.sleep(0)
                 if not member.called:
                     msg = await self.ex.get_msg(ctx, "groupmembers", "not_called",
                                                 ['idol_name', f"{member.full_name} ({member.stage_name})"])
@@ -516,6 +530,7 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
                 else:
                     rank_list = await self.ex.conn.fetch("SELECT memberid FROM groupmembers.count ORDER BY Count DESC")
                     for count, rank_row in enumerate(rank_list):
+                        await asyncio.sleep(0)
                         mem_id = rank_row[0]
                         if mem_id == member.id:
                             final_rank = count + 1
@@ -543,6 +558,7 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
         all_members = await self.ex.conn.fetch("SELECT MemberID, Count FROM groupmembers.Count ORDER BY Count DESC")
         count_loop = 0
         for member_id, count in all_members:
+            await asyncio.sleep(0)
             count_loop += 1
             if count_loop <= 10:
                 idol = await self.ex.u_group_members.get_member(member_id)

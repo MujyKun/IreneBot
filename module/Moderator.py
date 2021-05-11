@@ -1,3 +1,5 @@
+import asyncio
+
 import discord
 from discord.ext import commands
 from IreneUtility.util import u_logger as log
@@ -152,6 +154,7 @@ class Moderator(commands.Cog):
     async def get_mute_role(self, ctx):
         mute_roles = await self.ex.conn.fetch("SELECT roleid FROM general.muteroles")
         for role in mute_roles:
+            await asyncio.sleep(0)
             role_id = role[0]
             role = ctx.guild.get_role(role_id)
             if role:
@@ -161,6 +164,7 @@ class Moderator(commands.Cog):
     async def check_if_muted(user_id, role):
         users = role.members
         for user in users:
+            await asyncio.sleep(0)
             if user.id == user_id:
                 return True
 
@@ -185,6 +189,7 @@ class Moderator(commands.Cog):
                 mute_role = await ctx.guild.create_role(reason="Creating Mute Role", name="Muted")
                 await self.ex.conn.execute("INSERT INTO general.muteroles(roleid) VALUES($1)", mute_role.id)
                 for channel in guild_channels:
+                    await asyncio.sleep(0)
                     try:
                         await channel.set_permissions(mute_role, send_messages=False)
                     except Exception as e:
@@ -379,6 +384,7 @@ class Moderator(commands.Cog):
             await ctx.send(
                 f"> **{amount}** messages will be deleted in 5 seconds and will be split in intervals of 100.")
             for _ in range(number):
+                await asyncio.sleep(0)
                 if not everyone:
                     await ctx.channel.purge(limit=100, check=clear_x, bulk=True)
                 elif everyone:
@@ -516,6 +522,7 @@ class Moderator(commands.Cog):
         org_emoji_name = emoji_name
         list_of_emojis = url.split(',')
         for emoji in list_of_emojis:
+            await asyncio.sleep(0)
             try:
                 url = await self.make_emoji(ctx, emoji)
                 if isinstance(url, str):

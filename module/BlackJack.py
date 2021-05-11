@@ -1,9 +1,7 @@
-import IreneUtility.models
 import discord
 from discord.ext import commands
 from IreneUtility.util import u_logger as log
 from IreneUtility.Utility import Utility
-from typing import List
 
 
 # noinspection PyPep8
@@ -55,10 +53,16 @@ class BlackJack(commands.Cog):
         user = await self.ex.get_user(ctx.author.id)
         if not user.in_currency_game:
             # user is not in a game.
-            pass
+            return await ctx.send(await self.ex.get_msg(ctx, "blackjack", "not_in_game",
+                                                        ["name", ctx.author.display_name]))
 
-        for game in self.ex.cache.blackjack_games:
-            pass
+        for blackjack_game in self.ex.cache.blackjack_games:
+            if user in [blackjack_game.first_player, blackjack_game.second_player]:
+                await blackjack_game.end_game()
+
+        # game has ended message
+        return await ctx.send(await self.ex.get_msg(ctx, "blackjack", "ended_game",
+                                                    ["name", ctx.author.display_name]))
 
     @commands.command()
     async def rules(self, ctx):

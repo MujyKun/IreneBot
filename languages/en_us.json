@@ -25,6 +25,10 @@
     "no_wins": "There are no bias game wins for {name}.",
     "lb_title": "Bias Game Leaderboard for {name}:\n"
   },
+  "blackjack": {
+    "not_in_game": "{name}, you are not in a blackjack game.",
+    "ended_game": "{name}, your blackjack game has successfully ended."
+  },
   "currency": {
     "daily_msg": "{name}, you have been given {daily_amount}.",
     "beg_msg": "{name}, a homeless man has given you {integer} {currency_name}(s).",

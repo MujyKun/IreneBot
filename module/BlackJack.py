@@ -23,8 +23,15 @@ class BlackJack(commands.Cog):
         server_prefix = await self.ex.get_server_prefix(ctx)
         user = await self.ex.get_user(ctx.author.id)
         bet = self.ex.remove_commas(bet)
+        await user.register_currency()  # ensure the user is registered.
         if bet < 0:
             bet = 0
+
+        if user.balance < bet:
+            return await ctx.send(await self.ex.get_msg(ctx, "currency", "not_enough", [
+                ["name", ctx.author.display_name], ["currency_name", self.ex.keys.currency_name],
+                ["balance", self.ex.add_commas(user.balance)]]))
+
         if user.in_currency_game:
             # user already in a game
             return await ctx.send(await self.ex.get_msg(ctx, "blackjack", "in_game",
@@ -48,8 +55,14 @@ class BlackJack(commands.Cog):
         user = await self.ex.get_user(ctx.author.id)
         opponent_user = await self.ex.get_user(opponent.id)
         bet = self.ex.remove_commas(bet)
+        await user.register_currency()  # ensure the user is registered.
         if bet < 0:
             bet = 0
+
+        if user.balance < bet:
+            return await ctx.send(await self.ex.get_msg(ctx, "currency", "not_enough", [
+                ["name", ctx.author.display_name], ["currency_name", self.ex.keys.currency_name],
+                ["balance", self.ex.add_commas(user.balance)]]))
 
         if not opponent_user.in_currency_game:
             # opponent is not in a game

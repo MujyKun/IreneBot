@@ -210,6 +210,9 @@ key_kwargs = {
     "datadog_api_key": make_int(os.getenv("DATADOG_API_KEY")),
     "datadog_app_key": make_int(os.getenv("DATADOG_APP_KEY")),
 
+    # Blackjack card location
+    "playing_card_location": os.getenv("CARD_LOCATION"),
+
     # API
     "api_port": os.getenv("API_PORT"),
     # translate private key is the same as the idol photo key.

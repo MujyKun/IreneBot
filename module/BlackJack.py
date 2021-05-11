@@ -3,6 +3,7 @@ import discord
 from discord.ext import commands
 from IreneUtility.util import u_logger as log
 from IreneUtility.Utility import Utility
+from typing import List
 
 
 # noinspection PyPep8
@@ -22,6 +23,10 @@ class BlackJack(commands.Cog):
         [Format: %blackjack (amount)]
         [Aliases: bj]
         """
+        user = await self.ex.get_user(ctx.author.id)
+        if user.in_currency_game:
+            # user already in a game
+            pass
 
     @commands.command(aliases=['jg'])
     async def joingame(self, ctx, user_or_game_id=0, bet="0"):
@@ -31,6 +36,13 @@ class BlackJack(commands.Cog):
         [Format: %joingame (@user or game_id) (bet)]
         [Aliases: jg]
         """
+        user = await self.ex.get_user(ctx.author.id)
+        if user.in_currency_game:
+            # user already in a game
+            pass
+
+
+        user.in_currency_game = True
 
     @commands.command(aliases=['eg'])
     async def endgame(self, ctx):
@@ -40,6 +52,13 @@ class BlackJack(commands.Cog):
         [Format: %endgame]
         [Aliases: eg]
         """
+        user = await self.ex.get_user(ctx.author.id)
+        if not user.in_currency_game:
+            # user is not in a game.
+            pass
+
+        for game in self.ex.cache.blackjack_games:
+            pass
 
     @commands.command()
     async def rules(self, ctx):
@@ -66,7 +85,4 @@ class BlackJack(commands.Cog):
         await ctx.send(embed=embed)
 
 
-class Game(IreneUtility.models.Game):
-    def __init__(self, *args):
-        super().__init__(*args)
 

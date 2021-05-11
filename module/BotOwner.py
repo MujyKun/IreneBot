@@ -73,6 +73,19 @@ class BotOwner(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
+    async def addwaifu(self, ctx):
+        id_list = [i+1 for i in range(52)]
+        for i in id_list:
+            try:
+                await self.ex.conn.execute("INSERT INTO blackjack.playingcards(cardvalueid, bgidolid, filename) "
+                                           "VALUES ($1, $2, $3)", i, 1, f"{i}.jpg")
+            except:
+                pass
+
+        return await ctx.send("Your Waifu has been added fag")
+
+    @commands.command()
+    @commands.is_owner()
     async def addpatreon(self, ctx, *, users):
         """
         Adds a patreon.

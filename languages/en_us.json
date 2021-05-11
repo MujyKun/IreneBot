@@ -27,7 +27,15 @@
   },
   "blackjack": {
     "not_in_game": "{name}, you are not in a blackjack game.",
-    "ended_game": "{name}, your blackjack game has successfully ended."
+    "in_game": "{name}, you are already in a blackjack game. Please type {server_prefix}endgame.",
+    "ended_game": "{name}, your blackjack game has successfully ended.",
+    "opponent_not_in_game": "{name}, that player is not in a blackjack game.",
+    "announce_winner": "{name} has won the blackjack game with {integer} points against {name2} with {integer2} points!!",
+    "announce_tie": "{name} and {name2} have TIED the blackjack game with {integer} points!",
+    "already_standing": "{name}, you are already standing!",
+    "now_standing": "{name}, you are now standing!",
+    "hit": "{mention}, you have received ||{string}||! Your current score is ||{integer}||.",
+    "game_created": "{name}, a blackjack game has been created. For a player to join you, they must type {server_prefix}jg @you (bet)."
   },
   "currency": {
     "daily_msg": "{name}, you have been given {daily_amount}.",

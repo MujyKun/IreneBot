@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands
-from IreneUtility.util import u_logger as log
 from IreneUtility.Utility import Utility
 
 
@@ -14,33 +13,58 @@ class BlackJack(commands.Cog):
         self.ex: Utility = ex
 
     @commands.command(aliases=['bj'])
-    async def blackjack(self, ctx, amount="0", versus="player"):
+    async def blackjack(self, ctx, bet="0"):
         """
         Start a game of BlackJack
 
         [Format: %blackjack (amount)]
         [Aliases: bj]
         """
+        server_prefix = await self.ex.get_server_prefix(ctx)
         user = await self.ex.get_user(ctx.author.id)
+        bet = self.ex.remove_commas(bet)
+        if bet < 0:
+            bet = 0
         if user.in_currency_game:
             # user already in a game
-            pass
+            return await ctx.send(await self.ex.get_msg(ctx, "blackjack", "in_game",
+                                                        [["name", ctx.author.display_name],
+                                                         ["server_prefix", server_prefix]]))
+        blackjack_game = self.ex.u_objects.BlackJackGame(self.ex, ctx, first_player=user, first_player_bet=bet)
+        self.ex.cache.blackjack_games.append(blackjack_game)
+        return await ctx.send(await self.ex.get_msg(ctx, "blackjack", "game_created", [
+            ["name", ctx.author.display_name],
+            ["server_prefix", await self.ex.get_server_prefix(ctx)]]))
 
     @commands.command(aliases=['jg'])
-    async def joingame(self, ctx, user_or_game_id=0, bet="0"):
+    async def joingame(self, ctx, opponent: discord.Member, bet="0"):
         """
         Join a game
 
-        [Format: %joingame (@user or game_id) (bet)]
+        [Format: %joingame (@user) (bet)]
         [Aliases: jg]
         """
+        server_prefix = await self.ex.get_server_prefix(ctx)
         user = await self.ex.get_user(ctx.author.id)
-        if user.in_currency_game:
-            # user already in a game
-            pass
+        opponent_user = await self.ex.get_user(opponent.id)
+        bet = self.ex.remove_commas(bet)
+        if bet < 0:
+            bet = 0
 
-
-        user.in_currency_game = True
+        if not opponent_user.in_currency_game:
+            # opponent is not in a game
+            return await ctx.send(await self.ex.get_msg(ctx, "blackjack", "opponent_not_in_game",
+                                                        ["name", ctx.author.display_name]))
+        elif user.in_currency_game:
+            # user in a game
+            return await ctx.send(await self.ex.get_msg(ctx, "blackjack", "in_game",
+                                                        [["name", ctx.author.display_name],
+                                                         ["server_prefix", server_prefix]]))
+        blackjack_game = await self.ex.u_blackjack.find_game(opponent_user)
+        blackjack_game.second_player = user
+        blackjack_game.second_player_bet = bet
+        blackjack_game.second_player_ctx = ctx
+        await blackjack_game.process_game()  # start the blackjack game.
 
     @commands.command(aliases=['eg'])
     async def endgame(self, ctx):
@@ -56,11 +80,13 @@ class BlackJack(commands.Cog):
             return await ctx.send(await self.ex.get_msg(ctx, "blackjack", "not_in_game",
                                                         ["name", ctx.author.display_name]))
 
-        for blackjack_game in self.ex.cache.blackjack_games:
-            if user in [blackjack_game.first_player, blackjack_game.second_player]:
-                await blackjack_game.end_game()
+        # find the game and end it.
+        blackjack_game = await self.ex.u_blackjack.find_game(user)
+        if blackjack_game:
+            await ctx.send(await self.ex.get_msg(ctx, 'biasgame', 'force_closed'))
+            return await blackjack_game.end_game()
 
-        # game has ended message
+        # send the fallback message of no game being found (the game ended in the middle of the command).
         return await ctx.send(await self.ex.get_msg(ctx, "blackjack", "ended_game",
                                                     ["name", ctx.author.display_name]))
 
@@ -72,21 +98,16 @@ class BlackJack(commands.Cog):
         In order to get blackjack, your final value must equal 21.\n
         If Player1 exceeds 21 and Player2 does not, Player1 busts and Player2 wins the game.\n
         You will have two options.\n
-        The first option is to `{server_prefix}hit`, which means to grab another card.\n
-        The second option is to `{server_prefix}stand` to finalize your deck.\n
+        The first option is to `hit`, which means to grab another card.\n
+        The second option is to `stand` to finalize your deck.\n
         If both players bust, Player closest to 21 wins!\n
         Number cards are their face values.\n
         Aces can be 1 or 11 depending on the situation you're in.\n
         Jack, Queen, and King are all worth 10.\n
-        Do not use `{server_prefix}hit` if you are over 21 points. This will give away that you busted!\n
+        If you go over 35 points, the bot will automatically stand you.\n
         MOST IMPORTANTLY!!! DO NOT peek at your opponent's cards or points!\n
-        You can play against a bot by typing `{server_prefix}blackjack (amount) bot`\n
-        Betting with the bot will either double your bet or lose all of it.**
         """
         embed = discord.Embed(title="BlackJack Rules", description=msg)
         embed = await self.ex.set_embed_author_and_footer(
             embed, f"{server_prefix}help BlackJack for the available commands.")
         await ctx.send(embed=embed)
-
-
-

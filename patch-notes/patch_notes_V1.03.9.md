@@ -15,6 +15,7 @@ Currency and BlackJack have been entirely recoded and have been re-enabled.
 -> Player VS Bot has been removed.  
 -> Currency rates have been lowered. Once finalized, all currency from users will be wiped to zero to reduce the 
 crazy inflation.  
+-> BlackJack has been recoded to allow for custom cards with idols. (Instantly generated from Idol Avatars)  
 
 Added API endpoint for guessing game (for other developers, not currently used on IreneBot.)  
 
@@ -34,11 +35,9 @@ Verivery, SHINee, SF9, AKMU, STAYC, and SISTAR were added this update.
 
 Users must now be in the support server to play Guessing/Bias Game. This is important for accurate user feedback.  
 
-BlackJack has been recoded to allow for custom cards with idols.  
--> These will be added over time.  
-
 Weverse messages no longer have a 5 second delay per channel.  
 -> This is a test in production to see how affected the bot will be.  
+
 
 ## **Bug/Issue/Backend Fixes/Changes:**
 

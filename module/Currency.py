@@ -58,15 +58,14 @@ class Currency(commands.Cog):
 
         [Format: %bet (amount)]
         """
+        # user is in a game like blackjack.
+        if await self.check_user_in_game(ctx):
+            return
+
         user = await self.ex.get_user(ctx.author.id)
         bet_amount: int = self.ex.remove_commas(bet_amount)  # remove all commas from the input.
         server_prefix = await self.ex.get_server_prefix(ctx)
         await user.register_currency()  # confirm the user is registered.
-
-        if user.in_currency_game:  # in a game that affects currency (such as blackjack).
-            msg = await self.ex.get_msg(user, "currency", "in_game", [["name", ctx.author.display_name],
-                                                                      ["server_prefix", server_prefix]])
-            return await ctx.send(msg)
 
         if bet_amount <= 0:  # input is wrong or they are trying to bet nothing.
             msg = await self.ex.get_msg(user, "currency", "nothing_to_bet",
@@ -167,6 +166,10 @@ class Currency(commands.Cog):
 
         [Format: %upgrade rob/daily/beg]
         """
+        # user is in a game like blackjack.
+        if await self.check_user_in_game(ctx):
+            return
+
         user = await self.ex.get_user(ctx.author.id)
         server_prefix = await self.ex.get_server_prefix(ctx)
         possible_options = ["rob", "daily", "beg"]
@@ -283,6 +286,11 @@ class Currency(commands.Cog):
 
         [Format: %give (@user) (amount)]
         """
+
+        # user is in a game like blackjack.
+        if await self.check_user_in_game(ctx):
+            return
+
         # TODO: take a fee from the user?
         if person_to_give == ctx.author:
             return await ctx.send(await self.ex.get_msg(ctx, "currency", "cannot_give_self",
@@ -322,6 +330,10 @@ class Currency(commands.Cog):
         [Format: %rps (r/p/s) (amount)]
         [Aliases: rockpaperscissors]
         """
+        # user is in a game like blackjack.
+        if await self.check_user_in_game(ctx):
+            return
+
         user = await self.ex.get_user(ctx.author.id)
         await user.register_currency()
 
@@ -389,3 +401,21 @@ class Currency(commands.Cog):
             msg = await self.ex.get_msg(ctx, "currency", "rps_tie", [["name", ctx.author.display_name],
                                                                      ["string", computer_choice]])
         return await ctx.send(msg)
+
+    async def check_user_in_game(self, ctx, user=None, server_prefix=None):
+        """
+        Check if a user is in a game like blackjack and return a message to them that they cannot use commands.
+
+        :param ctx: Context Object
+        :param user: Utility user object
+        :param server_prefix: Bot server prefix
+        :return: True if the user is in a game
+        """
+        user = user or await self.ex.get_user(ctx.author.id)
+        server_prefix = server_prefix or await self.ex.get_server_prefix(ctx)
+
+        if user.in_currency_game:  # in a game that affects currency (such as blackjack).
+            msg = await self.ex.get_msg(user, "currency", "in_game", [["name", ctx.author.display_name],
+                                                                      ["server_prefix", server_prefix]])
+            await ctx.send(msg)
+            return True

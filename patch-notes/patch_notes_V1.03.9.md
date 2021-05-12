@@ -117,4 +117,10 @@ Fixed broken help command.
 
 Removed possible negative numbers on currency by defaulting all balance amounts to 0 if less than 0.  
 
-Guilds Table is now accurately updated when guilds join/leave and is reset completely everytime discord cache reloads.
+Guilds Table is now accurately updated when guilds join/leave and is reset completely everytime discord cache reloads.  
+
+Fixed guessing game idol difficulties not containing the right idols.  
+
+Added safety check for guessing game not ending.  
+
+Users in a currency game can no longer use certain currency commands.  

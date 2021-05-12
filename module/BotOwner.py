@@ -4,6 +4,7 @@ import discord
 from discord.ext import commands
 from IreneUtility.util import u_logger as log
 from IreneUtility.Utility import Utility
+from PIL import Image
 
 
 # noinspection PyPep8
@@ -138,6 +139,14 @@ class BotOwner(commands.Cog):
     async def speak(self, ctx, *, message):
         """Owner to Bot TTS"""
         await ctx.send(f">>> {message}", tts=True, delete_after=10)
+
+    @commands.command()
+    @commands.is_owner()
+    async def generateplayingcards(self, ctx):
+        """Generate custom playing cards with idol avatars."""
+        await ctx.send("> Deleting and regenerating playing cards.")
+        await self.ex.u_blackjack.generate_playing_cards()
+        await ctx.send("> Finished generating all playing cards.")
 
     @commands.command()
     @commands.is_owner()

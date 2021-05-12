@@ -301,6 +301,7 @@ To find out more, look at the `GroupMembers` category.
 | addpatreon         | Adds a patreon.                           | %addpatreon (userid,userid,userid)             |               |
 | approve       | Approve a query id for an unregistered group or idol. | %approve (query id) ('idol' or 'group') |    |
 | clearnword       | Clear A User's Nword Counter                                   | %clearnword @user               |               |
+| generateplayingcards       | Generate custom playing cards with idol avatars. | %generateplayingcards  |               |
 | removepatreon         | Removes a patreon.                           | %removepatreon (userid,userid,userid)             |               |
 | resetcache          | Reset the cache.  | %resetcache                        |              |
 | scandrive        | Scan DriveIDs Table and update other tables.                                       | %scandrive (name=NULL) (member_id=0)                                                                           |                       |

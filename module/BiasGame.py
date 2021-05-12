@@ -33,7 +33,7 @@ class BiasGame(commands.Cog):
             server_prefix = await self.ex.get_server_prefix(ctx)
             return await ctx.send(
                 await self.ex.get_msg(user, 'biasgame', 'in_progress', [['server_prefix', server_prefix]]))
-        game = self.ex.u_objects.BiasGame(self.ex, ctx, bracket_size, gender)
+        game = self.ex.u_objects.BiasGame(self.ex, ctx, bracket_size=bracket_size, gender=gender)
         self.ex.cache.bias_games[ctx.channel.id] = game
 
         msg = await self.ex.get_msg(user, 'biasgame', 'start_game',

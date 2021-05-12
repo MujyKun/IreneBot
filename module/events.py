@@ -113,6 +113,7 @@ class Events(commands.Cog):
         except Exception as e:
             log.useless(f"{e} - Unable to send message on guild join. - Events.on_guild_join")
         log.console(f"{guild.name} ({guild.id}) has invited Irene.")
+        await ex.sql.s_cache.add_guild(guild)
 
     @staticmethod
     @client.event
@@ -159,6 +160,7 @@ class Events(commands.Cog):
                                   str(guild.region), guild.owner_id, guild.member_count)
         except Exception as e:
             log.console(f"{guild.name} ({guild.id})has already kicked Irene before. - {e}")
+        await ex.sql.s_cache.remove_guild(guild)
 
     @staticmethod
     @client.event

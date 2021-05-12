@@ -6,6 +6,10 @@ import os
 
 class AutoRestart:
     def __init__(self):
+        """
+        Main Server to control the restarting of other servers.
+
+        """
         self.saved_time = time.time()
         self.api = None
         self.bot = None
@@ -31,7 +35,7 @@ class AutoRestart:
 
     @staticmethod
     def start_api():
-        os.system("sudo gunicorn --bind 0.0.0.0:5454 --workers=25 --threads=1 --chdir API run:app")
+        os.system("sudo gunicorn --bind 0.0.0.0:5454 --workers=25 --threads=1 --chdir IreneAPI run:app")
 
     @staticmethod
     def start_site():
@@ -73,9 +77,7 @@ if __name__ == "__main__":
     restart.api.start()
     restart.bot.start()
     restart.site.start()
-    app.run(debug=True, use_reloader=False, port=5123)
+    app.run(debug=False, use_reloader=False, port=5123)
     restart.api.join()
     restart.bot.join()
     restart.site.join()
-
-

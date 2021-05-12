@@ -1,13 +1,17 @@
+import asyncio
+
 import discord
 from discord.ext import commands
-from module import events, logger as log
-from Utility import resources as ex
+from module import events
+from IreneUtility.util import u_logger as log
 import typing
+from IreneUtility.Utility import Utility
 
 
 # noinspection PyBroadException,PyPep8
 class LastFM(commands.Cog):
-    def __init__(self):
+    def __init__(self, ex):
+        self.ex: Utility = ex
         self.user_not_found = "That user was not found. Refer to `setfm` to link an account."
         self.user_does_not_exist = "That discord user does not have a Last FM account attached. Refer to `setfm`."
 
@@ -36,11 +40,11 @@ class LastFM(commands.Cog):
                 tracks_and_titles.append([title, main_desc, image_url])
         return tracks_and_titles
 
-    @staticmethod
-    async def create_fm_embed(title, stats_info, inline=False, individual=False):
+    async def create_fm_embed(self, title, stats_info, inline=False, individual=False):
         """Create and return an embed that matches the format for FM tracks and artists."""
-        embed = await ex.create_embed(title=title, color=ex.get_random_color())
+        embed = await self.ex.create_embed(title=title, color=self.ex.get_random_color())
         for info in stats_info:
+            await asyncio.sleep(0)
             # DO NOT SHORTEN FOR LOOP -> stats_info may contain less/more values to unpack than needed.
             name = info[0]
             value = info[1]
@@ -59,11 +63,11 @@ class LastFM(commands.Cog):
             if self.set_period(None, org_user) != "overall":
                 org_user = None
         if not org_user:
-            user = await ex.u_last_fm.get_fm_username(ctx.author.id)
+            user = await self.ex.u_last_fm.get_fm_username(ctx.author.id)
         elif type(org_user) is str:
             return org_user
         elif type(org_user) is discord.User:
-            user = await ex.u_last_fm.get_fm_username(org_user.id)
+            user = await self.ex.u_last_fm.get_fm_username(org_user.id)
             if not user:
                 user = org_user.name
         else:
@@ -98,13 +102,16 @@ class LastFM(commands.Cog):
 
     @commands.command()
     async def fm(self, ctx, user: typing.Union[discord.User, str] = None):
-        """Get information about a Last FM account by a discord user or a Last FM username.
-        [Format: %fm @user]."""
+        """
+        Get information about a Last FM account by a discord user or a Last FM username.
+
+        [Format: %fm @user].
+        """
         try:
             user = await self.set_user(ctx, user)
             if not user:
                 await events.Events.error(ctx, self.user_does_not_exist)
-            response = await ex.u_last_fm.get_fm_response('user.getinfo', user)
+            response = await self.ex.u_last_fm.get_fm_response('user.getinfo', user)
             user_info = response['user']
             title_desc = f"""Age: {user_info['age']}
 
@@ -121,49 +128,53 @@ class LastFM(commands.Cog):
             URL: {user_info['url']}                
             """
             title = f"{user}'s LastFM Account Info"
-            embed = await ex.create_embed(title=title, color=ex.get_random_color(), title_desc=title_desc)
+            embed = await self.ex.create_embed(title=title, color=self.ex.get_random_color(), title_desc=title_desc)
             await ctx.send(embed=embed)
 
         except KeyError:
             await events.Events.error(ctx, self.user_not_found)
         except Exception as e:
             log.console(e)
-            await ctx.send(f"> **Something went wrong.. Please {await ex.get_server_prefix_by_context(ctx)}report it.**")
+            await ctx.send(f"> **Something went wrong.. Please {await self.ex.get_server_prefix(ctx)}report it.**")
 
     @commands.command()
     async def setfm(self, ctx, username):
-        """Attach a Last FM username to your Discord Account.
-        [Format: %setfm username]."""
+        """
+        Attach a Last FM username to your Discord Account.
+
+        [Format: %setfm username].
+        """
         try:
-            response = await ex.u_last_fm.set_fm_username(ctx.author.id, username)  # can be an Exception or True
+            response = await self.ex.u_last_fm.set_fm_username(ctx.author.id, username)  # can be an Exception or True
             if response:
                 await ctx.send(f"> **{username} (last.fm) is now attached to {ctx.author.display_name}.**")
             else:
                 await events.Events.error(ctx, response)
         except Exception as e:
             log.console(e)
-            await ctx.send(f"> **Something went wrong.. Please {await ex.get_server_prefix_by_context(ctx)}report it.**")
+            await ctx.send(f"> **Something went wrong.. Please {await self.ex.get_server_prefix(ctx)}report it.**")
 
     @commands.command(aliases=['recents', 'rt'])
     async def recenttracks(self, ctx, user: typing.Union[discord.User, str] = None):
-        """Get the recent tracks of a Last FM Account by a discord user or a Last FM username"""
+        """Get the recent tracks of a Last FM Account by a discord user or a Last FM username."""
         try:
             user = await self.set_user(ctx, user)
-            response = await ex.u_last_fm.get_fm_response('user.getRecentTracks', user)
+            response = await self.ex.u_last_fm.get_fm_response('user.getRecentTracks', user)
             tracks_and_titles = self.get_recent_tracks(response, limit=10)
-            await ctx.send(embed=await self.create_fm_embed(f"{user} **Recent Tracks **", tracks_and_titles, inline=True))
+            await ctx.send(embed=await self.create_fm_embed(f"{user} **Recent Tracks **", tracks_and_titles,
+                                                            inline=True))
         except KeyError:
             await events.Events.error(ctx, self.user_not_found)
         except Exception as e:
             log.console(e)
-            await ctx.send(f"> **Something went wrong.. Please {await ex.get_server_prefix_by_context(ctx)}report it.**")
+            await ctx.send(f"> **Something went wrong.. Please {await self.ex.get_server_prefix(ctx)}report it.**")
 
     @commands.command()
     async def recent(self, ctx, user: typing.Union[discord.User, str] = None):
-        """Get the last listened track of a Last FM Account by a discord user or a Last FM username"""
+        """Get the last listened track of a Last FM Account by a discord user or a Last FM username."""
         try:
             user = await self.set_user(ctx, user)
-            response = await ex.u_last_fm.get_fm_response('user.getRecentTracks', user)
+            response = await self.ex.u_last_fm.get_fm_response('user.getRecentTracks', user)
             tracks_and_titles = self.get_recent_tracks(response, limit=1)
             embed = await self.create_fm_embed(f"{user}'s **Most Recent Track**", tracks_and_titles, individual=True)
             image_url = tracks_and_titles[0][2]
@@ -174,77 +185,98 @@ class LastFM(commands.Cog):
             await events.Events.error(ctx, self.user_not_found)
         except Exception as e:
             log.console(e)
-            await ctx.send(f"> **Something went wrong.. Please {await ex.get_server_prefix_by_context(ctx)}report it.**")
+            await ctx.send(f"> **Something went wrong.. Please {await self.ex.get_server_prefix(ctx)}report it.**")
 
     @commands.command(aliases=['ta'])
-    async def topartists(self, ctx, user: typing.Union[discord.User, str] = None, time_period: typing.Union[discord.User, str] = None):
-        """See the top artists of a Last FM Account by a discord user or a Last FM username
+    async def topartists(self, ctx, user: typing.Union[discord.User, str] = None,
+                         time_period: typing.Union[discord.User, str] = None):
+        """
+        See the top artists of a Last FM Account by a discord user or a Last FM username
+
         [Format: %topartists (username) (time period)]
-        Time period options are ``overall | week | month | 3month | 6month | year``. Time period defaults to overall."""
+        Time period options are ``overall | week | month | 3month | 6month | year``. Time period defaults to overall.
+        """
         try:
             user, time_period = await self.set_user(ctx, user, time_period), self.set_period(user, time_period)
-            response = await ex.u_last_fm.get_fm_response('user.getTopArtists', user, limit=10, time_period=time_period)
+            response = await self.ex.u_last_fm.get_fm_response('user.getTopArtists', user, limit=10,
+                                                               time_period=time_period)
             list_of_artists = response['topartists']['artist']
             counter = 0
             artist_and_titles = []
             for artist in list_of_artists:
+                await asyncio.sleep(0)
                 counter += 1
                 title = f"**#{counter} ({artist['playcount']} plays)**"
                 artist_name = f"**[{artist['name']}]({artist['url']})**"
                 artist_and_titles.append([title, artist_name])
-            await ctx.send(embed=await self.create_fm_embed(f"{user} **Top Artists ({time_period})**", artist_and_titles))
+            await ctx.send(embed=await self.create_fm_embed(f"{user} **Top Artists ({time_period})**",
+                                                            artist_and_titles))
         except KeyError:
             await events.Events.error(ctx, self.user_not_found)
         except Exception as e:
             log.console(e)
-            await ctx.send(f"> **Something went wrong.. Please {await ex.get_server_prefix_by_context(ctx)}report it.**")
+            await ctx.send(f"> **Something went wrong.. Please {await self.ex.get_server_prefix(ctx)}report it.**")
 
     @commands.command(aliases=['tt'])
-    async def toptracks(self, ctx, user: typing.Union[discord.User, str] = None, time_period: typing.Union[discord.User, str] = None):
-        """See the top tracks of a Last FM Account by a discord user or a Last FM username
+    async def toptracks(self, ctx, user: typing.Union[discord.User, str] = None,
+                        time_period: typing.Union[discord.User, str] = None):
+        """
+        See the top tracks of a Last FM Account by a discord user or a Last FM username
+
         [Format: %toptracks (username) (time period)]
         Time period options are ``overall | week | month | 3month | 6month | year``.
-        Time period defaults to overall."""
+        Time period defaults to overall.
+        """
         try:
             user, time_period = await self.set_user(ctx, user, time_period), self.set_period(user, time_period)
-            response = await ex.u_last_fm.get_fm_response('user.getTopTracks', user, limit=10, time_period=time_period)
+            response = await self.ex.u_last_fm.get_fm_response('user.getTopTracks', user, limit=10,
+                                                               time_period=time_period)
             list_of_tracks = response['toptracks']['track']
             counter = 0
             tracks_and_titles = []
             for track in list_of_tracks:
+                await asyncio.sleep(0)
                 counter += 1
                 title = f"**#{counter} ({track['playcount']} plays)**"
                 artist_name = f"**[{track['name']} by {track['artist']['name']}]({track['url']})**"
                 tracks_and_titles.append([title, artist_name])
-            await ctx.send(embed=await self.create_fm_embed(f"{user} **Top Tracks ({time_period})**", tracks_and_titles))
+            await ctx.send(embed=await self.create_fm_embed(f"{user} **Top Tracks ({time_period})**",
+                                                            tracks_and_titles))
         except KeyError:
             await events.Events.error(ctx, self.user_not_found)
         except Exception as e:
             log.console(e)
             await ctx.send(
-                f"> **Something went wrong.. Please {await ex.get_server_prefix_by_context(ctx)}report it.**")
+                f"> **Something went wrong.. Please {await self.ex.get_server_prefix(ctx)}report it.**")
 
     @commands.command(aliases=["tal"])
-    async def topalbums(self, ctx, user: typing.Union[discord.User, str] = None, time_period: typing.Union[discord.User, str] = None):
-        """See the top albums of a Last FM Account by a discord user or a Last FM username
+    async def topalbums(self, ctx, user: typing.Union[discord.User, str] = None,
+                        time_period: typing.Union[discord.User, str] = None):
+        """
+        See the top albums of a Last FM Account by a discord user or a Last FM username
+
         [Format: %topalbums (username) (time period)]
         Time period options are ``overall | week | month | 3month | 6month | year``.
-        Time period defaults to overall."""
+        Time period defaults to overall.
+        """
         try:
             user, time_period = await self.set_user(ctx, user, time_period), self.set_period(user, time_period)
-            response = await ex.u_last_fm.get_fm_response('user.getTopAlbums', user, limit=10, time_period=time_period)
+            response = await self.ex.u_last_fm.get_fm_response('user.getTopAlbums', user, limit=10,
+                                                               time_period=time_period)
             list_of_albums = response['topalbums']['album']
             counter = 0
             tracks_and_titles = []
             for album in list_of_albums:
+                await asyncio.sleep(0)
                 counter += 1
                 title = f"**#{counter} ({album['playcount']} plays)**"
                 artist_name = f"**[{album['name']} by {album['artist']['name']}]({album['url']})**"
                 tracks_and_titles.append([title, artist_name])
-            await ctx.send(embed=await self.create_fm_embed(f"{user} **Top Albums ({time_period})**", tracks_and_titles))
+            await ctx.send(embed=await self.create_fm_embed(f"{user} **Top Albums ({time_period})**",
+                                                            tracks_and_titles))
         except KeyError:
             await events.Events.error(ctx, self.user_not_found)
         except Exception as e:
             log.console(e)
             await ctx.send(
-                f"> **Something went wrong.. Please {await ex.get_server_prefix_by_context(ctx)}report it.**")
+                f"> **Something went wrong.. Please {await self.ex.get_server_prefix(ctx)}report it.**")

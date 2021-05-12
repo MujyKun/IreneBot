@@ -1,371 +1,421 @@
+import asyncio
+import random
 from discord.ext import commands
 from discord.ext.commands.cooldowns import BucketType
-from random import *
 import discord
-from module import logger as log
-from module.keys import bot_website
-from Utility import resources as ex
+from random import randint
+from IreneUtility.Utility import Utility
 
 
 # noinspection PyBroadException,PyPep8
 class Currency(commands.Cog):
-    """
-    Will be rewritten from scratch
-    -> DO NOT BOTHER REFORMATTING
-    -> literally delete this file and start over. It's just too bad
-    """
+    def __init__(self, ex):
+        """
 
-    def __init__(self):
-        self.counter2 = -1
-        self.counter = 0
+        :param ex: Utility object
+        """
+        self.ex: Utility = ex
 
     @commands.command()
     @commands.cooldown(1, 86400, BucketType.user)
     async def daily(self, ctx):
-        """Gives a certain amount of money every 24 hours [Format: %daily]"""
-        try:
-            user_balance = await ex.u_currency.get_balance(ctx.author.id)
-            user_level = await ex.u_levels.get_level(ctx.author.id, "daily")
-            daily_amount = int(user_balance * (user_level/200))
-            if daily_amount < 100:
-                daily_amount = 100
-            await ex.u_currency.update_balance(ctx.author.id, str(user_balance + daily_amount))
-            await ctx.send(f"> **{ctx.author.display_name} has been given ${daily_amount:,}.**")
-        except Exception as e:
-            log.console(e)
+        """
+        Gives a certain amount of money every 24 hours
+
+        [Format: %daily]
+        """
+        user = await self.ex.get_user(ctx.author.id)
+        daily_amount = await user.get_daily_amount()
+        await user.update_balance(add=daily_amount)  # will auto register.
+        msg_str = await self.ex.get_msg(user, 'currency', 'daily_msg',
+                                        [["name", ctx.author.display_name], ["daily_amount", daily_amount]])
+        return await ctx.send(msg_str)
 
     @commands.command(aliases=['b', 'bal', '$'])
-    async def balance(self, ctx, *, user: discord.Member = discord.Member):
-        """View your balance [Format: %balance (@user)][Aliases: b,bal,$]"""
-        if user == discord.Member:
-            user_id = ctx.author.id
-        else:
-            user_id = user.id
-        try:
-            await ex.u_currency.register_user(user_id)
-            amount = await ex.u_currency.get_balance(user_id)
-            await ctx.send("> **{} currently has {:,} Dollars.**".format(ex.client.get_user(user_id), amount))
-        except Exception as e:
-            log.console(e)
+    async def balance(self, ctx, *, member: discord.Member = None):
+        """
+        View your balance
+
+        [Format: %balance (@user)]
+        [Aliases: b,bal,$]
+        """
+        if not member:
+            member = ctx.author
+
+        user = await self.ex.get_user(member.id)
+        await user.register_currency()
+
+        msg_str = await self.ex.get_msg(user, 'currency', 'balance_msg',
+                                        [["name", member.display_name],
+                                         ["balance", (self.ex.add_commas(user.balance))],
+                                         ["currency_name", self.ex.keys.currency_name]])
+        return await ctx.send(msg_str)
 
     @commands.command()
-    async def bet(self, ctx, *, balance="1"):
-        """Bet your money [Format: %bet (amount)]"""
-        try:
-            balance = ex.remove_commas(balance)
-            check = True
-        except:
-            await ctx.send(f"> **{balance} is not a proper value.**")
-            check = False
-        try:
-            if check:
-                user_id = ctx.author.id
-                if not await ex.u_blackjack.check_in_game(user_id, ctx):
-                    keep_going = True
-                    if balance == 0:
-                        await ctx.send("> **You are not allowed to bet 0.**")
-                        keep_going = False
-                    if balance > 0:
-                        if keep_going:
-                            await ex.u_currency.register_user(user_id)
-                            amount = await ex.u_currency.get_balance(user_id)
-                            if balance > amount:
-                                await ctx.send(embed=await ex.create_embed(title="Not Enough Money", title_desc=f"**You do not have enough money to bet {balance:,}. You have {amount:,} Dollars.**"))
-                            if balance <= amount:
-                                a = randint(1, 100)
-                                if a <= 50:
-                                    if a <= 10:
-                                        new_balance = round(balance)
-                                        new_amount = round(amount - balance)
-                                        await ctx.send(embed=await ex.create_embed(title="Bet Loss", title_desc=f"**<@{user_id}> Got Super Unlucky! You lost {new_balance:,} out of {balance:,}. Your updated balance is {new_amount:,}.**"))
-                                        await ex.u_currency.update_balance(user_id, str(new_amount))
-                                    if a > 10:
-                                        new_balance = round(balance - (balance / 2))
-                                        new_amount = round(amount - new_balance)
-                                        await ctx.send(embed=await ex.create_embed(title="Bet Loss", title_desc=f"**<@{user_id}> Lost! You lost {new_balance:,} out of {balance:,}. Your updated balance is {new_amount:,}.**"))
-                                        await ex.u_currency.update_balance(user_id, str(new_amount))
-                                if a > 50:
-                                    if a <= 60:
-                                        new_balance = round(balance / 5)
-                                        new_amount = round(amount + new_balance)
-                                        await ctx.send(embed=await ex.create_embed(title="Bet Win", title_desc=f"**<@{user_id}> Won! You bet {balance:,} and received {new_balance:,}. Your updated balance is {new_amount:,}.**"))
-                                        await ex.u_currency.update_balance(user_id, str(new_amount))
-                                    if a > 60:
-                                        if a <= 70:
-                                            new_balance = round(balance / 4)
-                                            new_amount = round(amount + new_balance)
-                                            await ctx.send(embed=await ex.create_embed(title="Bet Win", title_desc=f"**<@{user_id}> Won! You bet {balance:,} and received {new_balance:,}. Your updated balance is {new_amount:,}.**"))
-                                            await ex.u_currency.update_balance(user_id, str(new_amount))
-                                        if a > 70:
-                                            if a <= 80:
-                                                new_balance = round(balance / 2)
-                                                new_amount = round(amount + new_balance)
-                                                await ctx.send(embed=await ex.create_embed(title="Bet Win", title_desc=f"**<@{user_id}> Won! You bet {balance:,} and received {new_balance:,}. Your updated balance is {new_amount:,}.**"))
-                                                await ex.u_currency.update_balance(user_id, str(new_amount))
-                                            if a > 80:
-                                                if a <= 90:
-                                                    new_balance = round(balance * 1.5)
-                                                    new_amount = round((amount - balance) + new_balance)
-                                                    await ctx.send(embed=await ex.create_embed(title="Bet Win", title_desc=f"**<@{user_id}> Won! You bet {balance:,} and received {new_balance:,}. Your updated balance is {new_amount:,}.**"))
-                                                    await ex.u_currency.update_balance(user_id, str(new_amount))
-                                                if a > 90:
-                                                    if a <= 99:
-                                                        new_balance = round(balance * 2)
-                                                        new_amount = round((amount - balance) + new_balance)
-                                                        await ctx.send(embed=await ex.create_embed(title="Bet Win", title_desc=f"**<@{user_id}> Won! You bet {balance:,} and received {new_balance:,}. Your updated balance is {new_amount:,}.**"))
-                                                        await ex.u_currency.update_balance(user_id, str(new_amount))
-                                                    if a == 100:
-                                                        new_balance = round(balance * 3)
-                                                        new_amount = round((amount - balance) + new_balance)
-                                                        await ctx.send(embed=await ex.create_embed(title="Bet Win", title_desc=f"**<@{user_id}> Won! You bet {balance:,} and received {new_balance:,}. Your updated balance is {new_amount:,}.**"))
-                                                        await ex.u_currency.update_balance(user_id, str(new_amount))
-        except Exception as e:
-            log.console(e)
+    async def bet(self, ctx, *, bet_amount: str):
+        """
+        Bet your money
+
+        [Format: %bet (amount)]
+        """
+        # user is in a game like blackjack.
+        if await self.check_user_in_game(ctx):
+            return
+
+        user = await self.ex.get_user(ctx.author.id)
+        bet_amount: int = self.ex.remove_commas(bet_amount)  # remove all commas from the input.
+        server_prefix = await self.ex.get_server_prefix(ctx)
+        await user.register_currency()  # confirm the user is registered.
+
+        if bet_amount <= 0:  # input is wrong or they are trying to bet nothing.
+            msg = await self.ex.get_msg(user, "currency", "nothing_to_bet",
+                                        [["name", ctx.author.display_name],
+                                         ["currency_name", self.ex.keys.currency_name]])
+            return await ctx.send(msg)
+
+        if bet_amount > user.balance:  # user does not have enough.
+            msg = await self.ex.get_msg(user, "currency", "not_enough",
+                                        [["name", ctx.author.display_name],
+                                         ["currency_name", self.ex.keys.currency_name],
+                                         ["balance", (self.ex.add_commas(user.balance))]])
+            return await ctx.send(msg)
+
+        user_random_number = randint(1, 100)  # served as comparator and is also the win percentage.
+        comp_random_number = randint(1, 100)  # served as comparator and is also the loss percentage.
+
+        # if the user and comp have an even number
+        user_is_even = user_random_number % 2 == 0
+        comp_is_even = comp_random_number % 2 == 0
+
+        if (user_is_even and comp_is_even) or (not user_is_even and not comp_is_even):
+            # if the user and comp random number are either both odd or both even -> win
+            multiplier = (100 + user_random_number) / 100  # percentage converted to decimal
+        else:
+            # loss
+            multiplier = (comp_random_number / 100)  # percentage converted to decimal
+
+        bet_result = int((multiplier * bet_amount) - bet_amount)  # the amount to add or remove from the bet amount.
+        result = "LOST" if bet_result < 0 else "WON"
+        await user.update_balance(add=bet_result)
+        msg = await self.ex.get_msg(user, "currency", "bet_result",
+                                    [["name", ctx.author.display_name],
+                                     ["result", result],
+                                     ["integer", -bet_result if bet_result < 0 else bet_result],
+                                     ["balance", self.ex.add_commas(user.balance)]])
+        await ctx.send(msg)
 
     @commands.command(aliases=['leaderboards', 'lb'])
     async def leaderboard(self, ctx, mode="server"):
-        """Shows Top 10 Users server/global wide [Format: %leaderboard (global/server)][Aliases: leaderboards, lb]"""
-        counter = ex.first_result(await ex.conn.fetchrow("SELECT count(UserID) FROM currency.Currency"))
-        embed = discord.Embed(title=f"Currency Leaderboard ({mode.lower()})", color=0xffb6c1)
-        embed.set_author(name="Irene", url=bot_website, icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
-        embed.set_footer(text="Type %bal (user) to view their balance.", icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
-        if counter == 0:
-            await ctx.send("> **There are no users to display.**", delete_after=60)
-        if counter > 0:
-            amount = await ex.conn.fetch("Select UserID,Money FROM currency.Currency")
-            sort_money = []
-            for sort in amount:
-                if sort[0] in [member.id for member in ctx.guild.members] or mode == "global":
-                    new_user = [sort[0], int(sort[1])]
-                    sort_money.append(new_user)
-            sort_money.sort(key=lambda x: x[1], reverse=True)
-            count = 0
-            for a in sort_money:
-                count += 1
-                user_id = a[0]
-                money = a[1]
-                user_name = ex.client.get_user(user_id)
-                if count <= 10:
-                    embed.add_field(name=f"{count}) {user_name} ({user_id})", value=await ex.u_currency.shorten_balance(str(money)), inline=True)
-            await ctx.send(embed=embed)
+        """
+        Shows Top 10 Users server/global wide
+
+        [Format: %leaderboard (global/server)]
+        [Aliases: leaderboards, lb]
+        """
+        sorted_balance = []
+
+        # user may be in DMs trying to access server currency list or misspelt the mode.
+        if not ctx.guild or mode.lower() not in ["global", "server"]:
+            mode = "global"
+        elif mode.lower() == "server":
+            # get member list of the server
+            guild_member_list = [await self.ex.get_user(member.id) for member in ctx.guild.members]
+            sorted_balance = [[t_user, t_user.balance] for t_user in guild_member_list]
+
+        # global list
+        if not sorted_balance:
+            sorted_balance = [[t_user, t_user.balance] for t_user in self.ex.cache.users.values()]
+
+        # sort by greatest value first
+        sorted_balance.sort(key=lambda user_and_bal: user_and_bal[1], reverse=True)
+
+        embed = await self.ex.create_embed(title=f"Currency Leaderboard ({mode.lower()})",
+                                           footer_desc="Type %bal (user) to view their balance.")
+
+        for count, user_info in enumerate(sorted_balance, 1):
+            await asyncio.sleep(0)
+            if count > 10:
+                break
+            user = user_info[0]
+            embed.add_field(name=f"{count}) {self.ex.client.get_user(user.id)} ({user.id})",
+                            value=await user.get_shortened_balance(), inline=True)
+
+        await ctx.send(embed=embed)
 
     @commands.command()
-    @commands.cooldown(1, 5, BucketType.user)
+    @commands.cooldown(1, 300, BucketType.user)
     async def beg(self, ctx):
-        """Beg a homeless man for money [Format: %beg]"""
-        try:
-            user_balance = await ex.u_currency.get_balance(ctx.author.id)
-            user_level = await ex.u_levels.get_level(ctx.author.id, "beg")
-            daily_amount = int(7/10 * (2 ** (user_level - 2)))
-            if daily_amount < 100:
-                if user_balance > 10000:
-                    daily_amount = randint(50, 100)
-                else:
-                    daily_amount = randint(1, 25)
-            await ex.u_currency.update_balance(ctx.author.id, str(user_balance + daily_amount))
-            await ctx.send(f"> ** A homeless man has given {ctx.author.display_name} {daily_amount:,} dollars.**")
-        except Exception as e:
-            log.console(e)
+        """
+        Beg a homeless man for money
+
+        [Format: %beg]
+        """
+        user = await self.ex.get_user(ctx.author.id)
+        beg_amount = (user.beg_level * 2) or random.randint(1, 25)  # randint > beg_amount until beg level 13
+        await user.update_balance(add=beg_amount)  # will auto register
+        msg_str = await self.ex.get_msg(user, 'currency', 'beg_msg', [["name", ctx.author.display_name],
+                                                                      ["integer", beg_amount],
+                                                                      ["currency_name", self.ex.keys.currency_name]])
+        return await ctx.send(msg_str)
 
     @commands.command(aliases=["levelup"])
     @commands.cooldown(1, 61, BucketType.user)
-    async def upgrade(self, ctx, command=""):
-        """Upgrade a command to the next level with your money. [Format: %upgrade rob/daily/beg]"""
-        try:
-            user_id = ctx.author.id
-            user_balance = await ex.u_currency.get_balance(user_id)
-            user_level = await ex.u_levels.get_level(user_id, command.lower())
-            money_needed_to_level = await ex.u_levels.get_xp(user_level, command.lower())
+    async def upgrade(self, ctx, command=None):
+        """
+        Upgrade a command to the next level with your money.
 
-            async def not_enough_money():
-                embed = await ex.create_embed(title="Not Enough Money!", title_desc=f"<@{user_id}> does not have **{money_needed_to_level:,}** dollars in order to level up {command}!")
-                await ctx.send(embed=embed)
-                ctx.command.reset_cooldown(ctx)
+        [Format: %upgrade rob/daily/beg]
+        """
+        # user is in a game like blackjack.
+        if await self.check_user_in_game(ctx):
+            return
 
-            async def level_up_process():
-                if await ex.u_currency.get_user_has_money(user_id):
-                    desc = f"Press the Thumbs Up Reaction within 1 minute to level up.\n<@{ctx.author.id}>, you are currently at level **{user_level}** and need at least **{money_needed_to_level:,}** dollars in order to level up."
-                    embed = await ex.create_embed(title="Level Up", title_desc=desc)
-                    msg = await ctx.send(embed=embed)
-                    reaction = "\U0001f44d"
-                    await msg.add_reaction(reaction)  # thumbs up
-                    if await ex.wait_for_reaction(msg, user_id, reaction):
-                        await msg.delete()
-                        if user_balance < money_needed_to_level:
-                            await not_enough_money()
-                        else:
-                            await ex.u_currency.update_balance(user_id, str(user_balance - money_needed_to_level))
-                            await ex.u_levels.set_level(user_id, user_level + 1, command.lower())
-                            embed = await ex.create_embed(title="You Have Leveled Up!",
-                                                          title_desc=f"<@{ctx.author.id}>, You are now at level {user_level+1}")
-                            await ctx.send(embed=embed)
-                            ctx.command.reset_cooldown(ctx)
-                else:
-                    await ctx.send("> **You are not registered. Please type %register.**")
-            if command.lower() == "rob":
-                await level_up_process()
-            elif command.lower() == "daily":
-                await level_up_process()
-            elif command.lower() == "beg":
-                await level_up_process()
-            else:
-                await ctx.send("> **You are able to upgrade rob, daily, and beg. (ex: %upgrade rob)**")
-                ctx.command.reset_cooldown(ctx)
-        except Exception as e:
-            await ctx.send("> **Please choose to upgrade rob, daily, or beg.**")
+        user = await self.ex.get_user(ctx.author.id)
+        server_prefix = await self.ex.get_server_prefix(ctx)
+        possible_options = ["rob", "daily", "beg"]
+
+        # get rid of invalid input.
+        if not command or command.lower() not in possible_options:
             ctx.command.reset_cooldown(ctx)
-            log.console(e)
+            msg_str = await self.ex.get_msg(user, 'general', 'invalid_input', [["name", ctx.author.display_name],
+                                                                               ["server_prefix", server_prefix],
+                                                                               ["command_name", "upgrade"]])
+            return await ctx.send(msg_str)
+
+        # set the current level of the user for the command we are trying to upgrade.
+        elif command.lower() == possible_options[0]:  # rob
+            level = user.rob_level
+        elif command.lower() == possible_options[1]:  # daily
+            level = user.daily_level
+        elif command.lower() == possible_options[2]:  # beg
+            level = user.beg_level
+
+        # Level option has no condition for a new command.
+        else:
+            ctx.command.reset_cooldown(ctx)
+            raise self.ex.exceptions.ShouldNotBeHere("Possible upgrade option has no logic added. "
+                                                     "-> Currency.upgrade() ")
+
+        # check howmuch money the user needs
+        money_needed = await user.get_needed_for_level(level, command.lower())
+
+        # if the user does not have enough money
+        if user.balance < money_needed:
+            ctx.command.reset_cooldown(ctx)
+            msg_str = await self.ex.get_msg(user, 'currency', 'upgrade_not_enough', [
+                ["name", ctx.author.display_name],
+                ["integer", self.ex.add_commas(money_needed)],
+                ["command_name", command.lower()],
+                ["balance", self.ex.add_commas(user.balance)]])
+            return await ctx.send(msg_str)
+
+        # confirm the user really wants to upgrade their level.
+        msg_str = await self.ex.get_msg(user, 'currency', 'upgrade_msg', [
+            ["name", ctx.author.display_name],
+            ["integer", self.ex.add_commas(money_needed)],
+            ["command_name", command.lower()],
+            ["balance", self.ex.add_commas(user.balance)]])
+        msg = await ctx.send(msg_str)
+        reaction = "\U0001f44d"
+        await msg.add_reaction(reaction)  # thumbs up]
+        if await self.ex.wait_for_reaction(msg, user.id, reaction):
+            # set the user's new level
+            await user.set_level(level + 1, command.lower())
+            ctx.command.reset_cooldown(ctx)
+            # let the user know their new level.
+            msg_str = await self.ex.get_msg(user, 'currency', 'upgrade_msg_success',
+                                            [["name", ctx.author.display_name],
+                                             ["integer", level + 1],
+                                             ["command_name", command.lower()]])
+            return await ctx.send(msg_str)
+        else:
+            # let the user know they failed to upgrade.
+            ctx.command.reset_cooldown(ctx)
+            msg_str = await self.ex.get_msg(user, 'currency', 'upgrade_out_of_time',
+                                            [["name", ctx.author.display_name],
+                                             ["command_name", command.lower()]])
+            return await ctx.send(msg_str)
 
     @commands.command()
     @commands.cooldown(1, 3600, BucketType.user)
-    async def rob(self, ctx, *, user: discord.Member = discord.Member):
-        """Rob a user [Format: %rob @user]"""
-        try:
-            # not actually a percent, this contains the a value of the random integer.
-            level = await ex.u_levels.get_level(ctx.author.id, "rob")
-            rob_percent_to_win = await ex.u_levels.get_rob_percentage(level)
-            do_this = True
-            robbed_user_id = user.id
-            if user == discord.Member:
-                await ctx.send("> **Please choose someone to rob!**")
-                ctx.command.reset_cooldown(ctx)
-                do_this = False
-            if ctx.author.id == robbed_user_id:
-                await ctx.send("> **You can't rob yourself!**")
-                ctx.command.reset_cooldown(ctx)
-                do_this = False
-            if do_this:
-                try:
-                    await ex.u_currency.register_user(robbed_user_id)
-                    await ex.u_currency.register_user(ctx.author.id)
-                    user_money = await ex.u_currency.get_balance(robbed_user_id)
-                    author_money = await ex.u_currency.get_balance(ctx.author.id)
-                    if author_money >= 0:
-                        if user_money >= 0:
-                                # b value is out of 20 so each 5% is considered 1
-                                all_possible_values = []
-                                for i in range(rob_percent_to_win, 21):
-                                    if i == rob_percent_to_win:
-                                        for j in range(rob_percent_to_win):
-                                            all_possible_values.append(i)
-                                    else:
-                                        all_possible_values.append(i)
-                                random_number = choice(all_possible_values)
-                                if random_number != rob_percent_to_win:
-                                    await ctx.send(embed=await ex.create_embed(title="Robbed User",
-                                                                               title_desc=f"**<@{ctx.author.id}> has failed to rob <@{robbed_user_id}>.**"))
-                                if random_number == rob_percent_to_win:
-                                    if user_money >= 100:
-                                        random_amount = await ex.u_currency.get_robbed_amount(author_money, user_money, level)
-                                        try:
-                                            await ex.u_currency.update_balance(robbed_user_id, str(user_money - random_amount))
-                                            await ex.u_currency.update_balance(ctx.author.id, str(author_money + random_amount))
-                                            await ctx.send(embed=await ex.create_embed(title="Robbed User",
-                                                                                       title_desc=f"**<@{ctx.author.id}> has stolen ${random_amount:,} from <@{robbed_user_id}>.**"))
-                                        except Exception as e:
-                                            await ctx.send(f"> **The Database is locked... -- {e}**")
-                                    elif user_money < 100:
-                                        await ctx.send("> **That user has less than $100!**")
-                                        ctx.command.reset_cooldown(ctx)
-                except Exception as e:
-                    log.console(e)
-                    await ctx.send(f"> **An error occurred. Please %report it.**")
-                    ctx.command.reset_cooldown(ctx)
-        except Exception as e:
-            log.console(e)
+    async def rob(self, ctx, *, person_to_rob: discord.Member):
+        """
+        Rob a user
+
+        [Format: %rob @user]
+        """
+        if person_to_rob == ctx.author:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(await self.ex.get_msg(ctx, "currency", "cannot_rob_self",
+                                                        ["name", ctx.author.display_name]))
+        if person_to_rob.bot:
+            ctx.command.reset_cooldown(ctx)
+            return await ctx.send(await self.ex.get_msg(ctx, "currency", "no_bots",
+                                                        ["name", ctx.author.display_name]))
+        user = await self.ex.get_user(ctx.author.id)
+        user_to_rob = await self.ex.get_user(person_to_rob.id)
+
+        # ensure both users are registered
+        await user.register_currency()
+        await user_to_rob.register_currency()
+
+        robbed = await user.try_to_rob_user(user_to_rob)
+        if not robbed:
+            # failed to rob user.
+            return await ctx.send(await self.ex.get_msg(ctx, "currency", "failed_to_rob",
+                                                        [["name", ctx.author.display_name],
+                                                         ["mention", f"<@{user_to_rob.id}>"]]))
+        else:
+            # succeeded in robbing user
+            # 2% if user has more than 100 currency, else 5%
+            rob_amount = int((0.02 * user_to_rob.balance) if user_to_rob.balance > 100
+                             else (0.05 * user_to_rob.balance))
+            # note that the final rob amount can still be 0.
+            await user.update_balance(add=rob_amount)
+            await user_to_rob.update_balance(remove=rob_amount)
+            return await ctx.send(await self.ex.get_msg(ctx, "currency", "rob_success",
+                                                        [["name", ctx.author.display_name],
+                                                         ["integer", f"{rob_amount:,}"],
+                                                         ["currency_name", self.ex.keys.currency_name],
+                                                         ["mention", f"<@{user_to_rob.id}>"]]))
 
     @commands.command()
-    async def give(self, ctx, mentioned_user: discord.Member = discord.Member, amount="0"):
-        """Give a user money [Format: %give (@user) (amount)]"""
-        try:
-            amount = ex.remove_commas(amount)
-            check = True
-        except:
-            await ctx.send(f"> **{amount} is not a proper value.**")
-            check = False
-        try:
-            if check:
-                user_id = ctx.author.id
-                if not await ex.u_blackjack.check_in_game(user_id, ctx):
-                    await ex.u_currency.register_user(user_id)
-                    if mentioned_user.id != user_id:
-                        current_amount = await ex.u_currency.get_balance(user_id)
-                        if amount == 0:
-                            await ctx.send("> **Please specify an amount [Format: %give (@user) (amount)]**", delete_after=60)
-                        if amount > 0:
-                            if amount > current_amount:
-                                await ctx.send("> **You do not have enough money to give!**", delete_after=60)
-                            if amount <= current_amount:
-                                mentioned_money = await ex.u_currency.get_balance(mentioned_user.id)
-                                new_amount = mentioned_money + amount
-                                subtracted_amount = current_amount - amount
-                                await ex.u_currency.update_balance(mentioned_user.id, str(new_amount))
-                                await ex.u_currency.update_balance(user_id, str(subtracted_amount))
-                                await ctx.send("> **Your money has been transferred.**")
-                    elif mentioned_user.id == user_id:
-                        await ctx.send("> **You can not give money to yourself!**")
-        except Exception as e:
-            log.console(e)
+    async def give(self, ctx, person_to_give: discord.Member, amount_to_give: str):
+        """
+        Give a user money
+
+        [Format: %give (@user) (amount)]
+        """
+
+        # user is in a game like blackjack.
+        if await self.check_user_in_game(ctx):
+            return
+
+        # TODO: take a fee from the user?
+        if person_to_give == ctx.author:
+            return await ctx.send(await self.ex.get_msg(ctx, "currency", "cannot_give_self",
+                                                        ["name", ctx.author.display_name]))
+        if person_to_give.bot:
+            return await ctx.send(await self.ex.get_msg(ctx, "currency", "no_bots",
+                                                        ["name", ctx.author.display_name]))
+        user = await self.ex.get_user(ctx.author.id)
+        user_to_give = await self.ex.get_user(person_to_give.id)
+        amount_to_give: int = self.ex.remove_commas(amount_to_give)  # remove all commas from the input.
+
+        # do not allow negatives to be given.
+        if amount_to_give < 0:
+            amount_to_give = 0
+
+        # not enough currency
+        if user.balance < amount_to_give:
+            return await ctx.send(await self.ex.get_msg(ctx, "currency", "not_enough",
+                                                        [["name", ctx.author.display_name],
+                                                         ["currency_name", self.ex.keys.currency_name],
+                                                         ["balance", self.ex.add_commas(user.balance)]]))
+        else:
+            # transfer the money
+            await user.update_balance(remove=amount_to_give)  # will auto register user
+            await user_to_give.update_balance(add=amount_to_give)  # will auto register user
+            return await ctx.send(await self.ex.get_msg(ctx, "currency", "give_success", [
+                ["name", ctx.author.display_name],
+                ["integer", f"{amount_to_give:,}"],
+                ["currency_name", self.ex.keys.currency_name],
+                ["mention", f"<@{user_to_give.id}>"]]))
 
     @commands.command(aliases=['rockpaperscissors'])
-    async def rps(self, ctx, rps_choice='', amount="0"):
-        """Play Rock Paper Scissors for Money [Format: %rps (r/p/s)(amount)][Aliases: rockpaperscissors]"""
-        try:
-            amount = ex.remove_commas(amount)
-            check = True
-        except:
-            await ctx.send(f"> **{amount} is not a proper value.**")
-            check = False
-        try:
-            if check:
-                if amount < 0:
-                    await ctx.send("> **You can't bet a negative number!**")
-                elif amount >= 0:
-                    user_id = ctx.author.id
-                    await ex.u_currency.register_user(user_id)
-                    if not await ex.u_blackjack.check_in_game(user_id, ctx):
-                        current_balance = await ex.u_currency.get_balance(user_id)
-                        if amount > current_balance:
-                            await ctx.send("> ** You do not have enough money **", delete_after=60)
-                        if amount <= current_balance:
-                            rps = ['rock', 'paper', 'scissors']
-                            a = randint(0, 2)
-                            b = randint(0, 2)
-                            cd = int(amount // (1/1.5))  # using floor division instead of multiplication
-                            if amount == 0:
-                                cd = 0
-                            if rps_choice == '':
-                                rps_choice = rps[a]
-                            compchoice = rps[b]
-                            if compchoice == 'rock':
-                                if rps_choice == 'rock' or rps_choice == 'r':
-                                    await ctx.send(embed=await ex.create_embed(title="Rock Paper Scissors", title_desc=f"**We Both Chose {compchoice} and Tied! You get nothing!**"))
-                                if rps_choice == 'paper' or rps_choice == 'p':
-                                    await ctx.send(embed=await ex.create_embed(title="Rock Paper Scissors", title_desc=f"**You Won {cd:,} Dollars! I chose {compchoice} while you chose {rps_choice}!**"))
-                                    await ex.u_currency.update_balance(user_id, str(current_balance + cd))
-                                if rps_choice == 'scissors' or rps_choice == 's':
-                                    await ctx.send(embed=await ex.create_embed(title="Rock Paper Scissors", title_desc=f"**You Lost {amount:,} Dollars! I chose {compchoice} while you chose {rps_choice}!**"))
-                                    await ex.u_currency.update_balance(user_id, str(current_balance - amount))
-                            if compchoice == 'paper':
-                                if rps_choice == 'rock' or rps_choice == 'r':
-                                    await ctx.send(embed=await ex.create_embed(title="Rock Paper Scissors", title_desc=f"**You Lost {amount:,} Dollars! I chose {compchoice} while you chose {rps_choice}!**"))
-                                    await ex.u_currency.update_balance(user_id, str(current_balance - amount))
-                                    check_amount = str(current_balance - amount)
-                                    await ex.u_currency.update_balance(user_id, check_amount)
-                                if rps_choice == 'paper' or rps_choice == 'p':
-                                    await ctx.send(embed=await ex.create_embed(title="Rock Paper Scissors", title_desc=f"**We Both Chose {compchoice} and Tied! You get nothing!**"))
-                                if rps_choice == 'scissors' or rps_choice == 's':
-                                    await ctx.send(embed=await ex.create_embed(title="Rock Paper Scissors", title_desc=f"**You Won {cd:,} Dollars! I chose {compchoice} while you chose {rps_choice}!**"))
-                                    await ex.u_currency.update_balance(user_id, str(current_balance + cd))
-                            if compchoice == 'scissors':
-                                if rps_choice == 'rock' or rps_choice == 'r':
-                                    await ctx.send(embed=await ex.create_embed(title="Rock Paper Scissors", title_desc=f"**You Won {cd:,} Dollars! I chose {compchoice} while you chose {rps_choice}!**"))
-                                    await ex.u_currency.update_balance(user_id, str(current_balance + cd))
-                                if rps_choice == 'paper' or rps_choice == 'p':
-                                    await ctx.send(embed=await ex.create_embed(title="Rock Paper Scissors", title_desc=f"**You Lost {amount:,} Dollars! I chose {compchoice} while you chose {rps_choice}!**"))
-                                    await ex.u_currency.update_balance(user_id, str(current_balance - amount))
-                                if rps_choice == 'scissors' or rps_choice == 's':
-                                    await ctx.send(embed=await ex.create_embed(title="Rock Paper Scissors", title_desc=f"**We Both Chose {compchoice} and Tied! You get nothing!**"))
-                await ctx.message.delete(delay=15)
-        except Exception as e:
-            log.console(e)
+    async def rps(self, ctx, rps_choice, amount_to_bet="0"):
+        """
+        Play Rock Paper Scissors for Money
+
+        [Format: %rps (r/p/s) (amount)]
+        [Aliases: rockpaperscissors]
+        """
+        # user is in a game like blackjack.
+        if await self.check_user_in_game(ctx):
+            return
+
+        user = await self.ex.get_user(ctx.author.id)
+        await user.register_currency()
+
+        # we do not know the format the user sent input in, so we will just remove all commas and adjust to our case.
+        amount_to_bet = self.ex.remove_commas(amount_to_bet)
+
+        # do not allow negatives to be given.
+        if amount_to_bet < 0:
+            amount_to_bet = 0
+
+        if user.balance < amount_to_bet:
+            return await ctx.send(await self.ex.get_msg(ctx, "currency", "not_enough",
+                                                        [["name", ctx.author.display_name],
+                                                         ["currency_name", self.ex.keys.currency_name],
+                                                         ["balance", self.ex.add_commas(user.balance)]]))
+        rock = ["rock", "r"]
+        paper = ["paper", "p"]
+        scissors = ["scissors", "scissor", "s"]
+        computer_choice = random.choice([rock[0], paper[0], scissors[0]])
+        rps_choice = rps_choice.lower()
+        if rps_choice in rock:
+            rps_choice = rock[0]
+        elif rps_choice in paper:
+            rps_choice = paper[0]
+        elif rps_choice in scissors:
+            rps_choice = scissors[0]
+        else:
+            # choose an option for the user.
+            rps_choice = random.choice([rock[0], paper[0], scissors[0]])
+
+        win_cases = {
+            rock[0]: scissors[0],
+            paper[0]: rock[0],
+            scissors[0]: paper[0]
+        }
+
+        loss_cases = {
+            rock[0]: paper[0],
+            paper[0]: scissors[0],
+            scissors[0]: rock[0]
+        }
+
+        if win_cases[rps_choice] == computer_choice:
+            # won
+            msg = await self.ex.get_msg(ctx, "currency", "rps_win_loss", [
+                ["name", ctx.author.display_name],
+                ["result", "WON"],
+                ["integer", self.ex.add_commas(amount_to_bet)],
+                ["currency_name", self.ex.keys.currency_name],
+                ["string", computer_choice],
+                ["string2", rps_choice]])
+            await user.update_balance(add=amount_to_bet)
+        elif loss_cases[rps_choice] == computer_choice:
+            # loss
+            msg = await self.ex.get_msg(ctx, "currency", "rps_win_loss", [
+                ["name", ctx.author.display_name],
+                ["result", "LOST"],
+                ["integer", self.ex.add_commas(amount_to_bet)],
+                ["currency_name", self.ex.keys.currency_name],
+                ["string", computer_choice],
+                ["string2", rps_choice]])
+            await user.update_balance(remove=amount_to_bet)
+        else:
+            # tie
+            msg = await self.ex.get_msg(ctx, "currency", "rps_tie", [["name", ctx.author.display_name],
+                                                                     ["string", computer_choice]])
+        return await ctx.send(msg)
+
+    async def check_user_in_game(self, ctx, user=None, server_prefix=None):
+        """
+        Check if a user is in a game like blackjack and return a message to them that they cannot use commands.
+
+        :param ctx: Context Object
+        :param user: Utility user object
+        :param server_prefix: Bot server prefix
+        :return: True if the user is in a game
+        """
+        user = user or await self.ex.get_user(ctx.author.id)
+        server_prefix = server_prefix or await self.ex.get_server_prefix(ctx)
+
+        if user.in_currency_game:  # in a game that affects currency (such as blackjack).
+            msg = await self.ex.get_msg(user, "currency", "in_game", [["name", ctx.author.display_name],
+                                                                      ["server_prefix", server_prefix]])
+            await ctx.send(msg)
+            return True

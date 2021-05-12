@@ -1,154 +1,126 @@
 import discord
 from discord.ext import commands
-from random import *
-from module import logger as log
-from module.keys import bot_id
-from Utility import resources as ex
+from IreneUtility.Utility import Utility
 
 
 # noinspection PyPep8
 class BlackJack(commands.Cog):
+    def __init__(self, ex):
+        """
+
+        :param ex: Utility Object
+        """
+        self.ex: Utility = ex
+
     @commands.command(aliases=['bj'])
-    async def blackjack(self, ctx, amount="0", versus="player"):
-        """Start a game of BlackJack [Format: %blackjack (amount)] [Aliases: bj]"""
-        try:
-            amount = ex.remove_commas(amount)
-            user_id = ctx.author.id
-            if versus != "bot":
-                if await ex.u_blackjack.process_bj_game(ctx, amount, user_id):
-                    await ex.u_blackjack.add_bj_game(user_id, amount, ctx, "player")
-            else:
-                if await ex.u_blackjack.process_bj_game(ctx, amount, user_id):
-                    await ex.u_blackjack.add_bj_game(user_id, amount, ctx, "bot")
-                    game_id = await ex.u_blackjack.get_game_by_player(user_id)
-                    fake_bot_id = int(f"{ex.u_miscellaneous.get_int_index(bot_id, 9)}{randint(1,999999999)}")
-                    await ex.u_blackjack.add_player_two(game_id, fake_bot_id, amount)
-                    await ex.u_blackjack.start_game(game_id)
-        except Exception as e:
-            log.console(e)
+    async def blackjack(self, ctx, bet="0"):
+        """
+        Start a game of BlackJack
+
+        [Format: %blackjack (amount)]
+        [Aliases: bj]
+        """
+        server_prefix = await self.ex.get_server_prefix(ctx)
+        user = await self.ex.get_user(ctx.author.id)
+        bet = self.ex.remove_commas(bet)
+        await user.register_currency()  # ensure the user is registered.
+        if bet < 0:
+            bet = 0
+
+        if user.balance < bet:
+            return await ctx.send(await self.ex.get_msg(ctx, "currency", "not_enough", [
+                ["name", ctx.author.display_name], ["currency_name", self.ex.keys.currency_name],
+                ["balance", self.ex.add_commas(user.balance)]]))
+
+        if user.in_currency_game:
+            # user already in a game
+            return await ctx.send(await self.ex.get_msg(ctx, "blackjack", "in_game",
+                                                        [["name", ctx.author.display_name],
+                                                         ["server_prefix", server_prefix]]))
+        blackjack_game = self.ex.u_objects.BlackJackGame(self.ex, ctx, first_player=user, first_player_bet=bet)
+        self.ex.cache.blackjack_games.append(blackjack_game)
+        return await ctx.send(await self.ex.get_msg(ctx, "blackjack", "game_created", [
+            ["name", ctx.author.display_name],
+            ["server_prefix", await self.ex.get_server_prefix(ctx)]]))
 
     @commands.command(aliases=['jg'])
-    async def joingame(self, ctx, game_id=0, amount="0"):
-        """Join a game [Format: %joingame (gameid) (bid)] [Aliases: jg]"""
-        try:
-            amount = ex.remove_commas(amount)
-            user_id = ctx.author.id
-            if await ex.u_blackjack.process_bj_game(ctx, amount, user_id):
-                game = await ex.u_blackjack.get_game(game_id)
-                if game is None:
-                    await ctx.send(f"> **{ctx.author}, {game_id} is not a valid game.**")
-                else:
-                    if game[5] == ctx.channel.id:  # Did not use already existing function due to incompatibility.
-                        await ex.u_blackjack.add_player_two(game_id, user_id, amount)
-                        await ex.u_blackjack.start_game(game_id)
-                    else:
-                        await ctx.send(f"> **{ctx.author}, that game ({game_id}) is not available in this text channel.**")
-        except Exception as e:
-            log.console(e)
+    async def joingame(self, ctx, opponent: discord.Member, bet="0"):
+        """
+        Join a game
+
+        [Format: %joingame (@user) (bet)]
+        [Aliases: jg]
+        """
+        server_prefix = await self.ex.get_server_prefix(ctx)
+        user = await self.ex.get_user(ctx.author.id)
+        opponent_user = await self.ex.get_user(opponent.id)
+        bet = self.ex.remove_commas(bet)
+        await user.register_currency()  # ensure the user is registered.
+        if bet < 0:
+            bet = 0
+
+        if user.balance < bet:
+            return await ctx.send(await self.ex.get_msg(ctx, "currency", "not_enough", [
+                ["name", ctx.author.display_name], ["currency_name", self.ex.keys.currency_name],
+                ["balance", self.ex.add_commas(user.balance)]]))
+
+        if not opponent_user.in_currency_game:
+            # opponent is not in a game
+            return await ctx.send(await self.ex.get_msg(ctx, "blackjack", "opponent_not_in_game",
+                                                        ["name", ctx.author.display_name]))
+        elif user.in_currency_game:
+            # user in a game
+            return await ctx.send(await self.ex.get_msg(ctx, "blackjack", "in_game",
+                                                        [["name", ctx.author.display_name],
+                                                         ["server_prefix", server_prefix]]))
+        blackjack_game = await self.ex.u_blackjack.find_game(opponent_user)
+        blackjack_game.second_player = user
+        blackjack_game.second_player_bet = bet
+        blackjack_game.second_player_ctx = ctx
+        await blackjack_game.process_game()  # start the blackjack game.
 
     @commands.command(aliases=['eg'])
     async def endgame(self, ctx):
-        """End your current game [Format: %endgame] [Aliases: eg]"""
-        try:
-            game_id = await ex.u_blackjack.get_game_by_player(ctx.author.id)
-            if game_id is None:
-                await ctx.send(f"> **{ctx.author}, you are not in a game.**")
-            else:
-                await ex.u_blackjack.delete_game(game_id)
-                await ctx.send(f"> **{ctx.author}, your game has been deleted.**")
-        except Exception as e:
-            log.console(e)
+        """
+        End your current game
 
-    @commands.command()
-    @commands.is_owner()
-    async def addcards(self, ctx):
-        """Fill The CardValues Table with Cards [Format: %addcards]"""
-        await ex.conn.execute("DELETE FROM blackjack.cards")
-        suit_names = ("Hearts", "Diamonds", "Spades", "Clubs")
-        rank_names = ("Ace", "Two", "Three", "Four", "Five", "Six", "Seven",
-                    "Eight", "Nine", "Ten", "Jack", "Queen", "King")
-        card_values = [11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11, 2, 3,
-                      4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
-        cards = []
-        for suit in suit_names[0:4]:
-            for rank in rank_names[0:13]:
-                cards += [("{} of {}".format(rank, suit))]
-        count_x = -1
-        for card in cards:
-            count_x += 1
-            await ex.conn.execute("INSERT INTO blackjack.cards (id, name, value) VALUES ($3, $1, $2)", card, card_values[count_x], count_x+1)
-        await ctx.send("> **All cards have been added into the table.**", delete_after=40)
+        [Format: %endgame]
+        [Aliases: eg]
+        """
+        user = await self.ex.get_user(ctx.author.id)
+        if not user.in_currency_game:
+            # user is not in a game.
+            return await ctx.send(await self.ex.get_msg(ctx, "blackjack", "not_in_game",
+                                                        ["name", ctx.author.display_name]))
 
-    @commands.command()
-    async def hit(self, ctx):
-        """Pick A Card [Format: %hit]"""
-        try:
-            game_id = await ex.u_blackjack.get_game_by_player(ctx.author.id)
-            if not game_id:
-                await ctx.send(f"> **{ctx.author}, you are not in a game.**")
-            else:
-                if await ex.u_blackjack.compare_channels(ctx.author.id, ctx.channel):
-                    game = await ex.u_blackjack.get_game(game_id)
-                    if ex.u_blackjack.check_if_bot(game[2]):
-                        if await ex.u_blackjack.get_player_total(game[2]) < 16:
-                            await ex.u_blackjack.add_card(game[2])
-                    await ex.u_blackjack.add_card(ctx.author.id)
-        except Exception as e:
-            log.console(e)
+        # find the game and end it.
+        blackjack_game = await self.ex.u_blackjack.find_game(user)
+        if blackjack_game:
+            await ctx.send(await self.ex.get_msg(ctx, 'biasgame', 'force_closed'))
+            return await blackjack_game.end_game()
 
-    @commands.command(aliases=['stay'])
-    async def stand(self, ctx):
-        """Keep Your Cards/Stand [Format: %stand]"""
-        try:
-            check = False
-            user_id = ctx.author.id
-            game_id = await ex.u_blackjack.get_game_by_player(user_id)
-            if game_id is None:
-                await ctx.send(f"> **{ctx.author}, you are not in a game.**")
-            else:
-                if await ex.u_blackjack.compare_channels(user_id, ctx.channel):
-                    # Do not inform other users that the player already stood by busting.
-                    # Instead, just send the same message that they are standing every time this command is called.
-                    await ex.u_blackjack.set_player_stand(user_id)
-                    game = await ex.u_blackjack.get_game(game_id)
-
-                    if ex.u_blackjack.check_if_bot(game[2]):
-                        check = True
-                        await ex.u_blackjack.finish_game(game_id, ctx.channel)
-
-                    if not check:
-                        total_score = str(await ex.u_blackjack.get_player_total(user_id))
-                        if len(total_score) == 1:
-                            total_score = '0' + total_score  # this is to prevent being able to detect the number of digits by the spoiler
-                        if not ex.u_blackjack.check_if_bot(game[2]):
-                            await ctx.send(f"> **{ctx.author} finalized their deck with ||{total_score}|| points.**")
-                        if await ex.u_blackjack.check_game_over(game_id):
-                            await ex.u_blackjack.finish_game(game_id, ctx.channel)
-        except Exception as e:
-            log.console(e)
+        # send the fallback message of no game being found (the game ended in the middle of the command).
+        return await ctx.send(await self.ex.get_msg(ctx, "blackjack", "ended_game",
+                                                    ["name", ctx.author.display_name]))
 
     @commands.command()
     async def rules(self, ctx):
         """View the rules of BlackJack."""
-        server_prefix = await ex.get_server_prefix_by_context(ctx)
-        msg = f"""**Each Player gets 2 cards at the start.\n
+        server_prefix = await self.ex.get_server_prefix(ctx)
+        msg = f"""Each Player gets 2 cards at the start.\n
         In order to get blackjack, your final value must equal 21.\n
         If Player1 exceeds 21 and Player2 does not, Player1 busts and Player2 wins the game.\n
         You will have two options.\n
-        The first option is to `{server_prefix}hit`, which means to grab another card.\n
-        The second option is to `{server_prefix}stand` to finalize your deck.\n
+        The first option is to `hit`, which means to grab another card.\n
+        The second option is to `stand` to finalize your deck.\n
         If both players bust, Player closest to 21 wins!\n
         Number cards are their face values.\n
         Aces can be 1 or 11 depending on the situation you're in.\n
         Jack, Queen, and King are all worth 10.\n
-        Do not use `{server_prefix}hit` if you are over 21 points. This will give away that you busted!\n
+        If you go over 35 points, the bot will automatically stand you.\n
         MOST IMPORTANTLY!!! DO NOT peek at your opponent's cards or points!\n
-        You can play against a bot by typing `{server_prefix}blackjack (amount) bot`\n
-        Betting with the bot will either double your bet or lose all of it.**
         """
         embed = discord.Embed(title="BlackJack Rules", description=msg)
-        embed = await ex.set_embed_author_and_footer(embed, f"{server_prefix}help BlackJack for the available commands.")
+        embed = await self.ex.set_embed_author_and_footer(
+            embed, f"{server_prefix}help BlackJack for the available commands.")
         await ctx.send(embed=embed)
-
-
-

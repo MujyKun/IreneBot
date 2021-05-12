@@ -1,4 +1,4 @@
-# [IreneBot V1.03.8](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=1609956823)
+# [IreneBot V1.03.9](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=1609956823)
 
 ## [Support Irene by becoming a Patron!](https://www.patreon.com/bePatron?u=38971435)  
 **[Become a Patron!](https://www.patreon.com/bePatron?u=38971435)**
@@ -37,7 +37,6 @@ To find out more, look at the `GroupMembers` category.
 #### BlackJack:
 | Command           | Description                                                                                           | Format                               | Aliases |
 |-------------------|-------------------------------------------------------------------------------------------------------|--------------------------------------|---------|
-| addcards          | Fill The CardValues Table with Cards                                                                  | %addcards                            | ♥       |
 | blackjack         | Start a game of BlackJack                                                                             | %blackjack (amount)                  | bj      |
 | endgame           | End your current game                                                                                 | %endgame                             | eg      |
 | hit               | Pick A Card                                                                                           | %hit                                 |         |
@@ -51,7 +50,6 @@ To find out more, look at the `GroupMembers` category.
 | addidoltogroup         | Adds idol to group.                                                              | %addidoltogroup (idol id) (group id)                                                                                                     |                       |
 | addinteraction       | Add a gif/photo to an interaction (ex: slap,kiss,lick,hug)                                   | %addinteraction (interaction) (url,url)               |               |
 | addstatus       | Add a playing status to Irene.                                   | %addstatus (status)               |               |
-| approve       | Approve a query id for an unregistered group or idol. | %approve (query id) ('idol' or 'group') |  ♥  |
 | botban       | Bans a user from Irene.                                   | %botban (user id)               |               |
 | botunban       | UnBans a user from Irene.                                   | %botunban (user id)               |               |
 | botwarn   | Warns a user from Irene's DMs                                   | %botwarn (user id) (reason)               |               |
@@ -114,7 +112,6 @@ To find out more, look at the `GroupMembers` category.
 | groups           | Lists the groups of idols the bot has photos of                                    | %groups                                                                                                        |                        |
 | members          | Lists the names of idols the bot has photos of                                     | %members (page number/group names)                                                                                                      |    member                    |
 | randomidol          | Sends a photo of a random idol.                                     | %%                                                                                                       |                   %     |
-| scandrive        | Scan DriveIDs Table and update other tables.                                       | %scandrive (name=NULL) (member_id=0)                                                                           | ♥                      |
 | sendimages      | All idol photo commands from the server will post idol photos in a specific text channel. To undo, type it again.                                     | %sendimages #text-channel                                                                                                   | ★                      |
 | stopimages             | Stops Irene from posting/recognizing idol photos in a specific text channel. To undo, type it again.                                    | %stopimages #text-channel                                                                                  | ★                     |
 
@@ -122,6 +119,8 @@ To find out more, look at the `GroupMembers` category.
 | Command          | Description                                                                                                                          | Format                          | Aliases        |
 |------------------|--------------------------------------------------------------------------------------------------------------------------------------|---------------------------------|----------------|
 | guessinggame | Start an idol guessing game in the current channel. The host of the game can use `stop` to end the game or `skip` to skip the current round without affecting the round number. | %guessinggame (Male/Female/All) (easy/medium/hard) (# of rounds - default 20) (timeout for each round - default 20s) | gg |
+| ggfilter | Add a filter for your guessing game. Only the groups you select will appear on the guessing game. Use the command with no group ids to enable/disable the filter. Filtered idols do not count for a real score. | %ggfilter [group_id_one, group_id_two, ...] | |
+| ggfilteredlist | View the current groups you currently have filtered. | %ggfilteredlist | ggfilterlist, filterlist |
 | ggleaderboard | Shows global leaderboards for guessing game. | %ggleaderboard (easy/medium/hard) (server/global)| ggl, gglb |
 | stopgg | Force-end a guessing game if you are a moderator or host of the game. This command is meant for any issues or if a game happens to be stuck. Must be game host or access to manage messages. | %stopgg | ★/Host|
 
@@ -156,11 +155,9 @@ To find out more, look at the `GroupMembers` category.
 |------------------|----------------------------------------------------------------|---------------------------------|----------------|
 | 8ball           | Asks the 8ball a question.                                     | %8ball (Question)               | 8        |
 | addnoti         | Receive a DM whenever a phrase or word is said in the current server. | %addnoti (phrase/word)    |               |
-| addpatreon         | Adds a patreon.                           | %addpatreon (userid,userid,userid)             | ♥              |
 | botinfo       | Get information about the bot.                                   | %botinfo               |               |
 | checkprefix       | Check the current prefix using the default prefix.                                   | %checkprefix               |               |
 | choose | Choose between a selection of options. Underscores are spaces between words. Spaces separate choices. | %choose option1 option2 | |
-| clearnword       | Clear A User's Nword Counter                                   | %clearnword @user               | ♥              |
 | displayemoji | Display an Emoji | %displayemoji :emoji | |
 | flip             | Flips a Coin                                                   | %flip                           |                |
 | invite           | Invite Link for Irene                                          | %invite                         |                |
@@ -171,13 +168,10 @@ To find out more, look at the `GroupMembers` category.
 | ping             | Shows Latency to Discord                                       | %ping                           | pong           |
 | random           | Choose a random number from a range (a,b)                      | %random a b [Ex: %random 1 100] | r,rand,randint |
 | removenoti         | Remove a phrase/word when it said in the current server.| %removenoti (phrase/word)             | deletenoti              |
-| removepatreon         | Removes a patreon.                           | %removepatreon (userid,userid,userid)             | ♥              |
 | report          | Report an issue with Irene.                                    | %report (issue)              |               |
-| send              | Send a message to a text channel.                                             | %send (channelid) (message)                  | ♥              |
 | servercount      | Shows how many servers Irene is on.                            | %servercount                    |                |
 | serverinfo      | View information about the current server.                            | %serverinfo                   |                |
-| servers          | Displays which servers Irene is in.  | %servers                        | ♥              |
-| speak            | Owner to Bot TTS                                               | %speak (message)                | ♥              |
+| setlanguage          | Changes language of Irene. Available Choices: en_us  | %setlanguage (language choice)                         |               |
 | suggest          | Suggest a feature for Irene                                    | %suggest (feature)              |               |
 | support          | Support Discord Server for Irene                               | %support                        |                |
 | translate          | Translate between languages using Papago                              | %translate English Korean this is a test phrase.                       |                |
@@ -270,7 +264,7 @@ To find out more, look at the `GroupMembers` category.
 #### Weverse:
 | Command     | Description                          | Format                 | Aliases           |
 |-------------|--------------------------------------|------------------------|-------------------|
-| updates | Receive Weverse Updates of a specific Weverse community in the current text channel. Use again to disable for a specific community. Available Communities -> [TXT, BTS, GFRIEND, SEVENTEEN, ENHYPEN, NU'EST, CL, P1Harmony, Weeekly, SUNMI, HENRY, Dreamcatcher] | %updates (community name) [role to notify] |  |
+| updates | Receive Weverse Updates of a specific Weverse community in the current text channel. Use again to disable for a specific community. Available Communities -> [TXT, BTS, GFRIEND, SEVENTEEN, ENHYPEN, NU'EST, CL, P1Harmony, Weeekly, SUNMI, HENRY, Dreamcatcher, CherryBullet, MIRAE, TREASURE] | %updates (community name) [role to notify] |  |
 | disablecomments | Disable updates for comments on a community. | %disablecomments (community name) |  |
 
 #### SelfAssignRoles:
@@ -299,3 +293,17 @@ To find out more, look at the `GroupMembers` category.
 | removetwitch | Removes a twitch username that is being kept track of. | %removetwitch (twitch username) | |
 | settwitchchannel | Set the discord channel that the twitch announcements will be posted on. | %settwitchchannel [#text channel] | |
 | settwitchrole | Set the discord role that will be mentioned on twitch announcements. If a discord role is set, everyone will not be mentioned. Use the command without a role to mention everyone. |%settwitchrole [@role] | |
+
+#### BotOwner: ♥♥♥
+| Command               | Description                                                                                           | Format                               |
+|-----------------------|-------------------------------------------------------------------------------------------------------|--------------------------------------|
+| addcards          | Fill The CardValues Table with Cards                                                                  | %addcards                            |       |
+| addpatreon         | Adds a patreon.                           | %addpatreon (userid,userid,userid)             |               |
+| approve       | Approve a query id for an unregistered group or idol. | %approve (query id) ('idol' or 'group') |    |
+| clearnword       | Clear A User's Nword Counter                                   | %clearnword @user               |               |
+| generateplayingcards       | Generate custom playing cards with idol avatars. | %generateplayingcards  |               |
+| removepatreon         | Removes a patreon.                           | %removepatreon (userid,userid,userid)             |               |
+| resetcache          | Reset the cache.  | %resetcache                        |              |
+| scandrive        | Scan DriveIDs Table and update other tables.                                       | %scandrive (name=NULL) (member_id=0)                                                                           |                       |
+| send              | Send a message to a text channel.                                             | %send (channelid) (message)                  |               |
+| speak            | Owner to Bot TTS                                               | %speak (message)                |              |

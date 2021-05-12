@@ -8,3 +8,6 @@ venv/
 *token.json
 *credentials.json
 *.pickle
+API/
+bias_game/
+idol/

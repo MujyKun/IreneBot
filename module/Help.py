@@ -1,41 +1,58 @@
+import asyncio
+
 import discord
 from discord.ext import commands
-from module.keys import bot_prefix, bot_support_server_link
-from Utility import resources as ex
 import itertools
+from IreneUtility.Utility import Utility
+
+
+ex: Utility
 
 
 class Help(commands.Cog):
-    def __init__(self):
+    def __init__(self, t_ex):
+        """
+
+        :param t_ex: Utility object
+        """
+        self.ex: Utility = t_ex
+        global ex
+        ex = self.ex
+
         self._original_help_command = ex.client.help_command
+
         ex.client.help_command = self.SubHelp()
         ex.client.help_command.cog = self
 
     # noinspection PyPep8
     class SubHelp(commands.MinimalHelpCommand):
+        """
+        Custom help command.
+        """
         async def get_server_prefix(self):
-            return await ex.get_server_prefix_by_context(self.context)
+            return await ex.get_server_prefix(self.context)
 
         async def send_pages(self):
             channel = self.get_destination()
             server_prefix = await self.get_server_prefix()
             for page in self.paginator.pages:
+                await asyncio.sleep(0)
                 embed = discord.Embed(title=f"Server Prefix is {server_prefix}", description=page)
                 await channel.send(embed=embed)
 
         async def send_command_help(self, command):
-            """%help (specific command)"""
+            """%help (specific command)."""
             channel = self.get_destination()
             cmd_format = self.get_command_signature(command)
             # change the default prefix to the server prefix
             cmd_prefix = await self.get_server_prefix()
             cmd_format = cmd_prefix + cmd_format[1:len(cmd_format)]
-            cmd_brief = command.help.replace(await ex.client.get_prefix(self.context.message), cmd_prefix)
+            cmd_brief = command.help.replace(ex.keys.bot_prefix, cmd_prefix)
             embed = discord.Embed(description=f"{cmd_format}\n\n{cmd_brief}")
             await channel.send(embed=embed)
 
         async def send_cog_help(self, cog):
-            """%help (specific cog)"""
+            """%help (specific cog)."""
             channel = self.get_destination()
             open_msg = await self.get_opening_note()
             cog_name = cog.qualified_name
@@ -46,11 +63,12 @@ class Help(commands.Cog):
             # filter the commands to check if the commands can be used by the user.
             cog_commands = await self.filter_commands(cog.get_commands())
             for command in cog_commands:
+                await asyncio.sleep(0)
                 if command.hidden is False:
                     embed_empty = False
                     cmd_name = command.name
                     cmd_prefix = await self.get_server_prefix()
-                    cmd_desc = command.short_doc.replace(await ex.client.get_prefix(self.context.message), cmd_prefix)
+                    cmd_desc = command.short_doc.replace(ex.keys.bot_prefix, cmd_prefix)
                     cmd_msg = f"\n{cmd_prefix}{cmd_name} - {cmd_desc}"
                     entire_msg += cmd_msg
                     if len(entire_msg) >= 1500:
@@ -67,16 +85,17 @@ class Help(commands.Cog):
 
         async def get_opening_note(self):
             """Was changed to async. Gets the opening message of a help command."""
-            server_prefix = await ex.get_server_prefix_by_context(self.context)
+            server_prefix = await ex.get_server_prefix(self.context)
             return f"Use ``{server_prefix}help [command]`` for more info on a command.\nYou can also use " \
                 f"``{server_prefix}help [category]`` (CASE-SENSITIVE) for more info on a category.\nTo reset a " \
-                f"server prefix, you may type ``{bot_prefix}setprefix``.\n\n " \
-                f"**Support Server:** {bot_support_server_link}\n\n" \
+                f"server prefix, you may type ``{ex.keys.bot_prefix}setprefix``.\n\n " \
+                f"**Support Server:** {ex.keys.bot_support_server_link}\n\n" \
                 f"**[Link to Commands](https://irenebot.com/commands)**"
 
         async def send_bot_help(self, mapping):
             """
-            THIS METHOD WAS COPY PASTED FROM D.PY V1.3.3
+            THIS METHOD WAS COPY PASTED FROM D.PY V1.6.0
+
             THE ONLY ALTERED CODE WAS CHANGING get_opening_note to be awaited.
             get_opening_note was not originally async.
             """
@@ -89,18 +108,20 @@ class Help(commands.Cog):
             note = await self.get_opening_note()
             if note:
                 self.paginator.add_line(note, empty=True)
-            no_category = '\u200b{0.no_category}'.format(self)
 
-            def get_category(command, *, no_category_t=no_category):
+            no_category_t = f"\u200b{self.no_category}"
+
+            def get_category(command, *, no_category=no_category_t):
                 cog = command.cog
-                return cog.qualified_name if cog is not None else no_category_t
+                return cog.qualified_name if cog is not None else no_category
 
             filtered = await self.filter_commands(bot.commands, sort=True, key=get_category)
             to_iterate = itertools.groupby(filtered, key=get_category)
 
-            for category, commands_t in to_iterate:
-                commands_t = sorted(commands_t, key=lambda c: c.name) if self.sort_commands else list(commands_t)
-                self.add_bot_commands_formatting(commands_t, category)
+            for category, t_commands in to_iterate:
+                await asyncio.sleep(0)
+                commands_list = sorted(t_commands, key=lambda c: c.name) if self.sort_commands else list(t_commands)
+                self.add_bot_commands_formatting(commands_list, category)
 
             note = self.get_ending_note()
             if note:
@@ -111,7 +132,8 @@ class Help(commands.Cog):
 
         async def send_group_help(self, group):
             """
-            THIS METHOD WAS COPY PASTED FROM D.PY V1.3.3
+            THIS METHOD WAS COPY PASTED FROM D.PY V1.6.0
+
             THE ONLY ALTERED CODE WAS CHANGING get_opening_note to be awaited.
             get_opening_note was not originally async.
             """
@@ -125,6 +147,7 @@ class Help(commands.Cog):
 
                 self.paginator.add_line('**%s**' % self.commands_heading)
                 for command in filtered:
+                    await asyncio.sleep(0)
                     self.add_subcommand_formatting(command)
 
                 note = self.get_ending_note()

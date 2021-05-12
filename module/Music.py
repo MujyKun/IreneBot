@@ -1,11 +1,12 @@
 import discord
 from discord.ext import commands, tasks
-from module import keys, logger as log
 import asyncio
+from IreneUtility.util import u_logger as log
 import youtube_dl
-from Utility import resources as ex
 import random
 import os
+from IreneUtility.Utility import Utility
+from ksoftapi import NoResults
 
 
 youtube_dl.utils.bug_reports_message = lambda: ''
@@ -37,18 +38,15 @@ async def download_video(video):
 def check_live(video):
     # return None = video is downloaded
     # return a message = video is ignored
-    try:
-        if video['duration'] > 14400:
+    video_duration = video.get("duration")
+    if video_duration:
+        if video_duration > 14400:
             return 'too_long'
-    except:
-        pass
-    try:
-        if not video['is_live']:
-            return
-        else:
-            return 'live_video'
-    except:
-        return  # this error occurs from is_live not being found.
+
+    if not video.get("is_live"):
+        return
+    else:
+        return "live_video"
 
 
 # https://github.com/ytdl-org/youtube-dl/blob/2391941f283a1107b01f9df76a8b0e521a5abe3b/youtube_dl/YoutubeDL.py#L143
@@ -80,39 +78,49 @@ queued = {}
 
 # noinspection PyBroadException,PyPep8
 class Music(commands.Cog):
+    def __init__(self, ex):
+        """
+        :param ex: Utility object.
+        """
+        self.ex: Utility = ex
+
     # noinspection PyBroadException
     @tasks.loop(seconds=30, minutes=1, hours=0, reconnect=True)
     async def check_voice_clients(self):
-        if not ex.client.loop.is_running():
+        if not self.ex.client.loop.is_running():
             return
         try:
-            for voice_client in ex.client.voice_clients:
+            for voice_client in self.ex.client.voice_clients:
+                await asyncio.sleep(0)
                 # members in vc must be equal to 1 to stop playing (includes the bot)
                 if voice_client.is_connected() and voice_client.channel.members == 1:
                     if voice_client.is_playing():
                         try:
-                            songs_queued = queued[voice_client.guild.id]
+                            songs_queued = queued.get(voice_client.guild.id)
                             if songs_queued:
                                 channel = songs_queued[0][1]
-                                msg = f"> **There are no users in this voice channel. Resetting queue and leaving.**"
+                                msg = "> **There are no users in this voice channel. Resetting queue and leaving.**"
                                 await channel.send(msg)
-                        except:
-                            pass
+                        except Exception as e:
+                            log.useless(f"{e} - Failed to send message to channel - Music.check_voice_clients")
+
                         self.reset_queue_for_guild(voice_client.guild.id)
                         voice_client.stop()
                     await voice_client.disconnect()
             keep_files = []
             for key in queued:
+                await asyncio.sleep(0)
                 file_name = (queued[key][0][2])
                 keep_files.append(file_name)
             for song_file_name in os.listdir("music"):
+                await asyncio.sleep(0)
                 file_location = f"music/{song_file_name}"
                 if file_location in keep_files and file_location == "music":
                     continue
                 try:
                     os.remove(file_location)
-                except:
-                    pass
+                except Exception as e:
+                    log.useless(f"{e} - Failed to remove local file for Music. - Music.check_voice_clients")
         except Exception as e:
             log.console(e)
 
@@ -130,31 +138,37 @@ class Music(commands.Cog):
     @staticmethod
     def reset_queue_for_guild(guild_id):
         try:
-            if not queued[guild_id]:
+            queued_songs = queued.get(guild_id)
+            if not queued_songs:
                 return
-            for song in queued[guild_id]:
+
+            for song in queued_songs:
                 player = song[0]
                 file_name = song[2]
                 if check_if_player(player):
                     player.cleanup()
                 try:
                     os.remove(file_name)
-                except:
-                    pass
+                except Exception as e:
+                    log.useless(f"{e} - Failed to remove local music for file. - Music.reset_queue_for_guild")
             queued.pop(guild_id, None)
-        except:
-            pass
+        except Exception as e:
+            log.useless(f"{e} - Failed to reset queue for guild - Music.reset_queue_for_guild")
 
     @commands.command()
     async def lyrics(self, ctx, *, song_query):
-        """Get the lyrics of a song (From https://api.ksoft.si)
-        [Format: %lyrics (song)]"""
-        if not keys.lyric_client:
+        """
+        Get the lyrics of a song (From https://api.ksoft.si)
+
+        [Format: %lyrics (song)]
+        """
+        if not self.ex.keys.lyric_client:
             log.console(f"There is no API Key currently set for the Lyrics and the Developer is working on it.")
-            return await ctx.send("> **There is no API Key currently set for the Lyrics and the Developer is working on it.**")
+            return await ctx.send("> **There is no API Key currently set for the Lyrics and the Developer is "
+                                  "working on it.**")
         try:
-            results = await keys.lyric_client.music.lyrics(song_query)
-        except keys.ksoftapi.NoResults:
+            results = await self.ex.keys.lyric_client.music.lyrics(song_query)
+        except NoResults:
             log.console(f"No lyrics were found for {song_query}.")
             return await ctx.send(f"> **No lyrics were found for {song_query}.**")
         except Exception as e:
@@ -165,13 +179,19 @@ class Music(commands.Cog):
             if len(song.lyrics) >= 1500:
                 first_page = song.lyrics[0:1500]
                 second_page = song.lyrics[1500:len(song.lyrics)]
-                embed = await ex.create_embed(title=f"{song.name} by {song.artist}", color=ex.get_random_color(),
-                                              title_desc=first_page,
-                                              footer_desc="Thanks for using Irene! Lyrics API is from ksoft.si.")
-                embed2 = await ex.create_embed(title=f"{song.name} by {song.artist}", color=ex.get_random_color(), title_desc=second_page, footer_desc="Thanks for using Irene! Lyrics API is from ksoft.si.")
+                embed = await self.ex.create_embed(title=f"{song.name} by {song.artist}",
+                                                   color=self.ex.get_random_color(),
+                                                   title_desc=first_page,
+                                                   footer_desc="Thanks for using Irene! Lyrics API is from ksoft.si.")
+                embed2 = await self.ex.create_embed(title=f"{song.name} by {song.artist}",
+                                                    color=self.ex.get_random_color(),
+                                                    title_desc=second_page,
+                                                    footer_desc="Thanks for using Irene! Lyrics API is from ksoft.si.")
                 msg = await ctx.send(embed=embed)
-                return await ex.check_left_or_right_reaction_embed(msg, [embed, embed2])
-            embed = await ex.create_embed(title=f"{song.name} by {song.artist}", color=ex.get_random_color(), title_desc=song.lyrics, footer_desc="Thanks for using Irene! Lyrics API is from ksoft.si.")
+                return await self.ex.check_left_or_right_reaction_embed(msg, [embed, embed2])
+            embed = await self.ex.create_embed(title=f"{song.name} by {song.artist}", color=self.ex.get_random_color(),
+                                               title_desc=song.lyrics,
+                                               footer_desc="Thanks for using Irene! Lyrics API is from ksoft.si.")
             await ctx.send(embed=embed)
 
     @commands.command()
@@ -187,22 +207,30 @@ class Music(commands.Cog):
                 other_songs = queued[ctx.guild.id][1:number_of_songs_in_queue]
                 random.shuffle(other_songs)
                 queued[ctx.guild.id] = currently_playing + other_songs
-            await ctx.send(f"> **{ctx.author}, the current queue was shuffled.**")
+            await ctx.send("> **{ctx.author}, the current queue was shuffled.**")
         except AttributeError:
-            await ctx.send(f"> **There is no list to shuffle or I am not in a voice channel.**")
+            await ctx.send("> **There is no list to shuffle or I am not in a voice channel.**")
 
     # noinspection PyBroadException
     @commands.command(aliases=['list', 'q'])
     async def queue(self, ctx, page_number=1):
-        """Shows Current Queue [Format: %queue]"""
+        """
+        Shows Current Queue
+
+        [Format: %queue]
+        """
         try:
             embed_page_number = 1
-            current_songs = queued[ctx.guild.id]
+            current_songs = queued.get(ctx.guild.id)
+            if not current_songs:
+                await ctx.send("> **There are no songs queued in this server.**")
+
             embed_list = []
             counter = 1
             set_of_songs = ""
             total_amount_of_time = 0
             for song in current_songs:
+                await asyncio.sleep(0)
                 author_id = song[4]
                 if check_if_player(song[0]):
                     player = song[0]
@@ -219,46 +247,54 @@ class Music(commands.Cog):
                 try:
                     try:
                         total_amount_of_time += duration
-                    except:
-                        pass
-                    duration = await ex.u_miscellaneous.get_cooldown_time(duration)
+                    except Exception as e:
+                        log.useless(f"{e} - Unable to increment the total amount of time - Music.queue")
+                    duration = await self.ex.u_miscellaneous.get_cooldown_time(duration)
                 except:
                     duration = "N/A"
                 if counter == 1:
-                    song_desc = f"[{counter}] **NOW PLAYING:** [{youtube_channel} - {song_name}]({song_link}) - {duration} - Requested by <@{author_id}> \n\n"
+                    song_desc = f"[{counter}] **NOW PLAYING:** [{youtube_channel} - {song_name}]({song_link}) - " \
+                                f"{duration} - Requested by <@{author_id}> \n\n"
                 else:
-                    song_desc = f"[{counter}] [{youtube_channel} - {song_name}]({song_link}) - {duration} - Requested by <@{author_id}>\n\n"
+                    song_desc = f"[{counter}] [{youtube_channel} - {song_name}]({song_link}) - " \
+                                f"{duration} - Requested by <@{author_id}>\n\n"
                 set_of_songs += song_desc
                 if counter % 10 == 0:
                     embed = discord.Embed(title=f"{ctx.guild.name}'s Music Playlist Page {embed_page_number}",
-                                          description=set_of_songs, color=ex.get_random_color())
-                    embed = await ex.set_embed_author_and_footer(embed, footer_message="Thanks for using Irene.")
+                                          description=set_of_songs, color=self.ex.get_random_color())
+                    embed = await self.ex.set_embed_author_and_footer(embed, footer_message="Thanks for using Irene.")
                     set_of_songs = ""
                     embed_list.append(embed)
                     embed_page_number += 1
                 counter += 1
             # if there are not more than 10 songs in queue.
             embed = discord.Embed(title=f"{ctx.guild.name}'s Music Playlist Page {embed_page_number}",
-                                  description=set_of_songs, color=ex.get_random_color())
-            embed = await ex.set_embed_author_and_footer(embed, footer_message="Thanks for using Irene.")
+                                  description=set_of_songs, color=self.ex.get_random_color())
+            embed = await self.ex.set_embed_author_and_footer(embed, footer_message="Thanks for using Irene.")
             embed_list.append(embed)
             if page_number > len(embed_list):
                 page_number = 1
             elif page_number <= 0:
                 page_number = 1
-            await ex.set_embed_author_and_footer(embed_list[page_number -1], footer_message=f"Total time of songs queued: {await ex.u_miscellaneous.get_cooldown_time(total_amount_of_time)}")
+            await self.ex.set_embed_author_and_footer(
+                embed_list[page_number - 1],
+                footer_message=f"Total time of songs queued: "
+                               f"{await self.ex.u_miscellaneous.get_cooldown_time(total_amount_of_time)}")
             msg = await ctx.send(embed=embed_list[page_number - 1])
             if len(embed_list) > 1:
-                await ex.check_left_or_right_reaction_embed(msg, embed_list, page_number - 1)
-        except KeyError:
-            await ctx.send(f"> **There are no songs queued in this server.**")
+                await self.ex.check_left_or_right_reaction_embed(msg, embed_list, page_number - 1)
+
         except Exception as e:
             log.console(e)
-            await ctx.send(f"> **Something went wrong.. Please {await ex.get_server_prefix_by_context(ctx)}report it.**")
+            await ctx.send(f"> **Something went wrong.. Please {await self.ex.get_server_prefix(ctx)}report it.**")
 
     @commands.command()
     async def join(self, ctx):
-        """Joins a voice channel [Format: %join]"""
+        """
+        Joins a voice channel
+
+        [Format: %join]
+        """
         try:
             channel = ctx.message.author.voice.channel
             await ctx.send(f"> **{ctx.author}, I joined {channel.name}.**")
@@ -272,7 +308,11 @@ class Music(commands.Cog):
 
     @commands.command()
     async def pause(self, ctx):
-        """Pauses currently playing song [Format: %pause]"""
+        """
+        Pauses currently playing song
+
+        [Format: %pause]
+        """
         if not self.check_user_in_vc(ctx):
             return await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
         if ctx.voice_client.is_paused():
@@ -282,7 +322,11 @@ class Music(commands.Cog):
 
     @commands.command(aliases=['unpause'])
     async def resume(self, ctx):
-        """Resumes a paused song [Format: %resume]"""
+        """
+        Resumes a paused song
+
+        [Format: %resume]
+        """
         if not self.check_user_in_vc(ctx):
             return await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
         if not ctx.voice_client.is_paused():
@@ -297,13 +341,17 @@ class Music(commands.Cog):
 
     @commands.command(aliases=['skipto'])
     async def move(self, ctx, song_number: int):
-        """Makes a song the next song to play without skipping the current song. [Format: %move (song number)] """
+        """
+        Makes a song the next song to play without skipping the current song.
+
+        [Format: %move (song number)]
+        """
         try:
             if not self.check_user_in_vc(ctx):
                 return await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
             song_number = song_number - 1  # account for starting from 0
             if not song_number:
-                return await ctx.send(f"> **You can not move the song currently playing.**")
+                return await ctx.send("> **You can not move the song currently playing.**")
                 # noinspection PyBroadException
             try:
                 title = get_video_title(queued[ctx.guild.id][song_number][0])
@@ -311,14 +359,18 @@ class Music(commands.Cog):
                 queued[ctx.guild.id].insert(1, queued[ctx.guild.id].pop(song_number))
                 await ctx.send(f"> **{title} will now be the next song to play.**")
             except:
-                await ctx.send(f"> **That song number was not found. Could not move it.**")
-        except:
-            pass
+                await ctx.send("> **That song number was not found. Could not move it.**")
+        except Exception as e:
+            log.useless(f"{e} - Failed to move song - Music.move")
 
     # noinspection PyBroadException
     @commands.command()
     async def remove(self, ctx, song_number: int):
-        """Remove a song from the queue. [Format: %remove (song number)] """
+        """
+        Remove a song from the queue.
+
+        [Format: %remove (song number)]
+        """
         try:
             if not self.check_user_in_vc(ctx):
                 return await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
@@ -328,13 +380,17 @@ class Music(commands.Cog):
                 queued[ctx.guild.id].pop(song_number)
                 await ctx.send(f"> **Removed {title} from the queue.**")
             except:
-                await ctx.send(f"> **That song number was not found. Could not remove it.**")
-        except:
-            pass
+                await ctx.send("> **That song number was not found. Could not remove it.**")
+        except Exception as e:
+            log.useless(f"{e} - Failed to remove song - Music.remove")
 
     @commands.command()
     async def skip(self, ctx):
-        """Skips the current song. [Format: %skip]"""
+        """
+        Skips the current song.
+
+        [Format: %skip]
+        """
         try:
             if not self.check_user_in_vc(ctx):
                 return await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
@@ -342,42 +398,49 @@ class Music(commands.Cog):
             player = queued[ctx.guild.id][0][0]
             title = get_video_title(player)
             await ctx.send(f"> **Skipped {title}**")
-        except:
-            pass
+        except Exception as e:
+            log.useless(f"{e} - Failed to skip song - Music.skip")
 
     def remove_song_in_queue(self, client_guild_id):
-        try:
-            if len(queued[client_guild_id]) == 1:  # do not shorten code. Checks if it's exactly 1 song left.
+        songs = queued.get(client_guild_id)
+        if songs:
+            if len(songs) == 1:  # checks for exactly 1 song left, do not shorten.
                 return self.reset_queue_for_guild(client_guild_id)
-        except KeyError:
-            pass
+        else:
+            return  # no songs in queue. ( this should never occur if called properly )
         try:
-            try:
-                (queued[client_guild_id][0][0]).cleanup()
-            except:
-                pass
-            try:
-                os.remove(queued[client_guild_id][0][2])
-            except:
-                pass
-            return queued[client_guild_id].pop(0)
-        except KeyError:
-            return
+            songs[0][0].cleanup()
+        except Exception as e:
+            log.useless(f"{e} - Failed to cleanup song. - Music.remove_song_in_queue")
+
+        try:
+            os.remove(songs[0][2])
+        except Exception as e:
+            log.useless(f"{e} - Failed to remove local music file - Music.remove_song_in_queue")
+            return songs.pop(0)
 
     @commands.command(aliases=['p'])
     async def play(self, ctx, *, url=None):
-        """Plays audio to a voice channel. [Format: %play (title/url)]"""
+        """
+        Plays audio to a voice channel.
+
+        [Format: %play (title/url)]
+        """
         if not url:
             if not ctx.voice_client.is_paused:
                 return await ctx.send("> The player is not paused. Please enter a title or link to play audio.")
             ctx.voice_client.resume()
-            return await ctx.send(f"> **The video player is now resumed**")
+            return await ctx.send("> **The video player is now resumed**")
         try:
             if not self.check_user_in_vc(ctx):
                 return await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
             async with ctx.typing():
-                msg = await ctx.send(f"> **Gathering information about the video/playlist, this may take a few minutes if it is a long playlist.**")
-                videos, first_video_live = await YTDLSource.from_url(url, loop=ex.client.loop, stream=False, guild_id=ctx.guild.id, channel=ctx.channel, author_id=ctx.author.id)
+                msg = await ctx.send(
+                    "> **Gathering information about the video/playlist, this may take a few minutes if it "
+                    "is a long playlist.**")
+                videos, first_video_live = await YTDLSource.from_url(url, loop=self.ex.client.loop,
+                                                                     stream=False, guild_id=ctx.guild.id,
+                                                                     channel=ctx.channel, author_id=ctx.author.id)
                 if not ctx.voice_client.is_playing():
                     if not first_video_live:
                         player = await download_video(videos[0])
@@ -406,14 +469,14 @@ class Music(commands.Cog):
                         await ctx.send(f"> **Added {len(videos)} songs to the queue.**")
                 await msg.delete()
         except IndexError:
-            pass
+            pass  # no need to log useless
         except Exception as e:
             log.console(e)
 
     def start_next_song(self, error):
         if error:
             return
-        all_voice_clients = ex.client.voice_clients
+        all_voice_clients = self.ex.client.voice_clients
         for voice_client in all_voice_clients:
             if voice_client.is_playing() or voice_client.is_paused():
                 continue
@@ -426,7 +489,7 @@ class Music(commands.Cog):
                 try:
                     if not live:  # we know it's video information and not a player because it is not live.
                         download_a_video = download_video(player)
-                        player = asyncio.run_coroutine_threadsafe(download_a_video, ex.client.loop)
+                        player = asyncio.run_coroutine_threadsafe(download_a_video, self.ex.client.loop)
                         try:
                             player = player.result()
                             queued[client_guild_id][0][0] = player  # making front of queue a player
@@ -438,7 +501,7 @@ class Music(commands.Cog):
                 send_channel_song = channel.send(f'> **Now playing: **{player.title}', delete_after=240)  # 4min
                 # used because async function cannot be used.
                 # https://discordpy.readthedocs.io/en/latest/faq.html#how-do-i-pass-a-coroutine-to-the-player-s-after-function
-                send_channel = asyncio.run_coroutine_threadsafe(send_channel_song, ex.client.loop)
+                send_channel = asyncio.run_coroutine_threadsafe(send_channel_song, self.ex.client.loop)
                 try:
                     send_channel.result()
                 except Exception as e:
@@ -450,7 +513,11 @@ class Music(commands.Cog):
 
     @commands.command()
     async def volume(self, ctx, volume: int = 10):
-        """Changes the player's volume - Songs default to 10. [Format: %volume (1-100)]"""
+        """
+        Changes the player's volume - Songs default to 10.
+
+        [Format: %volume (1-100)]
+        """
         try:
             if not self.check_user_in_vc(ctx):
                 return await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
@@ -468,7 +535,11 @@ class Music(commands.Cog):
 
     @commands.command(aliases=["leave"])
     async def stop(self, ctx):
-        """Disconnects from voice channel and resets queue. [Format: %stop]"""
+        """
+        Disconnects from voice channel and resets queue.
+
+        [Format: %stop]
+        """
         try:
             if not self.check_user_in_vc(ctx):
                 return await ctx.send(f"> **{ctx.author}, we are not in the same voice channel.**")
@@ -502,11 +573,12 @@ class Music(commands.Cog):
     @queue.before_invoke
     @shuffle.before_invoke
     async def check_patreon(self, ctx):
-        if await ex.u_patreon.check_if_patreon(ctx.author.id, super_patron=True) or await ex.u_patreon.check_if_patreon(ctx.guild.owner.id, super_patron=True):
+        if await self.ex.u_patreon.check_if_patreon(ctx.author.id, super_patron=True) or \
+                await self.ex.u_patreon.check_if_patreon(ctx.guild.owner.id, super_patron=True):
             await self.ensure_voice(ctx)
         else:
-            await ctx.send(f"""**Music is only available to $5 Patreons that support <@{keys.bot_id}>.
-Become a Patron at {keys.patreon_link}.**""")
+            await ctx.send(f"""**Music is only available to $5 Patreons that support <@{self.ex.keys.bot_id}>.
+Become a Patron at {self.ex.keys.patreon_link}.**""")
             raise commands.CommandError(f"{ctx.author.name} ({ctx.author.id}) is not a Patron.")
 
 
@@ -530,7 +602,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
                 live = False
                 status = check_live(video)
                 if status == 'too_long':
-                    await channel.send(f"> **A video will not be added because it is over 4 hours long.**")
+                    await channel.send("> **A video will not be added because it is over 4 hours long.**")
                 else:
                     if status == 'live_video':
                         live = True
@@ -558,6 +630,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         if 'entries' in data:  # several videos
             counter = 0
             for video_entry in data['entries']:
+                await asyncio.sleep(0)
                 if counter == 0:
                     first_video_live = await add_video(video_entry)
                 else:

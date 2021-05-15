@@ -1,4 +1,5 @@
 import asyncio
+import time
 
 import discord
 from random import *
@@ -389,32 +390,25 @@ Maintenance Status: {maintenance_status}
 
         guild = self.ex.client.get_guild(guild_id)
         member_list = [member.id for member in guild.members]
-        n_word_list = {}  # user_id : n_word_count
 
-        for user in self.ex.cache.users.values():
-            await asyncio.sleep(0)
-            if mode.lower() == "global":
-                n_word_list[user.id] = user.n_word
-            else:
-                # server
-                if user.id in member_list:
-                    n_word_list[user.id] = user.n_word
+        embed_field_counter = 0  # do not use enumerate for this.
 
-        sorted_n_word = {key: value for key, value in sorted(n_word_list.items(), key=lambda item: item[1],
-                                                             reverse=True)}
-        for count, user_id in enumerate(sorted_n_word):
+        # fastest way to bring up the organized leaderboard is actually through the DB instead of cache.
+        for user_id, n_word_count in await self.ex.sql.s_general.fetch_n_word(ordered_by_greatest=True):
             await asyncio.sleep(0)
-            value = sorted_n_word.get(user_id)
-            if not value:
-                continue
-            if count >= 10:
+            if embed_field_counter >= 10:
                 break
+
             try:
                 user_name = (self.ex.client.get_user(user_id)).name
             except:
                 # if the user is not in discord.py's member cache, then set the user's name to null.
                 user_name = "NULL"
-            embed.add_field(name=f"{count+1}) {user_name} ({user_id})", value=value)
+
+            if mode.lower() == "global" or user_id in member_list:
+                embed.add_field(name=f"{embed_field_counter + 1}) {user_name} ({user_id})", value=n_word_count)
+                embed_field_counter += 1
+
         await ctx.send(embed=embed)
 
     @commands.command(aliases=['rand', 'randint', 'r'])

@@ -152,5 +152,10 @@
     "group_fail": "Failed to add Group {group_id}. Proceeding to add idol.",
     "idol_query_approved": "Added Query ID {query_id} as an Idol ({idol_id}).\nThis idol has been added to the following groups: {group_ids}.\nThe cache is now refreshing.",
     "group_query_approved": "Added Query ID {query_id} as a Group ({group_id}).\nThe cache is now refreshing."
+  },
+  "moderator": {
+    "welcome_role_delete": "The welcome role you had set was removed.",
+    "no_role_to_delete": "There is no welcome role to remove.",
+    "welcome_role_set": "The new welcome role has been set."
   }
 }

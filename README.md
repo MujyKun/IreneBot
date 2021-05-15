@@ -195,6 +195,7 @@ To find out more, look at the `GroupMembers` category.
 | unban            | UnBan A User (Ban Members)                                                                                                                      | %unban @user                    |               |
 | unmute            | UnMute A User (Manage Messages & Manage Roles)                                                                                                                      | %unmute @user (reason)                    |               |
 | welcome            | Set a welcome message or disable welcome in the current channel. Use %user where they should be mentioned. Use %guild_name if the server name should be added. (Manage Messages)  | %welcome (Welcome %user to %guild_name!)                    |               |
+| welcomerole            | The role to give a user when they first join the server. Use command without role to delete the welcome role set to the guild. (Manage Messages)  | %welcomerole @role                    |               |
 
 #### Music:  
 | Command          | Description                                                                                                                          | Format                          | Aliases        |

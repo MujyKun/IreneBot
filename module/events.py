@@ -256,6 +256,14 @@ class Events(commands.Cog):
                 except Exception as e:
                     log.useless(f"{e} - Unable to send message to new user in guild. - Events.on_member_join")
 
+        # set the user's welcome role if the guild has one.
+        role = ex.cache.welcome_roles.get(guild)
+        if role:
+            try:
+                await member.add_roles(role, reason="Welcome Role")
+            except Exception as e:
+                log.console(f"{e} -> Unable to add role to {member.id} from {guild.id}. on_member_join")
+
         # update cache for all new members joining the support server.
         if guild.id == ex.keys.bot_support_server_id:
             ex.cache.member_ids_in_support_server.append(member.id)

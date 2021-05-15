@@ -91,12 +91,12 @@ class Moderator(commands.Cog):
         if not ctx.guild:  # command must not be used in DMs.
             return await ctx.send(await self.ex.get_msg(ctx, "general", "no_dm"))
 
-        guild = self.ex.cache.welcome_roles.get(ctx.guild.id)
+        guild = self.ex.cache.welcome_roles.get(ctx.guild)
 
         # if the user wants to delete the role.
         if not role and guild:
-            await self.ex.sql.s_general.delete_welcome_role()
-            self.ex.cache.welcome_roles.pop(ctx.guild.id)
+            await self.ex.sql.s_general.delete_welcome_role(ctx.guild.id)
+            self.ex.cache.welcome_roles.pop(ctx.guild)
             return await ctx.send(await self.ex.get_msg(ctx, "moderator", "welcome_role_delete"))
         elif not role and not guild:
             return await ctx.send(await self.ex.get_msg(ctx, "moderator", "no_role_to_delete"))

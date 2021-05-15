@@ -101,13 +101,16 @@ class Moderator(commands.Cog):
         elif not role and not guild:
             return await ctx.send(await self.ex.get_msg(ctx, "moderator", "no_role_to_delete"))
 
-        # if the user wants to set a role
-        if role and guild:
-            # role already in place
-            await self.ex.sql.s_general.update_welcome_role(guild.id, role.id)
-        elif role and not guild:
-            # first time they are using the command
-            await self.ex.sql.s_general.insert_welcome_role(ctx.guild.id, role.id)
+        try:
+            # if the user wants to set a role
+            if role and guild:
+                # role already in place
+                await self.ex.sql.s_general.update_welcome_role(guild.id, role.id)
+            elif role and not guild:
+                # first time they are using the command
+                await self.ex.sql.s_general.insert_welcome_role(ctx.guild.id, role.id)
+        except Exception as e:
+            log.console(f"{e} -> Welcome Join Cache and DB are not synced.")
 
         self.ex.cache.welcome_roles[ctx.guild] = role
         return await ctx.send(await self.ex.get_msg(ctx, "moderator", "welcome_role_set"))

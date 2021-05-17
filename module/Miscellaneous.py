@@ -81,7 +81,7 @@ Message Author: {message.author}
         options = options.split(' ')
         random_choice = (choice(options)).replace('_', ' ')
         embed = await self.ex.create_embed(title="Random Choice", title_desc=f"{ctx.author.display_name}, your choice "
-                                                                             f"is {random_choice}")
+                                                                             f"is **{random_choice}**")
         return await ctx.send(embed=embed)
 
     @commands.command()

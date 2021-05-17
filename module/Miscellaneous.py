@@ -80,7 +80,9 @@ Message Author: {message.author}
         """
         options = options.split(' ')
         random_choice = (choice(options)).replace('_', ' ')
-        return await ctx.send(f"{ctx.author.display_name}, your choice is {random_choice}")
+        embed = await self.ex.create_embed(title="Random Choice", title_desc=f"{ctx.author.display_name}, your choice "
+                                                                             f"is {random_choice}")
+        return await ctx.send(embed=embed)
 
     @commands.command()
     async def displayemoji(self, ctx, emoji: discord.PartialEmoji):

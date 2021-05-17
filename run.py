@@ -18,6 +18,8 @@ class Irene:
     def __init__(self):
         # Set to True if running a test bot.
         ex.test_bot = True
+        # Set to True if you need the db structure created.
+        ex.create_db_structure = True
 
         # define the modules for reuse
         self.miscellaneous = module.Miscellaneous.Miscellaneous(ex)

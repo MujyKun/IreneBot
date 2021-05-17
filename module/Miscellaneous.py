@@ -1,13 +1,10 @@
 import asyncio
-import time
-
 import discord
 from random import *
 from discord.ext import commands
 from IreneUtility.util import u_logger as log
-import datetime
 from IreneUtility.Utility import Utility
-from datetime import datetime
+from datetime import datetime, date
 
 
 # noinspection PyBroadException,PyPep8
@@ -249,7 +246,7 @@ Maintenance Status: {maintenance_status}
                               f"/{len(await self.ex.u_logging.get_channels_logged())} Logged", inline=True)
         embed.add_field(name="Bot Uptime", value=bot_uptime, inline=True)
         embed.add_field(name="Total Commands Used", value=f"{self.ex.cache.total_used} Commands", inline=True)
-        embed.add_field(name=f"This Session ({self.ex.cache.session_id} | {datetime.date.today()})",
+        embed.add_field(name=f"This Session ({self.ex.cache.session_id} | {date.today()})",
                         value=f"{self.ex.cache.current_session} Commands", inline=True)
         embed.add_field(name="Playing Music", value=f"{len(self.ex.client.voice_clients)} Voice Clients", inline=True)
         embed.add_field(name="Playing Guessing/Bias",

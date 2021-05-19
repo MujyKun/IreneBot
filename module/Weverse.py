@@ -118,9 +118,9 @@ class Weverse(commands.Cog):
                     return  # we do not want constant attempts to send a message.
 
                 for channel_info in channels:
-                    await asyncio.sleep(0)
-                    # sleep for 5 seconds per channel because of rate-limiting issues on the bot.
-                    # await asyncio.sleep(5)
+                    # sleeping for 2 seconds before every channel post. still needs to be properly tested
+                    # for rate-limits
+                    await asyncio.sleep(2)
                     channel_id = channel_info[0]
                     notification_ids = self.notifications_already_posted.get(channel_id)
                     if not notification_ids:

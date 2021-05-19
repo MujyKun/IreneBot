@@ -275,11 +275,16 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
         message = "Irene is restarting... All games in this channel will force-end."
 
         async def get_games():
-            for existing_game in self.ex.cache.guessing_games.values():
+            # create copies to not have dictionary changed during iteration issue.
+            gg_copy = self.ex.cache.guessing_games.copy()
+            bg_copy = self.ex.cache.bias_games.copy()
+            bj_copy = self.ex.cache.blackjack_games.copy()
+
+            for existing_game in gg_copy.values():
                 yield existing_game
-            for existing_game in self.ex.cache.bias_games.values():
+            for existing_game in bg_copy.values():
                 yield existing_game
-            for existing_game in self.ex.cache.blackjack_games:
+            for existing_game in bj_copy:
                 yield existing_game
 
         async for game in get_games():

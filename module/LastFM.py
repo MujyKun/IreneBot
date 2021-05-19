@@ -169,7 +169,7 @@ class LastFM(commands.Cog):
             log.console(e)
             await ctx.send(f"> **Something went wrong.. Please {await self.ex.get_server_prefix(ctx)}report it.**")
 
-    @commands.command()
+    @commands.command(aliases=['np'])
     async def recent(self, ctx, user: typing.Union[discord.User, str] = None):
         """Get the last listened track of a Last FM Account by a discord user or a Last FM username."""
         try:

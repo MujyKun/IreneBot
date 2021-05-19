@@ -225,7 +225,7 @@ To find out more, look at the `GroupMembers` category.
 |------------------|------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|------------------------|
 | fm          | Get information about a Last FM account by a discord user or a Last FM username.   | %fm (username or @user)             |                        |
 | recenttracks            | Get the recent tracks of a Last FM Account by a discord user or a Last FM username | %recenttracks (username or @user)         |  rt, recents                      |
-| recent            | Get the last listened track of a Last FM Account by a discord user or a Last FM username        | %recent (username or @user)            |                        |
+| recent            | Get the last listened track of a Last FM Account by a discord user or a Last FM username        | %recent (username or @user)            |  np                      |
 | topalbums            | See the top albums of a Last FM Account by a discord user or a Last FM username                                       | %topalbums (username or @user)       |   tal                     |
 | topartists            | See the top artists of a Last FM Account by a discord user or a Last FM username.                                       | %topartists (username or @user)  |  ta                      |
 | toptracks            | See the top tracks of a Last FM Account by a discord user or a Last FM username                                       | %toptracks (username or @user)  | tt                        |

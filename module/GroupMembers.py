@@ -28,7 +28,7 @@ class GroupMembers(commands.Cog):
             return
         try:
             if await self.ex.u_group_members.check_server_sending_photos(message.guild.id):
-                channel = await self.ex.u_group_members.get_channel_sending_photos(message.guild.id)
+                channel = await self.ex.u_group_members.get_channel_sending_photos(message.guild.id) or message.channel
         except Exception as e:
             # error is guild not found, likely being accessed from DMs
             log.useless(f"{e} - Unable to get guild - GroupMembers.idol_photo_on_message")
@@ -366,7 +366,7 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
             channel = ctx.channel
             try:
                 if await self.ex.u_group_members.check_server_sending_photos(ctx.guild.id):
-                    channel = await self.ex.u_group_members.get_channel_sending_photos(ctx.guild.id)
+                    channel = await self.ex.u_group_members.get_channel_sending_photos(ctx.guild.id) or ctx.channel
             except Exception as e:
                 # error is guild not found, likely being accessed from DMs
                 log.useless(f"{e} - Likely guild not found - GroupMembers.randomidol")

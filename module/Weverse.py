@@ -40,7 +40,7 @@ class Weverse(commands.Cog):
                     await self.ex.u_weverse.delete_weverse_channel(channel_id, community_name)
                     return await ctx.send(f"> {ctx.author.display_name}, You will no longer receive updates for "
                                           f"{community_name}.")
-            for community in self.ex.weverse_client.all_communities:
+            for community in self.ex.weverse_client.all_communities.values():
                 await asyncio.sleep(0)
                 if community.name.lower() == community_name:
                     # delete any existing before adding a new one.

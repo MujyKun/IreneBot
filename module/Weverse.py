@@ -79,56 +79,60 @@ class Weverse(commands.Cog):
     @tasks.loop(seconds=30, minutes=0, hours=0, reconnect=True)
     async def weverse_updates(self):
         """Process for checking for Weverse updates and sending to discord channels."""
-        if self.ex.weverse_client.cache_loaded:
-            if await self.ex.weverse_client.check_new_user_notifications():
-                user_notifications = self.ex.weverse_client.user_notifications
-                if not user_notifications:
-                    return
-                is_comment = False
-                latest_notification = user_notifications[0]
+        if not self.ex.weverse_client.cache_loaded:
+            return
 
-                community_name = latest_notification.community_name or latest_notification.bold_element
-                if not community_name:
-                    return
-                channels = await self.ex.u_weverse.get_weverse_channels(community_name.lower())
-                if not channels:
-                    log.console("WARNING: There were no channels to post the Weverse notification to.")
-                    return
+        if not await self.ex.weverse_client.check_new_user_notifications():
+            return
 
-                noti_type = self.ex.weverse_client.determine_notification_type(latest_notification.message)
-                embed_title = f"New {community_name} Notification!"
-                message_text = None
-                if noti_type == 'comment':
-                    is_comment = True
-                    embed = await self.ex.u_weverse.set_comment_embed(latest_notification, embed_title)
-                elif noti_type == 'post':
-                    embed, message_text = await self.ex.u_weverse.set_post_embed(latest_notification, embed_title)
-                elif noti_type == 'media':
-                    embed, message_text = await self.ex.u_weverse.set_media_embed(latest_notification, embed_title)
-                elif noti_type == 'announcement':
-                    return None  # not keeping track of announcements ATM
-                else:
-                    return None
+        user_notifications = self.ex.weverse_client.user_notifications
+        if not user_notifications:
+            return
+        is_comment = False
+        latest_notification = user_notifications[0]
 
-                if not embed:
-                    log.console(f"WARNING: Could not receive Weverse information for {community_name}. "
-                                f"Noti ID:{latest_notification.id} - "
-                                f"Contents ID: {latest_notification.contents_id} - "
-                                f"Noti Type: {latest_notification.contents_type}")
-                    return  # we do not want constant attempts to send a message.
+        community_name = latest_notification.community_name or latest_notification.bold_element
+        if not community_name:
+            return
+        channels = await self.ex.u_weverse.get_weverse_channels(community_name.lower())
+        if not channels:
+            log.console("WARNING: There were no channels to post the Weverse notification to.")
+            return
 
-                for channel_info in channels:
-                    # sleeping for 2 seconds before every channel post. still needs to be properly tested
-                    # for rate-limits
-                    await asyncio.sleep(2)
-                    channel_id = channel_info[0]
-                    notification_ids = self.notifications_already_posted.get(channel_id)
-                    if not notification_ids:
-                        await self.ex.u_weverse.send_weverse_to_channel(channel_info, message_text, embed, is_comment,
-                                                                        community_name)
-                        self.notifications_already_posted[channel_id] = [latest_notification.id]
-                    else:
-                        if latest_notification.id not in notification_ids:
-                            self.notifications_already_posted[channel_id].append(latest_notification.id)
-                            await self.ex.u_weverse.send_weverse_to_channel(channel_info, message_text, embed,
-                                                                            is_comment, community_name)
+        noti_type = self.ex.weverse_client.determine_notification_type(latest_notification.message)
+        embed_title = f"New {community_name} Notification!"
+        message_text = None
+        if noti_type == 'comment':
+            is_comment = True
+            embed = await self.ex.u_weverse.set_comment_embed(latest_notification, embed_title)
+        elif noti_type == 'post':
+            embed, message_text = await self.ex.u_weverse.set_post_embed(latest_notification, embed_title)
+        elif noti_type == 'media':
+            embed, message_text = await self.ex.u_weverse.set_media_embed(latest_notification, embed_title)
+        elif noti_type == 'announcement':
+            return None  # not keeping track of announcements ATM
+        else:
+            return None
+
+        if not embed:
+            log.console(f"WARNING: Could not receive Weverse information for {community_name}. "
+                        f"Noti ID:{latest_notification.id} - "
+                        f"Contents ID: {latest_notification.contents_id} - "
+                        f"Noti Type: {latest_notification.contents_type}")
+            return  # we do not want constant attempts to send a message.
+
+        for channel_info in channels:
+            # sleeping for 2 seconds before every channel post. still needs to be properly tested
+            # for rate-limits
+            await asyncio.sleep(2)
+            channel_id = channel_info[0]
+            notification_ids = self.notifications_already_posted.get(channel_id)
+            if not notification_ids:
+                await self.ex.u_weverse.send_weverse_to_channel(channel_info, message_text, embed, is_comment,
+                                                                community_name)
+                self.notifications_already_posted[channel_id] = [latest_notification.id]
+            else:
+                if latest_notification.id not in notification_ids:
+                    self.notifications_already_posted[channel_id].append(latest_notification.id)
+                    await self.ex.u_weverse.send_weverse_to_channel(channel_info, message_text, embed,
+                                                                    is_comment, community_name)

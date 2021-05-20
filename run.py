@@ -17,7 +17,7 @@ class Irene:
     """
     def __init__(self):
         # Set to True if running a test bot.
-        ex.test_bot = True
+        ex.test_bot = False
         # Set to True if you need the db structure created.
         ex.create_db_structure = False
 

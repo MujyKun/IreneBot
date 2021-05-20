@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from IreneUtility.util import u_logger as log
-from Weverse.weverseasync import WeverseAsync
+from Weverse.weverseasync import WeverseClientAsync
 import aiofiles
 from IreneUtility.Utility import Utility
 import asyncio
@@ -66,8 +66,9 @@ class BotMod(commands.Cog):
         [Format %weverseauth <token>]
         """
         self.ex.keys.weverse_auth_token = token
-        self.ex.weverse_client = WeverseAsync(authorization=self.ex.keys.weverse_auth_token,
-                                              web_session=self.ex.session, verbose=True, loop=asyncio.get_event_loop())
+        self.ex.weverse_client = WeverseClientAsync(authorization=self.ex.keys.weverse_auth_token,
+                                                    web_session=self.ex.session, verbose=True,
+                                                    loop=asyncio.get_event_loop())
         await ctx.send("> Token and Weverse client has been updated.")
         await self.ex.weverse_client.start()
 

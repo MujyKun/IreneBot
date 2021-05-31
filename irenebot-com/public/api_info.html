@@ -62,7 +62,9 @@
 
 <p class="api_info">
     <strong>Pass in Private Keys as an Authorization Bearer Token in the header.</strong><br><br><br>
-    <strong>https://api.irenebot.com/photos/guessing_game/ </strong>  (POST)-> Pass in 'allow_group_photos' as 1 to get any photos, or 0 to not get group photos. <br>
+    <strong>https://api.irenebot.com/photos/guessing_game/ </strong>  (POST)->
+        Pass in 'allow_group_photos' as 1 to get any photos, or 0 to not get group photos. <br>
+        Pass in 'redirect' as 0 to not be redirected. <br>
         Status 500 -> Server Issue<br>
         Status 200 -> Will receive a json containing Idol Information along with the image url.<br>
     Example:

@@ -172,6 +172,7 @@ To find out more, look at the `GroupMembers` category.
 | servercount      | Shows how many servers Irene is on.                            | %servercount                    |                |
 | serverinfo      | View information about the current server.                            | %serverinfo                   |                |
 | setlanguage          | Changes language of Irene. Available Choices: en_us  | %setlanguage (language choice)                         |               |
+| stopgames          | End all games that you are hosting or that may exist in the text channel.  | %stopgames |  stopgame, endgame, endames             |
 | suggest          | Suggest a feature for Irene                                    | %suggest (feature)              |               |
 | support          | Support Discord Server for Irene                               | %support                        |                |
 | translate          | Translate between languages using Papago                              | %translate English Korean this is a test phrase.                       |                |

@@ -68,7 +68,8 @@
   },
   "miscellaneous": {
     "set_language_fail": "{name}, that is not an available language. Use one of the following: {languages}.",
-    "set_language_success": "{name}, your language is now set to {language}."
+    "set_language_success": "{name}, your language is now set to {language}.",
+    "terminating_games": "{name}, I am terminating all the games that exist in this channel or by the host."
   },
   "utility": {
     "join_support_server_feature": "In order to use this feature of {bot_name}, you must first join the Support Server at <{support_server_link}>"

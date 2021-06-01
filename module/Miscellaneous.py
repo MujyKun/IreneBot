@@ -545,6 +545,26 @@ Maintenance Status: {maintenance_status}
         else:
             await ctx.send("> **Please enter an 8ball prompt.**")
 
+    @commands.command(aliases=['stopgame', 'endgame', 'endgames'])
+    async def stopgames(self, ctx):
+        """End all games that you are hosting or that may exist in the text channel.
+
+        BlackJack can only be terminated by the players themselves and not a moderator.
+
+        [Format: %stopgames]
+        [Aliases: stopgame, endgame, endgames]
+        """
+        user = await self.ex.get_user(ctx.author.id)
+        msg = await self.ex.get_msg(user, "miscellaneous", "terminating_games", ["name", ctx.author.display_name])
+        await ctx.send(msg)
+        await self.ex.stop_game(ctx, self.ex.cache.bias_games)  # stop any bias games.
+
+        await self.ex.stop_game(ctx, self.ex.cache.guessing_games)  # stop any guessing games.
+
+        blackjack_game = await self.ex.u_blackjack.find_game(user)
+        if blackjack_game:
+            await blackjack_game.end_game()  # stop any blackjack game.
+
     @commands.command(aliases=['pong'])
     async def ping(self, ctx):
         """

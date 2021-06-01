@@ -30,9 +30,9 @@ class UnScramble(commands.Cog):
         (timeout for each round - default 20s)]
         [Aliases: us]
 
-        Easy -> Only Stage Names
-        Medium -> Stage Names and Full Names
-        Hard -> Former Full/Stage Names + All capitalized letters are now lowercase.
+        Easy -> Only Stage Names (from easy idols).
+        Medium -> Stage/Full/Group Names (from medium idols).
+        Hard -> Former Full/Stage Names + All capitalized letters are now lowercase (from hard idols).
         """
         if not ctx.guild:
             return await ctx.send("> You are not allowed to play the unscramble game in DMs.")

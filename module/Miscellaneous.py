@@ -561,6 +561,8 @@ Maintenance Status: {maintenance_status}
 
         await self.ex.stop_game(ctx, self.ex.cache.guessing_games)  # stop any guessing games.
 
+        await self.ex.stop_game(ctx, self.ex.cache.unscramble_games)  # stop any unscramble games.
+
         blackjack_game = await self.ex.u_blackjack.find_game(user)
         if blackjack_game:
             await blackjack_game.end_game()  # stop any blackjack game.

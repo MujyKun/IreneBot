@@ -3,7 +3,11 @@
 ## **New Commands/Features:**
 Added ability to toggle games using `%togglegames`.  
 
-Added Unscramble Game! `%help UnScramble`  
+Added Unscramble Game! `%help UnScramble`  (`unscramble`, `usleaderboard`, `stopus`)
+Unscramble difficulties are portrayed as below:   
+-> Easy - Only Stage Names (from easy idols).  
+-> Medium - Stage/Full/Group Names (from medium idols).  
+-> Hard - Former Full/Stage Names + Aliases + All capitalized letters are now lowercase (from hard idols).  
 
 Added photos for `PIXY`, `WJSN`, `Pentagon`, `PLAYBACK`, `PURPLE KISS`, `9MUSES`, `A.C.E`, `REDSQUARE`,  
 `3YE`, `P.O.P`, `Maka Maka`, `Ikon`, `Winner`, `Brave Girls`, `KARD`, `Ladies Code`

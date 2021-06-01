@@ -1,3 +1,4 @@
+import asyncio
 from discord.ext import commands
 from IreneUtility.util import u_logger as log
 from IreneUtility.Utility import Utility
@@ -18,6 +19,43 @@ class UnScramble(commands.Cog):
         """
         self.ex: Utility = t_ex
 
+    @commands.command(aliases=['usl', 'uslb'])
+    async def usleaderboard(self, ctx, difficulty="medium", mode="server"):
+        """
+        Shows leaderboards for unscramble game
+
+        [Format: %usleaderboard (easy/medium/hard) (server/global)]
+        [Aliases: usl, uslb]
+        """
+        if difficulty.lower() not in ['easy', 'medium', 'hard']:
+            difficulty = "medium"
+
+        try:
+            if mode.lower() not in ["server", "global"]:
+                mode = "server"
+            if mode == "server":
+                server_id = await self.ex.get_server_id(ctx)
+                if not server_id:
+                    return await ctx.send("> You should not use this command in DMs.")
+                members = f"({', '.join([str(member.id) for member in self.ex.client.get_guild(server_id).members])})"
+                top_user_scores = await self.ex.u_unscramblegame.get_unscramble_game_top_ten(difficulty,
+                                                                                             members=members)
+
+            else:
+                top_user_scores = await self.ex.u_unscramblegame.get_unscramble_game_top_ten(difficulty)
+
+            lb_string = ""
+            for user_position, (user_id, score) in enumerate(top_user_scores):
+                await asyncio.sleep(0)
+                score = await self.ex.u_unscramblegame.get_user_score(difficulty.lower(), user_id)
+                lb_string += f"**{user_position + 1})** <@{user_id}> - {score}\n"
+            m_embed = await self.ex.create_embed(title=f"Unscramble Game Leaderboard ({difficulty.lower()}) ({mode})",
+                                                 title_desc=lb_string)
+            await ctx.send(embed=m_embed)
+        except Exception as e:
+            log.console(e)
+            return await ctx.send(f"> You may not understand this error. Please report it -> {e}")
+
     @check_user_in_support_server()
     @commands.command(aliases=["us"])
     async def unscramble(self, ctx, gender="all", difficulty="medium", rounds=20, timeout=20):
@@ -32,7 +70,7 @@ class UnScramble(commands.Cog):
 
         Easy -> Only Stage Names (from easy idols).
         Medium -> Stage/Full/Group Names (from medium idols).
-        Hard -> Former Full/Stage Names + All capitalized letters are now lowercase (from hard idols).
+        Hard -> Former Full/Stage Names + Aliases + All capitalized letters are now lowercase (from hard idols).
         """
         if not ctx.guild:
             return await ctx.send("> You are not allowed to play the unscramble game in DMs.")

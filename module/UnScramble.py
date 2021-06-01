@@ -29,6 +29,10 @@ class UnScramble(commands.Cog):
         [Format: %unscramble (Male/Female/All) (easy/medium/hard) (# of rounds - default 20)
         (timeout for each round - default 20s)]
         [Aliases: us]
+
+        Easy -> Only Stage Names
+        Medium -> Stage Names and Full Names
+        Hard -> Former Full/Stage Names + All capitalized letters are now lowercase.
         """
         if not ctx.guild:
             return await ctx.send("> You are not allowed to play the unscramble game in DMs.")

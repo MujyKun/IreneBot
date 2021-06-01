@@ -119,8 +119,8 @@ class Profile(commands.Cog):
 
     async def increase_profile_level(self, msg):
         """Increase the profile level appropriately after every message."""
+        user = await self.ex.get_user(msg.author.id)
         try:
-            user = await self.ex.get_user(msg.author.id)
             xp_per_message = 10
             current_level = user.profile_level
             current_xp = await user.get_profile_xp()
@@ -131,4 +131,4 @@ class Profile(commands.Cog):
             await user.set_profile_xp(1)
             await user.set_level(current_level + 1, "profile")
         except Exception as e:
-            log.useless(f"{e} - failed to increase profile level. - Profile.increase_profile_level")
+            log.useless(f"{e} - {user.id} failed to increase profile level. - Profile.increase_profile_level")

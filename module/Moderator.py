@@ -81,6 +81,42 @@ class Moderator(commands.Cog):
 
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
+    async def welcomerole(self, ctx, role: discord.Role = None):
+        """
+        The role to give a user when they first join the server.
+
+        Use command without role to delete the welcome role set to the guild.
+        [Format: %welcomerole @role]
+        """
+        if not ctx.guild:  # command must not be used in DMs.
+            return await ctx.send(await self.ex.get_msg(ctx, "general", "no_dm"))
+
+        guild = self.ex.cache.welcome_roles.get(ctx.guild)
+
+        # if the user wants to delete the role.
+        if not role and guild:
+            await self.ex.sql.s_general.delete_welcome_role(ctx.guild.id)
+            self.ex.cache.welcome_roles.pop(ctx.guild)
+            return await ctx.send(await self.ex.get_msg(ctx, "moderator", "welcome_role_delete"))
+        elif not role and not guild:
+            return await ctx.send(await self.ex.get_msg(ctx, "moderator", "no_role_to_delete"))
+
+        try:
+            # if the user wants to set a role
+            if role and guild:
+                # role already in place
+                await self.ex.sql.s_general.update_welcome_role(guild.id, role.id)
+            elif role and not guild:
+                # first time they are using the command
+                await self.ex.sql.s_general.insert_welcome_role(ctx.guild.id, role.id)
+        except Exception as e:
+            log.console(f"{e} -> Welcome Join Cache and DB are not synced.")
+
+        self.ex.cache.welcome_roles[ctx.guild] = role
+        return await ctx.send(await self.ex.get_msg(ctx, "moderator", "welcome_role_set"))
+
+    @commands.command()
+    @commands.has_guild_permissions(manage_messages=True)
     async def welcome(self, ctx, *, message=None):
         """
         Set a welcome message or disable welcome in the current channel.
@@ -566,3 +602,28 @@ class Moderator(commands.Cog):
                 await ctx.send(f"> **Invalid URL.**")
             except Exception as e:
                 log.console(e)
+
+    @commands.command()
+    @commands.has_guild_permissions(manage_messages=True)
+    async def togglegames(self, ctx, *, channel: discord.TextChannel = None):
+        """Disable or Enable the ability to play games in a text channel.
+
+        [Format: %togglegames [#channel]]
+        """
+        channel = channel or ctx.channel
+        user = await self.ex.get_user(ctx.author.id)
+        if not channel:
+            log.console(f"Could not find text channel. -> User: {user.id} - Moderator.togglegames")
+            msg = await self.ex.get_msg(user, "moderator", "channel_not_found")
+            return await ctx.send(msg)
+
+        enabled_msg = "enabled" if await self.ex.u_moderator.toggle_games(channel.id) else "disabled"
+
+        msg = await self.ex.get_msg(user, "moderator", "channel_toggled", [
+            ["name", ctx.author.display_name], ["text_channel", channel.name], ["result", enabled_msg]
+        ])
+
+        return await ctx.send(msg)
+
+
+

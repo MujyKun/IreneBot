@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from IreneUtility.util import u_logger as log
-from Weverse.weverseasync import WeverseAsync
+from Weverse.weverseasync import WeverseClientAsync
 import aiofiles
 from IreneUtility.Utility import Utility
 import asyncio
@@ -66,8 +66,9 @@ class BotMod(commands.Cog):
         [Format %weverseauth <token>]
         """
         self.ex.keys.weverse_auth_token = token
-        self.ex.weverse_client = WeverseAsync(authorization=self.ex.keys.weverse_auth_token,
-                                              web_session=self.ex.session, verbose=True, loop=asyncio.get_event_loop())
+        self.ex.weverse_client = WeverseClientAsync(authorization=self.ex.keys.weverse_auth_token,
+                                                    web_session=self.ex.session, verbose=True,
+                                                    loop=asyncio.get_event_loop())
         await ctx.send("> Token and Weverse client has been updated.")
         await self.ex.weverse_client.start()
 
@@ -275,11 +276,16 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
         message = "Irene is restarting... All games in this channel will force-end."
 
         async def get_games():
-            for existing_game in self.ex.cache.guessing_games.values():
+            # create copies to not have dictionary changed during iteration issue.
+            gg_copy = self.ex.cache.guessing_games.copy()
+            bg_copy = self.ex.cache.bias_games.copy()
+            bj_copy = self.ex.cache.blackjack_games.copy()
+
+            for existing_game in gg_copy.values():
                 yield existing_game
-            for existing_game in self.ex.cache.bias_games.values():
+            for existing_game in bg_copy.values():
                 yield existing_game
-            for existing_game in self.ex.cache.blackjack_games:
+            for existing_game in bj_copy:
                 yield existing_game
 
         async for game in get_games():

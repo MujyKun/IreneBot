@@ -211,7 +211,9 @@ class Reminder(commands.Cog):
     async def reminder_loop(self):
         """Process for checking for reminders and sending them out if they are past overdue."""
         try:
-            for user in self.ex.cache.users.values():
+            # we do not want dictionary to change size during iteration, so we will make a copy.
+            users_copy = self.ex.cache.users.copy()
+            for user in users_copy.values():
                 if not user.reminders:
                     continue
                 for remind_id, remind_reason, remind_time in user.reminders:
@@ -225,10 +227,12 @@ class Reminder(commands.Cog):
                             embed = await self.ex.create_embed(title="Reminder", title_desc=title_desc)
                             await dm_channel.send(embed=embed)
                             await self.ex.u_reminder.remove_user_reminder(user.id, remind_id)
-                    except Exception as e:
+                    except discord.Forbidden as e:
                         # likely forbidden error -> do not have access to dm user
-                        log.useless(f"{e} - Likely do not have access to dm user - Reminder.reminder_loop")
-
+                        log.useless(f"{e} - Likely do not have access to dm user {user.id} - Reminder.reminder_loop")
+                        # remove the reminder since we do not want to try constantly reminding someone we cant.
+                        await self.ex.u_reminder.remove_user_reminder(user.id, remind_id)
+                    except Exception as e:
+                        log.console(f"{e} - Reminder Loop")
         except Exception as e:
-            # dictionary changed size during iteration -> Next Loop instance will take care of this loop.
-            log.useless(f"{e} - Likely dictionary changed size during iteration. - Reminder.reminder_loop")
+            log.useless(f"{e} - Reminder.reminder_loop")

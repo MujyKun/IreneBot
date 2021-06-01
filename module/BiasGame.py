@@ -27,10 +27,18 @@ class BiasGame(commands.Cog):
         [Format: %biasgame (Male/Female/All) (bracket size (4,8,16,32))]
         """
         user = await self.ex.get_user(ctx.author.id)
+        server_prefix = await self.ex.get_server_prefix(ctx)
+
         if not ctx.guild:
             return await ctx.send(await self.ex.get_msg(user, 'biasgame', 'no_dm'))
+
+        if ctx.channel.id in self.ex.cache.channels_with_disabled_games:
+            msg = await self.ex.get_msg(user, "general", "game_disabled", [
+                ["name", ctx.author.display_name], ["server_prefix", server_prefix]
+            ])
+            return await ctx.send(msg)
+
         if self.ex.cache.bias_games.get(ctx.channel.id):
-            server_prefix = await self.ex.get_server_prefix(ctx)
             return await ctx.send(
                 await self.ex.get_msg(user, 'biasgame', 'in_progress', [['server_prefix', server_prefix]]))
         game = self.ex.u_objects.BiasGame(self.ex, ctx, bracket_size=bracket_size, gender=gender)
@@ -54,7 +62,8 @@ class BiasGame(commands.Cog):
         This command is meant for any issues or if a game happens to be stuck.
         """
         if not await self.ex.stop_game(ctx, self.ex.cache.bias_games):
-            return await ctx.send("> No game is currently in session.")
+            msg = await self.ex.get_msg(ctx, "miscellaneous", "no_game", ["string", "bias"])
+            return await ctx.send(msg)
         log.console(f"Force-Ended Bias Game in {ctx.channel.id}")
 
     @commands.command()

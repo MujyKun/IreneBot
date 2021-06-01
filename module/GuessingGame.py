@@ -70,8 +70,14 @@ class GuessingGame(commands.Cog):
         """
         if not ctx.guild:
             return await ctx.send("> You are not allowed to play guessing game in DMs.")
+        server_prefix = await self.ex.get_server_prefix(ctx)
+        if ctx.channel.id in self.ex.cache.channels_with_disabled_games:
+            msg = await self.ex.get_msg(ctx.author.id, "general", "game_disabled", [
+                ["name", ctx.author.display_name], ["server_prefix", server_prefix]
+            ])
+            return await ctx.send(msg)
+
         if self.ex.cache.guessing_games.get(ctx.channel.id):
-            server_prefix = await self.ex.get_server_prefix(ctx)
             return await ctx.send(f"> **A guessing game is currently in progress in this channel. "
                                   f"If this is a mistake, use `{server_prefix}stopgg`.**")
         if rounds > 60 or timeout > 60:
@@ -83,44 +89,53 @@ class GuessingGame(commands.Cog):
         # task = asyncio.create_task(self.start_game(ctx, rounds, timeout, gender, difficulty))
 
     @commands.command()
-    async def ggfilter(self, ctx, *, group_ids=None):
+    async def ggfilter(self, ctx, *, groups=None):
         """
         Add a filter for your guessing game. Only the groups you select will appear on the guessing game.
 
         Use the command with no group ids to enable/disable the filter. Split group ids with commas.
-        [Format: %ggfilter [group_id_one, group_id_two, ...]]
+        Group Names are now allowed to be used, but if the group name is more than one word, an underscore must be used.
+        [Format: %ggfilter [group_id_one, group_id_two, group_name_one ...]]
+        [Example: %ggfilter 5, 4, blackpink, 2, red_velvet]
         """
         user = await self.ex.get_user(ctx.author.id)
-        if not group_ids:
+        if not groups:
             # toggle guessing game filter.
             await self.ex.u_guessinggame.toggle_filter(user.id)
             return await ctx.send(f"> Your Guessing Game Filter is now {'enabled' if user.gg_filter else 'disabled'}")
 
-        group_ids = group_ids.replace(' ', '')
-        group_ids = group_ids.split(',')
+        groups = groups.replace(' ', '')
+        groups = groups.replace('_', ' ')
+        groups = groups.split(',')
 
         # remove duplicate inputs
-        group_ids = list(dict.fromkeys(group_ids))
+        groups = list(dict.fromkeys(groups))
 
         invalid_group_ids = []
         added_group_ids = []
         removed_group_ids = []
 
-        for group_id in group_ids:
+        for group_id_or_name in groups:
             await asyncio.sleep(0)
-            # check for empty input
-            if not group_id:
+
+            # check for empty input in the list
+            if not group_id_or_name:
                 continue
+
+            group_from_group_name = await self.ex.u_group_members.get_group_where_group_matches_name(group_id_or_name)
+            if group_from_group_name:
+                # only add the first group recognized, otherwise user will need to be more specific.
+                group_id_or_name = str((group_from_group_name[0]).id)
 
             try:
                 added_group = await self.ex.u_guessinggame.filter_auto_add_remove_group(
-                    user_or_id=user, group_or_id=group_id)
+                    user_or_id=user, group_or_id=group_id_or_name)
                 if added_group:
-                    added_group_ids.append(group_id)
+                    added_group_ids.append(group_id_or_name)
                 else:
-                    removed_group_ids.append(group_id)
+                    removed_group_ids.append(group_id_or_name)
             except self.ex.exceptions.InvalidParamsPassed:
-                invalid_group_ids.append(group_id)
+                invalid_group_ids.append(group_id_or_name)
 
         final_message = f"<@{user.id}>"
         if invalid_group_ids:
@@ -181,7 +196,9 @@ class GuessingGame(commands.Cog):
         [Format: %stopgg]
         """
         if not await self.ex.stop_game(ctx, self.ex.cache.guessing_games):
-            return await ctx.send("> No guessing game is currently in session.")
+            msg = await self.ex.get_msg(ctx, "miscellaneous", "no_game", ["string", "guessing"])
+            return await ctx.send(msg)
+
         log.console(f"Force-Ended Guessing Game in {ctx.channel.id}")
 
     async def start_game(self, ctx, rounds, timeout, gender, difficulty):

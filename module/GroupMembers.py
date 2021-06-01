@@ -28,7 +28,7 @@ class GroupMembers(commands.Cog):
             return
         try:
             if await self.ex.u_group_members.check_server_sending_photos(message.guild.id):
-                channel = await self.ex.u_group_members.get_channel_sending_photos(message.guild.id)
+                channel = await self.ex.u_group_members.get_channel_sending_photos(message.guild.id) or message.channel
         except Exception as e:
             # error is guild not found, likely being accessed from DMs
             log.useless(f"{e} - Unable to get guild - GroupMembers.idol_photo_on_message")
@@ -90,6 +90,9 @@ class GroupMembers(commands.Cog):
         """Adds an idol using the syntax from https://irenebot.com/addidol.html
 
         [Format: %addidol (json)]
+
+        VERY IMPORTANT:
+        THIS COMMAND SHOULD ONLY BE USED IF A %CARD DOES NOT EXIST FOR THE IDOL.
         """
         try:
             # load string to json
@@ -160,7 +163,9 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
             await ctx.send(msg)
         except Exception as e:
             log.console(e)
-            msg = await self.ex.get_msg(ctx, "general", "error", ["e", e])
+            server_prefix = await self.ex.get_server_prefix(ctx)
+            msg = await self.ex.get_msg(ctx, "groupmembers", "add_error", [
+                ["e", e], ["server_prefix", server_prefix], ["command_name", "addidol"]])
             await ctx.send(msg)
 
     @commands.command()
@@ -168,6 +173,9 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
         """Adds a group using the syntax from https://irenebot.com/addgroup.html
 
         [Format: %addgroup (json)]
+
+        VERY IMPORTANT:
+        THIS COMMAND SHOULD ONLY BE USED IF A %CARD DOES NOT EXIST FOR THE GROUP.
         """
         try:
             # load string to json
@@ -233,7 +241,9 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
             await ctx.send(msg)
         except Exception as e:
             log.console(e)
-            msg = await self.ex.get_msg(ctx, "general", "error", ["e", e])
+            server_prefix = await self.ex.get_server_prefix(ctx)
+            msg = await self.ex.get_msg(ctx, "groupmembers", "add_error", [
+                ["e", e], ["server_prefix", server_prefix], ["command_name", "addgroup"]])
             await ctx.send(msg)
 
     @commands.command()
@@ -366,7 +376,7 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
             channel = ctx.channel
             try:
                 if await self.ex.u_group_members.check_server_sending_photos(ctx.guild.id):
-                    channel = await self.ex.u_group_members.get_channel_sending_photos(ctx.guild.id)
+                    channel = await self.ex.u_group_members.get_channel_sending_photos(ctx.guild.id) or ctx.channel
             except Exception as e:
                 # error is guild not found, likely being accessed from DMs
                 log.useless(f"{e} - Likely guild not found - GroupMembers.randomidol")

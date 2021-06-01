@@ -22,6 +22,13 @@ class BlackJack(commands.Cog):
         """
         server_prefix = await self.ex.get_server_prefix(ctx)
         user = await self.ex.get_user(ctx.author.id)
+
+        if ctx.channel.id in self.ex.cache.channels_with_disabled_games:
+            msg = await self.ex.get_msg(user, "general", "game_disabled", [
+                ["name", ctx.author.display_name], ["server_prefix", server_prefix]
+            ])
+            return await ctx.send(msg)
+
         bet = self.ex.remove_commas(bet)
         await user.register_currency()  # ensure the user is registered.
         if bet < 0:
@@ -79,13 +86,12 @@ class BlackJack(commands.Cog):
         blackjack_game.second_player_ctx = ctx
         await blackjack_game.process_game()  # start the blackjack game.
 
-    @commands.command(aliases=['eg'])
-    async def endgame(self, ctx):
+    @commands.command()
+    async def stopbj(self, ctx):
         """
         End your current game
 
-        [Format: %endgame]
-        [Aliases: eg]
+        [Format: %stopbj]
         """
         user = await self.ex.get_user(ctx.author.id)
         if not user.in_currency_game:

@@ -1,4 +1,4 @@
-# [IreneBot V1.03.9](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=1609956823)
+# [IreneBot V1.04.0](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=1609956823)
 
 ## [Support Irene by becoming a Patron!](https://www.patreon.com/bePatron?u=38971435)  
 **[Become a Patron!](https://www.patreon.com/bePatron?u=38971435)**
@@ -38,7 +38,7 @@ To find out more, look at the `GroupMembers` category.
 | Command           | Description                                                                                           | Format                               | Aliases |
 |-------------------|-------------------------------------------------------------------------------------------------------|--------------------------------------|---------|
 | blackjack         | Start a game of BlackJack                                                                             | %blackjack (amount)                  | bj      |
-| endgame           | End your current game                                                                                 | %endgame                             | eg      |
+| stopbj           | End your current blackjack game                                                                                 | %stopbj                             |       |
 | hit               | Pick A Card                                                                                           | %hit                                 |         |
 | joingame          | Join a game                                                                                           | %joingame (gameid) (bid)             | jg      |
 | rules          | View the rules of BlackJack.                                                                                           | %rules             |       |
@@ -121,7 +121,7 @@ To find out more, look at the `GroupMembers` category.
 | guessinggame | Start an idol guessing game in the current channel. The host of the game can use `stop` to end the game or `skip` to skip the current round without affecting the round number. | %guessinggame (Male/Female/All) (easy/medium/hard) (# of rounds - default 20) (timeout for each round - default 20s) | gg |
 | ggfilter | Add a filter for your guessing game. Only the groups you select will appear on the guessing game. Use the command with no group ids to enable/disable the filter. Filtered idols do not count for a real score. | %ggfilter [group_id_one, group_id_two, ...] | |
 | ggfilteredlist | View the current groups you currently have filtered. | %ggfilteredlist | ggfilterlist, filterlist |
-| ggleaderboard | Shows global leaderboards for guessing game. | %ggleaderboard (easy/medium/hard) (server/global)| ggl, gglb |
+| ggleaderboard | Shows leaderboards for guessing game. | %ggleaderboard (easy/medium/hard) (server/global)| ggl, gglb |
 | stopgg | Force-end a guessing game if you are a moderator or host of the game. This command is meant for any issues or if a game happens to be stuck. Must be game host or access to manage messages. | %stopgg | ★/Host|
 
 #### Interactions:
@@ -172,6 +172,7 @@ To find out more, look at the `GroupMembers` category.
 | servercount      | Shows how many servers Irene is on.                            | %servercount                    |                |
 | serverinfo      | View information about the current server.                            | %serverinfo                   |                |
 | setlanguage          | Changes language of Irene. Available Choices: en_us  | %setlanguage (language choice)                         |               |
+| stopgames          | End all games that you are hosting or that may exist in the text channel.  | %stopgames |  stopgame, endgame, endames             |
 | suggest          | Suggest a feature for Irene                                    | %suggest (feature)              |               |
 | support          | Support Discord Server for Irene                               | %support                        |                |
 | translate          | Translate between languages using Papago                              | %translate English Korean this is a test phrase.                       |                |
@@ -192,9 +193,11 @@ To find out more, look at the `GroupMembers` category.
 | sayembed              | Make Irene say an embed message. (Manage Messages)                                          | %sayembed #text-channel (json formatted message from https://embedbuilder.nadekobot.me/)                  |               |
 | setprefix      | Set the server prefix. If prefix was forgotten, type this command with the default prefix. (Manage Messages) | %setprefix $         |          | 
 | tempchannel      | Makes Current Channel a temporary channel deleting messages after a certain time period (greater than 1 minute). If delay is -1, it will remove the channel. (Manage Messages)| %tempchannel [delay=-1]         | temp         |
+| togglegames      | Choose to enable/disable games in a text channel. (Manage Messages)| %togglegames [#channel]         |          |
 | unban            | UnBan A User (Ban Members)                                                                                                                      | %unban @user                    |               |
 | unmute            | UnMute A User (Manage Messages & Manage Roles)                                                                                                                      | %unmute @user (reason)                    |               |
 | welcome            | Set a welcome message or disable welcome in the current channel. Use %user where they should be mentioned. Use %guild_name if the server name should be added. (Manage Messages)  | %welcome (Welcome %user to %guild_name!)                    |               |
+| welcomerole            | The role to give a user when they first join the server. Use command without role to delete the welcome role set to the guild. (Manage Messages)  | %welcomerole @role                    |               |
 
 #### Music:  
 | Command          | Description                                                                                                                          | Format                          | Aliases        |
@@ -224,7 +227,7 @@ To find out more, look at the `GroupMembers` category.
 |------------------|------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|------------------------|
 | fm          | Get information about a Last FM account by a discord user or a Last FM username.   | %fm (username or @user)             |                        |
 | recenttracks            | Get the recent tracks of a Last FM Account by a discord user or a Last FM username | %recenttracks (username or @user)         |  rt, recents                      |
-| recent            | Get the last listened track of a Last FM Account by a discord user or a Last FM username        | %recent (username or @user)            |                        |
+| recent            | Get the last listened track of a Last FM Account by a discord user or a Last FM username        | %recent (username or @user)            |  np                      |
 | topalbums            | See the top albums of a Last FM Account by a discord user or a Last FM username                                       | %topalbums (username or @user)       |   tal                     |
 | topartists            | See the top artists of a Last FM Account by a discord user or a Last FM username.                                       | %topartists (username or @user)  |  ta                      |
 | toptracks            | See the top tracks of a Last FM Account by a discord user or a Last FM username                                       | %toptracks (username or @user)  | tt                        |
@@ -248,6 +251,13 @@ To find out more, look at the `GroupMembers` category.
 | deletetweet      | Delete a Tweet by it's ID                                                                                                            | %deletetweet (id)               |
 | recenttweets     | Show Most Recents Tweets                                                                                                             | %recenttweets (amount)          |
 | tweet            | Tweets a status update on Twitter                                                                                                    | %tweet (status)                 |
+
+#### UnScramble:
+| Command          | Description                                                                                                                          | Format                          | Aliases        |
+|------------------|--------------------------------------------------------------------------------------------------------------------------------------|---------------------------------|----------------|
+| unscramble | Start an idol unscrambing game in the current channel. The host of the game can use `stop` to end the game | %unscramble (Male/Female/All) (easy/medium/hard) (# of rounds - default 20) (timeout for each round - default 20s) | us |
+| usleaderboard | Shows leaderboards for unscramble game. | %uslb (easy/medium/hard) (server/global)| usl, uslb |
+| stopus | Force-end an unscramble game if you are a moderator or host of the game. This command is meant for any issues or if a game happens to be stuck. Must be game host or access to manage messages. | %stopus | ★/Host|
 
 
 #### Youtube: ♥♥♥

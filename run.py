@@ -17,7 +17,9 @@ class Irene:
     """
     def __init__(self):
         # Set to True if running a test bot.
-        ex.test_bot = True
+        ex.test_bot = False
+        # Set to True if you need the db structure created.
+        ex.create_db_structure = False
 
         # define the modules for reuse
         self.miscellaneous = module.Miscellaneous.Miscellaneous(ex)
@@ -45,6 +47,7 @@ class Irene:
         self.reminder = module.Reminder.Reminder(ex)
         self.twitch = module.Twitch.Twitch(ex)
         self.botowner = module.BotOwner.BotOwner(ex)
+        self.unscramble = module.UnScramble.UnScramble(ex)
         # self.gacha = module.Gacha.Gacha()
         self.status = module.status.Status(ex)  # not a command cog
 
@@ -52,7 +55,7 @@ class Irene:
                      self.archive, self.moderator, self.profile, self.help, self.logging, self.music, self.botmod,
                      self.events, self.lastfm, self.interactions, self.wolfram, self.guessinggame, self.customcommands,
                      self.biasgame, self.weverse, self.selfassignroles, self.reminder, self.twitch,
-                     self.botowner]
+                     self.botowner, self.unscramble]
 
         # Modules/Cogs that contain 'ex' (Utility) and the 'conn' (DB connection).
         # AKA -> Classes that are have inherited IreneUtility.Base.Base()

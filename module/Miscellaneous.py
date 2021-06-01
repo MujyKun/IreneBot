@@ -1,12 +1,10 @@
 import asyncio
-
 import discord
 from random import *
 from discord.ext import commands
 from IreneUtility.util import u_logger as log
-import datetime
 from IreneUtility.Utility import Utility
-from datetime import datetime
+from datetime import datetime, date
 
 
 # noinspection PyBroadException,PyPep8
@@ -82,7 +80,9 @@ Message Author: {message.author}
         """
         options = options.split(' ')
         random_choice = (choice(options)).replace('_', ' ')
-        return await ctx.send(f"{ctx.author.display_name}, your choice is {random_choice}")
+        embed = await self.ex.create_embed(title="Random Choice", title_desc=f"{ctx.author.display_name}, your choice "
+                                                                             f"is **{random_choice}**")
+        return await ctx.send(embed=embed)
 
     @commands.command()
     async def displayemoji(self, ctx, emoji: discord.PartialEmoji):
@@ -248,7 +248,7 @@ Maintenance Status: {maintenance_status}
                               f"/{len(await self.ex.u_logging.get_channels_logged())} Logged", inline=True)
         embed.add_field(name="Bot Uptime", value=bot_uptime, inline=True)
         embed.add_field(name="Total Commands Used", value=f"{self.ex.cache.total_used} Commands", inline=True)
-        embed.add_field(name="This Session ({self.ex.cache.session_id} | {datetime.date.today()})",
+        embed.add_field(name=f"This Session ({self.ex.cache.session_id} | {date.today()})",
                         value=f"{self.ex.cache.current_session} Commands", inline=True)
         embed.add_field(name="Playing Music", value=f"{len(self.ex.client.voice_clients)} Voice Clients", inline=True)
         embed.add_field(name="Playing Guessing/Bias",
@@ -389,32 +389,25 @@ Maintenance Status: {maintenance_status}
 
         guild = self.ex.client.get_guild(guild_id)
         member_list = [member.id for member in guild.members]
-        n_word_list = {}  # user_id : n_word_count
 
-        for user in self.ex.cache.users.values():
-            await asyncio.sleep(0)
-            if mode.lower() == "global":
-                n_word_list[user.id] = user.n_word
-            else:
-                # server
-                if user.id in member_list:
-                    n_word_list[user.id] = user.n_word
+        embed_field_counter = 0  # do not use enumerate for this.
 
-        sorted_n_word = {key: value for key, value in sorted(n_word_list.items(), key=lambda item: item[1],
-                                                             reverse=True)}
-        for count, user_id in enumerate(sorted_n_word):
+        # fastest way to bring up the organized leaderboard is actually through the DB instead of cache.
+        for user_id, n_word_count in await self.ex.sql.s_general.fetch_n_word(ordered_by_greatest=True):
             await asyncio.sleep(0)
-            value = sorted_n_word.get(user_id)
-            if not value:
-                continue
-            if count >= 10:
+            if embed_field_counter >= 10:
                 break
+
             try:
                 user_name = (self.ex.client.get_user(user_id)).name
             except:
                 # if the user is not in discord.py's member cache, then set the user's name to null.
                 user_name = "NULL"
-            embed.add_field(name=f"{count+1}) {user_name} ({user_id})", value=value)
+
+            if mode.lower() == "global" or user_id in member_list:
+                embed.add_field(name=f"{embed_field_counter + 1}) {user_name} ({user_id})", value=n_word_count)
+                embed_field_counter += 1
+
         await ctx.send(embed=embed)
 
     @commands.command(aliases=['rand', 'randint', 'r'])
@@ -551,6 +544,28 @@ Maintenance Status: {maintenance_status}
             await ctx.send(f">>> **Question: {question} \nAnswer: {choice(self.ex.cache.eight_ball_responses)}**")
         else:
             await ctx.send("> **Please enter an 8ball prompt.**")
+
+    @commands.command(aliases=['stopgame', 'endgame', 'endgames'])
+    async def stopgames(self, ctx):
+        """End all games that you are hosting or that may exist in the text channel.
+
+        BlackJack can only be terminated by the players themselves and not a moderator.
+
+        [Format: %stopgames]
+        [Aliases: stopgame, endgame, endgames]
+        """
+        user = await self.ex.get_user(ctx.author.id)
+        msg = await self.ex.get_msg(user, "miscellaneous", "terminating_games", ["name", ctx.author.display_name])
+        await ctx.send(msg)
+        await self.ex.stop_game(ctx, self.ex.cache.bias_games)  # stop any bias games.
+
+        await self.ex.stop_game(ctx, self.ex.cache.guessing_games)  # stop any guessing games.
+
+        await self.ex.stop_game(ctx, self.ex.cache.unscramble_games)  # stop any unscramble games.
+
+        blackjack_game = await self.ex.u_blackjack.find_game(user)
+        if blackjack_game:
+            await blackjack_game.end_game()  # stop any blackjack game.
 
     @commands.command(aliases=['pong'])
     async def ping(self, ctx):

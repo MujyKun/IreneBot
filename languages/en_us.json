@@ -27,7 +27,7 @@
   },
   "blackjack": {
     "not_in_game": "{name}, you are not in a blackjack game.",
-    "in_game": "{name}, you are already in a blackjack game. Please type {server_prefix}endgame.",
+    "in_game": "{name}, you are already in a blackjack game. Please type {server_prefix}stopbj.",
     "ended_game": "{name}, your blackjack game has successfully ended.",
     "opponent_not_in_game": "{name}, that player is not in a blackjack game.",
     "announce_winner": "{name} has won the blackjack game with {integer} points against {name2} with {integer2} points!!",
@@ -42,7 +42,7 @@
     "beg_msg": "{name}, a homeless man has given you {integer} {currency_name}(s).",
     "balance_msg": "{name} currently has {balance} {currency_name}(s).",
     "nothing_to_bet": "{name}, you cannot bet less than 1 {currency_name}.",
-    "in_game": "{name}, you cannot use Currency while you are in a game. Please type {server_prefix}endgame.",
+    "in_game": "{name}, you cannot use Currency while you are in a game. Please type {server_prefix}stopbj.",
     "not_enough": "{name}, you do not have enough {currency_name}s. You have {balance}.",
     "bet_result": "{name}, you {result} {integer}! Your updated balance is {balance}.",
     "upgrade_msg": "{name}, you need {integer} to level up {command_name}. Press the Thumbs Up Reaction within 1 minute to confirm.",
@@ -68,7 +68,9 @@
   },
   "miscellaneous": {
     "set_language_fail": "{name}, that is not an available language. Use one of the following: {languages}.",
-    "set_language_success": "{name}, your language is now set to {language}."
+    "set_language_success": "{name}, your language is now set to {language}.",
+    "terminating_games": "{name}, I am terminating all the games that exist in this channel or by the host.",
+    "no_game": "No {string} game is currently in session."
   },
   "utility": {
     "join_support_server_feature": "In order to use this feature of {bot_name}, you must first join the Support Server at <{support_server_link}>"
@@ -77,6 +79,7 @@
     "patron_msg": "As of September 23rd 2020, non-Patrons can only send {idol_post_send_limit} photos a day maximum, as the current host can not reliably handle additional traffic.\nYou may become a patron for as little as $3 per month in order to send unlimited photos; every Patron contributes to upgrading and maintaining the host.\nIf the guild owner is a super patron, All guild members (non-patrons) get {owner_super_patron_benefit} photos a day.\nPlease support <@{bot_id}>'s development at {patreon_link}.\nThank You.",
     "add_idol_sent": "{name}, your request for adding this Idol has been successfully sent. The Idol's query ID is {query_id}.",
     "add_group_sent": "{name}, your request for adding this Group has been successfully sent. The Group's query ID is {query_id}.",
+    "add_error": "An error occurred -> \nError MSG: {e}\nIt is likely that you do not understand this error!\nYou can find more information about this command using {server_prefix}help {command_name}.",
     "no_card_info": "I could not find any information on that idol/group.",
     "stop_images_disable": "{text_channel} can no longer send or receive idol photos.",
     "stop_images_enable": "{text_channel} can now send and receive idol photos.",
@@ -106,7 +109,8 @@
     "cooldown": "You are on cooldown. Try again in {time}.",
     "on_guild_join": "Hello!\nMy prefix for this server is set to {server_prefix}.\nIf you have any questions or concerns, you may join the support server ({server_prefix}support).",
     "maintenance": "A maintenance is currently in progress. Join the support server for more information. <{support_server_link}>\nREASON: {reason}",
-    "invalid_input": "{name}, That option is not valid. Please look into {server_prefix}help {command_name}."
+    "invalid_input": "{name}, That option is not valid. Please look into {server_prefix}help {command_name}.",
+    "game_disabled": "{name}, Games have been disabled in this text channel using {server_prefix}togglegames."
   },
   "twitch": {
     "follow_limit": "You are only allowed to have {follow_limit} channels followed.",
@@ -152,5 +156,12 @@
     "group_fail": "Failed to add Group {group_id}. Proceeding to add idol.",
     "idol_query_approved": "Added Query ID {query_id} as an Idol ({idol_id}).\nThis idol has been added to the following groups: {group_ids}.\nThe cache is now refreshing.",
     "group_query_approved": "Added Query ID {query_id} as a Group ({group_id}).\nThe cache is now refreshing."
+  },
+  "moderator": {
+    "welcome_role_delete": "The welcome role you had set was removed.",
+    "no_role_to_delete": "There is no welcome role to remove.",
+    "welcome_role_set": "The new welcome role has been set.",
+    "channel_not_found": "That text channel was not found.",
+    "channel_toggled": "{name}, {text_channel} now has games {result}."
   }
 }

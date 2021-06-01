@@ -207,8 +207,8 @@ key_kwargs = {
     "twitch_client_secret": os.getenv("TWITCH_CLIENT_SECRET"),
 
     # Datadog
-    "datadog_api_key": make_int(os.getenv("DATADOG_API_KEY")),
-    "datadog_app_key": make_int(os.getenv("DATADOG_APP_KEY")),
+    "datadog_api_key": (os.getenv("DATADOG_API_KEY")),
+    "datadog_app_key": (os.getenv("DATADOG_APP_KEY")),
 
     # Blackjack card location
     "playing_card_location": os.getenv("CARD_LOCATION"),
@@ -218,9 +218,8 @@ key_kwargs = {
     # translate private key is the same as the idol photo key.
     "translate_private_key": ((os.getenv("PRIVATE_KEYS")).split(','))[0],  # use the first result in the list of keys.
 
-    "site_port": os.getenv("SITE_PORT")  # site port
-
-
+    "site_port": os.getenv("SITE_PORT"),  # site port
+    "idol_photo_location": os.getenv("FOLDER_LOCATION")
 }
 
 keys_obj = Keys_Obj(**key_kwargs)

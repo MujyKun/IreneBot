@@ -10,6 +10,7 @@ class Youtube(commands.Cog):
     def __init__(self, ex):
         self.ex: Utility = ex
         self.current_yt_loop_instance = None
+        self.allowed_links = ["https://www.youtube.com/", "https://youtube.com/", "https://youtu.be/"]
 
     @commands.command()
     @commands.is_owner()
@@ -19,14 +20,15 @@ class Youtube(commands.Cog):
 
         [Format: %addurl (link)]
         """
-        if 'youtube.com' in link or 'youtu.be' in link:
-            try:
-                await self.ex.conn.execute("INSERT INTO youtube.links(link, channelid) VALUES($1, $2)", link,
-                                           ctx.channel.id)
-                await ctx.send(f"> **<{link}> is now being tracked.**")
-            except Exception as e:
-                log.console(e)
-                await ctx.send(f"> **<{link}> is already being tracked.**")
+        for allowed_link in self.allowed_links:
+            if allowed_link in link:
+                try:
+                    await self.ex.conn.execute("INSERT INTO youtube.links(link, channelid) VALUES($1, $2)", link,
+                                               ctx.channel.id)
+                    await ctx.send(f"> **<{link}> is now being tracked.**")
+                except Exception as e:
+                    log.console(e)
+                    await ctx.send(f"> **<{link}> is already being tracked.**")
 
     @commands.command()
     @commands.is_owner()

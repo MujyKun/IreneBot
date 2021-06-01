@@ -251,8 +251,9 @@ Maintenance Status: {maintenance_status}
         embed.add_field(name=f"This Session ({self.ex.cache.session_id} | {date.today()})",
                         value=f"{self.ex.cache.current_session} Commands", inline=True)
         embed.add_field(name="Playing Music", value=f"{len(self.ex.client.voice_clients)} Voice Clients", inline=True)
-        embed.add_field(name="Playing Guessing/Bias",
-                        value=f"{len(self.ex.cache.guessing_games)}/{len(self.ex.cache.bias_games)} Games", inline=True)
+        embed.add_field(name="Playing Guessing/Bias/Unscramble",
+                        value=f"{len(self.ex.cache.guessing_games)}/{len(self.ex.cache.bias_games)}"
+                              f"/{len(self.ex.cache.unscramble_games)} Games", inline=True)
         embed.add_field(name="Ping", value=f"{self.ex.get_ping()} ms", inline=True)
         embed.add_field(name="Shards", value=f"{self.ex.client.shard_count}", inline=True)
         embed.add_field(name="Bot Owner", value=f"<@{app_owner.id}>", inline=True)

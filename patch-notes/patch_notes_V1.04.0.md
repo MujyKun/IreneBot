@@ -25,7 +25,7 @@ will ask for a double confirmation.
 
 `%endgame` was renamed to `%stopbj`.  
 
-New command `%endgames`/`%stopgames`/`%stopgame`/`%endgame` was added to stop ALL games in the current text channel  
+New command `%stopgames` (Aliases: `%endgames`/`%stopgame`/`%endgame`) was added to stop ALL games in the current text channel  
 or that the user is a host of.  
 
 ## **Bug/Issue/Backend Fixes/Changes:**
@@ -65,3 +65,6 @@ Added Metrics For:
 -> Amount of users with gg filter enabled.  
 
 Bias game should no longer say it was force-closed when it ended normally.  
+
+Added more appropriate error message for `%addidol` and `%addgroup` since users found it confusing.  
+

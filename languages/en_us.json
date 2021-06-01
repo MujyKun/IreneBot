@@ -77,6 +77,7 @@
     "patron_msg": "As of September 23rd 2020, non-Patrons can only send {idol_post_send_limit} photos a day maximum, as the current host can not reliably handle additional traffic.\nYou may become a patron for as little as $3 per month in order to send unlimited photos; every Patron contributes to upgrading and maintaining the host.\nIf the guild owner is a super patron, All guild members (non-patrons) get {owner_super_patron_benefit} photos a day.\nPlease support <@{bot_id}>'s development at {patreon_link}.\nThank You.",
     "add_idol_sent": "{name}, your request for adding this Idol has been successfully sent. The Idol's query ID is {query_id}.",
     "add_group_sent": "{name}, your request for adding this Group has been successfully sent. The Group's query ID is {query_id}.",
+    "add_error": "An error occurred -> \nError MSG: {e}\nIt is likely that you do not understand this error!\nYou can find more information about this command using {server_prefix}help {command_name}.",
     "no_card_info": "I could not find any information on that idol/group.",
     "stop_images_disable": "{text_channel} can no longer send or receive idol photos.",
     "stop_images_enable": "{text_channel} can now send and receive idol photos.",

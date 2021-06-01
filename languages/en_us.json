@@ -106,7 +106,8 @@
     "cooldown": "You are on cooldown. Try again in {time}.",
     "on_guild_join": "Hello!\nMy prefix for this server is set to {server_prefix}.\nIf you have any questions or concerns, you may join the support server ({server_prefix}support).",
     "maintenance": "A maintenance is currently in progress. Join the support server for more information. <{support_server_link}>\nREASON: {reason}",
-    "invalid_input": "{name}, That option is not valid. Please look into {server_prefix}help {command_name}."
+    "invalid_input": "{name}, That option is not valid. Please look into {server_prefix}help {command_name}.",
+    "game_disabled": "{name}, Games have been disabled in this text channel using {server_prefix}togglegames."
   },
   "twitch": {
     "follow_limit": "You are only allowed to have {follow_limit} channels followed.",
@@ -156,6 +157,8 @@
   "moderator": {
     "welcome_role_delete": "The welcome role you had set was removed.",
     "no_role_to_delete": "There is no welcome role to remove.",
-    "welcome_role_set": "The new welcome role has been set."
+    "welcome_role_set": "The new welcome role has been set.",
+    "channel_not_found": "That text channel was not found.",
+    "channel_toggled": "{name}, {text_channel} now has games {result}."
   }
 }

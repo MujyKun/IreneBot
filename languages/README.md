@@ -58,7 +58,7 @@ When you are adding several input with the same needed keyword, you may number t
 **Group IDs:** `{group_ids}`  
 
 **Idol Name:** `{idol_name}`  
-**Group Name:** `{idol_name}`  
+**Group Name:** `{group_name}`  
 **Generalized Name for either Idol or Group:** `{object_name}`  
 **Amount of times an Idol has been called:** `{called}`  
 **Generalized Rank:** `{rank}`  

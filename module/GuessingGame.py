@@ -70,8 +70,14 @@ class GuessingGame(commands.Cog):
         """
         if not ctx.guild:
             return await ctx.send("> You are not allowed to play guessing game in DMs.")
+        server_prefix = await self.ex.get_server_prefix(ctx)
+        if ctx.channel.id in self.ex.cache.channels_with_disabled_games:
+            msg = await self.ex.get_msg(ctx.author.id, "general", "game_disabled", [
+                ["name", ctx.author.display_name], ["server_prefix", server_prefix]
+            ])
+            return await ctx.send(msg)
+
         if self.ex.cache.guessing_games.get(ctx.channel.id):
-            server_prefix = await self.ex.get_server_prefix(ctx)
             return await ctx.send(f"> **A guessing game is currently in progress in this channel. "
                                   f"If this is a mistake, use `{server_prefix}stopgg`.**")
         if rounds > 60 or timeout > 60:

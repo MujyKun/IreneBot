@@ -602,3 +602,28 @@ class Moderator(commands.Cog):
                 await ctx.send(f"> **Invalid URL.**")
             except Exception as e:
                 log.console(e)
+
+    @commands.command()
+    @commands.has_guild_permissions(manage_messages=True)
+    async def togglegames(self, ctx, *, channel: discord.TextChannel = None):
+        """Disable or Enable the ability to play games in a text channel.
+
+        [Format: %togglegames [#channel]]
+        """
+        channel = channel or ctx.channel
+        user = await self.ex.get_user(ctx.author.id)
+        if not channel:
+            log.console(f"Could not find text channel. -> User: {user.id} - Moderator.togglegames")
+            msg = await self.ex.get_msg(user, "moderator", "channel_not_found")
+            return await ctx.send(msg)
+
+        enabled_msg = "enabled" if await self.ex.u_moderator.toggle_games(channel.id) else "disabled"
+
+        msg = await self.ex.get_msg(user, "moderator", "channel_toggled", [
+            ["name", ctx.author.display_name], ["text_channel", channel.name], ["result", enabled_msg]
+        ])
+
+        return await ctx.send(msg)
+
+
+

@@ -252,6 +252,12 @@ To find out more, look at the `GroupMembers` category.
 | recenttweets     | Show Most Recents Tweets                                                                                                             | %recenttweets (amount)          |
 | tweet            | Tweets a status update on Twitter                                                                                                    | %tweet (status)                 |
 
+#### UnScramble:
+| Command          | Description                                                                                                                          | Format                          | Aliases        |
+|------------------|--------------------------------------------------------------------------------------------------------------------------------------|---------------------------------|----------------|
+| guessinggame | Start an idol unscrambing game in the current channel. The host of the game can use `stop` to end the game | %unscramble (Male/Female/All) (easy/medium/hard) (# of rounds - default 20) (timeout for each round - default 20s) | us |
+| stopus | Force-end an unscramble game if you are a moderator or host of the game. This command is meant for any issues or if a game happens to be stuck. Must be game host or access to manage messages. | %stopus | ★/Host|
+
 
 #### Youtube: ♥♥♥
 

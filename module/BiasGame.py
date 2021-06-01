@@ -62,7 +62,8 @@ class BiasGame(commands.Cog):
         This command is meant for any issues or if a game happens to be stuck.
         """
         if not await self.ex.stop_game(ctx, self.ex.cache.bias_games):
-            return await ctx.send("> No game is currently in session.")
+            msg = await self.ex.get_msg(ctx, "miscellaneous", "no_game", ["string", "bias"])
+            return await ctx.send(msg)
         log.console(f"Force-Ended Bias Game in {ctx.channel.id}")
 
     @commands.command()

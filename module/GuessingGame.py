@@ -196,7 +196,9 @@ class GuessingGame(commands.Cog):
         [Format: %stopgg]
         """
         if not await self.ex.stop_game(ctx, self.ex.cache.guessing_games):
-            return await ctx.send("> No guessing game is currently in session.")
+            msg = await self.ex.get_msg(ctx, "miscellaneous", "no_game", ["string", "guessing"])
+            return await ctx.send(msg)
+
         log.console(f"Force-Ended Guessing Game in {ctx.channel.id}")
 
     async def start_game(self, ctx, rounds, timeout, gender, difficulty):

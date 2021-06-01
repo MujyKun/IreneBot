@@ -86,13 +86,12 @@ class BlackJack(commands.Cog):
         blackjack_game.second_player_ctx = ctx
         await blackjack_game.process_game()  # start the blackjack game.
 
-    @commands.command(aliases=['eg'])
-    async def endgame(self, ctx):
+    @commands.command()
+    async def stopbj(self, ctx):
         """
         End your current game
 
-        [Format: %endgame]
-        [Aliases: eg]
+        [Format: %stopbj]
         """
         user = await self.ex.get_user(ctx.author.id)
         if not user.in_currency_game:

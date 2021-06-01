@@ -38,7 +38,7 @@ To find out more, look at the `GroupMembers` category.
 | Command           | Description                                                                                           | Format                               | Aliases |
 |-------------------|-------------------------------------------------------------------------------------------------------|--------------------------------------|---------|
 | blackjack         | Start a game of BlackJack                                                                             | %blackjack (amount)                  | bj      |
-| endgame           | End your current game                                                                                 | %endgame                             | eg      |
+| stopbj           | End your current blackjack game                                                                                 | %stopbj                             |       |
 | hit               | Pick A Card                                                                                           | %hit                                 |         |
 | joingame          | Join a game                                                                                           | %joingame (gameid) (bid)             | jg      |
 | rules          | View the rules of BlackJack.                                                                                           | %rules             |       |

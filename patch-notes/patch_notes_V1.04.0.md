@@ -23,8 +23,10 @@ Guessing Game can now report images using `dead` or `report` instead of `skip`.
 will ask for a double confirmation.  
 -> Skip will now be used as an actual skip/pass without the option to report.  
 
+`%endgame` was renamed to `%stopbj`.  
 
-
+New command `%endgames`/`%stopgames`/`%stopgame`/`%endgame` was added to stop ALL games in the current text channel  
+or that the user is a host of.  
 
 ## **Bug/Issue/Backend Fixes/Changes:**
 Fixed Session ID not appearing on %botinfo.  
@@ -50,3 +52,16 @@ they do not exist without making a direct API call.
 -> Deletes random file if there are more than 25k photos.  
 
 ALL WJSN photos were deleted and replaced.  
+
+Added requirement for more specific youtube urls.  
+
+Added Metrics For:  
+-> Amount of Text channels with games disabled.  
+-> Amount of dead images.  
+-> Amount of User Objects.  
+-> Amount of welcome roles.  
+-> Amount of playing cards.  
+-> Amount of members in support server.  
+-> Amount of users with gg filter enabled.  
+
+Bias game should no longer say it was force-closed when it ended normally.  

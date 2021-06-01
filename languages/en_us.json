@@ -27,7 +27,7 @@
   },
   "blackjack": {
     "not_in_game": "{name}, you are not in a blackjack game.",
-    "in_game": "{name}, you are already in a blackjack game. Please type {server_prefix}endgame.",
+    "in_game": "{name}, you are already in a blackjack game. Please type {server_prefix}stopbj.",
     "ended_game": "{name}, your blackjack game has successfully ended.",
     "opponent_not_in_game": "{name}, that player is not in a blackjack game.",
     "announce_winner": "{name} has won the blackjack game with {integer} points against {name2} with {integer2} points!!",
@@ -42,7 +42,7 @@
     "beg_msg": "{name}, a homeless man has given you {integer} {currency_name}(s).",
     "balance_msg": "{name} currently has {balance} {currency_name}(s).",
     "nothing_to_bet": "{name}, you cannot bet less than 1 {currency_name}.",
-    "in_game": "{name}, you cannot use Currency while you are in a game. Please type {server_prefix}endgame.",
+    "in_game": "{name}, you cannot use Currency while you are in a game. Please type {server_prefix}stopbj.",
     "not_enough": "{name}, you do not have enough {currency_name}s. You have {balance}.",
     "bet_result": "{name}, you {result} {integer}! Your updated balance is {balance}.",
     "upgrade_msg": "{name}, you need {integer} to level up {command_name}. Press the Thumbs Up Reaction within 1 minute to confirm.",

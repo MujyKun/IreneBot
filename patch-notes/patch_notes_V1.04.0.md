@@ -3,7 +3,7 @@
 ## **New Commands/Features:**
 Added ability to toggle games using `%togglegames`.  
 
-
+Added Unscramble Game! `%help UnScramble`  
 
 Added photos for `PIXY`, `WJSN`, `Pentagon`, `PLAYBACK`, `PURPLE KISS`, `9MUSES`, `A.C.E`, `REDSQUARE`,  
 `3YE`, `P.O.P`, `Maka Maka`, `Ikon`, `Winner`, `Brave Girls`, `KARD`, `Ladies Code`

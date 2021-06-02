@@ -14,6 +14,14 @@ class BotOwner(commands.Cog):
 
     @commands.is_owner()
     @commands.command()
+    async def uploadfromhost(self, ctx):
+        """Toggles whether images are uploaded from host or not."""
+        self.ex.upload_from_host = not self.ex.upload_from_host
+        return await ctx.send(f"Uploading from host is now set to {self.ex.upload_from_host}")
+
+
+    @commands.is_owner()
+    @commands.command()
     async def resetcache(self, ctx):
         """Reset the cache."""
         await ctx.send(await self.ex.get_msg(ctx, 'botowner', 'cache_reset'))

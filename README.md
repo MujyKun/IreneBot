@@ -318,4 +318,3 @@ To find out more, look at the `GroupMembers` category.
 | send              | Send a message to a text channel.                                             | %send (channelid) (message)                  |               |
 | speak            | Owner to Bot TTS                                               | %speak (message)                |              |
 | uploadfromhost            | Toggles whether images are uploaded from host or not.            | %uploadfromhost |              |
-s

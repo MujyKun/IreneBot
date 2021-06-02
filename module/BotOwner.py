@@ -19,7 +19,6 @@ class BotOwner(commands.Cog):
         self.ex.upload_from_host = not self.ex.upload_from_host
         return await ctx.send(f"Uploading from host is now set to {self.ex.upload_from_host}")
 
-
     @commands.is_owner()
     @commands.command()
     async def resetcache(self, ctx):

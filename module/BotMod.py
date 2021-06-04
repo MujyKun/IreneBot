@@ -275,20 +275,23 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
         await ctx.send("> **The bot is now offline.**")
         message = "Irene is restarting... All games in this channel will force-end."
 
-        async def get_games():
+        def get_games():
             # create copies to not have dictionary changed during iteration issue.
             gg_copy = self.ex.cache.guessing_games.copy()
             bg_copy = self.ex.cache.bias_games.copy()
             bj_copy = self.ex.cache.blackjack_games.copy()
+            us_copy = self.ex.cache.unscramble_games.copy()
 
             for existing_game in gg_copy.values():
                 yield existing_game
             for existing_game in bg_copy.values():
                 yield existing_game
+            for existing_game in us_copy.values():
+                yield existing_game
             for existing_game in bj_copy:
                 yield existing_game
 
-        async for game in get_games():
+        for game in get_games():
             try:
                 await game.end_game()
                 log.console(f"Closed the game in {game.channel.id}.")
@@ -317,6 +320,10 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
         except Exception as e:
             log.console("Failed to log out of the bot.")
             log.useless(f"{e} - Failed to log out of bot. - BotMod.kill")
+
+        # we do not want any extra background tasks to still exist
+        # so the auto restarter can instantly boot the bot back up
+        exit(0)
 
     @commands.command()
     @check_if_mod()

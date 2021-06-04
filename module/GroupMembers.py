@@ -697,7 +697,8 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
                     channel = None
 
                     try:
-                        channel = self.ex.client.get_channel(text_channel) or self.ex.client.fetch_channel(text_channel)
+                        channel = self.ex.client.get_channel(text_channel) or await \
+                            self.ex.client.fetch_channel(text_channel)
                     except discord.Forbidden:
                         # delete channel from our list permanently.
                         await self.ex.u_group_members.delete_channel_from_send_idol(channel)

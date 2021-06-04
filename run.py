@@ -118,6 +118,8 @@ class Irene:
         self.status.change_bot_status_loop.start()
         # Start Voice Client Loop
         self.music.check_voice_clients.start()
+        # Start Idol Posting to text channels that requested it after t time.
+        self.groupmembers.send_idol_photo_loop.start()
         # Update Cache Every 12 hours
         ex.u_cache.update_cache.start()
         # Start a loop that sends cache information to DataDog.

@@ -699,7 +699,7 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
                     try:
                         channel = self.ex.client.get_channel(text_channel) or await \
                             self.ex.client.fetch_channel(text_channel)
-                    except discord.Forbidden:
+                    except discord.Forbidden or discord.NotFound:
                         # delete channel from our list permanently.
                         await self.ex.u_group_members.delete_channel_from_send_idol(channel)
 
@@ -723,7 +723,7 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
                     idol = await self.ex.u_group_members.get_member(idol_id)
                     try:
                         msg, photo_url = await self.ex.u_group_members.idol_post(channel, idol)
-                    except discord.Forbidden:
+                    except discord.Forbidden or discord.NotFound:
                         # permanently remove channel from cache.
                         await self.ex.u_group_members.delete_channel_from_send_idol(channel)
                         break

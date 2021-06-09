@@ -7,7 +7,7 @@ asyncio==3.4.3
 asyncpg==0.22.0
 git+git://github.com/MujyKun/boats.py@master#boats.py
 dblpy==0.4.0
-discord.py==1.6.0
+discord.py>=1.6.0
 tweepy==3.10.0
 google-api-python-client==1.7.11
 google-auth==1.10.0

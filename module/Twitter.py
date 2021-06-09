@@ -53,6 +53,7 @@ class Twitter(commands.Cog):
             await asyncio.sleep(5)
         try:
             twitter_link = await self.ex.u_twitter.upload_random_image()  # upload unique random idol photo.
-            await self.ex.cache.twitter_channel.send(twitter_link)  # post to discord.
+            if twitter_link:
+                await self.ex.cache.twitter_channel.send(twitter_link)  # post to discord.
         except Exception as e:
             log.console(f"{e} -> send_photos_to_twitter")

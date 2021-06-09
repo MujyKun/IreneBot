@@ -120,6 +120,8 @@ class Irene:
         self.music.check_voice_clients.start()
         # Start Idol Posting to text channels that requested it after t time.
         self.groupmembers.send_idol_photo_loop.start()
+        # Start Automatic Twitter Posts
+        self.twitter.send_photos_to_twitter.start()
         # Update Cache Every 12 hours
         ex.u_cache.update_cache.start()
         # Start a loop that sends cache information to DataDog.

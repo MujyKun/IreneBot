@@ -93,6 +93,7 @@ key_kwargs = {
     "dead_image_channel_id": make_int(os.getenv("DEAD_IMAGE_CHANNEL_ID")),
     "add_idol_channel_id": make_int(os.getenv("ADD_IDOL_CHANNEL_ID")),
     "add_group_channel_id": make_int(os.getenv("ADD_GROUP_CHANNEL_ID")),
+    "twitter_channel_id": make_int(os.getenv("TWITTER_CHANNEL_ID")),
     "idol_post_send_limit": idol_post_send_limit,
     # the amount normal users can use if the guild owner is a super patron.
     "owner_super_patron_benefit": idol_post_send_limit * 2,

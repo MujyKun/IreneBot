@@ -12,6 +12,8 @@ class BotOwner(commands.Cog):
     def __init__(self, ex):
         self.ex: Utility = ex
 
+    @commands.is_owner()
+    @commands.command()
     async def notifyweverse(self, ctx):
         """A temporary command to notify the weverse channels about a change."""
         weverse_channels = self.ex.cache.weverse_channels.copy()

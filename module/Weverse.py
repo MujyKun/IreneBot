@@ -134,14 +134,32 @@ class Weverse(commands.Cog):
                         f"Noti Type: {latest_notification.contents_type}")
             return  # we do not want constant attempts to send a message.
 
+        server_text_channel_ids = []  # text channels that belong to the support server
+
+        try:
+            support_server = self.ex.client.get_guild(self.ex.keys.bot_support_server_id) or self.ex.client.\
+                fetch_guild(self.ex.keys.bot_support_server_id)
+
+            server_text_channel_ids = [channel.id for channel in support_server.text_channels]
+        except:
+            warning_msg = "WARNING: Support Server could not be found for Weverse Cache to get the text channel IDs."
+            log.console(warning_msg)
+            log.useless(warning_msg)
+
         for channel_info in channels:
+            channel_id = channel_info[0]
+            if self.ex.weverse_announcements and not channel_id not in server_text_channel_ids:
+                # we do not want to remove the existing list of channels in the database, so we will use a filtering
+                # method instead
+                continue
+
             # sleeping for 2 seconds before every channel post. still needs to be properly tested
             # for rate-limits
 
             # after testing, Irene has been rate-limited too often, so we will introduce announcement
             # channels to the support server instead of constantly sending the same content to every channel.
             await asyncio.sleep(2)
-            channel_id = channel_info[0]
+
             notification_ids = self.notifications_already_posted.get(channel_id)
             if not notification_ids:
                 await self.ex.u_weverse.send_weverse_to_channel(channel_info, message_text, embed, is_comment,

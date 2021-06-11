@@ -8,6 +8,7 @@ from IreneUtility.Utility import Utility
 # noinspection PyPep8
 class Weverse(commands.Cog):
     def __init__(self, ex):
+        self.running = False
         self.ex: Utility = ex
         self.current_notification_id = 0
         self.notifications_already_posted = {}  # channel_id : [notification ids]
@@ -30,6 +31,12 @@ class Weverse(commands.Cog):
             if not self.ex.weverse_client.cache_loaded:
                 return await ctx.send(f"> {ctx.author.display_name}, "
                                       f"Weverse cache is being updated. Please try again in a minute or two.")
+
+            if self.ex.weverse_announcements:
+                if ctx.author.id != self.ex.keys.owner_id:
+                    msg = await self.ex.get_msg(ctx.author.id, "weverse", "bot_owner_only",
+                                                ["support_server_link", self.ex.keys.bot_support_server_link])
+                    return await ctx.send(msg)
 
             channel_id = ctx.channel.id
             community_name = community_name.lower()
@@ -62,6 +69,12 @@ class Weverse(commands.Cog):
     @commands.has_guild_permissions(manage_messages=True)
     async def disablecomments(self, ctx, community_name):
         """Disable updates for comments on a community."""
+        if self.ex.weverse_announcements:
+            if ctx.author.id != self.ex.keys.owner_id:
+                msg = await self.ex.get_msg(ctx.author.id, "weverse", "bot_owner_only",
+                                            ["support_server_link", self.ex.keys.bot_support_server_link])
+                return await ctx.send(msg)
+
         channel_id = ctx.channel.id
         if not await self.ex.u_weverse.check_weverse_channel(channel_id, community_name):
             return await ctx.send(f"This channel is not subscribed to weverse updates from {community_name}.")
@@ -124,6 +137,9 @@ class Weverse(commands.Cog):
         for channel_info in channels:
             # sleeping for 2 seconds before every channel post. still needs to be properly tested
             # for rate-limits
+
+            # after testing, Irene has been rate-limited too often, so we will introduce announcement
+            # channels to the support server instead of constantly sending the same content to every channel.
             await asyncio.sleep(2)
             channel_id = channel_info[0]
             notification_ids = self.notifications_already_posted.get(channel_id)

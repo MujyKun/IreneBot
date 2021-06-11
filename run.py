@@ -22,6 +22,9 @@ class Irene:
         ex.upload_from_host = False
         # Set to True if you need the db structure created.
         ex.create_db_structure = False
+        # Set to True if you intend to have announcement text channels on the support server and would like
+        # the weverse updates command to be private only to the bot owner.
+        ex.weverse_announcements = False
 
         # define the modules for reuse
         self.miscellaneous = module.Miscellaneous.Miscellaneous(ex)
@@ -80,14 +83,14 @@ class Irene:
         # set top.gg client
         module.keys.keys_obj.top_gg = dbl.DBLClient(ex.client, module.keys.keys_obj.top_gg_key, autopost=True)
         self.start_up()
-        self.start_loops()
+        self.start_loops(run_twitter=True)
         ex.client.run(module.keys.keys_obj.client_token)
 
     def run_test_bot(self):
         """Run Test Ver. of the the bot."""
         self.start_up()
         # background loops are optional with test bot.
-        self.start_loops(run_weverse=False)
+        self.start_loops(run_weverse=False, run_twitter=False)
         log.console("--TEST BOT--")
         ex.client.run(module.keys.keys_obj.test_client_token)
 
@@ -102,7 +105,7 @@ class Irene:
         # For Debugging
         # module.log.debug()
 
-    def start_loops(self, run_weverse=True):
+    def start_loops(self, run_weverse=True, run_twitter=True):
         """Start Loops (Optional)"""
         # Start checking for Weverse Updates
         if run_weverse:
@@ -121,7 +124,8 @@ class Irene:
         # Start Idol Posting to text channels that requested it after t time.
         self.groupmembers.send_idol_photo_loop.start()
         # Start Automatic Twitter Posts
-        self.twitter.send_photos_to_twitter.start()
+        if run_twitter:
+            self.twitter.send_photos_to_twitter.start()
         # Update Cache Every 12 hours
         ex.u_cache.update_cache.start()
         # Start a loop that sends cache information to DataDog.

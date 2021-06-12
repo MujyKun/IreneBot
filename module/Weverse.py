@@ -148,7 +148,7 @@ class Weverse(commands.Cog):
 
         for channel_info in channels:
             channel_id = channel_info[0]
-            if self.ex.weverse_announcements and not channel_id not in server_text_channel_ids:
+            if self.ex.weverse_announcements and channel_id not in server_text_channel_ids:
                 # we do not want to remove the existing list of channels in the database, so we will use a filtering
                 # method instead
                 continue

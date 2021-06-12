@@ -693,6 +693,8 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
                 # if the key is an id, then we need to get the channel,
                 # and if we cant get it due to Forbidden exception,
                 # then we delete it permanently.
+
+                await asyncio.sleep(5)  # we want to ease Irene's workload, so we will post every 5 seconds.
                 if isinstance(text_channel, int):
                     channel = None
 

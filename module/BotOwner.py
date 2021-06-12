@@ -14,32 +14,6 @@ class BotOwner(commands.Cog):
 
     @commands.is_owner()
     @commands.command()
-    async def notifyweverse(self, ctx):
-        """A temporary command to notify the weverse channels about a change."""
-        weverse_channels = self.ex.cache.weverse_channels.copy()
-        for community_channels in weverse_channels.values():
-            for community_channel in community_channels:
-                await asyncio.sleep(5)
-                text_channel_id = community_channel[0]
-                text_channel = None
-                log.console(f"Sending Weverse Announcement to {text_channel_id}")
-                try:
-                    text_channel = self.ex.client.get_channel(text_channel_id) or await self.ex.client.fetch_channel(
-                        text_channel_id)
-                except:
-                    # no access or http exception
-                    pass
-
-                if not text_channel:
-                    continue
-                msg = await self.ex.get_msg(ctx.author.id, "weverse", "bot_owner_only",
-                                            ["support_server_link", self.ex.keys.bot_support_server_link])
-                msg = f"**IMPORTANT:**\n**WEVERSE NOTIFICATIONS DISABLED**\n{msg}"
-                await text_channel.send(msg)
-        log.console("Finished Sending Weverse Announcements")
-
-    @commands.is_owner()
-    @commands.command()
     async def uploadfromhost(self, ctx):
         """Toggles whether images are uploaded from host or not."""
         self.ex.upload_from_host = not self.ex.upload_from_host

@@ -321,6 +321,13 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
             log.console("Failed to log out of the bot.")
             log.useless(f"{e} - Failed to log out of bot. - BotMod.kill")
 
+        tasks = asyncio.Task.all_tasks()
+        pending = [task for task in tasks if not task.done()]
+        for task in pending:
+            if not task.done():
+                log.console(f"Cancelling {task}")
+                task.cancel()
+
         # we do not want any extra background tasks to still exist
         # so the auto restarter can instantly boot the bot back up
         exit(0)

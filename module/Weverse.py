@@ -24,7 +24,7 @@ class Weverse(commands.Cog):
         Use again to disable for a specific community.
         Available Communities ->
         [TXT, BTS, GFRIEND, SEVENTEEN, ENHYPEN, NU'EST, CL, P1Harmony, Weeekly, SUNMI, HENRY, Dreamcatcher,
-        CherryBullet, MIRAE, TREASURE]
+        CherryBullet, MIRAE, TREASURE, LETTEAMOR, EVERGLOW, FTISLAND, woo!ah!, IKON, BLACKPINK]
         [Format: %updates <community name> [role to notify]]
         """
         try:

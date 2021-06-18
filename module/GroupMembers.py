@@ -695,10 +695,10 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
                     # and if we cant get it due to Forbidden exception,
                     # then we delete it permanently.
 
+                    log.console(f"Attempting to send automatic idol photo to {text_channel}.")
                     await asyncio.sleep(5)  # we want to ease Irene's workload, so we will post every 5 seconds.
                     if isinstance(text_channel, int):
                         channel = None
-                        log.console(f"Attempting to send automatic idol photo to {text_channel}.")
 
                         try:
                             channel = self.ex.client.get_channel(text_channel) or await \

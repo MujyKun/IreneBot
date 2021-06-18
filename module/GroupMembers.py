@@ -690,44 +690,50 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
             copied_send_idol_cache = self.ex.cache.send_idol_photos.copy()
 
             for text_channel in copied_send_idol_cache.keys():
-                # if the key is an id, then we need to get the channel,
-                # and if we cant get it due to Forbidden exception,
-                # then we delete it permanently.
+                try:
+                    # if the key is an id, then we need to get the channel,
+                    # and if we cant get it due to Forbidden exception,
+                    # then we delete it permanently.
 
-                await asyncio.sleep(5)  # we want to ease Irene's workload, so we will post every 5 seconds.
-                if isinstance(text_channel, int):
-                    channel = None
+                    await asyncio.sleep(5)  # we want to ease Irene's workload, so we will post every 5 seconds.
+                    if isinstance(text_channel, int):
+                        channel = None
+                        log.console(f"Attempting to send automatic idol photo to {text_channel}.")
 
-                    try:
-                        channel = self.ex.client.get_channel(text_channel) or await \
-                            self.ex.client.fetch_channel(text_channel)
-                    except discord.Forbidden or discord.NotFound:
-                        # delete channel from our list permanently.
-                        await self.ex.u_group_members.delete_channel_from_send_idol(channel)
+                        try:
+                            channel = self.ex.client.get_channel(text_channel) or await \
+                                self.ex.client.fetch_channel(text_channel)
+                        except discord.Forbidden or discord.NotFound:
+                            # delete channel from our list permanently.
+                            await self.ex.u_group_members.delete_channel_from_send_idol(channel)
 
-                    if not channel:
-                        continue
+                        if not channel:
+                            continue
 
-                    # we should update our cache with a discord.TextChannel object instead of an integer for next time.
-                    try:
-                        self.ex.cache.send_idol_photos[channel] = self.ex.cache.send_idol_photos.pop(text_channel)
-                    except KeyError:
-                        # it shouldn't fail unless they remove a value from the live cache as we were iterating over a
-                        # copy. In that case, we will just pass since we can work with integers on the next loop.
-                        pass
+                        # we should update our cache with a discord.TextChannel object instead of an integer for
+                        # next time.
+                        try:
+                            self.ex.cache.send_idol_photos[channel] = self.ex.cache.send_idol_photos.pop(text_channel)
+                        except KeyError:
+                            # it shouldn't fail unless they remove a value from the live cache as we were
+                            # iterating over a copy.
+                            # In that case, we will just pass since we can work with integers on the next loop.
+                            pass
 
-                else:  # only other option is a discord.TextChannel
-                    channel = text_channel
+                    else:  # only other option is a discord.TextChannel
+                        channel = text_channel
 
-                idol_ids: list = copied_send_idol_cache.get(text_channel)
-                log.console(f"Sending Idols {idol_ids} to Text Channel {channel.id}. -> send_idol_photo_loop")
-                for idol_id in idol_ids:
-                    idol = await self.ex.u_group_members.get_member(idol_id)
-                    try:
-                        msg, photo_url = await self.ex.u_group_members.idol_post(channel, idol)
-                    except discord.Forbidden or discord.NotFound:
-                        # permanently remove channel from cache.
-                        await self.ex.u_group_members.delete_channel_from_send_idol(channel)
-                        break
+                    idol_ids: list = copied_send_idol_cache.get(text_channel)
+                    log.console(f"Sending Idols {idol_ids} to Text Channel {channel.id}. -> send_idol_photo_loop")
+                    for idol_id in idol_ids:
+                        idol = await self.ex.u_group_members.get_member(idol_id)
+                        try:
+                            msg, photo_url = await self.ex.u_group_members.idol_post(channel, idol)
+                        except discord.Forbidden or discord.NotFound:
+                            # permanently remove channel from cache.
+                            await self.ex.u_group_members.delete_channel_from_send_idol(channel)
+                            break
+                except Exception as e:
+                    log.console(f"{e} - send_idol_photo_loop (1)")
         except Exception as e:
-            log.console(e)
+            log.console(f"{e} - send_idol_photo_loop (2)")

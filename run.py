@@ -25,6 +25,8 @@ class Irene:
         # Set to True if you intend to have announcement text channels on the support server and would like
         # the weverse updates command to be private only to the bot owner.
         ex.weverse_announcements = False
+        # Set to False if you do not want the cache to reset itself every 12 hours.
+        ex.reset_cache = False
 
         # define the modules for reuse
         self.miscellaneous = module.Miscellaneous.Miscellaneous(ex)

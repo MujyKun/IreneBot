@@ -87,7 +87,7 @@ class Music(commands.Cog):
     # noinspection PyBroadException
     @tasks.loop(seconds=30, minutes=1, hours=0, reconnect=True)
     async def check_voice_clients(self):
-        if not self.ex.client.loop.is_running():
+        if not self.ex.irene_cache_loaded:
             return
         try:
             for voice_client in self.ex.client.voice_clients:

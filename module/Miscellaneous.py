@@ -44,7 +44,8 @@ Message Author: {message.author}
                                                    title_desc=title_desc)
                 await dm_channel.send(embed=embed)
         except Exception as e:
-            log.useless(f"{e} - User Phrase - Miscellaneous.on_message_user_notifications")
+            log.useless(f"{e} (Exception) - User Phrase",
+                        method=self.on_message_user_notifications)
 
     @commands.command()
     async def setlanguage(self, ctx, language_choice):
@@ -135,7 +136,7 @@ Message Author: {message.author}
                 return await ctx.send(
                     f"> **{ctx.author.display_name}, You are not allowed to use this command in DMs.**")
             except Exception as e:
-                log.useless(f"{e} - Failed to remove user phrase - Miscellaneous.removenoti")
+                log.useless(f"{e} (Exception) - Failed to remove user phrase", method=self.removenoti)
             await ctx.send(f"> **{ctx.author.display_name}, if you were receiving notifications for that phrase, "
                            f"it has been removed.**")
         except Exception as e:

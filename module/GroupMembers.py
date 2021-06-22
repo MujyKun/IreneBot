@@ -31,7 +31,7 @@ class GroupMembers(commands.Cog):
                 channel = await self.ex.u_group_members.get_channel_sending_photos(message.guild.id) or message.channel
         except Exception as e:
             # error is guild not found, likely being accessed from DMs
-            log.useless(f"{e} - Unable to get guild - GroupMembers.idol_photo_on_message")
+            log.useless(f"{e} (Exception) - Unable to get guild", method=self.idol_photo_on_message)
 
         posted = False
         api_url = None
@@ -83,7 +83,7 @@ class GroupMembers(commands.Cog):
                         await self.ex.u_group_members.check_idol_post_reactions(photo_msg, message, random_member,
                                                                                 api_url)
         except Exception as e:
-            log.useless(f"{e} - Processing Idol Photo Message Issue - GroupMembers.idol_photo_on_message")
+            log.useless(f"{e} (Exception) - Processing Idol Photo Message Issue", self.idol_photo_on_message)
 
     @commands.command()
     async def addidol(self, ctx, *, idol_json):
@@ -379,7 +379,7 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
                     channel = await self.ex.u_group_members.get_channel_sending_photos(ctx.guild.id) or ctx.channel
             except Exception as e:
                 # error is guild not found, likely being accessed from DMs
-                log.useless(f"{e} - Likely guild not found - GroupMembers.randomidol")
+                log.useless(f"{e} (Exception) - Likely guild not found", self.randomidol)
             idol = await self.ex.u_group_members.get_random_idol()
             photo_msg, api_url, posted = await self.ex.u_group_members.request_image_post(ctx.message, idol, channel)
             if posted:

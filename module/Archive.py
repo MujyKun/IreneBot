@@ -64,7 +64,7 @@ class Archive(commands.Cog):
                         # quickstart.Drive.checker()
                 await self.deletephotos()
         except Exception as e:
-            log.useless(f"{e} - Archive.on_message")
+            log.useless(f"{e} (Exception)", method=self.on_message)
 
     @commands.has_guild_permissions(manage_messages=True)
     @commands.command()
@@ -143,7 +143,7 @@ class Archive(commands.Cog):
             except Exception as e:
                 # Error would occur on test bot if the client does not have access to a certain channel id
                 # this try-except will also be useful if a server removed the bot.
-                log.useless(f"{e} - Archive.listchannels")
+                log.useless(f"{e} (Exception)", method=self.listchannels)
         if check:
             await ctx.send(embed=embed)
         else:
@@ -215,7 +215,7 @@ class Archive(commands.Cog):
                 try:
                     os.unlink('Photos/{}'.format(photo))
                 except Exception as e:
-                    log.useless(f"{e} - Failed to unlink photo - Archive.deletephotos")
+                    log.useless(f"{e} (Exception) - Failed to unlink photo", method=self.deletephotos)
 
     @commands.has_guild_permissions(manage_messages=True)
     @commands.command()

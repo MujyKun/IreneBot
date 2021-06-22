@@ -174,7 +174,8 @@ class GuessingGame(commands.Cog):
                 try:
                     value = await self.ex.u_group_members.get_member_names_as_string(group)
                 except Exception as e:
-                    log.useless(f"{e} -> {group.id} has an idol that does not exist.")
+                    log.useless(f"{e} (Exception) -> {group.id} has an idol that does not exist.",
+                                method=self.ggfilteredlist)
                     value = f"The group ({group.id}) has an Idol that doesn't exist. Please report it.\n"
                 embed.add_field(name=name, value=value, inline=True)
             else:

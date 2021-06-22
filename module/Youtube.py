@@ -81,7 +81,7 @@ class Youtube(commands.Cog):
                 self.current_yt_loop_instance.loop_youtube_videos.start()
                 await ctx.send("> **Loop started.**")
         except Exception as e:
-            log.useless(f" {e} -> A youtube loop is already running.")
+            log.useless(f" {e} (Exception) -> A youtube loop is already running.", method=self.startloop)
             await ctx.send("> **A loop is already running.**")
 
 

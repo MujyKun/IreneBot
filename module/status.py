@@ -39,4 +39,4 @@ class Status:
             activity = discord.Activity(name=final_status, type=discord.ActivityType.listening)
             await self.ex.client.change_presence(status=discord.Status.online, activity=activity)
         except Exception as e:
-            log.useless(f"{e} - Failed to change status presence of bot. - Status.change_bot_status_loop")
+            log.useless(f"{e} (Exception) - Failed to change status presence of bot. - Status.change_bot_status_loop")

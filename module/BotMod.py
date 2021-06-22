@@ -298,28 +298,28 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
                 await game.channel.send(message)
             except Exception as e:
                 log.console(f"Failed to close the game in {game.channel.id}")
-                log.useless(f"{e} - Failed to close game - BotMod.kill")
+                log.useless(f"{e} (Exception) - Failed to close game", method=self.kill)
 
         try:
             await self.ex.conn.terminate()  # close all db connections.
             log.console("Closed all DB Connections.")
         except Exception as e:
             log.console("Failed to close all DB Connections.")
-            log.useless(f"{e} - Failed to close DB Connections - BotMod.kill")
+            log.useless(f"{e} (Exception) - Failed to close DB Connections", method=self.kill)
 
         try:
             await self.ex.session.close()  # close the aiohttp client session.
             log.console("Closed the aiohttp session")
         except Exception as e:
             log.console("Failed to cose the aiohttp Client Session.")
-            log.useless(f"{e} - Failed to close Web Session - BotMod.kill")
+            log.useless(f"{e} (Exception) - Failed to close Web Session", method=self.kill)
 
         try:
             await self.ex.client.logout()  # log out of bot.
             log.console("Logged out of the bot.")
         except Exception as e:
             log.console("Failed to log out of the bot.")
-            log.useless(f"{e} - Failed to log out of bot. - BotMod.kill")
+            log.useless(f"{e} (Exception) - Failed to log out of bot.", method=self.kill)
 
         tasks = asyncio.Task.all_tasks()
         pending = [task for task in tasks if not task.done()]
@@ -377,7 +377,7 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
                 await self.ex.conn.execute("DELETE FROM general.interactions WHERE url = $1", url)
                 await ctx.send(f"Removed <{url}>")
             except Exception as e:
-                log.useless(f"{e} - Failed to delete interaction. - BotMod.deleteinteraction")
+                log.useless(f"{e} (Exception) - Failed to delete interaction.", self.deleteinteraction)
         await ctx.send("Finished removing urls.")
 
     @commands.command()

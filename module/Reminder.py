@@ -229,10 +229,11 @@ class Reminder(commands.Cog):
                             await self.ex.u_reminder.remove_user_reminder(user.id, remind_id)
                     except discord.Forbidden as e:
                         # likely forbidden error -> do not have access to dm user
-                        log.useless(f"{e} - Likely do not have access to dm user {user.id} - Reminder.reminder_loop")
+                        log.useless(f"{e} (discord.Forbidden) - Likely do not have access to dm user {user.id}",
+                                    method=self.reminder_loop)
                         # remove the reminder since we do not want to try constantly reminding someone we cant.
                         await self.ex.u_reminder.remove_user_reminder(user.id, remind_id)
                     except Exception as e:
                         log.console(f"{e} - Reminder Loop")
         except Exception as e:
-            log.useless(f"{e} - Reminder.reminder_loop")
+            log.useless(f"{e} (Exception) - Reminder.reminder_loop")

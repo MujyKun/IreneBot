@@ -16,7 +16,7 @@ def make_int(var):
     try:
         return int(var)
     except Exception as exc:
-        log.useless(f"{exc} -> Failed to turn {var} into an integer. -> module.keys.make_int()")
+        log.useless(f"{exc} (Exception) -> Failed to turn {var} into an integer. -> module.keys.make_int")
         return None
 
 
@@ -30,13 +30,13 @@ test_client_token = os.getenv("TEST_BOT_TOKEN")
 try:
     mods_list_split = (os.getenv("MODS_LIST")).split(',')
 except Exception as e:
-    log.useless(f"{e} -> There are no mods listed for the bot.)")
+    log.useless(f"{e} (Exception) -> There are no mods listed for the bot.")
     mods_list_split = None
 
 try:
     n_word_list = (os.getenv("NWORD_LIST")).split(',')
 except Exception as e:
-    log.useless(f"{e} -> There are no n-word triggers listed for the bot.)")
+    log.useless(f"{e} (Exception) -> There are no n-word triggers listed for the bot.")
     n_word_list = []
 
 mods_list = [int(mod) for mod in mods_list_split]

@@ -131,4 +131,5 @@ class Profile(commands.Cog):
             await user.set_profile_xp(1)
             await user.set_level(current_level + 1, "profile")
         except Exception as e:
-            log.useless(f"{e} - {user.id} failed to increase profile level. - Profile.increase_profile_level")
+            log.useless(f"{e} (Exception) - {user.id} failed to increase profile level",
+                        method=self.increase_profile_level)

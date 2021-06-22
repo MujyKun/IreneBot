@@ -21,7 +21,8 @@ class Logging(commands.Cog):
                     embed = discord.Embed(title="Message Sent", description=embed_message, color=0xffffff)
                     await logging_channel.send(embed=embed, files=files)
             except Exception as e:
-                log.useless(f"ON_MESSAGE_LOG ERROR: {e} Server ID: {message.guild.id} Channel ID: {message.channel.id}")
+                log.useless(f"ON_MESSAGE_LOG ERROR: {e} Server ID: {message.guild.id} Channel ID: {message.channel.id}"
+                            , method=self.on_message_log)
 
     @commands.has_guild_permissions(manage_messages=True)
     @commands.command()

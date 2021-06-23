@@ -51,6 +51,10 @@ class Twitter(commands.Cog):
         # we should wait for the bot's cache to load before going further.
         while not self.ex.irene_cache_loaded:
             await asyncio.sleep(5)
+
+        # TODO: This method is blocking Irene's heartbeat. For now it will be disabled.
+        self.send_photos_to_twitter.stop()
+
         try:
             twitter_link = await self.ex.u_twitter.upload_random_image()  # upload unique random idol photo.
             if twitter_link:

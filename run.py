@@ -57,12 +57,13 @@ class Irene:
         self.unscramble = module.UnScramble.UnScramble(ex)
         # self.gacha = module.Gacha.Gacha()
         self.status = module.status.Status(ex)  # not a command cog
+        self.blocking_monitor = module.blockingcog.BlockingMonitor(ex)
 
         self.cogs = [self.miscellaneous, self.twitter, self.currency, self.blackjack, self.youtube, self.groupmembers,
                      self.archive, self.moderator, self.profile, self.help, self.logging, self.music, self.botmod,
                      self.events, self.lastfm, self.interactions, self.wolfram, self.guessinggame, self.customcommands,
                      self.biasgame, self.weverse, self.selfassignroles, self.reminder, self.twitch,
-                     self.botowner, self.unscramble]
+                     self.botowner, self.unscramble, self.blocking_monitor]
 
         # Modules/Cogs that contain 'ex' (Utility) and the 'conn' (DB connection).
         # AKA -> Classes that are have inherited IreneUtility.Base.Base()

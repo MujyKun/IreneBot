@@ -24,7 +24,7 @@ class BlockingMonitor(commands.Cog):
         """
         self.ex: Utility = ex
         self.bot = self.ex.client
-        self.monitor_thread = StackMonitor(self.bot)
+        self.monitor_thread = StackMonitor(self.bot, self.ex)
         self.monitor_thread.start()
 
     def cog_unload(self):
@@ -50,14 +50,14 @@ class BlockingMonitor(commands.Cog):
         if self.monitor_thread:
             return await ctx.send("Already running blocking monitor")
 
-        self.monitor_thread = StackMonitor(self.bot)
+        self.monitor_thread = StackMonitor(self.bot, self.ex)
         self.monitor_thread.start()
 
 
 class StackMonitor(threading.Thread):
-    def __init__(self, bot, block_threshold=1, check_freq=2):
+    def __init__(self, bot, ex, block_threshold=1, check_freq=2):
         super().__init__(name=f'{type(self).__name__}-{threading._counter()}', daemon=True)
-
+        self.ex = ex
         self.bot = bot
         self._do_run = threading.Event()
         self._do_run.set()
@@ -92,20 +92,21 @@ class StackMonitor(threading.Thread):
                frame.f_lasti == self._last_frame.f_lasti:
 
                 self.still_blocked = True
-                log.console("Still blocked...")
+                log.console("Still blocked...", method=self.test_loop_availability, event_loop=self.ex.client.loop)
                 return
             else:
                 self.still_blocked = False
 
-            log.console(f"Future took longer than {self.block_threshold}s to return")
-            log.console(''.join(stack))
+            log.console(f"Future took longer than {self.block_threshold}s to return", method=self.test_loop_availability
+                        , event_loop=self.ex.client.loop)
+            log.console(''.join(stack), method=self.test_loop_availability, event_loop=self.ex.client.loop)
 
             self.last_stack = stack
             self._last_frame = frame
 
         else:
             if self.still_blocked:
-                log.console("No longer blocked")
+                log.console("No longer blocked", method=self.test_loop_availability, event_loop=self.ex.client.loop)
                 self.still_blocked = False
 
             self.last_stack = None

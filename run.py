@@ -17,7 +17,7 @@ class Irene:
     """
     def __init__(self):
         # Set to True if running a test bot.
-        ex.test_bot = False
+        ex.test_bot = True
         # Set to True if you want the bot to upload its images from host rather than using url.
         ex.upload_from_host = False
         # Set to True if you need the db structure created.
@@ -93,7 +93,7 @@ class Irene:
         """Run Test Ver. of the the bot."""
         self.start_up()
         # background loops are optional with test bot.
-        self.start_loops(run_weverse=False, run_twitter=False)
+        self.start_loops(run_weverse=False, run_twitter=True)
         log.console("--TEST BOT--")
         ex.client.run(module.keys.keys_obj.test_client_token)
 

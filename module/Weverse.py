@@ -24,7 +24,7 @@ class Weverse(commands.Cog):
         Use again to disable for a specific community.
         Available Communities ->
         [TXT, BTS, GFRIEND, SEVENTEEN, ENHYPEN, NU'EST, CL, P1Harmony, Weeekly, SUNMI, HENRY, Dreamcatcher,
-        CherryBullet, MIRAE, TREASURE, LETTEAMOR, EVERGLOW, FTISLAND, woo!ah!, IKON, BLACKPINK]
+        Cherry_Bullet, MIRAE, TREASURE, LETTEAMOR, EVERGLOW, FTISLAND, woo!ah!, IKON, JUST_B, BLACKPINK]
         [Format: %updates <community name> [role to notify]]
         """
         try:
@@ -40,8 +40,7 @@ class Weverse(commands.Cog):
 
             channel_id = ctx.channel.id
             community_name = community_name.lower()
-            if community_name in ['cherry_bullet', 'cherrybullet']:
-                community_name = "cherry bullet"
+            community_name = community_name.replace("_", " ")
             if await self.ex.u_weverse.check_weverse_channel(channel_id, community_name):
                 if not role:
                     await self.ex.u_weverse.delete_weverse_channel(channel_id, community_name)

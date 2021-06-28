@@ -93,7 +93,7 @@ class Irene:
         """Run Test Ver. of the the bot."""
         self.start_up()
         # background loops are optional with test bot.
-        self.start_loops(run_weverse=False, run_twitter=True)
+        self.start_loops(run_weverse=False, run_twitter=False)
         log.console("--TEST BOT--")
         ex.client.run(module.keys.keys_obj.test_client_token)
 

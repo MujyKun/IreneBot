@@ -66,15 +66,15 @@ class Weverse(commands.Cog):
 
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
-    async def disablecomments(self, ctx, community_name):
+    async def disablecomments(self, ctx, *, community_name):
         """Disable updates for comments on a community."""
-        await self.ex.u_weverse.disable_type(ctx, community_name)
+        await self.ex.u_weverse.disable_type(ctx, community_name.replace("_", " "))
 
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
-    async def disablemedia(self, ctx, community_name):
+    async def disablemedia(self, ctx, *, community_name):
         """Disable updates for media on a community."""
-        await self.ex.u_weverse.disable_type(ctx, community_name, media=True)
+        await self.ex.u_weverse.disable_type(ctx, community_name.replace("_", " "), media=True)
 
     # testing with the amount of seconds to avoid duplicates (checks have been put in place).
     @tasks.loop(seconds=45, minutes=0, hours=0, reconnect=True)

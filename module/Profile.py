@@ -119,6 +119,12 @@ class Profile(commands.Cog):
 
     async def increase_profile_level(self, msg):
         """Increase the profile level appropriately after every message."""
+        # do not attempt to increase level if cache is not loaded
+        # this is very dangerous as it can reset all the profile levels for the users sent here
+        # if it takes too long for cache to load.
+        if not self.ex.irene_cache_loaded:
+            return
+
         user = await self.ex.get_user(msg.author.id)
         try:
             xp_per_message = 10

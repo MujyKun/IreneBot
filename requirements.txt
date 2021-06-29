@@ -1,4 +1,4 @@
-git+git://github.com/MujyKun/IreneUtility@dev#IreneUtility
+git+git://github.com/MujyKun/IreneUtility@master#V1.04.1
 beautifulsoup4==4.9.3
 aiofiles==0.4.0
 async-timeout==3.0.1

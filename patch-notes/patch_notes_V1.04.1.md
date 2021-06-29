@@ -82,4 +82,4 @@ Params for API:
 
 Added dev mode to Irene. This way we can run a production version of the bot without messing up important data.  
 
-
+Weverse no longers loads all past cache and loads in < 10 seconds instead of 10 minutes now.  

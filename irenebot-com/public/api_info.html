@@ -44,11 +44,18 @@
 <h2>GroupMembers:</h2>
 <p class="api_info">
     <strong>Pass in Private Keys as an Authorization Bearer Token in the header.</strong><br><br><br>
-    <strong>https://api.irenebot.com/photos/:idolID </strong>   (POST)-> Get redirected to an image of the Idol. Pass in 'allow_group_photos' as 1 to get any photos, or 0 to not get group photos. <br>
+    <strong>https://api.irenebot.com/photos/:idolID </strong>   (POST)-> <br><br>
+        <strong>Params:</strong><br>
+            redirect: (0 or 1)  Whether to redirect to the image. (Defaults to 1)<br>
+            video_allowed: (0 or 1) Whether a video is allowed (Defaults to 1)<br>
+            min_faces: Minimum amount of faces the photo must have. (Defaults to 1)<br>
+            max_faces: Maximum amount of faces the photo must have. (Defaults to 999)<br>
+        <br>
         Status 404 -> Idol has no Photos<br>
         Status 500 -> Server Issue<br>
         Status 200 -> You have been redirected to the image (essentially 308). If using from code and not postman, you can typically get the url of the open connection and that will be the image url.<br>
         Status 415 (does not match the actual http status) -> Is a video file, purposed for IreneBot, it will return a JSON.<br>
+        Status 422 Incorrect Param Data (Could not make param data into integers)
     Example:
     <br>
 </p>

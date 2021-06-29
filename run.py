@@ -16,8 +16,11 @@ class Irene:
     We are not subclassing an AutoShardedClient, but will rather define it directly in keys.
     """
     def __init__(self):
-        # Set to True if running a test bot.
+        # Set to True if running a test bot (AKA DEV MODE) .
         ex.test_bot = True
+        # Set to True if not on the production server (useful if ex.test_bot as False).
+        # This was initially created to not flood datadog with incorrect input while ex.test_bot was False
+        ex.dev_mode = True
         # Set to True if you want the bot to upload its images from host rather than using url.
         ex.upload_from_host = False
         # Set to True if you need the db structure created.

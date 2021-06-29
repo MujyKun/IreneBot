@@ -20,6 +20,7 @@ class GuessingGame(commands.Cog):
         :param t_ex: Utility object
         """
         self.ex: Utility = t_ex
+        self.possible_game_options = ["idol", "group"]
 
     @commands.command(aliases=['ggl', 'gglb'])
     async def ggleaderboard(self, ctx, difficulty="medium", mode="server"):
@@ -56,18 +57,8 @@ class GuessingGame(commands.Cog):
             log.console(e)
             return await ctx.send(f"> You may not understand this error. Please report it -> {e}")
 
-    @check_user_in_support_server()
-    @commands.command(aliases=['gg'])
-    async def guessinggame(self, ctx, gender="all", difficulty="medium", rounds=20, timeout=20):
-        """
-        Start an idol guessing game in the current channel.
-
-        The host of the game can use `stop`/`end` to end the game or
-        `skip` to skip the current round without affecting the round number.
-
-        [Format: %guessinggame (Male/Female/All) (easy/medium/hard) (# of rounds - default 20)
-        (timeout for each round - default 20s)]
-        """
+    async def manage_gg_cmd(self, ctx, gender="all", difficulty="medium", rounds=20, timeout=20, game_mode="idol"):
+        """Manages the guessing game commands."""
         if not ctx.guild:
             return await ctx.send("> You are not allowed to play guessing game in DMs.")
         server_prefix = await self.ex.get_server_prefix(ctx)
@@ -84,9 +75,36 @@ class GuessingGame(commands.Cog):
             return await ctx.send("> **ERROR -> The max rounds is 60 and the max timeout is 60s.**")
         elif rounds < 1 or timeout < 3:
             return await ctx.send("> **ERROR -> The minimum rounds is 1 and the minimum timeout is 3 seconds.**")
-        await self.start_game(ctx, rounds, timeout, gender, difficulty)
-        # Bot has been crashing without issue being known. Reverting creating a separate task for every game.
-        # task = asyncio.create_task(self.start_game(ctx, rounds, timeout, gender, difficulty))
+
+        await self.start_game(ctx, rounds, timeout, gender, difficulty, game_mode=game_mode)
+
+    @check_user_in_support_server()
+    @commands.command(aliases=['gg'])
+    async def guessinggame(self, ctx, gender="all", difficulty="medium", rounds=20, timeout=20):
+        """
+        Start an idol guessing game in the current channel.
+
+        The host of the game can use `stop`/`end` to end the game or
+        `skip` to skip the current round without affecting the round number.
+
+        [Format: %guessinggame (Male/Female/All) (easy/medium/hard) (# of rounds - default 20)
+        (timeout for each round - default 20s)]
+        """
+        await self.manage_gg_cmd(ctx, gender, difficulty, rounds, timeout, game_mode="idol")
+
+    @check_user_in_support_server()
+    @commands.command(aliases=['ggg', 'groupgg'])
+    async def groupguessinggame(self, ctx, gender="all", difficulty="medium", rounds=20, timeout=20):
+        """
+        Start a group guessing game in the current channel.
+
+        The host of the game can use `stop`/`end` to end the game or
+        `skip` to skip the current round without affecting the round number.
+
+        [Format: %groupguessinggame (Male/Female/All) (easy/medium/hard) (# of rounds - default 20)
+        (timeout for each round - default 20s)]
+        """
+        await self.manage_gg_cmd(ctx, gender, difficulty, rounds, timeout, game_mode="group")
 
     @commands.command()
     async def ggfilter(self, ctx, *, groups=None):
@@ -202,14 +220,18 @@ class GuessingGame(commands.Cog):
 
         log.console(f"Force-Ended Guessing Game in {ctx.channel.id}")
 
-    async def start_game(self, ctx, rounds, timeout, gender, difficulty):
+    async def start_game(self, ctx, rounds, timeout, gender, difficulty, game_mode):
         """Officially starts the guessing game."""
         game = self.ex.u_objects.GuessingGame(self.ex, ctx, max_rounds=rounds, timeout=timeout, gender=gender,
-                                              difficulty=difficulty)
+                                              difficulty=difficulty, game_mode=game_mode)
         self.ex.cache.guessing_games[ctx.channel.id] = game
-        await ctx.send(f"> Starting a guessing game for "
-                       f"`{game.gender if game.gender != 'all' else 'both male and female'}` idols"
-                       f" with `{game.difficulty}` difficulty, `{rounds}` rounds, and `{timeout}s` of guessing time.")
+
+        game_mode_msg = "a group" if game_mode == "group" else "an idol"
+        gender_msg = game.gender if game.gender != 'all' else 'both male and female'
+        start_msg = f"> Starting `{game_mode_msg}` guessing game for `{gender_msg}` idols with `{game.difficulty}` " \
+                    f"difficulty, `{rounds}` rounds, and `{timeout}s` of guessing time."
+
+        await ctx.send(start_msg)
         await game.process_game()
         await self.ex.stop_game(ctx, self.ex.cache.guessing_games)
         log.console(f"Ended Guessing Game in {ctx.channel.id}")

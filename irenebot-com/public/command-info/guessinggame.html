@@ -1,43 +1,49 @@
 <h4 id="guessinggame-">GuessingGame:</h4>
 <table>
     <thead>
-        <tr>
-            <th>Command</th>
-            <th>Description</th>
-            <th>Format</th>
-            <th>Aliases</th>
-        </tr>
+    <tr>
+        <th>Command</th>
+        <th>Description</th>
+        <th>Format</th>
+        <th>Aliases</th>
+    </tr>
     </thead>
     <tbody>
-        <tr>
-            <td>guessinggame</td>
-            <td>Start an idol guessing game in the current channel. The host of the game can use <code>stop</code> to end the game or <code>skip</code> to skip the current round without affecting the round number.</td>
-            <td>%guessinggame (Male/Female/All) (easy/medium/hard) (# of rounds - default 20) (timeout for each round - default 20s)</td>
-            <td>gg</td>
-        </tr>
-        <tr>
-            <td>ggfilter</td>
-            <td>Add a filter for your guessing game. Only the groups you select will appear on the guessing game. Use the command with no group ids to enable/disable the filter. Filtered idols do not count for a real score.</td>
-            <td>%ggfilter [group_id_one, group_id_two, ...]</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>ggfilteredlist</td>
-            <td>View the current groups you currently have filtered.</td>
-            <td>%ggfilteredlist</td>
-            <td>ggfilterlist, filterlist</td>
-        </tr>
-        <tr>
-            <td>ggleaderboard</td>
-            <td>Shows global leaderboards for guessing game.</td>
-            <td>%ggleaderboard (easy/medium/hard) (server/global)</td>
-            <td>ggl, gglb</td>
-        </tr>
-        <tr>
-            <td>stopgg</td>
-            <td>Force-end a guessing game if you are a moderator or host of the game. This command is meant for any issues or if a game happens to be stuck. Must be game host or access to manage messages.</td>
-            <td>%stopgg</td>
-            <td>★/Host</td>
-        </tr>
+    <tr>
+        <td>guessinggame</td>
+        <td>Start an idol guessing game in the current channel. The host of the game can use <code>stop</code> to end the game or <code>skip</code> to skip the current round without affecting the round number.</td>
+        <td>%guessinggame (Male/Female/All) (easy/medium/hard) (# of rounds - default 20) (timeout for each round - default 20s)</td>
+        <td>gg</td>
+    </tr>
+    <tr>
+        <td>groupguessinggame</td>
+        <td>Start a group guessing game in the current channel. The host of the game can use <code>stop</code> to end the game or <code>skip</code> to skip the current round without affecting the round number.</td>
+        <td>%groupguessinggame (Male/Female/All) (easy/medium/hard) (# of rounds - default 20) (timeout for each round - default 20s)</td>
+        <td>ggg, groupgg</td>
+    </tr>
+    <tr>
+        <td>ggfilter</td>
+        <td>Add a filter for your guessing game. Only the groups you select will appear on the guessing game. Use the command with no group ids to enable/disable the filter. Filtered idols do not count for a real score.</td>
+        <td>%ggfilter [group_id_one, group_id_two, ...]</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>ggfilteredlist</td>
+        <td>View the current groups you currently have filtered.</td>
+        <td>%ggfilteredlist</td>
+        <td>ggfilterlist, filterlist</td>
+    </tr>
+    <tr>
+        <td>ggleaderboard</td>
+        <td>Shows leaderboards for guessing game.</td>
+        <td>%ggleaderboard (easy/medium/hard) (server/global)</td>
+        <td>ggl, gglb</td>
+    </tr>
+    <tr>
+        <td>stopgg</td>
+        <td>Force-end a guessing game if you are a moderator or host of the game. This command is meant for any issues or if a game happens to be stuck. Must be game host or access to manage messages.</td>
+        <td>%stopgg</td>
+        <td>★/Host</td>
+    </tr>
     </tbody>
 </table>

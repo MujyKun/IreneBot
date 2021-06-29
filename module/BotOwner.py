@@ -14,6 +14,13 @@ class BotOwner(commands.Cog):
 
     @commands.is_owner()
     @commands.command()
+    async def uploadfromhost(self, ctx):
+        """Toggles whether images are uploaded from host or not."""
+        self.ex.upload_from_host = not self.ex.upload_from_host
+        return await ctx.send(f"Uploading from host is now set to {self.ex.upload_from_host}")
+
+    @commands.is_owner()
+    @commands.command()
     async def resetcache(self, ctx):
         """Reset the cache."""
         await ctx.send(await self.ex.get_msg(ctx, 'botowner', 'cache_reset'))
@@ -213,7 +220,8 @@ class BotOwner(commands.Cog):
                     # if it succeeds, replace the current group id with the version without spaces
                     group_id = int(group_id_without_spaces)
                 except Exception as e:
-                    log.useless(f" {e}| {group_id} -> could not make the group id an integer, it must be a group name.")
+                    log.useless(f" {e} (Exception) | {group_id} -> could not make the group id an integer, "
+                                f"it must be a group name.", method=self.approve)
                     # could not make the group id an integer, it must be a group name.
                     group = await self.ex.u_group_members.get_group_where_group_matches_name(group_id)
                     if group:

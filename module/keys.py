@@ -16,7 +16,7 @@ def make_int(var):
     try:
         return int(var)
     except Exception as exc:
-        log.useless(f"{exc} -> Failed to turn {var} into an integer. -> module.keys.make_int()")
+        log.useless(f"{exc} (Exception) -> Failed to turn {var} into an integer. -> module.keys.make_int")
         return None
 
 
@@ -30,13 +30,13 @@ test_client_token = os.getenv("TEST_BOT_TOKEN")
 try:
     mods_list_split = (os.getenv("MODS_LIST")).split(',')
 except Exception as e:
-    log.useless(f"{e} -> There are no mods listed for the bot.)")
+    log.useless(f"{e} (Exception) -> There are no mods listed for the bot.")
     mods_list_split = None
 
 try:
     n_word_list = (os.getenv("NWORD_LIST")).split(',')
 except Exception as e:
-    log.useless(f"{e} -> There are no n-word triggers listed for the bot.)")
+    log.useless(f"{e} (Exception) -> There are no n-word triggers listed for the bot.")
     n_word_list = []
 
 mods_list = [int(mod) for mod in mods_list_split]
@@ -93,12 +93,14 @@ key_kwargs = {
     "dead_image_channel_id": make_int(os.getenv("DEAD_IMAGE_CHANNEL_ID")),
     "add_idol_channel_id": make_int(os.getenv("ADD_IDOL_CHANNEL_ID")),
     "add_group_channel_id": make_int(os.getenv("ADD_GROUP_CHANNEL_ID")),
+    "twitter_channel_id": make_int(os.getenv("TWITTER_CHANNEL_ID")),
     "idol_post_send_limit": idol_post_send_limit,
     # the amount normal users can use if the guild owner is a super patron.
     "owner_super_patron_benefit": idol_post_send_limit * 2,
     # amount of votes that can be sent without voting.
     "idol_no_vote_send_limit": make_int(os.getenv("IDOL_NO_VOTE_LIMIT")),
     "reminder_limit": make_int(os.getenv("REMINDER_LIMIT")),
+    "idol_send_limit": make_int(os.getenv("IDOL_SEND_LIMIT")),
     "currency_name": os.getenv("CURRENCY_NAME"),
     "icon_url": os.getenv("ICON_URL"),
     "footer_url": os.getenv("FOOTER_URL"),

@@ -87,7 +87,7 @@ class Music(commands.Cog):
     # noinspection PyBroadException
     @tasks.loop(seconds=30, minutes=1, hours=0, reconnect=True)
     async def check_voice_clients(self):
-        if not self.ex.client.loop.is_running():
+        if not self.ex.irene_cache_loaded:
             return
         try:
             for voice_client in self.ex.client.voice_clients:
@@ -102,7 +102,8 @@ class Music(commands.Cog):
                                 msg = "> **There are no users in this voice channel. Resetting queue and leaving.**"
                                 await channel.send(msg)
                         except Exception as e:
-                            log.useless(f"{e} - Failed to send message to channel - Music.check_voice_clients")
+                            log.useless(f"{e} (Exception) - Failed to send message to channel - "
+                                        f"Music.check_voice_clients")
 
                         self.reset_queue_for_guild(voice_client.guild.id)
                         voice_client.stop()
@@ -120,7 +121,7 @@ class Music(commands.Cog):
                 try:
                     os.remove(file_location)
                 except Exception as e:
-                    log.useless(f"{e} - Failed to remove local file for Music. - Music.check_voice_clients")
+                    log.useless(f"{e} (Exception) - Failed to remove local file for Music. - Music.check_voice_clients")
         except Exception as e:
             log.console(e)
 
@@ -150,10 +151,11 @@ class Music(commands.Cog):
                 try:
                     os.remove(file_name)
                 except Exception as e:
-                    log.useless(f"{e} - Failed to remove local music for file. - Music.reset_queue_for_guild")
+                    log.useless(f"{e} (Exception) - Failed to remove local music for file. - "
+                                f"Music.reset_queue_for_guild")
             queued.pop(guild_id, None)
         except Exception as e:
-            log.useless(f"{e} - Failed to reset queue for guild - Music.reset_queue_for_guild")
+            log.useless(f"{e} (Exception) - Failed to reset queue for guild - Music.reset_queue_for_guild")
 
     @commands.command()
     async def lyrics(self, ctx, *, song_query):
@@ -248,7 +250,8 @@ class Music(commands.Cog):
                     try:
                         total_amount_of_time += duration
                     except Exception as e:
-                        log.useless(f"{e} - Unable to increment the total amount of time - Music.queue")
+                        log.useless(f"{e} (Exception) - Unable to increment the total amount of time",
+                                    method=self.queue)
                     duration = await self.ex.u_miscellaneous.get_cooldown_time(duration)
                 except:
                     duration = "N/A"
@@ -361,7 +364,7 @@ class Music(commands.Cog):
             except:
                 await ctx.send("> **That song number was not found. Could not move it.**")
         except Exception as e:
-            log.useless(f"{e} - Failed to move song - Music.move")
+            log.useless(f"{e} (Exception) - Failed to move song", method=self.move)
 
     # noinspection PyBroadException
     @commands.command()
@@ -382,7 +385,7 @@ class Music(commands.Cog):
             except:
                 await ctx.send("> **That song number was not found. Could not remove it.**")
         except Exception as e:
-            log.useless(f"{e} - Failed to remove song - Music.remove")
+            log.useless(f"{e} (Exception) - Failed to remove song", method=self.remove)
 
     @commands.command()
     async def skip(self, ctx):
@@ -399,7 +402,7 @@ class Music(commands.Cog):
             title = get_video_title(player)
             await ctx.send(f"> **Skipped {title}**")
         except Exception as e:
-            log.useless(f"{e} - Failed to skip song - Music.skip")
+            log.useless(f"{e} (Exception) - Failed to skip song", method=self.skip)
 
     def remove_song_in_queue(self, client_guild_id):
         songs = queued.get(client_guild_id)
@@ -411,12 +414,12 @@ class Music(commands.Cog):
         try:
             songs[0][0].cleanup()
         except Exception as e:
-            log.useless(f"{e} - Failed to cleanup song. - Music.remove_song_in_queue")
+            log.useless(f"{e} (Exception) - Failed to cleanup song.", method=self.remove_song_in_queue)
 
         try:
             os.remove(songs[0][2])
         except Exception as e:
-            log.useless(f"{e} - Failed to remove local music file - Music.remove_song_in_queue")
+            log.useless(f"{e} (Exception) - Failed to remove local music file", method=self.remove_song_in_queue)
             return songs.pop(0)
 
     @commands.command(aliases=['p'])

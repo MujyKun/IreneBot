@@ -58,7 +58,7 @@ class Events(commands.Cog):
             # increment general error count per minute -> Does not include unable to send messages to people.
             ex.cache.errors_per_minute += 1
         except Exception as e:
-            log.useless(f"{e} - Failed to process error - Events.error")
+            log.useless(f"{e} (Exception) - Failed to process error - Events.error")
 
     @staticmethod
     @client.event
@@ -111,7 +111,7 @@ class Events(commands.Cog):
                 msg = await ex.get_msg(ex.keys.bot_id, "general", "on_guild_join", ["server_prefix", server_prefix])
                 await guild.system_channel.send(msg)
         except Exception as e:
-            log.useless(f"{e} - Unable to send message on guild join. - Events.on_guild_join")
+            log.useless(f"{e} (Exception) - Unable to send message on guild join. - Events.on_guild_join")
         log.console(f"{guild.name} ({guild.id}) has invited Irene.")
         await ex.sql.s_cache.add_guild(guild)
 
@@ -254,7 +254,8 @@ class Events(commands.Cog):
                 try:
                     await channel.send(message)
                 except Exception as e:
-                    log.useless(f"{e} - Unable to send message to new user in guild. - Events.on_member_join")
+                    log.useless(f"{e} (Exception)- Unable to send message to new user in guild. - "
+                                f"Events.on_member_join")
 
         # set the user's welcome role if the guild has one.
         role = ex.cache.welcome_roles.get(guild)
@@ -276,7 +277,8 @@ class Events(commands.Cog):
             try:
                 ex.cache.member_ids_in_support_server.remove(member.id)
             except Exception as e:
-                log.useless(f"{e} - {member.id} was not found in support server cache -> Events.on_member_leave()")
+                log.useless(f"{e} (Exception) - {member.id} was not found in support server cache -> "
+                            f"Events.on_member_remove")
 
     @staticmethod
     @client.event

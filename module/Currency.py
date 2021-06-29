@@ -220,6 +220,7 @@ class Currency(commands.Cog):
         await msg.add_reaction(reaction)  # thumbs up]
         if await self.ex.wait_for_reaction(msg, user.id, reaction):
             # set the user's new level
+            await user.update_balance(remove=money_needed)
             await user.set_level(level + 1, command.lower())
             ctx.command.reset_cooldown(ctx)
             # let the user know their new level.

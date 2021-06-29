@@ -29,6 +29,10 @@ class Help(commands.Cog):
         """
         Custom help command.
         """
+        def __init__(self):
+            super(Help.SubHelp, self).__init__()
+            self.command_attrs["aliases"] = ["commands"]  # add commands as an alias for help.
+
         async def get_server_prefix(self):
             return await ex.get_server_prefix(self.context)
 

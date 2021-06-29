@@ -1,7 +1,7 @@
 import asyncio
 
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 from IreneUtility.util import u_logger as log
 import time
 import typing
@@ -31,7 +31,7 @@ class GroupMembers(commands.Cog):
                 channel = await self.ex.u_group_members.get_channel_sending_photos(message.guild.id) or message.channel
         except Exception as e:
             # error is guild not found, likely being accessed from DMs
-            log.useless(f"{e} - Unable to get guild - GroupMembers.idol_photo_on_message")
+            log.useless(f"{e} (Exception) - Unable to get guild", method=self.idol_photo_on_message)
 
         posted = False
         api_url = None
@@ -83,7 +83,7 @@ class GroupMembers(commands.Cog):
                         await self.ex.u_group_members.check_idol_post_reactions(photo_msg, message, random_member,
                                                                                 api_url)
         except Exception as e:
-            log.useless(f"{e} - Processing Idol Photo Message Issue - GroupMembers.idol_photo_on_message")
+            log.useless(f"{e} (Exception) - Processing Idol Photo Message Issue", self.idol_photo_on_message)
 
     @commands.command()
     async def addidol(self, ctx, *, idol_json):
@@ -379,7 +379,7 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
                     channel = await self.ex.u_group_members.get_channel_sending_photos(ctx.guild.id) or ctx.channel
             except Exception as e:
                 # error is guild not found, likely being accessed from DMs
-                log.useless(f"{e} - Likely guild not found - GroupMembers.randomidol")
+                log.useless(f"{e} (Exception) - Likely guild not found", self.randomidol)
             idol = await self.ex.u_group_members.get_random_idol()
             photo_msg, api_url, posted = await self.ex.u_group_members.request_image_post(ctx.message, idol, channel)
             if posted:
@@ -574,3 +574,166 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
                 idol = await self.ex.u_group_members.get_member(member_id)
                 embed.add_field(name=f"{count_loop}) {idol.full_name} ({idol.stage_name})", value=count)
         await ctx.send(embed=embed)
+
+    @commands.has_guild_permissions(manage_messages=True)
+    @commands.command()
+    async def sendidol(self, ctx, idol_id: int = None, text_channel: discord.TextChannel = None):
+        """Request for an idol photo to be sent to a certain text channel every 12 hours.
+
+        Using the command without any values will REMOVE ALL existing idols from the channel.
+        [Format: %sendidol [idol id] [#text channel]]
+        Requires Manage Messages
+        """
+
+        text_channel = text_channel or ctx.channel
+        user = await self.ex.get_user(ctx.author.id)
+
+        patron_multiplier = 3
+        limit = self.ex.keys.idol_send_limit if not user.patron else self.ex.keys.idol_send_limit*patron_multiplier
+
+        # Possible that they are requesting this from DMs.
+        if not ctx.guild:
+            msg = await self.ex.get_msg(user, "general", "no_dm")
+            return await ctx.send(msg)
+
+        # if no input was given, remove all of the idols from the text channel.
+        if not idol_id:
+            # get the active list of idol ids they have for the channel.
+            idol_list: set = self.ex.cache.send_idol_photos.get(text_channel.id) or self.ex.\
+                cache.send_idol_photos.get(text_channel)
+
+            # The text channel has no idols to remove.
+            if not idol_list:
+                msg = await self.ex.get_msg(user, "groupmembers", "no_idols_to_remove")
+                return await ctx.send(msg)
+
+            # copy the existing idol ids to not run into values changing during iteration.
+            copied_idol_list = idol_list.copy()
+
+            # remove all the ids in the current idol list.
+            for copied_idol_id in copied_idol_list:
+                # remove all the idol ids
+                await self.ex.u_group_members.manage_send_idol_photo(text_channel, copied_idol_id)
+
+            # All of the idols were successfully removed.
+            msg = await self.ex.get_msg(user, "groupmembers", "send_idol_success", [[
+                "result", "removed"],
+                ["result2", copied_idol_list],
+                ["result3", self.ex.cache.send_idol_photos.get(text_channel.id) or
+                 self.ex.cache.send_idol_photos.get(text_channel)]])
+            log.console(f"Removed all idol ids from {text_channel.id}")
+            return await ctx.send(msg)
+
+        idol = await self.ex.u_group_members.get_member(idol_id)
+
+        # Invalid idol id
+        if not idol:
+            msg = await self.ex.get_msg(user, "groupmembers", "invalid_id")
+            return await ctx.send(msg)
+
+        # That idol has no photos.
+        if not idol.photo_count:
+            msg = await self.ex.get_msg(user, "groupmembers", "no_photos")
+            return await ctx.send(msg)
+
+        # update/insert/remove any ids necessary.
+        try:
+            result = await self.ex.u_group_members.manage_send_idol_photo(text_channel, idol.id, limit=limit)
+        except self.ex.exceptions.Limit:
+            # the user has reached the limit.
+            if not user.patron:
+                msg = await self.ex.get_msg(user, "groupmembers", "send_idol_no_patron_limit", [
+                    ["integer", self.ex.keys.idol_send_limit], ["server_prefix", await self.ex.get_server_prefix(ctx)]])
+            else:
+                msg = await self.ex.get_msg(user, "groupmembers", "send_idol_limit", ["integer",
+                                                                                      self.ex.keys.idol_send_limit *
+                                                                                      patron_multiplier])
+            return await ctx.send(msg)
+
+        # get the updated cache
+        updated_idol_list: set = self.ex.cache.send_idol_photos.get(text_channel.id) or self.ex.\
+            cache.send_idol_photos.get(text_channel)
+
+        # check the result from updating/insert/remove and send a message accordingly.
+        if not result:
+            # there was an error updating.
+            msg = await self.ex.get_msg(user, "groupmembers", "send_idol_fail")
+            log.console(f"Was not able to update {idol.id} to Text channel {text_channel.id} -> GroupMembers.sendidol")
+        elif result == "insert":
+            # the idol id was added.
+            msg = await self.ex.get_msg(user, "groupmembers", "send_idol_success", [["result", "added"],
+                                                                                    ["result2", idol.id],
+                                                                                    ["result3", updated_idol_list]])
+            log.console(f"Added Idol ID {idol.id} to Text Channel {text_channel.id}")
+        elif result in ["remove", "delete"]:
+            # the idol id was removed.
+            msg = await self.ex.get_msg(user, "groupmembers", "send_idol_success", [["result", "removed"],
+                                                                                    ["result2", idol.id],
+                                                                                    ["result3", updated_idol_list]])
+            log.console(f"Removed Idol ID {idol.id} from Text Channel {text_channel.id}.")
+        else:
+            # we should never be here.
+            raise self.ex.exceptions.ShouldNotBeHere(" -> GroupMembers.sendidol")
+
+        return await ctx.send(msg)
+
+    @tasks.loop(seconds=0, minutes=0, hours=12, reconnect=True)
+    async def send_idol_photo_loop(self):
+        """Send Idol Photos to certain channels that requested it every 12 hours."""
+
+        # we should wait for the bot's cache to load before going further.
+        while not self.ex.irene_cache_loaded:
+            await asyncio.sleep(5)
+
+        try:
+            # create a copy to not deal with values changing during iteration
+            copied_send_idol_cache = self.ex.cache.send_idol_photos.copy()
+
+            for text_channel in copied_send_idol_cache.keys():
+                try:
+                    # if the key is an id, then we need to get the channel,
+                    # and if we cant get it due to Forbidden exception,
+                    # then we delete it permanently.
+
+                    log.console(f"Attempting to send automatic idol photo to {text_channel}.")
+                    await asyncio.sleep(5)  # we want to ease Irene's workload, so we will post every 5 seconds.
+                    if isinstance(text_channel, int):
+                        channel = None
+
+                        try:
+                            channel = self.ex.client.get_channel(text_channel) or await \
+                                self.ex.client.fetch_channel(text_channel)
+                        except discord.Forbidden or discord.NotFound:
+                            # delete channel from our list permanently.
+                            await self.ex.u_group_members.delete_channel_from_send_idol(channel)
+
+                        if not channel:
+                            continue
+
+                        # we should update our cache with a discord.TextChannel object instead of an integer for
+                        # next time.
+                        try:
+                            self.ex.cache.send_idol_photos[channel] = self.ex.cache.send_idol_photos.pop(text_channel)
+                        except KeyError:
+                            # it shouldn't fail unless they remove a value from the live cache as we were
+                            # iterating over a copy.
+                            # In that case, we will just pass since we can work with integers on the next loop.
+                            pass
+
+                    else:  # only other option is a discord.TextChannel
+                        channel = text_channel
+
+                    idol_ids: list = copied_send_idol_cache.get(text_channel)
+                    log.console(f"Sending Idols {idol_ids} to Text Channel {channel.id}. -> send_idol_photo_loop")
+                    for idol_id in idol_ids:
+                        idol = await self.ex.u_group_members.get_member(idol_id)
+                        try:
+                            msg, photo_url = await self.ex.u_group_members.idol_post(channel, idol)
+                        except discord.Forbidden or discord.NotFound:
+                            # permanently remove channel from cache.
+                            await self.ex.u_group_members.delete_channel_from_send_idol(channel)
+                            break
+                except Exception as e:
+                    log.console(f"{e} - send_idol_photo_loop (1)")
+        except Exception as e:
+            log.console(f"{e} - send_idol_photo_loop (2)")

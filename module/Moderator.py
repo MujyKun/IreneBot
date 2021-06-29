@@ -229,7 +229,7 @@ class Moderator(commands.Cog):
                     try:
                         await channel.set_permissions(mute_role, send_messages=False)
                     except Exception as e:
-                        log.useless(f"{e} - Failed to set channel mute permissions. - Moderator.mute")
+                        log.useless(f"{e} (Exception) - Failed to set channel mute permissions.", method=self.mute)
             muted = await self.check_if_muted(user.id, mute_role)
             if muted:
                 return await ctx.send(f"**<@{user.id}> is already muted.**")
@@ -537,13 +537,12 @@ class Moderator(commands.Cog):
             await ctx.send(f"> Error - {e}")
             log.console(e)
 
-    @staticmethod
-    async def make_emoji(ctx, emoji):
+    async def make_emoji(self, ctx, emoji):
         # a simple emoji converter
         try:
             return await commands.PartialEmojiConverter().convert(ctx, emoji)
         except Exception as e:
-            log.useless(f"{e} -> Partial Emoji Converter failed for {emoji}.")
+            log.useless(f"{e} (Exception) -> Partial Emoji Converter failed for {emoji}.", method=self.make_emoji)
             return str(emoji)
 
     @commands.command(aliases=['yoink'])

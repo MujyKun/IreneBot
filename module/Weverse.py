@@ -8,6 +8,7 @@ from IreneUtility.Utility import Utility
 # noinspection PyPep8
 class Weverse(commands.Cog):
     def __init__(self, ex):
+        self.running = False
         self.ex: Utility = ex
         self.current_notification_id = 0
         self.notifications_already_posted = {}  # channel_id : [notification ids]
@@ -23,7 +24,7 @@ class Weverse(commands.Cog):
         Use again to disable for a specific community.
         Available Communities ->
         [TXT, BTS, GFRIEND, SEVENTEEN, ENHYPEN, NU'EST, CL, P1Harmony, Weeekly, SUNMI, HENRY, Dreamcatcher,
-        CherryBullet, MIRAE, TREASURE]
+        Cherry_Bullet, MIRAE, TREASURE, LETTEAMOR, EVERGLOW, FTISLAND, woo!ah!, IKON, JUST_B, BLACKPINK]
         [Format: %updates <community name> [role to notify]]
         """
         try:
@@ -31,10 +32,15 @@ class Weverse(commands.Cog):
                 return await ctx.send(f"> {ctx.author.display_name}, "
                                       f"Weverse cache is being updated. Please try again in a minute or two.")
 
+            if self.ex.weverse_announcements:
+                if ctx.author.id != self.ex.keys.owner_id:
+                    msg = await self.ex.get_msg(ctx.author.id, "weverse", "bot_owner_only",
+                                                ["support_server_link", self.ex.keys.bot_support_server_link])
+                    return await ctx.send(msg)
+
             channel_id = ctx.channel.id
             community_name = community_name.lower()
-            if community_name in ['cherry_bullet', 'cherrybullet']:
-                community_name = "cherry bullet"
+            community_name = community_name.replace("_", " ")
             if await self.ex.u_weverse.check_weverse_channel(channel_id, community_name):
                 if not role:
                     await self.ex.u_weverse.delete_weverse_channel(channel_id, community_name)
@@ -60,23 +66,18 @@ class Weverse(commands.Cog):
 
     @commands.command()
     @commands.has_guild_permissions(manage_messages=True)
-    async def disablecomments(self, ctx, community_name):
+    async def disablecomments(self, ctx, *, community_name):
         """Disable updates for comments on a community."""
-        channel_id = ctx.channel.id
-        if not await self.ex.u_weverse.check_weverse_channel(channel_id, community_name):
-            return await ctx.send(f"This channel is not subscribed to weverse updates from {community_name}.")
-        for channel in await self.ex.u_weverse.get_weverse_channels(community_name):
-            await asyncio.sleep(0)
-            if channel[0] != channel_id:
-                continue
-            await self.ex.u_weverse.change_weverse_comment_status(channel_id, community_name, not channel[2],
-                                                                  updated=True)
-            if channel[2]:
-                return await ctx.send(f"> This channel will no longer receive comments from {community_name}.")
-            return await ctx.send(f"> This channel will now receive comments from {community_name}.")
+        await self.ex.u_weverse.disable_type(ctx, community_name.replace("_", " "))
+
+    @commands.command()
+    @commands.has_guild_permissions(manage_messages=True)
+    async def disablemedia(self, ctx, *, community_name):
+        """Disable updates for media on a community."""
+        await self.ex.u_weverse.disable_type(ctx, community_name.replace("_", " "), media=True)
 
     # testing with the amount of seconds to avoid duplicates (checks have been put in place).
-    @tasks.loop(seconds=30, minutes=0, hours=0, reconnect=True)
+    @tasks.loop(seconds=45, minutes=0, hours=0, reconnect=True)
     async def weverse_updates(self):
         """Process for checking for Weverse updates and sending to discord channels."""
         if not self.ex.weverse_client.cache_loaded:
@@ -89,6 +90,7 @@ class Weverse(commands.Cog):
         if not user_notifications:
             return
         is_comment = False
+        is_media = False
         latest_notification = user_notifications[0]
 
         community_name = latest_notification.community_name or latest_notification.bold_element
@@ -106,8 +108,10 @@ class Weverse(commands.Cog):
             is_comment = True
             embed = await self.ex.u_weverse.set_comment_embed(latest_notification, embed_title)
         elif noti_type == 'post':
+            is_media = True
             embed, message_text = await self.ex.u_weverse.set_post_embed(latest_notification, embed_title)
         elif noti_type == 'media':
+            is_media = True
             embed, message_text = await self.ex.u_weverse.set_media_embed(latest_notification, embed_title)
         elif noti_type == 'announcement':
             return None  # not keeping track of announcements ATM
@@ -121,18 +125,43 @@ class Weverse(commands.Cog):
                         f"Noti Type: {latest_notification.contents_type}")
             return  # we do not want constant attempts to send a message.
 
+        server_text_channel_ids = []  # text channels that belong to the support server
+
+        try:
+            support_server = self.ex.client.get_guild(self.ex.keys.bot_support_server_id) or self.ex.client.\
+                fetch_guild(self.ex.keys.bot_support_server_id)
+
+            server_text_channel_ids = [channel.id for channel in support_server.text_channels]
+        except:
+            warning_msg = "WARNING: Support Server could not be found for Weverse Cache to get the text channel IDs."
+            log.console(warning_msg)
+            log.useless(warning_msg)
+
         for channel_info in channels:
+            channel_id = channel_info[0]
+            if self.ex.weverse_announcements and channel_id not in server_text_channel_ids:
+                # we do not want to remove the existing list of channels in the database, so we will use a filtering
+                # method instead
+                continue
+
             # sleeping for 2 seconds before every channel post. still needs to be properly tested
             # for rate-limits
-            await asyncio.sleep(2)
-            channel_id = channel_info[0]
+
+            # after testing, Irene has been rate-limited too often, so we will introduce announcement
+            # channels to the support server instead of constantly sending the same content to every channel.
+            if not self.ex.weverse_announcements:
+                await asyncio.sleep(2)
+
             notification_ids = self.notifications_already_posted.get(channel_id)
             if not notification_ids:
-                await self.ex.u_weverse.send_weverse_to_channel(channel_info, message_text, embed, is_comment,
+                await self.ex.u_weverse.send_weverse_to_channel(channel_info, message_text, embed, is_comment, is_media,
                                                                 community_name)
                 self.notifications_already_posted[channel_id] = [latest_notification.id]
             else:
-                if latest_notification.id not in notification_ids:
-                    self.notifications_already_posted[channel_id].append(latest_notification.id)
-                    await self.ex.u_weverse.send_weverse_to_channel(channel_info, message_text, embed,
-                                                                    is_comment, community_name)
+                if latest_notification.id in notification_ids:
+                    # it was already posted
+                    continue
+
+                self.notifications_already_posted[channel_id].append(latest_notification.id)
+                await self.ex.u_weverse.send_weverse_to_channel(channel_info, message_text, embed,
+                                                                is_comment, is_media, community_name)

@@ -93,7 +93,14 @@
     "no_aliases": "No results were found. Please specify whether you want member or group aliases, or enter a name of an idol/group.\n{server_prefix}help aliases",
     "all_idol_count": "All Idols have been called a total of {called} times.",
     "not_called": "{idol_name} has not been called by a user yet.",
-    "called_and_rank": "{idol_name} has been called {called} times at rank {rank}."
+    "called_and_rank": "{idol_name} has been called {called} times at rank {rank}.",
+    "send_idol_success": "The following idol(s) have been {result}: {result2}\nThis text channel currently receives idol photos every 12 hours from {result3}.",
+    "send_idol_fail": "There was an issue adding/remove that idol.",
+    "send_idol_no_patron_limit": "As a non-patron, you only have access to have posts from {integer} idols per text channel. Become a {server_prefix}patreon for more!",
+    "send_idol_limit": "As a patron, you only have access to have posts from {integer} idols per text channel",
+    "no_photos": "There are no photos for that idol id.",
+    "invalid_id": "The ID you have entered is Invalid!",
+    "no_idols_to_remove": "There are no idols to remove."
   },
   "twitter": {
     "tweet_success": "Your Tweet has been successfully uploaded to {tweet_url}",
@@ -163,5 +170,9 @@
     "welcome_role_set": "The new welcome role has been set.",
     "channel_not_found": "That text channel was not found.",
     "channel_toggled": "{name}, {text_channel} now has games {result}."
+  },
+  "weverse": {
+   "bot_owner_only": "Weverse Updates are now privatized to the bot owner only! In order to get weverse updates, join the support server {support_server_link} and click Follow on the Weverse channels you want. Since more than 3000 channels were following Weverse updates, Irene has gotten a lot slower and this action should be done to reduce Irene's workload."
   }
+
 }

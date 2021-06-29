@@ -16,10 +16,20 @@ class Irene:
     We are not subclassing an AutoShardedClient, but will rather define it directly in keys.
     """
     def __init__(self):
-        # Set to True if running a test bot.
-        ex.test_bot = False
+        # Set to True if running a test bot (AKA DEV MODE) .
+        ex.test_bot = True
+        # Set to True if not on the production server (useful if ex.test_bot as False).
+        # This was initially created to not flood datadog with incorrect input while ex.test_bot was False
+        ex.dev_mode = True
+        # Set to True if you want the bot to upload its images from host rather than using url.
+        ex.upload_from_host = False
         # Set to True if you need the db structure created.
         ex.create_db_structure = False
+        # Set to True if you intend to have announcement text channels on the support server and would like
+        # the weverse updates command to be private only to the bot owner.
+        ex.weverse_announcements = False
+        # Set to False if you do not want the cache to reset itself every 12 hours.
+        ex.reset_cache = False
 
         # define the modules for reuse
         self.miscellaneous = module.Miscellaneous.Miscellaneous(ex)
@@ -50,12 +60,13 @@ class Irene:
         self.unscramble = module.UnScramble.UnScramble(ex)
         # self.gacha = module.Gacha.Gacha()
         self.status = module.status.Status(ex)  # not a command cog
+        self.blocking_monitor = module.blockingcog.BlockingMonitor(ex)
 
         self.cogs = [self.miscellaneous, self.twitter, self.currency, self.blackjack, self.youtube, self.groupmembers,
                      self.archive, self.moderator, self.profile, self.help, self.logging, self.music, self.botmod,
                      self.events, self.lastfm, self.interactions, self.wolfram, self.guessinggame, self.customcommands,
                      self.biasgame, self.weverse, self.selfassignroles, self.reminder, self.twitch,
-                     self.botowner, self.unscramble]
+                     self.botowner, self.unscramble, self.blocking_monitor]
 
         # Modules/Cogs that contain 'ex' (Utility) and the 'conn' (DB connection).
         # AKA -> Classes that are have inherited IreneUtility.Base.Base()
@@ -78,14 +89,14 @@ class Irene:
         # set top.gg client
         module.keys.keys_obj.top_gg = dbl.DBLClient(ex.client, module.keys.keys_obj.top_gg_key, autopost=True)
         self.start_up()
-        self.start_loops()
+        self.start_loops(run_twitter=True)
         ex.client.run(module.keys.keys_obj.client_token)
 
     def run_test_bot(self):
         """Run Test Ver. of the the bot."""
         self.start_up()
         # background loops are optional with test bot.
-        self.start_loops(run_weverse=False)
+        self.start_loops(run_weverse=False, run_twitter=False)
         log.console("--TEST BOT--")
         ex.client.run(module.keys.keys_obj.test_client_token)
 
@@ -100,7 +111,7 @@ class Irene:
         # For Debugging
         # module.log.debug()
 
-    def start_loops(self, run_weverse=True):
+    def start_loops(self, run_weverse=True, run_twitter=True):
         """Start Loops (Optional)"""
         # Start checking for Weverse Updates
         if run_weverse:
@@ -116,6 +127,11 @@ class Irene:
         self.status.change_bot_status_loop.start()
         # Start Voice Client Loop
         self.music.check_voice_clients.start()
+        # Start Idol Posting to text channels that requested it after t time.
+        self.groupmembers.send_idol_photo_loop.start()
+        # Start Automatic Twitter Posts
+        if run_twitter:
+            self.twitter.send_photos_to_twitter.start()
         # Update Cache Every 12 hours
         ex.u_cache.update_cache.start()
         # Start a loop that sends cache information to DataDog.

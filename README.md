@@ -1,4 +1,4 @@
-# [IreneBot V1.04.0](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=1609956823)
+# [IreneBot V1.04.1](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=1609956823)
 
 ## [Support Irene by becoming a Patron!](https://www.patreon.com/bePatron?u=38971435)  
 **[Become a Patron!](https://www.patreon.com/bePatron?u=38971435)**
@@ -112,6 +112,7 @@ To find out more, look at the `GroupMembers` category.
 | groups           | Lists the groups of idols the bot has photos of                                    | %groups                                                                                                        |                        |
 | members          | Lists the names of idols the bot has photos of                                     | %members (page number/group names)                                                                                                      |    member                    |
 | randomidol          | Sends a photo of a random idol.                                     | %%                                                                                                       |                   %     |
+| sendidol      | Request for an idol photo to be sent to a certain text channel every 12 hours. Not specifying an idol will remove all of them. You may add or remove by putting in an idol id. Requires Manage Messages  | %sendidol [idol_id] [#text-channel]                                                                                                   | ★                      |
 | sendimages      | All idol photo commands from the server will post idol photos in a specific text channel. To undo, type it again.                                     | %sendimages #text-channel                                                                                                   | ★                      |
 | stopimages             | Stops Irene from posting/recognizing idol photos in a specific text channel. To undo, type it again.                                    | %stopimages #text-channel                                                                                  | ★                     |
 
@@ -119,6 +120,7 @@ To find out more, look at the `GroupMembers` category.
 | Command          | Description                                                                                                                          | Format                          | Aliases        |
 |------------------|--------------------------------------------------------------------------------------------------------------------------------------|---------------------------------|----------------|
 | guessinggame | Start an idol guessing game in the current channel. The host of the game can use `stop` to end the game or `skip` to skip the current round without affecting the round number. | %guessinggame (Male/Female/All) (easy/medium/hard) (# of rounds - default 20) (timeout for each round - default 20s) | gg |
+| groupguessinggame | Start a group guessing game in the current channel. The host of the game can use `stop` to end the game or `skip` to skip the current round without affecting the round number. | %groupguessinggame (Male/Female/All) (easy/medium/hard) (# of rounds - default 20) (timeout for each round - default 20s) | ggg, groupgg |
 | ggfilter | Add a filter for your guessing game. Only the groups you select will appear on the guessing game. Use the command with no group ids to enable/disable the filter. Filtered idols do not count for a real score. | %ggfilter [group_id_one, group_id_two, ...] | |
 | ggfilteredlist | View the current groups you currently have filtered. | %ggfilteredlist | ggfilterlist, filterlist |
 | ggleaderboard | Shows leaderboards for guessing game. | %ggleaderboard (easy/medium/hard) (server/global)| ggl, gglb |
@@ -271,11 +273,13 @@ To find out more, look at the `GroupMembers` category.
 | stoploop         | Stops scraping youtube videos                                                                                                        | %stoploop                                    |
 
 
-#### Weverse:
+#### Weverse (This is now disabled for normal users, but join the support server and follow the announcement channels to your text channels):
 | Command     | Description                          | Format                 | Aliases           |
 |-------------|--------------------------------------|------------------------|-------------------|
-| updates | Receive Weverse Updates of a specific Weverse community in the current text channel. Use again to disable for a specific community. Available Communities -> [TXT, BTS, GFRIEND, SEVENTEEN, ENHYPEN, NU'EST, CL, P1Harmony, Weeekly, SUNMI, HENRY, Dreamcatcher, CherryBullet, MIRAE, TREASURE] | %updates (community name) [role to notify] |  |
+| updates | Receive Weverse Updates of a specific Weverse community in the current text channel. Use again to disable for a specific community. Available Communities -> [TXT, BTS, GFRIEND, SEVENTEEN, ENHYPEN, NU'EST, CL, P1Harmony, Weeekly, SUNMI, HENRY, Dreamcatcher, CherryBullet, MIRAE, TREASURE, LETTEAMOR, EVERGLOW, FTISLAND, woo!ah!, IKON, JUST B, BLACKPINK] | %updates (community name) [role to notify] |  |
 | disablecomments | Disable updates for comments on a community. | %disablecomments (community name) |  |
+| disablemedia | Disable updates for media on a community. | %disablecomments (community name) |  |
+
 
 #### SelfAssignRoles:
 | Command     | Description                          | Format                 | Aliases           |
@@ -317,3 +321,4 @@ To find out more, look at the `GroupMembers` category.
 | scandrive        | Scan DriveIDs Table and update other tables.                                       | %scandrive (name=NULL) (member_id=0)                                                                           |                       |
 | send              | Send a message to a text channel.                                             | %send (channelid) (message)                  |               |
 | speak            | Owner to Bot TTS                                               | %speak (message)                |              |
+| uploadfromhost            | Toggles whether images are uploaded from host or not.            | %uploadfromhost |              |

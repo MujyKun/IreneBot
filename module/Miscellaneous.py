@@ -44,7 +44,8 @@ Message Author: {message.author}
                                                    title_desc=title_desc)
                 await dm_channel.send(embed=embed)
         except Exception as e:
-            log.useless(f"{e} - User Phrase - Miscellaneous.on_message_user_notifications")
+            log.useless(f"{e} (Exception) - User Phrase",
+                        method=self.on_message_user_notifications)
 
     @commands.command()
     async def setlanguage(self, ctx, language_choice):
@@ -135,7 +136,7 @@ Message Author: {message.author}
                 return await ctx.send(
                     f"> **{ctx.author.display_name}, You are not allowed to use this command in DMs.**")
             except Exception as e:
-                log.useless(f"{e} - Failed to remove user phrase - Miscellaneous.removenoti")
+                log.useless(f"{e} (Exception) - Failed to remove user phrase", method=self.removenoti)
             await ctx.send(f"> **{ctx.author.display_name}, if you were receiving notifications for that phrase, "
                            f"it has been removed.**")
         except Exception as e:
@@ -251,8 +252,9 @@ Maintenance Status: {maintenance_status}
         embed.add_field(name=f"This Session ({self.ex.cache.session_id} | {date.today()})",
                         value=f"{self.ex.cache.current_session} Commands", inline=True)
         embed.add_field(name="Playing Music", value=f"{len(self.ex.client.voice_clients)} Voice Clients", inline=True)
-        embed.add_field(name="Playing Guessing/Bias",
-                        value=f"{len(self.ex.cache.guessing_games)}/{len(self.ex.cache.bias_games)} Games", inline=True)
+        embed.add_field(name="Playing Guessing/Bias/Unscramble",
+                        value=f"{len(self.ex.cache.guessing_games)}/{len(self.ex.cache.bias_games)}"
+                              f"/{len(self.ex.cache.unscramble_games)} Games", inline=True)
         embed.add_field(name="Ping", value=f"{self.ex.get_ping()} ms", inline=True)
         embed.add_field(name="Shards", value=f"{self.ex.client.shard_count}", inline=True)
         embed.add_field(name="Bot Owner", value=f"<@{app_owner.id}>", inline=True)

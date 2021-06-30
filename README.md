@@ -39,10 +39,8 @@ To find out more, look at the `GroupMembers` category.
 |-------------------|-------------------------------------------------------------------------------------------------------|--------------------------------------|---------|
 | blackjack         | Start a game of BlackJack                                                                             | %blackjack (amount)                  | bj      |
 | stopbj           | End your current blackjack game                                                                                 | %stopbj                             |       |
-| hit               | Pick A Card                                                                                           | %hit                                 |         |
-| joingame          | Join a game                                                                                           | %joingame (gameid) (bid)             | jg      |
+| joingame          | Join a game                                                                                           | %joingame (@user) (bid)             | jg      |
 | rules          | View the rules of BlackJack.                                                                                           | %rules             |       |
-| stand             | Keep Your Cards                                                                                       | %stand                               |         |
 
 #### BotMod: 😇😇😇  
 | Command           | Description                                                                                           | Format                               | Aliases |
@@ -59,16 +57,22 @@ To find out more, look at the `GroupMembers` category.
 | deleteidol         | Deletes an idol.                                                              | %deleteidol (idol id)                                                                                             | removeidol                      |
 | deleteidolfromgroup         | Deletes idol from group                                                              | %deleteidolfromgroup (idol id) (group id)                                                                                             | removeidolfromgroup                      |
 | deleteinteraction       | Delete a url from an interaction                                   | %deleteinteraction (url,url)               |               |
+| fixlinks        | Fix thumbnails and banners of idols and groups and put them on the host. | %fixlinks |               |
 | getstatuses             | Get all statuses of Irene.                                                   | %getstatuses                           |                |
 | kill             | Kills the bot                                                  | %kill                           |               |
 | killapi             | Restarts the API                                                  | %killapi                           |               |
 | maintenance             | Enable/Disable Maintenance Mode. | %maintenance (reason)                          |               |
 | mergeidol | Merges a duplicate Idol with it's original | %mergeidol (original idol id) (duplicate idol id) | |
 | mergegroup | Merges a duplicate Group with it's original | %mergegroup (original group id) (duplicate group id) | |
+| moveto | Moves an image to another idol. | %moveto (idol id) (url) | |
 | removestatus             | Remove a status based on it's index. The index can be found using %getstatuses | %removestatus (status index)                           |               |
-| repost             | Reposts a certain post from the DC APP to all channels.                                                  | %repost (post_number)                           |               |
 | weverseauth      | Updates Weverse Authentication Token without restarting bot. Only use this in DMs or a private channel for security purposes. | %weverseauth (token)                           |               |
 
+#### BlockingManager: ♥♥♥
+| Command           | Description                                                                                           | Format                               | Aliases |
+|-------------------|-------------------------------------------------------------------------------------------------------|--------------------------------------|---------|
+| bmon start         | Starts the blocking manager.                                                              | %bmon start                                                                                                     |                       |
+| bmon stop       | Stops the blocking manager.                                   | %bmon stop               |               |
 
 #### BiasGame:
 | Command     | Description                          | Format                 | Aliases           |
@@ -164,8 +168,6 @@ To find out more, look at the `GroupMembers` category.
 | flip             | Flips a Coin                                                   | %flip                           |                |
 | invite           | Invite Link for Irene                                          | %invite                         |                |
 | listnoti          | list all your notification phrases that exist in the current server.| %listnoti     |               |
-| nword            | Checks how many times a user has said the N Word               | %nword @user                    |                |
-| nwordleaderboard | Shows leaderboards for how many times the nword has been said. | %nwl (server/global)                           | nwl            |
 | patreon             | Displays Patreon Information.                                       | %patreon                           |   patron         |
 | ping             | Shows Latency to Discord                                       | %ping                           | pong           |
 | random           | Choose a random number from a range (a,b)                      | %random a b [Ex: %random 1 100] | r,rand,randint |
@@ -174,10 +176,10 @@ To find out more, look at the `GroupMembers` category.
 | servercount      | Shows how many servers Irene is on.                            | %servercount                    |                |
 | serverinfo      | View information about the current server.                            | %serverinfo                   |                |
 | setlanguage          | Changes language of Irene. Available Choices: en_us  | %setlanguage (language choice)                         |               |
-| stopgames          | End all games that you are hosting or that may exist in the text channel.  | %stopgames |  stopgame, endgame, endames             |
+| stopgames          | End all games that you are hosting or that may exist in the text channel.  | %stopgames |  stopgame, endgame, endgames             |
 | suggest          | Suggest a feature for Irene                                    | %suggest (feature)              |               |
 | support          | Support Discord Server for Irene                               | %support                        |                |
-| translate          | Translate between languages using Papago                              | %translate English Korean this is a test phrase.                       |                |
+| translate          | Translate between languages using Papago                              | %translate English Korean this is a test phrase.                       |   t, trans             |
 | vote          | Link to Voting for Irene on Top.gg | %vote                       |                |
 
 #### Moderator: ★★★
@@ -188,7 +190,7 @@ To find out more, look at the `GroupMembers` category.
 | ban              | Ban A User (Ban Members)                                                                                                                           | %ban @user                      |               |
 | clear            | Prune Messages (LIMIT 1000) (Manage Messages)                                                                                                                      | %clear (amount)                 |  prune        |
 | deletealias         | Remove alias from an idol/group. (Underscores are spaces)                                                               | %deletealias (alias) (ID of idol/group) ("idol" or "group")                                                                                                     |  removealias                      |
-| disableinteraction            | Disable an interaction on your server. Redo to enable again (Manage Messages)                                                                                                                      | %deleteinteraction (interaction)                 |  |
+| disableinteraction            | Disable an interaction on your server. Redo to enable again (Manage Messages)                                                                                                                      | %disableinteraction (interaction)                 |  |
 | kick             | Kick A User. (Kick Members)                                                                                                                          | %kick @user                     |               |
 | mute             | Mute A User. (Manage Messages & Manage Roles)                                                                                                                          | %mute @user (reason)                     |               |
 | say              | Make Irene say a message. (Manage Messages)                                          | %say #[text-channel] (message)                  |               |
@@ -197,7 +199,7 @@ To find out more, look at the `GroupMembers` category.
 | tempchannel      | Makes Current Channel a temporary channel deleting messages after a certain time period (greater than 1 minute). If delay is -1, it will remove the channel. (Manage Messages)| %tempchannel [delay=-1]         | temp         |
 | togglegames      | Choose to enable/disable games in a text channel. (Manage Messages)| %togglegames [#channel]         |          |
 | unban            | UnBan A User (Ban Members)                                                                                                                      | %unban @user                    |               |
-| unmute            | UnMute A User (Manage Messages & Manage Roles)                                                                                                                      | %unmute @user (reason)                    |               |
+| unmute            | UnMute A User (Manage Messages & Manage Roles)                                                                                                                      | %unmute @user                   |               |
 | welcome            | Set a welcome message or disable welcome in the current channel. Use %user where they should be mentioned. Use %guild_name if the server name should be added. (Manage Messages)  | %welcome (Welcome %user to %guild_name!)                    |               |
 | welcomerole            | The role to give a user when they first join the server. Use command without role to delete the welcome role set to the guild. (Manage Messages)  | %welcomerole @role                    |               |
 
@@ -233,6 +235,7 @@ To find out more, look at the `GroupMembers` category.
 | topalbums            | See the top albums of a Last FM Account by a discord user or a Last FM username                                       | %topalbums (username or @user)       |   tal                     |
 | topartists            | See the top artists of a Last FM Account by a discord user or a Last FM username.                                       | %topartists (username or @user)  |  ta                      |
 | toptracks            | See the top tracks of a Last FM Account by a discord user or a Last FM username                                       | %toptracks (username or @user)  | tt                        |
+| setfm            | Attach a LastFM username to your discord account.                                       | %setfm (LastFM username)  |                         |
 
 
 #### Wolfram: 
@@ -309,7 +312,6 @@ To find out more, look at the `GroupMembers` category.
 | addcards          | Fill The CardValues Table with Cards                                                                  | %addcards                            |       |
 | addpatreon         | Adds a patreon.                           | %addpatreon (userid,userid,userid)             |               |
 | approve       | Approve a query id for an unregistered group or idol. | %approve (query id) ('idol' or 'group') |    |
-| clearnword       | Clear A User's Nword Counter                                   | %clearnword @user               |               |
 | generateplayingcards       | Generate custom playing cards with idol avatars. | %generateplayingcards  |               |
 | removepatreon         | Removes a patreon.                           | %removepatreon (userid,userid,userid)             |               |
 | resetcache          | Reset the cache.  | %resetcache                        |              |

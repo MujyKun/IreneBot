@@ -1,83 +1,80 @@
 {
   "Archive": {
     "addchannel": {
-      "description": null,
+      "description": "Add the current channel to start archiving images to Google Drive.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%addchannel <drive_folder_id> [name=NULL] [owner_present=0]",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": [
+        "Bot Owner Presence",
+        "Manage Messages"
+      ],
       "aliases": null
     },
     "addhistory": {
-      "description": null,
+      "description": "Add the previous images in the current text channel to Google Drive.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%addhistory [year] [month] [day]",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
       "aliases": null
     },
     "deletechannel": {
-      "description": null,
+      "description": "Stop the current channel from being archived to Google Drive.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%deletechannel",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
       "aliases": null
     },
     "listchannels": {
-      "description": null,
+      "description": "List the channels in the server that are being archived.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%listchannels",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
       "aliases": null
     }
   },
   "BlackJack": {
     "blackjack": {
-      "description": null,
+      "description": "Start a game of BlackJack.",
       "example_image_url": null,
       "syntax": null,
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": [
+        "bj"
+      ]
     },
     "stopbj": {
-      "description": null,
+      "description": "End the current BlackJack game.",
       "example_image_url": null,
-      "syntax": null,
-      "example_syntax": null,
-      "permissions_needed": null,
-      "aliases": null
-    },
-    "hit": {
-      "description": null,
-      "example_image_url": null,
-      "syntax": null,
+      "syntax": "%blackjack [bet=0]",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
     },
     "joingame": {
-      "description": null,
+      "description": "Join an existing game of BlackJack.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%joingame <opponent> [bet=0]",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": [
+        "jg"
+      ]
     },
     "rules": {
-      "description": null,
+      "description": "View the rules of BlackJack.",
       "example_image_url": null,
-      "syntax": null,
-      "example_syntax": null,
-      "permissions_needed": null,
-      "aliases": null
-    },
-    "stand": {
-      "description": null,
-      "example_image_url": null,
-      "syntax": null,
+      "syntax": "%rules",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
@@ -85,169 +82,220 @@
   },
   "BotMod": {
     "addidoltogroup": {
-      "description": null,
+      "description": "Adds an Idol to a Group.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%addidoltogroup <idol id> <group id>",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
       "aliases": null
     },
     "addinteraction": {
-      "description": null,
+      "description": "Add a GIF to an interaction.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%addinteraction <interaction_type> <link1,link2,...>",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
       "aliases": null
     },
     "addstatus": {
-      "description": null,
+      "description": "Adds a playing status to the Bot.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%addstatus <status message>",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
       "aliases": null
     },
     "botban": {
-      "description": null,
+      "description": "Bans a user from using the Bot.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%botban <user id>",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
       "aliases": null
     },
     "botunban": {
-      "description": null,
+      "description": "Unbans a user that was not able to use the Bot.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%botunban <user id>",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
       "aliases": null
     },
     "botwarn": {
-      "description": null,
+      "description": "Warn a user through Bot DMs.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%botwarn <user> [reason]",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
       "aliases": null
     },
     "closedm": {
-      "description": null,
+      "description": "Closes a DM",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%closedm [user id]",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
       "aliases": null
     },
     "createdm": {
-      "description": null,
+      "description": "Creates a DM between you and the user with the Bot as the middleman.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%createdm <user id>",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
       "aliases": null
     },
     "deletegroup": {
-      "description": null,
+      "description": "Deletes a Group",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%deletegroup <group id>",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
       "aliases": null
     },
     "deleteidol": {
-      "description": null,
+      "description": "Deletes an Idol.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%deleteidol <idol id>",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
       "aliases": null
     },
     "deleteidolfromgroup": {
-      "description": null,
+      "description": "Deletes an Idol from a Group.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%deleteidolfromgroup <idol id> <group iid>\n",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
       "aliases": null
     },
     "deleteinteraction": {
-      "description": null,
+      "description": "Remove URL from an interaction.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%deleteinteraction <urls>",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
+      "aliases": null,
+      "note": "Separate urls with commas."
+    },
+    "fixlinks": {
+      "description": "Fix Invalid Thumbnails/Avatars/Banners of Idols/Groups and puts them on the host.",
+      "example_image_url": null,
+      "syntax": "%fixlinks",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Owner"
+      ],
       "aliases": null
     },
     "getstatuses": {
-      "description": null,
+      "description": "List all of the statuses of the Bot.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%getstatuses",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
       "aliases": null
     },
     "kill": {
-      "description": null,
+      "description": "Kills the Bot.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%kill",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
       "aliases": null
     },
     "killapi": {
-      "description": null,
+      "description": "Kills the API.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%killapi",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
       "aliases": null
     },
     "maintenance": {
-      "description": null,
+      "description": "Toggles Maintenance Mode",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%maintenance",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
       "aliases": null
     },
     "mergeidol": {
-      "description": null,
+      "description": "Merge a duplicated idol with the original idol.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%mergeidol <original_idol_id> <duplicate_idol_id>",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
       "aliases": null
     },
     "mergegroup": {
-      "description": null,
+      "description": "Merge a duplicated group with the original group.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%mergegroup <original_group_id> <duplicate_group_id>",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
+      "aliases": null
+    },
+    "moveto": {
+      "description": "Moves an image to another idol.",
+      "example_image_url": null,
+      "syntax": "%moveto <idol_id> <link>",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
       "aliases": null
     },
     "removestatus": {
-      "description": null,
+      "description": "Removes a playing status based on it's index.",
       "example_image_url": null,
       "syntax": null,
-      "example_syntax": null,
-      "permissions_needed": null,
-      "aliases": null
-    },
-    "repost": {
-      "description": null,
-      "example_image_url": null,
-      "syntax": null,
-      "example_syntax": null,
-      "permissions_needed": null,
+      "example_syntax": "%removestatus <status index>",
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
       "aliases": null
     },
     "weverseauth": {
-      "description": null,
+      "description": "Updates Weverse Authentication Token.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%weverseauth <token>",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
@@ -255,125 +303,171 @@
   },
   "BiasGame": {
     "biasgame": {
-      "description": null,
+      "description": "Start a BiasGame in the current channel.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%biasgame [gender=Male/Female/All] [bracket_size=4/8/16/32]",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": [
+        "bg"
+      ]
     },
     "stopbg": {
-      "description": null,
+      "description": "Force-End a BiasGame.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%stopbg",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": [
+        "Host",
+        "Manage Messages"
+      ],
       "aliases": null
     },
     "listbg": {
-      "description": null,
+      "description": "List a user's BiasGame Leaderboards.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%listbg [user]",
       "example_syntax": null,
       "permissions_needed": null,
+      "aliases": null
+    }
+  },
+  "BlockingManager": {
+    "bmon start": {
+      "description": "Starts the Blocking Manager.",
+      "example_image_url": null,
+      "syntax": "%bmon start",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Owner"
+      ],
+      "aliases": null
+    },
+    "bmon stop": {
+      "description": "Turns off the Blocking Manager.",
+      "example_image_url": null,
+      "syntax": "%bmon stop",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Owner"
+      ],
       "aliases": null
     }
   },
   "Currency": {
     "balance": {
-      "description": null,
+      "description": "View a user's balance.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%balance [member]",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": [
+        "b",
+        "bal",
+        "$"
+      ]
     },
     "beg": {
-      "description": null,
+      "description": "Beg a homeless man for money.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%beg",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
     },
     "bet": {
-      "description": null,
+      "description": "Bet your money.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%bet <amount>",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
     },
     "daily": {
-      "description": null,
+      "description": "Get the daily reward.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%daily",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
     },
     "give": {
-      "description": null,
+      "description": "Give a user money.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%give <member> <amount>",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
     },
     "leaderboard": {
-      "description": null,
+      "description": "Shows the Top 10 users server/global wide.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%leaderboard [mode=server/global]",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": [
+        "lb",
+        "leaderboards"
+      ]
     },
     "rob": {
-      "description": null,
+      "description": "Rob a member.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%rob <member>",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
     },
     "rps": {
-      "description": null,
+      "description": "Play Rock Paper Scissors.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%rps <rock/paper/scissors> [amount to bet=0]",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": [
+        "rockpaperscissors"
+      ]
     },
     "upgrade": {
-      "description": null,
+      "description": "Upgrades a command to the next level.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%upgrade <rob/daily/beg>",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": [
+        "levelup"
+      ]
     }
   },
   "CustomCommands": {
     "createcommand": {
-      "description": null,
+      "description": "Create a custom command.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%createcommand <command name> <message>",
       "example_syntax": null,
-      "permissions_needed": null,
-      "aliases": null
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": [
+        "addcommand"
+      ]
     },
     "deletecommand": {
-      "description": null,
+      "description": "Delete a custom command.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%deletecommand <command name>",
       "example_syntax": null,
-      "permissions_needed": null,
-      "aliases": null
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": [
+        "removecommand"
+      ]
     },
     "listcommands": {
-      "description": null,
+      "description": "List all custom commands for the server.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%listcommands",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
@@ -381,269 +475,301 @@
   },
   "GroupMembers": {
     "addidol": {
-      "description": null,
+      "description": "Adds an Unregistered Idol using the syntax from https://irenebot.com/addidol.html/.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%addidol <JSON>",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": null,
+      "note": "Command should only be used if the card does not exist for the Idol."
     },
     "addgroup": {
-      "description": null,
+      "description": "Adds an Unregistered Group using the syntax from https://irenebot.com/addgroup.html/.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%addgroup <JSON>",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": null,
+      "note": "Command should only be used if the card does not exist for the Group."
     },
     "aliases": {
-      "description": null,
+      "description": "Lists the aliases of Idols/Groups that have one.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%aliases [Idol/Group names] [page number=1]",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": null,
+      "note": "Underscores are spaces and commas are used to split Idol/Group names."
     },
     "card": {
-      "description": null,
+      "description": "Display an Idol/Group's Profile Card.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%card <Idol/Group ID/Name>",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
     },
     "count": {
-      "description": null,
+      "description": "Displays amount of times an Idol has been called.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%count (idol name/all)",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
     },
     "countleaderboard": {
-      "description": null,
+      "description": "Displays leaderboard for times an Idol has been called.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%countleaderboard",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": [
+        "clb"
+      ]
     },
     "countgroup": {
-      "description": null,
+      "description": "Displays the number of photos a Group has.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%countgroup <group name>",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
     },
     "countmember": {
-      "description": null,
+      "description": "Displays the number of photos an Idol has.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%countmember <idol name/all>",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
     },
     "fullnames": {
-      "description": null,
+      "description": "List the full names of Idols the bot has photos of.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%fullnames [page number/group name]",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": null,
+      "note": "To a Bot Moderator, this will also display Idols with no photos and show their ID."
     },
     "groups": {
-      "description": null,
+      "description": "Lists the groups of idols the Bot has photos of.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%groups",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": null,
+      "note": "To a Bot Moderator, this will also display Groups with no photos and show their ID."
     },
     "members": {
-      "description": null,
+      "description": "List the names of idols the Bot has photos of.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%members [page number/group name]",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": null,
+      "note": "To a Bot Moderator, this will also display Idols with no photos and show their ID."
     },
     "randomidol": {
-      "description": null,
+      "description": "Posts media of a random Idol.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%randomidol",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": [
+        "%"
+      ]
     },
     "sendidol": {
-      "description": null,
+      "description": "Have an Idol Photo sent to a text channel every 12 hours.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%sendidol [idol id] [text channel]",
       "example_syntax": null,
-      "permissions_needed": null,
-      "aliases": null
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": null,
+      "note": "Using the command without an Idol ID will remove all existing idols from the channel."
     },
     "sendimages": {
-      "description": null,
+      "description": "Have all of the Idol Photos appear in a specific text channel.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%sendimages [text channel]",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
       "aliases": null
     },
     "stopimages": {
-      "description": null,
+      "description": "Stops the Bot from posting idol photos in a specific text channel.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%stopimages [text channel]",
       "example_syntax": null,
-      "permissions_needed": null,
-      "aliases": null
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": null,
+      "note": "Type the command again to re-enable."
     }
   },
   "GuessingGame": {
     "guessinggame": {
-      "description": null,
+      "description": "Start an Idol GuessingGame in the current channel.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%guessinggame [gender=all] [difficulty=medium] [rounds=20] [timeout=20]",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": [
+        "gg"
+      ],
+      "note": "The host of the game can type stop or end to end the game or skip to skip the current round without affecting the round number."
     },
     "groupguessinggame": {
-      "description": null,
+      "description": "Start a Group GuessingGame in the current channel.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%groupguessinggame [gender=all] [difficulty=medium] [rounds=20] [timeout=20]",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": [
+        "ggg",
+        "groupgg"
+      ],
+      "note": "The host of the game can type stop or end to end the game or skip to skip the current round without affecting the round number."
     },
     "ggfilter": {
-      "description": null,
+      "description": "Add a filter to your GuessingGame.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%ggfilter [group id/name, ...]",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": null,
+      "note": "Only the groups filtered will appear on the GuessingGame. If you do not specify a Group ID or Name, it will toggle the filter. Group IDs and Names must be split by commas. Group Names with more than one word must have an underscore used as a space."
     },
     "ggfilteredlist": {
-      "description": null,
+      "description": "View the current groups that are filtered.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%ggfilteredlist",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
     },
     "ggleaderboard": {
-      "description": null,
+      "description": "Shows Server/Global leaderboards for the GuessingGame.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%ggleaderboard [difficulty=easy/medium/hard] [mode=server/global]",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": [
+        "gglb",
+        "ggl"
+      ]
     },
     "stopgg": {
-      "description": null,
+      "description": "Force-end a GuessingGame.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%stopgg",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": [
+        "Host",
+        "Manage Messages"
+      ],
       "aliases": null
     }
   },
   "Interactions": {
     "choke": {
-      "description": null,
+      "description": "Choke a member.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%choke [user]",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
     },
     "cuddle": {
-      "description": null,
+      "description": "Cuddle a member.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%cuddle [user]",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
     },
     "hug": {
-      "description": null,
+      "description": "Hug a member.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%hug [user]",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
     },
     "kiss": {
-      "description": null,
+      "description": "Kiss a member.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%kiss [user]",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
     },
     "lick": {
-      "description": null,
+      "description": "Lick a member.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%lick [user]",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
     },
     "pat": {
-      "description": null,
+      "description": "Pat a member.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%pat [user]",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
     },
     "punch": {
-      "description": null,
+      "description": "Punch a member.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%punch [user]",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
     },
     "pullhair": {
-      "description": null,
+      "description": "Pull hair of a member.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%pullhair [user]",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
     },
     "slap": {
-      "description": null,
+      "description": "Slap a member.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%slap [user]",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
     },
     "spit": {
-      "description": null,
+      "description": "Spit at a member.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%spit [user]",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
     },
     "stab": {
-      "description": null,
+      "description": "Stab a member.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%stab [user]",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
     },
     "stepon": {
-      "description": null,
+      "description": "Step on a member.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%stepon [user]",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
@@ -651,235 +777,258 @@
   },
   "Logging": {
     "logadd": {
-      "description": null,
+      "description": "Start logging a text channel.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%logadd [text channel]",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
       "aliases": null
     },
     "logremove": {
-      "description": null,
+      "description": "Stop logging a text channel",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%logremove [text channel]",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
       "aliases": null
     },
     "sendall": {
-      "description": null,
+      "description": "Toggle all messages going to log channel. Will only send edited and edited messages if turned off.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%sendall",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
       "aliases": null
     },
     "startlogging": {
-      "description": null,
+      "description": "Start sending log messages in the current server and channel.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%startlogging",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
       "aliases": null
     },
     "stoplogging": {
-      "description": null,
+      "description": "Stop sending log messages in the current server.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%stoplogging",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
       "aliases": null
     }
   },
   "Miscellaneous": {
     "8ball": {
-      "description": null,
+      "description": "Ask the 8ball a yes or no question.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%8ball [question]",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": [
+        "8"
+      ]
     },
     "addnoti": {
-      "description": null,
+      "description": "Receive a DM whenever a phrase/word is said in the server.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%addnoti <phrase>",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
     },
     "botinfo": {
-      "description": null,
+      "description": "Displays general information about the Bot.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%botinfo",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
     },
     "checkprefix": {
-      "description": null,
+      "description": "Check the current prefix.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%checkprefix",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": null,
+      "note": "This command will always work with the bot's default prefix."
     },
     "choose": {
-      "description": null,
+      "description": "Choose between a selection of options.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%choose <options>",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": null,
+      "note": "Underscores are used for spaces between words. Spaces are used to separate choices."
     },
     "displayemoji": {
-      "description": null,
+      "description": "Displays an emoji at a larger size.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%displayemoji <emoji>",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
     },
     "flip": {
-      "description": null,
+      "description": "Flip a coin.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%flip",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": [
+        "coinflip",
+        "f"
+      ]
     },
     "invite": {
-      "description": null,
+      "description": "Invite link to add the Bot to a server.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%invite",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
     },
     "listnoti": {
-      "description": null,
+      "description": "List all your notification phrases for the current server.",
       "example_image_url": null,
-      "syntax": null,
-      "example_syntax": null,
-      "permissions_needed": null,
-      "aliases": null
-    },
-    "nword": {
-      "description": null,
-      "example_image_url": null,
-      "syntax": null,
-      "example_syntax": null,
-      "permissions_needed": null,
-      "aliases": null
-    },
-    "nwordleaderboard": {
-      "description": null,
-      "example_image_url": null,
-      "syntax": null,
+      "syntax": "%listnoti",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
     },
     "patreon": {
-      "description": null,
+      "description": "Displays link to Patreon.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%patreon",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": [
+        "patron"
+      ]
     },
     "ping": {
-      "description": null,
+      "description": "Shows Overall Latency to Discord.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%ping",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": [
+        "pong"
+      ]
     },
     "random": {
-      "description": null,
+      "description": "Choose a random integer from a to b.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%random <a> <b>",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": [
+        "r",
+        "rand",
+        "randint"
+      ],
+      "note": "Random integer may include b."
     },
     "removenoti": {
-      "description": null,
+      "description": "Remove a phrase/word from notifying you when it is said in the current server.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%removenoti <phrase/word>",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": [
+        "deletenoti"
+      ]
     },
     "report": {
-      "description": null,
+      "description": "Report an issue with the Bot.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%report <issue>",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
     },
     "servercount": {
-      "description": null,
+      "description": "Shows the amount of servers connected to the Bot.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%servercount",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
     },
     "serverinfo": {
-      "description": null,
+      "description": "View information about the current server.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%serverinfo",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
     },
     "setlanguage": {
-      "description": null,
+      "description": "Changes language of the Bot.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%setlanguage <language choice>",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": null,
+      "note": "Available choices: en_us"
     },
     "stopgames": {
-      "description": null,
+      "description": "End all games that you are hosting or that are in the channel.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%stopgames",
       "example_syntax": null,
-      "permissions_needed": null,
-      "aliases": null
+      "permissions_needed": [
+        "Host",
+        "Manage Messages"
+      ],
+      "aliases": [
+        "stopgame",
+        "endgame",
+        "endgames"
+      ]
     },
     "suggest": {
-      "description": null,
+      "description": "Suggest a feature for the Bot.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%suggest <suggestion>",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
     },
     "support": {
-      "description": null,
+      "description": "Discord Invite link to the Bot's Support Server.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%support",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
     },
     "translate": {
-      "description": null,
+      "description": "Translate between languages using Papago.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%translate <from language> <to language> <message>",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": [
+        "t",
+        "trans"
+      ]
     },
     "vote": {
-      "description": null,
+      "description": "Direct link to vote for the Bot.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%vote",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
@@ -887,201 +1036,262 @@
   },
   "Moderator": {
     "addalias": {
-      "description": null,
+      "description": "Add an alias to an idol/group.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%addalias <alias> <idol/group id> [mode=idol/group]",
       "example_syntax": null,
-      "permissions_needed": null,
-      "aliases": null
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": null,
+      "note": "Underscores for the alias are spaces. If a Bot Moderator uses this command, it will be a global (not local) alias."
     },
     "addemoji": {
-      "description": null,
+      "description": "Adds emojis to the server.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%addemoji <urls/emojis> [emoji_name]",
       "example_syntax": null,
-      "permissions_needed": null,
-      "aliases": null
+      "permissions_needed": [
+        "Manage Messages",
+        "Manage Emojis"
+      ],
+      "aliases": [
+        "yoink"
+      ]
     },
     "ban": {
-      "description": null,
+      "description": "Ban a member.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%ban [user] [reason=No Reason]",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": [
+        "Ban Members"
+      ],
       "aliases": null
     },
     "clear": {
-      "description": null,
+      "description": "Prunes messages in the text channel.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%clear <amount> [user]",
       "example_syntax": null,
-      "permissions_needed": null,
-      "aliases": null
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": [
+        "prune"
+      ],
+      "note": "Amount limit is 1000."
     },
     "deletealias": {
-      "description": null,
+      "description": "Delete an alias from an idol/group.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%deletealias <alias> <idol/group id> [mode=idol/group]",
       "example_syntax": null,
-      "permissions_needed": null,
-      "aliases": null
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": [
+        "removealias"
+      ],
+      "note": "Underscores for the alias are spaces. If a Bot Moderator uses this command, it will be a global (not local) alias."
     },
-    "deleteinteraction": {
-      "description": null,
+    "disableinteraction": {
+      "description": "Disable an interaction on the server.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%disableinteraction <interaction>",
       "example_syntax": null,
-      "permissions_needed": null,
-      "aliases": null
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": null,
+      "note": "To re-enable, use the same command again."
     },
     "kick": {
-      "description": null,
+      "description": "Kick a member.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%kick [user] [reason=No Reason]",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": [
+        "Kick Members"
+      ],
       "aliases": null
     },
     "mute": {
-      "description": null,
+      "description": "Mutes a member.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%mute [user] [reason]",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": [
+        "Manage Messages",
+        "Manage Roles"
+      ],
       "aliases": null
     },
     "say": {
-      "description": null,
+      "description": "Make the Bot say a message.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%say [text channel] [message]",
       "example_syntax": null,
-      "permissions_needed": null,
-      "aliases": null
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": null,
+      "note": "If a text channel is not provided, it will send the message in the current channel."
     },
     "sayembed": {
-      "description": null,
+      "description": "Make the Bot say an embed message.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%sayembed [text channel] [embed format]",
       "example_syntax": null,
-      "permissions_needed": null,
-      "aliases": null
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": null,
+      "note": "Follows the format from https://embedbuilder.nadekobot.me/. If a text channel is not provided, it will send the message in the current channel."
     },
     "setprefix": {
-      "description": null,
+      "description": "Set the server prefix.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%setprefix [prefix=%]",
       "example_syntax": null,
-      "permissions_needed": null,
-      "aliases": null
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": null,
+      "note": "Using the command with the default prefix (and no new prefix) will set it back to the default."
     },
     "tempchannel": {
-      "description": null,
+      "description": "Make the current channel a temporary channel deleting messages after a delay.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%tempchannel [delay=-1]",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": [
+        "temp"
+      ],
+      "note": "The time delay must be greater than a minute. If the delay is -1, it will remove the channel as a temp channel. The delay must be put in seconds."
     },
     "togglegames": {
-      "description": null,
+      "description": "Toggle the ability to play games in a text channel.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%togglegames [text channel]",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
       "aliases": null
     },
     "unban": {
-      "description": null,
+      "description": "Unban a user.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%unban [user] [reason=No Reason]",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": [
+        "Ban Members"
+      ],
       "aliases": null
     },
     "unmute": {
-      "description": null,
+      "description": "Unmute a member.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%unmute [user]",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": [
+        "Manage Messages",
+        "Manage Roles"
+      ],
       "aliases": null
     },
     "welcome": {
-      "description": null,
+      "description": "Set a welcome message in the current channel.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%welcome [message]",
       "example_syntax": null,
-      "permissions_needed": null,
-      "aliases": null
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": null,
+      "note": "Use the command with no message to disable the welcome message. If the message contains %user, it will mention the user. If the message contains %guild_name, the server name will be added."
     },
     "welcomerole": {
-      "description": null,
+      "description": "The role to give a user when they first join the server.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%welcomerole [role]",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
       "aliases": null
     }
   },
   "Music": {
     "join": {
-      "description": null,
+      "description": "Makes the Bot join the current voice channel.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%join",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
     },
     "move": {
-      "description": null,
+      "description": "Make a song the next to play without skipping the current song.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%move <song number>",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": [
+        "skipto"
+      ]
     },
     "pause": {
-      "description": null,
+      "description": "Pause the currently playing song.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%pause",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
     },
     "play": {
-      "description": null,
+      "description": "Play a song.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%play [url/song]",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": [
+        "p"
+      ]
     },
     "queue": {
-      "description": null,
+      "description": "Shows the currently queued songs.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%queue [page number=1]",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": [
+        "list",
+        "q"
+      ]
     },
     "remove": {
-      "description": null,
+      "description": "Remove a song from the queue.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%remove <song number>",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
     },
     "resume": {
-      "description": null,
+      "description": "Resume a paused song.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%resume",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": [
+        "unpause"
+      ]
     },
     "shuffle": {
-      "description": null,
+      "description": "Shuffle the playlist/queue.",
       "example_image_url": null,
       "syntax": null,
       "example_syntax": null,
@@ -1089,51 +1299,55 @@
       "aliases": null
     },
     "skip": {
-      "description": null,
+      "description": "Skip the current song.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%skip",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
     },
     "stop": {
-      "description": null,
+      "description": "Disconnects from the voice channel and resets the queue.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%stop",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": [
+        "leave"
+      ]
     },
     "volume": {
-      "description": null,
+      "description": "Change the player's volume.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%volume [volume=10]",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": null,
+      "note": "The volume is by default set to 10."
     },
     "lyrics": {
-      "description": null,
+      "description": "Get the lyrics of a song.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%lyrics <song query>",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": null,
+      "note": "The lyrics are retrieved from https://api.ksoft.si/"
     }
   },
   "Profile": {
     "avatar": {
-      "description": null,
+      "description": "View a member's avatar.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%avatar [user]",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
     },
     "profile": {
-      "description": null,
+      "description": "View a member's profile.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%profile [user]",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
@@ -1141,49 +1355,57 @@
   },
   "LastFM": {
     "fm": {
-      "description": null,
+      "description": "Get information about a Last FM account.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%fm [user/lastfm username]",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
     },
     "recenttracks": {
-      "description": null,
+      "description": "Get the recent tracks of a Last FM Account.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%recenttracks [user/lastfm username]",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": ["rt", "recents"]
     },
     "recent": {
-      "description": null,
+      "description": "Get the most recent track of a Last FM Account.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%recent [user/lastfm username]",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": ["np"]
     },
     "topalbums": {
-      "description": null,
+      "description": "See the top albums of a Last FM Account.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%topalbums [user/lastfm username]",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": ["tal"]
     },
     "topartists": {
-      "description": null,
+      "description": "See the top artists of a Last FM Account.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%topartists [user/lastfm username]",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": ["ta"]
     },
     "toptracks": {
-      "description": null,
+      "description": "See the top tracks of a Last FM Account.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%toptracks [user/lastfm username]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": ["tt"]
+    },
+    "setfm": {
+      "description": "Attach a LastFM username to your Discord account.",
+      "example_image_url": null,
+      "syntax": "%setfm <lastfm username>",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
@@ -1191,9 +1413,9 @@
   },
   "Wolfram": {
     "w": {
-      "description": null,
+      "description": "Send a request to Wolfram",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%w <query>",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
@@ -1201,337 +1423,347 @@
   },
   "Twitter": {
     "deletetweet": {
-      "description": null,
+      "description": "Delete a tweet by it's ID.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%deletetweet <tweet id>",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": ["Bot Owner"],
       "aliases": null
     },
     "recenttweets": {
-      "description": null,
+      "description": "View the recent tweets.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%recenttweets [amount of tweets=20]",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": ["Bot Owner"],
       "aliases": null
     },
     "tweet": {
-      "description": null,
+      "description": "Tweets a status update on Twitter.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%tweet <tweet>",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": ["Bot Owner"],
       "aliases": null
     }
   },
   "UnScramble": {
     "unscramble": {
-      "description": null,
+      "description": "Start an Idol Unscramble Game in the current channel.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%unscramble [gender=all] [difficulty=medium] [rounds=20] [timeout=20]",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": [
+        "us"
+      ],
+      "note": "The host of the game can type stop or end to end the game or skip to skip the current round without affecting the round number."
     },
     "usleaderboard": {
-      "description": null,
+      "description": "Shows Server/Global leaderboards for the Unscramble Game.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%usleaderboard [difficulty=easy/medium/hard] [mode=server/global]",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": ["uslb", "usl"]
     },
     "stopus": {
-      "description": null,
+      "description": "Force-end an Unscramble Game.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%stopus",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": [
+        "Host",
+        "Manage Messages"
+      ],
       "aliases": null
     }
   },
   "Youtube": {
     "addurl": {
-      "description": null,
+      "description": "Adds url to youtube videos to scrape.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%addurl <link>",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": ["Bot Owner"],
       "aliases": null
     },
     "removeurl": {
-      "description": null,
+      "description": "Remove a url from the youtube videos.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%removeurl <link>",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": ["Bot Owner"],
       "aliases": null
     },
     "scrapeyoutube": {
-      "description": null,
+      "description": "Scrape view count from the youtube videos in the DB.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%scrapeyoutube",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": ["Bot Owner"],
       "aliases": null
     },
     "startloop": {
-      "description": null,
+      "description": "Start scraping youtube videos with a new instance after t seconds.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%startloop [seconds=0]",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": ["Bot Owner"],
       "aliases": null
     },
     "stoploop": {
-      "description": null,
+      "description": "Stop scraping youtube videos.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%stoploop",
       "example_syntax": null,
-      "permissions_needed": null,
-      "aliases": null
+      "permissions_needed": ["Bot Owner"],
+      "aliases": null,
+      "note": "This will also stop the main instance running on start-up."
     }
   },
   "Weverse": {
     "updates": {
-      "description": null,
+      "description": "Receive Weverse updates of a Weverse community in the current text channel.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%updates <community name> [role]",
       "example_syntax": null,
-      "permissions_needed": null,
-      "aliases": null
+      "permissions_needed": ["Bot Owner"],
+      "aliases": null,
+      "note": "This command has been privatized to the Bot Owner. Available Communities are TXT, BTS, GFRIEND, SEVENTEEN, ENHYPEN, NU'EST, CL, P1Harmony, Weeekly, SUNMI, HENRY, Dreamcatcher, Cherry_Bullet, MIRAE, TREASURE, LETTEAMOR, EVERGLOW, FTISLAND, woo!ah!, IKON, JUST_B, and BLACKPINK."
     },
     "disablecomments": {
-      "description": null,
+      "description": "Disable the comments of a Weverse community.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%disablecomments <community name>",
       "example_syntax": null,
-      "permissions_needed": null,
-      "aliases": null
+      "permissions_needed": ["Bot Owner"],
+      "aliases": null,
+      "note": "Use the command again to re-enable."
     },
     "disablemedia": {
-      "description": null,
+      "description": "Disable the media of a Weverse community.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%disablemedia <community name>",
       "example_syntax": null,
-      "permissions_needed": null,
-      "aliases": null
+      "permissions_needed": ["Bot Owner"],
+      "aliases": null,
+      "note": "Use the command again to re-enable."
     }
   },
   "SelfAssignRoles": {
     "addrole": {
-      "description": null,
+      "description": "Add a role to be self-assignable.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%addrole <role> <role name>",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": ["Manage Messages"],
       "aliases": null
     },
     "listroles": {
-      "description": null,
+      "description": "List all of the self-assignable roles in the server.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%listroles",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": ["Manage Messages"],
       "aliases": null
     },
     "removerole": {
-      "description": null,
+      "description": "Remove a self-assignable role based on the role name given.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%removerole <role name>",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": ["Manage Messages"],
       "aliases": null
     },
     "sendrolemessage": {
-      "description": null,
+      "description": "Sends the default role message in the current channel.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%sendrolemessage",
       "example_syntax": null,
-      "permissions_needed": null,
-      "aliases": null
+      "permissions_needed": ["Manage Messages"],
+      "aliases": null,
+      "note": "The roles will work without this command, but should be used to have a list of roles."
     },
     "setrolechannel": {
-      "description": null,
+      "description": "Set the channel for self-assignable roles to be used in.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%setrolechannel [text channel]",
       "example_syntax": null,
-      "permissions_needed": null,
-      "aliases": null
+      "permissions_needed": ["Manage Messages"],
+      "aliases": null,
+      "note": "Since this command will erase all future messages, it is suggested to use %sendrolemessage before this one."
     }
   },
   "Reminder": {
     "gettimezone": {
-      "description": null,
+      "description": "Get your current set timezone.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%gettz [timezone]",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": ["gettz", "time"]
     },
     "listreminders": {
-      "description": null,
+      "description": "List out your reminders.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%listreminders",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": ["listreminds", "reminders", "reminds"]
     },
     "remindme": {
-      "description": null,
+      "description": "Create a reminder to do a task at a certain time.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%remindme to ______ at 9PM or %remindme to ____ in 6hrs 30mins",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": ["remind"],
+      "note": "The user input is fairly flexible for this command."
     },
     "removereminder": {
-      "description": null,
+      "description": "Remove a reminder based on it's index.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%removereminder <reminder index>",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": ["removeremind"]
     },
     "settimezone": {
-      "description": null,
+      "description": "Set your local timezone with a timezone abbreviation and country code.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%settimezone (timezone name) (country code)",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": ["settz"],
+      "note": "The country code is the short-handed version of the location (ex: USA)."
     }
   },
   "Twitch": {
     "addtwitch": {
-      "description": null,
+      "description": "Adds a Twitch username to keep track of.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%addtwitch <twitch username>",
       "example_syntax": null,
-      "permissions_needed": null,
-      "aliases": null
+      "permissions_needed": ["Manage Messages"],
+      "aliases": null,
+      "note": "Maximum 2 Twitch channels per server."
     },
     "listtwitch": {
-      "description": null,
+      "description": "List the Twitch channels the server follows.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%listtwitch",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": ["Manage Messages"],
       "aliases": null
     },
     "removetwitch": {
-      "description": null,
+      "description": "Remove a Twitch username that is being kept track of.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%removetwitch <twitch username>",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": ["Manage Messages"],
       "aliases": null
     },
     "settwitchchannel": {
-      "description": null,
+      "description": "Set the Discord channel that the Twitch announcements will be posted on.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%settwitchchannel [text channel]",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": ["Manage Messages"],
       "aliases": null
     },
     "settwitchrole": {
-      "description": null,
+      "description": "Set the Discord Role that will be mentioned on Twitch announcements.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%settwitchrole [role]",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": ["Manage Messages"],
       "aliases": null
     }
   },
   "BotOwner": {
     "addcards": {
-      "description": null,
+      "description": "Fill the cards table with the default card names.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%addcards",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": ["Bot Owner"],
       "aliases": null
     },
     "addpatreon": {
-      "description": null,
+      "description": "Adds a permanent patron",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%addpatreon <user ids>",
       "example_syntax": null,
-      "permissions_needed": null,
-      "aliases": null
+      "permissions_needed": ["Bot Owner"],
+      "aliases": null,
+      "note": "Use commas to separate user ids."
     },
     "approve": {
-      "description": null,
+      "description": "Approve a query id for an unregistered Group or Idol.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%approve <query id> [mode=idol/group]",
       "example_syntax": null,
-      "permissions_needed": null,
-      "aliases": null
-    },
-    "clearnword": {
-      "description": null,
-      "example_image_url": null,
-      "syntax": null,
-      "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": ["Bot Owner"],
       "aliases": null
     },
     "generateplayingcards": {
-      "description": null,
+      "description": "Generate Custom Playing Cards with Idol Avatars.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%generateplayingcards",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": ["Bot Owner"],
       "aliases": null
     },
     "removepatreon": {
-      "description": null,
+      "description": "Removes a permanent patron.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%removepatreon <user ids>",
       "example_syntax": null,
-      "permissions_needed": null,
-      "aliases": null
+      "permissions_needed": ["Bot Owner"],
+      "aliases": null,
+      "note": "Use commas to separate user ids."
     },
     "resetcache": {
-      "description": null,
+      "description": "Reset Cache",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%resetcache",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": ["Bot Owner"],
       "aliases": null
     },
     "scandrive": {
-      "description": null,
+      "description": "Scan an archived name and transfer them to an idol.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%scandrive [name] [member id]",
       "example_syntax": null,
-      "permissions_needed": null,
-      "aliases": null
+      "permissions_needed": ["Bot Owner"],
+      "aliases": null,
+      "note": "Archive has not been looked at in a very long time and may not work efficiently."
     },
     "send": {
-      "description": null,
+      "description": "Send a message to a text channel.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%send <channel id> <message>",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": ["Bot Owner"],
       "aliases": null
     },
     "speak": {
-      "description": null,
+      "description": "Owner to Bot TTS",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%speak <message>",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": ["Bot Owner"],
       "aliases": null
     },
     "uploadfromhost": {
-      "description": null,
+      "description": "Toggles whether images are uploaded from the host or are used through an image url.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%uploadfromhost",
       "example_syntax": null,
-      "permissions_needed": null,
+      "permissions_needed": ["Bot Owner"],
       "aliases": null
     }
   }

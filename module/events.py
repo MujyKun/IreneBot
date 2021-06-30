@@ -40,8 +40,6 @@ class Events(commands.Cog):
             ex.cache.messages_received_per_minute += 1
             # delete messages that are in temp channels
             await Events.catch_on_message_errors(ex.u_miscellaneous.delete_temp_messages, message)
-            # check for the n word
-            await Events.catch_on_message_errors(ex.u_miscellaneous.check_for_nword, message)
             # check for self-assignable roles and process it.
             await Events.catch_on_message_errors(ex.u_self_assign_roles.check_for_self_assignable_role, message)
             # process the commands with their prefixes.

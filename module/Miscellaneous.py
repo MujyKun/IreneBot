@@ -356,62 +356,6 @@ Maintenance Status: {maintenance_status}
             log.console(e)
             await ctx.send("Could not fetch channel to suggest to.")
 
-    @commands.command()
-    async def nword(self, ctx, user: discord.Member = None):
-        """
-        Checks how many times a user has said the N Word
-
-        [Format: %nword @user]
-        """
-        if not user:
-            user = ctx.author
-        current_amount = (await self.ex.get_user(user.id)).n_word
-        if not current_amount:
-            return await ctx.send(f"> **<@{user.id}> has not said the N-Word a single time!**")
-        else:
-            await ctx.send(f"> **<@{user.id}> has said the N-Word {current_amount} time(s)!**")
-
-    @commands.command(aliases=["nwl"])
-    async def nwordleaderboard(self, ctx, mode="server"):
-        """
-        Shows leaderboards for how many times the nword has been said.
-
-        [Format: %nwl (server/global)]
-        """
-        embed = discord.Embed(title=f"NWord Leaderboard", color=0xffb6c1)
-        embed.set_author(name="Irene", url=self.ex.keys.bot_website, icon_url=self.ex.keys.icon_url)
-        embed.set_footer(
-            text=f"Type {await self.ex.get_server_prefix(ctx)}nword (user) to view their individual stats.",
-            icon_url=self.ex.keys.footer_url)
-
-        guild_id = await self.ex.get_server_id(ctx)
-        if not guild_id:
-            # server rankings can not be accessed from DMs.
-            mode = "global"
-
-        guild = self.ex.client.get_guild(guild_id)
-        member_list = [member.id for member in guild.members]
-
-        embed_field_counter = 0  # do not use enumerate for this.
-
-        # fastest way to bring up the organized leaderboard is actually through the DB instead of cache.
-        for user_id, n_word_count in await self.ex.sql.s_general.fetch_n_word(ordered_by_greatest=True):
-            await asyncio.sleep(0)
-            if embed_field_counter >= 10:
-                break
-
-            try:
-                user_name = (self.ex.client.get_user(user_id)).name
-            except:
-                # if the user is not in discord.py's member cache, then set the user's name to null.
-                user_name = "NULL"
-
-            if mode.lower() == "global" or user_id in member_list:
-                embed.add_field(name=f"{embed_field_counter + 1}) {user_name} ({user_id})", value=n_word_count)
-                embed_field_counter += 1
-
-        await ctx.send(embed=embed)
-
     @commands.command(aliases=['rand', 'randint', 'r'])
     async def random(self, ctx, a: int, b: int):
         """Choose a random number from a range (a,b)."""

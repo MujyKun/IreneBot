@@ -1,4 +1,4 @@
-# [IreneBot V1.04.1](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=1609956823)
+# [IreneBot V1.04.2](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=1609956823)
 
 ## [Support Irene by becoming a Patron!](https://www.patreon.com/bePatron?u=38971435)  
 **[Become a Patron!](https://www.patreon.com/bePatron?u=38971435)**
@@ -241,11 +241,6 @@ To find out more, look at the `GroupMembers` category.
 |------------------|--------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------|
 | w           | Send a request to Wolfram.                                                                                                            | %wolfram (query)                               |
 
-
-#### Testing ♥♥♥
-| Command          | Description                                                                                                                          | Format                          |
-|------------------|--------------------------------------------------------------------------------------------------------------------------------------|---------------------------------|
-| testcommands      | Tests all commands (Use this while in a voice channel)                                                                                                            | %testcommands               |
 
 #### Twitter: ♥♥♥
 | Command          | Description                                                                                                                          | Format                          |

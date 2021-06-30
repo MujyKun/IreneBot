@@ -1,0 +1,1538 @@
+{
+  "Archive": {
+    "addchannel": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "addhistory": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "deletechannel": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "listchannels": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    }
+  },
+  "BlackJack": {
+    "blackjack": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "stopbj": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "hit": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "joingame": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "rules": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "stand": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    }
+  },
+  "BotMod": {
+    "addidoltogroup": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "addinteraction": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "addstatus": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "botban": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "botunban": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "botwarn": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "closedm": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "createdm": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "deletegroup": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "deleteidol": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "deleteidolfromgroup": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "deleteinteraction": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "getstatuses": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "kill": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "killapi": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "maintenance": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "mergeidol": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "mergegroup": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "removestatus": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "repost": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "weverseauth": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    }
+  },
+  "BiasGame": {
+    "biasgame": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "stopbg": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "listbg": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    }
+  },
+  "Currency": {
+    "balance": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "beg": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "bet": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "daily": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "give": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "leaderboard": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "rob": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "rps": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "upgrade": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    }
+  },
+  "CustomCommands": {
+    "createcommand": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "deletecommand": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "listcommands": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    }
+  },
+  "GroupMembers": {
+    "addidol": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "addgroup": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "aliases": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "card": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "count": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "countleaderboard": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "countgroup": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "countmember": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "fullnames": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "groups": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "members": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "randomidol": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "sendidol": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "sendimages": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "stopimages": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    }
+  },
+  "GuessingGame": {
+    "guessinggame": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "groupguessinggame": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "ggfilter": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "ggfilteredlist": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "ggleaderboard": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "stopgg": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    }
+  },
+  "Interactions": {
+    "choke": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "cuddle": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "hug": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "kiss": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "lick": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "pat": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "punch": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "pullhair": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "slap": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "spit": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "stab": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "stepon": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    }
+  },
+  "Logging": {
+    "logadd": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "logremove": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "sendall": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "startlogging": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "stoplogging": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    }
+  },
+  "Miscellaneous": {
+    "8ball": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "addnoti": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "botinfo": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "checkprefix": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "choose": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "displayemoji": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "flip": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "invite": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "listnoti": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "nword": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "nwordleaderboard": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "patreon": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "ping": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "random": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "removenoti": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "report": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "servercount": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "serverinfo": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "setlanguage": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "stopgames": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "suggest": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "support": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "translate": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "vote": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    }
+  },
+  "Moderator": {
+    "addalias": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "addemoji": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "ban": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "clear": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "deletealias": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "deleteinteraction": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "kick": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "mute": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "say": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "sayembed": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "setprefix": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "tempchannel": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "togglegames": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "unban": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "unmute": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "welcome": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "welcomerole": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    }
+  },
+  "Music": {
+    "join": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "move": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "pause": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "play": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "queue": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "remove": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "resume": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "shuffle": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "skip": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "stop": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "volume": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "lyrics": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    }
+  },
+  "Profile": {
+    "avatar": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "profile": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    }
+  },
+  "LastFM": {
+    "fm": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "recenttracks": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "recent": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "topalbums": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "topartists": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "toptracks": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    }
+  },
+  "Wolfram": {
+    "w": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    }
+  },
+  "Twitter": {
+    "deletetweet": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "recenttweets": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "tweet": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    }
+  },
+  "UnScramble": {
+    "unscramble": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "usleaderboard": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "stopus": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    }
+  },
+  "Youtube": {
+    "addurl": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "removeurl": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "scrapeyoutube": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "startloop": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "stoploop": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    }
+  },
+  "Weverse": {
+    "updates": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "disablecomments": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "disablemedia": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    }
+  },
+  "SelfAssignRoles": {
+    "addrole": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "listroles": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "removerole": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "sendrolemessage": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "setrolechannel": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    }
+  },
+  "Reminder": {
+    "gettimezone": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "listreminders": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "remindme": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "removereminder": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "settimezone": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    }
+  },
+  "Twitch": {
+    "addtwitch": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "listtwitch": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "removetwitch": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "settwitchchannel": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "settwitchrole": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    }
+  },
+  "BotOwner": {
+    "addcards": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "addpatreon": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "approve": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "clearnword": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "generateplayingcards": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "removepatreon": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "resetcache": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "scandrive": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "send": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "speak": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "uploadfromhost": {
+      "description": null,
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    }
+  }
+}

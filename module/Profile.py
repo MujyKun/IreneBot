@@ -19,6 +19,10 @@ class Profile(commands.Cog):
 
     @commands.command()
     async def avatar(self, ctx, user: discord.Member = None):
+        """View a member's avatar.
+
+        [Format: %avatar [@user]]
+        """
         try:
             if not user:
                 user_id = ctx.author.id
@@ -33,6 +37,10 @@ class Profile(commands.Cog):
 
     @commands.command()
     async def profile(self, ctx, user: discord.Member = None):
+        """View a member's profile.
+
+        [Format: %profile [@user]]
+        """
         try:
             if not user:
                 user_id = ctx.author.id

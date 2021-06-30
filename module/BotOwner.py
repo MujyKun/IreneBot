@@ -113,21 +113,6 @@ class BotOwner(commands.Cog):
         msg = await self.ex.get_msg(ctx, 'botowner', 'patrons_removed', ['users', users])
         await ctx.send(msg)
 
-    @commands.is_owner()
-    @commands.command()
-    async def clearnword(self, ctx, user: discord.Member):
-        """
-        Clear A User's Nword Counter
-
-        [Format: %clearnword @user]
-        """
-        if not (await self.ex.get_user(user.id)).n_word:
-            return await ctx.send(await self.ex.get_msg(ctx, 'general', 'no_n_word'))
-
-        await self.ex.conn.execute("DELETE FROM general.nword where userid = $1", user.id)
-        (await self.ex.get_user(user.id)).n_word = 0
-        await ctx.send(await self.ex.get_msg(ctx, 'botowner', 'cleared'))
-
     @commands.command()
     @commands.is_owner()
     async def send(self, ctx, channel_id, *, message_to_send):

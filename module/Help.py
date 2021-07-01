@@ -47,12 +47,37 @@ class Help(commands.Cog):
         async def send_command_help(self, command):
             """%help (specific command)."""
             channel = self.get_destination()
-            cmd_format = self.get_command_signature(command)
+
+            """
+            We are now going to have manually updated information for our commands instead of directly through
+            methods. This will make it easier to share accurate and precise information across all of the Bot's 
+            Systems. If information is needed from a cog command, use the argument passed into the method.
+            """
+            unique_command = ex.get_unique_command(command.cog_name, command.qualified_name)
             # change the default prefix to the server prefix
             cmd_prefix = await self.get_server_prefix()
-            cmd_format = cmd_prefix + cmd_format[1:len(cmd_format)]
-            cmd_brief = command.help.replace(ex.keys.bot_prefix, cmd_prefix)
-            embed = discord.Embed(description=f"{cmd_format}\n\n{cmd_brief}")
+
+            if not unique_command:
+                cmd_format = self.get_command_signature(command)
+                cmd_format = cmd_prefix + cmd_format[1:len(cmd_format)]
+                cmd_brief = command.help.replace(ex.keys.bot_prefix, cmd_prefix)
+                embed = discord.Embed(description=f"{cmd_format}\n\n{cmd_brief}")
+
+            else:
+                syntax = "" if not unique_command.syntax else f"**Syntax**:\n{unique_command.syntax}\n\n"
+                example_syntax = "" if not unique_command.example_syntax else \
+                    f"**Example Syntax**:\n{unique_command.example_syntax}\n\n"
+                desc = "" if not unique_command.description else f"**Description**:\n{unique_command.description}\n\n"
+                notes = "" if not unique_command.notes else f"**Additional Notes**:\n{unique_command.notes}\n\n"
+                aliases = "" if not unique_command.aliases else f"**Aliases**:\n{', '.join(unique_command.aliases)}\n\n"
+                cog_name = "" if not unique_command.cog_name else f"**Cog Name**:\n{unique_command.cog_name}\n\n"
+                perms_needed = "" if not unique_command.permissions_needed else \
+                    f"**Permissions Needed**:\n{', '.join(unique_command.permissions_needed)}\n\n"
+                cmd_brief = f"{syntax}{desc}{notes}{example_syntax}{aliases}{cog_name}{perms_needed}"
+                cmd_brief = cmd_brief.replace(ex.keys.bot_prefix, cmd_prefix)
+                embed = discord.Embed(description=cmd_brief)
+                if unique_command.example_image_url:
+                    embed.set_image(url=unique_command.example_image_url)
             await channel.send(embed=embed)
 
         async def send_cog_help(self, cog):

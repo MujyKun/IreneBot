@@ -323,4 +323,7 @@ To find out more, look at the `GroupMembers` category.
 #### Vlive: ★★★
 | Command     | Description                          | Format                 | Aliases           |
 |-------------|--------------------------------------|------------------------|-------------------|
-| vliveupdates | Adds a Twitch username to keep track of. Maximum 2 Twitch channels per server. | %addtwitch (twitch username) | vlive |
+| vliveupdates code | Follow a VLIVE channel based on the channel code. | %vliveupdates code (vlive channel code) [role id] | vlive code |
+| vliveupdates group | Follow a VLIVE channel belonging to a Group ID If they have one. | %vliveupdates group (group id) [role id] | vlive group |
+| vliveupdates idol | Follow a VLIVE channel belonging to an Idol ID If they have one. | %vliveupdates idol (idol id) [role id] | vlive idol |
+| vliveupdates list | Lists the VLIVE channels currently being followed in the text channel. | %vliveupdates list | vlive list |

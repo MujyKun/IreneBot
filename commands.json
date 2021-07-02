@@ -1553,15 +1553,18 @@
     }
   },
   "Weverse": {
-    "updates": {
+    "weverseupdates": {
       "description": "Receive Weverse updates of a Weverse community in the current text channel.",
       "example_image_url": null,
-      "syntax": "%updates <community name> [role]",
+      "syntax": "%weverseupdates <community name> [role]",
       "example_syntax": null,
       "permissions_needed": [
-        "Bot Owner"
+        "Bot Owner",
+        "Manage Messages"
       ],
-      "aliases": null,
+      "aliases": [
+        "weverse"
+      ],
       "note": "This command has been privatized to the Bot Owner. Available Communities are TXT, BTS, GFRIEND, SEVENTEEN, ENHYPEN, NU'EST, CL, P1Harmony, Weeekly, SUNMI, HENRY, Dreamcatcher, Cherry_Bullet, MIRAE, TREASURE, LETTEAMOR, EVERGLOW, FTISLAND, woo!ah!, IKON, JUST_B, and BLACKPINK."
     },
     "disablecomments": {
@@ -1570,7 +1573,8 @@
       "syntax": "%disablecomments <community name>",
       "example_syntax": null,
       "permissions_needed": [
-        "Bot Owner"
+        "Bot Owner",
+        "Manage Messages"
       ],
       "aliases": null,
       "note": "Use the command again to re-enable."
@@ -1581,7 +1585,8 @@
       "syntax": "%disablemedia <community name>",
       "example_syntax": null,
       "permissions_needed": [
-        "Bot Owner"
+        "Bot Owner",
+        "Manage Messages"
       ],
       "aliases": null,
       "note": "Use the command again to re-enable."
@@ -1854,6 +1859,63 @@
         "Bot Owner"
       ],
       "aliases": null
+    }
+  },
+  "Vlive": {
+    "vliveupdates": {
+      "description": "Receive Updates for VLive.",
+      "example_image_url": null,
+      "syntax": "%vliveupdates <code/group/idol/list> <channel code, group id, idol id> [role id]",
+      "example_syntax": null,
+      "sub_commands": {
+        "code": {
+          "description": "Follow a VLIVE channel based on the channel code.",
+          "example_image_url": null,
+          "syntax": "%vliveupdates code <channel code> [role id]",
+          "example_syntax": null,
+          "permissions_needed": [
+            "Manage Messages"
+          ],
+          "aliases": null
+        },
+        "group": {
+          "description": "Follow a VLIVE channel belonging to a Group ID If they have one.",
+          "example_image_url": null,
+          "syntax": "%vliveupdates group <group id> [role id]",
+          "example_syntax": null,
+          "permissions_needed": [
+            "Manage Messages"
+          ],
+          "aliases": null
+        },
+        "idol": {
+          "description": "Follow a VLIVE channel belonging to an Idol ID If they have one.",
+          "example_image_url": null,
+          "syntax": "%vliveupdates idol <idol id> [role id]",
+          "example_syntax": null,
+          "permissions_needed": [
+            "Manage Messages"
+          ],
+          "aliases": null
+        },
+        "list": {
+          "description": "Lists the VLIVE channels currently being followed in the text channel.",
+          "example_image_url": null,
+          "syntax": "%vliveupdates list",
+          "example_syntax": null,
+          "permissions_needed": [
+            "Manage Messages"
+          ],
+          "aliases": null
+        }
+      },
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": [
+        "vlive"
+      ],
+      "note": "This command contains sub-commands. This means any following arguments are respective to the first argument."
     }
   }
 }

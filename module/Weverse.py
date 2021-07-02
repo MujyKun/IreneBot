@@ -13,11 +13,12 @@ class Weverse(commands.Cog):
         self.current_notification_id = 0
         self.notifications_already_posted = {}  # channel_id : [notification ids]
         self.available_choices = "[TXT, BTS, GFRIEND, SEVENTEEN, ENHYPEN, NU'EST, CL, P1Harmony, Weeekly, SUNMI," \
-                                 " HENRY, Dreamcatcher, CherryBullet, MIRAE, TREASURE]"
+                                 " HENRY, Dreamcatcher, CherryBullet, MIRAE, TREASURE, LETTEAMOR, EVERGLOW, FTISLAND," \
+                                 " woo!ah!, IKON, JUST_B, BlackPink]"
 
-    @commands.command()
+    @commands.command(aliases=["weverse"])
     @commands.has_guild_permissions(manage_messages=True)
-    async def updates(self, ctx, community_name, role: discord.Role = None):
+    async def weverseupdates(self, ctx, community_name, role: discord.Role = None):
         """
         Receive Weverse Updates of a specific Weverse community in the current text channel.
 

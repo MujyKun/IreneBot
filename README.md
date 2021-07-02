@@ -274,7 +274,7 @@ To find out more, look at the `GroupMembers` category.
 #### Weverse (This is now disabled for normal users, but join the support server and follow the announcement channels to your text channels):
 | Command     | Description                          | Format                 | Aliases           |
 |-------------|--------------------------------------|------------------------|-------------------|
-| updates | Receive Weverse Updates of a specific Weverse community in the current text channel. Use again to disable for a specific community. Available Communities -> [TXT, BTS, GFRIEND, SEVENTEEN, ENHYPEN, NU'EST, CL, P1Harmony, Weeekly, SUNMI, HENRY, Dreamcatcher, CherryBullet, MIRAE, TREASURE, LETTEAMOR, EVERGLOW, FTISLAND, woo!ah!, IKON, JUST B, BLACKPINK] | %updates (community name) [role to notify] |  |
+| weverseupdates | Receive Weverse Updates of a specific Weverse community in the current text channel. Use again to disable for a specific community. Available Communities -> [TXT, BTS, GFRIEND, SEVENTEEN, ENHYPEN, NU'EST, CL, P1Harmony, Weeekly, SUNMI, HENRY, Dreamcatcher, CherryBullet, MIRAE, TREASURE, LETTEAMOR, EVERGLOW, FTISLAND, woo!ah!, IKON, JUST B, BLACKPINK] | %weverseupdates (community name) [role to notify] | weverse |
 | disablecomments | Disable updates for comments on a community. | %disablecomments (community name) |  |
 | disablemedia | Disable updates for media on a community. | %disablecomments (community name) |  |
 
@@ -319,3 +319,8 @@ To find out more, look at the `GroupMembers` category.
 | send              | Send a message to a text channel.                                             | %send (channelid) (message)                  |               |
 | speak            | Owner to Bot TTS                                               | %speak (message)                |              |
 | uploadfromhost            | Toggles whether images are uploaded from host or not.            | %uploadfromhost |              |
+
+#### Vlive: ★★★
+| Command     | Description                          | Format                 | Aliases           |
+|-------------|--------------------------------------|------------------------|-------------------|
+| vliveupdates | Adds a Twitch username to keep track of. Maximum 2 Twitch channels per server. | %addtwitch (twitch username) | vlive |

@@ -33,12 +33,6 @@ except Exception as e:
     log.useless(f"{e} (Exception) -> There are no mods listed for the bot.")
     mods_list_split = None
 
-try:
-    n_word_list = (os.getenv("NWORD_LIST")).split(',')
-except Exception as e:
-    log.useless(f"{e} (Exception) -> There are no n-word triggers listed for the bot.")
-    n_word_list = []
-
 mods_list = [int(mod) for mod in mods_list_split]
 
 idol_post_send_limit = make_int(os.getenv("IDOL_POST_LIMIT")) or 20
@@ -104,7 +98,6 @@ key_kwargs = {
     "currency_name": os.getenv("CURRENCY_NAME"),
     "icon_url": os.getenv("ICON_URL"),
     "footer_url": os.getenv("FOOTER_URL"),
-    "n_word_list": n_word_list,
     "client": client,
     "trash_emoji": get_emoji(os.getenv("TRASH_EMOJI")),
     "check_emoji": get_emoji(os.getenv("CHECK_MARK_EMOJI")),
@@ -208,6 +201,10 @@ key_kwargs = {
     "twitch_client_id": os.getenv("TWITCH_CLIENT_ID"),
     "twitch_client_secret": os.getenv("TWITCH_CLIENT_SECRET"),
 
+    # Vlive
+    "vlive_base_url": os.getenv("VLIVE_BASE_URL"),
+    "vlive_app_id": os.getenv("VLIVE_APP_ID"),
+
     # Datadog
     "datadog_api_key": (os.getenv("DATADOG_API_KEY")),
     "datadog_app_key": (os.getenv("DATADOG_APP_KEY")),
@@ -222,6 +219,7 @@ key_kwargs = {
 
     "site_port": os.getenv("SITE_PORT"),  # site port
     "idol_photo_location": os.getenv("FOLDER_LOCATION")
+
 }
 
 keys_obj = Keys_Obj(**key_kwargs)

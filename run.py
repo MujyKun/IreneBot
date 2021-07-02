@@ -58,6 +58,7 @@ class Irene:
         self.twitch = module.Twitch.Twitch(ex)
         self.botowner = module.BotOwner.BotOwner(ex)
         self.unscramble = module.UnScramble.UnScramble(ex)
+        self.vlive = module.Vlive.Vlive(ex)
         # self.gacha = module.Gacha.Gacha()
         self.status = module.status.Status(ex)  # not a command cog
         self.blocking_monitor = module.blockingcog.BlockingMonitor(ex)
@@ -66,7 +67,7 @@ class Irene:
                      self.archive, self.moderator, self.profile, self.help, self.logging, self.music, self.botmod,
                      self.events, self.lastfm, self.interactions, self.wolfram, self.guessinggame, self.customcommands,
                      self.biasgame, self.weverse, self.selfassignroles, self.reminder, self.twitch,
-                     self.botowner, self.unscramble, self.blocking_monitor]
+                     self.botowner, self.unscramble, self.blocking_monitor, self.vlive]
 
         # Modules/Cogs that contain 'ex' (Utility) and the 'conn' (DB connection).
         # AKA -> Classes that are have inherited IreneUtility.Base.Base()

@@ -524,3 +524,26 @@ Maintenance Status: {maintenance_status}
             await ctx.send(f"> **My ping is currently {self.ex.get_ping()}ms.**")
         except:
             await ctx.send("> Cannot determine ping at this time.")
+
+    @commands.command(aliases=["shardinfo"])
+    async def shard(self, ctx):
+        """
+        Shows information about the current shard.
+
+        [Format: %shard]
+        """
+        if not ctx.guild:
+            no_dm_msg = await self.ex.get_msg(ctx, "general", "no_dm")
+            return await ctx.send(no_dm_msg)
+        shard_id = ctx.guild.shard_id
+        shard = self.ex.client.get_shard(shard_id)
+        embed_title = f"Shard Details for {ctx.guild.name}"
+        embed = await self.ex.create_embed(title=embed_title)
+        embed.add_field(name="Shard ID", value=shard_id)
+        embed.add_field(name="Latency", value=f"{int(shard.latency * 1000)} ms")
+        embed.add_field(name="Closed", value=f"{shard.is_closed()}")
+        embed.add_field(name="Rate-Limited", value=f"{shard.is_ws_ratelimited()}")
+        await ctx.send(embed=embed)
+
+
+

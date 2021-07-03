@@ -983,6 +983,14 @@
       "aliases": null,
       "note": "Available choices: en_us"
     },
+    "shard": {
+      "description": "Gets shard information about the current server.",
+      "example_image_url": null,
+      "syntax": "%shard",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": ["shardinfo"]
+    },
     "stopgames": {
       "description": "End all games that you are hosting or that are in the channel.",
       "example_image_url": null,

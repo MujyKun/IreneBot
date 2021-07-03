@@ -92,6 +92,7 @@ class Weverse(commands.Cog):
             return
         is_comment = False
         is_media = False
+        images = None
         latest_notification = user_notifications[0]
 
         community_name = latest_notification.community_name or latest_notification.bold_element
@@ -110,7 +111,7 @@ class Weverse(commands.Cog):
             embed = await self.ex.u_weverse.set_comment_embed(latest_notification, embed_title)
         elif noti_type == 'post':
             is_media = True
-            embed, message_text = await self.ex.u_weverse.set_post_embed(latest_notification, embed_title)
+            embed, images, message_text = await self.ex.u_weverse.set_post_embed(latest_notification, embed_title)
         elif noti_type == 'media':
             is_media = True
             embed, message_text = await self.ex.u_weverse.set_media_embed(latest_notification, embed_title)
@@ -156,7 +157,7 @@ class Weverse(commands.Cog):
             notification_ids = self.notifications_already_posted.get(channel_id)
             if not notification_ids:
                 await self.ex.u_weverse.send_weverse_to_channel(channel_info, message_text, embed, is_comment, is_media,
-                                                                community_name)
+                                                                community_name, images=images)
                 self.notifications_already_posted[channel_id] = [latest_notification.id]
             else:
                 if latest_notification.id in notification_ids:
@@ -165,4 +166,4 @@ class Weverse(commands.Cog):
 
                 self.notifications_already_posted[channel_id].append(latest_notification.id)
                 await self.ex.u_weverse.send_weverse_to_channel(channel_info, message_text, embed,
-                                                                is_comment, is_media, community_name)
+                                                                is_comment, is_media, community_name, images=images)

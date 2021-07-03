@@ -20,8 +20,9 @@ class Vlive(commands.Cog):
         ...
 
     @vliveupdates.command()
-    async def idol(self, ctx, idol_id: int, role_id: int = None):
+    async def idol(self, ctx, idol_id: int, role: discord.Role = None):
         """Follow a VLIVE channel belonging to an Idol ID If they have one."""
+        role_id = None if not role else role.id
         idol = await self.ex.u_group_members.get_member(idol_id)
         if not idol:
             msg = await self.ex.get_msg(ctx, "groupmembers", "invalid_id")
@@ -34,8 +35,9 @@ class Vlive(commands.Cog):
         await self.ex.u_vlive.follow_or_unfollow(ctx, ctx.channel, idol.vlive.id, role_id=role_id)
 
     @vliveupdates.command()
-    async def group(self, ctx, group_id: int, role_id: int = None):
+    async def group(self, ctx, group_id: int, role: discord.Role = None):
         """Follow a VLIVE channel belonging to a Group ID If they have one."""
+        role_id = None if not role else role.id
         group = await self.ex.u_group_members.get_group(group_id)
         if not group:
             msg = await self.ex.get_msg(ctx, "groupmembers", "invalid_id")
@@ -48,8 +50,9 @@ class Vlive(commands.Cog):
         await self.ex.u_vlive.follow_or_unfollow(ctx, ctx.channel, group.vlive.id, role_id=role_id)
 
     @vliveupdates.command()
-    async def code(self, ctx, channel_code: str, role_id: int = None):
+    async def code(self, ctx, channel_code: str, role: discord.Role = None):
         """Follow a VLIVE channel based on the channel code."""
+        role_id = None if not role else role.id
         channel_code = channel_code.lower()
         vlive_obj = self.ex.cache.vlive_channels.get(channel_code)
         if not vlive_obj:
@@ -79,17 +82,21 @@ class Vlive(commands.Cog):
 
     # notification loop
     @tasks.loop(seconds=0, minutes=1, hours=0, reconnect=True)
-    async def vlive_updates(self):
+    async def vlive_notification_updates(self):
         """Send vlive announcements for live channels."""
         if not self.ex.irene_cache_loaded:
             return
 
         for vlive_channel in self.ex.cache.vlive_channels.values():
             await asyncio.sleep(0)  # bare yield
+
+            if not len(vlive_channel):
+                continue
+
             try:
                 if await vlive_channel.check_live() and not vlive_channel.already_posted:
                     channels_to_remove = await vlive_channel.send_live_to_followers()
                     for text_channel in channels_to_remove:
                         await self.ex.u_vlive.unfollow_vlive(text_channel, vlive_channel.id)
             except Exception as e:
-                log.console(f"{e} (Exception)", method=self.vlive_updates)
+                log.console(f"{e} (Exception)", method=self.vlive_notification_updates)

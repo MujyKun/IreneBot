@@ -1871,7 +1871,7 @@
         "code": {
           "description": "Follow a VLIVE channel based on the channel code.",
           "example_image_url": null,
-          "syntax": "%vliveupdates code <channel code> [role id]",
+          "syntax": "%vliveupdates code <channel code> [role]",
           "example_syntax": null,
           "permissions_needed": [
             "Manage Messages"
@@ -1881,7 +1881,7 @@
         "group": {
           "description": "Follow a VLIVE channel belonging to a Group ID If they have one.",
           "example_image_url": null,
-          "syntax": "%vliveupdates group <group id> [role id]",
+          "syntax": "%vliveupdates group <group id> [role]",
           "example_syntax": null,
           "permissions_needed": [
             "Manage Messages"
@@ -1891,7 +1891,7 @@
         "idol": {
           "description": "Follow a VLIVE channel belonging to an Idol ID If they have one.",
           "example_image_url": null,
-          "syntax": "%vliveupdates idol <idol id> [role id]",
+          "syntax": "%vliveupdates idol <idol id> [role]",
           "example_syntax": null,
           "permissions_needed": [
             "Manage Messages"

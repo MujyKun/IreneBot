@@ -133,6 +133,8 @@ class Irene:
         # Start Automatic Twitter Posts
         if run_twitter:
             self.twitter.send_photos_to_twitter.start()
+        # vlive announcements.
+        self.vlive.vlive_notification_updates.start()
         # Update Cache Every 12 hours
         ex.u_cache.update_cache.start()
         # Start a loop that sends cache information to DataDog.

@@ -50,7 +50,7 @@ class Events(commands.Cog):
     @staticmethod
     async def error(ctx, error):
         try:
-            embed = discord.Embed(title="Error", description=error, color=0xff00f6)
+            embed = discord.Embed(title="Error", description=f"{error}", color=0xff00f6)
             await ctx.send(embed=embed)
             log.console(f"{error}")
             # increment general error count per minute -> Does not include unable to send messages to people.

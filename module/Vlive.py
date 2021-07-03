@@ -90,7 +90,7 @@ class Vlive(commands.Cog):
         for vlive_channel in self.ex.cache.vlive_channels.values():
             await asyncio.sleep(0)  # bare yield
 
-            if not len(vlive_channel):
+            if not vlive_channel:  # no channels are following the channel.
                 continue
 
             try:

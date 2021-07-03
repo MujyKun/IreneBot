@@ -77,9 +77,9 @@ class BiasGame(commands.Cog):
             user = ctx.author
         user_wins = await self.ex.conn.fetch(
             "SELECT idolid, wins FROM biasgame.winners WHERE userid = $1 ORDER BY WINS DESC LIMIT $2", user.id, 15)
+        title = await self.ex.get_msg(user.id, 'biasgame', 'lb_title', ['name', user.display_name])
         if user_wins:
-            msg_string = await self.ex.get_msg(user.id, 'biasgame', 'lb_title', ['name', user.display_name])
-
+            msg_string = ""
             counter = 1
             for idol_id, wins in user_wins:
                 await asyncio.sleep(0)
@@ -88,4 +88,5 @@ class BiasGame(commands.Cog):
                 counter += 1
         else:
             msg_string = await self.ex.get_msg(user.id, 'biasgame', 'no_wins', ['name', user.display_name])
-        await ctx.send(msg_string)
+        embed = await self.ex.create_embed(title=title, title_desc=msg_string)
+        await ctx.send(embed=embed)

@@ -28,7 +28,7 @@ class Vlive(commands.Cog):
             msg = await self.ex.get_msg(ctx, "groupmembers", "invalid_id")
             return await ctx.send(msg)
 
-        if not idol.vlive:
+        if not isinstance(idol.vlive, VliveChannel):
             msg = await self.ex.get_msg(ctx, "vlive", "unknown_code", ["result", "idol"])
             return await ctx.send(msg)
 
@@ -43,7 +43,7 @@ class Vlive(commands.Cog):
             msg = await self.ex.get_msg(ctx, "groupmembers", "invalid_id")
             return await ctx.send(msg)
 
-        if not group.vlive:
+        if not isinstance(group.vlive, VliveChannel):
             msg = await self.ex.get_msg(ctx, "vlive", "unknown_code", ["result", "group"])
             return await ctx.send(msg)
 

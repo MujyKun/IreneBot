@@ -88,12 +88,12 @@ class Vlive(commands.Cog):
             return
 
         for vlive_channel in self.ex.cache.vlive_channels.values():
-            await asyncio.sleep(0)  # bare yield
-
-            if not vlive_channel:  # no channels are following the channel.
-                continue
-
             try:
+                await asyncio.sleep(0)  # bare yield
+
+                if not vlive_channel:  # no channels are following the channel.
+                    continue
+
                 if await vlive_channel.check_live() and not vlive_channel.already_posted:
                     channels_to_remove = await vlive_channel.send_live_to_followers()
                     for text_channel in channels_to_remove:

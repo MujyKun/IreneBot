@@ -1598,6 +1598,16 @@
       ],
       "aliases": null,
       "note": "Use the command again to re-enable."
+    },
+    "testweverse": {
+      "description": "Attempt to post the notifications in Weverse to the channel.",
+      "example_image_url": null,
+      "syntax": "%testweverse [amount=20]",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Owner"
+      ],
+      "aliases": null
     }
   },
   "SelfAssignRoles": {

@@ -87,7 +87,7 @@ class Weverse(commands.Cog):
             if count == amount:
                 return
 
-# testing with the amount of seconds to avoid duplicates (checks have been put in place).
+    # testing with the amount of seconds to avoid duplicates (checks have been put in place).
     @tasks.loop(seconds=45, minutes=0, hours=0, reconnect=True)
     async def weverse_updates(self):
         """Process for checking for Weverse updates and sending to discord channels."""

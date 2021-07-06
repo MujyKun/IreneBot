@@ -13,12 +13,12 @@ class Irene:
     """
     Startup Client for Irene.
 
-    We are not subclassing an AutoShardedClient, but will rather define it directly in keys.
+    We are not subclassing an AutoShardedClient, but will rather define it directly in the keys module.
     """
     def __init__(self):
-        # Set to True if running a test bot (AKA DEV MODE) .
+        # Set to True if running a test bot (Not equivalent to dev mode).
         ex.test_bot = True
-        # Set to True if not on the production server (useful if ex.test_bot as False).
+        # Set to True if not on the production server (useful if ex.test_bot is False).
         # This was initially created to not flood datadog with incorrect input while ex.test_bot was False
         ex.dev_mode = True
         # Set to True if you want the bot to upload its images from host rather than using url.
@@ -69,8 +69,8 @@ class Irene:
                      self.biasgame, self.weverse, self.selfassignroles, self.reminder, self.twitch,
                      self.botowner, self.unscramble, self.blocking_monitor, self.vlive]
 
-        # Modules/Cogs that contain 'ex' (Utility) and the 'conn' (DB connection).
-        # AKA -> Classes that are have inherited IreneUtility.Base.Base()
+        # Modules/Cogs that contain the main 'ex' (Utility) object.
+        # AKA -> Classes that are have inherited IreneUtility.Base.Base
         self.base_modules: [IreneUtility.Base.Base] = self.cogs + [self.status]
 
     def run(self):
@@ -149,15 +149,19 @@ class Irene:
 
     def add_listeners(self):
         """Add Listener Events."""
-        module.keys.keys_obj.client.add_listener(self.groupmembers.idol_photo_on_message, 'on_message')
-        module.keys.keys_obj.client.add_listener(self.archive.on_message, 'on_message')
-        module.keys.keys_obj.client.add_listener(self.logging.on_message_log, 'on_message')
-        module.keys.keys_obj.client.add_listener(self.logging.logging_on_message_edit, 'on_message_edit')
-        module.keys.keys_obj.client.add_listener(self.logging.logging_on_message_delete, 'on_message_delete')
-        module.keys.keys_obj.client.add_listener(self.miscellaneous.on_message_user_notifications, 'on_message')
-        module.keys.keys_obj.client.add_listener(self.botmod.mod_mail_on_message, 'on_message')
-        module.keys.keys_obj.client.add_listener(self.customcommands.process_custom_commands, 'on_message')
-        module.keys.keys_obj.client.add_listener(self.profile.increase_profile_level, 'on_message')
+        on_message_events = [self.groupmembers.idol_photo_on_message, self.archive.on_message,
+                             self.logging.on_message_log, self.miscellaneous.on_message_user_notifications,
+                             self.botmod.mod_mail_on_message, self.customcommands.process_custom_commands,
+                             self.profile.increase_profile_level]
+        on_edit_events = [self.logging.logging_on_message_edit]
+        on_delete_events = [self.logging.logging_on_message_delete]
+
+        for method in on_message_events:
+            module.keys.keys_obj.client.add_listener(method, 'on_message')
+        for method in on_edit_events:
+            module.keys.keys_obj.client.add_listener(method, 'on_message_edit')
+        for method in on_delete_events:
+            module.keys.keys_obj.client.add_listener(method, 'on_message_delete')
 
     def add_cogs(self):
         """Add the cogs to the bot client."""

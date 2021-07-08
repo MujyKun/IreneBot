@@ -239,6 +239,7 @@ Maintenance Status: {maintenance_status}
 """
         embed = await self.ex.create_embed(title=f"I am {app_name}! ({app_id})", title_desc=title_desc)
         embed.set_thumbnail(url=app_icon_url)
+
         embed.add_field(name="Servers Connected", value=f"{self.ex.u_miscellaneous.get_server_count()} Servers",
                         inline=True)
         embed.add_field(name="Text/Voice Channels Watched",
@@ -251,7 +252,7 @@ Maintenance Status: {maintenance_status}
         embed.add_field(name="Total Commands Used", value=f"{self.ex.cache.total_used} Commands", inline=True)
         embed.add_field(name=f"This Session ({self.ex.cache.session_id} | {date.today()})",
                         value=f"{self.ex.cache.current_session} Commands", inline=True)
-        embed.add_field(name="Playing Music", value=f"{len(self.ex.client.voice_clients)} Voice Clients", inline=True)
+        embed.add_field(name="Playing Music", value=f"{len(self.ex.wavelink.players)} Voice Clients", inline=True)
         embed.add_field(name="Playing Guessing/Bias/Unscramble",
                         value=f"{len(self.ex.cache.guessing_games)}/{len(self.ex.cache.bias_games)}"
                               f"/{len(self.ex.cache.unscramble_games)} Games", inline=True)

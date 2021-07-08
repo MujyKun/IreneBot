@@ -15,8 +15,6 @@ class Music(commands.Cog):
         self.ex: Utility = ex
         self.ex.wavelink = wavelink.Client(bot=self.ex.client)
 
-        self.ex.client.loop.create_task(self.ex.u_music.start_nodes())
-
     @commands.command(aliases=["connect"])
     async def join(self, ctx, *, channel: discord.VoiceChannel = None):
         """
@@ -296,6 +294,9 @@ class Music(commands.Cog):
     @tasks.loop(seconds=2, minutes=0, hours=0, reconnect=True)
     async def check_players(self):
         """Queues up a new song for the player when a song ends."""
+        if not self.ex.irene_cache_loaded:
+            return
+
         for player in self.ex.wavelink.players.copy().values():
             player: wavelink.Player
             if player.is_paused:

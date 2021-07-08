@@ -76,4 +76,4 @@ When you are adding several input with the same needed keyword, you may number t
 **Mention a User:** `{mention}` -> Please be aware that this requires the full syntax when replacing (<@user_id>).  
 
 **Title of Something:** `{title}`  
-**Artist of Something:** `{author}`  
+**Artist of Something:** `{artist}`  

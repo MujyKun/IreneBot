@@ -267,7 +267,11 @@ class Music(commands.Cog):
         player = self.ex.wavelink.get_player(ctx.guild.id)
         if hasattr(player, "playlist"):
             try:
-                player.playlist.insert(0, player.playlist.pop(song_number - 1))
+                track: wavelink.Track = player.playlist.pop(song_number - 1)
+                player.playlist.insert(0, track)
+                msg = await self.ex.get_msg(ctx, "music", "moved_song", [["title", track.title],
+                                                                         ["artist", track.author]])
+                return await ctx.send(msg)
             except IndexError:
                 msg = await self.ex.get_msg(ctx, "general", "out_of_range")
                 return await ctx.send(msg)
@@ -294,7 +298,7 @@ class Music(commands.Cog):
         msg = await self.ex.get_msg(ctx, "music", "player_status", ["result", loop_status])
         return await ctx.send(msg)
 
-    @tasks.loop(seconds=10, minutes=0, hours=0, reconnect=True)
+    @tasks.loop(seconds=5, minutes=0, hours=0, reconnect=True)
     async def check_players(self):
         """Queues up a new song for the player when a song ends."""
         if not self.ex.irene_cache_loaded:
@@ -306,7 +310,7 @@ class Music(commands.Cog):
                 continue
 
             if hasattr(player, "playlist"):
-                if not player.playlist:
+                if not player.playlist and not player.is_playing and not player.current:
                     # disconnect from the voice channel if there are no songs.
                     await player.disconnect(force=True)
                     await player.destroy(force=True)

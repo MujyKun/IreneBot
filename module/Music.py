@@ -294,7 +294,7 @@ class Music(commands.Cog):
         msg = await self.ex.get_msg(ctx, "music", "player_status", ["result", loop_status])
         return await ctx.send(msg)
 
-    @tasks.loop(seconds=2, minutes=0, hours=0, reconnect=True)
+    @tasks.loop(seconds=10, minutes=0, hours=0, reconnect=True)
     async def check_players(self):
         """Queues up a new song for the player when a song ends."""
         if not self.ex.irene_cache_loaded:

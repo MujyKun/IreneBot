@@ -1236,10 +1236,10 @@
     "join": {
       "description": "Makes the Bot join the current voice channel.",
       "example_image_url": null,
-      "syntax": "%join",
+      "syntax": "%join [Voice Channel]",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null
+      "aliases": ["connect"]
     },
     "move": {
       "description": "Make a song the next to play without skipping the current song.",
@@ -1252,7 +1252,7 @@
       ]
     },
     "pause": {
-      "description": "Pause the currently playing song.",
+      "description": "Pause the player.",
       "example_image_url": null,
       "syntax": "%pause",
       "example_syntax": null,
@@ -1260,9 +1260,9 @@
       "aliases": null
     },
     "play": {
-      "description": "Play a song.",
+      "description": "Play a song based on a search query.",
       "example_image_url": null,
-      "syntax": "%play [url/song]",
+      "syntax": "%play <url/song/query>",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": [
@@ -1270,7 +1270,7 @@
       ]
     },
     "queue": {
-      "description": "Shows the currently queued songs.",
+      "description": "Displays the currently queued songs in the player.",
       "example_image_url": null,
       "syntax": "%queue [page number=1]",
       "example_syntax": null,
@@ -1289,7 +1289,7 @@
       "aliases": null
     },
     "resume": {
-      "description": "Resume a paused song.",
+      "description": "Resume a paused player.",
       "example_image_url": null,
       "syntax": "%resume",
       "example_syntax": null,
@@ -1301,7 +1301,7 @@
     "shuffle": {
       "description": "Shuffle the playlist/queue.",
       "example_image_url": null,
-      "syntax": null,
+      "syntax": "%shuffle ",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null
@@ -1321,17 +1321,16 @@
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": [
-        "leave"
+        "leave", "disconnect"
       ]
     },
     "volume": {
       "description": "Change the player's volume.",
       "example_image_url": null,
-      "syntax": "%volume [volume=10]",
+      "syntax": "%volume <volume>",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": null,
-      "note": "The volume is by default set to 10."
+      "aliases": ["vol"]
     },
     "lyrics": {
       "description": "Get the lyrics of a song.",

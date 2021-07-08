@@ -108,6 +108,7 @@
     "recent_tweets": "Here are the past {tweet_amount} tweets:\n{tweets}"
   },
   "general": {
+    "out_of_range": "The number you entered is out of the available range.",
     "no_dm": "You can not use this command in DMs.",
     "error": "An error occurred -> Please report it on the support server.\nError MSG: {e}",
     "error_no_support": "Error MSG: {e}",
@@ -170,6 +171,20 @@
     "welcome_role_set": "The new welcome role has been set.",
     "channel_not_found": "That text channel was not found.",
     "channel_toggled": "{name}, {text_channel} now has games {result}."
+  },
+  "music": {
+    "no_channel": "There is no voice channel for me to join.",
+    "connecting": "Connecting to {voice_channel}.",
+    "disconnected": "Disconnected from the voice channel.",
+    "no_songs": "Could not find any songs with that search query.",
+    "player_status": "The Player is {result}.",
+    "volume_status": "The volume of the player is now set to {result}.",
+    "added_to_queue": "Added {result} to the queue.",
+    "now_playing": "Now playing {title} by {author}.",
+    "shuffled": "If there were songs in the queue, they were shuffled.",
+    "empty_queue": "The song queue is currently empty.",
+    "no_api_key": "There is no API Key currently set for the Lyrics and the Developer is working on it.",
+    "no_lyrics": "No lyrics were found for that query."
   },
   "weverse": {
    "bot_owner_only": "Weverse Updates are now privatized to the bot owner only! In order to get weverse updates, join the support server {support_server_link} and click Follow on the Weverse channels you want. Since more than 3000 channels were following Weverse updates, Irene has gotten a lot slower and this action should be done to reduce Irene's workload."

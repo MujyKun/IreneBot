@@ -17,6 +17,7 @@ When you are adding several input with the same needed keyword, you may number t
 **Support Server Link:** `{support_server_link}`  
 **Guild/Server ID:** `{server_id}`  
 **Text Channel Name:** `{text_channel}`  
+**Voice Channel Name:** `{voice_channel}`  
 **Command Name:** `{command_name}`  
 **Currency Name:** `{currency_name}`  
 
@@ -73,3 +74,6 @@ When you are adding several input with the same needed keyword, you may number t
 **Any type of result (string):** `{result}` or `{string}`  
 
 **Mention a User:** `{mention}` -> Please be aware that this requires the full syntax when replacing (<@user_id>).  
+
+**Title of Something:** `{title}`  
+**Artist of Something:** `{author}`  

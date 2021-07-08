@@ -150,6 +150,14 @@ key_kwargs = {
         "password": os.getenv("POSTGRES_PASSWORD")
     },
 
+    # wavelink connection
+    "wavelink_options": {
+        "host": os.getenv("WAVELINK_HOST"),
+        "port": os.getenv("WAVELINK_PORT"),
+        "rest_uri": os.getenv("WAVELINK_URI"),
+        "password": os.getenv("WAVELINK_PASSWORD")
+    },
+
     "db_conn": None,  # will contain the connection later on. asyncpg.pool.Pool
 
     # papago translation keys - not needed - https://developers.naver.com/docs/papago/

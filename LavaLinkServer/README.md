@@ -1,0 +1,1 @@
+**Run using `java -jar Lavalink.jar`**.

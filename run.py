@@ -23,8 +23,6 @@ class Irene:
         ex.dev_mode = True
         # Set to True if you want the bot to upload its images from host rather than using url.
         ex.upload_from_host = False
-        # Set to True if you need the db structure created.
-        ex.create_db_structure = False
         # Set to True if you intend to have announcement text channels on the support server and would like
         # the weverse updates command to be private only to the bot owner.
         ex.weverse_announcements = False
@@ -43,7 +41,6 @@ class Irene:
         self.profile = module.Profile.Profile(ex)
         self.help = module.Help.Help(ex)
         self.logging = module.Logging.Logging(ex)
-        self.music = module.Music.Music(ex)
         self.botmod = module.BotMod.BotMod(ex)
         self.events = module.events.Events(ex)
         self.lastfm = module.LastFM.LastFM(ex)
@@ -59,6 +56,7 @@ class Irene:
         self.botowner = module.BotOwner.BotOwner(ex)
         self.unscramble = module.UnScramble.UnScramble(ex)
         self.vlive = module.Vlive.Vlive(ex)
+        self.music = module.Music.Music(ex)
         # self.gacha = module.Gacha.Gacha()
         self.status = module.status.Status(ex)  # not a command cog
         self.blocking_monitor = module.blockingcog.BlockingMonitor(ex)
@@ -126,8 +124,8 @@ class Irene:
         ex.cache.main_youtube_instance.loop_youtube_videos.start()
         # Start Status Change Loop
         self.status.change_bot_status_loop.start()
-        # Start Voice Client Loop
-        self.music.check_voice_clients.start()
+        # Start Voice Client Player Loop
+        self.music.check_players.start()
         # Start Idol Posting to text channels that requested it after t time.
         self.groupmembers.send_idol_photo_loop.start()
         # Start Automatic Twitter Posts

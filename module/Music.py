@@ -230,7 +230,8 @@ class Music(commands.Cog):
             return await ctx.send(msg)
 
         msg = await ctx.send(embed=embed_list[0])
-        await self.ex.check_left_or_right_reaction_embed(msg, embed_list)
+        if len(embed_list) > 1:
+            await self.ex.check_left_or_right_reaction_embed(msg, embed_list)
 
     @commands.command()
     async def remove(self, ctx, song_number: int):

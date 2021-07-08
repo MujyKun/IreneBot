@@ -14,6 +14,9 @@ class Music(commands.Cog):
         """
         self.ex: Utility = ex
         self.ex.wavelink = wavelink.Client(bot=self.ex.client)
+        # Modified version of wavelink to not have to wait till d.py cache loads.
+        self.ex.wavelink.bot_user_id = self.ex.keys.bot_id
+        self.ex.client.loop.create_task(self.ex.u_music.start_nodes())
 
     @commands.command(aliases=["connect"])
     async def join(self, ctx, *, channel: discord.VoiceChannel = None):

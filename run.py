@@ -17,7 +17,7 @@ class Irene:
     """
     def __init__(self):
         # Set to True if running a test bot (Not equivalent to dev mode).
-        ex.test_bot = True
+        ex.test_bot = False
         # Set to True if not on the production server (useful if ex.test_bot is False).
         # This was initially created to not flood datadog with incorrect input while ex.test_bot was False
         ex.dev_mode = True

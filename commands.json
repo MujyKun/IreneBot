@@ -1857,6 +1857,24 @@
       ],
       "aliases": null
     },
+    "resetgroupcache": {
+      "description": "Reset Group Object Cache.",
+      "example_image_url": null,
+      "syntax": "%resetgroupcache",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Owner"
+      ]
+    },
+    "resetidolcache": {
+      "description": "Reset Idol Object Cache.",
+      "example_image_url": null,
+      "syntax": "%resetidolcache",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Owner"
+      ]
+    },
     "speak": {
       "description": "Owner to Bot TTS",
       "example_image_url": null,

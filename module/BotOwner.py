@@ -56,7 +56,7 @@ class BotOwner(commands.Cog):
         except Exception as e:
             log.console(e)
 
-    @commands.is_owner()
+    @commands.command()
     async def addcards(self, ctx):
         """
         Fill The CardValues Table with Cards
@@ -80,7 +80,7 @@ class BotOwner(commands.Cog):
                                        card_values[count_x], count_x+1)
         await ctx.send(await self.ex.get_msg(ctx, 'botowner', 'cards_added'), delete_after=40)
 
-    @commands.is_owner()
+    @commands.command()
     async def addpatreon(self, ctx, *, users):
         """
         Adds a patreon.
@@ -94,7 +94,7 @@ class BotOwner(commands.Cog):
         msg = await self.ex.get_msg(ctx, 'botowner', 'patrons_added', ['users', users])
         await ctx.send(msg)
 
-    @commands.is_owner()
+    @commands.command()
     async def removepatreon(self, ctx, *, users):
         """
         Removes a patreon.
@@ -108,7 +108,7 @@ class BotOwner(commands.Cog):
         msg = await self.ex.get_msg(ctx, 'botowner', 'patrons_removed', ['users', users])
         await ctx.send(msg)
 
-    @commands.is_owner()
+    @commands.command()
     async def send(self, ctx, channel_id, *, message_to_send):
         """Send a message to a text channel."""
         try:
@@ -120,19 +120,19 @@ class BotOwner(commands.Cog):
             msg = await self.ex.get_msg(ctx, 'general', 'error_no_support', ['e', e])
             await ctx.send(msg)
 
-    @commands.is_owner()
+    @commands.command()
     async def speak(self, ctx, *, message):
         """Owner to Bot TTS"""
         await ctx.send(f">>> {message}", tts=True, delete_after=10)
 
-    @commands.is_owner()
+    @commands.command()
     async def generateplayingcards(self, ctx):
         """Generate custom playing cards with idol avatars."""
         await ctx.send("> Deleting and regenerating playing cards.")
         await self.ex.u_blackjack.generate_playing_cards()
         await ctx.send("> Finished generating all playing cards.")
 
-    @commands.is_owner()
+    @commands.command()
     async def approve(self, ctx, query_id: int, mode="idol"):
         """Approve a query id for an unregistered group or idol."""
         if mode == "group":
@@ -219,5 +219,17 @@ class BotOwner(commands.Cog):
             await ctx.send(msg)
 
         # reset cache for idols/groups.
-        await self.ex.u_cache.create_group_cache()
+        # await self.ex.u_cache.create_group_cache()
+        # await self.ex.u_cache.create_idol_cache()
+
+    @commands.command()
+    async def resetidolcache(self, ctx):
+        """Reset Idol Cache."""
         await self.ex.u_cache.create_idol_cache()
+        await ctx.send("Finished creating idol cache.")
+
+    @commands.command()
+    async def resetgroupcache(self, ctx):
+        """Reset Group Cache."""
+        await self.ex.u_cache.create_group_cache()
+        await ctx.send("Finished creating group cache.")

@@ -124,8 +124,6 @@ class Irene:
         ex.cache.main_youtube_instance.loop_youtube_videos.start()
         # Start Status Change Loop
         self.status.change_bot_status_loop.start()
-        # Start Voice Client Player Loop
-        self.music.check_players.start()
         # Start Idol Posting to text channels that requested it after t time.
         self.groupmembers.send_idol_photo_loop.start()
         # Start Automatic Twitter Posts

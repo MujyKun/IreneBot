@@ -14,9 +14,22 @@ class Music(commands.Cog):
         """
         self.ex: Utility = ex
         self.ex.wavelink = wavelink.Client(bot=self.ex.client)
+
         # Modified version of wavelink to not have to wait till d.py cache loads.
+
+        # IMPORTANT: THIS BOT ID MUST BE ACCURATE FOR THE MUSIC PLAYER TO WORK
+        # IMPORTANT: THIS BOT ID MUST BE ACCURATE FOR THE MUSIC PLAYER TO WORK
+        # IMPORTANT: THIS BOT ID MUST BE ACCURATE FOR THE MUSIC PLAYER TO WORK
+
+        # The Bot ID is used across the nodes.
         self.ex.wavelink.bot_user_id = self.ex.keys.bot_id
         self.ex.client.loop.create_task(self.ex.u_music.start_nodes())
+
+    async def cog_check(self, ctx):
+        """A local check for this cog."""
+        if not ctx.guild:
+            raise commands.NoPrivateMessage
+        return True
 
     @commands.command(aliases=["connect"])
     async def join(self, ctx, *, channel: discord.VoiceChannel = None):
@@ -33,9 +46,6 @@ class Music(commands.Cog):
 
         [Format: %volume <volume>]
         """
-        if not ctx.guild:
-            return await ctx.send(await self.ex.get_msg(ctx, "general", "no_dm"))
-
         player = self.ex.wavelink.get_player(ctx.guild.id)
         volume = 100 if volume > 100 else volume
         volume = 0 if volume < 0 else volume
@@ -52,14 +62,9 @@ class Music(commands.Cog):
         [Format: %stop]
         [Aliases: leave, disconnect]
         """
-        if not ctx.guild:
-            return await ctx.send(await self.ex.get_msg(ctx, "general", "no_dm"))
-
         player = self.ex.wavelink.get_player(ctx.guild.id)
-
-        # disconnect and destroy the player.
-        await player.disconnect(force=True)
-        await player.destroy(force=True)
+        # destroy the player
+        await self.ex.u_music.destroy_player(player)
 
         msg = await self.ex.get_msg(ctx, "music", "disconnected")
         return await ctx.send(msg)
@@ -70,9 +75,6 @@ class Music(commands.Cog):
 
         [Format: %play (query)]
         """
-        if not ctx.guild:
-            return await ctx.send(await self.ex.get_msg(ctx, "general", "no_dm"))
-
         tracks = await self.ex.wavelink.get_tracks(query) or await self.ex.wavelink.get_tracks(f'ytsearch:{query}')
 
         if not tracks:
@@ -111,9 +113,8 @@ class Music(commands.Cog):
             await ctx.send(msg)
             player.playlist.append(tracks[0])
 
-        # play a track if nothing is playing and the player is not paused.
-        if not player.is_playing and not player.is_paused:
-            await self.ex.u_music.play_next(player)
+        # start the player loop if it was not already started.
+        await self.ex.u_music.start_player_loop(player)
 
     @commands.command()
     async def pause(self, ctx):
@@ -134,15 +135,13 @@ class Music(commands.Cog):
 
     @commands.command()
     async def skip(self, ctx):
-        """Skip the current song on the player..
+        """Skip the current song on the player.
 
         [Format: %skip]
         """
-        if not ctx.guild:
-            return await ctx.send(await self.ex.get_msg(ctx, "general", "no_dm"))
-
-        player = self.ex.wavelink.get_player(ctx.guild.id)
-        await self.ex.u_music.play_next(player)
+        controller = self.ex.u_music.get_controller(ctx)
+        controller.skipped = True
+        controller.next.set()
 
     @commands.command()
     async def lyrics(self, ctx, *, song_query: str):
@@ -201,9 +200,6 @@ class Music(commands.Cog):
 
         [Format: %shuffle]
         """
-        if not ctx.guild:
-            return await ctx.send(await self.ex.get_msg(ctx, "general", "no_dm"))
-
         player = self.ex.wavelink.get_player(ctx.guild.id)
         if hasattr(player, "playlist"):
             shuffle(player.playlist)
@@ -219,9 +215,6 @@ class Music(commands.Cog):
         [Format: %queue]
         [Aliases: q, list]
         """
-        if not ctx.guild:
-            return await ctx.send(await self.ex.get_msg(ctx, "general", "no_dm"))
-
         player = self.ex.wavelink.get_player(ctx.guild.id)
         embed_list = await self.ex.u_music.create_queue_embed(player)
 
@@ -240,9 +233,6 @@ class Music(commands.Cog):
 
         [Format: %remove (song number)]
         """
-        if not ctx.guild:
-            return await ctx.send(await self.ex.get_msg(ctx, "general", "no_dm"))
-
         player = self.ex.wavelink.get_player(ctx.guild.id)
         if hasattr(player, "playlist"):
             try:
@@ -262,9 +252,6 @@ class Music(commands.Cog):
         [Format: %move (song number)]
         [Aliases: skipto]
         """
-        if not ctx.guild:
-            return await ctx.send(await self.ex.get_msg(ctx, "general", "no_dm"))
-
         player = self.ex.wavelink.get_player(ctx.guild.id)
         if hasattr(player, "playlist"):
             try:
@@ -286,9 +273,6 @@ class Music(commands.Cog):
 
         [Format: %loop]
         """
-        if not ctx.guild:
-            return await ctx.send(await self.ex.get_msg(ctx, "general", "no_dm"))
-
         player = self.ex.wavelink.get_player(ctx.guild.id)
 
         if hasattr(player, "loop"):
@@ -298,24 +282,3 @@ class Music(commands.Cog):
         loop_status = "now looping" if player.loop else "no longer looping"
         msg = await self.ex.get_msg(ctx, "music", "player_status", ["result", loop_status])
         return await ctx.send(msg)
-
-    @tasks.loop(seconds=5, minutes=0, hours=0, reconnect=True)
-    async def check_players(self):
-        """Queues up a new song for the player when a song ends."""
-        if not self.ex.irene_cache_loaded:
-            return
-
-        for player in self.ex.wavelink.players.copy().values():
-            player: wavelink.Player
-            if player.is_paused:
-                continue
-
-            if hasattr(player, "playlist"):
-                if not player.playlist and not player.is_playing and not player.current:
-                    # disconnect from the voice channel if there are no songs.
-                    await player.disconnect(force=True)
-                    await player.destroy(force=True)
-                    continue
-
-                if not player.is_playing:
-                    await self.ex.u_music.play_next(player)

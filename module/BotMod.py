@@ -7,13 +7,6 @@ from IreneUtility.Utility import Utility
 import asyncio
 
 
-def check_if_mod():
-    """Decorator for checking if a user is in the support server."""
-    def predicate(ctx):
-        return ctx.cog.ex.check_if_mod(ctx)
-    return commands.check(predicate)
-
-
 # noinspection PyBroadException,PyPep8
 class BotMod(commands.Cog):
     def __init__(self, t_ex):
@@ -56,8 +49,11 @@ class BotMod(commands.Cog):
         except Exception as e:
             log.console(f"{e} - BotMod.mod_mail_on_message")
 
+    async def cog_check(self, ctx):
+        """A local check for this cog. Checks if the user is a mod."""
+        return self.ex.check_if_mod(ctx)
+
     @commands.command()
-    @check_if_mod()
     async def weverseauth(self, ctx, token):
         """
         Updates Weverse Authentication Token without restarting bot.
@@ -73,7 +69,6 @@ class BotMod(commands.Cog):
         await self.ex.weverse_client.start()
 
     @commands.command()
-    @check_if_mod()
     async def moveto(self, ctx, idol_id, link):
         """
         Moves a link to another idol. (Cannot be used for adding new links)
@@ -93,7 +88,6 @@ class BotMod(commands.Cog):
             await ctx.send(f"> **{e}**")
 
     @commands.command()
-    @commands.is_owner()
     async def fixlinks(self, ctx):
         """
         Fix thumbnails and banners of idols and groups and put them on the host.
@@ -151,7 +145,6 @@ class BotMod(commands.Cog):
             "> All images have been fixed, merged to image hosting service and have links set up for them.")
 
     @commands.command()
-    @check_if_mod()
     async def mergeidol(self, ctx, original_idol_id: int, duplicate_idol_id: int):
         """
         Merge a duplicated idol with it's original idol.
@@ -184,7 +177,6 @@ class BotMod(commands.Cog):
         await ctx.send(f"> Merged {duplicate_idol_id} to {original_idol_id}.")
 
     @commands.command()
-    @check_if_mod()
     async def mergegroup(self, ctx, original_group_id: int, duplicate_group_id: int):
         """
         Merge a duplicated group with it's original group.
@@ -219,7 +211,6 @@ class BotMod(commands.Cog):
         await ctx.send(f"> Merged {duplicate_group_id} to {original_group_id}.")
 
     @commands.command()
-    @check_if_mod()
     async def killapi(self, ctx):
         """
         Restarts the API.
@@ -230,7 +221,6 @@ class BotMod(commands.Cog):
         await self.ex.kill_api()
 
     @commands.command()
-    @check_if_mod()
     async def maintenance(self, ctx, *, maintenance_reason=None):
         """
         Enable/Disable Maintenance Mode.
@@ -243,7 +233,6 @@ class BotMod(commands.Cog):
         return await ctx.send(f"> **Maintenance mode is set to {self.ex.cache.maintenance_mode}.**")
 
     @commands.command()
-    @check_if_mod()
     async def botwarn(self, ctx, user: discord.User, *, reason=None):
         """
         Warns a user from Irene's DMs
@@ -265,7 +254,6 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
             return await ctx.send(f"> I do not have permission to send a message to <@{user.id}>")
 
     @commands.command()
-    @check_if_mod()
     async def kill(self, ctx):
         """
         Kills the bot
@@ -333,7 +321,6 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
         exit(0)
 
     @commands.command()
-    @check_if_mod()
     async def addinteraction(self, ctx, interaction_type, *, links):
         """
         Add a gif/photo to an interaction (ex: slap,kiss,lick,hug)
@@ -361,7 +348,6 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
             log.console(e)
 
     @commands.command()
-    @check_if_mod()
     async def deleteinteraction(self, ctx, *, url):
         """
         Delete a url from an interaction
@@ -381,21 +367,19 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
         await ctx.send("Finished removing urls.")
 
     @commands.command()
-    @check_if_mod()
     async def botban(self, ctx, *, user: discord.User):
         """
         Bans a user from Irene.
 
         [Format: %botban (user id)]
         """
-        if not self.ex.check_if_mod(user.id, 1):
+        if not self.ex.check_if_mod(user.id):
             await self.ex.u_miscellaneous.ban_user_from_bot(user.id)
             await ctx.send(f"> **<@{user.id}> has been banned from using Irene.**")
         else:
             await ctx.send(f"> **<@{ctx.author.id}>, you cannot ban a bot mod.**")
 
     @commands.command()
-    @check_if_mod()
     async def botunban(self, ctx, *, user: discord.User):
         """
         UnBans a user from Irene.
@@ -406,7 +390,6 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
         await ctx.send(f"> **If the user was banned, they are now unbanned.**")
 
     @commands.command()
-    @check_if_mod()
     async def addstatus(self, ctx, *, status: str):
         """
         Add a playing status to Irene.
@@ -418,7 +401,6 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
         await ctx.send(f"> **{status} was added.**")
 
     @commands.command()
-    @check_if_mod()
     async def getstatuses(self, ctx):
         """Get all statuses of Irene."""
         final_list = ""
@@ -434,7 +416,6 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
         await ctx.send(embed=embed)
 
     @commands.command()
-    @check_if_mod()
     async def removestatus(self, ctx, status_index: int):
         """
         Remove a status based on it's indself.ex. The index can be found using %getstatuses.
@@ -451,7 +432,6 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
             await ctx.send(e)
 
     @commands.command()
-    @check_if_mod()
     async def addidoltogroup(self, ctx, idol_id: int, group_id: int):
         """
         Adds idol to group.
@@ -471,7 +451,6 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
             log.console(e)
 
     @commands.command(aliases=['removeidolfromgroup'])
-    @check_if_mod()
     async def deleteidolfromgroup(self, ctx, idol_id: int, group_id: int):
         """
         Deletes idol from group.
@@ -492,7 +471,6 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
             log.console(e)
 
     @commands.command(aliases=['removeidol'])
-    @check_if_mod()
     async def deleteidol(self, ctx, idol_id: int):
         """
         Deletes an idol
@@ -508,7 +486,6 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
             log.console(e)
 
     @commands.command(aliases=['removegroup'])
-    @check_if_mod()
     async def deletegroup(self, ctx, group_id: int):
         """
         Deletes a group
@@ -523,7 +500,6 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
             log.console(e)
 
     @commands.command()
-    @check_if_mod()
     async def createdm(self, ctx, user: discord.User):
         """
         Create a DM with a user with the bot as a middle man. One user per mod channel.
@@ -551,7 +527,6 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
             log.console(e)
 
     @commands.command()
-    @check_if_mod()
     async def closedm(self, ctx, user: discord.User = None):
         """
         Closes a DM either by the User ID or by the current channel.

@@ -8,8 +8,11 @@ class Twitter(commands.Cog):
     def __init__(self, ex):
         self.ex: Utility = ex
 
+    async def cog_check(self, ctx):
+        """A local check for this cog."""
+        return await self.ex.client.is_owner(ctx.author)
+
     @commands.command()
-    @commands.is_owner()
     async def tweet(self, ctx, *, tweet):
         """
         Tweets a status update on Twitter
@@ -21,7 +24,6 @@ class Twitter(commands.Cog):
         await ctx.send(msg)
 
     @commands.command()
-    @commands.is_owner()
     async def deletetweet(self, ctx, *, tweet_id):
         """
         Delete a Tweet by it's ID
@@ -33,7 +35,6 @@ class Twitter(commands.Cog):
         await ctx.send(msg)
 
     @commands.command()
-    @commands.is_owner()
     async def recenttweets(self, ctx, *, amount_of_tweets=20):
         """
         Show Most Recents Tweets

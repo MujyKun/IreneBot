@@ -6,19 +6,15 @@ from IreneUtility.util import u_logger as log
 from IreneUtility.Utility import Utility
 
 
-def check_user_in_support_server():
-    """Decorator for checking if a user is in the support server"""
-    def predicate(ctx):
-        return ctx.cog.ex.check_user_in_support_server(ctx)
-    return commands.check(predicate)
-
-
 # noinspection PyPep8
 class BiasGame(commands.Cog):
     def __init__(self, t_ex):
         self.ex: Utility = t_ex
 
-    @check_user_in_support_server()
+    async def cog_check(self, ctx):
+        """A local check for this cog. Checks if the user is in the support server."""
+        return await self.ex.check_user_in_support_server(ctx)
+
     @commands.command(aliases=['bg'])
     async def biasgame(self, ctx, gender="all", bracket_size=8):
         """

@@ -4,13 +4,6 @@ from IreneUtility.util import u_logger as log
 from IreneUtility.Utility import Utility
 
 
-def check_user_in_support_server():
-    """Decorator for checking if a user is in the support server"""
-    def predicate(ctx):
-        return ctx.cog.ex.check_user_in_support_server(ctx)
-    return commands.check(predicate)
-
-
 class UnScramble(commands.Cog):
     def __init__(self, t_ex):
         """
@@ -18,6 +11,10 @@ class UnScramble(commands.Cog):
         :param t_ex: Utility object
         """
         self.ex: Utility = t_ex
+
+    async def cog_check(self, ctx):
+        """A local check for this cog. Checks if the user is in the support server."""
+        return await self.ex.check_user_in_support_server(ctx)
 
     @commands.command(aliases=['usl', 'uslb'])
     async def usleaderboard(self, ctx, difficulty="medium", mode="server"):
@@ -56,7 +53,6 @@ class UnScramble(commands.Cog):
             log.console(e)
             return await ctx.send(f"> You may not understand this error. Please report it -> {e}")
 
-    @check_user_in_support_server()
     @commands.command(aliases=["us"])
     async def unscramble(self, ctx, gender="all", difficulty="medium", rounds=20, timeout=20):
         """

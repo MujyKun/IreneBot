@@ -1,10 +1,7 @@
 import asyncio
-
-import discord
 from discord.ext import commands
 from IreneUtility.util import u_logger as log
 from IreneUtility.Utility import Utility
-from PIL import Image
 
 
 # noinspection PyPep8
@@ -12,21 +9,22 @@ class BotOwner(commands.Cog):
     def __init__(self, ex):
         self.ex: Utility = ex
 
-    @commands.is_owner()
+    async def cog_check(self, ctx):
+        """A local check for this cog."""
+        return await self.ex.client.is_owner(ctx.author)
+
     @commands.command()
     async def uploadfromhost(self, ctx):
         """Toggles whether images are uploaded from host or not."""
         self.ex.upload_from_host = not self.ex.upload_from_host
         return await ctx.send(f"Uploading from host is now set to {self.ex.upload_from_host}")
 
-    @commands.is_owner()
     @commands.command()
     async def resetcache(self, ctx):
         """Reset the cache."""
         await ctx.send(await self.ex.get_msg(ctx, 'botowner', 'cache_reset'))
         await self.ex.u_cache.create_cache(on_boot_up=False)
 
-    @commands.is_owner()
     @commands.command()
     async def scandrive(self, ctx, name="NULL", member_id=0):
         """Scan DriveIDs Table and update other tables."""
@@ -58,7 +56,6 @@ class BotOwner(commands.Cog):
         except Exception as e:
             log.console(e)
 
-    @commands.command()
     @commands.is_owner()
     async def addcards(self, ctx):
         """
@@ -83,7 +80,6 @@ class BotOwner(commands.Cog):
                                        card_values[count_x], count_x+1)
         await ctx.send(await self.ex.get_msg(ctx, 'botowner', 'cards_added'), delete_after=40)
 
-    @commands.command()
     @commands.is_owner()
     async def addpatreon(self, ctx, *, users):
         """
@@ -98,7 +94,6 @@ class BotOwner(commands.Cog):
         msg = await self.ex.get_msg(ctx, 'botowner', 'patrons_added', ['users', users])
         await ctx.send(msg)
 
-    @commands.command()
     @commands.is_owner()
     async def removepatreon(self, ctx, *, users):
         """
@@ -113,7 +108,6 @@ class BotOwner(commands.Cog):
         msg = await self.ex.get_msg(ctx, 'botowner', 'patrons_removed', ['users', users])
         await ctx.send(msg)
 
-    @commands.command()
     @commands.is_owner()
     async def send(self, ctx, channel_id, *, message_to_send):
         """Send a message to a text channel."""
@@ -126,13 +120,11 @@ class BotOwner(commands.Cog):
             msg = await self.ex.get_msg(ctx, 'general', 'error_no_support', ['e', e])
             await ctx.send(msg)
 
-    @commands.command()
     @commands.is_owner()
     async def speak(self, ctx, *, message):
         """Owner to Bot TTS"""
         await ctx.send(f">>> {message}", tts=True, delete_after=10)
 
-    @commands.command()
     @commands.is_owner()
     async def generateplayingcards(self, ctx):
         """Generate custom playing cards with idol avatars."""
@@ -140,7 +132,6 @@ class BotOwner(commands.Cog):
         await self.ex.u_blackjack.generate_playing_cards()
         await ctx.send("> Finished generating all playing cards.")
 
-    @commands.command()
     @commands.is_owner()
     async def approve(self, ctx, query_id: int, mode="idol"):
         """Approve a query id for an unregistered group or idol."""

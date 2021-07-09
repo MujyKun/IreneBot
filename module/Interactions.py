@@ -6,19 +6,15 @@ from IreneUtility.util import u_logger as log
 from IreneUtility.Utility import Utility
 
 
-def check_interaction_enabled():
-    """Decorator for checking if an interaction is enabled on a server."""
-    def predicate(ctx):
-        return ctx.cog.ex.check_interaction_enabled(ctx)
-    return commands.check(predicate)
-
-
 class Interactions(commands.Cog):
     def __init__(self, t_ex):
         self.ex: Utility = t_ex
 
+    async def cog_check(self, ctx):
+        """A local check for this cog. Checks if the current interaction is enabled in the server."""
+        return await self.ex.check_interaction_enabled(ctx)
+
     @commands.command()
-    @check_interaction_enabled()
     @commands.cooldown(1, 60, BucketType.user)
     async def stepon(self, ctx, user: discord.Member = None):
         """
@@ -29,7 +25,6 @@ class Interactions(commands.Cog):
         await self.ex.u_miscellaneous.interact_with_user(ctx, user, "stepped on", "stepon")
 
     @commands.command()
-    @check_interaction_enabled()
     @commands.cooldown(1, 60, BucketType.user)
     async def stab(self, ctx, user: discord.Member = None):
         """
@@ -40,7 +35,6 @@ class Interactions(commands.Cog):
         await self.ex.u_miscellaneous.interact_with_user(ctx, user, "stabbed", "stab")
 
     @commands.command()
-    @check_interaction_enabled()
     @commands.cooldown(1, 60, BucketType.user)
     async def choke(self, ctx, user: discord.Member = None):
         """
@@ -51,7 +45,6 @@ class Interactions(commands.Cog):
         await self.ex.u_miscellaneous.interact_with_user(ctx, user, "choked", "choke")
 
     @commands.command()
-    @check_interaction_enabled()
     @commands.cooldown(1, 60, BucketType.user)
     async def pullhair(self, ctx, user: discord.Member = None):
         """
@@ -62,7 +55,6 @@ class Interactions(commands.Cog):
         await self.ex.u_miscellaneous.interact_with_user(ctx, user, "is pulling the hair of", "pullhair")
 
     @commands.command()
-    @check_interaction_enabled()
     @commands.cooldown(1, 60, BucketType.user)
     async def cuddle(self, ctx, user: discord.Member = None):
         """
@@ -73,7 +65,6 @@ class Interactions(commands.Cog):
         await self.ex.u_miscellaneous.interact_with_user(ctx, user, "is cuddling with", "cuddle")
 
     @commands.command()
-    @check_interaction_enabled()
     @commands.cooldown(1, 60, BucketType.user)
     async def pat(self, ctx, user: discord.Member = None):
         """
@@ -84,7 +75,6 @@ class Interactions(commands.Cog):
         await self.ex.u_miscellaneous.interact_with_user(ctx, user, "patted", "pat")
 
     @commands.command()
-    @check_interaction_enabled()
     @commands.cooldown(1, 60, BucketType.user)
     async def punch(self, ctx, user: discord.Member = None):
         """
@@ -95,7 +85,6 @@ class Interactions(commands.Cog):
         await self.ex.u_miscellaneous.interact_with_user(ctx, user, "punched", "punch")
 
     @commands.command()
-    @check_interaction_enabled()
     @commands.cooldown(1, 60, BucketType.user)
     async def spit(self, ctx, user: discord.Member = None):
         """
@@ -106,7 +95,6 @@ class Interactions(commands.Cog):
         await self.ex.u_miscellaneous.interact_with_user(ctx, user, "spit on", "spit")
 
     @commands.command()
-    @check_interaction_enabled()
     @commands.cooldown(1, 60, BucketType.user)
     async def lick(self, ctx, user: discord.Member = None):
         """
@@ -117,7 +105,6 @@ class Interactions(commands.Cog):
         await self.ex.u_miscellaneous.interact_with_user(ctx, user, "licked", "lick")
 
     @commands.command()
-    @check_interaction_enabled()
     @commands.cooldown(1, 60, BucketType.user)
     async def hug(self, ctx, user: discord.Member = None):
         """
@@ -128,7 +115,6 @@ class Interactions(commands.Cog):
         await self.ex.u_miscellaneous.interact_with_user(ctx, user, "hugged", "hug")
 
     @commands.command()
-    @check_interaction_enabled()
     @commands.cooldown(1, 60, BucketType.user)
     async def kiss(self, ctx, user: discord.Member = None):
         """
@@ -139,7 +125,6 @@ class Interactions(commands.Cog):
         await self.ex.u_miscellaneous.interact_with_user(ctx, user, "kissed", "kiss")
 
     @commands.command()
-    @check_interaction_enabled()
     @commands.cooldown(1, 60, BucketType.user)
     async def slap(self, ctx, user: discord.Member = None):
         """

@@ -99,6 +99,8 @@ class Events(commands.Cog):
             ctx.command.reset_cooldown(ctx)
         elif isinstance(error, commands.errors.MissingPermissions) or isinstance(error, commands.errors.UserInputError):
             await Events.error(ctx, error)
+        elif isinstance(error, commands.NoPrivateMessage):
+            await ctx.send(await ex.get_msg(ctx, "general", "no_dm"))
 
     @staticmethod
     @client.event
@@ -133,8 +135,10 @@ class Events(commands.Cog):
     @staticmethod
     @client.event
     async def on_command(ctx):
+        """Routine for every command."""
+        # We will log attempted commands as well.
         msg_content = ctx.message.clean_content
-        if not ex.check_if_mod(ctx.author.id, 1):
+        if not ex.check_if_mod(ctx.author.id):
             log.console(
                 f"CMD LOG: ChannelID = {ctx.channel.id} - {ctx.author} ({ctx.author.id})|| {msg_content} ")
         else:
@@ -187,7 +191,7 @@ class Events(commands.Cog):
                     log.console(err)
                 return None, None, None, None
 
-            if ex.check_if_mod(user_id, mode=1):
+            if ex.check_if_mod(user_id):
                 if str(emoji) == ex.keys.trash_emoji:
                     msg, link, idol_id, _ = await get_msg_and_image()
                     if link:

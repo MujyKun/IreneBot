@@ -5,13 +5,6 @@ from IreneUtility.util import u_logger as log
 from IreneUtility.Utility import Utility
 
 
-def check_user_in_support_server():
-    """Decorator for checking if a user is in the support server"""
-    def predicate(ctx):
-        return ctx.cog.ex.check_user_in_support_server(ctx)
-    return commands.check(predicate)
-
-
 # noinspection PyPep8,PyBroadException
 class GuessingGame(commands.Cog):
     def __init__(self, t_ex):
@@ -21,6 +14,10 @@ class GuessingGame(commands.Cog):
         """
         self.ex: Utility = t_ex
         self.possible_game_options = ["idol", "group"]
+
+    async def cog_check(self, ctx):
+        """A local check for this cog. Checks if the user is in the support server."""
+        return await self.ex.check_user_in_support_server(ctx)
 
     @commands.command(aliases=['ggl', 'gglb'])
     async def ggleaderboard(self, ctx, difficulty="medium", mode="server"):
@@ -78,7 +75,6 @@ class GuessingGame(commands.Cog):
 
         await self.start_game(ctx, rounds, timeout, gender, difficulty, game_mode=game_mode)
 
-    @check_user_in_support_server()
     @commands.command(aliases=['gg'])
     async def guessinggame(self, ctx, gender="all", difficulty="medium", rounds=20, timeout=20):
         """
@@ -92,7 +88,6 @@ class GuessingGame(commands.Cog):
         """
         await self.manage_gg_cmd(ctx, gender, difficulty, rounds, timeout, game_mode="idol")
 
-    @check_user_in_support_server()
     @commands.command(aliases=['ggg', 'groupgg'])
     async def groupguessinggame(self, ctx, gender="all", difficulty="medium", rounds=20, timeout=20):
         """

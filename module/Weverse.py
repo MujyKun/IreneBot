@@ -101,8 +101,9 @@ class Weverse(commands.Cog):
         if not user_notifications:
             return
 
-        latest_notification = user_notifications[0]
-
-        await self.ex.u_weverse.send_notification(latest_notification)
+        new_notifications = self.ex.weverse_client.get_new_notifications()
+        
+        for notification in new_notifications:
+            await self.ex.u_weverse.send_notification(notification)
 
 

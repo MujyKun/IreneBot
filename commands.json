@@ -1839,6 +1839,16 @@
       ],
       "aliases": null
     },
+    "reload": {
+      "description": "Will hot reload all of IreneBot, IreneUtility, and any other self-made packages.",
+      "example_image_url": null,
+      "syntax": "%reload",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Owner"
+      ],
+      "aliases": null
+    },
     "reloadmodule": {
       "description": "Reload a module from it's name.",
       "example_image_url": null,
@@ -1848,6 +1858,26 @@
         "Bot Owner"
       ],
       "aliases": ["reloadcog"]
+    },
+    "reloadutility": {
+      "description": "Reloads the utility package for the bot.",
+      "example_image_url": null,
+      "syntax": "%reloadutility",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Owner"
+      ],
+      "aliases": null
+    },
+    "reloadweverse": {
+      "description": "Reloads the Weverse Lib and Client.",
+      "example_image_url": null,
+      "syntax": "%reloadweverse",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Owner"
+      ],
+      "aliases": null
     },
     "resetgroupcache": {
       "description": "Reset Group Object Cache.",

@@ -474,24 +474,6 @@
     }
   },
   "GroupMembers": {
-    "addidol": {
-      "description": "Adds an Unregistered Idol using the syntax from https://irenebot.com/addidol.html/.",
-      "example_image_url": null,
-      "syntax": "%addidol <JSON>",
-      "example_syntax": null,
-      "permissions_needed": null,
-      "aliases": null,
-      "note": "Command should only be used if the card does not exist for the Idol."
-    },
-    "addgroup": {
-      "description": "Adds an Unregistered Group using the syntax from https://irenebot.com/addgroup.html/.",
-      "example_image_url": null,
-      "syntax": "%addgroup <JSON>",
-      "example_syntax": null,
-      "permissions_needed": null,
-      "aliases": null,
-      "note": "Command should only be used if the card does not exist for the Group."
-    },
     "aliases": {
       "description": "Lists the aliases of Idols/Groups that have one.",
       "example_image_url": null,
@@ -1857,6 +1839,16 @@
       ],
       "aliases": null
     },
+    "reloadmodule": {
+      "description": "Reload a module from it's name.",
+      "example_image_url": null,
+      "syntax": "%reloadmodule <module name>",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Owner"
+      ],
+      "aliases": ["reloadcog"]
+    },
     "resetgroupcache": {
       "description": "Reset Group Object Cache.",
       "example_image_url": null,
@@ -1864,7 +1856,8 @@
       "example_syntax": null,
       "permissions_needed": [
         "Bot Owner"
-      ]
+      ],
+      "aliases": null
     },
     "resetidolcache": {
       "description": "Reset Idol Object Cache.",
@@ -1873,7 +1866,8 @@
       "example_syntax": null,
       "permissions_needed": [
         "Bot Owner"
-      ]
+      ],
+      "aliases": null
     },
     "speak": {
       "description": "Owner to Bot TTS",
@@ -1951,6 +1945,26 @@
         "vlive"
       ],
       "note": "This command contains sub-commands. This means any following arguments are respective to the first argument."
+    }
+  },
+  "DataMod": {
+    "addidol": {
+      "description": "Adds an Unregistered Idol using the syntax from https://irenebot.com/addidol.html/.",
+      "example_image_url": null,
+      "syntax": "%addidol <JSON>",
+      "example_syntax": null,
+      "permissions_needed": ["Data Moderator"],
+      "aliases": null,
+      "note": "Command should only be used if the card does not exist for the Idol."
+    },
+    "addgroup": {
+      "description": "Adds an Unregistered Group using the syntax from https://irenebot.com/addgroup.html/.",
+      "example_image_url": null,
+      "syntax": "%addgroup <JSON>",
+      "example_syntax": null,
+      "permissions_needed": ["Data Moderator"],
+      "aliases": null,
+      "note": "Command should only be used if the card does not exist for the Group."
     }
   }
 }

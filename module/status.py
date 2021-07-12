@@ -1,5 +1,5 @@
 import discord
-from discord.ext import tasks
+from discord.ext import tasks, commands
 from module.keys import bot_prefix
 import random
 from IreneUtility.util import u_logger as log
@@ -7,7 +7,7 @@ from IreneUtility.Utility import Utility
 
 
 # noinspection PyBroadException,PyPep8
-class Status:
+class Status(commands.Cog):
     def __init__(self, ex):
         """
 

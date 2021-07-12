@@ -2,20 +2,69 @@ import asyncio
 from discord.ext import commands
 from IreneUtility.util import u_logger as log
 from IreneUtility.Utility import Utility
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from ..run import Irene
 
 
 # noinspection PyPep8
 class BotOwner(commands.Cog):
-    def __init__(self, ex):
+    def __init__(self, ex, startup_object):
         self.ex: Utility = ex
+
+        # Does not serve as an actual discord client, but is the manager and main startup class.
+        self.startup_obj: Irene = startup_object
 
     async def cog_check(self, ctx):
         """A local check for this cog."""
         return await self.ex.client.is_owner(ctx.author)
 
     @commands.command()
+    async def reload(self, ctx):
+        """Will hot reload all of IreneBot, IreneUtility, and any other self-made packages.
+
+        [Format: %reload]
+        """
+        self.startup_obj.reload()
+        return await ctx.send("Done")
+
+    @commands.command()
+    async def reloadutility(self, ctx):
+        """
+        Reloads the utility package for the bot.
+
+        [Format: %reloadutility]
+        """
+        self.startup_obj.reload_utility()
+        return await ctx.send("Done")
+
+    @commands.command()
+    async def reloadweverse(self, ctx):
+        """
+        Reloads the Weverse Lib and Client.
+
+        [Format: %reloadweverse
+        """
+        self.startup_obj.reload_weverse()
+        return await ctx.send("Done")
+
+    @commands.command(aliases=["reloadcog"])
+    async def reloadmodule(self, ctx, *, module_name: str):
+        """Reload a module/cog from it's name.
+
+        [Format: %reloadmodule (module name)]
+        [Aliases: %reloadcog (cog name)]
+        """
+        cog = self.startup_obj.cogs[module_name.lower()]
+        self.startup_obj.reload_cog(cog)
+        return await ctx.send("Done")
+
+    @commands.command()
     async def uploadfromhost(self, ctx):
-        """Toggles whether images are uploaded from host or not."""
+        """Toggles whether images are uploaded from host or not.
+
+        [Format: %uploadfromhost]
+        """
         self.ex.upload_from_host = not self.ex.upload_from_host
         return await ctx.send(f"Uploading from host is now set to {self.ex.upload_from_host}")
 

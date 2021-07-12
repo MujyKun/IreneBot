@@ -328,3 +328,9 @@ To find out more, look at the `GroupMembers` category.
 | vliveupdates group | Follow a VLIVE channel belonging to a Group ID If they have one. | %vliveupdates group (group id) [role id] | vlive group |
 | vliveupdates idol | Follow a VLIVE channel belonging to an Idol ID If they have one. | %vliveupdates idol (idol id) [role id] | vlive idol |
 | vliveupdates list | Lists the VLIVE channels currently being followed in the text channel. | %vliveupdates list | vlive list |
+
+#### DataMod: 😇😇😇
+| Command          | Description                                                                        | Format                                                                                                         | Aliases                |
+|------------------|------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|------------------------|
+| addidol         | Adds an idol using the syntax from https://irenebot.com/addidol.html | %addidol (json)                                                                                                      |                      |
+| addgroup         | Adds a group using the syntax from https://irenebot.com/addgroup.html | %addgroup (json)                                                                                                      |                       |

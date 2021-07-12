@@ -13,10 +13,6 @@ class Weverse(commands.Cog):
         self.available_choices = "[TXT, BTS, GFRIEND, SEVENTEEN, ENHYPEN, NU'EST, CL, P1Harmony, Weeekly, SUNMI," \
                                  " HENRY, Dreamcatcher, CherryBullet, MIRAE, TREASURE, LETTEAMOR, EVERGLOW, FTISLAND," \
                                  " woo!ah!, IKON, JUST_B, BlackPink]"
-        x = 9
-        y = 6
-
-        print(x, y)
 
     @commands.command(aliases=["weverse"])
     @commands.has_guild_permissions(manage_messages=True)

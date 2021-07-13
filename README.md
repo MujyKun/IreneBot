@@ -104,8 +104,6 @@ To find out more, look at the `GroupMembers` category.
 #### GroupMembers:
 | Command          | Description                                                                        | Format                                                                                                         | Aliases                |
 |------------------|------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|------------------------|
-| addidol         | Adds an idol using the syntax from https://irenebot.com/addidol.html | %addidol (json)                                                                                                      |                      |
-| addgroup         | Adds a group using the syntax from https://irenebot.com/addgroup.html | %addgroup (json)                                                                                                      |                       |
 | aliases          | Lists the aliases of idols or groups that have one. Underscores are spaces and commas are to split idol or group names                                        | %aliases (name of idol or group) [page number] ex: %aliases irene,seulgi,red_velvet                                                                                                       |                        |
 | card | Displays an Idol/Group's profile card. | %card (Idol/Group Name/ID) | |
 | count            | Shows howmany times an idol has been called.                                       | %count (name)                                                                                                  |                        |

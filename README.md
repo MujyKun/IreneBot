@@ -239,8 +239,7 @@ To find out more, look at the `GroupMembers` category.
 | setfm            | Attach a LastFM username to your discord account.                                       | %setfm (LastFM username)  |                         |
 
 
-#### Wolfram: 
-
+#### Wolfram:
 | Command          | Description                                                                                                                          | Format                                       |
 |------------------|--------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------|
 | w           | Send a request to Wolfram.                                                                                                            | %wolfram (query)                               |
@@ -262,7 +261,6 @@ To find out more, look at the `GroupMembers` category.
 
 
 #### Youtube: ♥♥♥
-
 | Command          | Description                                                                                                                          | Format                                       |
 |------------------|--------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------|
 | addurl           | Add url to youtube videos                                                                                                            | %addurl (link)                               |
@@ -314,7 +312,11 @@ To find out more, look at the `GroupMembers` category.
 | addpatreon         | Adds a patreon.                           | %addpatreon (userid,userid,userid)             |               |
 | approve       | Approve a query id for an unregistered group or idol. | %approve (query id) ('idol' or 'group') |    |
 | generateplayingcards       | Generate custom playing cards with idol avatars. | %generateplayingcards  |               |
-| removepatreon         | Removes a patreon.                           | %removepatreon (userid,userid,userid)             |               |
+| reload         | Will hot reload all of IreneBot, IreneUtility, and any other self-made packages.     | %reload            |               |
+| reloadmodule         |    Reload a module/cog from it's name.            | %reloadmodule (module name)            |    cog           |
+| reloadutility         |   Reloads the utility package for the bot.          | %reloadutility             |               |
+| reloadweverse         |   Reloads the Weverse Lib and Client.            | %reloadweverse             |               |
+| removepatreon         |          | %removepatreon (userid,userid,userid)             |               |
 | resetcache          | Reset the cache.  | %resetcache                        |              |
 | scandrive        | Scan DriveIDs Table and update other tables.                                       | %scandrive (name=NULL) (member_id=0)                                                                           |                       |
 | send              | Send a message to a text channel.                                             | %send (channelid) (message)                  |               |

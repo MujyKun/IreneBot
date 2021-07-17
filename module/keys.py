@@ -150,7 +150,8 @@ def get_and_reload_keys() -> Keys_Obj:
             "host": os.getenv("POSTGRES_HOST"),
             "database": os.getenv("POSTGRES_DATABASE"),
             "user": os.getenv("POSTGRES_USER"),
-            "password": os.getenv("POSTGRES_PASSWORD")
+            "password": os.getenv("POSTGRES_PASSWORD"),
+            "port": os.getenv("POSTGRES_PORT")
         },
 
         # wavelink connection

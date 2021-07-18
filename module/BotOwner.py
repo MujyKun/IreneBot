@@ -282,3 +282,9 @@ class BotOwner(commands.Cog):
         """Reset Group Cache."""
         await self.ex.u_cache.create_group_cache()
         await ctx.send("Finished creating group cache.")
+
+    @commands.command()
+    async def resetgroupphotos(self, ctx):
+        """Resets the amount of photos for groups."""
+        await self.ex.u_cache.create_groups()
+        await ctx.send("Finished creating group photo cache.")

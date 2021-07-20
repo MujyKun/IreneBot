@@ -50,7 +50,11 @@ class BotMod(commands.Cog):
 
     async def cog_check(self, ctx):
         """A local check for this cog. Checks if the user is a mod."""
-        return self.ex.check_if_mod(ctx)
+        is_bot_mod = self.ex.check_if_mod(ctx)
+        if not is_bot_mod:
+            await ctx.send("This command can only be used by a Bot Mod.")
+
+        return is_bot_mod
 
     @commands.command()
     async def moveto(self, ctx, idol_id, link):

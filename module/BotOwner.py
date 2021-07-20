@@ -286,5 +286,21 @@ class BotOwner(commands.Cog):
     @commands.command()
     async def resetgroupphotos(self, ctx):
         """Resets the amount of photos for groups."""
+        # TODO: Add to commands.json
         await self.ex.u_cache.create_groups()
         await ctx.send("Finished creating group photo cache.")
+
+    @commands.command()
+    async def callidol(self, ctx, idol_id: int, amount: int):
+        """Call an idol a certain amount of times.
+
+        Amount of calls must be lower than 100.
+        [Format: %callidol (idol id) (amount)]
+        """
+        # TODO: Add to commands.json
+        member = await self.ex.u_group_members.get_member(idol_id)
+        for i in range(amount if amount < 100 else 100):
+            await self.ex.u_group_members.idol_post(ctx.channel, member)
+
+
+

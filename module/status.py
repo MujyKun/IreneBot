@@ -15,7 +15,7 @@ class Status(commands.Cog):
         """
         self.ex: Utility = ex
 
-    @tasks.loop(seconds=30, minutes=0, hours=0, reconnect=True)
+    @tasks.loop(seconds=0, minutes=1, hours=0, reconnect=True)
     async def change_bot_status_loop(self):
         """Change the bot's playing status in a loop"""
         try:

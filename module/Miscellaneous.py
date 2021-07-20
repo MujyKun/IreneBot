@@ -186,7 +186,7 @@ Message Author: {message.author}
     @commands.command()
     async def botinfo(self, ctx):
         """Get information about the bot."""
-        maintenance_status = api_status = db_status = images_status = weverse_status = d_py_status = \
+        maintenance_status = api_status = db_status = images_status = d_py_status = \
             irene_cache_status = ":red_circle:"
 
         working = ":green_circle:"
@@ -198,8 +198,6 @@ Message Author: {message.author}
             images_status = working
         if self.ex.cache.maintenance_mode:
             maintenance_status = working
-        if await self.ex.weverse_client.check_token_works():
-            weverse_status = working
         if self.ex.discord_cache_loaded:
             d_py_status = working
         if self.ex.irene_cache_loaded:
@@ -232,7 +230,6 @@ Message Author: {message.author}
 API Status: {api_status} 
 Images Status: {images_status} 
 Database Status: {db_status} 
-Weverse Status: {weverse_status}
 Irene Cache: {irene_cache_status}
 discord.py Cache: {d_py_status}
 Maintenance Status: {maintenance_status}

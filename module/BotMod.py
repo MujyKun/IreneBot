@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands
 from IreneUtility.util import u_logger as log
-from Weverse.weverseasync import WeverseClientAsync
 import aiofiles
 from IreneUtility.Utility import Utility
 import asyncio
@@ -52,21 +51,6 @@ class BotMod(commands.Cog):
     async def cog_check(self, ctx):
         """A local check for this cog. Checks if the user is a mod."""
         return self.ex.check_if_mod(ctx)
-
-    @commands.command()
-    async def weverseauth(self, ctx, token):
-        """
-        Updates Weverse Authentication Token without restarting bot.
-
-        Only use this in DMs or a private channel for security purposes.
-        [Format %weverseauth <token>]
-        """
-        self.ex.keys.weverse_auth_token = token
-        self.ex.weverse_client = WeverseClientAsync(authorization=self.ex.keys.weverse_auth_token,
-                                                    web_session=self.ex.session, verbose=True,
-                                                    loop=asyncio.get_event_loop())
-        await ctx.send("> Token and Weverse client has been updated.")
-        await self.ex.weverse_client.start()
 
     @commands.command()
     async def moveto(self, ctx, idol_id, link):

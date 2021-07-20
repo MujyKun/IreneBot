@@ -66,7 +66,6 @@ To find out more, look at the `GroupMembers` category.
 | mergegroup | Merges a duplicate Group with it's original | %mergegroup (original group id) (duplicate group id) | |
 | moveto | Moves an image to another idol. | %moveto (idol id) (url) | |
 | removestatus             | Remove a status based on it's index. The index can be found using %getstatuses | %removestatus (status index)                           |               |
-| weverseauth      | Updates Weverse Authentication Token without restarting bot. Only use this in DMs or a private channel for security purposes. | %weverseauth (token)                           |               |
 
 #### BlockingManager: ♥♥♥
 | Command           | Description                                                                                           | Format                               | Aliases |
@@ -267,15 +266,6 @@ To find out more, look at the `GroupMembers` category.
 | startloop        | Starts scraping youtube videos.                                                                                                      | %startloop (seconds until it starts looping) |
 | stoploop         | Stops scraping youtube videos                                                                                                        | %stoploop                                    |
 
-
-#### Weverse (This is now disabled for normal users, but join the support server and follow the announcement channels to your text channels):
-| Command     | Description                          | Format                 | Aliases           |
-|-------------|--------------------------------------|------------------------|-------------------|
-| weverseupdates | Receive Weverse Updates of a specific Weverse community in the current text channel. Use again to disable for a specific community. Available Communities -> [TXT, BTS, GFRIEND, SEVENTEEN, ENHYPEN, NU'EST, CL, P1Harmony, Weeekly, SUNMI, HENRY, Dreamcatcher, CherryBullet, MIRAE, TREASURE, LETTEAMOR, EVERGLOW, FTISLAND, woo!ah!, IKON, JUST B, BLACKPINK] | %weverseupdates (community name) [role to notify] | weverse |
-| disablecomments | Disable updates for comments on a community. | %disablecomments (community name) |  |
-| disablemedia | Disable updates for media on a community. | %disablecomments (community name) |  |
-
-
 #### SelfAssignRoles:
 | Command     | Description                          | Format                 | Aliases           |
 |-------------|--------------------------------------|------------------------|-------------------|
@@ -313,7 +303,6 @@ To find out more, look at the `GroupMembers` category.
 | reload         | Will hot reload all of IreneBot, IreneUtility, and any other self-made packages.     | %reload            |               |
 | reloadmodule         |    Reload a module/cog from it's name.            | %reloadmodule (module name)            |    cog           |
 | reloadutility         |   Reloads the utility package for the bot.          | %reloadutility             |               |
-| reloadweverse         |   Reloads the Weverse Lib and Client.            | %reloadweverse             |               |
 | removepatreon         |          | %removepatreon (userid,userid,userid)             |               |
 | resetcache          | Reset the cache.  | %resetcache                        |              |
 | scandrive        | Scan DriveIDs Table and update other tables.                                       | %scandrive (name=NULL) (member_id=0)                                                                           |                       |

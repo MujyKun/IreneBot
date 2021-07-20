@@ -1,6 +1,4 @@
 from typing import List
-
-import IreneUtility.Base
 import dbl
 import discord.ext.commands
 from discord.ext.tasks import Loop
@@ -22,16 +20,13 @@ class Irene:
     """
 
     def __init__(self):
-        self.define_start_up_criteria(test_bot=True, dev_mode=True, upload_from_host=False,
-                                      weverse_announcements=False, reset_cache=False)
-        # Whether to Run Weverse
-        self.run_weverse = not ex.test_bot
+        self.define_start_up_criteria(test_bot=True, dev_mode=True, upload_from_host=False, reset_cache=False)
         # Whether to Run Twitter
         self.run_twitter = not ex.test_bot
 
         self.cog_names = ["miscellaneous", "twitter", "currency", "blackjack", "youtube", "groupmembers", "archive",
                           "moderator", "profile", "help", "logging", "botmod", "events", "lastfm", "interactions",
-                          "wolfram", "guessinggame", "customcommands", "biasgame", "weverse", "selfassignroles",
+                          "wolfram", "guessinggame", "customcommands", "biasgame", "selfassignroles",
                           "reminder", "twitch", "botowner", "unscramble", "vlive", "music", "blocking_monitor",
                           "data_mod",  "status"]
 
@@ -76,7 +71,6 @@ class Irene:
             "guessinggame": module.GuessingGame.GuessingGame,
             "customcommands": module.CustomCommands.CustomCommands,
             "biasgame": module.BiasGame.BiasGame,
-            "weverse": module.Weverse.Weverse,
             "selfassignroles": module.SelfAssignRoles.SelfAssignRoles,
             "reminder": module.Reminder.Reminder,
             "twitch": module.Twitch.Twitch,
@@ -109,8 +103,7 @@ class Irene:
 
     def define_utility_properties(self):
         """Defines essential attributes and properties for the Utility lib."""
-        ex.define_unique_properties(weverse=True, data_dog=True, twitter=True, db_connection=True,
-                                    events=self.cogs.get("events"))
+        ex.define_unique_properties(data_dog=True, twitter=True, db_connection=True, events=self.cogs.get("events"))
 
     def run_live_bot(self):
         """Run Production Ver. of the the bot."""
@@ -129,8 +122,7 @@ class Irene:
         ex.client.run(module.keys.keys_obj.test_client_token)
 
     @staticmethod
-    def define_start_up_criteria(test_bot=False, dev_mode=False, upload_from_host=True,
-                                 weverse_announcements=True, reset_cache=False):
+    def define_start_up_criteria(test_bot=False, dev_mode=False, upload_from_host=True, reset_cache=False):
         """Settings for running the bot."""
         # Set to True if running a test bot (Not equivalent to dev mode).
         ex.test_bot = test_bot
@@ -139,9 +131,6 @@ class Irene:
         ex.dev_mode = dev_mode
         # Set to True if you want the bot to upload its images from host rather than using url.
         ex.upload_from_host = upload_from_host
-        # Set to True if you intend to have announcement text channels on the support server and would like
-        # the weverse updates command to be private only to the bot owner.
-        ex.weverse_announcements = weverse_announcements
         # Set to False if you do not want the cache to reset itself every 12 hours.
         ex.reset_cache = reset_cache
 
@@ -167,13 +156,6 @@ class Irene:
             self.reload_cog(cog)
 
         self.reload_utility()
-
-    def reload_weverse(self):
-        """Reload Weverse Lib and Client."""
-        self.cogs["weverse"].weverse_updates.cancel()
-        ex.reload_weverse(module.keys.keys_obj.weverse_auth_token)
-        ex.client.loop.create_task(ex.weverse_client.start(create_old_posts=False))
-        self.cogs["weverse"].weverse_updates.start()
 
     def reload_utility(self):
         """Reloads the utility package for the bot."""
@@ -229,8 +211,6 @@ class Irene:
                       self.cogs["twitch"].twitch_updates, self.cogs["reminder"].reminder_loop]
         if self.run_twitter:
             self.loops.append(self.cogs["twitter"].send_photos_to_twitter)
-        if self.run_weverse:
-            self.loops.append(self.cogs["weverse"].weverse_updates)
         ex.cache.main_youtube_instance = module.Youtube.YoutubeLoop(ex)
         self.loops.append(ex.cache.main_youtube_instance.loop_youtube_videos)
 

@@ -38,16 +38,6 @@ class BotOwner(commands.Cog):
         self.startup_obj.reload_utility()
         return await ctx.send("Done")
 
-    @commands.command()
-    async def reloadweverse(self, ctx):
-        """
-        Reloads the Weverse Lib and Client.
-
-        [Format: %reloadweverse
-        """
-        self.startup_obj.reload_weverse()
-        return await ctx.send("Done")
-
     @commands.command(aliases=["reloadcog"])
     async def reloadmodule(self, ctx, *, module_name: str):
         """Reload a module/cog from it's name.

@@ -205,10 +205,6 @@ def get_and_reload_keys() -> Keys_Obj:
         # Bias Game Folder Location
         "bias_game_location": os.getenv("BIAS_GAME_LOCATION"),
 
-        # Weverse
-        "weverse_auth_token": os.getenv("WEVERSE_AUTH"),
-        "weverse_image_folder": os.getenv("WEVERSE_IMAGE_FOLDER"),
-
         # Twitch
         "twitch_client_id": os.getenv("TWITCH_CLIENT_ID"),
         "twitch_client_secret": os.getenv("TWITCH_CLIENT_SECRET"),

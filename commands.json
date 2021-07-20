@@ -291,14 +291,6 @@
         "Bot Moderator"
       ],
       "aliases": null
-    },
-    "weverseauth": {
-      "description": "Updates Weverse Authentication Token.",
-      "example_image_url": null,
-      "syntax": "%weverseauth <token>",
-      "example_syntax": null,
-      "permissions_needed": null,
-      "aliases": null
     }
   },
   "BiasGame": {
@@ -1541,56 +1533,6 @@
       "note": "This will also stop the main instance running on start-up."
     }
   },
-  "Weverse": {
-    "weverseupdates": {
-      "description": "Receive Weverse updates of a Weverse community in the current text channel.",
-      "example_image_url": null,
-      "syntax": "%weverseupdates <community name> [role]",
-      "example_syntax": null,
-      "permissions_needed": [
-        "Bot Owner",
-        "Manage Messages"
-      ],
-      "aliases": [
-        "weverse"
-      ],
-      "note": "This command has been privatized to the Bot Owner. Available Communities are TXT, BTS, GFRIEND, SEVENTEEN, ENHYPEN, NU'EST, CL, P1Harmony, Weeekly, SUNMI, HENRY, Dreamcatcher, Cherry_Bullet, MIRAE, TREASURE, LETTEAMOR, EVERGLOW, FTISLAND, woo!ah!, IKON, JUST_B, and BLACKPINK."
-    },
-    "disablecomments": {
-      "description": "Disable the comments of a Weverse community.",
-      "example_image_url": null,
-      "syntax": "%disablecomments <community name>",
-      "example_syntax": null,
-      "permissions_needed": [
-        "Bot Owner",
-        "Manage Messages"
-      ],
-      "aliases": null,
-      "note": "Use the command again to re-enable."
-    },
-    "disablemedia": {
-      "description": "Disable the media of a Weverse community.",
-      "example_image_url": null,
-      "syntax": "%disablemedia <community name>",
-      "example_syntax": null,
-      "permissions_needed": [
-        "Bot Owner",
-        "Manage Messages"
-      ],
-      "aliases": null,
-      "note": "Use the command again to re-enable."
-    },
-    "testweverse": {
-      "description": "Attempt to post the notifications in Weverse to the channel.",
-      "example_image_url": null,
-      "syntax": "%testweverse [amount=20]",
-      "example_syntax": null,
-      "permissions_needed": [
-        "Bot Owner"
-      ],
-      "aliases": null
-    }
-  },
   "SelfAssignRoles": {
     "addrole": {
       "description": "Add a role to be self-assignable.",
@@ -1863,16 +1805,6 @@
       "description": "Reloads the utility package for the bot.",
       "example_image_url": null,
       "syntax": "%reloadutility",
-      "example_syntax": null,
-      "permissions_needed": [
-        "Bot Owner"
-      ],
-      "aliases": null
-    },
-    "reloadweverse": {
-      "description": "Reloads the Weverse Lib and Client.",
-      "example_image_url": null,
-      "syntax": "%reloadweverse",
       "example_syntax": null,
       "permissions_needed": [
         "Bot Owner"

@@ -187,9 +187,6 @@
     "no_lyrics": "No lyrics were found for that query.",
     "moved_song": "Moved {title} by {artist} to the next song in queue."
   },
-  "weverse": {
-   "bot_owner_only": "Weverse Updates are now privatized to the bot owner only! In order to get weverse updates, join the support server {support_server_link} and click Follow on the Weverse channels you want. Since more than 3000 channels were following Weverse updates, Irene has gotten a lot slower and this action should be done to reduce Irene's workload."
-  },
   "vlive": {
     "list_channel_codes": "This is a list of the Vlive channel codes in this channel: {result}.",
     "invalid_code": "That code does not belong to a Vlive Channel.",

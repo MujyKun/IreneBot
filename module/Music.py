@@ -5,6 +5,7 @@ from IreneUtility.Utility import Utility
 from ksoftapi import NoResults
 import wavelink
 from random import shuffle
+import re
 
 
 class Music(commands.Cog):
@@ -14,6 +15,7 @@ class Music(commands.Cog):
         """
         self.ex: Utility = ex
         self.ex.wavelink = wavelink.Client(bot=self.ex.client)
+        self.URL_REGEX = re.compile(r'https?://(?:www\.)?.+')
 
         # Modified version of wavelink to not have to wait till d.py cache loads.
 
@@ -75,7 +77,11 @@ class Music(commands.Cog):
 
         [Format: %play (query)]
         """
-        tracks = await self.ex.wavelink.get_tracks(query) or await self.ex.wavelink.get_tracks(f'ytsearch:{query}')
+        query = query.strip('<>')
+        if not self.URL_REGEX.match(query):
+            query = f'ytsearch:{query}'
+
+        tracks = await self.ex.wavelink.get_tracks(query)
 
         if not tracks:
             # no tracks exist based on the search query.

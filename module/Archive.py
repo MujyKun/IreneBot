@@ -8,6 +8,17 @@ from datetime import datetime
 from IreneUtility.Utility import Utility
 from IreneUtility.util import u_logger as log
 
+"""
+WARNING:
+
+THIS FILE SHOULD NOT BE USED AS A REFERENCE.
+THIS FILE SHOULD NOT BE USED AS A REFERENCE.
+THIS FILE SHOULD NOT BE USED AS A REFERENCE.
+
+
+Will be entirely reworked.
+"""
+
 
 # noinspection PyBroadException,PyPep8
 class Archive(commands.Cog):

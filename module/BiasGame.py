@@ -72,17 +72,24 @@ class BiasGame(commands.Cog):
         if not user:
             user = ctx.author
         user_wins = await self.ex.conn.fetch(
-            "SELECT idolid, wins FROM biasgame.winners WHERE userid = $1 ORDER BY WINS DESC LIMIT $2", user.id, 15)
+            "SELECT idolid, wins FROM biasgame.winners WHERE userid = $1 ORDER BY WINS DESC", user.id)
         title = await self.ex.get_msg(user.id, 'biasgame', 'lb_title', ['name', user.display_name])
+        embed_list = []
         if user_wins:
             msg_string = ""
-            counter = 1
-            for idol_id, wins in user_wins:
+            for counter, idol_win_info in enumerate(user_wins, 1):
                 await asyncio.sleep(0)
+                idol_id = idol_win_info[0]
+                wins = idol_win_info[1]
                 member = await self.ex.u_group_members.get_member(idol_id)
                 msg_string += f"{counter}) {member.full_name} ({member.stage_name}) -> {wins} Win(s).\n"
-                counter += 1
+                if counter % 15 == 0:
+                    embed_list.append(await self.ex.create_embed(title=title, title_desc=msg_string))
+                    msg_string = ""
         else:
             msg_string = await self.ex.get_msg(user.id, 'biasgame', 'no_wins', ['name', user.display_name])
-        embed = await self.ex.create_embed(title=title, title_desc=msg_string)
-        await ctx.send(embed=embed)
+        if msg_string:
+            embed_list.append(await self.ex.create_embed(title=title, title_desc=msg_string))
+        msg = await ctx.send(embed=embed_list[0])
+        if len(embed_list) > 1:
+            await self.ex.check_left_or_right_reaction_embed(msg, embed_list)

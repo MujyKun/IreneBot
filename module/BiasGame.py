@@ -71,23 +71,23 @@ class BiasGame(commands.Cog):
         """
         if not user:
             user = ctx.author
-        user_wins = await self.ex.conn.fetch(
-            "SELECT idolid, wins FROM biasgame.winners WHERE userid = $1 ORDER BY WINS DESC", user.id)
+        user_wins = await self.ex.sql.s_biasgame.fetch_user_wins(user.id)
+        if not user_wins:
+            return await ctx.send(await self.ex.get_msg(user.id, 'biasgame', 'no_wins', ['name', user.display_name]))
+
         title = await self.ex.get_msg(user.id, 'biasgame', 'lb_title', ['name', user.display_name])
         embed_list = []
-        if user_wins:
-            msg_string = ""
-            for counter, idol_win_info in enumerate(user_wins, 1):
-                await asyncio.sleep(0)
-                idol_id = idol_win_info[0]
-                wins = idol_win_info[1]
-                member = await self.ex.u_group_members.get_member(idol_id)
-                msg_string += f"{counter}) {member.full_name} ({member.stage_name}) -> {wins} Win(s).\n"
-                if counter % 15 == 0:
-                    embed_list.append(await self.ex.create_embed(title=title, title_desc=msg_string))
-                    msg_string = ""
-        else:
-            msg_string = await self.ex.get_msg(user.id, 'biasgame', 'no_wins', ['name', user.display_name])
+        msg_string = ""
+        for counter, idol_win_info in enumerate(user_wins, 1):
+            await asyncio.sleep(0)
+            idol_id = idol_win_info[0]
+            wins = idol_win_info[1]
+            member = await self.ex.u_group_members.get_member(idol_id)
+            msg_string += f"{counter}) {member.full_name} ({member.stage_name}) -> {wins} Win(s).\n"
+            if counter % 15 == 0:
+                embed_list.append(await self.ex.create_embed(title=title, title_desc=msg_string))
+                msg_string = ""
+
         if msg_string:
             embed_list.append(await self.ex.create_embed(title=title, title_desc=msg_string))
         msg = await ctx.send(embed=embed_list[0])

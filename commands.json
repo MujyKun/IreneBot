@@ -1,47 +1,4 @@
 {
-  "Archive": {
-    "addchannel": {
-      "description": "Add the current channel to start archiving images to Google Drive.",
-      "example_image_url": null,
-      "syntax": "%addchannel <drive_folder_id> [name=NULL] [owner_present=0]",
-      "example_syntax": null,
-      "permissions_needed": [
-        "Bot Owner Presence",
-        "Manage Messages"
-      ],
-      "aliases": null
-    },
-    "addhistory": {
-      "description": "Add the previous images in the current text channel to Google Drive.",
-      "example_image_url": null,
-      "syntax": "%addhistory [year] [month] [day]",
-      "example_syntax": null,
-      "permissions_needed": [
-        "Manage Messages"
-      ],
-      "aliases": null
-    },
-    "deletechannel": {
-      "description": "Stop the current channel from being archived to Google Drive.",
-      "example_image_url": null,
-      "syntax": "%deletechannel",
-      "example_syntax": null,
-      "permissions_needed": [
-        "Manage Messages"
-      ],
-      "aliases": null
-    },
-    "listchannels": {
-      "description": "List the channels in the server that are being archived.",
-      "example_image_url": null,
-      "syntax": "%listchannels",
-      "example_syntax": null,
-      "permissions_needed": [
-        "Manage Messages"
-      ],
-      "aliases": null
-    }
-  },
   "BlackJack": {
     "blackjack": {
       "description": "Start a game of BlackJack.",
@@ -1759,17 +1716,6 @@
         "Bot Owner"
       ],
       "aliases": null
-    },
-    "scandrive": {
-      "description": "Scan an archived name and transfer them to an idol.",
-      "example_image_url": null,
-      "syntax": "%scandrive [name] [member id]",
-      "example_syntax": null,
-      "permissions_needed": [
-        "Bot Owner"
-      ],
-      "aliases": null,
-      "note": "Archive has not been looked at in a very long time and may not work efficiently."
     },
     "send": {
       "description": "Send a message to a text channel.",

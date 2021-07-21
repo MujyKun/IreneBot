@@ -73,7 +73,7 @@ When you are adding several input with the same needed keyword, you may number t
 **An Amount of Anything (integer):** `{integer}`  
 **Any type of result (string):** `{result}` or `{string}`  
 
-**Mention a User:** `{mention}` -> Please be aware that this requires the full syntax when replacing (<@user_id>).  
+**Mention a User:** `{mention}` -> Be aware that this requires the full syntax when replacing (<@user_id>).  
 
 **Title of Something:** `{title}`  
 **Artist of Something:** `{artist}`  

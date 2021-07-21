@@ -25,15 +25,6 @@ To find out more, look at the `GroupMembers` category.
 
 ## COMMANDS
 
-#### Archive: ★★★
-| Command               | Description                                                                                           | Format                               |
-|-----------------------|-------------------------------------------------------------------------------------------------------|--------------------------------------|
-| addchannel            | REQUIRES BOT OWNER PRESENCE TO ADD -- Make the current channel start archiving images to google drive | %addchannel (drive_folder_id) (name) |
-| addhistory            | Add all of the previous images from a text channel to google drive.                                   | %addhistory (year) (month) (day)     |
-| deletechannel         | Stop the current channel from being archived                                                          | %deletechannel                       |
-| listchannels          | List the channels in your server that are being archived.                                             | %listchannels                        |
-
-
 #### BlackJack:
 | Command           | Description                                                                                           | Format                               | Aliases |
 |-------------------|-------------------------------------------------------------------------------------------------------|--------------------------------------|---------|

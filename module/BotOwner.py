@@ -65,37 +65,6 @@ class BotOwner(commands.Cog):
         await self.ex.u_cache.create_cache(on_boot_up=False)
 
     @commands.command()
-    async def scandrive(self, ctx, name="NULL", member_id=0):
-        """Scan DriveIDs Table and update other tables."""
-        try:
-            all_links = await self.ex.conn.fetch("SELECT id, linkid, name FROM archive.DriveIDs")
-            for p_id, link_id, link_name in all_links:
-                await asyncio.sleep(0)
-                try:
-                    new_link = f"https://drive.google.com/uc?export=view&id={link_id}"
-                    all_names = await self.ex.conn.fetch("SELECT Name FROM archive.ChannelList")
-                    if name == "NULL" and member_id == 0:
-                        for idol_name in all_names:
-                            await asyncio.sleep(0)
-                            idol_name = idol_name[0]
-                            if idol_name == link_name and (idol_name != "Group" or idol_name != "MDG Group"):
-                                member_id1 = self.ex.first_result(
-                                    await self.ex.conn.fetchrow("SELECT ID FROM groupmembers.Member WHERE StageName = "
-                                                                "$1", idol_name))
-                                await self.ex.conn.execute(
-                                    "INSERT INTO groupmembers.uploadimagelinks VALUES($1,$2)", new_link, member_id1)
-                                await self.ex.conn.execute("DELETE FROM archive.DriveIDs WHERE ID = $1", p_id)
-                    elif link_name.lower() == name.lower():
-                        await self.ex.conn.execute("DELETE FROM archive.DriveIDs WHERE ID = $1", p_id)
-                        await self.ex.conn.execute(
-                            "INSERT INTO groupmembers.uploadimagelinks VALUES($1,$2)", new_link, member_id)
-                except Exception as e:
-                    log.console(e)
-            await ctx.send(await self.ex.get_msg(ctx, 'botowner', 'scan_drive_complete'))
-        except Exception as e:
-            log.console(e)
-
-    @commands.command()
     async def addcards(self, ctx):
         """
         Fill The CardValues Table with Cards

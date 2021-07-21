@@ -24,7 +24,7 @@ class Irene:
         # Whether to Run Twitter
         self.run_twitter = not ex.test_bot
 
-        self.cog_names = ["miscellaneous", "twitter", "currency", "blackjack", "youtube", "groupmembers", "archive",
+        self.cog_names = ["miscellaneous", "twitter", "currency", "blackjack", "youtube", "groupmembers",
                           "moderator", "profile", "help", "logging", "botmod", "events", "lastfm", "interactions",
                           "wolfram", "guessinggame", "customcommands", "biasgame", "selfassignroles",
                           "reminder", "twitch", "botowner", "unscramble", "vlive", "music", "blocking_monitor",
@@ -58,7 +58,6 @@ class Irene:
             "blackjack": module.BlackJack.BlackJack,
             "youtube": module.Youtube.Youtube,
             "groupmembers": module.GroupMembers.GroupMembers,
-            "archive": module.Archive.Archive,
             "moderator": module.Moderator.Moderator,
             "profile": module.Profile.Profile,
             "help": module.Help.Help,
@@ -225,7 +224,6 @@ class Irene:
     def add_listeners(self):
         """Add Listener Events."""
         on_message_events = [self.cogs["groupmembers"].idol_photo_on_message,
-                             self.cogs["archive"].on_message,
                              self.cogs["logging"].on_message_log,
                              self.cogs["miscellaneous"].on_message_user_notifications,
                              self.cogs["botmod"].mod_mail_on_message,

@@ -17,11 +17,7 @@ class BotOwner(commands.Cog):
 
     async def cog_check(self, ctx):
         """A local check for this cog."""
-        is_owner = await self.ex.client.is_owner(ctx.author)
-        if not is_owner:
-            await ctx.send("This command can only be used by the Bot Owner.")
-
-        return is_owner
+        return await self.ex.client.is_owner(ctx.author)
 
     @commands.command()
     async def reload(self, ctx):

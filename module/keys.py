@@ -158,7 +158,7 @@ def get_and_reload_keys() -> Keys_Obj:
         "wavelink_options": {
             "host": os.getenv("WAVELINK_HOST"),
             "port": os.getenv("WAVELINK_PORT"),
-            "rest_uri": os.getenv("WAVELINK_URI"),
+            # "rest_uri": os.getenv("WAVELINK_URI"),
             "password": os.getenv("WAVELINK_PASSWORD")
         },
 

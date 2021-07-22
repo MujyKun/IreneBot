@@ -1,11 +1,10 @@
 import discord
-from discord.ext import commands, tasks
+from discord.ext import commands
 from IreneUtility.util import u_logger as log
 from IreneUtility.Utility import Utility
 from ksoftapi import NoResults
 import wavelink
 from random import shuffle
-import re
 
 
 class Music(commands.Cog):
@@ -14,17 +13,9 @@ class Music(commands.Cog):
         :param ex: Utility object.
         """
         self.ex: Utility = ex
-        self.ex.wavelink = wavelink.Client(bot=self.ex.client)
-        self.URL_REGEX = re.compile(r'https?://(?:www\.)?.+')
 
-        # Modified version of wavelink to not have to wait till d.py cache loads.
+        self.ex.client.id = self.ex.keys.bot_id  # this is very important if the bot is not fully loaded.
 
-        # IMPORTANT: THIS BOT ID MUST BE ACCURATE FOR THE MUSIC PLAYER TO WORK
-        # IMPORTANT: THIS BOT ID MUST BE ACCURATE FOR THE MUSIC PLAYER TO WORK
-        # IMPORTANT: THIS BOT ID MUST BE ACCURATE FOR THE MUSIC PLAYER TO WORK
-
-        # The Bot ID is used across the nodes.
-        self.ex.wavelink.bot_user_id = self.ex.keys.bot_id
         self.ex.client.loop.create_task(self.ex.u_music.start_nodes())
 
     async def cog_check(self, ctx):
@@ -33,6 +24,20 @@ class Music(commands.Cog):
             raise commands.NoPrivateMessage
         return True
 
+    @commands.Cog.listener()
+    async def on_wavelink_node_ready(self, node: wavelink.Node):
+        """Event fired when a node has finished connecting."""
+        log.console(f'Wavelink Node: {node.identifier} is ready!')
+
+    @commands.Cog.listener()
+    async def on_wavelink_track_end(self, player, track, reason):
+        controller = self.ex.u_music.get_controller(player)
+        controller.next.set()
+
+    @commands.Cog.listener()
+    async def on_wavelink_track_stuck(self, track, threshold):
+        print(track, threshold)
+
     @commands.command(aliases=["connect"])
     async def join(self, ctx, *, channel: discord.VoiceChannel = None):
         """
@@ -40,7 +45,7 @@ class Music(commands.Cog):
 
         [Format: %join [Voice Channel]]
         """
-        await self.ex.u_music.connect_to_vc(ctx, channel)
+        await self.ex.u_music.connect_to_vc(ctx)
 
     @commands.command(aliases=["vol"])
     async def volume(self, ctx, volume: int):
@@ -48,7 +53,10 @@ class Music(commands.Cog):
 
         [Format: %volume <volume>]
         """
-        player = self.ex.wavelink.get_player(ctx.guild.id)
+        try:
+            player = await self.ex.u_music.connect_to_vc(ctx)
+        except discord.NotFound:
+            return
         volume = 100 if volume > 100 else volume
         volume = 0 if volume < 0 else volume
         await player.set_volume(volume)
@@ -64,7 +72,10 @@ class Music(commands.Cog):
         [Format: %stop]
         [Aliases: leave, disconnect]
         """
-        player = self.ex.wavelink.get_player(ctx.guild.id)
+        try:
+            player = await self.ex.u_music.connect_to_vc(ctx)
+        except discord.NotFound:
+            return
         # destroy the player
         await self.ex.u_music.destroy_player(player)
 
@@ -72,55 +83,59 @@ class Music(commands.Cog):
         return await ctx.send(msg)
 
     @commands.command(aliases=["p"])
-    async def play(self, ctx, *, query: str):
+    async def play(self, ctx, *, source: str):
         """Play a song based on a search query.
 
         [Format: %play (query)]
         """
-        query = query.strip('<>')
-        if not self.URL_REGEX.match(query):
-            query = f'ytsearch:{query}'
+        try:
+            player = await self.ex.u_music.connect_to_vc(ctx)
+        except discord.NotFound:
+            return
 
-        tracks = await self.ex.wavelink.get_tracks(query)
+        source = await self.ex.u_music.search_query(source)
 
-        if not tracks:
+        if not source:
             # no tracks exist based on the search query.
             msg = await self.ex.get_msg(ctx, "music", "no_songs")
             return await ctx.send(msg)
 
-        player = self.ex.wavelink.get_player(ctx.guild.id)
-
-        if not player.is_connected:
-            # connect to voice channel.
-            await ctx.invoke(self.join)
-
         if not hasattr(player, "playlist"):
             # create an empty playlist.
             player.playlist = []
+        try:
+            if isinstance(source, (wavelink.YouTubePlaylist, list)):
+                # add an entire playlist to the player playlist.
+                if isinstance(source, wavelink.YouTubePlaylist):
+                    list_of_tracks = source.tracks
+                else:
+                    list_of_tracks = source
 
-        if isinstance(tracks, wavelink.TrackPlaylist):
-            # add an entire playlist to the player playlist.
-            list_of_tracks = tracks.tracks
+                for track in list_of_tracks:
+                    # every track in the playlist will have the Context it was created in.
+                    track.info["ctx"] = ctx
 
-            for track in list_of_tracks:
-                # every track in the playlist will have the Context it was created in.
-                track.info["ctx"] = ctx
+                player.playlist = player.playlist + list_of_tracks
+                length_of_tracks = len(list_of_tracks)
+                result = f"{length_of_tracks} songs" if length_of_tracks == 1 else str(list_of_tracks[0])
+                msg = await self.ex.get_msg(ctx, "music", "added_to_queue", ["result", f"{result}"])
+                await ctx.send(msg)
+            else:
+                # add the Context that had the track created.
+                source.info["ctx"] = ctx
 
-            player.playlist = player.playlist + list_of_tracks
-            msg = await self.ex.get_msg(ctx, "music", "added_to_queue", ["result", f"{len(list_of_tracks)} songs"])
-            await ctx.send(msg)
-        else:
-            track = tracks[0]
-            # add the Context that had the track created.
-            track.info["ctx"] = ctx
+                # add a single track to the player playlist.
+                msg = await self.ex.get_msg(ctx, "music", "added_to_queue", ["result", str(source)])
+                await ctx.send(msg)
+                player.playlist.append(source)
 
-            # add a single track to the player playlist.
-            msg = await self.ex.get_msg(ctx, "music", "added_to_queue", ["result", str(track)])
-            await ctx.send(msg)
-            player.playlist.append(tracks[0])
+            # start the player loop if it was not already started.
+            await self.ex.u_music.start_player_loop(player)
+            await self.ex.u_music.remove_partial_tracks(player)
 
-        # start the player loop if it was not already started.
-        await self.ex.u_music.start_player_loop(player)
+        except Exception as e:
+            await ctx.send(f"ERROR: {e}")
+            log.console(e, method=self.play)
 
     @commands.command()
     async def pause(self, ctx):
@@ -206,7 +221,10 @@ class Music(commands.Cog):
 
         [Format: %shuffle]
         """
-        player = self.ex.wavelink.get_player(ctx.guild.id)
+        try:
+            player = await self.ex.u_music.connect_to_vc(ctx)
+        except discord.NotFound:
+            return
         if hasattr(player, "playlist"):
             shuffle(player.playlist)
 
@@ -221,7 +239,10 @@ class Music(commands.Cog):
         [Format: %queue]
         [Aliases: q, list]
         """
-        player = self.ex.wavelink.get_player(ctx.guild.id)
+        try:
+            player = await self.ex.u_music.connect_to_vc(ctx)
+        except discord.NotFound:
+            return
         embed_list = await self.ex.u_music.create_queue_embed(player)
 
         if not embed_list:
@@ -239,7 +260,11 @@ class Music(commands.Cog):
 
         [Format: %remove (song number)]
         """
-        player = self.ex.wavelink.get_player(ctx.guild.id)
+        try:
+            player = await self.ex.u_music.connect_to_vc(ctx)
+        except discord.NotFound:
+            return
+
         if hasattr(player, "playlist"):
             try:
                 player.playlist.pop(song_number - 1)
@@ -258,7 +283,11 @@ class Music(commands.Cog):
         [Format: %move (song number)]
         [Aliases: skipto]
         """
-        player = self.ex.wavelink.get_player(ctx.guild.id)
+        try:
+            player = await self.ex.u_music.connect_to_vc(ctx)
+        except discord.NotFound:
+            return
+
         if hasattr(player, "playlist"):
             try:
                 track: wavelink.Track = player.playlist.pop(song_number - 1)
@@ -279,7 +308,10 @@ class Music(commands.Cog):
 
         [Format: %loop]
         """
-        player = self.ex.wavelink.get_player(ctx.guild.id)
+        try:
+            player = await self.ex.u_music.connect_to_vc(ctx)
+        except discord.NotFound:
+            return
 
         if hasattr(player, "loop"):
             player.loop = not player.loop

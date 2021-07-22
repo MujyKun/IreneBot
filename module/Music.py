@@ -117,7 +117,7 @@ class Music(commands.Cog):
 
                 player.playlist = player.playlist + list_of_tracks
                 length_of_tracks = len(list_of_tracks)
-                result = f"{length_of_tracks} songs" if length_of_tracks == 1 else str(list_of_tracks[0])
+                result = f"{length_of_tracks} songs" if length_of_tracks > 1 else str(list_of_tracks[0])
                 msg = await self.ex.get_msg(ctx, "music", "added_to_queue", ["result", f"{result}"])
                 await ctx.send(msg)
             else:

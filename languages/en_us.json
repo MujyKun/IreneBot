@@ -168,7 +168,8 @@
     "empty_queue": "The song queue is currently empty.",
     "no_api_key": "There is no API Key currently set for the Lyrics and the Developer is working on it.",
     "no_lyrics": "No lyrics were found for that query.",
-    "moved_song": "Moved {title} by {artist} to the next song in queue."
+    "moved_song": "Moved {title} by {artist} to the next song in queue.",
+    "no_nodes": "There are no nodes available to play a track."
   },
   "vlive": {
     "list_channel_codes": "This is a list of the Vlive channel codes in this channel: {result}.",

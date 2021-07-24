@@ -88,6 +88,9 @@ class Music(commands.Cog):
 
         [Format: %play (query)]
         """
+        if not self.ex.u_music.node_pool:
+            msg = await self.ex.get_msg(ctx, "music", "no_nodes")
+            return await ctx.send(msg)
         try:
             player = await self.ex.u_music.connect_to_vc(ctx)
         except discord.NotFound:

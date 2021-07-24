@@ -249,8 +249,9 @@ Maintenance Status: {maintenance_status}
         embed.add_field(name="Total Commands Used", value=f"{self.ex.cache.total_used} Commands", inline=True)
         embed.add_field(name=f"This Session ({self.ex.cache.session_id} | {date.today()})",
                         value=f"{self.ex.cache.current_session} Commands", inline=True)
-        embed.add_field(name="Playing Music", value=f"{len(self.ex.client.voice_clients)} Wavelink Players", inline=True)
-        embed.add_field(name="Playing Guessing/Bias/Unscramble/Guessing",
+        embed.add_field(name="Playing Music", value=f"{len(self.ex.client.voice_clients)} Wavelink Players",
+                        inline=True)
+        embed.add_field(name="Playing Guessing/Bias/Unscramble/BlackJack",
                         value=f"{len(self.ex.cache.guessing_games)}/{len(self.ex.cache.bias_games)}"
                               f"/{len(self.ex.cache.unscramble_games)}/{len(self.ex.cache.blackjack_games)} Games",
                         inline=True)

@@ -88,7 +88,13 @@ class Music(commands.Cog):
 
         [Format: %play (query)]
         """
-        if not self.ex.u_music.node_pool:
+        node_available = False
+        for node in self.ex.u_music.node_pool.nodes.values():
+            if node.is_connected():
+                node_available = True
+                break
+
+        if not node_available:
             msg = await self.ex.get_msg(ctx, "music", "no_nodes")
             return await ctx.send(msg)
         try:

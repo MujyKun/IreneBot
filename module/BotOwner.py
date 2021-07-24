@@ -20,6 +20,18 @@ class BotOwner(commands.Cog):
         return await self.ex.client.is_owner(ctx.author)
 
     @commands.command()
+    async def reloadnodes(self, ctx):
+        """Will reload the music nodes.
+
+        [Format: %reloadnodes]
+        """
+        # TODO: Add to commands.json
+        for key, node in self.ex.u_music.node_pool.nodes.copy().items():
+            await node.disconnect(force=True)
+        await self.ex.u_music.start_nodes()
+        return await ctx.send("Done")
+
+    @commands.command()
     async def reload(self, ctx):
         """Will hot reload all of IreneBot, IreneUtility, and any other self-made packages.
 

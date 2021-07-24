@@ -1167,7 +1167,7 @@
     "join": {
       "description": "Makes the Bot join the current voice channel.",
       "example_image_url": null,
-      "syntax": "%join [Voice Channel]",
+      "syntax": "%join",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": ["connect"]

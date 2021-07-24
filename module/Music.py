@@ -39,7 +39,7 @@ class Music(commands.Cog):
         print(track, threshold)
 
     @commands.command(aliases=["connect"])
-    async def join(self, ctx, *, channel: discord.VoiceChannel = None):
+    async def join(self, ctx):
         """
         Makes the Bot join the current voice channel.
 

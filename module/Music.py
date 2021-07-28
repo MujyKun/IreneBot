@@ -20,6 +20,9 @@ class Music(commands.Cog):
 
     async def cog_check(self, ctx):
         """A local check for this cog."""
+        if ctx.invoked_with and ctx.invoked_with == 'help':
+            return True
+
         if not ctx.guild:
             raise commands.NoPrivateMessage
         return True

@@ -14,6 +14,8 @@ class UnScramble(commands.Cog):
 
     async def cog_check(self, ctx):
         """A local check for this cog. Checks if the user is in the support server."""
+        if ctx.invoked_with and ctx.invoked_with == 'help':
+            return True
         return await self.ex.check_user_in_support_server(ctx)
 
     @commands.command(aliases=['usl', 'uslb'])

@@ -125,6 +125,7 @@ class YoutubeLoop:
 
     @tasks.loop(seconds=0, minutes=30, hours=0, reconnect=True)
     async def loop_youtube_videos(self):
-        if self.ex.client.loop.is_running():
-            if self.ex.conn:  # make sure a connection to the db exists.
-                await self.scrape_videos()
+        while not self.ex.client.loop.is_running or not self.ex.conn:
+            await asyncio.sleep(5)
+
+        await self.scrape_videos()

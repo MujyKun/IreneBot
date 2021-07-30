@@ -93,8 +93,12 @@ class Vlive(commands.Cog):
 
                 if not vlive_channel:  # no channels are following the channel.
                     continue
+                log.console(f"Checking if VLIVE Channel {vlive_channel.id} is live.",
+                            method=self.vlive_notification_updates)
 
                 if await vlive_channel.check_live() and not vlive_channel.already_posted:
+                    log.console(f"VLIVE Channel {vlive_channel.id} was found LIVE.",
+                                method=self.vlive_notification_updates)
                     channels_to_remove = await vlive_channel.send_live_to_followers()
                     for text_channel in channels_to_remove:
                         await self.ex.u_vlive.unfollow_vlive(text_channel, vlive_channel.id)

@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 from IreneUtility.Utility import Utility
+from IreneUtility.util import u_logger as log
 
 
 # noinspection PyPep8
@@ -85,6 +86,8 @@ class BlackJack(commands.Cog):
         blackjack_game.second_player_bet = bet
         blackjack_game.second_player_ctx = ctx
         await blackjack_game.process_game()  # start the blackjack game.
+        await self.ex.stop_game(ctx, self.ex.cache.blackjack_games)
+        log.console(f"Ended BlackJack Game in {ctx.channel.id}")
 
     @commands.command()
     async def stopbj(self, ctx):
@@ -93,12 +96,16 @@ class BlackJack(commands.Cog):
 
         [Format: %stopbj]
         """
+        if not ctx.author:
+            log.console("Could not get the Author of the context.", method=self.stopbj)
+            return await ctx.send("I could not find the Author object of your context. "
+                                  "This message was sent on purpose to find an issue with the BlackJack game.")
+
         user = await self.ex.get_user(ctx.author.id)
         if not user.in_currency_game:
             # user is not in a game.
             return await ctx.send(await self.ex.get_msg(ctx, "blackjack", "not_in_game",
                                                         ["name", ctx.author.display_name]))
-
         # find the game and end it.
         blackjack_game = await self.ex.u_blackjack.find_game(user)
         if blackjack_game:

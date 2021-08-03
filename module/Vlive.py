@@ -93,7 +93,7 @@ class Vlive(commands.Cog):
 
                 if not vlive_channel:  # no channels are following the channel.
                     continue
-                log.console(f"Checking if VLIVE Channel {vlive_channel.id} is live.",
+                log.useless(f"Checking if VLIVE Channel {vlive_channel.id} is live.",
                             method=self.vlive_notification_updates)
 
                 if await vlive_channel.check_live() and not vlive_channel.already_posted:

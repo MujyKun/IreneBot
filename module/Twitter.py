@@ -140,31 +140,34 @@ class Twitter(commands.Cog):
         return await ctx.send(msg)
 
     # notification loop
-    @tasks.loop(seconds=5, minutes=0, hours=0, reconnect=True)
+    @tasks.loop(seconds=45, minutes=0, hours=0, reconnect=True)
     async def twitter_notification_updates(self):
         """Send Twitter announcements for new tweets."""
-        if not self.ex.irene_cache_loaded:
-            return
+        try:
+            if not self.ex.irene_cache_loaded:
+                return
 
-        if self._update_loop_busy:
-            # we do not want to mess up another iteration's task process for updates
-            # wait until the next iteration.
-            return
-        self._update_loop_busy = True
+            if self._update_loop_busy:
+                # we do not want to mess up another iteration's task process for updates
+                # wait until the next iteration.
+                return
+            self._update_loop_busy = True
 
-        for twitter_channel in self.ex.cache.twitter_channels.values():
-            try:
-                await asyncio.sleep(0)  # bare yield
+            for twitter_channel in self.ex.cache.twitter_channels.values():
+                try:
+                    await asyncio.sleep(0)  # bare yield
 
-                if not twitter_channel:  # no channels are following the channel.
-                    continue
+                    if not twitter_channel:  # no channels are following the channel.
+                        continue
 
-                log.useless(f"Checking if Twitter Channel {twitter_channel.id} has a new Tweet.",
-                            method=self.twitter_notification_updates)
-                twitter_link = await twitter_channel.fetch_new_tweet()
-                if twitter_link:
-                    await twitter_channel.send_update_to_followers(twitter_link)
-            except Exception as e:
-                log.console(f"{e} (Exception)", method=self.twitter_notification_updates)
+                    log.useless(f"Checking if Twitter Channel {twitter_channel.id} has a new Tweet.",
+                                method=self.twitter_notification_updates)
+                    twitter_link = await twitter_channel.fetch_new_tweet()
+                    if twitter_link:
+                        await twitter_channel.send_update_to_followers(twitter_link)
+                except Exception as e:
+                    log.console(f"{e} (Exception)", method=self.twitter_notification_updates)
+        except Exception as e:
+            log.console(f"{e} (Exception2)", method=self.twitter_notification_updates)
 
         self._update_loop_busy = False

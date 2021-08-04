@@ -920,7 +920,9 @@
       "syntax": "%shard",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": ["shardinfo"]
+      "aliases": [
+        "shardinfo"
+      ]
     },
     "stopgames": {
       "description": "End all games that you are hosting or that are in the channel.",
@@ -1170,7 +1172,9 @@
       "syntax": "%join",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": ["connect"]
+      "aliases": [
+        "connect"
+      ]
     },
     "move": {
       "description": "Make a song the next to play without skipping the current song.",
@@ -1252,7 +1256,8 @@
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": [
-        "leave", "disconnect"
+        "leave",
+        "disconnect"
       ]
     },
     "volume": {
@@ -1261,7 +1266,9 @@
       "syntax": "%volume <volume>",
       "example_syntax": null,
       "permissions_needed": null,
-      "aliases": ["vol"]
+      "aliases": [
+        "vol"
+      ]
     },
     "lyrics": {
       "description": "Get the lyrics of a song.",
@@ -1400,6 +1407,64 @@
         "Bot Owner"
       ],
       "aliases": null
+    },
+    "twitterupdates": {
+      "description": "Receive Updates for Twitter.",
+      "example_image_url": null,
+      "syntax": "%twitterupdates <code/group/idol/list> <channel username, group id, idol id> [role id]",
+      "example_syntax": null,
+      "sub_commands": {
+        "code": {
+          "description": "Follow a Twitter channel based on the channel username.",
+          "example_image_url": null,
+          "syntax": "%twitterupdates code <channel username> [role]",
+          "example_syntax": null,
+          "permissions_needed": [
+            "Manage Messages"
+          ],
+          "aliases": [
+            "user",
+            "username"
+          ]
+        },
+        "group": {
+          "description": "Follow a Twitter channel belonging to a Group ID If they have one.",
+          "example_image_url": null,
+          "syntax": "%twitterupdates group <group id> [role]",
+          "example_syntax": null,
+          "permissions_needed": [
+            "Manage Messages"
+          ],
+          "aliases": null
+        },
+        "idol": {
+          "description": "Follow a Twitter channel belonging to an Idol ID If they have one.",
+          "example_image_url": null,
+          "syntax": "%twitterupdates idol <idol id> [role]",
+          "example_syntax": null,
+          "permissions_needed": [
+            "Manage Messages"
+          ],
+          "aliases": null
+        },
+        "list": {
+          "description": "Lists the Twitter channels currently being followed in the text channel.",
+          "example_image_url": null,
+          "syntax": "%twitterupdates list",
+          "example_syntax": null,
+          "permissions_needed": [
+            "Manage Messages"
+          ],
+          "aliases": null
+        }
+      },
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": [
+        "twitter"
+      ],
+      "note": "This command contains sub-commands. This means any following arguments are respective to the first argument."
     }
   },
   "UnScramble": {
@@ -1745,7 +1810,9 @@
       "permissions_needed": [
         "Bot Owner"
       ],
-      "aliases": ["reloadcog"]
+      "aliases": [
+        "reloadcog"
+      ]
     },
     "reloadutility": {
       "description": "Reloads the utility package for the bot.",
@@ -1861,7 +1928,9 @@
       "example_image_url": null,
       "syntax": "%addidol <JSON>",
       "example_syntax": null,
-      "permissions_needed": ["Data Moderator"],
+      "permissions_needed": [
+        "Data Moderator"
+      ],
       "aliases": null,
       "note": "Command should only be used if the card does not exist for the Idol."
     },
@@ -1870,7 +1939,9 @@
       "example_image_url": null,
       "syntax": "%addgroup <JSON>",
       "example_syntax": null,
-      "permissions_needed": ["Data Moderator"],
+      "permissions_needed": [
+        "Data Moderator"
+      ],
       "aliases": null,
       "note": "Command should only be used if the card does not exist for the Group."
     }

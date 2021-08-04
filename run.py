@@ -207,7 +207,8 @@ class Irene:
                       ex.u_cache.send_cache_data_to_data_dog, ex.u_cache.update_cache,
                       self.cogs["vlive"].vlive_notification_updates,
                       self.cogs["groupmembers"].send_idol_photo_loop, self.cogs["status"].change_bot_status_loop,
-                      self.cogs["twitch"].twitch_updates, self.cogs["reminder"].reminder_loop]
+                      self.cogs["twitch"].twitch_updates, self.cogs["reminder"].reminder_loop,
+                      self.cogs["twitter"].twitter_notification_updates]
         if self.run_twitter:
             self.loops.append(self.cogs["twitter"].send_photos_to_twitter)
         ex.cache.main_youtube_instance = module.Youtube.YoutubeLoop(ex)

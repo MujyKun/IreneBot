@@ -540,7 +540,7 @@ class GroupMembers(commands.Cog):
                         try:
                             channel = self.ex.client.get_channel(text_channel) or await \
                                 self.ex.client.fetch_channel(text_channel)
-                        except discord.Forbidden or discord.NotFound:
+                        except (discord.Forbidden, discord.NotFound):
                             # delete channel from our list permanently.
                             await self.ex.u_group_members.delete_channel_from_send_idol(channel)
 
@@ -561,7 +561,8 @@ class GroupMembers(commands.Cog):
                         channel = text_channel
 
                     idol_ids: list = copied_send_idol_cache.get(text_channel)
-                    log.console(f"Sending Idols {idol_ids} to Text Channel {channel.id}. -> send_idol_photo_loop")
+                    log.console(f"Sending Idols {idol_ids} to Text Channel {channel.id}.",
+                                method=self.send_idol_photo_loop)
                     for idol_id in idol_ids:
                         idol = await self.ex.u_group_members.get_member(idol_id)
                         try:

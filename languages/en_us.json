@@ -88,7 +88,12 @@
   "twitter": {
     "tweet_success": "Your Tweet has been successfully uploaded to {tweet_url}",
     "delete_success": "The Tweet ID {tweet_id} has been successfully deleted.",
-    "recent_tweets": "Here are the past {tweet_amount} tweets:\n{tweets}"
+    "recent_tweets": "Here are the past {tweet_amount} tweets:\n{tweets}",
+    "list_channel_codes": "This is a list of the Twitter channels in this channel: {result}.",
+    "invalid_code": "That username does not belong to a Twitter Channel.",
+    "unfollowed": "This channel is no longer following {result}.",
+    "followed": "This channel is now following {result}.",
+    "unknown_code": "The username of that {result} is not known. Feel free to use the user command instead."
   },
   "general": {
     "out_of_range": "The number you entered is out of the available range.",

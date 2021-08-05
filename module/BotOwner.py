@@ -249,6 +249,12 @@ class BotOwner(commands.Cog):
         await ctx.send("Finished creating idol cache.")
 
     @commands.command()
+    async def resetidolphotos(self, ctx):
+        """Reset Idol Photo Cache."""
+        await self.ex.u_cache.create_idols()
+        await ctx.send("Finished creating idol cache.")
+
+    @commands.command()
     async def resetgroupcache(self, ctx):
         """Reset Group Cache."""
         await self.ex.u_cache.create_group_cache()

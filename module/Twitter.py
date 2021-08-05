@@ -12,6 +12,7 @@ class Twitter(commands.Cog):
     def __init__(self, ex):
         self.ex: Utility = ex
         self._update_loop_busy = False
+        self.twitter_upload_patron_limit = self.ex.keys.twitter_update_limit * 5
 
     async def cog_check(self, ctx):
         """A local check for this cog."""
@@ -79,7 +80,7 @@ class Twitter(commands.Cog):
 
         [Format: %twitterupdates (idol/group/code) (idol id/group id/twitter code)]
         """
-        ...
+        ...  # this command can not be used in DMs already.
 
     @twitterupdates.command()
     async def idol(self, ctx, idol_id: int, role: discord.Role = None):

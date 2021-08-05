@@ -80,11 +80,12 @@ class Events(commands.Cog):
         if isinstance(error, commands.errors.CommandNotFound):
             pass
         elif isinstance(error, commands.errors.CommandInvokeError):
-            try:
-                if error.original.status == 403:
-                    return
-            except AttributeError:
-                pass  # do not need to log as useless
+            if hasattr(error, "original"):
+                if hasattr(error.original, "status"):
+                    if error.original.status == 403:
+                        return
+                if isinstance(error.original, ex.exceptions.Limit):
+                    return await ctx.send(error.original.args[0])
 
             log.console(f"Command Invoke Error -- {error} -- {ctx.command.name}")
             ex.cache.errors_per_minute += 1
@@ -97,7 +98,7 @@ class Events(commands.Cog):
         elif isinstance(error, commands.errors.BadArgument):
             await Events.error(ctx, error)
             ctx.command.reset_cooldown(ctx)
-        elif isinstance(error, commands.errors.MissingPermissions) or isinstance(error, commands.errors.UserInputError):
+        elif isinstance(error, (commands.errors.MissingPermissions, commands.errors.UserInputError)):
             await Events.error(ctx, error)
         elif isinstance(error, commands.NoPrivateMessage):
             await ctx.send(await ex.get_msg(ctx, "general", "no_dm"))

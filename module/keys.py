@@ -98,6 +98,7 @@ def get_and_reload_keys() -> Keys_Obj:
         "idol_no_vote_send_limit": make_int(os.getenv("IDOL_NO_VOTE_LIMIT")),
         "reminder_limit": make_int(os.getenv("REMINDER_LIMIT")),
         "idol_send_limit": make_int(os.getenv("IDOL_SEND_LIMIT")),
+        "twitter_update_limit": make_int(os.getenv("TWITTER_UPDATE_LIMIT")),
         "currency_name": os.getenv("CURRENCY_NAME"),
         "icon_url": os.getenv("ICON_URL"),
         "footer_url": os.getenv("FOOTER_URL"),

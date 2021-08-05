@@ -15,8 +15,9 @@ class Twitter(commands.Cog):
 
     async def cog_check(self, ctx):
         """A local check for this cog."""
-        return await self.ex.client.is_owner(ctx.author)
+        ...
 
+    @commands.is_owner()
     @commands.command()
     async def tweet(self, ctx, *, tweet):
         """
@@ -28,6 +29,7 @@ class Twitter(commands.Cog):
         msg = await self.ex.get_msg(ctx.author.id, "twitter", "tweet_success", ['tweet_url', tweet_url])
         await ctx.send(msg)
 
+    @commands.is_owner()
     @commands.command()
     async def deletetweet(self, ctx, *, tweet_id):
         """
@@ -39,6 +41,7 @@ class Twitter(commands.Cog):
         msg = await self.ex.get_msg(ctx.author.id, "twitter", "delete_success", ['tweet_id', tweet_id])
         await ctx.send(msg)
 
+    @commands.is_owner()
     @commands.command()
     async def recenttweets(self, ctx, *, amount_of_tweets=20):
         """

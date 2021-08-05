@@ -165,6 +165,7 @@ class Twitter(commands.Cog):
 
                     log.useless(f"Checking if Twitter Channel {twitter_channel.id} has a new Tweet.",
                                 method=self.twitter_notification_updates)
+                    await asyncio.sleep(10)
                     twitter_link = await twitter_channel.fetch_new_tweet()
                     if twitter_link:
                         await twitter_channel.send_update_to_followers(twitter_link)

@@ -252,16 +252,6 @@ To find out more, look at the `GroupMembers` category.
 | usleaderboard | Shows leaderboards for unscramble game. | %uslb (easy/medium/hard) (server/global)| usl, uslb |
 | stopus | Force-end an unscramble game if you are a moderator or host of the game. This command is meant for any issues or if a game happens to be stuck. Must be game host or access to manage messages. | %stopus | ★/Host|
 
-
-#### Youtube: ♥♥♥
-| Command          | Description                                                                                                                          | Format                                       |
-|------------------|--------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------|
-| addurl           | Add url to youtube videos                                                                                                            | %addurl (link)                               |
-| removeurl        | Remove url from youtube videos                                                                                                       | %removeurl (link)                            |
-| scrapeyoutube    | Scrape the views from the Youtube Videos in the DB                                                                                                          | %scrapeyoutube                               |
-| startloop        | Starts scraping youtube videos.                                                                                                      | %startloop (seconds until it starts looping) |
-| stoploop         | Stops scraping youtube videos                                                                                                        | %stoploop                                    |
-
 #### SelfAssignRoles:
 | Command     | Description                          | Format                 | Aliases           |
 |-------------|--------------------------------------|------------------------|-------------------|

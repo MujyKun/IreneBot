@@ -61,6 +61,16 @@ class BotOwner(commands.Cog):
         self.startup_obj.reload_cog(cog)
         return await ctx.send("Done")
 
+    @commands.command(aliases=["reloadcogs"])
+    async def reloadmodules(self, ctx):
+        """Reload all modules/cogs
+
+        [Format: %reloadmodules]
+        [Aliases: %reloadcogs]
+        """
+        self.startup_obj.reload_cogs()
+        return await ctx.send("Done")
+
     @commands.command()
     async def uploadfromhost(self, ctx):
         """Toggles whether images are uploaded from host or not.

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 import dbl
 import discord.ext.commands
 from discord.ext.tasks import Loop
@@ -22,7 +22,7 @@ class Irene:
     def __init__(self):
         self.define_start_up_criteria(test_bot=True, dev_mode=True, upload_from_host=False, reset_cache=False)
         # Whether to Run Twitter
-        self.run_twitter = not ex.test_bot
+        self.run_twitter_uploads = not ex.test_bot
 
         self.cog_names = ["miscellaneous", "twitter", "currency", "blackjack", "youtube", "groupmembers",
                           "moderator", "profile", "help", "logging", "botmod", "events", "lastfm", "interactions",
@@ -34,7 +34,7 @@ class Irene:
         self.cogs = {}
         self.set_cogs()
 
-        self.loops: List[Loop] = []  # Contains list of loops that may be started/stopped
+        self.loops: Dict[str, List[Loop]] = {}  # Contains dict of loops that may be started/stopped {cog_name: [Loops]}
 
     def run(self):
         """Start the bot."""
@@ -56,7 +56,6 @@ class Irene:
             "twitter": module.Twitter.Twitter,
             "currency": module.Currency.Currency,
             "blackjack": module.BlackJack.BlackJack,
-            "youtube": module.Youtube.Youtube,
             "groupmembers": module.GroupMembers.GroupMembers,
             "moderator": module.Moderator.Moderator,
             "profile": module.Profile.Profile,
@@ -196,31 +195,69 @@ class Irene:
         ex.client.remove_cog(cog.qualified_name)
 
         new_cog = self.set_cogs(cog.qualified_name.lower())
+
         try:
             ex.client.add_cog(new_cog)
         except Exception as e:
             log.console(f"Failed to add Cog {cog} (Exception) - {e}", self.reload_cog)
 
-    def start_loops(self):
+        self.start_loops(cog_name=cog.qualified_name.lower())
+
+    def reset_loops(self, cog_name: str = None):
+        # [[cog name, [loops]]]
+        loop_lists = [
+            ["database", [ex.u_database.show_irene_alive]],
+            ["cache", [ex.u_cache.update_patron_and_guild_cache, ex.u_cache.update_cache,
+                       ex.u_cache.send_cache_data_to_data_dog]],
+            ["vlive", [self.cogs["vlive"].vlive_notification_updates]],
+            ["groupmembers", [self.cogs["groupmembers"].send_idol_photo_loop]],
+            ["status", [self.cogs["status"].change_bot_status_loop]],
+            ["twitch", [self.cogs["twitch"].twitch_updates]],
+            ["reminder", [self.cogs["reminder"].reminder_loop]],
+            ["twitter", [self.cogs["twitter"].twitter_notification_updates]],
+        ]
+
+        for loop_list in loop_lists:
+            list_cog_name = loop_list[0]
+
+            if cog_name and list_cog_name.lower() != cog_name.lower():
+                continue
+
+            self.loops[list_cog_name.lower()] = loop_list[1]
+            if self.run_twitter_uploads and (not cog_name or (list_cog_name.lower() == cog_name.lower() == "twitter")):
+                self.loops["twitter"].append(self.cogs["twitter"].send_photos_to_twitter)
+
+    def start_loops(self, cog_name: str = None):
         """Start Loops (Optional)"""
-        self.loops = [ex.u_database.show_irene_alive, ex.u_cache.update_patron_and_guild_cache,
-                      ex.u_cache.send_cache_data_to_data_dog, ex.u_cache.update_cache,
-                      self.cogs["vlive"].vlive_notification_updates,
-                      self.cogs["groupmembers"].send_idol_photo_loop, self.cogs["status"].change_bot_status_loop,
-                      self.cogs["twitch"].twitch_updates, self.cogs["reminder"].reminder_loop,
-                      self.cogs["twitter"].twitter_notification_updates]
-        if self.run_twitter:
-            self.loops.append(self.cogs["twitter"].send_photos_to_twitter)
-        ex.cache.main_youtube_instance = module.Youtube.YoutubeLoop(ex)
-        self.loops.append(ex.cache.main_youtube_instance.loop_youtube_videos)
+        self.stop_loops(safe_cancel=False, cog_name=cog_name)  # stop the loops just incase.
+        self.reset_loops(cog_name=cog_name)
+        for loop_cog_name, loop_list in self.loops.items():
+            if cog_name and loop_cog_name.lower() != cog_name.lower():
+                continue
+            for loop in loop_list:
+                log.console(f"Starting Loop: {loop} -> Cog Name: {cog_name}", method=self.start_loops)
+                try:
+                    loop.start()
+                except Exception as e:
+                    log.console(f"{e} (Exception)", self.start_loops)
 
-        for loop in self.loops:
-            loop.start()
+    def stop_loops(self, safe_cancel=False, cog_name: str = None):
+        """Stop all loops.
 
-    def stop_loops(self, safe_cancel=False):
-        """Stop all loops."""
-        for loop in self.loops:
-            loop.cancel() if not safe_cancel else loop.stop()
+        :param safe_cancel: (bool) Whether to cancel a loop safely or not.
+        :param cog_name: (str) The cog name to stop loops for.
+        """
+        for loop_cog_name, loop_list in self.loops.items():
+            if cog_name and loop_cog_name.lower() != cog_name.lower():
+                continue
+
+            for loop in loop_list:
+                if loop.is_running():
+                    log.console(f"Stopping Loop: {loop} -> Cog Name: {cog_name}", method=self.stop_loops)
+                    try:
+                        loop.cancel() if not safe_cancel else loop.stop()
+                    except Exception as e:
+                        log.console(f"{e} (Exception)", self.start_loops)
 
     def add_listeners(self):
         """Add Listener Events."""

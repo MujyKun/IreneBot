@@ -1502,59 +1502,6 @@
       "aliases": null
     }
   },
-  "Youtube": {
-    "addurl": {
-      "description": "Adds url to youtube videos to scrape.",
-      "example_image_url": null,
-      "syntax": "%addurl <link>",
-      "example_syntax": null,
-      "permissions_needed": [
-        "Bot Owner"
-      ],
-      "aliases": null
-    },
-    "removeurl": {
-      "description": "Remove a url from the youtube videos.",
-      "example_image_url": null,
-      "syntax": "%removeurl <link>",
-      "example_syntax": null,
-      "permissions_needed": [
-        "Bot Owner"
-      ],
-      "aliases": null
-    },
-    "scrapeyoutube": {
-      "description": "Scrape view count from the youtube videos in the DB.",
-      "example_image_url": null,
-      "syntax": "%scrapeyoutube",
-      "example_syntax": null,
-      "permissions_needed": [
-        "Bot Owner"
-      ],
-      "aliases": null
-    },
-    "startloop": {
-      "description": "Start scraping youtube videos with a new instance after t seconds.",
-      "example_image_url": null,
-      "syntax": "%startloop [seconds=0]",
-      "example_syntax": null,
-      "permissions_needed": [
-        "Bot Owner"
-      ],
-      "aliases": null
-    },
-    "stoploop": {
-      "description": "Stop scraping youtube videos.",
-      "example_image_url": null,
-      "syntax": "%stoploop",
-      "example_syntax": null,
-      "permissions_needed": [
-        "Bot Owner"
-      ],
-      "aliases": null,
-      "note": "This will also stop the main instance running on start-up."
-    }
-  },
   "SelfAssignRoles": {
     "addrole": {
       "description": "Add a role to be self-assignable.",
@@ -1812,6 +1759,18 @@
       ],
       "aliases": [
         "reloadcog"
+      ]
+    },
+    "reloadmodules": {
+      "description": "Reload all modules.",
+      "example_image_url": null,
+      "syntax": "%reloadmodules",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Owner"
+      ],
+      "aliases": [
+        "reloadcogs"
       ]
     },
     "reloadutility": {

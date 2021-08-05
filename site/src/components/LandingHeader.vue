@@ -19,7 +19,7 @@
         <p
           class="lg:text-2xl text-xl max-w-md leading-relaxed font-regular mb-4"
         >
-          A database of over <b>1.8 million</b> idol photos, kpop games, music
+          A database of over <b>2.4 million</b> idol photos, kpop games, music
           radio, packaged with many more features.
         </p>
         <invite-button class="mb-4"/>
@@ -57,10 +57,10 @@
       </div>
       <StatsBar
         class="absolute bottom-0 left-0 right-0 z-20"
-        :servers="server_count ? server_count : 9648"
-        :users="member_count ? member_count : 600000"
-        :commandUsage="total_commands_used ? total_commands_used : 1842916"
-        :photos="idol_photo_count ? idol_photo_count : 1824673"
+        :servers="server_count ? server_count : 14001"
+        :users="member_count ? member_count : 1212445"
+        :commandUsage="total_commands_used ? total_commands_used : 2892847"
+        :photos="idol_photo_count ? idol_photo_count : 2451153"
       />
     </section>
     <img

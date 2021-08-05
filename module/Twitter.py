@@ -15,7 +15,7 @@ class Twitter(commands.Cog):
 
     async def cog_check(self, ctx):
         """A local check for this cog."""
-        ...
+        return True
 
     @commands.is_owner()
     @commands.command()

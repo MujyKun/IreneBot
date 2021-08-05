@@ -233,12 +233,17 @@ To find out more, look at the `GroupMembers` category.
 | w           | Send a request to Wolfram.                                                                                                            | %wolfram (query)                               |
 
 
-#### Twitter: ♥♥♥
-| Command          | Description                                                                                                                          | Format                          |
-|------------------|--------------------------------------------------------------------------------------------------------------------------------------|---------------------------------|
-| deletetweet      | Delete a Tweet by it's ID                                                                                                            | %deletetweet (id)               |
-| recenttweets     | Show Most Recents Tweets                                                                                                             | %recenttweets (amount)          |
-| tweet            | Tweets a status update on Twitter                                                                                                    | %tweet (status)                 |
+#### Twitter:  
+| Command          | Description                                                                                                                          | Format                          | Aliases        |
+|------------------|--------------------------------------------------------------------------------------------------------------------------------------|---------------------------------|----------------|
+| deletetweet      | Delete a Tweet by it's ID                                                                                                            | %deletetweet (id)               | ♥  |
+| recenttweets     | Show Most Recents Tweets                                                                                                             | %recenttweets (amount)          | ♥  |
+| tweet            | Tweets a status update on Twitter                                                                                                    | %tweet (status)                 | ♥  |
+| twitterupdates code | Follow a Twitter channel based on the account username. | %twitterupdates code (twitter username) [role id] | twitter code, twitter user, twitter username |
+| twitterupdates group | Follow a Twitter channel belonging to a Group ID If they have one. | %twitterupdates group (group id) [role id] | twitter group |
+| twitterupdates idol | Follow a Twitter channel belonging to an Idol ID If they have one. | %twitterupdates idol (idol id) [role id] | twitter idol |
+| twitterupdates list | Lists the Twitter channels currently being followed in the text channel. | %twitterupdates list | twitter list |
+
 
 #### UnScramble:
 | Command          | Description                                                                                                                          | Format                          | Aliases        |

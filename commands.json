@@ -1411,11 +1411,11 @@
     "twitterupdates": {
       "description": "Receive Updates for Twitter.",
       "example_image_url": null,
-      "syntax": "%twitterupdates <code/group/idol/list> <channel username, group id, idol id> [role id]",
+      "syntax": "%twitterupdates <code/group/idol/list> <account username, group id, idol id> [role id]",
       "example_syntax": null,
       "sub_commands": {
         "code": {
-          "description": "Follow a Twitter channel based on the channel username.",
+          "description": "Follow a Twitter channel based on the account username.",
           "example_image_url": null,
           "syntax": "%twitterupdates code <channel username> [role]",
           "example_syntax": null,

@@ -1,6 +1,6 @@
 <template>
   <div class="text-blueGray-200">
-    <!-- <Navbar /> -->
+    <Navbar />
     <router-view />
   </div>
 </template>

@@ -125,6 +125,9 @@ Message Author: {message.author}
 
         [Format: %removenoti (phrase/word)]
         """
+        if isinstance(ctx.channel, discord.DMChannel):
+            raise commands.NoPrivateMessage
+
         try:
             await self.ex.conn.execute("DELETE FROM general.notifications WHERE guildid=$1 AND userid=$2 AND phrase=$3",
                                        ctx.guild.id, ctx.author.id, phrase.lower())
@@ -132,16 +135,12 @@ Message Author: {message.author}
                 user = await self.ex.get_user(ctx.author.id)
                 user.notifications.remove([ctx.guild.id, phrase.lower()])
                 self.ex.cache.user_notifications.remove([ctx.guild.id, ctx.author.id, phrase.lower()])  # full list
-            except AttributeError:
-                return await ctx.send(
-                    f"> **{ctx.author.display_name}, You are not allowed to use this command in DMs.**")
             except Exception as e:
                 log.useless(f"{e} (Exception) - Failed to remove user phrase", method=self.removenoti)
-            await ctx.send(f"> **{ctx.author.display_name}, if you were receiving notifications for that phrase, "
-                           f"it has been removed.**")
+            await ctx.send(await self.ex.get_msg(ctx, "miscellaneous", "noti_removed"))
         except Exception as e:
             log.console(e)
-            await ctx.send(f"> **Something Went Wrong, please {await self.ex.get_server_prefix(ctx)}report it.**")
+            await ctx.send(await self.ex.get_msg(ctx, "general", "error", ["e", e]))
 
     @commands.command()
     async def listnoti(self, ctx):
@@ -168,11 +167,10 @@ Message Author: {message.author}
                     final_list += f"**{phrase}**"
             await ctx.send(final_list)
         except AttributeError:
-            return await ctx.send(
-                f"> **{ctx.author.display_name}, You do not have any notification phrases on this server.**")
+            await ctx.send(await self.ex.get_msg(ctx, "miscellaneous", "no_notis"))
         except Exception as e:
             log.console(e)
-            await ctx.send(f"> **Something Went Wrong, please {await self.ex.get_server_prefix(ctx)}report it.**")
+            await ctx.send(await self.ex.get_msg(ctx, "general", "error", ["e", e]))
 
     @commands.command(aliases=['patron'])
     async def patreon(self, ctx):
@@ -303,7 +301,7 @@ Maintenance Status: {maintenance_status}
             msg = f"Original ({target_lang}): {message} \nTranslated ({to_language}): {text} "
             return await ctx.send(msg)
         except Exception as e:
-            await ctx.send("An error has occurred with the Translation.")
+            await ctx.send(await self.ex.get_msg(ctx, "general", "error", ["e", e]))
             log.console(e)
 
     @commands.command()
@@ -324,13 +322,14 @@ Maintenance Status: {maintenance_status}
             # 403 error ( no access ) on testing
             channel = await self.ex.client.fetch_channel(self.ex.keys.report_channel_id)
             msg = await channel.send(embed=embed)
-            await ctx.send("> **Your bug report has been sent.**")
+            await ctx.send(await self.ex.get_msg(ctx, "miscellaneous", "bug_sent"))
             await msg.add_reaction("\U0001f44d")  # thumbs up
             await msg.add_reaction("\U0001f44e")  # thumbs down
         except:
             # Error would occur on test bot if the client does not have access to a certain channel id
             # this try-except will also be useful if a server removed the bot.
-            await ctx.send("Could not fetch channel to report to.")
+            await ctx.send(await self.ex.get_msg(ctx, "general", "error",
+                                                 ["e", "Could not fetch channel to report to."]))
 
     @commands.command()
     async def suggest(self, ctx, *, suggestion):
@@ -349,20 +348,21 @@ Maintenance Status: {maintenance_status}
         try:
             channel = await self.ex.client.fetch_channel(self.ex.keys.suggest_channel_id)  # 403 error on testing
             msg = await channel.send(embed=embed)
-            await ctx.send("> **Your suggestion has been sent.**")
+            await ctx.send(await self.ex.get_msg(ctx, "miscellaneous", "suggestion_sent"))
             await msg.add_reaction("\U0001f44d")  # thumbs up
             await msg.add_reaction("\U0001f44e")  # thumbs down
         except Exception as e:
             log.console(e)
-            await ctx.send("Could not fetch channel to suggest to.")
+            await ctx.send(await self.ex.get_msg(ctx, "general", "error",
+                                                 ["e", "Could not fetch channel to report to."]))
 
     @commands.command(aliases=['rand', 'randint', 'r'])
     async def random(self, ctx, a: int, b: int):
         """Choose a random number from a range (a,b)."""
         try:
-            await ctx.send(f"> **Your random number is {randint(a, b)}.**")
+            await ctx.send(await self.ex.get_msg(ctx, "miscellaneous", "random_number", ["result", randint(a, b)]))
         except Exception as e:
-            await ctx.send(f"> **{e}**")
+            await ctx.send(await self.ex.get_msg(ctx, "general", "error", ["e", e]))
 
     @commands.command(aliases=['coinflip', 'f'])
     async def flip(self, ctx):
@@ -372,7 +372,7 @@ Maintenance Status: {maintenance_status}
         [Format: %flip]
         [Aliases: coinflip, f]
         """
-        await ctx.send(f"> **You flipped {choice(['Heads', 'Tails'])}.**")
+        await ctx.send(await self.ex.get_msg(ctx, "miscellaneous", "coin_flip", ["result", choice(['Heads', 'Tails'])]))
 
     @commands.command(aliases=['define', 'u'])
     async def urban(self, ctx, term=None, number=1, override=0):
@@ -477,7 +477,7 @@ Maintenance Status: {maintenance_status}
             await ctx.send(embed=embed)
         except Exception as e:
             log.console(e)
-            await ctx.send("> This server has not yet been loaded into my cache (takes about an hour from restart).")
+            await ctx.send(await self.ex.get_msg(ctx, "miscellaneous", "not_in_cache"))
 
     @commands.command(name="8ball", aliases=['8'])
     async def _8ball(self, ctx, *, question=None):
@@ -487,9 +487,11 @@ Maintenance Status: {maintenance_status}
         [Format: %8ball Question]
         """
         if question:
-            await ctx.send(f">>> **Question: {question} \nAnswer: {choice(self.ex.cache.eight_ball_responses)}**")
+            await ctx.send(await self.ex.get_msg(ctx, "miscellaneous", "prompt_answer",
+                                                 [["result", question],
+                                                  ["result2", choice(self.ex.cache.eight_ball_responses)]]))
         else:
-            await ctx.send("> **Please enter an 8ball prompt.**")
+            await ctx.send(await self.ex.get_msg(ctx, "miscellaneous", "prompt"))
 
     @commands.command(aliases=['stopgame', 'endgame', 'endgames'])
     async def stopgames(self, ctx):

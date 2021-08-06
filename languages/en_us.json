@@ -49,7 +49,7 @@
     "bot_unbanned": "If the user was banned, they are now unbanned.",
     "ban_bot_mod": "<@{mention}>, you cannot ban a bot moderator.>",
     "status_added": "{result} was added.",
-    "status_removed": "{result} was removed from the statuses.",
+    "status_removed": "{result} was removed from the statuses."
   },
   "currency": {
     "daily_msg": "{name}, you have been given {daily_amount}.",
@@ -85,7 +85,16 @@
     "set_language_success": "{name}, your language is now set to {language}.",
     "terminating_games": "{name}, I am terminating all the games that exist in this channel or by the host.",
     "no_game": "No {string} game is currently in session.",
-    "moderator_or_host": "You must be a moderator or the host of the game in order to end the game."
+    "moderator_or_host": "You must be a moderator or the host of the game in order to end the game.",
+    "noti_removed": "If you were receiving notifications for that phrase, it has been removed.",
+    "no_notis": "You do not have any notification phrases on this server.",
+    "suggestion_sent": "Your suggestion has been sent.",
+    "bug_sent": "Your bug report has been sent.",
+    "random_number": "Your random number is {result}.",
+    "coin_flip": "You flipped {result}.",
+    "not_in_cache": "This server has not been loaded into cache.",
+    "prompt": "Please enter an 8ball prompt.",
+    "prompt_answer": "Question: {result}\nAnswer: {result2}"
   },
   "utility": {
     "join_support_server_feature": "In order to use this feature of {bot_name}, you must first join the Support Server at <{support_server_link}>"

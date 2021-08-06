@@ -1,5 +1,6 @@
 import asyncio
 
+import discord
 from discord.ext import commands
 from IreneUtility.util import u_logger as log
 from IreneUtility.Utility import Utility
@@ -28,6 +29,9 @@ class GuessingGame(commands.Cog):
 
         [Format: %ggleaderboard (easy/medium/hard) (server/global)]
         """
+        if isinstance(ctx.channel, discord.DMChannel):
+            raise commands.NoPrivateMessage
+
         if difficulty.lower() not in ['easy', 'medium', 'hard']:
             difficulty = "medium"
 
@@ -36,8 +40,6 @@ class GuessingGame(commands.Cog):
                 mode = "server"
             if mode == "server":
                 server_id = await self.ex.get_server_id(ctx)
-                if not server_id:
-                    return await ctx.send("> You should not use this command in DMs.")
                 members = f"({', '.join([str(member.id) for member in self.ex.client.get_guild(server_id).members])})"
                 top_user_scores = await self.ex.u_guessinggame.get_guessing_game_top_ten(difficulty, members=members)
 
@@ -54,7 +56,7 @@ class GuessingGame(commands.Cog):
             await ctx.send(embed=m_embed)
         except Exception as e:
             log.console(e)
-            return await ctx.send(f"> You may not understand this error. Please report it -> {e}")
+            await ctx.send(await self.ex.get_msg(ctx, "general", "gen_error", ["e", e]))
 
     async def manage_gg_cmd(self, ctx, gender="all", difficulty="medium", rounds=20, timeout=20, game_mode="idol"):
         """Manages the guessing game commands."""

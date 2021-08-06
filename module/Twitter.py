@@ -1,5 +1,3 @@
-from typing import List
-
 import discord
 from discord.ext import commands, tasks
 from IreneUtility.Utility import Utility
@@ -12,7 +10,6 @@ class Twitter(commands.Cog):
     def __init__(self, ex):
         self.ex: Utility = ex
         self._update_loop_busy = False
-        self.twitter_upload_patron_limit = self.ex.keys.twitter_update_limit * 5
 
     async def cog_check(self, ctx):
         """A local check for this cog."""

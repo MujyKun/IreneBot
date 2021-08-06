@@ -56,7 +56,7 @@ Message Author: {message.author}
             await user.set_language(language_choice)
             msg_str = self.ex.cache.languages[language_choice]['miscellaneous']['set_language_success']
         else:
-            msg_str = self.ex.cache.languages[language_choice]['miscellaneous']['set_language_fail']
+            msg_str = await self.ex.get_msg(user, "miscellaneous", "set_language_fail")
 
         msg_str = await self.ex.replace(msg_str, [["name", ctx.author.display_name], ["language", user.language],
                                                   ["languages", ", ".join(self.ex.cache.languages.keys())]])

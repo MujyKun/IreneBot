@@ -18,7 +18,38 @@
     "already_standing": "{name}, you are already standing!",
     "now_standing": "{name}, you are now standing!",
     "hit": "{mention}, you have received ||{string}||! Your current score is ||{integer}||.",
-    "game_created": "{name}, a blackjack game has been created. For a player to join you, they must type {server_prefix}jg @you (bet)."
+    "game_created": "{name}, a blackjack game has been created. For a player to join you, they must type {server_prefix}jg @you (bet).",
+    "rules": "Each Player gets 2 cards at the start.\n\nIn order to get blackjack, your final value must equal 21.\n\nIf Player1 exceeds 21 and Player2 does not, Player1 busts and Player2 wins the game.\n\nYou will have two options.\n\nThe first option is to `hit`, which means to grab another card.\n\nThe second option is to `stand` to finalize your deck.\n\nIf both players bust, Player closest to 21 wins!\n\nNumber cards are their face values.\n\nAces can be 1 or 11 depending on the situation you're in.\n\nJack, Queen, and King are all worth 10.\n\nIf you go over 35 points, the bot will automatically stand you.\n\nMOST IMPORTANTLY!!! DO NOT peek at your opponent's cards or points!\n",
+    "rules_title": "BlackJack Rules",
+    "rules_footer": "{server_prefix}help BlackJack for the available commands."
+  },
+  "bm": {
+    "stopped": "Blocking Monitor Stopped.",
+    "started": "Blocking Monitor Stopped.",
+    "not_running": "Blocking Monitor is not running.",
+    "already_running": "Blocking Monitor is already running."
+  },
+  "botmod": {
+    "linked_idol": "Moved {result} to {result2} if it existed.",
+    "image_host_success": "All images have been fixed, merged to image hosting service and have links set up for them.",
+    "no_idol_found": "Could not find idol {result}.",
+    "no_group_found": "Could not find group {result}.",
+    "merge_success": "Merged {result} to {result2}.",
+    "api_restart": "Restarting the API.",
+    "maintenance_mode": "Maintenance mode is set to {result}.",
+    "warn": "You have been warned by <@{mention}>.\nPlease be aware that you may get banned from the bot if this behavior is repeated numerous times.\nReason:** {reason}\nHave questions? Join the support server at {support_server_link}.",
+    "dm_channel_not_found": "Could not find <@{mention}>'s DM Channel.",
+    "message_to_user": "Message was sent to <@{mention}>.",
+    "no_permission": "I do not have permission to send a message to <@{mention}>.",
+    "bot_killed": "The bot is now offline.",
+    "restarting_msg": "The bot is restarting... All games in this channel will force-end.",
+    "interactions_removed": "Finished removing urls for interactions.",
+    "interaction_removed": "Removed {link}.",
+    "bot_banned": "<@{mention}> has been banned from using the Bot.",
+    "bot_unbanned": "If the user was banned, they are now unbanned.",
+    "ban_bot_mod": "<@{mention}>, you cannot ban a bot moderator.>",
+    "status_added": "{result} was added.",
+    "status_removed": "{result} was removed from the statuses.",
   },
   "currency": {
     "daily_msg": "{name}, you have been given {daily_amount}.",
@@ -53,7 +84,8 @@
     "set_language_fail": "{name}, that is not an available language. Use one of the following: {languages}.",
     "set_language_success": "{name}, your language is now set to {language}.",
     "terminating_games": "{name}, I am terminating all the games that exist in this channel or by the host.",
-    "no_game": "No {string} game is currently in session."
+    "no_game": "No {string} game is currently in session.",
+    "moderator_or_host": "You must be a moderator or the host of the game in order to end the game."
   },
   "utility": {
     "join_support_server_feature": "In order to use this feature of {bot_name}, you must first join the Support Server at <{support_server_link}>"
@@ -107,7 +139,8 @@
     "on_guild_join": "Hello!\nMy prefix for this server is set to {server_prefix}.\nIf you have any questions or concerns, you may join the support server ({server_prefix}support).",
     "maintenance": "A maintenance is currently in progress. Join the support server for more information. <{support_server_link}>\nREASON: {reason}",
     "invalid_input": "{name}, That option is not valid. Please look into {server_prefix}help {command_name}.",
-    "game_disabled": "{name}, Games have been disabled in this text channel using {server_prefix}togglegames."
+    "game_disabled": "{name}, Games have been disabled in this text channel using {server_prefix}togglegames.",
+    "gen_error": "ERROR - {e}"
   },
   "twitch": {
     "follow_limit": "You are only allowed to have {follow_limit} channels followed.",

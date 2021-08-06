@@ -39,19 +39,21 @@ class BlockingMonitor(commands.Cog):
     async def stop(self, ctx):
         """Stop BlockingMonitor"""
         if not self.monitor_thread:
-            return await ctx.send("Not running monitor")
+            return await ctx.send(await self.ex.get_msg(ctx, "bm", "not_running"))
 
         self.monitor_thread.stop()
         self.monitor_thread = None
+        return await ctx.send(await self.ex.get_msg(ctx, "bm", "stopped"))
 
     @bmon.command()
     async def start(self, ctx):
         """Start BlockingMonitor"""
         if self.monitor_thread:
-            return await ctx.send("Already running blocking monitor")
+            return await ctx.send(await self.ex.get_msg(ctx, "bm", "already_running"))
 
         self.monitor_thread = StackMonitor(self.bot, self.ex)
         self.monitor_thread.start()
+        return await ctx.send(await self.ex.get_msg(ctx, "bm", "started"))
 
 
 class StackMonitor(threading.Thread):

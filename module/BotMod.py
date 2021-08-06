@@ -66,7 +66,8 @@ class BotMod(commands.Cog):
                 return await ctx.send(f"> **{link} does not have a connection to a google drive link.**")
             await self.ex.conn.execute("UPDATE groupmembers.imagelinks SET memberid = $1 WHERE link = $2", int(idol_id),
                                        drive_link)
-            await ctx.send(f"> **Moved {link} to {idol_id} if it existed.**")
+            msg = await self.ex.get_msg(ctx, "botmod", "linked_idol", [["result", link], ["result2", idol_id]])
+            await ctx.send(msg)
         except Exception as e:
             log.console(e)
             await ctx.send(f"> **{e}**")
@@ -125,8 +126,7 @@ class BotMod(commands.Cog):
                 if self.ex.check_file_exists(file_loc):
                     await self.ex.conn.execute(
                         "UPDATE groupmembers.groups SET banner = $1 WHERE groupid = $2", image_url, grp_id)
-        return await ctx.send(
-            "> All images have been fixed, merged to image hosting service and have links set up for them.")
+        return await ctx.send(await self.ex.get_msg(ctx, "botmod", "image_host_success"))
 
     @commands.command()
     async def mergeidol(self, ctx, original_idol_id: int, duplicate_idol_id: int):
@@ -143,9 +143,11 @@ class BotMod(commands.Cog):
         duplicate_idol = await self.ex.u_group_members.get_member(duplicate_idol_id)
 
         if not duplicate_idol:
-            return await ctx.send(f"> {duplicate_idol_id} could not find an Idol.")
+            msg = await self.ex.get_msg(ctx, "botmod", "no_idol_found", ["result", duplicate_idol_id])
+            return await ctx.send(msg)
         if not original_idol:
-            return await ctx.send(f"> {original_idol} could not find an Idol.")
+            msg = await self.ex.get_msg(ctx, "botmod", "no_idol_found", ["result", original_idol])
+            return await ctx.send(msg)
         for group_id in duplicate_idol.groups:
             await asyncio.sleep(0)
             if group_id not in original_idol.groups:
@@ -158,7 +160,9 @@ class BotMod(commands.Cog):
         # recreate cache
         await self.ex.u_cache.create_idol_cache()
         await self.ex.u_cache.create_group_cache()
-        await ctx.send(f"> Merged {duplicate_idol_id} to {original_idol_id}.")
+        msg = await self.ex.get_msg(ctx, "botmod", "merge_success", [["result", duplicate_idol_id],
+                                                                     ["result2", original_idol_id]])
+        await ctx.send(msg)
 
     @commands.command()
     async def mergegroup(self, ctx, original_group_id: int, duplicate_group_id: int):
@@ -173,9 +177,11 @@ class BotMod(commands.Cog):
         original_group = await self.ex.u_group_members.get_group(original_group_id)
         duplicate_group = await self.ex.u_group_members.get_group(duplicate_group_id)
         if not duplicate_group:
-            return await ctx.send(f"> {duplicate_group_id} could not find a Group.")
+            msg = await self.ex.get_msg(ctx, "botmod", "no_group_found", ["result", duplicate_group_id])
+            return await ctx.send(msg)
         if not original_group:
-            return await ctx.send(f"> {original_group} could not find a Group.")
+            msg = await self.ex.get_msg(ctx, "botmod", "no_group_found", ["result", original_group_id])
+            return await ctx.send(msg)
         # move aliases
         await self.ex.conn.execute(
             "UPDATE groupmembers.aliases SET objectid = $1 WHERE isgroup = $2 AND objectid = $3",
@@ -192,7 +198,9 @@ class BotMod(commands.Cog):
         # recreate cache
         await self.ex.u_cache.create_idol_cache()
         await self.ex.u_cache.create_group_cache()
-        await ctx.send(f"> Merged {duplicate_group_id} to {original_group_id}.")
+        msg = await self.ex.get_msg(ctx, "botmod", "merge_success", [["result", duplicate_group_id],
+                                                                     ["result2", original_group_id]])
+        await ctx.send(msg)
 
     @commands.command()
     async def killapi(self, ctx):
@@ -201,7 +209,8 @@ class BotMod(commands.Cog):
 
         [Format: %killapi]
         """
-        await ctx.send("> Restarting the API.")
+        msg = await self.ex.get_msg(ctx, "botmod", "api_restart")
+        await ctx.send(msg)
         await self.ex.kill_api()
 
     @commands.command()
@@ -214,7 +223,8 @@ class BotMod(commands.Cog):
         self.ex.cache.maintenance_mode = not self.ex.cache.maintenance_mode
         self.ex.cache.maintenance_reason = maintenance_reason
 
-        return await ctx.send(f"> **Maintenance mode is set to {self.ex.cache.maintenance_mode}.**")
+        msg = await self.ex.get_msg(ctx, "botmod", "maintenance_mode", ["result", self.ex.cache.maintenance_mode])
+        return await ctx.send(msg)
 
     @commands.command()
     async def botwarn(self, ctx, user: discord.User, *, reason=None):
@@ -223,19 +233,19 @@ class BotMod(commands.Cog):
 
         [Format: %botwarn (user id) <reason>]
         """
-        message = f"""
-**You have been warned by <@{ctx.author.id}>.**
-**Please be aware that you may get banned from the bot if this behavior is repeated numerous times.**
-**Reason:** {reason}
-Have questions? Join the support server at {self.ex.keys.bot_support_server_link}."""
+        msg = await self.ex.get_msg(ctx, "botmod", "warn", [
+            ["mention", ctx.author.id], ["support_server_link", self.ex.keys.bot_support_server_link]])
         dm_channel = await self.ex.get_dm_channel(user.id)
         if not dm_channel:
-            return await ctx.send(f"> Could not find <@{user.id}>'s DM channel.")
+            msg = await self.ex.get_msg(ctx, "botmod", "dm_channel_not_found", ["mention", user.id])
+            return await ctx.send(msg)
         try:
-            await dm_channel.send(message)
-            return await ctx.send(f"> **Message was sent to <@{user.id}>**")
+            await dm_channel.send(msg)
+            msg = await self.ex.get_msg(ctx, "botmod", "message_to_user", ["mention", user.id])
+            return await ctx.send(msg)
         except:
-            return await ctx.send(f"> I do not have permission to send a message to <@{user.id}>")
+            msg = await self.ex.get_msg(ctx, "botmod", "no_permission", ["mention", user.id])
+            return await ctx.send(msg)
 
     @commands.command()
     async def kill(self, ctx):
@@ -244,8 +254,9 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
 
         [Format: %kill]
         """
-        await ctx.send("> **The bot is now offline.**")
-        message = "Irene is restarting... All games in this channel will force-end."
+        await ctx.send(await self.ex.get_msg(ctx, "botmod", "bot_killed"))
+
+        message = await self.ex.get_msg(ctx, "botmod", "restarting_msg")
 
         def get_games():
             # create copies to not have dictionary changed during iteration issue.
@@ -328,7 +339,7 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
             else:
                 await ctx.send("> **Please choose a proper interaction.**")
         except Exception as e:
-            await ctx.send(f"**ERROR -** {e}")
+            await ctx.send(await self.ex.get_msg(ctx, "general", "gen_error", ["e", f"{e}"]))
             log.console(e)
 
     @commands.command()
@@ -345,10 +356,10 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
                 url.replace(' ', '')
                 url = url.replace('\n', '')
                 await self.ex.conn.execute("DELETE FROM general.interactions WHERE url = $1", url)
-                await ctx.send(f"Removed <{url}>")
+                await ctx.send(await self.ex.get_msg(ctx, "botmod", "interaction_removed", ["link", url]))
             except Exception as e:
                 log.useless(f"{e} (Exception) - Failed to delete interaction.", self.deleteinteraction)
-        await ctx.send("Finished removing urls.")
+        await ctx.send(await self.ex.get_msg(ctx, "botmod", "interactions_removed"))
 
     @commands.command()
     async def botban(self, ctx, *, user: discord.User):
@@ -360,8 +371,9 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
         if not self.ex.check_if_mod(user.id):
             await self.ex.u_miscellaneous.ban_user_from_bot(user.id)
             await ctx.send(f"> **<@{user.id}> has been banned from using Irene.**")
+            await ctx.send(await self.ex.get_msg(ctx, "botmod", "bot_banned", ["mention", user.id]))
         else:
-            await ctx.send(f"> **<@{ctx.author.id}>, you cannot ban a bot mod.**")
+            await ctx.send(await self.ex.get_msg(ctx, "botmod", "ban_bot_mod", ["mention", ctx.author.id]))
 
     @commands.command()
     async def botunban(self, ctx, *, user: discord.User):
@@ -371,7 +383,7 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
         [Format: %botunban (user id)]
         """
         await self.ex.u_miscellaneous.unban_user_from_bot(user.id)
-        await ctx.send(f"> **If the user was banned, they are now unbanned.**")
+        await ctx.send(await self.ex.get_msg(ctx, "botmod", "bot_unbanned"))
 
     @commands.command()
     async def addstatus(self, ctx, *, status: str):
@@ -382,7 +394,7 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
         """
         await self.ex.conn.execute("INSERT INTO general.botstatus (status) VALUES ($1)", status)
         self.ex.cache.bot_statuses.append(status)
-        await ctx.send(f"> **{status} was added.**")
+        await self.ex.get_msg(ctx, "botmod", "status_added", ["result", status])
 
     @commands.command()
     async def getstatuses(self, ctx):
@@ -410,7 +422,7 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
             status = self.ex.cache.bot_statuses[status_index]
             await self.ex.conn.execute("DELETE FROM general.botstatus WHERE status = $1", status)
             self.ex.cache.bot_statuses.pop(status_index)
-            await ctx.send(f"> {status} was removed from the bot statuses.")
+            await ctx.send(await self.ex.get_msg(ctx, "botmod", "result", ["result", status]))
         except Exception as e:
             log.console(e)
             await ctx.send(e)
@@ -431,7 +443,7 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
                 await self.ex.u_group_members.add_idol_to_group(idol_id, group_id)
                 await ctx.send(f"**Added {member.stage_name} ({idol_id}) to {group.name} ({group_id}).**")
         except Exception as e:
-            await ctx.send(f"Something went wrong - {e}")
+            await ctx.send(await self.ex.get_msg(ctx, "general", "gen_error", ["e", e]))
             log.console(e)
 
     @commands.command(aliases=['removeidolfromgroup'])
@@ -451,7 +463,7 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
                 await self.ex.u_group_members.remove_idol_from_group(idol_id, group_id)
                 await ctx.send(f"**Removed {member.stage_name} ({idol_id}) from {group.name} ({group_id}).**")
         except Exception as e:
-            await ctx.send(f"Something went wrong - {e}")
+            await ctx.send(await self.ex.get_msg(ctx, "general", "gen_error", ["e", e]))
             log.console(e)
 
     @commands.command(aliases=['removeidol'])
@@ -466,7 +478,7 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
             await self.ex.conn.execute("DELETE FROM groupmembers.member WHERE id = $1", idol_id)
             await ctx.send(f"{idol_name} ({idol_id}) deleted.")
         except Exception as e:
-            await ctx.send(f"Something went wrong - {e}")
+            await ctx.send(await self.ex.get_msg(ctx, "general", "gen_error", ["e", e]))
             log.console(e)
 
     @commands.command(aliases=['removegroup'])
@@ -480,7 +492,7 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
             await self.ex.conn.execute("DELETE FROM groupmembers.groups WHERE groupid = $1", group_id)
             await ctx.send(f"{(await self.ex.u_group_members.get_group(group_id)).name} ({group_id}) deleted.")
         except Exception as e:
-            await ctx.send(f"Something went wrong - {e}")
+            await ctx.send(await self.ex.get_msg(ctx, "general", "gen_error", ["e", e]))
             log.console(e)
 
     @commands.command()
@@ -507,7 +519,7 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
             else:
                 await ctx.send("> I was not able to create a DM with that user.")
         except Exception as e:
-            await ctx.send(f"ERROR - {e}")
+            await ctx.send(await self.ex.get_msg(ctx, "general", "gen_error", ["e", e]))
             log.console(e)
 
     @commands.command()
@@ -536,5 +548,5 @@ Have questions? Join the support server at {self.ex.keys.bot_support_server_link
                 f"> {ctx.author.display_name} ({ctx.author.id}) has closed the DM with you. "
                 f"Your messages will no longer be sent to them.")
         except Exception as e:
-            await ctx.send(f"ERROR - {e}")
+            await ctx.send(await self.ex.get_msg(ctx, "general", "gen_error", ["e", e]))
             log.console(e)

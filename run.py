@@ -235,7 +235,7 @@ class Irene:
             if cog_name and loop_cog_name.lower() != cog_name.lower():
                 continue
             for loop in loop_list:
-                log.console(f"Starting Loop: {loop} -> Cog Name: {cog_name}", method=self.start_loops)
+                log.useless(f"Starting Loop: {loop} -> Cog Name: {cog_name}", method=self.start_loops)
                 try:
                     loop.start()
                 except Exception as e:
@@ -253,7 +253,7 @@ class Irene:
 
             for loop in loop_list:
                 if loop.is_running():
-                    log.console(f"Stopping Loop: {loop} -> Cog Name: {cog_name}", method=self.stop_loops)
+                    log.useless(f"Stopping Loop: {loop} -> Cog Name: {cog_name}", method=self.stop_loops)
                     try:
                         loop.cancel() if not safe_cancel else loop.stop()
                     except Exception as e:

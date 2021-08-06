@@ -20,6 +20,7 @@ When you are adding several input with the same needed keyword, you may number t
 **Voice Channel Name:** `{voice_channel}`  
 **Command Name:** `{command_name}`  
 **Currency Name:** `{currency_name}`  
+**General Link:** `{link}`  
 
 
 **Support Server Link:** `{support_server_link}`  

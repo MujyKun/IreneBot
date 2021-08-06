@@ -96,11 +96,6 @@ class BlackJack(commands.Cog):
 
         [Format: %stopbj]
         """
-        if not ctx.author:
-            log.console("Could not get the Author of the context.", method=self.stopbj)
-            return await ctx.send("I could not find the Author object of your context. "
-                                  "This message was sent on purpose to find an issue with the BlackJack game.")
-
         user = await self.ex.get_user(ctx.author.id)
         if not user.in_currency_game:
             # user is not in a game.
@@ -120,20 +115,10 @@ class BlackJack(commands.Cog):
     async def rules(self, ctx):
         """View the rules of BlackJack."""
         server_prefix = await self.ex.get_server_prefix(ctx)
-        msg = f"""Each Player gets 2 cards at the start.\n
-        In order to get blackjack, your final value must equal 21.\n
-        If Player1 exceeds 21 and Player2 does not, Player1 busts and Player2 wins the game.\n
-        You will have two options.\n
-        The first option is to `hit`, which means to grab another card.\n
-        The second option is to `stand` to finalize your deck.\n
-        If both players bust, Player closest to 21 wins!\n
-        Number cards are their face values.\n
-        Aces can be 1 or 11 depending on the situation you're in.\n
-        Jack, Queen, and King are all worth 10.\n
-        If you go over 35 points, the bot will automatically stand you.\n
-        MOST IMPORTANTLY!!! DO NOT peek at your opponent's cards or points!\n
-        """
-        embed = discord.Embed(title="BlackJack Rules", description=msg)
+        msg = await self.ex.get_msg(ctx, "blackjack", "rules")
+        embed_title = await self.ex.get_msg(ctx, "blackjack", "rules_title")
+        embed_footer = await self.ex.get_msg(ctx, "blackjack", "rules_footer", ["server_prefix", server_prefix])
+        embed = discord.Embed(title=embed_title, description=msg)
         embed = await self.ex.set_embed_author_and_footer(
-            embed, f"{server_prefix}help BlackJack for the available commands.")
+            embed, embed_footer)
         await ctx.send(embed=embed)

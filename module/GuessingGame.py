@@ -60,8 +60,8 @@ class GuessingGame(commands.Cog):
 
     async def manage_gg_cmd(self, ctx, gender="all", difficulty="medium", rounds=20, timeout=20, game_mode="idol"):
         """Manages the guessing game commands."""
-        if not ctx.guild:
-            return await ctx.send("> You are not allowed to play guessing game in DMs.")
+        if isinstance(ctx.channel, discord.DMChannel):
+            raise commands.NoPrivateMessage
         server_prefix = await self.ex.get_server_prefix(ctx)
         if ctx.channel.id in self.ex.cache.channels_with_disabled_games:
             msg = await self.ex.get_msg(ctx.author.id, "general", "game_disabled", [

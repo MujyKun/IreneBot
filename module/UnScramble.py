@@ -1,4 +1,6 @@
 import asyncio
+
+import discord
 from discord.ext import commands
 from IreneUtility.util import u_logger as log
 from IreneUtility.Utility import Utility
@@ -26,6 +28,9 @@ class UnScramble(commands.Cog):
         [Format: %usleaderboard (easy/medium/hard) (server/global)]
         [Aliases: usl, uslb]
         """
+        if isinstance(ctx.channel, discord.DMChannel):
+            raise commands.NoPrivateMessage
+
         if difficulty.lower() not in ['easy', 'medium', 'hard']:
             difficulty = "medium"
 
@@ -34,8 +39,6 @@ class UnScramble(commands.Cog):
                 mode = "server"
             if mode == "server":
                 server_id = await self.ex.get_server_id(ctx)
-                if not server_id:
-                    return await ctx.send("> You should not use this command in DMs.")
                 members = f"({', '.join([str(member.id) for member in self.ex.client.get_guild(server_id).members])})"
                 top_user_scores = await self.ex.u_unscramblegame.get_unscramble_game_top_ten(difficulty,
                                                                                              members=members)

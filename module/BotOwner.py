@@ -41,6 +41,16 @@ class BotOwner(commands.Cog):
         return await ctx.send("Done")
 
     @commands.command()
+    async def reloadlanguages(self, ctx):
+        """
+        Reloads the language packs for the bot.
+
+        [Format: %reloadlanguages]
+        """
+        await self.ex.u_cache.load_language_packs()
+        return await ctx.send("Done")
+
+    @commands.command()
     async def reloadutility(self, ctx):
         """
         Reloads the utility package for the bot.

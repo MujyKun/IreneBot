@@ -62,7 +62,6 @@ def get_and_reload_keys() -> Keys_Obj:
     """
     load_dotenv()  # reloads .env to memory
     mods_list = [int(mod) for mod in env_to_list("MODS_LIST")]
-    data_mods_list = [int(mod) for mod in env_to_list("DATA_MODS_LIST")]
     idol_post_send_limit = make_int(os.getenv("IDOL_POST_LIMIT")) or 20
     discord_boats_key = os.getenv("DISCORD_BOATS_KEY")
 
@@ -78,7 +77,6 @@ def get_and_reload_keys() -> Keys_Obj:
         "bot_id": make_int(os.getenv("BOT_ID")),
         "owner_id": owner_id,
         "mods_list": mods_list,
-        "data_mods_list": data_mods_list,
         "bot_invite_link": os.getenv("BOT_INVITE_LINK"),
         "bot_support_server_id": make_int(os.getenv("SUPPORT_SERVER_ID")),
         "bot_support_server_link": os.getenv("SUPPORT_SERVER_LINK"),
@@ -182,6 +180,11 @@ def get_and_reload_keys() -> Keys_Obj:
         "patreon_link": os.getenv("PATREON_LINK"),
         "patreon_role_id": make_int(os.getenv("PATREON_ROLE_ID")),
         "patreon_super_role_id": make_int(os.getenv("PATREON_SUPER_ROLE_ID")),
+
+        # Translator/Proofreader/DataMod
+        "translator_role_id": make_int(os.getenv("TRANSLATOR_ROLE_ID")),
+        "proofreader_role_id": make_int(os.getenv("PROOFREADER_ROLE_ID")),
+        "datamod_role_id": make_int(os.getenv("DATAMOD_ROLE_ID")),
 
         # startup time
         "startup_time": datetime.now(),

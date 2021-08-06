@@ -22,7 +22,7 @@ class Irene:
     def __init__(self):
         self.define_start_up_criteria(test_bot=True, dev_mode=True, upload_from_host=False, reset_cache=False)
         # Whether to Run Twitter
-        self.run_twitter_uploads = not ex.test_bot
+        self.run_twitter_uploads = ex.test_bot
 
         self.cog_names = ["miscellaneous", "twitter", "currency", "blackjack", "youtube", "groupmembers",
                           "moderator", "profile", "help", "logging", "botmod", "events", "lastfm", "interactions",
@@ -78,7 +78,7 @@ class Irene:
             "music": module.Music.Music,
             "blockingmonitor": module.blockingmonitor.BlockingMonitor,
             "datamod": module.DataMod.DataMod,
-            "status": module.status.Status
+            "status": module.status.Status,
             # "gacha":  module.Gacha.Gacha
         }
 
@@ -224,7 +224,10 @@ class Irene:
                 continue
 
             self.loops[list_cog_name.lower()] = loop_list[1]
-            if self.run_twitter_uploads and (not cog_name or (list_cog_name.lower() == cog_name.lower() == "twitter")):
+
+            twitter_cog_name_check = True if not cog_name else cog_name.lower() == "twitter"
+
+            if (list_cog_name.lower() == "twitter" and self.run_twitter_uploads) and twitter_cog_name_check:
                 self.loops["twitter"].append(self.cogs["twitter"].send_photos_to_twitter)
 
     def start_loops(self, cog_name: str = None):

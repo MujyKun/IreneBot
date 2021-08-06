@@ -25,7 +25,7 @@
   },
   "bm": {
     "stopped": "Blocking Monitor Stopped.",
-    "started": "Blocking Monitor Stopped.",
+    "started": "Blocking Monitor Started.",
     "not_running": "Blocking Monitor is not running.",
     "already_running": "Blocking Monitor is already running."
   },
@@ -37,17 +37,17 @@
     "merge_success": "Merged {result} to {result2}.",
     "api_restart": "Restarting the API.",
     "maintenance_mode": "Maintenance mode is set to {result}.",
-    "warn": "You have been warned by <@{mention}>.\nPlease be aware that you may get banned from the bot if this behavior is repeated numerous times.\nReason:** {reason}\nHave questions? Join the support server at {support_server_link}.",
-    "dm_channel_not_found": "Could not find <@{mention}>'s DM Channel.",
-    "message_to_user": "Message was sent to <@{mention}>.",
-    "no_permission": "I do not have permission to send a message to <@{mention}>.",
+    "warn": "You have been warned by {mention}.\nPlease be aware that you may get banned from the bot if this behavior is repeated numerous times.\nReason:** {reason}\nHave questions? Join the support server at {support_server_link}.",
+    "dm_channel_not_found": "Could not find {mention}'s DM Channel.",
+    "message_to_user": "Message was sent to {mention}.",
+    "no_permission": "I do not have permission to send a message to {mention}.",
     "bot_killed": "The bot is now offline.",
     "restarting_msg": "The bot is restarting... All games in this channel will force-end.",
     "interactions_removed": "Finished removing urls for interactions.",
     "interaction_removed": "Removed {link}.",
-    "bot_banned": "<@{mention}> has been banned from using the Bot.",
+    "bot_banned": "{mention} has been banned from using the Bot.",
     "bot_unbanned": "If the user was banned, they are now unbanned.",
-    "ban_bot_mod": "<@{mention}>, you cannot ban a bot moderator.>",
+    "ban_bot_mod": "{mention}, you cannot ban a bot moderator.",
     "status_added": "{result} was added.",
     "status_removed": "{result} was removed from the statuses."
   },
@@ -71,7 +71,6 @@
     "give_success": "{name}, you gave {integer} {currency_name}(s) to {mention}.",
     "rps_win_loss": "{name}, You {result} {integer} {currency_name}(s)! I chose {string} and you chose {string2}",
     "rps_tie": "{name}, We both chose {string} and TIED!"
-
   },
   "customcommands": {
     "bot_command_exists": "{command_name} is already a bot command and can not be added.",
@@ -92,7 +91,7 @@
     "bug_sent": "Your bug report has been sent.",
     "random_number": "Your random number is {result}.",
     "coin_flip": "You flipped {result}.",
-    "not_in_cache": "This server has not been loaded into cache.",
+    "not_in_cache": "You flipped {result}.",
     "prompt": "Please enter an 8ball prompt.",
     "prompt_answer": "Question: {result}\nAnswer: {result2}"
   },
@@ -213,7 +212,7 @@
     "added_to_queue": "Added {result} to the queue.",
     "now_playing": "Now playing {title} by {artist}.",
     "shuffled": "If there were songs in the queue, they were shuffled.",
-    "empty_queue": "The song queue is currently empty.",
+    "empty_queue": "If there were songs in the queue, they were shuffled.",
     "no_api_key": "There is no API Key currently set for the Lyrics and the Developer is working on it.",
     "no_lyrics": "No lyrics were found for that query.",
     "moved_song": "Moved {title} by {artist} to the next song in queue.",

@@ -41,6 +41,15 @@ class BotOwner(commands.Cog):
         return await ctx.send("Done")
 
     @commands.command()
+    async def reloadpatrons(self, ctx):
+        """Will attempt to reload patrons
+
+        [Format: %reloadpatrons]
+        """
+        await self.ex.u_cache.create_patreons()
+        return await ctx.send("Done")
+
+    @commands.command()
     async def reloadlanguages(self, ctx):
         """
         Reloads the language packs for the bot.

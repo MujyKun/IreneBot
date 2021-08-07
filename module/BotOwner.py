@@ -48,6 +48,7 @@ class BotOwner(commands.Cog):
         [Format: %reloadlanguages]
         """
         await self.ex.u_cache.load_language_packs()
+        await self.ex.u_cache.create_original_command_cache()
         return await ctx.send("Done")
 
     @commands.command()

@@ -47,13 +47,14 @@ class Help(commands.Cog):
         async def send_command_help(self, command):
             """%help (specific command)."""
             channel = self.get_destination()
+            user = await ex.get_user(self.context.author.id)
 
             """
             We are now going to have manually updated information for our commands instead of directly through
             methods. This will make it easier to share accurate and precise information across all of the Bot's 
             Systems. If information is needed from a cog command, use the argument passed into the method.
             """
-            unique_command = ex.get_unique_command(command.cog_name, command.qualified_name)
+            unique_command = ex.get_unique_command(command.cog_name, command.qualified_name, language=user.language)
             # change the default prefix to the server prefix
             cmd_prefix = await self.get_server_prefix()
 

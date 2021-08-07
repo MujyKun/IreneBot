@@ -22,7 +22,7 @@ class Irene:
     def __init__(self):
         self.define_start_up_criteria(test_bot=True, dev_mode=True, upload_from_host=False, reset_cache=False)
         # Whether to Run Twitter
-        self.run_twitter_uploads = ex.test_bot
+        self.run_twitter_uploads = not ex.test_bot
 
         self.cog_names = ["miscellaneous", "twitter", "currency", "blackjack", "youtube", "groupmembers",
                           "moderator", "profile", "help", "logging", "botmod", "events", "lastfm", "interactions",

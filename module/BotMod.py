@@ -414,7 +414,7 @@ class BotMod(commands.Cog):
     @commands.command()
     async def removestatus(self, ctx, status_index: int):
         """
-        Remove a status based on it's indself.ex. The index can be found using %getstatuses.
+        Remove a status based on it's index. The index can be found using %getstatuses.
 
         [Format: %removestatus (status index)]
         """

@@ -230,17 +230,26 @@ class Events(commands.Cog):
             if added_roles:
                 for role in added_roles:
                     await asyncio.sleep(0)
+                    if role.id in [ex.keys.patreon_role_id, ex.keys.datamod_role_id, ex.keys.proofreader_role_id,
+                                   ex.keys.translator_role_id, ex.keys.patreon_super_role_id]:
+                        user.patron = True
                     if role.id == ex.keys.patreon_super_role_id:
-                        user.patron = True
                         user.super_patron = True
-                    if role.id == ex.keys.patreon_role_id:
-                        user.patron = True
+                    if role.id == ex.keys.datamod_role_id:
+                        user.is_data_mod = True
+                    if role.id == ex.keys.translator_role_id:
+                        user.is_translator = True
+                    if role.id == ex.keys.proofreader_role_id:
+                        user.is_proofreader = True
             # if the user was removed from patron or super patron role, update cache
             after_role_ids = [after_role.id for after_role in after_roles]
             if removed_roles:
                 # only update if there were removed roles
                 user.super_patron = ex.keys.patreon_super_role_id in after_role_ids
                 user.patron = ex.keys.patreon_role_id in after_role_ids
+                user.is_translator = ex.keys.translator_role_id in after_role_ids
+                user.is_proofreader = ex.keys.proofreader_role_id in after_role_ids
+                user.is_data_mod = ex.keys.datamod_role_id in after_role_ids
 
     @staticmethod
     @client.event

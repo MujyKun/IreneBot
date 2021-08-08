@@ -92,7 +92,8 @@ class Twitter(commands.Cog):
             msg = await self.ex.get_msg(ctx, "twitter", "unknown_code", ["result", "idol"])
             return await ctx.send(msg)
 
-        await self.ex.u_twitter.follow_or_unfollow(ctx, ctx.channel, idol.twitter.id, role_id=role_id)
+        await ctx.send(await self.ex.get_msg(ctx, "general", "may_take_time"))
+        asyncio.create_task(self.ex.u_twitter.follow_or_unfollow(ctx, ctx.channel, idol.twitter.id, role_id=role_id))
 
     @twitterupdates.command()
     async def group(self, ctx, group_id: int, role: discord.Role = None):
@@ -107,7 +108,8 @@ class Twitter(commands.Cog):
             msg = await self.ex.get_msg(ctx, "twitter", "unknown_code", ["result", "group"])
             return await ctx.send(msg)
 
-        await self.ex.u_twitter.follow_or_unfollow(ctx, ctx.channel, group.twitter.id, role_id=role_id)
+        await ctx.send(await self.ex.get_msg(ctx, "general", "may_take_time"))
+        asyncio.create_task(self.ex.u_twitter.follow_or_unfollow(ctx, ctx.channel, group.twitter.id, role_id=role_id))
 
     @twitterupdates.command(aliases=["user", "username"])
     async def code(self, ctx, channel_user_name: str, role: discord.Role = None):
@@ -127,7 +129,8 @@ class Twitter(commands.Cog):
             # add new object to the cache
             self.ex.cache.twitter_channels[twitter_obj.id] = twitter_obj
 
-        await self.ex.u_twitter.follow_or_unfollow(ctx, ctx.channel, channel_code, role_id=role_id)
+        await ctx.send(await self.ex.get_msg(ctx, "general", "may_take_time"))
+        asyncio.create_task(self.ex.u_twitter.follow_or_unfollow(ctx, ctx.channel, channel_code, role_id=role_id))
 
     @twitterupdates.command()
     async def list(self, ctx):

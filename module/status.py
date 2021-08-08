@@ -1,3 +1,5 @@
+import asyncio
+
 import discord
 from discord.ext import tasks, commands
 from module.keys import bot_prefix
@@ -19,8 +21,8 @@ class Status(commands.Cog):
     async def change_bot_status_loop(self):
         """Change the bot's playing status in a loop"""
         try:
-            if not self.ex.client.loop.is_running():
-                raise Exception
+            if not self.ex.client.loop.is_running() or not self.ex.irene_cache_loaded:
+                return
 
             random_statuses = [
                 f'{self.ex.u_miscellaneous.get_server_count()} servers.',

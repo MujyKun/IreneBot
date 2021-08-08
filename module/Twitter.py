@@ -56,8 +56,8 @@ class Twitter(commands.Cog):
     async def send_photos_to_twitter(self):
         """Send Idol Photos to twitter every 10 minutes."""
         # we should wait for the bot's cache to load before going further.
-        while not self.ex.irene_cache_loaded:
-            await asyncio.sleep(5)
+        if not self.ex.irene_cache_loaded:
+            return
 
         try:
             twitter_link = await self.ex.u_twitter.upload_random_image()  # upload unique random idol photo.

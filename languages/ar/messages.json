@@ -224,5 +224,8 @@
     "unfollowed": "هذه القناة لم تعد تتابع {result}.",
     "followed": "هذه القناة لم تعد تتابع {result}.",
     "unknown_code": "اسم المستخدم لذلك {result} غير معروف. لا تتردد في استخدام أمر المستخدم بدلا من ذلك."
+  },
+  "general ": {
+    " may_take_time": "This command may take a few minutes to respond since it relies on a third-party application."
   }
 }

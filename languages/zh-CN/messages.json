@@ -224,5 +224,8 @@
     "unfollowed": "此频道不再关注 {result}。",
     "followed": "此频道正在关注{result}。",
     "unknown_code": "该 {result} 的代码未知。请随意使用代码命令代替。"
+  },
+  "general ": {
+    " may_take_time": "This command may take a few minutes to respond since it relies on a third-party application."
   }
 }

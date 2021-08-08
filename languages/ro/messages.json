@@ -224,5 +224,8 @@
     "unfollowed": "Acest canal nu mai urmărește {result}.",
     "followed": "Acest canal urmărește în prezent {result}.",
     "unknown_code": "Codul acestui {result} nu este cunoscut. Simte-te liber să folosești comanda codului."
+  },
+  "general ": {
+    " may_take_time": "This command may take a few minutes to respond since it relies on a third-party application."
   }
 }

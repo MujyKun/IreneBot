@@ -224,5 +224,8 @@
     "unfollowed": "یہ چینل اب {result} کو فالو نہیں کر رہا ہے۔",
     "followed": "یہ چینل اب {result} کو فالو کر رہا ہے۔",
     "unknown_code": "اس {result} کا کوڈ معلوم نہیں ہے۔ اس کے بجائے کوڈ کمانڈ استعمال کریں۔"
+  },
+  "general ": {
+    " may_take_time": "This command may take a few minutes to respond since it relies on a third-party application."
   }
 }

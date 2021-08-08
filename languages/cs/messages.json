@@ -224,5 +224,8 @@
     "unfollowed": "Tento kanál již nesleduje {result}.",
     "followed": "Tento kanál nyní sleduje {result}.",
     "unknown_code": "Kód tohoto {result} není znám. Nebojte se místo toho použít kódový příkaz."
+  },
+  "general ": {
+    " may_take_time": "This command may take a few minutes to respond since it relies on a third-party application."
   }
 }

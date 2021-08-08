@@ -224,5 +224,8 @@
     "unfollowed": "Ce salon ne suit plus le canal {result}.",
     "followed": "Ce canal suit maintenant {result}.",
     "unknown_code": "Le nom d'utilisateur de ce {result} n'est pas connu. N'hésitez pas à utiliser la commande utilisateur à la place."
+  },
+  "general ": {
+    " may_take_time": "This command may take a few minutes to respond since it relies on a third-party application."
   }
 }

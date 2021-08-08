@@ -224,5 +224,8 @@
     "unfollowed": "This channel is no longer following {result}.",
     "followed": "This channel is now following {result}.",
     "unknown_code": "The code of that {result} is not known. Feel free to use the code command instead."
+  },
+  "general ": {
+    " may_take_time": "This command may take a few minutes to respond since it relies on a third-party application."
   }
 }

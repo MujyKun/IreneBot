@@ -1,6 +1,6 @@
 {
   "biasgame": {
-    "no_dm": "No tienes permitido jugar el juego de bias en DMs.",
+    "no_dm": "No tienes permisos para jugar el juego de bias en los Mensajes Privados.",
     "in_progress": "Una partida de juego de bias se encuentra actualmente en progreso en este canal.\nSolo 1 partida puede ejecutarse en un canal a la vez.\nSi esto es un error, utilice {server_prefix}stopbg.",
     "start_game": "Comenzando el bracket de {bracket_size} para el juego del bias con los idols {gender}.",
     "unexpected_error": "Ha ocurrido un error y el juego se ha terminado. Por favor, reporta esto.",
@@ -224,5 +224,8 @@
     "unfollowed": "Este canal ya no sigue a {result}.",
     "followed": "Este canal ahora está siguiendo a {result}.",
     "unknown_code": "El código para ese {result} no es conocido. No dude en usar el comando code en su lugar."
+  },
+  "general ": {
+    " may_take_time": "This command may take a few minutes to respond since it relies on a third-party application."
   }
 }

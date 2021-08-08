@@ -224,5 +224,8 @@
     "unfollowed": "Saluran ini tidak lagi mengikuti {result}.",
     "followed": "Saluran ini sekarang mengikuti {result}.",
     "unknown_code": "Kode dari {result} itu tidak diketahui. Jangan ragu untuk menggunakan perintah kode sebagai gantinya."
+  },
+  "general ": {
+    " may_take_time": "This command may take a few minutes to respond since it relies on a third-party application."
   }
 }

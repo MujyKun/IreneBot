@@ -49,7 +49,7 @@
       "aliases": null
     },
     "addinteraction": {
-      "description": "Add a GIF to an interaction.",
+      "description": "Adaugă un GIF la o interacțiune.",
       "example_image_url": null,
       "syntax": "%addinteraction <interaction_type> <link1,link2,...>",
       "example_syntax": null,
@@ -59,7 +59,7 @@
       "aliases": null
     },
     "addstatus": {
-      "description": "Adds a playing status to the Bot.",
+      "description": "Adaugă un statut de redare pentru Bot.",
       "example_image_url": null,
       "syntax": "%addstatus <status message>",
       "example_syntax": null,
@@ -69,7 +69,7 @@
       "aliases": null
     },
     "botban": {
-      "description": "Bans a user from using the Bot.",
+      "description": "Interzice unui jucător să folosească Bot-ul.",
       "example_image_url": null,
       "syntax": "%botban <user id>",
       "example_syntax": null,
@@ -79,7 +79,7 @@
       "aliases": null
     },
     "botunban": {
-      "description": "Unbans a user that was not able to use the Bot.",
+      "description": "Anulează interzicerea unui jucător care nu putea folosi Bot-ul.",
       "example_image_url": null,
       "syntax": "%botunban <user id>",
       "example_syntax": null,
@@ -89,7 +89,7 @@
       "aliases": null
     },
     "botwarn": {
-      "description": "Warn a user through Bot DMs.",
+      "description": "Avertizează un utilizator prin DM-urile Bot-ului.",
       "example_image_url": null,
       "syntax": "%botwarn <user> [reason]",
       "example_syntax": null,
@@ -99,7 +99,7 @@
       "aliases": null
     },
     "closedm": {
-      "description": "Closes a DM",
+      "description": "Închide un DM",
       "example_image_url": null,
       "syntax": "%closedm [user id]",
       "example_syntax": null,
@@ -109,7 +109,7 @@
       "aliases": null
     },
     "createdm": {
-      "description": "Creates a DM between you and the user with the Bot as the middleman.",
+      "description": "Crează un DM între tine și utilizatorul cu Bot-ul ca intermediar.",
       "example_image_url": null,
       "syntax": "%createdm <user id>",
       "example_syntax": null,
@@ -119,7 +119,7 @@
       "aliases": null
     },
     "deletegroup": {
-      "description": "Deletes a Group",
+      "description": "Șterge un grup",
       "example_image_url": null,
       "syntax": "%deletegroup <group id>",
       "example_syntax": null,
@@ -129,7 +129,7 @@
       "aliases": null
     },
     "deleteidol": {
-      "description": "Deletes an Idol.",
+      "description": "Șterge un idol.",
       "example_image_url": null,
       "syntax": "%deleteidol <idol id>",
       "example_syntax": null,
@@ -139,7 +139,7 @@
       "aliases": null
     },
     "deleteidolfromgroup": {
-      "description": "Deletes an Idol from a Group.",
+      "description": "Șterge un idol dintr-un grup.",
       "example_image_url": null,
       "syntax": "%deleteidolfromgroup <idol id> <group iid>\n",
       "example_syntax": null,
@@ -149,7 +149,7 @@
       "aliases": null
     },
     "deleteinteraction": {
-      "description": "Remove URL from an interaction.",
+      "description": "Șterge URL-ul dintr-o interacțiune.",
       "example_image_url": null,
       "syntax": "%deleteinteraction <urls>",
       "example_syntax": null,
@@ -157,10 +157,10 @@
         "Bot Moderator"
       ],
       "aliases": null,
-      "note": "Separate urls with commas."
+      "note": "Separă URL-uri cu virgule."
     },
     "fixlinks": {
-      "description": "Fix Invalid Thumbnails/Avatars/Banners of Idols/Groups and puts them on the host.",
+      "description": "Repară Thumbnail-urile/Avatar-urile/Banerele invalide ale Idolilor/Grupurilor și le pune la gazdă.",
       "example_image_url": null,
       "syntax": "%fixlinks",
       "example_syntax": null,
@@ -170,7 +170,7 @@
       "aliases": null
     },
     "getstatuses": {
-      "description": "List all of the statuses of the Bot.",
+      "description": "Listă a tuturor statusurilor ale Bot-ului.",
       "example_image_url": null,
       "syntax": "%getstatuses",
       "example_syntax": null,
@@ -180,7 +180,7 @@
       "aliases": null
     },
     "kill": {
-      "description": "Kills the Bot.",
+      "description": "Omoară Bot-ul.",
       "example_image_url": null,
       "syntax": "%kill",
       "example_syntax": null,
@@ -190,7 +190,7 @@
       "aliases": null
     },
     "killapi": {
-      "description": "Kills the API.",
+      "description": "Omoară API-ul.",
       "example_image_url": null,
       "syntax": "%killapi",
       "example_syntax": null,
@@ -200,7 +200,7 @@
       "aliases": null
     },
     "maintenance": {
-      "description": "Toggles Maintenance Mode",
+      "description": "Activează modul de mentenanță",
       "example_image_url": null,
       "syntax": "%maintenance",
       "example_syntax": null,
@@ -210,7 +210,7 @@
       "aliases": null
     },
     "mergeidol": {
-      "description": "Merge a duplicated idol with the original idol.",
+      "description": "Îmbină un idol duplicat cu cel original.",
       "example_image_url": null,
       "syntax": "%mergeidol <original_idol_id> <duplicate_idol_id>",
       "example_syntax": null,
@@ -220,7 +220,7 @@
       "aliases": null
     },
     "mergegroup": {
-      "description": "Merge a duplicated group with the original group.",
+      "description": "Îmbină un grup duplicat cu cel original.",
       "example_image_url": null,
       "syntax": "%mergegroup <original_group_id> <duplicate_group_id>",
       "example_syntax": null,
@@ -230,7 +230,7 @@
       "aliases": null
     },
     "moveto": {
-      "description": "Moves an image to another idol.",
+      "description": "Mută o imagine la alt idol.",
       "example_image_url": null,
       "syntax": "%moveto <idol_id> <link>",
       "example_syntax": null,
@@ -240,7 +240,7 @@
       "aliases": null
     },
     "removestatus": {
-      "description": "Removes a playing status based on it's index.",
+      "description": "Șterge un status de redat pe baza index-ului său.",
       "example_image_url": null,
       "syntax": null,
       "example_syntax": "%removestatus <status index>",
@@ -252,7 +252,7 @@
   },
   "BiasGame": {
     "biasgame": {
-      "description": "Start a BiasGame in the current channel.",
+      "description": "Începe un joc al favoriților în canalul curent.",
       "example_image_url": null,
       "syntax": "%biasgame [gender=Male/Female/All] [bracket_size=4/8/16/32]",
       "example_syntax": null,
@@ -262,7 +262,7 @@
       ]
     },
     "stopbg": {
-      "description": "Force-End a BiasGame.",
+      "description": "Închide forțat un joc al favoriților.",
       "example_image_url": null,
       "syntax": "%stopbg",
       "example_syntax": null,
@@ -273,7 +273,7 @@
       "aliases": null
     },
     "listbg": {
-      "description": "List a user's BiasGame Leaderboards.",
+      "description": "Listează clasamentul jocului favoriților a unui utilizator.",
       "example_image_url": null,
       "syntax": "%listbg [user]",
       "example_syntax": null,
@@ -283,7 +283,7 @@
   },
   "BlockingManager": {
     "bmon start": {
-      "description": "Starts the Blocking Manager.",
+      "description": "Începe managerul de blocare.",
       "example_image_url": null,
       "syntax": "%bmon start",
       "example_syntax": null,
@@ -293,7 +293,7 @@
       "aliases": null
     },
     "bmon stop": {
-      "description": "Turns off the Blocking Manager.",
+      "description": "Oprește managerul de blocare.",
       "example_image_url": null,
       "syntax": "%bmon stop",
       "example_syntax": null,
@@ -305,7 +305,7 @@
   },
   "Currency": {
     "balance": {
-      "description": "View a user's balance.",
+      "description": "Vede soldul unui utilizator.",
       "example_image_url": null,
       "syntax": "%balance [member]",
       "example_syntax": null,
@@ -317,7 +317,7 @@
       ]
     },
     "beg": {
-      "description": "Beg a homeless man for money.",
+      "description": "Cere bani unui om fără casă.",
       "example_image_url": null,
       "syntax": "%beg",
       "example_syntax": null,

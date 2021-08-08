@@ -224,5 +224,8 @@
     "unfollowed": "이 채널은 {result} 더 이상 팔로우하지 않습니다",
     "followed": "이 채널은 {result} 팔로우 중입니다.",
     "unknown_code": "{result} 에 코드는 유효하지 않습니다. 대신 코드 명령을 사용하세요."
+  },
+  "general ": {
+    " may_take_time": "This command may take a few minutes to respond since it relies on a third-party application."
   }
 }

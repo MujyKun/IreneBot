@@ -224,5 +224,8 @@
     "unfollowed": "Dit kanaal volgt niet langer {result}.",
     "followed": "Dit kanaal volgt nu {result}.",
     "unknown_code": "De code van die {result} is niet bekend. Voel je vrij om in plaats daarvan de code command te gebruiken."
+  },
+  "general ": {
+    " may_take_time": "This command may take a few minutes to respond since it relies on a third-party application."
   }
 }

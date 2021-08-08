@@ -224,5 +224,8 @@
     "unfollowed": "Questo canale non sta più seguendo {result}.",
     "followed": "Questo canale ora sta seguendo {result}.",
     "unknown_code": "Il codice di quel {result} è sconosciuto. Sentiti libero di usare il codice di comando."
+  },
+  "general ": {
+    " may_take_time": "This command may take a few minutes to respond since it relies on a third-party application."
   }
 }

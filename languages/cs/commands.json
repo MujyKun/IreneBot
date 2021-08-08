@@ -520,10 +520,10 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "Using the command without an Idol ID will remove all existing idols from the channel."
+      "note": "Použití příkazu bez idol ID odstraní z kanálu všechny stávající idoly."
     },
     "sendimages": {
-      "description": "Have all of the Idol Photos appear in a specific text channel.",
+      "description": "Nechte si všechny Idol Fotografie zobrazit v konkrétním textovém kanálu.",
       "example_image_url": null,
       "syntax": "%sendimages [text channel]",
       "example_syntax": null,
@@ -533,7 +533,7 @@
       "aliases": null
     },
     "stopimages": {
-      "description": "Stops the Bot from posting idol photos in a specific text channel.",
+      "description": "Zastaví Bota v zasílání fotografií idolů na konkrétní textový kanál.",
       "example_image_url": null,
       "syntax": "%stopimages [text channel]",
       "example_syntax": null,
@@ -541,12 +541,12 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "Type the command again to re-enable."
+      "note": "Zadejte příkaz znovu k opětovnému povolení."
     }
   },
   "GuessingGame": {
     "guessinggame": {
-      "description": "Start an Idol GuessingGame in the current channel.",
+      "description": "Spusťte hru Idol GuessingGame v aktuálním kanálu.",
       "example_image_url": null,
       "syntax": "%guessinggame [gender=all] [difficulty=medium] [rounds=20] [timeout=20]",
       "example_syntax": null,
@@ -554,10 +554,10 @@
       "aliases": [
         "gg"
       ],
-      "note": "The host of the game can type stop or end to end the game or skip to skip the current round without affecting the round number."
+      "note": "Hostitel hry může napsat stop nebo end pro ukončení hry nebo přeskočit pro přeskočení aktuálního kola bez ovlivnění čísla kola."
     },
     "groupguessinggame": {
-      "description": "Start a Group GuessingGame in the current channel.",
+      "description": "Spusťte Group GuessingGame v aktuálním kanálu.",
       "example_image_url": null,
       "syntax": "%groupguessinggame [gender=all] [difficulty=medium] [rounds=20] [timeout=20]",
       "example_syntax": null,
@@ -566,19 +566,19 @@
         "ggg",
         "groupgg"
       ],
-      "note": "The host of the game can type stop or end to end the game or skip to skip the current round without affecting the round number."
+      "note": "Hostitel hry může napsat stop nebo end pro ukončení hry nebo skip pro přeskočení aktuálního kola bez ovlivnění čísla kola."
     },
     "ggfilter": {
-      "description": "Add a filter to your GuessingGame.",
+      "description": "Přidejte filtr do vaší GuessingGame.",
       "example_image_url": null,
       "syntax": "%ggfilter [group id/name, ...]",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null,
-      "note": "Only the groups filtered will appear on the GuessingGame. If you do not specify a Group ID or Name, it will toggle the filter. Group IDs and Names must be split by commas. Group Names with more than one word must have an underscore used as a space."
+      "note": "Na GuessingGame se zobrazí pouze filtrované skupiny. Pokud neupřesníte ID skupiny nebo název, přepne to filtr. Group IDs a Jména musí být odděleny čárkami. Názvy skupin s více než jedním slovem musí mít podtržítko použité jako mezeru."
     },
     "ggfilteredlist": {
-      "description": "View the current groups that are filtered.",
+      "description": "Zobrazit aktuální skupiny, které jsou filtrovány.",
       "example_image_url": null,
       "syntax": "%ggfilteredlist",
       "example_syntax": null,
@@ -586,7 +586,7 @@
       "aliases": null
     },
     "ggleaderboard": {
-      "description": "Shows Server/Global leaderboards for the GuessingGame.",
+      "description": "Ukáže Server/Globální žebříčky pro GuessingGame.",
       "example_image_url": null,
       "syntax": "%ggleaderboard [difficulty=easy/medium/hard] [mode=server/global]",
       "example_syntax": null,
@@ -597,7 +597,7 @@
       ]
     },
     "stopgg": {
-      "description": "Force-end a GuessingGame.",
+      "description": "Vynutit konec hry GuessingGame.",
       "example_image_url": null,
       "syntax": "%stopgg",
       "example_syntax": null,
@@ -610,7 +610,7 @@
   },
   "Interactions": {
     "choke": {
-      "description": "Choke a member.",
+      "description": "Uškrtit člena.",
       "example_image_url": null,
       "syntax": "%choke [user]",
       "example_syntax": null,
@@ -618,7 +618,7 @@
       "aliases": null
     },
     "cuddle": {
-      "description": "Cuddle a member.",
+      "description": "Mazlit člena.",
       "example_image_url": null,
       "syntax": "%cuddle [user]",
       "example_syntax": null,
@@ -626,7 +626,7 @@
       "aliases": null
     },
     "hug": {
-      "description": "Hug a member.",
+      "description": "Obejmout člena.",
       "example_image_url": null,
       "syntax": "%hug [user]",
       "example_syntax": null,
@@ -634,7 +634,7 @@
       "aliases": null
     },
     "kiss": {
-      "description": "Kiss a member.",
+      "description": "Políbit člena.",
       "example_image_url": null,
       "syntax": "%kiss [user]",
       "example_syntax": null,
@@ -642,7 +642,7 @@
       "aliases": null
     },
     "lick": {
-      "description": "Lick a member.",
+      "description": "Olíznout člena.",
       "example_image_url": null,
       "syntax": "%lick [user]",
       "example_syntax": null,
@@ -650,7 +650,7 @@
       "aliases": null
     },
     "pat": {
-      "description": "Pat a member.",
+      "description": "Pohladit člena.",
       "example_image_url": null,
       "syntax": "%pat [user]",
       "example_syntax": null,
@@ -658,7 +658,7 @@
       "aliases": null
     },
     "punch": {
-      "description": "Punch a member.",
+      "description": "Udeřit člena.",
       "example_image_url": null,
       "syntax": "%punch [user]",
       "example_syntax": null,
@@ -666,7 +666,7 @@
       "aliases": null
     },
     "pullhair": {
-      "description": "Pull hair of a member.",
+      "description": "Tahat vlasy člena.",
       "example_image_url": null,
       "syntax": "%pullhair [user]",
       "example_syntax": null,
@@ -674,7 +674,7 @@
       "aliases": null
     },
     "slap": {
-      "description": "Slap a member.",
+      "description": "Dát facku členu.",
       "example_image_url": null,
       "syntax": "%slap [user]",
       "example_syntax": null,
@@ -682,7 +682,7 @@
       "aliases": null
     },
     "spit": {
-      "description": "Spit at a member.",
+      "description": "Plivněte na člena.",
       "example_image_url": null,
       "syntax": "%spit [user]",
       "example_syntax": null,
@@ -690,7 +690,7 @@
       "aliases": null
     },
     "stab": {
-      "description": "Stab a member.",
+      "description": "Bodnout člena.",
       "example_image_url": null,
       "syntax": "%stab [user]",
       "example_syntax": null,
@@ -698,7 +698,7 @@
       "aliases": null
     },
     "stepon": {
-      "description": "Step on a member.",
+      "description": "Šlápnout na člena.",
       "example_image_url": null,
       "syntax": "%stepon [user]",
       "example_syntax": null,
@@ -708,7 +708,7 @@
   },
   "Logging": {
     "logadd": {
-      "description": "Start logging a text channel.",
+      "description": "Začněte logovat textový kanál.",
       "example_image_url": null,
       "syntax": "%logadd [text channel]",
       "example_syntax": null,
@@ -718,7 +718,7 @@
       "aliases": null
     },
     "logremove": {
-      "description": "Stop logging a text channel",
+      "description": "Zastavit logování textového kanálu",
       "example_image_url": null,
       "syntax": "%logremove [text channel]",
       "example_syntax": null,
@@ -728,7 +728,7 @@
       "aliases": null
     },
     "sendall": {
-      "description": "Toggle all messages going to log channel. Will only send edited and edited messages if turned off.",
+      "description": "Přepněte všechny zprávy do log kanálu. Bude pouze odesílat upravené a upravované zprávy, pokud je vypnutý.",
       "example_image_url": null,
       "syntax": "%sendall",
       "example_syntax": null,
@@ -738,7 +738,7 @@
       "aliases": null
     },
     "startlogging": {
-      "description": "Start sending log messages in the current server and channel.",
+      "description": "Začněte odesílat log zprávy na aktuálním serveru a kanálu.",
       "example_image_url": null,
       "syntax": "%startlogging",
       "example_syntax": null,
@@ -748,7 +748,7 @@
       "aliases": null
     },
     "stoplogging": {
-      "description": "Stop sending log messages in the current server.",
+      "description": "Zastavit odesílání log zpráv na aktuálním serveru.",
       "example_image_url": null,
       "syntax": "%stoplogging",
       "example_syntax": null,
@@ -760,7 +760,7 @@
   },
   "Miscellaneous": {
     "8ball": {
-      "description": "Ask the 8ball a yes or no question.",
+      "description": "Položte 8ball ano nebo ne otázku.",
       "example_image_url": null,
       "syntax": "%8ball [question]",
       "example_syntax": null,
@@ -770,7 +770,7 @@
       ]
     },
     "addnoti": {
-      "description": "Receive a DM whenever a phrase/word is said in the server.",
+      "description": "Dostávej DM vždy, když je na serveru vyslovena fráze/slovo.",
       "example_image_url": null,
       "syntax": "%addnoti <phrase>",
       "example_syntax": null,
@@ -778,7 +778,7 @@
       "aliases": null
     },
     "botinfo": {
-      "description": "Displays general information about the Bot.",
+      "description": "Zobrazí obecné informace o Botu.",
       "example_image_url": null,
       "syntax": "%botinfo",
       "example_syntax": null,
@@ -786,25 +786,25 @@
       "aliases": null
     },
     "checkprefix": {
-      "description": "Check the current prefix.",
+      "description": "Zkontrolujte aktuální prefix.",
       "example_image_url": null,
       "syntax": "%checkprefix",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null,
-      "note": "This command will always work with the bot's default prefix."
+      "note": "Tento příkaz bude vždy fungovat s výchozím prefixem robota."
     },
     "choose": {
-      "description": "Choose between a selection of options.",
+      "description": "Vybírejte mezi výběrem několika možností.",
       "example_image_url": null,
       "syntax": "%choose <options>",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null,
-      "note": "Underscores are used for spaces between words. Spaces are used to separate choices."
+      "note": "Podtržítka se používají pro mezery mezi slovy. Mezery slouží k oddělení voleb."
     },
     "displayemoji": {
-      "description": "Displays an emoji at a larger size.",
+      "description": "Zobrazuje emoji ve větší velikosti.",
       "example_image_url": null,
       "syntax": "%displayemoji <emoji>",
       "example_syntax": null,
@@ -812,7 +812,7 @@
       "aliases": null
     },
     "flip": {
-      "description": "Flip a coin.",
+      "description": "Hoď si mincí.",
       "example_image_url": null,
       "syntax": "%flip",
       "example_syntax": null,
@@ -823,7 +823,7 @@
       ]
     },
     "invite": {
-      "description": "Invite link to add the Bot to a server.",
+      "description": "Odkaz k pozvání na přidání Bota na server.",
       "example_image_url": null,
       "syntax": "%invite",
       "example_syntax": null,
@@ -831,7 +831,7 @@
       "aliases": null
     },
     "listnoti": {
-      "description": "List all your notification phrases for the current server.",
+      "description": "Napište všechny vaše notifikační fráze pro aktuální server.",
       "example_image_url": null,
       "syntax": "%listnoti",
       "example_syntax": null,
@@ -839,7 +839,7 @@
       "aliases": null
     },
     "patreon": {
-      "description": "Displays link to Patreon.",
+      "description": "Zobrazí odkazy k Patreon.",
       "example_image_url": null,
       "syntax": "%patreon",
       "example_syntax": null,
@@ -849,7 +849,7 @@
       ]
     },
     "ping": {
-      "description": "Shows Overall Latency to Discord.",
+      "description": "Zobrazí Celkovou Odezvu k Discord.",
       "example_image_url": null,
       "syntax": "%ping",
       "example_syntax": null,
@@ -859,7 +859,7 @@
       ]
     },
     "random": {
-      "description": "Choose a random integer from a to b.",
+      "description": "Vyberte náhodné celé číslo od a do b.",
       "example_image_url": null,
       "syntax": "%random <a> <b>",
       "example_syntax": null,
@@ -1276,12 +1276,12 @@
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null,
-      "note": "The lyrics are retrieved from https://api.ksoft.si/"
+      "note": "Texty jsou načteny z https://api.ksoft.si/"
     }
   },
   "Profile": {
     "avatar": {
-      "description": "View a member's avatar.",
+      "description": "Zobrazit profilový obrázek člena.",
       "example_image_url": null,
       "syntax": "%avatar [user]",
       "example_syntax": null,
@@ -1289,7 +1289,7 @@
       "aliases": null
     },
     "profile": {
-      "description": "View a member's profile.",
+      "description": "Zobrazit profil člena.",
       "example_image_url": null,
       "syntax": "%profile [user]",
       "example_syntax": null,
@@ -1299,7 +1299,7 @@
   },
   "LastFM": {
     "fm": {
-      "description": "Get information about a Last FM account.",
+      "description": "Získejte informace o Posledního FM účtu.",
       "example_image_url": null,
       "syntax": "%fm [user/lastfm username]",
       "example_syntax": null,
@@ -1307,7 +1307,7 @@
       "aliases": null
     },
     "recenttracks": {
-      "description": "Get the recent tracks of a Last FM Account.",
+      "description": "Získejte nejnovější skladby z Posledního FM účtu.",
       "example_image_url": null,
       "syntax": "%recenttracks [user/lastfm username]",
       "example_syntax": null,
@@ -1318,7 +1318,7 @@
       ]
     },
     "recent": {
-      "description": "Get the most recent track of a Last FM Account.",
+      "description": "Získejte nejnovější skladby posledního FM účtu.",
       "example_image_url": null,
       "syntax": "%recent [user/lastfm username]",
       "example_syntax": null,
@@ -1328,7 +1328,7 @@
       ]
     },
     "topalbums": {
-      "description": "See the top albums of a Last FM Account.",
+      "description": "Podívejte se na nejlepší alba posledního FM účtu.",
       "example_image_url": null,
       "syntax": "%topalbums [user/lastfm username]",
       "example_syntax": null,
@@ -1338,7 +1338,7 @@
       ]
     },
     "topartists": {
-      "description": "See the top artists of a Last FM Account.",
+      "description": "Podívejte se na nejlepší umělce posledního FM účtu.",
       "example_image_url": null,
       "syntax": "%topartists [user/lastfm username]",
       "example_syntax": null,
@@ -1348,7 +1348,7 @@
       ]
     },
     "toptracks": {
-      "description": "See the top tracks of a Last FM Account.",
+      "description": "Podívejte se na nejlepší skladby posledního FM účtu.",
       "example_image_url": null,
       "syntax": "%toptracks [user/lastfm username]",
       "example_syntax": null,
@@ -1358,7 +1358,7 @@
       ]
     },
     "setfm": {
-      "description": "Attach a LastFM username to your Discord account.",
+      "description": "Připojte poslední FM uživatelské jméno k vašemu Discord účtu.",
       "example_image_url": null,
       "syntax": "%setfm <lastfm username>",
       "example_syntax": null,
@@ -1368,7 +1368,7 @@
   },
   "Wolfram": {
     "w": {
-      "description": "Send a request to Wolfram",
+      "description": "Odeslat žádost na Wolfram",
       "example_image_url": null,
       "syntax": "%w <query>",
       "example_syntax": null,
@@ -1378,7 +1378,7 @@
   },
   "Twitter": {
     "deletetweet": {
-      "description": "Delete a tweet by it's ID.",
+      "description": "Smažte tweet podle jeho ID.",
       "example_image_url": null,
       "syntax": "%deletetweet <tweet id>",
       "example_syntax": null,
@@ -1388,7 +1388,7 @@
       "aliases": null
     },
     "recenttweets": {
-      "description": "View the recent tweets.",
+      "description": "Podívejte se na nedávné tweety.",
       "example_image_url": null,
       "syntax": "%recenttweets [amount of tweets=20]",
       "example_syntax": null,
@@ -1398,7 +1398,7 @@
       "aliases": null
     },
     "tweet": {
-      "description": "Tweets a status update on Twitter.",
+      "description": "Tweetne aktualizaci statusu na Twitter.",
       "example_image_url": null,
       "syntax": "%tweet <tweet>",
       "example_syntax": null,
@@ -1408,13 +1408,13 @@
       "aliases": null
     },
     "twitterupdates": {
-      "description": "Receive Updates for Twitter.",
+      "description": "Přijímejte aktualizace pro Twitter.",
       "example_image_url": null,
       "syntax": "%twitterupdates <code/group/idol/list> <account username, group id, idol id> [role id]",
       "example_syntax": null,
       "sub_commands": {
         "code": {
-          "description": "Follow a Twitter channel based on the account username.",
+          "description": "Sledujte Twitter kanál na základě uživatelského jména účtu.",
           "example_image_url": null,
           "syntax": "%twitterupdates code <channel username> [role]",
           "example_syntax": null,
@@ -1427,7 +1427,7 @@
           ]
         },
         "group": {
-          "description": "Follow a Twitter channel belonging to a Group ID If they have one.",
+          "description": "Sledujte Twitter kanál patřící pod ID skupiny, pokud ho má.",
           "example_image_url": null,
           "syntax": "%twitterupdates group <group id> [role]",
           "example_syntax": null,
@@ -1437,7 +1437,7 @@
           "aliases": null
         },
         "idol": {
-          "description": "Follow a Twitter channel belonging to an Idol ID If they have one.",
+          "description": "Sledujte Twitter kanál který patří k Idol ID, pokud ho mají.",
           "example_image_url": null,
           "syntax": "%twitterupdates idol <idol id> [role]",
           "example_syntax": null,
@@ -1447,7 +1447,7 @@
           "aliases": null
         },
         "list": {
-          "description": "Lists the Twitter channels currently being followed in the text channel.",
+          "description": "Zobrazí Twitter kanály které aktuálně sledujete v textovém kanálu.",
           "example_image_url": null,
           "syntax": "%twitterupdates list",
           "example_syntax": null,
@@ -1463,12 +1463,12 @@
       "aliases": [
         "twitter"
       ],
-      "note": "This command contains sub-commands. This means any following arguments are respective to the first argument."
+      "note": "Tento příkaz obsahuje dílčí-příkazy. To znamená, že následující argumenty se vztahují k prvnímu argumentu."
     }
   },
   "UnScramble": {
     "unscramble": {
-      "description": "Start an Idol Unscramble Game in the current channel.",
+      "description": "Spusťte hru Idol Dešifrovací hra na aktuálním kanálu.",
       "example_image_url": null,
       "syntax": "%unscramble [gender=all] [difficulty=medium] [rounds=20] [timeout=20]",
       "example_syntax": null,
@@ -1476,10 +1476,10 @@
       "aliases": [
         "us"
       ],
-      "note": "The host of the game can type stop or end to end the game or skip to skip the current round without affecting the round number."
+      "note": "Host hry může napsat stop pro zastavení hry nebo konec pro ukončení hry nebo přeskočit pro přeskočení aktuálního kola bez ovlivnění čísla kola."
     },
     "usleaderboard": {
-      "description": "Shows Server/Global leaderboards for the Unscramble Game.",
+      "description": "Ukazuje Server/Globální žebříčky pro Dešifrovací hru.",
       "example_image_url": null,
       "syntax": "%usleaderboard [difficulty=easy/medium/hard] [mode=server/global]",
       "example_syntax": null,
@@ -1490,7 +1490,7 @@
       ]
     },
     "stopus": {
-      "description": "Force-end an Unscramble Game.",
+      "description": "Vynutit-konec Dešifrovací hry.",
       "example_image_url": null,
       "syntax": "%stopus",
       "example_syntax": null,
@@ -1503,7 +1503,7 @@
   },
   "SelfAssignRoles": {
     "addrole": {
-      "description": "Add a role to be self-assignable.",
+      "description": "Přidejte roli, která bude sama-přiřaditelná.",
       "example_image_url": null,
       "syntax": "%addrole <role> <role name>",
       "example_syntax": null,
@@ -1513,7 +1513,7 @@
       "aliases": null
     },
     "listroles": {
-      "description": "List all of the self-assignable roles in the server.",
+      "description": "Seznam všech samo-přiřaditelných rolí na serveru.",
       "example_image_url": null,
       "syntax": "%listroles",
       "example_syntax": null,
@@ -1523,7 +1523,7 @@
       "aliases": null
     },
     "removerole": {
-      "description": "Remove a self-assignable role based on the role name given.",
+      "description": "Odeberte samo-přiřazitelnou roli na základě zadaného názvu role.",
       "example_image_url": null,
       "syntax": "%removerole <role name>",
       "example_syntax": null,
@@ -1533,7 +1533,7 @@
       "aliases": null
     },
     "sendrolemessage": {
-      "description": "Sends the default role message in the current channel.",
+      "description": "Odešle zprávu o výchozí roli v aktuálním kanálu.",
       "example_image_url": null,
       "syntax": "%sendrolemessage",
       "example_syntax": null,
@@ -1541,10 +1541,10 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "The roles will work without this command, but should be used to have a list of roles."
+      "note": "Role budou fungovat bez tohoto příkazu, ale měly by být použity k vytvoření seznamu rolí."
     },
     "setrolechannel": {
-      "description": "Set the channel for self-assignable roles to be used in.",
+      "description": "Nastavte kanál pro samo-přiřazovací role kde budou používány.",
       "example_image_url": null,
       "syntax": "%setrolechannel [text channel]",
       "example_syntax": null,
@@ -1552,12 +1552,12 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "Since this command will erase all future messages, it is suggested to use %sendrolemessage before this one."
+      "note": "Jelikož tento příkaz vymaže všechny budoucí zprávy, doporučujeme použít %sendrolemessage před touto zprávou."
     }
   },
   "Reminder": {
     "gettimezone": {
-      "description": "Get your current set timezone.",
+      "description": "Zjisti aktuální nastavené časové pásmo.",
       "example_image_url": null,
       "syntax": "%gettz [timezone]",
       "example_syntax": null,
@@ -1568,7 +1568,7 @@
       ]
     },
     "listreminders": {
-      "description": "List out your reminders.",
+      "description": "Zobrazte si svá připomenutí.",
       "example_image_url": null,
       "syntax": "%listreminders",
       "example_syntax": null,
@@ -1580,7 +1580,7 @@
       ]
     },
     "remindme": {
-      "description": "Create a reminder to do a task at a certain time.",
+      "description": "Vytvořte si připomenutí k provedení úkolu v určitý čas.",
       "example_image_url": null,
       "syntax": "%remindme to ______ at 9PM or %remindme to ____ in 6hrs 30mins",
       "example_syntax": null,
@@ -1588,10 +1588,10 @@
       "aliases": [
         "remind"
       ],
-      "note": "The user input is fairly flexible for this command."
+      "note": "Vstup uživatele je pro tento příkaz poměrně flexibilní."
     },
     "removereminder": {
-      "description": "Remove a reminder based on it's index.",
+      "description": "Odstraňte připomenutí na základě jeho indexu.",
       "example_image_url": null,
       "syntax": "%removereminder <reminder index>",
       "example_syntax": null,
@@ -1601,7 +1601,7 @@
       ]
     },
     "settimezone": {
-      "description": "Set your local timezone with a timezone abbreviation and country code.",
+      "description": "Nastavte si místní časové pásmo pomocí zkratky časového pásma a kódu země.",
       "example_image_url": null,
       "syntax": "%settimezone (timezone name) (country code)",
       "example_syntax": null,
@@ -1609,12 +1609,12 @@
       "aliases": [
         "settz"
       ],
-      "note": "The country code is the short-handed version of the location (ex: USA)."
+      "note": "Kód země je krátká verze místa (např: USA)."
     }
   },
   "Twitch": {
     "addtwitch": {
-      "description": "Adds a Twitch username to keep track of.",
+      "description": "Přidá uživatelské jméno Twitch které budete sledovat.",
       "example_image_url": null,
       "syntax": "%addtwitch <twitch username>",
       "example_syntax": null,
@@ -1622,10 +1622,10 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "Maximum 2 Twitch channels per server."
+      "note": "Maximálně 2 Twitch kanály pro server."
     },
     "listtwitch": {
-      "description": "List the Twitch channels the server follows.",
+      "description": "Napište Twitch kanály, které server sleduje.",
       "example_image_url": null,
       "syntax": "%listtwitch",
       "example_syntax": null,
@@ -1635,7 +1635,7 @@
       "aliases": null
     },
     "removetwitch": {
-      "description": "Remove a Twitch username that is being kept track of.",
+      "description": "Odeberte uživatelské jméno Twitch, které sledujete.",
       "example_image_url": null,
       "syntax": "%removetwitch <twitch username>",
       "example_syntax": null,
@@ -1645,7 +1645,7 @@
       "aliases": null
     },
     "settwitchchannel": {
-      "description": "Set the Discord channel that the Twitch announcements will be posted on.",
+      "description": "Nastavte Discord kanál kde budou Twitch oznámení zveřejněna.",
       "example_image_url": null,
       "syntax": "%settwitchchannel [text channel]",
       "example_syntax": null,
@@ -1655,7 +1655,7 @@
       "aliases": null
     },
     "settwitchrole": {
-      "description": "Set the Discord Role that will be mentioned on Twitch announcements.",
+      "description": "Nastavte Discord roli, která bude zmíněna v Twitch oznámeních.",
       "example_image_url": null,
       "syntax": "%settwitchrole [role]",
       "example_syntax": null,
@@ -1667,7 +1667,7 @@
   },
   "BotOwner": {
     "addcards": {
-      "description": "Fill the cards table with the default card names.",
+      "description": "Vyplňte tabulku karet výchozími názvy karet.",
       "example_image_url": null,
       "syntax": "%addcards",
       "example_syntax": null,
@@ -1677,7 +1677,7 @@
       "aliases": null
     },
     "addpatreon": {
-      "description": "Adds a permanent patron",
+      "description": "Přidá trvalého patrona",
       "example_image_url": null,
       "syntax": "%addpatreon <user ids>",
       "example_syntax": null,
@@ -1685,10 +1685,10 @@
         "Bot Owner"
       ],
       "aliases": null,
-      "note": "Use commas to separate user ids."
+      "note": "K oddělení ID uživatelů použijte čárky."
     },
     "approve": {
-      "description": "Approve a query id for an unregistered Group or Idol.",
+      "description": "Schválit ID dotazu pro neregistrovanou skupinu nebo idoly.",
       "example_image_url": null,
       "syntax": "%approve <query id> [mode=idol/group]",
       "example_syntax": null,
@@ -1698,7 +1698,7 @@
       "aliases": null
     },
     "generateplayingcards": {
-      "description": "Generate Custom Playing Cards with Idol Avatars.",
+      "description": "Vytvoř vlastní Hrací Karty s Idol Avatary.",
       "example_image_url": null,
       "syntax": "%generateplayingcards",
       "example_syntax": null,
@@ -1708,7 +1708,7 @@
       "aliases": null
     },
     "removepatreon": {
-      "description": "Removes a permanent patron.",
+      "description": "Odstraní trvalého patrona.",
       "example_image_url": null,
       "syntax": "%removepatreon <user ids>",
       "example_syntax": null,

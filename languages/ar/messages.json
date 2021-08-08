@@ -148,7 +148,8 @@
     "maintenance": "هناك صيانة قيد التقدم حاليا. انضم إلى خادم الدعم للمزيد من المعلومات. <{support_server_link}>\nREASON: {reason}",
     "invalid_input": "{name}، هذا الخيار غير صالح. الرجاء النظر في {server_prefix}help {command_name}.",
     "game_disabled": "{name}، تم تعطيل الألعاب في هذه القناة النصية باستخدام {server_prefix}togglegames.",
-    "gen_error": "خطأ - {e}"
+    "gen_error": "خطأ - {e}",
+    "may_take_time": "This command may take a few minutes to respond since it relies on a third-party application."
   },
   "twitch": {
     "follow_limit": "يسمح لك فقط بمتابعة {follow_limit} قنوات.",
@@ -224,8 +225,5 @@
     "unfollowed": "هذه القناة لم تعد تتابع {result}.",
     "followed": "هذه القناة لم تعد تتابع {result}.",
     "unknown_code": "اسم المستخدم لذلك {result} غير معروف. لا تتردد في استخدام أمر المستخدم بدلا من ذلك."
-  },
-  "general ": {
-    " may_take_time": "This command may take a few minutes to respond since it relies on a third-party application."
   }
 }

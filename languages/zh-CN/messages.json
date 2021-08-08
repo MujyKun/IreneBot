@@ -148,7 +148,8 @@
     "maintenance": "目前正在进行维护。加入支持服务器以获取更多信息。 <{support_server_link}>\n原因：{reason}",
     "invalid_input": "{name}，该选项无效。请查看{server_prefix}帮助{command_name}。",
     "game_disabled": "{name}，已使用 {server_prefix}togglegames 在此文本频道中禁用游戏。",
-    "gen_error": "错误 - {e}"
+    "gen_error": "错误 - {e}",
+    "may_take_time": "This command may take a few minutes to respond since it relies on a third-party application."
   },
   "twitch": {
     "follow_limit": "您只能关注 {follow_limit} 个频道。",
@@ -224,8 +225,5 @@
     "unfollowed": "此频道不再关注 {result}。",
     "followed": "此频道正在关注{result}。",
     "unknown_code": "该 {result} 的代码未知。请随意使用代码命令代替。"
-  },
-  "general ": {
-    " may_take_time": "This command may take a few minutes to respond since it relies on a third-party application."
   }
 }

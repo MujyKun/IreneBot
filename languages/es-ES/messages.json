@@ -148,7 +148,8 @@
     "maintenance": "Un mantenimiento está en proceso, Únete al Support Server para mas información.\n<{support_server_link}>\nRAZÓN: {reason}",
     "invalid_input": "{name}, Esa opción no es válida. Por favor revisa {server_prefix}help {command_name}.",
     "game_disabled": "{name}, los Juegos han sido deshabilitados en este canal de texto usando {server_prefix}togglegames.",
-    "gen_error": "ERROR - {e}"
+    "gen_error": "ERROR - {e}",
+    "may_take_time": "This command may take a few minutes to respond since it relies on a third-party application."
   },
   "twitch": {
     "follow_limit": "Solo tienes permitido seguir {follow_limit} canales.",
@@ -224,8 +225,5 @@
     "unfollowed": "Este canal ya no sigue a {result}.",
     "followed": "Este canal ahora está siguiendo a {result}.",
     "unknown_code": "El código para ese {result} no es conocido. No dude en usar el comando code en su lugar."
-  },
-  "general ": {
-    " may_take_time": "This command may take a few minutes to respond since it relies on a third-party application."
   }
 }

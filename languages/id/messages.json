@@ -148,7 +148,8 @@
     "maintenance": "Pemeliharaan saat ini sedang berlangsung. Bergabung dengan server dukungan untuk informasi lebih lanjut.<{support_server_link}> ALASAN: {reason}",
     "invalid_input": "{name}, Opsi itu tidak valid. Silakan lihat {server_prefix}help {command_name}.",
     "game_disabled": "{name}, Permainan telah dinonaktifkan di saluran teks ini menggunakan {server_prefix}togglegames.",
-    "gen_error": "KESALAHAN - {e}"
+    "gen_error": "KESALAHAN - {e}",
+    "may_take_time": "This command may take a few minutes to respond since it relies on a third-party application."
   },
   "twitch": {
     "follow_limit": "Anda hanya diperbolehkan untuk memiliki saluran {follow_limit} diikuti.",
@@ -224,8 +225,5 @@
     "unfollowed": "Saluran ini tidak lagi mengikuti {result}.",
     "followed": "Saluran ini sekarang mengikuti {result}.",
     "unknown_code": "Kode dari {result} itu tidak diketahui. Jangan ragu untuk menggunakan perintah kode sebagai gantinya."
-  },
-  "general ": {
-    " may_take_time": "This command may take a few minutes to respond since it relies on a third-party application."
   }
 }

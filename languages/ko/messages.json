@@ -148,7 +148,8 @@
     "maintenance": "현재 유지 보수가 진행 중입니다. 자세한 내용은 지원 서버에 가입하세요. <{support_server_link}> 이유: {reason}",
     "invalid_input": "{name}, 해당 옵션은 유효하지 않습니다. {server_prefix}help {command_name} 을를 살펴보십시오.",
     "game_disabled": "{name}님, {server_prefix}togglegames를 사용하여 이 텍스트 채널에서 게임이 비활성화되었습니다.",
-    "gen_error": "오류 - {e}"
+    "gen_error": "오류 - {e}",
+    "may_take_time": "This command may take a few minutes to respond since it relies on a third-party application."
   },
   "twitch": {
     "follow_limit": "{follow_limit} 채널만 팔로우할 수 있습니다.",
@@ -224,8 +225,5 @@
     "unfollowed": "이 채널은 {result} 더 이상 팔로우하지 않습니다",
     "followed": "이 채널은 {result} 팔로우 중입니다.",
     "unknown_code": "{result} 에 코드는 유효하지 않습니다. 대신 코드 명령을 사용하세요."
-  },
-  "general ": {
-    " may_take_time": "This command may take a few minutes to respond since it relies on a third-party application."
   }
 }

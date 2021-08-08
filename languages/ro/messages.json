@@ -148,7 +148,8 @@
     "maintenance": "A maintenance is currently in progress. Join the support server for more information. <{support_server_link}>\nREASON: {reason}",
     "invalid_input": "{name}, That option is not valid. Please look into {server_prefix}help {command_name}.",
     "game_disabled": "{name}, Games have been disabled in this text channel using {server_prefix}togglegames.",
-    "gen_error": "ERROR - {e}"
+    "gen_error": "ERROR - {e}",
+    "may_take_time": "This command may take a few minutes to respond since it relies on a third-party application."
   },
   "twitch": {
     "follow_limit": "You are only allowed to have {follow_limit} channels followed.",
@@ -224,8 +225,5 @@
     "unfollowed": "Acest canal nu mai urmărește {result}.",
     "followed": "Acest canal urmărește în prezent {result}.",
     "unknown_code": "Codul acestui {result} nu este cunoscut. Simte-te liber să folosești comanda codului."
-  },
-  "general ": {
-    " may_take_time": "This command may take a few minutes to respond since it relies on a third-party application."
   }
 }

@@ -148,7 +148,8 @@
     "maintenance": "Údržba je momentálně v progresu. Připojte se k podpoře pro více informací. <{support_server_link}>\nDŮVOD: {reason}",
     "invalid_input": "{name}, tato možnost není platná. Podívejte se prosím na {server_prefix}help {command_name}.",
     "game_disabled": "{name}, Hry byly zakázány v tomto textovém kanálu pomocí {server_prefix}togglegames.",
-    "gen_error": "CHYBA - {e}"
+    "gen_error": "CHYBA - {e}",
+    "may_take_time": "This command may take a few minutes to respond since it relies on a third-party application."
   },
   "twitch": {
     "follow_limit": "Je Vám pouze povoleno sledovat {follow_limit} kanálů.",
@@ -224,8 +225,5 @@
     "unfollowed": "Tento kanál již nesleduje {result}.",
     "followed": "Tento kanál nyní sleduje {result}.",
     "unknown_code": "Kód tohoto {result} není znám. Nebojte se místo toho použít kódový příkaz."
-  },
-  "general ": {
-    " may_take_time": "This command may take a few minutes to respond since it relies on a third-party application."
   }
 }

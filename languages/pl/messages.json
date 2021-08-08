@@ -25,7 +25,7 @@
   },
   "bm": {
     "stopped": "Blokowanie monitora zatrzymane.",
-    "started": "Blocking Monitor Started.",
+    "started": "Blokowanie monitora rozpoczęte.",
     "not_running": "Blokowanie monitora nie jest uruchomione.",
     "already_running": "Blokowanie monitora jest uruchomione."
   },

@@ -1,7 +1,7 @@
 {
   "BlackJack": {
     "blackjack": {
-      "description": "Start a game of BlackJack.",
+      "description": "开始黑杰克游戏。",
       "example_image_url": null,
       "syntax": null,
       "example_syntax": null,
@@ -11,7 +11,7 @@
       ]
     },
     "stopbj": {
-      "description": "End the current BlackJack game.",
+      "description": "结束当前的黑杰克游戏。",
       "example_image_url": null,
       "syntax": "%blackjack [bet=0]",
       "example_syntax": null,
@@ -19,7 +19,7 @@
       "aliases": null
     },
     "joingame": {
-      "description": "Join an existing game of BlackJack.",
+      "description": "加入已有的黑杰克游戏。",
       "example_image_url": null,
       "syntax": "%joingame <opponent> [bet=0]",
       "example_syntax": null,
@@ -29,7 +29,7 @@
       ]
     },
     "rules": {
-      "description": "View the rules of BlackJack.",
+      "description": "查看黑杰克的规则。",
       "example_image_url": null,
       "syntax": "%rules",
       "example_syntax": null,
@@ -39,7 +39,7 @@
   },
   "BotMod": {
     "addidoltogroup": {
-      "description": "Adds an Idol to a Group.",
+      "description": "添加一位偶像 到组。",
       "example_image_url": null,
       "syntax": "%addidoltogroup <idol id> <group id>",
       "example_syntax": null,
@@ -49,7 +49,7 @@
       "aliases": null
     },
     "addinteraction": {
-      "description": "Add a GIF to an interaction.",
+      "description": "将一个GIF添加到交互中。",
       "example_image_url": null,
       "syntax": "%addinteraction <interaction_type> <link1,link2,...>",
       "example_syntax": null,
@@ -59,7 +59,7 @@
       "aliases": null
     },
     "addstatus": {
-      "description": "Adds a playing status to the Bot.",
+      "description": "将bot而添加播放状态角色。",
       "example_image_url": null,
       "syntax": "%addstatus <status message>",
       "example_syntax": null,
@@ -69,7 +69,7 @@
       "aliases": null
     },
     "botban": {
-      "description": "Bans a user from using the Bot.",
+      "description": "禁止用户使用 Bot。",
       "example_image_url": null,
       "syntax": "%botban <user id>",
       "example_syntax": null,
@@ -79,7 +79,7 @@
       "aliases": null
     },
     "botunban": {
-      "description": "Unbans a user that was not able to use the Bot.",
+      "description": "取消禁止无法使用bot的用户。",
       "example_image_url": null,
       "syntax": "%botunban <user id>",
       "example_syntax": null,
@@ -89,7 +89,7 @@
       "aliases": null
     },
     "botwarn": {
-      "description": "Warn a user through Bot DMs.",
+      "description": "通过Bot DM而警告用户。",
       "example_image_url": null,
       "syntax": "%botwarn <user> [reason]",
       "example_syntax": null,
@@ -99,7 +99,7 @@
       "aliases": null
     },
     "closedm": {
-      "description": "Closes a DM",
+      "description": "关闭私信",
       "example_image_url": null,
       "syntax": "%closedm [user id]",
       "example_syntax": null,
@@ -109,7 +109,7 @@
       "aliases": null
     },
     "createdm": {
-      "description": "Creates a DM between you and the user with the Bot as the middleman.",
+      "description": "以机器人作为中间人，在您和用户之间创建一个DM。",
       "example_image_url": null,
       "syntax": "%createdm <user id>",
       "example_syntax": null,
@@ -119,7 +119,7 @@
       "aliases": null
     },
     "deletegroup": {
-      "description": "Deletes a Group",
+      "description": "删除组",
       "example_image_url": null,
       "syntax": "%deletegroup <group id>",
       "example_syntax": null,
@@ -129,7 +129,7 @@
       "aliases": null
     },
     "deleteidol": {
-      "description": "Deletes an Idol.",
+      "description": "删除明星。",
       "example_image_url": null,
       "syntax": "%deleteidol <idol id>",
       "example_syntax": null,
@@ -139,7 +139,7 @@
       "aliases": null
     },
     "deleteidolfromgroup": {
-      "description": "Deletes an Idol from a Group.",
+      "description": "从项目中删除项。",
       "example_image_url": null,
       "syntax": "%deleteidolfromgroup <idol id> <group iid>\n",
       "example_syntax": null,
@@ -149,7 +149,7 @@
       "aliases": null
     },
     "deleteinteraction": {
-      "description": "Remove URL from an interaction.",
+      "description": "从交互中删除 URL。",
       "example_image_url": null,
       "syntax": "%deleteinteraction <urls>",
       "example_syntax": null,
@@ -157,10 +157,10 @@
         "Bot Moderator"
       ],
       "aliases": null,
-      "note": "Separate urls with commas."
+      "note": "以逗号分隔 URL"
     },
     "fixlinks": {
-      "description": "Fix Invalid Thumbnails/Avatars/Banners of Idols/Groups and puts them on the host.",
+      "description": "修复无效的缩略图明星/组的个人资料图片/横幅，并将它们放在主机上。",
       "example_image_url": null,
       "syntax": "%fixlinks",
       "example_syntax": null,
@@ -170,7 +170,7 @@
       "aliases": null
     },
     "getstatuses": {
-      "description": "List all of the statuses of the Bot.",
+      "description": "列出机器人的所有状态。",
       "example_image_url": null,
       "syntax": "%getstatuses",
       "example_syntax": null,
@@ -180,7 +180,7 @@
       "aliases": null
     },
     "kill": {
-      "description": "Kills the Bot.",
+      "description": "击杀机器人。",
       "example_image_url": null,
       "syntax": "%kill",
       "example_syntax": null,
@@ -190,7 +190,7 @@
       "aliases": null
     },
     "killapi": {
-      "description": "Kills the API.",
+      "description": "击杀API。",
       "example_image_url": null,
       "syntax": "%killapi",
       "example_syntax": null,
@@ -200,7 +200,7 @@
       "aliases": null
     },
     "maintenance": {
-      "description": "Toggles Maintenance Mode",
+      "description": "启用维护模式",
       "example_image_url": null,
       "syntax": "%maintenance",
       "example_syntax": null,
@@ -210,7 +210,7 @@
       "aliases": null
     },
     "mergeidol": {
-      "description": "Merge a duplicated idol with the original idol.",
+      "description": "合并一个重复的明星和原生的明星。",
       "example_image_url": null,
       "syntax": "%mergeidol <original_idol_id> <duplicate_idol_id>",
       "example_syntax": null,
@@ -220,7 +220,7 @@
       "aliases": null
     },
     "mergegroup": {
-      "description": "Merge a duplicated group with the original group.",
+      "description": "将重复的组与原组合并。",
       "example_image_url": null,
       "syntax": "%mergegroup <original_group_id> <duplicate_group_id>",
       "example_syntax": null,
@@ -230,7 +230,7 @@
       "aliases": null
     },
     "moveto": {
-      "description": "Moves an image to another idol.",
+      "description": "将图像移动到另一个明星位置。",
       "example_image_url": null,
       "syntax": "%moveto <idol_id> <link>",
       "example_syntax": null,
@@ -240,7 +240,7 @@
       "aliases": null
     },
     "removestatus": {
-      "description": "Removes a playing status based on it's index.",
+      "description": "移除基于其索引的播放状态。",
       "example_image_url": null,
       "syntax": null,
       "example_syntax": "%removestatus <status index>",
@@ -252,7 +252,7 @@
   },
   "BiasGame": {
     "biasgame": {
-      "description": "Start a BiasGame in the current channel.",
+      "description": "在当前频道开始一局Bias游戏。",
       "example_image_url": null,
       "syntax": "%biasgame [gender=Male/Female/All] [bracket_size=4/8/16/32]",
       "example_syntax": null,
@@ -262,7 +262,7 @@
       ]
     },
     "stopbg": {
-      "description": "Force-End a BiasGame.",
+      "description": "立刻结束一局Bias游戏。",
       "example_image_url": null,
       "syntax": "%stopbg",
       "example_syntax": null,
@@ -273,7 +273,7 @@
       "aliases": null
     },
     "listbg": {
-      "description": "List a user's BiasGame Leaderboards.",
+      "description": "列出用户 Bias游戏排行榜。",
       "example_image_url": null,
       "syntax": "%listbg [user]",
       "example_syntax": null,
@@ -283,7 +283,7 @@
   },
   "BlockingManager": {
     "bmon start": {
-      "description": "Starts the Blocking Manager.",
+      "description": "启动黑名单管理员。",
       "example_image_url": null,
       "syntax": "%bmon start",
       "example_syntax": null,
@@ -293,7 +293,7 @@
       "aliases": null
     },
     "bmon stop": {
-      "description": "Turns off the Blocking Manager.",
+      "description": "关闭阻止管理员。",
       "example_image_url": null,
       "syntax": "%bmon stop",
       "example_syntax": null,
@@ -305,7 +305,7 @@
   },
   "Currency": {
     "balance": {
-      "description": "View a user's balance.",
+      "description": "查看用户余额。",
       "example_image_url": null,
       "syntax": "%balance [member]",
       "example_syntax": null,
@@ -317,7 +317,7 @@
       ]
     },
     "beg": {
-      "description": "Beg a homeless man for money.",
+      "description": "向无家可归的人乞讨钱。",
       "example_image_url": null,
       "syntax": "%beg",
       "example_syntax": null,
@@ -325,7 +325,7 @@
       "aliases": null
     },
     "bet": {
-      "description": "Bet your money.",
+      "description": "赌钱。",
       "example_image_url": null,
       "syntax": "%bet <amount>",
       "example_syntax": null,
@@ -333,7 +333,7 @@
       "aliases": null
     },
     "daily": {
-      "description": "Get the daily reward.",
+      "description": "获取每日奖励。",
       "example_image_url": null,
       "syntax": "%daily",
       "example_syntax": null,
@@ -341,7 +341,7 @@
       "aliases": null
     },
     "give": {
-      "description": "Give a user money.",
+      "description": "馈赠给用户钱。",
       "example_image_url": null,
       "syntax": "%give <member> <amount>",
       "example_syntax": null,
@@ -349,7 +349,7 @@
       "aliases": null
     },
     "leaderboard": {
-      "description": "Shows the Top 10 users server/global wide.",
+      "description": "显示最高级的10位用户全国排行榜。",
       "example_image_url": null,
       "syntax": "%leaderboard [mode=server/global]",
       "example_syntax": null,
@@ -360,7 +360,7 @@
       ]
     },
     "rob": {
-      "description": "Rob a member.",
+      "description": "向为用户抢钱。",
       "example_image_url": null,
       "syntax": "%rob <member>",
       "example_syntax": null,
@@ -368,7 +368,7 @@
       "aliases": null
     },
     "rps": {
-      "description": "Play Rock Paper Scissors.",
+      "description": "和bot玩一局石头剪刀布。",
       "example_image_url": null,
       "syntax": "%rps <rock/paper/scissors> [amount to bet=0]",
       "example_syntax": null,
@@ -378,7 +378,7 @@
       ]
     },
     "upgrade": {
-      "description": "Upgrades a command to the next level.",
+      "description": "升级命令。",
       "example_image_url": null,
       "syntax": "%upgrade <rob/daily/beg>",
       "example_syntax": null,
@@ -390,7 +390,7 @@
   },
   "CustomCommands": {
     "createcommand": {
-      "description": "Create a custom command.",
+      "description": "创建自定义角色。",
       "example_image_url": null,
       "syntax": "%createcommand <command name> <message>",
       "example_syntax": null,
@@ -402,7 +402,7 @@
       ]
     },
     "deletecommand": {
-      "description": "Delete a custom command.",
+      "description": "输入自定义命令。",
       "example_image_url": null,
       "syntax": "%deletecommand <command name>",
       "example_syntax": null,
@@ -414,7 +414,7 @@
       ]
     },
     "listcommands": {
-      "description": "List all custom commands for the server.",
+      "description": "列出服务器所有自定义命令。",
       "example_image_url": null,
       "syntax": "%listcommands",
       "example_syntax": null,
@@ -433,7 +433,7 @@
       "note": "Underscores are spaces and commas are used to split Idol/Group names."
     },
     "card": {
-      "description": "Display an Idol/Group's Profile Card.",
+      "description": "显示偶像/群组个人资料卡。",
       "example_image_url": null,
       "syntax": "%card <Idol/Group ID/Name>",
       "example_syntax": null,
@@ -441,7 +441,7 @@
       "aliases": null
     },
     "count": {
-      "description": "Displays amount of times an Idol has been called.",
+      "description": "显示一位偶像被调用的次数。",
       "example_image_url": null,
       "syntax": "%count (idol name/all)",
       "example_syntax": null,
@@ -449,7 +449,7 @@
       "aliases": null
     },
     "countleaderboard": {
-      "description": "Displays leaderboard for times an Idol has been called.",
+      "description": "显示偶像调用次数排行榜。",
       "example_image_url": null,
       "syntax": "%countleaderboard",
       "example_syntax": null,
@@ -459,7 +459,7 @@
       ]
     },
     "countgroup": {
-      "description": "Displays the number of photos a Group has.",
+      "description": "显示组拥有的照片数量。",
       "example_image_url": null,
       "syntax": "%countgroup <group name>",
       "example_syntax": null,
@@ -467,7 +467,7 @@
       "aliases": null
     },
     "countmember": {
-      "description": "Displays the number of photos an Idol has.",
+      "description": "显示 偶像照片数量。",
       "example_image_url": null,
       "syntax": "%countmember <idol name/all>",
       "example_syntax": null,
@@ -475,34 +475,34 @@
       "aliases": null
     },
     "fullnames": {
-      "description": "List the full names of Idols the bot has photos of.",
+      "description": "列出bot所应有照片的偶像全名称呼。",
       "example_image_url": null,
       "syntax": "%fullnames [page number/group name]",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null,
-      "note": "To a Bot Moderator, this will also display Idols with no photos and show their ID."
+      "note": "对于机器人版主，这也将显示没有照片的偶像并显示的ID。"
     },
     "groups": {
-      "description": "Lists the groups of idols the Bot has photos of.",
+      "description": "列出机器人有明星照片的团体。",
       "example_image_url": null,
       "syntax": "%groups",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null,
-      "note": "To a Bot Moderator, this will also display Groups with no photos and show their ID."
+      "note": "对于机器人版主，这也将显示没有照片的偶像，并显示他们的ID。"
     },
     "members": {
-      "description": "List the names of idols the Bot has photos of.",
+      "description": "列出机器人有照片的偶像的名字。",
       "example_image_url": null,
       "syntax": "%members [page number/group name]",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null,
-      "note": "To a Bot Moderator, this will also display Idols with no photos and show their ID."
+      "note": "对于机器人版主，这也将显示没有照片的偶像并显示他们的ID。"
     },
     "randomidol": {
-      "description": "Posts media of a random Idol.",
+      "description": "发布随机偶像的媒体。",
       "example_image_url": null,
       "syntax": "%randomidol",
       "example_syntax": null,
@@ -512,7 +512,7 @@
       ]
     },
     "sendidol": {
-      "description": "Have an Idol Photo sent to a text channel every 12 hours.",
+      "description": "每隔12小时有一张偶像照片发送到文字频道。",
       "example_image_url": null,
       "syntax": "%sendidol [idol id] [text channel]",
       "example_syntax": null,
@@ -520,10 +520,10 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "Using the command without an Idol ID will remove all existing idols from the channel."
+      "note": "使用没有偶像ID的命令将从频道中删除所有现有的偶像。"
     },
     "sendimages": {
-      "description": "Have all of the Idol Photos appear in a specific text channel.",
+      "description": "让所有的偶像照片出现在一个特定的文字频道。",
       "example_image_url": null,
       "syntax": "%sendimages [text channel]",
       "example_syntax": null,
@@ -533,7 +533,7 @@
       "aliases": null
     },
     "stopimages": {
-      "description": "Stops the Bot from posting idol photos in a specific text channel.",
+      "description": "阻止机器人在特定的文字频道中发布偶像照片。",
       "example_image_url": null,
       "syntax": "%stopimages [text channel]",
       "example_syntax": null,
@@ -541,12 +541,12 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "Type the command again to re-enable."
+      "note": "再次输入命令以重新启用。"
     }
   },
   "GuessingGame": {
     "guessinggame": {
-      "description": "Start an Idol GuessingGame in the current channel.",
+      "description": "在当前频道启动一个偶像GuessingGame游戏。",
       "example_image_url": null,
       "syntax": "%guessinggame [gender=all] [difficulty=medium] [rounds=20] [timeout=20]",
       "example_syntax": null,
@@ -554,10 +554,10 @@
       "aliases": [
         "gg"
       ],
-      "note": "The host of the game can type stop or end to end the game or skip to skip the current round without affecting the round number."
+      "note": "游戏的主人可以输入停止或结束来结束游戏，或输入跳过来跳过当前回合，而不影响回合数。"
     },
     "groupguessinggame": {
-      "description": "Start a Group GuessingGame in the current channel.",
+      "description": "在当前频道中开始一个团体GuessingGame游戏。",
       "example_image_url": null,
       "syntax": "%groupguessinggame [gender=all] [difficulty=medium] [rounds=20] [timeout=20]",
       "example_syntax": null,
@@ -566,19 +566,19 @@
         "ggg",
         "groupgg"
       ],
-      "note": "The host of the game can type stop or end to end the game or skip to skip the current round without affecting the round number."
+      "note": "游戏的主人可以输入停止或结束来结束游戏，或输入跳过来跳过当前回合，而不影响回合数。"
     },
     "ggfilter": {
-      "description": "Add a filter to your GuessingGame.",
+      "description": "给您的GuessingGame添加一个过滤器。",
       "example_image_url": null,
       "syntax": "%ggfilter [group id/name, ...]",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null,
-      "note": "Only the groups filtered will appear on the GuessingGame. If you do not specify a Group ID or Name, it will toggle the filter. Group IDs and Names must be split by commas. Group Names with more than one word must have an underscore used as a space."
+      "note": "只有被过滤的t团体才会出现在GuessingGame上。如果你不指定团体ID或名称，它将切换过滤器。团体的ID和名称必须用逗号分割。有一个以上单词的组名必须有一个下划线作为空格。"
     },
     "ggfilteredlist": {
-      "description": "View the current groups that are filtered.",
+      "description": "查看当前已被过滤的团体。",
       "example_image_url": null,
       "syntax": "%ggfilteredlist",
       "example_syntax": null,
@@ -586,7 +586,7 @@
       "aliases": null
     },
     "ggleaderboard": {
-      "description": "Shows Server/Global leaderboards for the GuessingGame.",
+      "description": "显示 GuessingGame 服务器/全球的排行榜。",
       "example_image_url": null,
       "syntax": "%ggleaderboard [difficulty=easy/medium/hard] [mode=server/global]",
       "example_syntax": null,
@@ -597,7 +597,7 @@
       ]
     },
     "stopgg": {
-      "description": "Force-end a GuessingGame.",
+      "description": "强制结束一个GuessingGame。",
       "example_image_url": null,
       "syntax": "%stopgg",
       "example_syntax": null,
@@ -610,7 +610,7 @@
   },
   "Interactions": {
     "choke": {
-      "description": "Choke a member.",
+      "description": "掐死一个成员。",
       "example_image_url": null,
       "syntax": "%choke [user]",
       "example_syntax": null,
@@ -618,7 +618,7 @@
       "aliases": null
     },
     "cuddle": {
-      "description": "Cuddle a member.",
+      "description": "楼抱一个成员。",
       "example_image_url": null,
       "syntax": "%cuddle [user]",
       "example_syntax": null,
@@ -626,7 +626,7 @@
       "aliases": null
     },
     "hug": {
-      "description": "Hug a member.",
+      "description": "拥抱一个成员。",
       "example_image_url": null,
       "syntax": "%hug [user]",
       "example_syntax": null,
@@ -634,7 +634,7 @@
       "aliases": null
     },
     "kiss": {
-      "description": "Kiss a member.",
+      "description": "亲一个成员。",
       "example_image_url": null,
       "syntax": "%kiss [user]",
       "example_syntax": null,
@@ -642,7 +642,7 @@
       "aliases": null
     },
     "lick": {
-      "description": "Lick a member.",
+      "description": "舔一个成员。",
       "example_image_url": null,
       "syntax": "%lick [user]",
       "example_syntax": null,
@@ -650,7 +650,7 @@
       "aliases": null
     },
     "pat": {
-      "description": "Pat a member.",
+      "description": "轻轻的拍一个成员。",
       "example_image_url": null,
       "syntax": "%pat [user]",
       "example_syntax": null,
@@ -658,7 +658,7 @@
       "aliases": null
     },
     "punch": {
-      "description": "Punch a member.",
+      "description": "打一个成员。",
       "example_image_url": null,
       "syntax": "%punch [user]",
       "example_syntax": null,
@@ -666,7 +666,7 @@
       "aliases": null
     },
     "pullhair": {
-      "description": "Pull hair of a member.",
+      "description": "拉扯成员的头发。",
       "example_image_url": null,
       "syntax": "%pullhair [user]",
       "example_syntax": null,
@@ -674,7 +674,7 @@
       "aliases": null
     },
     "slap": {
-      "description": "Slap a member.",
+      "description": "给一个成员一巴掌。",
       "example_image_url": null,
       "syntax": "%slap [user]",
       "example_syntax": null,
@@ -682,7 +682,7 @@
       "aliases": null
     },
     "spit": {
-      "description": "Spit at a member.",
+      "description": "向一个成员吐口水。",
       "example_image_url": null,
       "syntax": "%spit [user]",
       "example_syntax": null,
@@ -690,7 +690,7 @@
       "aliases": null
     },
     "stab": {
-      "description": "Stab a member.",
+      "description": "刺伤一名成员。",
       "example_image_url": null,
       "syntax": "%stab [user]",
       "example_syntax": null,
@@ -698,7 +698,7 @@
       "aliases": null
     },
     "stepon": {
-      "description": "Step on a member.",
+      "description": "踩一名成员。",
       "example_image_url": null,
       "syntax": "%stepon [user]",
       "example_syntax": null,
@@ -708,7 +708,7 @@
   },
   "Logging": {
     "logadd": {
-      "description": "Start logging a text channel.",
+      "description": "开始记录文字频道。",
       "example_image_url": null,
       "syntax": "%logadd [text channel]",
       "example_syntax": null,
@@ -718,7 +718,7 @@
       "aliases": null
     },
     "logremove": {
-      "description": "Stop logging a text channel",
+      "description": "停止记录文字频道。",
       "example_image_url": null,
       "syntax": "%logremove [text channel]",
       "example_syntax": null,
@@ -728,7 +728,7 @@
       "aliases": null
     },
     "sendall": {
-      "description": "Toggle all messages going to log channel. Will only send edited and edited messages if turned off.",
+      "description": "切换所有消息到日志通告。如果闭关，只发送编辑的消息。",
       "example_image_url": null,
       "syntax": "%sendall",
       "example_syntax": null,
@@ -738,7 +738,7 @@
       "aliases": null
     },
     "startlogging": {
-      "description": "Start sending log messages in the current server and channel.",
+      "description": "开始在当前服务器和频道中发送日志信息。",
       "example_image_url": null,
       "syntax": "%startlogging",
       "example_syntax": null,
@@ -748,7 +748,7 @@
       "aliases": null
     },
     "stoplogging": {
-      "description": "Stop sending log messages in the current server.",
+      "description": "停止在当前服务器上发送日志消息。",
       "example_image_url": null,
       "syntax": "%stoplogging",
       "example_syntax": null,
@@ -760,7 +760,7 @@
   },
   "Miscellaneous": {
     "8ball": {
-      "description": "Ask the 8ball a yes or no question.",
+      "description": "向8ball提出一个是或不是的问题。",
       "example_image_url": null,
       "syntax": "%8ball [question]",
       "example_syntax": null,
@@ -770,7 +770,7 @@
       ]
     },
     "addnoti": {
-      "description": "Receive a DM whenever a phrase/word is said in the server.",
+      "description": "每当服务器中的一个短语/词被说出来时，就会收到一个DM。",
       "example_image_url": null,
       "syntax": "%addnoti <phrase>",
       "example_syntax": null,
@@ -778,7 +778,7 @@
       "aliases": null
     },
     "botinfo": {
-      "description": "Displays general information about the Bot.",
+      "description": "显示有关机器人的一般信息。",
       "example_image_url": null,
       "syntax": "%botinfo",
       "example_syntax": null,
@@ -786,25 +786,25 @@
       "aliases": null
     },
     "checkprefix": {
-      "description": "Check the current prefix.",
+      "description": "检查目前的前缀。",
       "example_image_url": null,
       "syntax": "%checkprefix",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null,
-      "note": "This command will always work with the bot's default prefix."
+      "note": "这条命令将始终以机器人的默认前缀工作。"
     },
     "choose": {
-      "description": "Choose between a selection of options.",
+      "description": "在一系列的选项中选择一个。",
       "example_image_url": null,
       "syntax": "%choose <options>",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null,
-      "note": "Underscores are used for spaces between words. Spaces are used to separate choices."
+      "note": "下划线用于单词之间的空格。空格用于来分隔选择。"
     },
     "displayemoji": {
-      "description": "Displays an emoji at a larger size.",
+      "description": "以更大的尺寸显示一个表情。",
       "example_image_url": null,
       "syntax": "%displayemoji <emoji>",
       "example_syntax": null,
@@ -812,7 +812,7 @@
       "aliases": null
     },
     "flip": {
-      "description": "Flip a coin.",
+      "description": "翻一个硬币。",
       "example_image_url": null,
       "syntax": "%flip",
       "example_syntax": null,
@@ -831,7 +831,7 @@
       "aliases": null
     },
     "listnoti": {
-      "description": "List all your notification phrases for the current server.",
+      "description": "列出当前服务器的所有通知短语。",
       "example_image_url": null,
       "syntax": "%listnoti",
       "example_syntax": null,
@@ -839,7 +839,7 @@
       "aliases": null
     },
     "patreon": {
-      "description": "Displays link to Patreon.",
+      "description": "显示到Patreon的链接。",
       "example_image_url": null,
       "syntax": "%patreon",
       "example_syntax": null,
@@ -849,7 +849,7 @@
       ]
     },
     "ping": {
-      "description": "Shows Overall Latency to Discord.",
+      "description": "显示Discord的总体延迟。",
       "example_image_url": null,
       "syntax": "%ping",
       "example_syntax": null,
@@ -859,7 +859,7 @@
       ]
     },
     "random": {
-      "description": "Choose a random integer from a to b.",
+      "description": "选择一个从a到b的随机整数。",
       "example_image_url": null,
       "syntax": "%random <a> <b>",
       "example_syntax": null,
@@ -869,10 +869,10 @@
         "rand",
         "randint"
       ],
-      "note": "Random integer may include b."
+      "note": "随机整数可包含b。"
     },
     "removenoti": {
-      "description": "Remove a phrase/word from notifying you when it is said in the current server.",
+      "description": "在当前服务器中使用时，删除短语/单词而通知您。",
       "example_image_url": null,
       "syntax": "%removenoti <phrase/word>",
       "example_syntax": null,
@@ -882,7 +882,7 @@
       ]
     },
     "report": {
-      "description": "Report an issue with the Bot.",
+      "description": "报告与bot有关的问题。",
       "example_image_url": null,
       "syntax": "%report <issue>",
       "example_syntax": null,
@@ -890,7 +890,7 @@
       "aliases": null
     },
     "servercount": {
-      "description": "Shows the amount of servers connected to the Bot.",
+      "description": "显示连接到 Bot 的服务器数量。",
       "example_image_url": null,
       "syntax": "%servercount",
       "example_syntax": null,
@@ -898,7 +898,7 @@
       "aliases": null
     },
     "serverinfo": {
-      "description": "View information about the current server.",
+      "description": "查看当前服务器的信息。",
       "example_image_url": null,
       "syntax": "%serverinfo",
       "example_syntax": null,
@@ -906,7 +906,7 @@
       "aliases": null
     },
     "setlanguage": {
-      "description": "Changes language of the Bot.",
+      "description": "更改Bot当前而使用的语言。",
       "example_image_url": null,
       "syntax": "%setlanguage <language choice>",
       "example_syntax": null,
@@ -914,7 +914,7 @@
       "aliases": null
     },
     "shard": {
-      "description": "Gets shard information about the current server.",
+      "description": "查看当前服务器shard信息。",
       "example_image_url": null,
       "syntax": "%shard",
       "example_syntax": null,
@@ -924,7 +924,7 @@
       ]
     },
     "stopgames": {
-      "description": "End all games that you are hosting or that are in the channel.",
+      "description": "结束您正在托管或在频道中的所有游戏。",
       "example_image_url": null,
       "syntax": "%stopgames",
       "example_syntax": null,
@@ -939,7 +939,7 @@
       ]
     },
     "suggest": {
-      "description": "Suggest a feature for the Bot.",
+      "description": "为机器人建议个功能。",
       "example_image_url": null,
       "syntax": "%suggest <suggestion>",
       "example_syntax": null,
@@ -947,7 +947,7 @@
       "aliases": null
     },
     "support": {
-      "description": "Discord Invite link to the Bot's Support Server.",
+      "description": "邀请用户到bot的支持服务器。",
       "example_image_url": null,
       "syntax": "%support",
       "example_syntax": null,
@@ -955,7 +955,7 @@
       "aliases": null
     },
     "translate": {
-      "description": "Translate between languages using Papago.",
+      "description": "使用 Papago 进行语言翻译。",
       "example_image_url": null,
       "syntax": "%translate <from language> <to language> <message>",
       "example_syntax": null,
@@ -966,7 +966,7 @@
       ]
     },
     "vote": {
-      "description": "Direct link to vote for the Bot.",
+      "description": "为bot而投票的直接链接。",
       "example_image_url": null,
       "syntax": "%vote",
       "example_syntax": null,
@@ -976,7 +976,7 @@
   },
   "Moderator": {
     "addalias": {
-      "description": "Add an alias to an idol/group.",
+      "description": "将别名添加到idol/群组。",
       "example_image_url": null,
       "syntax": "%addalias <alias> <idol/group id> [mode=idol/group]",
       "example_syntax": null,
@@ -984,10 +984,10 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "Underscores for the alias are spaces. If a Bot Moderator uses this command, it will be a global (not local) alias."
+      "note": "下划分别名是空格。如果一个Bot 版主使用此命令，本别名将成为国际(非本地)别名。"
     },
     "addemoji": {
-      "description": "Adds emojis to the server.",
+      "description": "将表情添加到服务器。",
       "example_image_url": null,
       "syntax": "%addemoji <urls/emojis> [emoji_name]",
       "example_syntax": null,
@@ -1000,7 +1000,7 @@
       ]
     },
     "ban": {
-      "description": "Ban a member.",
+      "description": "禁止一位用户",
       "example_image_url": null,
       "syntax": "%ban [user] [reason=No Reason]",
       "example_syntax": null,
@@ -1010,7 +1010,7 @@
       "aliases": null
     },
     "clear": {
-      "description": "Prunes messages in the text channel.",
+      "description": "删减文字频道中的信息。",
       "example_image_url": null,
       "syntax": "%clear <amount> [user]",
       "example_syntax": null,
@@ -1020,10 +1020,10 @@
       "aliases": [
         "prune"
       ],
-      "note": "Amount limit is 1000."
+      "note": "限量维持1000。"
     },
     "deletealias": {
-      "description": "Delete an alias from an idol/group.",
+      "description": "从偶像/群组删除别名。",
       "example_image_url": null,
       "syntax": "%deletealias <alias> <idol/group id> [mode=idol/group]",
       "example_syntax": null,
@@ -1033,10 +1033,10 @@
       "aliases": [
         "removealias"
       ],
-      "note": "Underscores for the alias are spaces. If a Bot Moderator uses this command, it will be a global (not local) alias."
+      "note": "下划分别名是空格。如果一个Bot 版主使用此命令，本别名将成为国际(非本地)别名。"
     },
     "disableinteraction": {
-      "description": "Disable an interaction on the server.",
+      "description": "在服务器中禁用某个交互。",
       "example_image_url": null,
       "syntax": "%disableinteraction <interaction>",
       "example_syntax": null,
@@ -1044,10 +1044,10 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "To re-enable, use the same command again."
+      "note": "若要重新启用，请再次使用相同的命令。"
     },
     "kick": {
-      "description": "Kick a member.",
+      "description": "删除一位用户。",
       "example_image_url": null,
       "syntax": "%kick [user] [reason=No Reason]",
       "example_syntax": null,
@@ -1057,7 +1057,7 @@
       "aliases": null
     },
     "mute": {
-      "description": "Mutes a member.",
+      "description": "禁言一位用户。",
       "example_image_url": null,
       "syntax": "%mute [user] [reason]",
       "example_syntax": null,
@@ -1068,7 +1068,7 @@
       "aliases": null
     },
     "say": {
-      "description": "Make the Bot say a message.",
+      "description": "命令bot转发信息。",
       "example_image_url": null,
       "syntax": "%say [text channel] [message]",
       "example_syntax": null,
@@ -1076,10 +1076,10 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "If a text channel is not provided, it will send the message in the current channel."
+      "note": "如果用户未提供文本频道，bot将会在当前频道中发送消息。"
     },
     "sayembed": {
-      "description": "Make the Bot say an embed message.",
+      "description": "命令bot转发一条嵌入消息。",
       "example_image_url": null,
       "syntax": "%sayembed [text channel] [embed format]",
       "example_syntax": null,
@@ -1087,10 +1087,10 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "Follows the format from https://embedbuilder.nadekobot.me/. If a text channel is not provided, it will send the message in the current channel."
+      "note": "题随从https://embedbuilder.nadekobot.me/的格式。如果用户没有提供文本通道，bot将会在当前通道发送消息。"
     },
     "setprefix": {
-      "description": "Set the server prefix.",
+      "description": "设置服务器前缀。",
       "example_image_url": null,
       "syntax": "%setprefix [prefix=%]",
       "example_syntax": null,
@@ -1533,7 +1533,7 @@
       "aliases": null
     },
     "sendrolemessage": {
-      "description": "Sends the default role message in the current channel.",
+      "description": "在当前频道中发送默认角色信息。",
       "example_image_url": null,
       "syntax": "%sendrolemessage",
       "example_syntax": null,
@@ -1655,7 +1655,7 @@
       "aliases": null
     },
     "settwitchrole": {
-      "description": "Set the Discord Role that will be mentioned on Twitch announcements.",
+      "description": "设置 Twitch 通知中将提及的 Discord 角色。",
       "example_image_url": null,
       "syntax": "%settwitchrole [role]",
       "example_syntax": null,
@@ -1667,7 +1667,7 @@
   },
   "BotOwner": {
     "addcards": {
-      "description": "Fill the cards table with the default card names.",
+      "description": "用默认卡片名称填充卡表。",
       "example_image_url": null,
       "syntax": "%addcards",
       "example_syntax": null,
@@ -1877,12 +1877,12 @@
       "aliases": [
         "vlive"
       ],
-      "note": "This command contains sub-commands. This means any following arguments are respective to the first argument."
+      "note": "此命令包含子命令。这意味着任何以下参数都与第一个参数相关。"
     }
   },
   "DataMod": {
     "addidol": {
-      "description": "Adds an Unregistered Idol using the syntax from https://irenebot.com/addidol.html/.",
+      "description": "从 https://irenebot.com/adddol.html/中使用语法添加一个未注册的 Idol。",
       "example_image_url": null,
       "syntax": "%addidol <JSON>",
       "example_syntax": null,
@@ -1890,10 +1890,10 @@
         "Data Moderator"
       ],
       "aliases": null,
-      "note": "Command should only be used if the card does not exist for the Idol."
+      "note": "只有在Idol卡不存在的情况下才能使用命令。"
     },
     "addgroup": {
-      "description": "Adds an Unregistered Group using the syntax from https://irenebot.com/addgroup.html/.",
+      "description": "从 https://irenebot.com/addgroup.html/添加未注册的组。",
       "example_image_url": null,
       "syntax": "%addgroup <JSON>",
       "example_syntax": null,
@@ -1901,7 +1901,7 @@
         "Data Moderator"
       ],
       "aliases": null,
-      "note": "Command should only be used if the card does not exist for the Group."
+      "note": "只有当该卡片不存在给该组时，命令才能使用。"
     }
   }
 }

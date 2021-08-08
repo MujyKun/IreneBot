@@ -1,7 +1,7 @@
 {
   "BlackJack": {
     "blackjack": {
-      "description": "Start a game of BlackJack.",
+      "description": "ブラックジャックのゲームを開始します。",
       "example_image_url": null,
       "syntax": null,
       "example_syntax": null,
@@ -11,7 +11,7 @@
       ]
     },
     "stopbj": {
-      "description": "End the current BlackJack game.",
+      "description": "現在のブラックジャックゲームを終了します。",
       "example_image_url": null,
       "syntax": "%blackjack [bet=0]",
       "example_syntax": null,
@@ -19,7 +19,7 @@
       "aliases": null
     },
     "joingame": {
-      "description": "Join an existing game of BlackJack.",
+      "description": "既存のブラックジャックゲームに参加します。",
       "example_image_url": null,
       "syntax": "%joingame <opponent> [bet=0]",
       "example_syntax": null,
@@ -29,7 +29,7 @@
       ]
     },
     "rules": {
-      "description": "View the rules of BlackJack.",
+      "description": "ブラックジャックのルールを表示します。",
       "example_image_url": null,
       "syntax": "%rules",
       "example_syntax": null,
@@ -39,7 +39,7 @@
   },
   "BotMod": {
     "addidoltogroup": {
-      "description": "Adds an Idol to a Group.",
+      "description": "グループにアイドルを追加する。",
       "example_image_url": null,
       "syntax": "%addidoltogroup <idol id> <group id>",
       "example_syntax": null,
@@ -49,7 +49,7 @@
       "aliases": null
     },
     "addinteraction": {
-      "description": "Add a GIF to an interaction.",
+      "description": "インタラクションにGIFを追加します。",
       "example_image_url": null,
       "syntax": "%addinteraction <interaction_type> <link1,link2,...>",
       "example_syntax": null,
@@ -59,7 +59,7 @@
       "aliases": null
     },
     "addstatus": {
-      "description": "Adds a playing status to the Bot.",
+      "description": "ボットに再生ステータスを追加します。",
       "example_image_url": null,
       "syntax": "%addstatus <status message>",
       "example_syntax": null,
@@ -69,7 +69,7 @@
       "aliases": null
     },
     "botban": {
-      "description": "Bans a user from using the Bot.",
+      "description": "ユーザーがボットを使用することを禁止します。",
       "example_image_url": null,
       "syntax": "%botban <user id>",
       "example_syntax": null,
@@ -79,7 +79,7 @@
       "aliases": null
     },
     "botunban": {
-      "description": "Unbans a user that was not able to use the Bot.",
+      "description": "ボットを使用できなかったユーザーの禁止を解除します。",
       "example_image_url": null,
       "syntax": "%botunban <user id>",
       "example_syntax": null,
@@ -89,7 +89,7 @@
       "aliases": null
     },
     "botwarn": {
-      "description": "Warn a user through Bot DMs.",
+      "description": "ボットDMを介してユーザーに警告します。",
       "example_image_url": null,
       "syntax": "%botwarn <user> [reason]",
       "example_syntax": null,
@@ -99,7 +99,7 @@
       "aliases": null
     },
     "closedm": {
-      "description": "Closes a DM",
+      "description": "DMを閉じる",
       "example_image_url": null,
       "syntax": "%closedm [user id]",
       "example_syntax": null,
@@ -109,7 +109,7 @@
       "aliases": null
     },
     "createdm": {
-      "description": "Creates a DM between you and the user with the Bot as the middleman.",
+      "description": "ボットを仲介者として、あなたとユーザーの間にDMを作るます。",
       "example_image_url": null,
       "syntax": "%createdm <user id>",
       "example_syntax": null,
@@ -119,7 +119,7 @@
       "aliases": null
     },
     "deletegroup": {
-      "description": "Deletes a Group",
+      "description": "グループを削除します",
       "example_image_url": null,
       "syntax": "%deletegroup <group id>",
       "example_syntax": null,
@@ -129,7 +129,7 @@
       "aliases": null
     },
     "deleteidol": {
-      "description": "Deletes an Idol.",
+      "description": "アイドルを削除します",
       "example_image_url": null,
       "syntax": "%deleteidol <idol id>",
       "example_syntax": null,
@@ -139,7 +139,7 @@
       "aliases": null
     },
     "deleteidolfromgroup": {
-      "description": "Deletes an Idol from a Group.",
+      "description": "グループからアイドルを削除します。",
       "example_image_url": null,
       "syntax": "%deleteidolfromgroup <idol id> <group iid>\n",
       "example_syntax": null,
@@ -149,7 +149,7 @@
       "aliases": null
     },
     "deleteinteraction": {
-      "description": "Remove URL from an interaction.",
+      "description": "相互作用から URL を削除します。",
       "example_image_url": null,
       "syntax": "%deleteinteraction <urls>",
       "example_syntax": null,
@@ -157,10 +157,10 @@
         "Bot Moderator"
       ],
       "aliases": null,
-      "note": "Separate urls with commas."
+      "note": "URLをコンマで区切ります"
     },
     "fixlinks": {
-      "description": "Fix Invalid Thumbnails/Avatars/Banners of Idols/Groups and puts them on the host.",
+      "description": "無効なサムネイル/アバター/アイドル/グループのバナーを修正し、ホストに置きます。",
       "example_image_url": null,
       "syntax": "%fixlinks",
       "example_syntax": null,
@@ -170,7 +170,7 @@
       "aliases": null
     },
     "getstatuses": {
-      "description": "List all of the statuses of the Bot.",
+      "description": "ボットのすべてステータスをリストします。",
       "example_image_url": null,
       "syntax": "%getstatuses",
       "example_syntax": null,
@@ -180,7 +180,7 @@
       "aliases": null
     },
     "kill": {
-      "description": "Kills the Bot.",
+      "description": "ボットを無効します",
       "example_image_url": null,
       "syntax": "%kill",
       "example_syntax": null,
@@ -190,7 +190,7 @@
       "aliases": null
     },
     "killapi": {
-      "description": "Kills the API.",
+      "description": "ボットを無効します",
       "example_image_url": null,
       "syntax": "%killapi",
       "example_syntax": null,
@@ -200,7 +200,7 @@
       "aliases": null
     },
     "maintenance": {
-      "description": "Toggles Maintenance Mode",
+      "description": "メンテナンスモードを切り替えます",
       "example_image_url": null,
       "syntax": "%maintenance",
       "example_syntax": null,

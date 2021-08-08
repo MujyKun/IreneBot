@@ -1,7 +1,7 @@
 {
   "BlackJack": {
     "blackjack": {
-      "description": "Start a game of BlackJack.",
+      "description": "Începe un joc de BlackJack.",
       "example_image_url": null,
       "syntax": null,
       "example_syntax": null,
@@ -11,7 +11,7 @@
       ]
     },
     "stopbj": {
-      "description": "End the current BlackJack game.",
+      "description": "Am terminat jocul curent de BlackJack.",
       "example_image_url": null,
       "syntax": "%blackjack [bet=0]",
       "example_syntax": null,
@@ -19,7 +19,7 @@
       "aliases": null
     },
     "joingame": {
-      "description": "Join an existing game of BlackJack.",
+      "description": "Alătură-te unui joc existent de BlackJack.",
       "example_image_url": null,
       "syntax": "%joingame <opponent> [bet=0]",
       "example_syntax": null,
@@ -29,7 +29,7 @@
       ]
     },
     "rules": {
-      "description": "View the rules of BlackJack.",
+      "description": "Vezi regulile BlackJack-ului.",
       "example_image_url": null,
       "syntax": "%rules",
       "example_syntax": null,
@@ -39,7 +39,7 @@
   },
   "BotMod": {
     "addidoltogroup": {
-      "description": "Adds an Idol to a Group.",
+      "description": "Adaugă un idol într-un grup.",
       "example_image_url": null,
       "syntax": "%addidoltogroup <idol id> <group id>",
       "example_syntax": null,

@@ -1,7 +1,7 @@
 {
   "BlackJack": {
     "blackjack": {
-      "description": "Start a game of BlackJack.",
+      "description": "블랙잭 게임 시작하세요.",
       "example_image_url": null,
       "syntax": null,
       "example_syntax": null,
@@ -11,7 +11,7 @@
       ]
     },
     "stopbj": {
-      "description": "End the current BlackJack game.",
+      "description": "현재 블랙잭 게임 종료하세요.",
       "example_image_url": null,
       "syntax": "%blackjack [bet=0]",
       "example_syntax": null,
@@ -19,7 +19,7 @@
       "aliases": null
     },
     "joingame": {
-      "description": "Join an existing game of BlackJack.",
+      "description": "블랙잭 게임에 참여하세요.",
       "example_image_url": null,
       "syntax": "%joingame <opponent> [bet=0]",
       "example_syntax": null,
@@ -29,7 +29,7 @@
       ]
     },
     "rules": {
-      "description": "View the rules of BlackJack.",
+      "description": "블랙잭의 규칙을 보세요.",
       "example_image_url": null,
       "syntax": "%rules",
       "example_syntax": null,
@@ -39,7 +39,7 @@
   },
   "BotMod": {
     "addidoltogroup": {
-      "description": "Adds an Idol to a Group.",
+      "description": "그룹에 아이돌을 추가합니다.",
       "example_image_url": null,
       "syntax": "%addidoltogroup <idol id> <group id>",
       "example_syntax": null,
@@ -49,7 +49,7 @@
       "aliases": null
     },
     "addinteraction": {
-      "description": "Add a GIF to an interaction.",
+      "description": "상호 작용에 GIF를 추가합니다.",
       "example_image_url": null,
       "syntax": "%addinteraction <interaction_type> <link1,link2,...>",
       "example_syntax": null,
@@ -59,7 +59,7 @@
       "aliases": null
     },
     "addstatus": {
-      "description": "Adds a playing status to the Bot.",
+      "description": "bot에 재생 상태를 추가합니다.",
       "example_image_url": null,
       "syntax": "%addstatus <status message>",
       "example_syntax": null,
@@ -69,7 +69,7 @@
       "aliases": null
     },
     "botban": {
-      "description": "Bans a user from using the Bot.",
+      "description": "사용자가 bot을 사용하지 못하도록 차단합니다.",
       "example_image_url": null,
       "syntax": "%botban <user id>",
       "example_syntax": null,
@@ -79,7 +79,7 @@
       "aliases": null
     },
     "botunban": {
-      "description": "Unbans a user that was not able to use the Bot.",
+      "description": "봇을 사용할 수 없는 사용자의 차단을 해제합니다.",
       "example_image_url": null,
       "syntax": "%botunban <user id>",
       "example_syntax": null,
@@ -89,7 +89,7 @@
       "aliases": null
     },
     "botwarn": {
-      "description": "Warn a user through Bot DMs.",
+      "description": "DM으로 bot이 사용자에게 경고합니다.",
       "example_image_url": null,
       "syntax": "%botwarn <user> [reason]",
       "example_syntax": null,
@@ -99,7 +99,7 @@
       "aliases": null
     },
     "closedm": {
-      "description": "Closes a DM",
+      "description": "DM을 닫습니다.",
       "example_image_url": null,
       "syntax": "%closedm [user id]",
       "example_syntax": null,
@@ -109,7 +109,7 @@
       "aliases": null
     },
     "createdm": {
-      "description": "Creates a DM between you and the user with the Bot as the middleman.",
+      "description": "봇을 중개자로 사용하여 귀하와 사용자 사이에 DM을 만듭니다.",
       "example_image_url": null,
       "syntax": "%createdm <user id>",
       "example_syntax": null,
@@ -119,7 +119,7 @@
       "aliases": null
     },
     "deletegroup": {
-      "description": "Deletes a Group",
+      "description": "그룹을 삭제합니다.",
       "example_image_url": null,
       "syntax": "%deletegroup <group id>",
       "example_syntax": null,
@@ -129,7 +129,7 @@
       "aliases": null
     },
     "deleteidol": {
-      "description": "Deletes an Idol.",
+      "description": "아이돌을 삭제합니다.",
       "example_image_url": null,
       "syntax": "%deleteidol <idol id>",
       "example_syntax": null,
@@ -139,7 +139,7 @@
       "aliases": null
     },
     "deleteidolfromgroup": {
-      "description": "Deletes an Idol from a Group.",
+      "description": "그룹에서 아이돌을 삭제합니다.",
       "example_image_url": null,
       "syntax": "%deleteidolfromgroup <idol id> <group iid>\n",
       "example_syntax": null,
@@ -149,7 +149,7 @@
       "aliases": null
     },
     "deleteinteraction": {
-      "description": "Remove URL from an interaction.",
+      "description": "상호작용에서 URL을 삭제합니다.",
       "example_image_url": null,
       "syntax": "%deleteinteraction <urls>",
       "example_syntax": null,
@@ -157,10 +157,10 @@
         "Bot Moderator"
       ],
       "aliases": null,
-      "note": "Separate urls with commas."
+      "note": "쉼표로 URL을 구분합니다."
     },
     "fixlinks": {
-      "description": "Fix Invalid Thumbnails/Avatars/Banners of Idols/Groups and puts them on the host.",
+      "description": "아이돌/그룹에 잘못된 썸네일/아바타/배너를 수정하고 호스트에 게시합니다.",
       "example_image_url": null,
       "syntax": "%fixlinks",
       "example_syntax": null,
@@ -170,7 +170,7 @@
       "aliases": null
     },
     "getstatuses": {
-      "description": "List all of the statuses of the Bot.",
+      "description": "bot의 모든 status을 나열합니다.",
       "example_image_url": null,
       "syntax": "%getstatuses",
       "example_syntax": null,
@@ -180,7 +180,7 @@
       "aliases": null
     },
     "kill": {
-      "description": "Kills the Bot.",
+      "description": "bot을 죽인다.",
       "example_image_url": null,
       "syntax": "%kill",
       "example_syntax": null,
@@ -190,7 +190,7 @@
       "aliases": null
     },
     "killapi": {
-      "description": "Kills the API.",
+      "description": "API를 죽인다.",
       "example_image_url": null,
       "syntax": "%killapi",
       "example_syntax": null,
@@ -200,7 +200,7 @@
       "aliases": null
     },
     "maintenance": {
-      "description": "Toggles Maintenance Mode",
+      "description": "관리 모드 전환합니다.",
       "example_image_url": null,
       "syntax": "%maintenance",
       "example_syntax": null,
@@ -210,7 +210,7 @@
       "aliases": null
     },
     "mergeidol": {
-      "description": "Merge a duplicated idol with the original idol.",
+      "description": "복제된 아이돌을 원본 아이돌과 병합합니다.",
       "example_image_url": null,
       "syntax": "%mergeidol <original_idol_id> <duplicate_idol_id>",
       "example_syntax": null,
@@ -220,7 +220,7 @@
       "aliases": null
     },
     "mergegroup": {
-      "description": "Merge a duplicated group with the original group.",
+      "description": "복제된 그룹을 원본 그룹과 병합합니다.",
       "example_image_url": null,
       "syntax": "%mergegroup <original_group_id> <duplicate_group_id>",
       "example_syntax": null,
@@ -230,7 +230,7 @@
       "aliases": null
     },
     "moveto": {
-      "description": "Moves an image to another idol.",
+      "description": "이미지를 다른 아이돌로 이동합니다.",
       "example_image_url": null,
       "syntax": "%moveto <idol_id> <link>",
       "example_syntax": null,
@@ -240,7 +240,7 @@
       "aliases": null
     },
     "removestatus": {
-      "description": "Removes a playing status based on it's index.",
+      "description": "인덱스에 따라 재생 상태를 제거합니다.",
       "example_image_url": null,
       "syntax": null,
       "example_syntax": "%removestatus <status index>",
@@ -252,7 +252,7 @@
   },
   "BiasGame": {
     "biasgame": {
-      "description": "Start a BiasGame in the current channel.",
+      "description": "현재 채널에서 Bias게임을 시작합니다.",
       "example_image_url": null,
       "syntax": "%biasgame [gender=Male/Female/All] [bracket_size=4/8/16/32]",
       "example_syntax": null,
@@ -262,7 +262,7 @@
       ]
     },
     "stopbg": {
-      "description": "Force-End a BiasGame.",
+      "description": "Bias게임을 강제 종료합니다.",
       "example_image_url": null,
       "syntax": "%stopbg",
       "example_syntax": null,
@@ -273,7 +273,7 @@
       "aliases": null
     },
     "listbg": {
-      "description": "List a user's BiasGame Leaderboards.",
+      "description": "사용자의 바이어스 게임 리더보드를 나열합니다.",
       "example_image_url": null,
       "syntax": "%listbg [user]",
       "example_syntax": null,
@@ -283,7 +283,7 @@
   },
   "BlockingManager": {
     "bmon start": {
-      "description": "Starts the Blocking Manager.",
+      "description": "‘Blocking Manager’ 시작.",
       "example_image_url": null,
       "syntax": "%bmon start",
       "example_syntax": null,
@@ -293,7 +293,7 @@
       "aliases": null
     },
     "bmon stop": {
-      "description": "Turns off the Blocking Manager.",
+      "description": "Blocking Manager를 끕니다.",
       "example_image_url": null,
       "syntax": "%bmon stop",
       "example_syntax": null,
@@ -305,7 +305,7 @@
   },
   "Currency": {
     "balance": {
-      "description": "View a user's balance.",
+      "description": "사용자의 잔액을 봅니다.",
       "example_image_url": null,
       "syntax": "%balance [member]",
       "example_syntax": null,
@@ -317,7 +317,7 @@
       ]
     },
     "beg": {
-      "description": "Beg a homeless man for money.",
+      "description": "노숙자에게 돈을 구걸합니다.",
       "example_image_url": null,
       "syntax": "%beg",
       "example_syntax": null,
@@ -325,7 +325,7 @@
       "aliases": null
     },
     "bet": {
-      "description": "Bet your money.",
+      "description": "돈을 걸다.",
       "example_image_url": null,
       "syntax": "%bet <amount>",
       "example_syntax": null,
@@ -333,7 +333,7 @@
       "aliases": null
     },
     "daily": {
-      "description": "Get the daily reward.",
+      "description": "일일 보상 받읍니다.",
       "example_image_url": null,
       "syntax": "%daily",
       "example_syntax": null,
@@ -341,7 +341,7 @@
       "aliases": null
     },
     "give": {
-      "description": "Give a user money.",
+      "description": "사용자에게 돈을 줍니다.",
       "example_image_url": null,
       "syntax": "%give <member> <amount>",
       "example_syntax": null,
@@ -349,7 +349,7 @@
       "aliases": null
     },
     "leaderboard": {
-      "description": "Shows the Top 10 users server/global wide.",
+      "description": "서버/전세계 상위 10명의 사용자를 표시합니다.",
       "example_image_url": null,
       "syntax": "%leaderboard [mode=server/global]",
       "example_syntax": null,
@@ -360,7 +360,7 @@
       ]
     },
     "rob": {
-      "description": "Rob a member.",
+      "description": "멤버를 강탈합니다.",
       "example_image_url": null,
       "syntax": "%rob <member>",
       "example_syntax": null,
@@ -368,7 +368,7 @@
       "aliases": null
     },
     "rps": {
-      "description": "Play Rock Paper Scissors.",
+      "description": "가위바위보를 하다.",
       "example_image_url": null,
       "syntax": "%rps <rock/paper/scissors> [amount to bet=0]",
       "example_syntax": null,
@@ -378,7 +378,7 @@
       ]
     },
     "upgrade": {
-      "description": "Upgrades a command to the next level.",
+      "description": "명령을 다음 단계로 업그레이드합니다.",
       "example_image_url": null,
       "syntax": "%upgrade <rob/daily/beg>",
       "example_syntax": null,
@@ -390,7 +390,7 @@
   },
   "CustomCommands": {
     "createcommand": {
-      "description": "Create a custom command.",
+      "description": "사용자 지정 명령을 생성합니다.",
       "example_image_url": null,
       "syntax": "%createcommand <command name> <message>",
       "example_syntax": null,
@@ -402,7 +402,7 @@
       ]
     },
     "deletecommand": {
-      "description": "Delete a custom command.",
+      "description": "사용자 지정 명령을 삭제합니다.",
       "example_image_url": null,
       "syntax": "%deletecommand <command name>",
       "example_syntax": null,
@@ -414,7 +414,7 @@
       ]
     },
     "listcommands": {
-      "description": "List all custom commands for the server.",
+      "description": "전부 ‘custom commands’ 리스트.",
       "example_image_url": null,
       "syntax": "%listcommands",
       "example_syntax": null,
@@ -433,7 +433,7 @@
       "note": "Underscores are spaces and commas are used to split Idol/Group names."
     },
     "card": {
-      "description": "Display an Idol/Group's Profile Card.",
+      "description": "아이돌/그룹의 프로필 카드 표시",
       "example_image_url": null,
       "syntax": "%card <Idol/Group ID/Name>",
       "example_syntax": null,
@@ -441,7 +441,7 @@
       "aliases": null
     },
     "count": {
-      "description": "Displays amount of times an Idol has been called.",
+      "description": "아이돌이 불렸던 숫자 표시.",
       "example_image_url": null,
       "syntax": "%count (idol name/all)",
       "example_syntax": null,
@@ -449,7 +449,7 @@
       "aliases": null
     },
     "countleaderboard": {
-      "description": "Displays leaderboard for times an Idol has been called.",
+      "description": "아이돌이 불렸던 리더보드 표시.",
       "example_image_url": null,
       "syntax": "%countleaderboard",
       "example_syntax": null,
@@ -459,7 +459,7 @@
       ]
     },
     "countgroup": {
-      "description": "Displays the number of photos a Group has.",
+      "description": "그룹의 사진 있는 숫자 표시.",
       "example_image_url": null,
       "syntax": "%countgroup <group name>",
       "example_syntax": null,
@@ -467,7 +467,7 @@
       "aliases": null
     },
     "countmember": {
-      "description": "Displays the number of photos an Idol has.",
+      "description": "아이돌의 사진 있는 숫자 표시.",
       "example_image_url": null,
       "syntax": "%countmember <idol name/all>",
       "example_syntax": null,
@@ -475,16 +475,16 @@
       "aliases": null
     },
     "fullnames": {
-      "description": "List the full names of Idols the bot has photos of.",
+      "description": "바트가 무슨 아이돌 사진을 있는 성명 리스트.",
       "example_image_url": null,
       "syntax": "%fullnames [page number/group name]",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null,
-      "note": "To a Bot Moderator, this will also display Idols with no photos and show their ID."
+      "note": "‘Bot Moderator’ 에겐, 사진 없는 아이돌을 보이면서 ID도 표시합니다."
     },
     "groups": {
-      "description": "Lists the groups of idols the Bot has photos of.",
+      "description": "봇이 사진이 있는 아이돌 그룹의 표시.",
       "example_image_url": null,
       "syntax": "%groups",
       "example_syntax": null,
@@ -541,7 +541,7 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "Type the command again to re-enable."
+      "note": "다시 활성화하려면 명령을 다시 입력하세요."
     }
   },
   "GuessingGame": {
@@ -569,16 +569,16 @@
       "note": "The host of the game can type stop or end to end the game or skip to skip the current round without affecting the round number."
     },
     "ggfilter": {
-      "description": "Add a filter to your GuessingGame.",
+      "description": "Guessing 게임에 필터 추가합니다.",
       "example_image_url": null,
       "syntax": "%ggfilter [group id/name, ...]",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null,
-      "note": "Only the groups filtered will appear on the GuessingGame. If you do not specify a Group ID or Name, it will toggle the filter. Group IDs and Names must be split by commas. Group Names with more than one word must have an underscore used as a space."
+      "note": "필터링된 그룹만 추측 게임에 나타납니다. 그룹 ID 아니면 이름을 지정하지 않으면 필터가 토글됩니다. 그룹 ID와 이름은 쉼표로 구분해야 합니다. 단어가 두 개 이상인 그룹 이름에는 공백으로 밑줄을 사용해야 합니다."
     },
     "ggfilteredlist": {
-      "description": "View the current groups that are filtered.",
+      "description": "필터된 현재 그룹 보기.",
       "example_image_url": null,
       "syntax": "%ggfilteredlist",
       "example_syntax": null,
@@ -586,7 +586,7 @@
       "aliases": null
     },
     "ggleaderboard": {
-      "description": "Shows Server/Global leaderboards for the GuessingGame.",
+      "description": "Guessing 게임에 대한 서버/글로벌 리더보드를 표시합니다.",
       "example_image_url": null,
       "syntax": "%ggleaderboard [difficulty=easy/medium/hard] [mode=server/global]",
       "example_syntax": null,
@@ -597,7 +597,7 @@
       ]
     },
     "stopgg": {
-      "description": "Force-end a GuessingGame.",
+      "description": "강제 종료 guessing 게임.",
       "example_image_url": null,
       "syntax": "%stopgg",
       "example_syntax": null,
@@ -610,7 +610,7 @@
   },
   "Interactions": {
     "choke": {
-      "description": "Choke a member.",
+      "description": "멤버를 추방시킵니다.",
       "example_image_url": null,
       "syntax": "%choke [user]",
       "example_syntax": null,
@@ -618,7 +618,7 @@
       "aliases": null
     },
     "cuddle": {
-      "description": "Cuddle a member.",
+      "description": "멤버를 껴안다.",
       "example_image_url": null,
       "syntax": "%cuddle [user]",
       "example_syntax": null,
@@ -626,7 +626,7 @@
       "aliases": null
     },
     "hug": {
-      "description": "Hug a member.",
+      "description": "멤버를 품다.",
       "example_image_url": null,
       "syntax": "%hug [user]",
       "example_syntax": null,
@@ -634,7 +634,7 @@
       "aliases": null
     },
     "kiss": {
-      "description": "Kiss a member.",
+      "description": "멤버를 키스하다.",
       "example_image_url": null,
       "syntax": "%kiss [user]",
       "example_syntax": null,
@@ -642,7 +642,7 @@
       "aliases": null
     },
     "lick": {
-      "description": "Lick a member.",
+      "description": "멤버를 핥다.",
       "example_image_url": null,
       "syntax": "%lick [user]",
       "example_syntax": null,
@@ -650,7 +650,7 @@
       "aliases": null
     },
     "pat": {
-      "description": "Pat a member.",
+      "description": "멤버를 쓰다듬다.",
       "example_image_url": null,
       "syntax": "%pat [user]",
       "example_syntax": null,
@@ -658,7 +658,7 @@
       "aliases": null
     },
     "punch": {
-      "description": "Punch a member.",
+      "description": "멤버를 펀치를 날리다.",
       "example_image_url": null,
       "syntax": "%punch [user]",
       "example_syntax": null,
@@ -666,7 +666,7 @@
       "aliases": null
     },
     "pullhair": {
-      "description": "Pull hair of a member.",
+      "description": "멤버를 머리카락을 잡아당기다.",
       "example_image_url": null,
       "syntax": "%pullhair [user]",
       "example_syntax": null,
@@ -674,7 +674,7 @@
       "aliases": null
     },
     "slap": {
-      "description": "Slap a member.",
+      "description": "멤버를 뺨을 때립니다.",
       "example_image_url": null,
       "syntax": "%slap [user]",
       "example_syntax": null,
@@ -682,7 +682,7 @@
       "aliases": null
     },
     "spit": {
-      "description": "Spit at a member.",
+      "description": "멤버를 침을 뱉다.",
       "example_image_url": null,
       "syntax": "%spit [user]",
       "example_syntax": null,
@@ -690,7 +690,7 @@
       "aliases": null
     },
     "stab": {
-      "description": "Stab a member.",
+      "description": "멤버를 찌릅니다.",
       "example_image_url": null,
       "syntax": "%stab [user]",
       "example_syntax": null,
@@ -698,7 +698,7 @@
       "aliases": null
     },
     "stepon": {
-      "description": "Step on a member.",
+      "description": "멤버를 밟다.",
       "example_image_url": null,
       "syntax": "%stepon [user]",
       "example_syntax": null,
@@ -708,7 +708,7 @@
   },
   "Logging": {
     "logadd": {
-      "description": "Start logging a text channel.",
+      "description": "텍스트 채널 로깅 시작합니다.",
       "example_image_url": null,
       "syntax": "%logadd [text channel]",
       "example_syntax": null,
@@ -718,7 +718,7 @@
       "aliases": null
     },
     "logremove": {
-      "description": "Stop logging a text channel",
+      "description": "텍스트 채널 로깅 시작합니다.",
       "example_image_url": null,
       "syntax": "%logremove [text channel]",
       "example_syntax": null,
@@ -728,7 +728,7 @@
       "aliases": null
     },
     "sendall": {
-      "description": "Toggle all messages going to log channel. Will only send edited and edited messages if turned off.",
+      "description": "로그 채널로 가는 모든 메시지를 토글합니다. 꺼져 있는 경우 편집 및 편집된 메시지만 보냅니다.",
       "example_image_url": null,
       "syntax": "%sendall",
       "example_syntax": null,
@@ -760,7 +760,7 @@
   },
   "Miscellaneous": {
     "8ball": {
-      "description": "Ask the 8ball a yes or no question.",
+      "description": "8볼에게 예 또는 아니오로 질문합니다.",
       "example_image_url": null,
       "syntax": "%8ball [question]",
       "example_syntax": null,
@@ -770,7 +770,7 @@
       ]
     },
     "addnoti": {
-      "description": "Receive a DM whenever a phrase/word is said in the server.",
+      "description": "서버에서 구문/단어가 언급될 때마다 DM을 받습니다.",
       "example_image_url": null,
       "syntax": "%addnoti <phrase>",
       "example_syntax": null,
@@ -786,7 +786,7 @@
       "aliases": null
     },
     "checkprefix": {
-      "description": "Check the current prefix.",
+      "description": "현재 prefix 확인합니다.",
       "example_image_url": null,
       "syntax": "%checkprefix",
       "example_syntax": null,
@@ -795,7 +795,7 @@
       "note": "This command will always work with the bot's default prefix."
     },
     "choose": {
-      "description": "Choose between a selection of options.",
+      "description": "선택 옵션 중에서 선택합니다.",
       "example_image_url": null,
       "syntax": "%choose <options>",
       "example_syntax": null,
@@ -804,7 +804,7 @@
       "note": "Underscores are used for spaces between words. Spaces are used to separate choices."
     },
     "displayemoji": {
-      "description": "Displays an emoji at a larger size.",
+      "description": "이모티콘을 더 크게 표시합니다.",
       "example_image_url": null,
       "syntax": "%displayemoji <emoji>",
       "example_syntax": null,
@@ -812,7 +812,7 @@
       "aliases": null
     },
     "flip": {
-      "description": "Flip a coin.",
+      "description": "동전을 뒤집어 라.",
       "example_image_url": null,
       "syntax": "%flip",
       "example_syntax": null,
@@ -823,7 +823,7 @@
       ]
     },
     "invite": {
-      "description": "Invite link to add the Bot to a server.",
+      "description": "Bot을 서버에 추가하기 위한 초대 링크입니다.",
       "example_image_url": null,
       "syntax": "%invite",
       "example_syntax": null,
@@ -1047,7 +1047,7 @@
       "note": "To re-enable, use the same command again."
     },
     "kick": {
-      "description": "Kick a member.",
+      "description": "멤버를 쫓겨났다.",
       "example_image_url": null,
       "syntax": "%kick [user] [reason=No Reason]",
       "example_syntax": null,

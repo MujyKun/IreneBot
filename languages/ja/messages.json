@@ -1,20 +1,20 @@
 {
   "biasgame": {
     "no_dm": "DMでバイアスゲームをプレイすることはできません。",
-    "in_progress": "A bias game is currently in progress in this channel.\nOnly 1 Bias Game can run in a channel at once.\nIf this is a mistake, use {server_prefix}stopbg.",
-    "start_game": "Starting a {bracket_size} bracket bias game for {gender} idols.",
-    "unexpected_error": "An error has occurred and the game has ended. Please report this.",
-    "force_closed": "The current game has now ended due to not responding in time or it was force closed.",
-    "no_wins": "There are no bias game wins for {name}.",
-    "lb_title": "Bias Game Leaderboard for {name}:\n"
+    "in_progress": "このチャンネルでは現在、バイアスゲームが進行中です。\n1つのチャネルで一度に実行できるバイアスゲームは1つだけです。\nこれが間違いである場合は、{server_prefix} stopbgを使用してください。",
+    "start_game": "{gender} アイドル向けの{bracket_size} ブラケットバイアスゲームを開始します。",
+    "unexpected_error": "エラーが発生し、ゲームが終了しました。これを報告してください。",
+    "force_closed": "現在のゲームは、時間内に応答しなかったか、強制的に終了したために終了しました。",
+    "no_wins": "{name}のバイアスゲームの勝利はありません。",
+    "lb_title": "{name}のバイアスゲームリーダーボード："
   },
   "blackjack": {
-    "not_in_game": "{name}, you are not in a blackjack game.",
-    "in_game": "{name}, you are already in a blackjack game. Please type {server_prefix}stopbj.",
-    "ended_game": "{name}, your blackjack game has successfully ended.",
-    "opponent_not_in_game": "{name}, that player is not in a blackjack game.",
-    "announce_winner": "{name} has won the blackjack game with {integer} points against {name2} with {integer2} points!!",
-    "announce_tie": "{name} and {name2} have TIED the blackjack game with {integer} points!",
+    "not_in_game": "{name}、あなたはブラックジャックゲームに参加していません。",
+    "in_game": "{name}、あなたはすでにブラックジャックゲームに参加しています。 {server_prefix} stopbj と入力してください。",
+    "ended_game": "{name}、ブラックジャックゲームは正常に終了しました。",
+    "opponent_not_in_game": "{name}、そのプレイヤーはブラックジャックゲームに参加していません。",
+    "announce_winner": "{name}は{integer2}ポイントで{name2}に対して{integer}ポイントでブラックジャックゲームに勝ちました!!",
+    "announce_tie": "{name}と{name2}は、ブラックジャックゲームを{integer}ポイントで結びました！",
     "already_standing": "{name}, you are already standing!",
     "now_standing": "{name}, you are now standing!",
     "hit": "{mention}, you have received ||{string}||! Your current score is ||{integer}||.",
@@ -25,8 +25,8 @@
   },
   "bm": {
     "stopped": "Blocking Monitor Stopped.",
-    "started": "Blocking Monitor Started.",
-    "not_running": "Blocking Monitor is not running.",
+    "started": "ブロックモニターを開始しました。",
+    "not_running": "ブロッキング モニターが実行されていません。",
     "already_running": "Blocking Monitor is already running."
   },
   "botmod": {

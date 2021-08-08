@@ -2,8 +2,8 @@
   "biasgame": {
     "no_dm": "No tienes permitido jugar el juego de bias en DMs.",
     "in_progress": "Una partida de juego de bias se encuentra actualmente en progreso en este canal.\nSolo 1 partida puede ejecutarse en un canal a la vez.\nSi esto es un error, utilice {server_prefix}stopbg.",
-    "start_game": "Starting a {bracket_size} bracket bias game for {gender} idols.",
-    "unexpected_error": "Ha ocurrido un error y el juego se ha detenido. Por favor, reporta esto.",
+    "start_game": "Comenzando el bracket de {bracket_size} para el juego del bias con los idols {gender}.",
+    "unexpected_error": "Ha ocurrido un error y el juego se ha terminado. Por favor, reporta esto.",
     "force_closed": "El juego actual se ha terminado debido a una falta de respuesta o un cierre forzado.",
     "no_wins": "No hay partidas ganadas en el Juego de Bias para {name}.",
     "lb_title": "Tabla de clasificación del Juego de Bias para {name}:\n"
@@ -16,7 +16,7 @@
     "announce_winner": "{name} ha ganado el juego de blackjack con {integer} points contra {name2} con {integer2} points!!",
     "announce_tie": "{name} y {name2} han EMPATADO la partida de Blackjack con {integer} puntos!",
     "already_standing": "{name}, ya estabas parado!",
-    "now_standing": "{name}, ¡ahora estás de pie!",
+    "now_standing": "{name}, ¡ahora estás plantado!",
     "hit": "{mention}, has recibido ||{string}||! Tu puntaje actual es ||{integer}||.",
     "game_created": "{name}, una partida de Blackjack ha sido creada. Para que un jugador se te una, debe escribir {server_prefix}jg @you (apuesta).",
     "rules": "Cada jugador recibe 2 cartas al empezar.\n\nPara obtener blackjack, su valor final debe ser igual a 21.\n\nSi Player1 excede 21 y Player2 no, Player1 se rompe y Player2 gana el juego.\n\nTendrás dos opciones.\n\nLa primera opción es `pedir`, lo que significa agarrar otra carta.\n\nLa segunda opción es `ponerse de pie` para finalizar su mazo.\n\nSi ambos jugadores se rompen, ¡el jugador más cercano a 21 gana!\n\nLas cartas numéricas son sus valores nominales.\n\nLos ases pueden ser 1 u 11 dependiendo de la situación en la que te encuentres.\n\nJack, Queen y King valen 10.\n\nSi superas los 35 puntos, el bot te apoyará automáticamente.\n\n¡¡¡LO MÁS IMPORTANTE!!! ¡NO eches un vistazo a las cartas o puntos de tu oponente!\n",
@@ -32,7 +32,7 @@
   "botmod": {
     "linked_idol": "Se movió {result} a {result2} si existía.",
     "image_host_success": "Todas las imágenes se han corregido, se han fusionado con el servicio de alojamiento de imágenes y se han configurado enlaces para ellas.",
-    "no_idol_found": "No se pudo encontrar el/la ídolo {result}.",
+    "no_idol_found": "No se pudo encontrar el Idol {result}.",
     "no_group_found": "No se pudo encontrar el grupo {result}.",
     "merge_success": "Se fusionó {result} con {result2}.",
     "api_restart": "Reiniciando el API.",

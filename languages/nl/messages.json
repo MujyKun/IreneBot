@@ -25,7 +25,7 @@
   },
   "bm": {
     "stopped": "Blokkerende Monitor Gestopt.",
-    "started": "Blocking Monitor Started.",
+    "started": "Blokkeringsmonitor is begonnen.",
     "not_running": "Blokkerende Monitor is niet actief.",
     "already_running": "Blokkerende Monitor is al actief."
   },

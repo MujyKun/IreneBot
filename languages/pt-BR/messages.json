@@ -92,17 +92,17 @@
     "random_number": "O seu número aleatório é {result}.",
     "coin_flip": "Você tirou {result}.",
     "not_in_cache": "Esse servidor não foi carregado no cache.",
-    "prompt": "Por favor insira um indicador de 8bolas.",
+    "prompt": "Por favor insira uma frase de 8ball.",
     "prompt_answer": "Pergunta: {result}\nResposta: {result2}"
   },
   "utility": {
     "join_support_server_feature": "Para usar este recurso de {bot_name}, você deve primeiro entrar no servidor de suporte em <{support_server_link}>"
   },
   "groupmembers": {
-    "patron_msg": "A partir de 23 de setembro de 2020, os não-patrons só podem enviar no máximo {idol_post_send_limit} fotos por dia, já que o host atual não pode lidar corretamente com tráfego adicional.\nVocê pode se tornar um patron por menos de $3 por mês para enviar fotos ilimitadas; cada patron contribui para atualizar e manter o host.\nSe o dono da guild for um super patron, todos os membros da guild (não patrons) terão {owner_super_patron_benefit} fotos por dia.\nPor favor, suporte o desenvolvimento de <@{bot_id}> em {patreon_link}.\nObrigado.",
+    "patron_msg": "A partir de 23 de setembro de 2020, os não-patrons só podem enviar no máximo {idol_post_send_limit} fotos por dia, já que o host atual não pode lidar corretamente com tráfego adicional.\nVocê pode se tornar um patron por tão pouco quanto $3 por mês para enviar fotos ilimitadas; Cada patron contribui para atualizar e manter o host.\nSe o dono da guilda for um super patron, todos os membros da guilda (não patrons) terão {owner_super_patron_benefit} fotos por dia.\nPor favor, suporte o desenvolvimento de <@{bot_id}> em {patreon_link}.\nObrigado.",
     "add_idol_sent": "{name}, o seu pedido para adicionar este idol foi enviado com sucesso. O ID de consulta do idol é {query_id}.",
     "add_group_sent": "{name}, o seu pedido para adicionar este grupo foi enviado com sucesso. O ID de consulta do grupo é {query_id}.",
-    "add_error": "Um erro ocorreu -> \nErro MSG: {e}\nÉ provável que você não entenda este erro!\nVocê pode encontrar mais informações sobre este comando usando {server_prefix}help {command_name}.",
+    "add_error": "Um erro ocorreu -> \nMensagem de erro: {e}\nÉ provável que você não entenda este erro!\nVocê pode encontrar mais informações sobre este comando usando {server_prefix}help {command_name}.",
     "no_card_info": "Não encontrei nenhuma informação sobre esse idol/grupo.",
     "stop_images_disable": "{text_channel} não pode mais enviar ou receber fotos de idols.",
     "stop_images_enable": "{text_channel} agora pode enviar e receber fotos de idols.",

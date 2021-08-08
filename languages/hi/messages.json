@@ -24,7 +24,7 @@
     "rules_footer": "{server_prefix}help BlackJack for the available commands."
   },
   "bm": {
-    "stopped": "Blocking Monitor Stopped.",
+    "stopped": "ब्लॉकिंग मॉनिटर बंद हो गया।",
     "started": "Blocking Monitor Started.",
     "not_running": "ब्लॉकिंग मॉनिटर नहीं चल रहा है।",
     "already_running": "ब्लॉकिंग मॉनिटर पहले से चल रहा है।"

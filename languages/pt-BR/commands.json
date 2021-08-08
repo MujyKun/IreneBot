@@ -1408,13 +1408,13 @@
       "aliases": null
     },
     "twitterupdates": {
-      "description": "Receive Updates for Twitter.",
+      "description": "Receber atualizações do twitter.",
       "example_image_url": null,
       "syntax": "%twitterupdates <code/group/idol/list> <account username, group id, idol id> [role id]",
       "example_syntax": null,
       "sub_commands": {
         "code": {
-          "description": "Follow a Twitter channel based on the account username.",
+          "description": "Siga um canal no twitter baseado no nome de usuário da conta.",
           "example_image_url": null,
           "syntax": "%twitterupdates code <channel username> [role]",
           "example_syntax": null,
@@ -1427,7 +1427,7 @@
           ]
         },
         "group": {
-          "description": "Follow a Twitter channel belonging to a Group ID If they have one.",
+          "description": "Siga um canal VLIVE pertencente a um grupo ID se ele possuir um.",
           "example_image_url": null,
           "syntax": "%twitterupdates group <group id> [role]",
           "example_syntax": null,
@@ -1437,7 +1437,7 @@
           "aliases": null
         },
         "idol": {
-          "description": "Follow a Twitter channel belonging to an Idol ID If they have one.",
+          "description": "Siga um canal VLIVE pertencente a um idol ID se ele possuir um.",
           "example_image_url": null,
           "syntax": "%twitterupdates idol <idol id> [role]",
           "example_syntax": null,
@@ -1447,7 +1447,7 @@
           "aliases": null
         },
         "list": {
-          "description": "Lists the Twitter channels currently being followed in the text channel.",
+          "description": "Lista os canais de Twitter atualmente seguidos no canal de texto.",
           "example_image_url": null,
           "syntax": "%twitterupdates list",
           "example_syntax": null,
@@ -1463,7 +1463,7 @@
       "aliases": [
         "twitter"
       ],
-      "note": "This command contains sub-commands. This means any following arguments are respective to the first argument."
+      "note": "Este comando contém subcomandos. Isso significa que quaisquer argumentos a seguir são respectivos ao primeiro argumento."
     }
   },
   "UnScramble": {
@@ -1851,7 +1851,7 @@
           "aliases": null
         },
         "idol": {
-          "description": "Follow a VLIVE channel belonging to an Idol ID If they have one.",
+          "description": "Siga um canal VLIVE pertencente a um Idol ID se ele possuir um.",
           "example_image_url": null,
           "syntax": "%vliveupdates idol <idol id> [role]",
           "example_syntax": null,
@@ -1861,7 +1861,7 @@
           "aliases": null
         },
         "list": {
-          "description": "Lists the VLIVE channels currently being followed in the text channel.",
+          "description": "Lista os canais VLIVE atualmente seguidos no canal de texto.",
           "example_image_url": null,
           "syntax": "%vliveupdates list",
           "example_syntax": null,
@@ -1877,12 +1877,12 @@
       "aliases": [
         "vlive"
       ],
-      "note": "This command contains sub-commands. This means any following arguments are respective to the first argument."
+      "note": "Este comando contém subcomandos. Isso significa que quaisquer argumentos a seguir são respectivos para o primeiro argumento."
     }
   },
   "DataMod": {
     "addidol": {
-      "description": "Adds an Unregistered Idol using the syntax from https://irenebot.com/addidol.html/.",
+      "description": "Adiciona um idol não registrado usando a sintaxe de https://irenebot.com/addidol.html/.",
       "example_image_url": null,
       "syntax": "%addidol <JSON>",
       "example_syntax": null,
@@ -1890,10 +1890,10 @@
         "Data Moderator"
       ],
       "aliases": null,
-      "note": "Command should only be used if the card does not exist for the Idol."
+      "note": "Comando só deve ser usado se a carta não existir para o idol."
     },
     "addgroup": {
-      "description": "Adds an Unregistered Group using the syntax from https://irenebot.com/addgroup.html/.",
+      "description": "Adiciona um grupo não registrado usando a sintaxe de https://irenebot.com/addgroup.html/.",
       "example_image_url": null,
       "syntax": "%addgroup <JSON>",
       "example_syntax": null,
@@ -1901,7 +1901,7 @@
         "Data Moderator"
       ],
       "aliases": null,
-      "note": "Command should only be used if the card does not exist for the Group."
+      "note": "Comando só deve ser usado se a carta não existir para o grupo."
     }
   }
 }

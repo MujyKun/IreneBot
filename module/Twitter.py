@@ -92,8 +92,7 @@ class Twitter(commands.Cog):
             msg = await self.ex.get_msg(ctx, "twitter", "unknown_code", ["result", "idol"])
             return await ctx.send(msg)
 
-        await ctx.send(await self.ex.get_msg(ctx, "general", "may_take_time"))
-        asyncio.create_task(self.ex.u_twitter.follow_or_unfollow(ctx, ctx.channel, idol.twitter.id, role_id=role_id))
+        await self.ex.u_twitter.follow_or_unfollow(ctx, ctx.channel, idol.twitter.id, role_id=role_id)
 
     @twitterupdates.command()
     async def group(self, ctx, group_id: int, role: discord.Role = None):
@@ -108,8 +107,7 @@ class Twitter(commands.Cog):
             msg = await self.ex.get_msg(ctx, "twitter", "unknown_code", ["result", "group"])
             return await ctx.send(msg)
 
-        await ctx.send(await self.ex.get_msg(ctx, "general", "may_take_time"))
-        asyncio.create_task(self.ex.u_twitter.follow_or_unfollow(ctx, ctx.channel, group.twitter.id, role_id=role_id))
+        await self.ex.u_twitter.follow_or_unfollow(ctx, ctx.channel, group.twitter.id, role_id=role_id)
 
     @twitterupdates.command(aliases=["user", "username"])
     async def code(self, ctx, channel_user_name: str, role: discord.Role = None):
@@ -129,8 +127,7 @@ class Twitter(commands.Cog):
             # add new object to the cache
             self.ex.cache.twitter_channels[twitter_obj.id] = twitter_obj
 
-        await ctx.send(await self.ex.get_msg(ctx, "general", "may_take_time"))
-        asyncio.create_task(self.ex.u_twitter.follow_or_unfollow(ctx, ctx.channel, channel_code, role_id=role_id))
+        await self.ex.u_twitter.follow_or_unfollow(ctx, ctx.channel, channel_code, role_id=role_id)
 
     @twitterupdates.command()
     async def list(self, ctx):
@@ -144,7 +141,7 @@ class Twitter(commands.Cog):
         return await ctx.send(msg)
 
     # notification loop
-    @tasks.loop(seconds=45, minutes=0, hours=0, reconnect=True)
+    @tasks.loop(seconds=0, minutes=5, hours=0, reconnect=True)
     async def twitter_notification_updates(self):
         """Send Twitter announcements for new tweets."""
         try:
@@ -157,10 +154,12 @@ class Twitter(commands.Cog):
                 return
             self._update_loop_busy = True
 
-            for twitter_channel in self.ex.cache.twitter_channels.values():
-                try:
-                    await asyncio.sleep(0)  # bare yield
+            # making a copy to not be disrupted by a change during iteration.
+            twitter_channels_results = await self.ex.run_blocking_code(self.ex.cache.twitter_channels.copy)
+            twitter_channels = twitter_channels_results[0]
 
+            for twitter_channel in twitter_channels.values():
+                try:
                     if not twitter_channel:  # no channels are following the channel.
                         continue
 

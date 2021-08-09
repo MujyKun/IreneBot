@@ -102,6 +102,8 @@ Message Author: {message.author}
         [Format: %addnoti (phrase/word)]
         """
         try:
+            if len(phrase) < 2:
+                return await ctx.send("> Your phrase must be at least two characters long.")
             check_exists = self.ex.first_result(
                 await self.ex.conn.fetchrow("SELECT COUNT(*) FROM general.notifications WHERE guildid = $1 AND "
                                             "userid = $2 AND phrase = $3", ctx.guild.id, ctx.author.id, phrase.lower()))

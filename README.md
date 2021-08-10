@@ -283,7 +283,6 @@ To find out more, look at the `GroupMembers` category.
 |-----------------------|-------------------------------------------------------------------------------------------------------|--------------------------------------|
 | addcards          | Fill The CardValues Table with Cards                                                                  | %addcards                            |       |
 | addpatreon         | Adds a patreon.                           | %addpatreon (userid,userid,userid)             |               |
-| approve       | Approve a query id for an unregistered group or idol. | %approve (query id) ('idol' or 'group') |    |
 | generateplayingcards       | Generate custom playing cards with idol avatars. | %generateplayingcards  |               |
 | reload         | Will hot reload all of IreneBot, IreneUtility, and any other self-made packages.     | %reload            |               |
 | reloadmodule         |    Reload a module/cog from it's name.            | %reloadmodule (module name)            |    cog           |
@@ -308,3 +307,4 @@ To find out more, look at the `GroupMembers` category.
 |------------------|------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|------------------------|
 | addidol         | Adds an idol using the syntax from https://irenebot.com/addidol.html | %addidol (json)                                                                                                      |                      |
 | addgroup         | Adds a group using the syntax from https://irenebot.com/addgroup.html | %addgroup (json)                                                                                                      |                       |
+| edit         | Edit information about a Idol/Group | %edit (idol/group) (idol/group id) (column name) (content)                                                                                                    |                       |

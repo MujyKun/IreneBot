@@ -79,6 +79,9 @@
     "custom_command_deleted": "{command_name} has been removed if it existed.",
     "no_custom_commands": "There are no custom commands for your server."
   },
+  "datamod": {
+    "column_not_found": "That column does not exist!"
+  },
   "miscellaneous": {
     "set_language_fail": "{name}, that is not an available language. Use one of the following: {languages}.",
     "set_language_success": "{name}, your language is now set to {language}.",

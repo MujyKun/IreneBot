@@ -185,6 +185,7 @@ def get_and_reload_keys() -> Keys_Obj:
         "translator_role_id": make_int(os.getenv("TRANSLATOR_ROLE_ID")),
         "proofreader_role_id": make_int(os.getenv("PROOFREADER_ROLE_ID")),
         "datamod_role_id": make_int(os.getenv("DATAMOD_ROLE_ID")),
+        "datamod_log_channel_id": make_int(os.getenv("DATAMOD_LOG_CHANNEL_ID")),
 
         # startup time
         "startup_time": datetime.now(),

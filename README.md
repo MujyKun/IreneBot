@@ -48,7 +48,6 @@ To find out more, look at the `GroupMembers` category.
 | deleteidol         | Deletes an idol.                                                              | %deleteidol (idol id)                                                                                             | removeidol                      |
 | deleteidolfromgroup         | Deletes idol from group                                                              | %deleteidolfromgroup (idol id) (group id)                                                                                             | removeidolfromgroup                      |
 | deleteinteraction       | Delete a url from an interaction                                   | %deleteinteraction (url,url)               |               |
-| fixlinks        | Fix thumbnails and banners of idols and groups and put them on the host. | %fixlinks |               |
 | getstatuses             | Get all statuses of Irene.                                                   | %getstatuses                           |                |
 | kill             | Kills the bot                                                  | %kill                           |               |
 | killapi             | Restarts the API                                                  | %killapi                           |               |

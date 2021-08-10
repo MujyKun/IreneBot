@@ -48,53 +48,36 @@ class DataMod(commands.Cog):
             if height:
                 height = int(height)
 
-            # for security purposes, do not simplify the structure.
-            await self.ex.conn.execute("INSERT INTO groupmembers.unregisteredmembers(fullname, stagename, "
-                                       "formerfullname, formerstagename, birthdate, birthcountry, birthcity, gender, "
-                                       "description, height, twitter, youtube, melon, instagram, vlive, spotify, "
-                                       "fancafe, facebook, tiktok, zodiac, thumbnail, banner, bloodtype, tags,"
-                                       " groupids, notes) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, "
-                                       "$12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, "
-                                       "$26)", full_name, stage_name, idol_json.get("Former Full Name"),
-                                       idol_json.get("Former Stage Name"), birth_date, idol_json.get("Birth Country"),
-                                       idol_json.get("Birth City"), idol_json.get("Gender"),
-                                       idol_json.get("Description"), height, idol_json.get("Twitter"),
-                                       idol_json.get("Youtube"), idol_json.get("Melon"), idol_json.get("Instagram"),
-                                       idol_json.get("VLive"), idol_json.get("Spotify"), idol_json.get("Fancafe"),
-                                       idol_json.get("Facebook"), idol_json.get("TikTok"), idol_json.get("Zodiac"),
-                                       idol_json.get("Avatar"), idol_json.get("Banner"),
-                                       idol_json.get("BloodType"), idol_json.get("Tags"),
-                                       idol_json.get("Group IDs"), idol_json.get("Approver Notes"))
+            args = (full_name, stage_name, idol_json.get("Former Full Name"),
+                    idol_json.get("Former Stage Name"), birth_date, idol_json.get("Birth Country"),
+                    idol_json.get("Birth City"), idol_json.get("Gender"),
+                    idol_json.get("Description"), height, idol_json.get("Twitter"),
+                    idol_json.get("Youtube"), idol_json.get("Melon"), idol_json.get("Instagram"),
+                    idol_json.get("VLive"), idol_json.get("Spotify"), idol_json.get("Fancafe"),
+                    idol_json.get("Facebook"), idol_json.get("TikTok"), idol_json.get("Zodiac"),
+                    idol_json.get("Avatar"), idol_json.get("Banner"),
+                    idol_json.get("BloodType"), idol_json.get("Tags"), idol_json.get("Difficulty"))
 
-            # get the id of the data that was just added to db.
-            query_id = self.ex.first_result(await self.ex.conn.fetchrow(
-                "SELECT id FROM groupmembers.unregisteredmembers WHERE fullname = $1 AND stagename = $2 ORDER BY "
-                "id DESC", full_name, stage_name))
+            group_ids = idol_json.get("Group IDs")
+            if group_ids:
+                group_ids = group_ids.split(',')
 
-            # get the channel to send idol information to.
-            channel = self.ex.client.get_channel(self.ex.keys.add_idol_channel_id)
-            # fetch if discord.py cache is not loaded.
-            if not channel:
-                channel = await self.ex.client.fetch_channel(self.ex.keys.add_idol_channel_id)
-            title_description = f"""
-==================
-Query ID: {query_id} 
-Requester: {ctx.author.display_name} ({ctx.author.id})
-==================
-"""
-            # Add all the key values to the title description
-            for key in idol_json:
-                await asyncio.sleep(0)
-                title_description += f"\n{key}: {idol_json.get(key)}"
+            idol_obj = await self.ex.u_group_members.add_new_idol(full_name, stage_name, group_ids, *args)
 
-            # send embed to approval/deny channel
-            embed = await self.ex.create_embed(title="New Unregistered Idol", title_desc=title_description)
-            msg = await channel.send(embed=embed)
-            await msg.add_reaction(self.ex.keys.check_emoji)
-            await msg.add_reaction(self.ex.keys.trash_emoji)
-            msg = await self.ex.get_msg(ctx, "groupmembers", "add_idol_sent",
-                                        [["name", ctx.author.display_name], ['query_id', query_id]])
-            await ctx.send(msg)
+            aliases = idol_json.get("Aliases")
+            if aliases:
+                aliases = aliases.split(',')
+
+            for alias in aliases:
+                await self.ex.u_group_members.set_global_alias(idol_obj, alias)
+
+            embed = await self.ex.u_group_members.set_embed_card_info(idol_obj,
+                                                                      server_id=await self.ex.get_server_id(ctx))
+            await ctx.send(embed=embed)
+            public_channel = self.ex.client.get_channel(self.ex.keys.datamod_log_channel_id) or await \
+                self.ex.client.fetch_channel(self.ex.keys.datamod_log_channel_id)
+            return await public_channel.send(embed=embed)
+
         except Exception as e:
             log.console(e)
             server_prefix = await self.ex.get_server_prefix(ctx)
@@ -131,51 +114,90 @@ Requester: {ctx.author.display_name} ({ctx.author.id})
 
             group_name = group_json.get("Group Name")
 
-            # for security purposes, do not simplify the structure as any json field can be entered.
-            await self.ex.conn.execute("INSERT INTO groupmembers.unregisteredgroups(groupname, debutdate, disbanddate,"
-                                       " description, twitter, youtube, melon, instagram, vlive, spotify, "
-                                       "fancafe, facebook, tiktok, fandom, company, website, thumbnail, banner, "
-                                       "gender, tags, notes) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12,"
-                                       " $13, $14, $15, $16, $17, $18, $19, $20, $21)", group_name, debut_date,
-                                       disband_date, group_json.get("Description"), group_json.get("Twitter"),
-                                       group_json.get("Youtube"), group_json.get("Melon"), group_json.get("Instagram"),
-                                       group_json.get("VLive"), group_json.get("Spotify"), group_json.get("Fancafe"),
-                                       group_json.get("Facebook"), group_json.get("TikTok"), group_json.get("Fandom"),
-                                       group_json.get("Company"), group_json.get("Website"), group_json.get("Avatar"),
-                                       group_json.get("Banner"), group_json.get("Gender"), group_json.get("Tags"),
-                                       group_json.get("Approver Notes"))
+            args = (group_name, debut_date,
+                    disband_date, group_json.get("Description"), group_json.get("Twitter"),
+                    group_json.get("Youtube"), group_json.get("Melon"), group_json.get("Instagram"),
+                    group_json.get("VLive"), group_json.get("Spotify"), group_json.get("Fancafe"),
+                    group_json.get("Facebook"), group_json.get("TikTok"), group_json.get("Fandom"),
+                    group_json.get("Company"), group_json.get("Website"), group_json.get("Avatar"),
+                    group_json.get("Banner"), group_json.get("Gender"), group_json.get("Tags"))
 
-            # get the id of the data that was just added to db.
-            query_id = self.ex.first_result(await self.ex.conn.fetchrow(
-                "SELECT id FROM groupmembers.unregisteredgroups WHERE groupname = $1 ORDER BY id DESC", group_name))
+            group = await self.ex.u_group_members.add_new_group(group_name, *args)
 
-            # get the channel to send idol information to.
-            channel = self.ex.client.get_channel(self.ex.keys.add_group_channel_id)
-            # fetch if discord.py cache is not loaded.
-            if not channel:
-                channel = await self.ex.client.fetch_channel(self.ex.keys.add_group_channel_id)
-            title_description = f"""
-==================
-Query ID: {query_id} 
-Requester: {ctx.author.display_name} ({ctx.author.id})
-==================
-"""
-            # Add all the key values to the title description
-            for key in group_json:
-                await asyncio.sleep(0)
-                title_description += f"\n{key}: {group_json.get(key)}"
+            aliases = group_json.get("Aliases")
+            if aliases:
+                aliases = aliases.split(',')
 
-            # send embed to approval/deny channel
-            embed = await self.ex.create_embed(title="New Unregistered Group", title_desc=title_description)
-            msg = await channel.send(embed=embed)
-            await msg.add_reaction(self.ex.keys.check_emoji)
-            await msg.add_reaction(self.ex.keys.trash_emoji)
-            msg = await self.ex.get_msg(ctx, "groupmembers", "add_group_sent",
-                                        [["name", ctx.author.display_name], ['query_id', query_id]])
-            await ctx.send(msg)
+            for alias in aliases:
+                await self.ex.u_group_members.set_global_alias(group, alias)
+
+            embed = await self.ex.u_group_members.set_embed_card_info(
+                group, group=True, server_id=await self.ex.get_server_id(ctx))
+            await ctx.send(embed=embed)
+
+            public_channel = self.ex.client.get_channel(self.ex.keys.datamod_log_channel_id) or await \
+                self.ex.client.fetch_channel(self.ex.keys.datamod_log_channel_id)
+            return await public_channel.send(embed=embed)
+
         except Exception as e:
             log.console(e)
             server_prefix = await self.ex.get_server_prefix(ctx)
             msg = await self.ex.get_msg(ctx, "groupmembers", "add_error", [
                 ["e", e], ["server_prefix", server_prefix], ["command_name", "addgroup"]])
             await ctx.send(msg)
+
+    @commands.group()
+    async def edit(self, ctx):
+        """Edit an Idol or Group's information.
+
+        [Format: %edit (idol/group) (group/idol id) (column) (content)]
+        """
+        ...
+
+    @edit.command()
+    async def idol(self, ctx, idol_id, column, *, content):
+        """
+        Edit data for an idol.
+
+        [Format: %edit idol (idol id) (column) (content)]
+        """
+        await self.update_group_idol_info(ctx, idol_id, column, content, False)
+
+    @edit.command()
+    async def group(self, ctx, group_id, column, *, content):
+        """
+        Edit data for a group.
+
+        [Format: %edit group (group id) (column) (content)]
+        """
+        await self.update_group_idol_info(ctx, group_id, column, content, True)
+
+    async def update_group_idol_info(self, ctx, obj_id, column, content, group=False):
+        """
+        Method to reduce duplicated code for updating info.
+
+        :param ctx: Context Object
+        :param obj_id: Idol/Group ID
+        :param column: Column Name
+        :param content: Content to be set.
+        :param group: Whether it is a group.
+        """
+        try:
+            obj = await self.ex.u_group_members.update_info(obj_id, column, content, group=group)
+            embed = await self.ex.u_group_members.set_embed_card_info(
+                obj, server_id=await self.ex.get_server_id(ctx), group=group)
+
+            await ctx.send(embed=embed)
+            desc = f"{'Group' if group else 'Idol'} ID: {obj_id} had the `{column}` changed to \n{content}."
+            public_embed = await self.ex.create_embed(f"Info Change by {ctx.author.display_name} ({ctx.author.id})",
+                                                      title_desc=desc)
+            public_channel = self.ex.client.get_channel(self.ex.keys.datamod_log_channel_id) or await \
+                self.ex.client.fetch_channel(self.ex.keys.datamod_log_channel_id)
+            return await public_channel.send(embed=public_embed)
+        except NotImplementedError:
+            msg = await self.ex.get_msg(ctx, "datamod", "column_not_found")
+        except KeyError:
+            msg = await self.ex.get_msg(ctx, "groupmembers", "invalid_id")
+        except Exception as e:
+            msg = await self.ex.get_msg(ctx, "general", "gen_error", ["e", e])
+        return await ctx.send(msg)

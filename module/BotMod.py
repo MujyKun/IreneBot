@@ -73,62 +73,6 @@ class BotMod(commands.Cog):
             await ctx.send(f"> **{e}**")
 
     @commands.command()
-    async def fixlinks(self, ctx):
-        """
-        Fix thumbnails and banners of idols and groups and put them on the host.
-
-        NOTE: this is not an official command is just used momentarily for updates. No reason for this code to be
-        simplified and is not a permanent command.
-        """
-        mem_info = await self.ex.conn.fetch('SELECT id, thumbnail, banner FROM groupmembers.member')
-        grp_info = await self.ex.conn.fetch('SELECT groupid, thumbnail, banner FROM groupmembers.groups')
-
-        async def download_image(link):
-            async with self.ex.session.get(link) as resp:
-                fd = await aiofiles.open(file_loc, mode='wb')
-                await fd.write(await resp.read())
-
-        for mem_id, mem_thumbnail, mem_banner in mem_info:
-            await asyncio.sleep(0)
-            file_name = f"{mem_id}_IDOL.png"
-            if mem_thumbnail:
-                file_loc = f"{self.ex.keys.idol_avatar_location}{file_name}"
-                if 'images.irenebot.com' not in mem_thumbnail:
-                    await download_image(mem_thumbnail)
-                if self.ex.check_file_exists(file_loc):
-                    image_url = f"{self.ex.keys.image_host}/avatar/{file_name}"
-                    await self.ex.conn.execute(
-                        "UPDATE groupmembers.member SET thumbnail = $1 WHERE id = $2", image_url, mem_id)
-            if mem_banner:
-                file_loc = f"{self.ex.keys.idol_banner_location}{file_name}"
-                if 'images.irenebot.com' not in mem_banner:
-                    await download_image(mem_banner)
-                image_url = f"https://images.irenebot.com/banner/{file_name}"
-                if self.ex.check_file_exists(file_loc):
-                    await self.ex.conn.execute(
-                        "UPDATE groupmembers.member SET banner = $1 WHERE id = $2", image_url, mem_id)
-        for grp_id, grp_thumbnail, grp_banner in grp_info:
-            await asyncio.sleep(0)
-            file_name = f"{grp_id}_GROUP.png"
-            if grp_thumbnail:
-                file_loc = f"{self.ex.keys.idol_avatar_location}{file_name}"
-                if 'images.irenebot.com' not in grp_thumbnail:
-                    await download_image(grp_thumbnail)
-                image_url = f"https://images.irenebot.com/avatar/{file_name}"
-                if self.ex.check_file_exists(file_loc):
-                    await self.ex.conn.execute(
-                        "UPDATE groupmembers.groups SET thumbnail = $1 WHERE groupid = $2", image_url, grp_id)
-            if grp_banner:
-                file_loc = f"{self.ex.keys.idol_banner_location}{file_name}"
-                if 'images.irenebot.com' not in grp_banner:
-                    await download_image(grp_banner)
-                image_url = f"https://images.irenebot.com/banner/{file_name}"
-                if self.ex.check_file_exists(file_loc):
-                    await self.ex.conn.execute(
-                        "UPDATE groupmembers.groups SET banner = $1 WHERE groupid = $2", image_url, grp_id)
-        return await ctx.send(await self.ex.get_msg(ctx, "botmod", "image_host_success"))
-
-    @commands.command()
     async def mergeidol(self, ctx, original_idol_id: int, duplicate_idol_id: int):
         """
         Merge a duplicated idol with it's original idol.

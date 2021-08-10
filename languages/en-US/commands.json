@@ -1687,16 +1687,6 @@
       "aliases": null,
       "note": "Use commas to separate user ids."
     },
-    "approve": {
-      "description": "Approve a query id for an unregistered Group or Idol.",
-      "example_image_url": null,
-      "syntax": "%approve <query id> [mode=idol/group]",
-      "example_syntax": null,
-      "permissions_needed": [
-        "Bot Owner"
-      ],
-      "aliases": null
-    },
     "generateplayingcards": {
       "description": "Generate Custom Playing Cards with Idol Avatars.",
       "example_image_url": null,

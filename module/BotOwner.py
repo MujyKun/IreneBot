@@ -50,6 +50,12 @@ class BotOwner(commands.Cog):
         return await ctx.send("Done")
 
     @commands.command()
+    async def fixlinks(self, ctx):
+        """Will attempt to migrate incorrect images to host."""
+        await self.ex.u_group_members.fix_links()
+        return await ctx.send("Done")
+
+    @commands.command()
     async def reloadlanguages(self, ctx):
         """
         Reloads the language packs for the bot.

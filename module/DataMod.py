@@ -68,8 +68,9 @@ class DataMod(commands.Cog):
             if aliases:
                 aliases = aliases.split(',')
 
-            for alias in aliases:
-                await self.ex.u_group_members.set_global_alias(idol_obj, alias)
+            if aliases:
+                for alias in aliases:
+                    await self.ex.u_group_members.set_global_alias(idol_obj, alias)
 
             embed = await self.ex.u_group_members.set_embed_card_info(idol_obj,
                                                                       server_id=await self.ex.get_server_id(ctx))
@@ -128,8 +129,9 @@ class DataMod(commands.Cog):
             if aliases:
                 aliases = aliases.split(',')
 
-            for alias in aliases:
-                await self.ex.u_group_members.set_global_alias(group, alias)
+            if aliases:
+                for alias in aliases:
+                    await self.ex.u_group_members.set_global_alias(group, alias)
 
             embed = await self.ex.u_group_members.set_embed_card_info(
                 group, group=True, server_id=await self.ex.get_server_id(ctx))

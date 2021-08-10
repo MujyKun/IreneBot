@@ -67,8 +67,6 @@ class DataMod(commands.Cog):
             aliases = idol_json.get("Aliases")
             if aliases:
                 aliases = aliases.split(',')
-
-            if aliases:
                 for alias in aliases:
                     await self.ex.u_group_members.set_global_alias(idol_obj, alias)
 
@@ -128,8 +126,6 @@ class DataMod(commands.Cog):
             aliases = group_json.get("Aliases")
             if aliases:
                 aliases = aliases.split(',')
-
-            if aliases:
                 for alias in aliases:
                     await self.ex.u_group_members.set_global_alias(group, alias)
 

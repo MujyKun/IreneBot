@@ -79,6 +79,9 @@
     "custom_command_deleted": "اگر{command_name} موجود ہے تو اسے ہٹا دیا گیا ہے۔",
     "no_custom_commands": "آپ کے سرور کے لیے کوئی کسٹم کمانڈز نہیں ہیں۔"
   },
+  "datamod": {
+    "column_not_found": "وہ کالم موجود نہیں!"
+  },
   "miscellaneous": {
     "set_language_fail": "{name} ، یہ دستیاب زبان نہیں ہے۔ مندرجہ ذیل میں سے ایک استعمال کریں: {languages}۔",
     "set_language_success": "{name} ، آپ کی زبان اب {language} پر سیٹ ہے۔",
@@ -149,7 +152,7 @@
     "invalid_input": "{name} ، یہ آپشن درست نہیں ہے۔ براہ کرم {server_prefix} مدد {command_name} کو دیکھیں۔",
     "game_disabled": "{name} ، گیمز کو اس ٹیکسٹ چینل میں {server_prefix} ٹوگل گیمز کا استعمال کرتے ہوئے غیر فعال کر دیا گیا ہے۔",
     "gen_error": "خرابی - {e}",
-    "may_take_time": "This command may take a few minutes to respond since it relies on a third-party application."
+    "may_take_time": "اس کمانڈ کو جواب دینے میں چند منٹ لگ سکتے ہیں کیونکہ یہ تیسرے فریق کی درخواست پر انحصار کرتا ہے."
   },
   "twitch": {
     "follow_limit": "آپ کو صرف {follow_limit} چینلز فالو کرنے کی اجازت ہے۔",
@@ -192,9 +195,7 @@
     "patrons_removed": "{users} کو بطور پیٹرن ہٹا دیا گیا!",
     "cleared": "صاف کر دیا۔",
     "message_sent": "پیغام چلا گیا.",
-    "group_fail": "گروپ {group_id} شامل کرنے میں ناکام۔ آئیڈیل شامل کیا جا رہا ہے۔",
-    "idol_query_approved": "استفسار ID {query_id} کو بطور آئیڈیل ({idol_id}) شامل کیا گیا۔\nاس آئیڈیل کو درج ذیل گروپس میں شامل کیا گیا ہے: {group_ids}۔\nکیش اب تازہ دم ہو رہا ہے۔",
-    "group_query_approved": "استفسار ID {query_id} کو بطور گروپ ({group_id}) شامل کیا گیا۔\nکیش اب تازہ دم ہو رہا ہے۔"
+    "group_fail": "گروپ {group_id} شامل کرنے میں ناکام۔ آئیڈیل شامل کیا جا رہا ہے۔"
   },
   "moderator": {
     "welcome_role_delete": "آپ نے جو ویلکم رول ترتیب دیا تھا اسے ہٹا دیا گیا۔",

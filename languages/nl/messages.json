@@ -79,6 +79,9 @@
     "custom_command_deleted": "{command_name} is verwijderd als deze bestond.",
     "no_custom_commands": "Er zijn geen aangepaste commando's voor uw server."
   },
+  "datamod": {
+    "column_not_found": "Die kolom bestaat niet!"
+  },
   "miscellaneous": {
     "set_language_fail": "{name}, dat is geen beschikbare taal. Gebruik een van de volgende: {languages}.",
     "set_language_success": "{name}, uw taal is nu ingesteld op {language}.",
@@ -149,7 +152,7 @@
     "invalid_input": "{name}, die optie is niet geldig. Kijk in {server_prefix}help {command_name}.",
     "game_disabled": "{name}, Spellen zijn uitgeschakeld in dit tekstkanaal met behulp van {server_prefix}togglegames.",
     "gen_error": "FOUT - {e}",
-    "may_take_time": "This command may take a few minutes to respond since it relies on a third-party application."
+    "may_take_time": "Dit command kan een paar minuten duren om te reageren, omdat het afhankelijk is van een third-party application."
   },
   "twitch": {
     "follow_limit": "Je mag maar {follow_limit} kanalen volgen.",
@@ -192,9 +195,7 @@
     "patrons_removed": "{users} is verwijderd als patron!",
     "cleared": "Verwijderd.",
     "message_sent": "Bericht verzonden.",
-    "group_fail": "Groep {group_id} toevoegen mislukt. Ga door met het toevoegen van idol.",
-    "idol_query_approved": "Query ID {query_id} toegevoegd als een Idol ({idol_id}).\nDeze idol is toegevoegd aan de volgende groepen: {group_ids}.\nDe cache wordt nu vernieuwd.",
-    "group_query_approved": "Toegevoegde Query ID {query_id} als Groep ({group_id}).\nDe cache is nu aan het vernieuwen."
+    "group_fail": "Groep {group_id} toevoegen mislukt. Ga door met het toevoegen van idol."
   },
   "moderator": {
     "welcome_role_delete": "De welkomstrol die u had ingesteld is verwijderd.",

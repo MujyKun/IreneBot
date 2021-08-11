@@ -1,7 +1,7 @@
 {
   "BlackJack": {
     "blackjack": {
-      "description": "Start a game of BlackJack.",
+      "description": "بلیک جیک کا کھیل شروع کریں۔",
       "example_image_url": null,
       "syntax": null,
       "example_syntax": null,
@@ -11,7 +11,7 @@
       ]
     },
     "stopbj": {
-      "description": "End the current BlackJack game.",
+      "description": "موجودہ بلیک جیک گیم کو ختم کریں۔",
       "example_image_url": null,
       "syntax": "%blackjack [bet=0]",
       "example_syntax": null,
@@ -19,7 +19,7 @@
       "aliases": null
     },
     "joingame": {
-      "description": "Join an existing game of BlackJack.",
+      "description": "بلیک جیک کے موجودہ گیم میں شامل ہوں۔",
       "example_image_url": null,
       "syntax": "%joingame <opponent> [bet=0]",
       "example_syntax": null,
@@ -29,7 +29,7 @@
       ]
     },
     "rules": {
-      "description": "View the rules of BlackJack.",
+      "description": "بلیک جیک کے قواعد دیکھیں۔",
       "example_image_url": null,
       "syntax": "%rules",
       "example_syntax": null,
@@ -38,18 +38,8 @@
     }
   },
   "BotMod": {
-    "addidoltogroup": {
-      "description": "Adds an Idol to a Group.",
-      "example_image_url": null,
-      "syntax": "%addidoltogroup <idol id> <group id>",
-      "example_syntax": null,
-      "permissions_needed": [
-        "Bot Moderator"
-      ],
-      "aliases": null
-    },
     "addinteraction": {
-      "description": "Add a GIF to an interaction.",
+      "description": "بات چیت میں ایک GIF شامل کریں۔",
       "example_image_url": null,
       "syntax": "%addinteraction <interaction_type> <link1,link2,...>",
       "example_syntax": null,
@@ -59,7 +49,7 @@
       "aliases": null
     },
     "addstatus": {
-      "description": "Adds a playing status to the Bot.",
+      "description": "بوٹ میں کھیل کی حیثیت شامل کرتا ہے۔",
       "example_image_url": null,
       "syntax": "%addstatus <status message>",
       "example_syntax": null,
@@ -69,7 +59,7 @@
       "aliases": null
     },
     "botban": {
-      "description": "Bans a user from using the Bot.",
+      "description": "صارف کو بوٹ استعمال کرنے سے پابندی لگاتا ہے-",
       "example_image_url": null,
       "syntax": "%botban <user id>",
       "example_syntax": null,
@@ -79,7 +69,7 @@
       "aliases": null
     },
     "botunban": {
-      "description": "Unbans a user that was not able to use the Bot.",
+      "description": "جو صارف بوٹ استعمال نہیں کر سکتا تھا اس سے پابندی ہٹا دی جائے گی-",
       "example_image_url": null,
       "syntax": "%botunban <user id>",
       "example_syntax": null,
@@ -89,7 +79,7 @@
       "aliases": null
     },
     "botwarn": {
-      "description": "Warn a user through Bot DMs.",
+      "description": "بوٹ ڈی ایم کے ذریعے صارف کو خبردار کریں۔",
       "example_image_url": null,
       "syntax": "%botwarn <user> [reason]",
       "example_syntax": null,
@@ -99,7 +89,7 @@
       "aliases": null
     },
     "closedm": {
-      "description": "Closes a DM",
+      "description": "کلوس DM",
       "example_image_url": null,
       "syntax": "%closedm [user id]",
       "example_syntax": null,
@@ -109,7 +99,7 @@
       "aliases": null
     },
     "createdm": {
-      "description": "Creates a DM between you and the user with the Bot as the middleman.",
+      "description": "آپ اور صارف کے درمیان بوٹ کے ساتھ مڈل مین کی حیثیت سے ڈی ایم بناتا ہے۔",
       "example_image_url": null,
       "syntax": "%createdm <user id>",
       "example_syntax": null,
@@ -119,7 +109,7 @@
       "aliases": null
     },
     "deletegroup": {
-      "description": "Deletes a Group",
+      "description": "ایک گروپ کو حذف کرتا ہے۔",
       "example_image_url": null,
       "syntax": "%deletegroup <group id>",
       "example_syntax": null,
@@ -129,7 +119,7 @@
       "aliases": null
     },
     "deleteidol": {
-      "description": "Deletes an Idol.",
+      "description": "ایک آئیڈیل کو حذف کرتا ہے۔",
       "example_image_url": null,
       "syntax": "%deleteidol <idol id>",
       "example_syntax": null,
@@ -138,18 +128,8 @@
       ],
       "aliases": null
     },
-    "deleteidolfromgroup": {
-      "description": "Deletes an Idol from a Group.",
-      "example_image_url": null,
-      "syntax": "%deleteidolfromgroup <idol id> <group iid>\n",
-      "example_syntax": null,
-      "permissions_needed": [
-        "Bot Moderator"
-      ],
-      "aliases": null
-    },
     "deleteinteraction": {
-      "description": "Remove URL from an interaction.",
+      "description": "یو آر ایل کو بات چیت سے ہٹا دیں۔",
       "example_image_url": null,
       "syntax": "%deleteinteraction <urls>",
       "example_syntax": null,
@@ -157,10 +137,10 @@
         "Bot Moderator"
       ],
       "aliases": null,
-      "note": "Separate urls with commas."
+      "note": "یو آر ایل کو کوما سے الگ کریں۔"
     },
     "fixlinks": {
-      "description": "Fix Invalid Thumbnails/Avatars/Banners of Idols/Groups and puts them on the host.",
+      "description": "آئیڈیل/گروپس کے غلط تھمب نیلز/اوتار/بینر درست کریں اور انہیں میزبان پر رکھیں۔",
       "example_image_url": null,
       "syntax": "%fixlinks",
       "example_syntax": null,
@@ -170,7 +150,7 @@
       "aliases": null
     },
     "getstatuses": {
-      "description": "List all of the statuses of the Bot.",
+      "description": "بوٹ کی تمام حیثیتوں کی فہرست بنائیں۔",
       "example_image_url": null,
       "syntax": "%getstatuses",
       "example_syntax": null,
@@ -180,7 +160,7 @@
       "aliases": null
     },
     "kill": {
-      "description": "Kills the Bot.",
+      "description": "بوٹ کو مارتا ہے۔",
       "example_image_url": null,
       "syntax": "%kill",
       "example_syntax": null,
@@ -190,7 +170,7 @@
       "aliases": null
     },
     "killapi": {
-      "description": "Kills the API.",
+      "description": "API کو مارتا ہے۔",
       "example_image_url": null,
       "syntax": "%killapi",
       "example_syntax": null,
@@ -200,7 +180,7 @@
       "aliases": null
     },
     "maintenance": {
-      "description": "Toggles Maintenance Mode",
+      "description": "بحالی کا طریقہ ٹوگل کرتا ہے۔",
       "example_image_url": null,
       "syntax": "%maintenance",
       "example_syntax": null,
@@ -210,7 +190,7 @@
       "aliases": null
     },
     "mergeidol": {
-      "description": "Merge a duplicated idol with the original idol.",
+      "description": "ڈپلیکیٹڈ آئیڈیل کو اصل بت کے ساتھ ملا دیں۔",
       "example_image_url": null,
       "syntax": "%mergeidol <original_idol_id> <duplicate_idol_id>",
       "example_syntax": null,
@@ -220,7 +200,7 @@
       "aliases": null
     },
     "mergegroup": {
-      "description": "Merge a duplicated group with the original group.",
+      "description": "ایک ڈپلیکیٹڈ گروپ کو اصل گروپ کے ساتھ ضم کریں۔",
       "example_image_url": null,
       "syntax": "%mergegroup <original_group_id> <duplicate_group_id>",
       "example_syntax": null,
@@ -230,7 +210,7 @@
       "aliases": null
     },
     "moveto": {
-      "description": "Moves an image to another idol.",
+      "description": "ایک تصویر کو دوسرے آئیڈیل میں منتقل کرتا ہے۔",
       "example_image_url": null,
       "syntax": "%moveto <idol_id> <link>",
       "example_syntax": null,
@@ -240,7 +220,7 @@
       "aliases": null
     },
     "removestatus": {
-      "description": "Removes a playing status based on it's index.",
+      "description": "اس کے انڈیکس کی بنیاد پر کھیلنے کی حیثیت کو ہٹا دیتا ہے۔",
       "example_image_url": null,
       "syntax": null,
       "example_syntax": "%removestatus <status index>",
@@ -252,7 +232,7 @@
   },
   "BiasGame": {
     "biasgame": {
-      "description": "Start a BiasGame in the current channel.",
+      "description": "موجودہ چینل میں BiasGame شروع کریں۔",
       "example_image_url": null,
       "syntax": "%biasgame [gender=Male/Female/All] [bracket_size=4/8/16/32]",
       "example_syntax": null,
@@ -262,7 +242,7 @@
       ]
     },
     "stopbg": {
-      "description": "Force-End a BiasGame.",
+      "description": "ایک BiasGame کو زبردستی ختم کریں۔",
       "example_image_url": null,
       "syntax": "%stopbg",
       "example_syntax": null,
@@ -273,7 +253,7 @@
       "aliases": null
     },
     "listbg": {
-      "description": "List a user's BiasGame Leaderboards.",
+      "description": "صارف کے BiasGame لیڈر بورڈز کی فہرست بنائیں۔",
       "example_image_url": null,
       "syntax": "%listbg [user]",
       "example_syntax": null,
@@ -283,7 +263,7 @@
   },
   "BlockingManager": {
     "bmon start": {
-      "description": "Starts the Blocking Manager.",
+      "description": "بلاکنگ مینیجر شروع کرتا ہے۔",
       "example_image_url": null,
       "syntax": "%bmon start",
       "example_syntax": null,
@@ -293,7 +273,7 @@
       "aliases": null
     },
     "bmon stop": {
-      "description": "Turns off the Blocking Manager.",
+      "description": "بلاکنگ مینیجر کو بند کردیتا ہے۔",
       "example_image_url": null,
       "syntax": "%bmon stop",
       "example_syntax": null,
@@ -305,7 +285,7 @@
   },
   "Currency": {
     "balance": {
-      "description": "View a user's balance.",
+      "description": "صارف کا بیلنس دیکھیں۔",
       "example_image_url": null,
       "syntax": "%balance [member]",
       "example_syntax": null,
@@ -317,7 +297,7 @@
       ]
     },
     "beg": {
-      "description": "Beg a homeless man for money.",
+      "description": "ایک بے گھر آدمی سے پیسے مانگو۔",
       "example_image_url": null,
       "syntax": "%beg",
       "example_syntax": null,
@@ -325,7 +305,7 @@
       "aliases": null
     },
     "bet": {
-      "description": "Bet your money.",
+      "description": "اپنے پیسے پر شرط لگائیں۔",
       "example_image_url": null,
       "syntax": "%bet <amount>",
       "example_syntax": null,
@@ -333,7 +313,7 @@
       "aliases": null
     },
     "daily": {
-      "description": "Get the daily reward.",
+      "description": "روزانہ کا انعام حاصل کریں۔",
       "example_image_url": null,
       "syntax": "%daily",
       "example_syntax": null,
@@ -341,7 +321,7 @@
       "aliases": null
     },
     "give": {
-      "description": "Give a user money.",
+      "description": "صارف کو پیسے دیں۔",
       "example_image_url": null,
       "syntax": "%give <member> <amount>",
       "example_syntax": null,
@@ -349,7 +329,7 @@
       "aliases": null
     },
     "leaderboard": {
-      "description": "Shows the Top 10 users server/global wide.",
+      "description": "ٹاپ 10 یوزرز سرور/گلوبل وائیڈ دکھاتا ہے۔",
       "example_image_url": null,
       "syntax": "%leaderboard [mode=server/global]",
       "example_syntax": null,
@@ -360,7 +340,7 @@
       ]
     },
     "rob": {
-      "description": "Rob a member.",
+      "description": "ایک ممبر کو لوٹیں۔",
       "example_image_url": null,
       "syntax": "%rob <member>",
       "example_syntax": null,
@@ -368,7 +348,7 @@
       "aliases": null
     },
     "rps": {
-      "description": "Play Rock Paper Scissors.",
+      "description": "راک پیپر کینچی کھیلیں۔",
       "example_image_url": null,
       "syntax": "%rps <rock/paper/scissors> [amount to bet=0]",
       "example_syntax": null,
@@ -378,7 +358,7 @@
       ]
     },
     "upgrade": {
-      "description": "Upgrades a command to the next level.",
+      "description": "کمانڈ کو اگلے درجے پر اپ گریڈ کرتا ہے۔",
       "example_image_url": null,
       "syntax": "%upgrade <rob/daily/beg>",
       "example_syntax": null,
@@ -390,7 +370,7 @@
   },
   "CustomCommands": {
     "createcommand": {
-      "description": "Create a custom command.",
+      "description": "اپنی مرضی کے مطابق کمانڈ بنائیں۔",
       "example_image_url": null,
       "syntax": "%createcommand <command name> <message>",
       "example_syntax": null,
@@ -402,7 +382,7 @@
       ]
     },
     "deletecommand": {
-      "description": "Delete a custom command.",
+      "description": "حسب ضرورت کمانڈ حذف کریں۔",
       "example_image_url": null,
       "syntax": "%deletecommand <command name>",
       "example_syntax": null,
@@ -414,7 +394,7 @@
       ]
     },
     "listcommands": {
-      "description": "List all custom commands for the server.",
+      "description": "سرور کے لیے تمام کسٹم کمانڈز کی فہرست بنائے۔",
       "example_image_url": null,
       "syntax": "%listcommands",
       "example_syntax": null,
@@ -433,7 +413,7 @@
       "note": "Underscores are spaces and commas are used to split Idol/Group names."
     },
     "card": {
-      "description": "Display an Idol/Group's Profile Card.",
+      "description": "آئیڈل/گروپ کا پروفائل کارڈ دکھائے۔",
       "example_image_url": null,
       "syntax": "%card <Idol/Group ID/Name>",
       "example_syntax": null,
@@ -441,7 +421,7 @@
       "aliases": null
     },
     "count": {
-      "description": "Displays amount of times an Idol has been called.",
+      "description": "آئیڈل بتائے جانے کی تعداد دکھاتا ہے۔",
       "example_image_url": null,
       "syntax": "%count (idol name/all)",
       "example_syntax": null,
@@ -449,7 +429,7 @@
       "aliases": null
     },
     "countleaderboard": {
-      "description": "Displays leaderboard for times an Idol has been called.",
+      "description": "آئیڈل بتائے جانے کی تعداد لیے کا لیڈر دکھاتا ہے۔",
       "example_image_url": null,
       "syntax": "%countleaderboard",
       "example_syntax": null,
@@ -459,7 +439,7 @@
       ]
     },
     "countgroup": {
-      "description": "Displays the number of photos a Group has.",
+      "description": "گروپ کی تصاویر کی تعداد دکھاتا ہے۔",
       "example_image_url": null,
       "syntax": "%countgroup <group name>",
       "example_syntax": null,
@@ -467,7 +447,7 @@
       "aliases": null
     },
     "countmember": {
-      "description": "Displays the number of photos an Idol has.",
+      "description": "آئیڈیل کی تصاویر کی تعداد دکھاتا ہے۔",
       "example_image_url": null,
       "syntax": "%countmember <idol name/all>",
       "example_syntax": null,
@@ -475,34 +455,34 @@
       "aliases": null
     },
     "fullnames": {
-      "description": "List the full names of Idols the bot has photos of.",
+      "description": "آئیڈیل کے مکمل نام بتائے جس کی بوٹ کے پاس تصویر ہے۔",
       "example_image_url": null,
       "syntax": "%fullnames [page number/group name]",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null,
-      "note": "To a Bot Moderator, this will also display Idols with no photos and show their ID."
+      "note": "ایک بوٹ ماڈریٹر کو ، یہ آئیڈیل کو بھی دکھائے گا جس میں کوئی تصویر نہیں ہے اور ان کی شناخت دکھائی جائے گی۔"
     },
     "groups": {
-      "description": "Lists the groups of idols the Bot has photos of.",
+      "description": "آئیڈیل کے گروپوں کی فہرست بوٹ کی تصاویر ہے.",
       "example_image_url": null,
       "syntax": "%groups",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null,
-      "note": "To a Bot Moderator, this will also display Groups with no photos and show their ID."
+      "note": "بوٹ ماڈریٹر کو ، یہ ایسے گروپ بھی دکھائے گا جن کے پاس کوئی تصویر نہیں ہے اور ان کی شناخت دکھائی جائے گی۔"
     },
     "members": {
-      "description": "List the names of idols the Bot has photos of.",
+      "description": "آئیڈیل کے نام بتائیں جس میں بوٹ کی تصاویر ہیں۔",
       "example_image_url": null,
       "syntax": "%members [page number/group name]",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null,
-      "note": "To a Bot Moderator, this will also display Idols with no photos and show their ID."
+      "note": "ایک بوٹ ماڈریٹر کو ، یہ آئیڈیل کو بھی دکھائے گا جس میں کوئی تصویر نہیں ہے اور ان کی شناخت دکھائی جائے گی۔"
     },
     "randomidol": {
-      "description": "Posts media of a random Idol.",
+      "description": "بے ترتیب آئیڈیل کا میڈیا پوسٹ کرتا ہے۔",
       "example_image_url": null,
       "syntax": "%randomidol",
       "example_syntax": null,
@@ -512,7 +492,7 @@
       ]
     },
     "sendidol": {
-      "description": "Have an Idol Photo sent to a text channel every 12 hours.",
+      "description": "ہر 12 گھنٹے میں ایک ٹیکسٹ چینل کو آئیڈل تصویر بھیجیں۔",
       "example_image_url": null,
       "syntax": "%sendidol [idol id] [text channel]",
       "example_syntax": null,
@@ -520,10 +500,10 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "Using the command without an Idol ID will remove all existing idols from the channel."
+      "note": "آئیڈل آئی ڈی کے بغیر کمانڈ کا استعمال چینل سے تمام موجودہ آئیڈل کو نکال دے گا۔"
     },
     "sendimages": {
-      "description": "Have all of the Idol Photos appear in a specific text channel.",
+      "description": "آئیڈیل کی تمام تصاویر ایک مخصوص ٹیکسٹ چینل میں ظاہر ہونے دیں۔",
       "example_image_url": null,
       "syntax": "%sendimages [text channel]",
       "example_syntax": null,
@@ -533,7 +513,7 @@
       "aliases": null
     },
     "stopimages": {
-      "description": "Stops the Bot from posting idol photos in a specific text channel.",
+      "description": "بوٹ کو ایک مخصوص ٹیکسٹ چینل میں بت کی تصاویر شائع کرنے سے روکتا ہے۔",
       "example_image_url": null,
       "syntax": "%stopimages [text channel]",
       "example_syntax": null,
@@ -541,12 +521,12 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "Type the command again to re-enable."
+      "note": "دوبارہ فعال کرنے کے لیے حکم کو دوبارہ ٹائپ کریں۔."
     }
   },
   "GuessingGame": {
     "guessinggame": {
-      "description": "Start an Idol GuessingGame in the current channel.",
+      "description": "موجودہ چینل میں آئیڈل پیگینگ گیم شروع کریں.",
       "example_image_url": null,
       "syntax": "%guessinggame [gender=all] [difficulty=medium] [rounds=20] [timeout=20]",
       "example_syntax": null,
@@ -554,10 +534,10 @@
       "aliases": [
         "gg"
       ],
-      "note": "The host of the game can type stop or end to end the game or skip to skip the current round without affecting the round number."
+      "note": "کھیل کا میزبان کھیل کو ختم کرنے کے لئے اسٹاپ ٹائپ یا ختم کر سکتا ہے یا راؤنڈ نمبر کو متاثر کیے بغیر موجودہ راؤنڈ کو چھوڑنے کے لئے چھوڑ سکتا ہے۔."
     },
     "groupguessinggame": {
-      "description": "Start a Group GuessingGame in the current channel.",
+      "description": "موجودہ چینل میں گروپ پیگینگ گیم شروع کریں۔.",
       "example_image_url": null,
       "syntax": "%groupguessinggame [gender=all] [difficulty=medium] [rounds=20] [timeout=20]",
       "example_syntax": null,
@@ -566,19 +546,19 @@
         "ggg",
         "groupgg"
       ],
-      "note": "The host of the game can type stop or end to end the game or skip to skip the current round without affecting the round number."
+      "note": "کھیل کا میزبان کھیل کو ختم کرنے کے لئے اسٹاپ ٹائپ یا ختم کر سکتا ہے یا راؤنڈ نمبر کو متاثر کیے بغیر موجودہ راؤنڈ کو چھوڑنے کے لئے چھوڑ سکتا ہے۔"
     },
     "ggfilter": {
-      "description": "Add a filter to your GuessingGame.",
+      "description": "اپنے اندازے کے کھیل میں فلٹر شامل کریں۔",
       "example_image_url": null,
       "syntax": "%ggfilter [group id/name, ...]",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null,
-      "note": "Only the groups filtered will appear on the GuessingGame. If you do not specify a Group ID or Name, it will toggle the filter. Group IDs and Names must be split by commas. Group Names with more than one word must have an underscore used as a space."
+      "note": "صرف فلٹر کیے گئے گروپ ہی قیاس گیم پر ظاہر ہوں گے۔ اگر آپ گروپ آئی ڈی یا نام کا اختصاص نہیں کرتے ہیں تو یہ فلٹر ٹوگل کرے گا۔ گروپ آئی ڈی اور ناموں کو کوما کے ذریعہ تقسیم کیا جانا چاہئے۔ ایک سے زیادہ الفاظ والے گروپ ناموں میں ایک جگہ کے طور پر استعمال ہونے والا ایک انڈر اسکور ہونا ضروری ہے۔"
     },
     "ggfilteredlist": {
-      "description": "View the current groups that are filtered.",
+      "description": "حالیہ گروپ دیکھیں جو فلٹر کیے گئے ہیں۔",
       "example_image_url": null,
       "syntax": "%ggfilteredlist",
       "example_syntax": null,
@@ -586,7 +566,7 @@
       "aliases": null
     },
     "ggleaderboard": {
-      "description": "Shows Server/Global leaderboards for the GuessingGame.",
+      "description": "قیاس گیم کے لیے پیش کار/عالمی لیڈر بورڈ دکھاتا ہے۔",
       "example_image_url": null,
       "syntax": "%ggleaderboard [difficulty=easy/medium/hard] [mode=server/global]",
       "example_syntax": null,
@@ -597,7 +577,7 @@
       ]
     },
     "stopgg": {
-      "description": "Force-end a GuessingGame.",
+      "description": "ایک اندازہ گیم کو زبردستی ختم کریں۔.",
       "example_image_url": null,
       "syntax": "%stopgg",
       "example_syntax": null,
@@ -610,7 +590,7 @@
   },
   "Interactions": {
     "choke": {
-      "description": "Choke a member.",
+      "description": "ایک رکن کا گلا گھونٹنا۔",
       "example_image_url": null,
       "syntax": "%choke [user]",
       "example_syntax": null,
@@ -618,7 +598,7 @@
       "aliases": null
     },
     "cuddle": {
-      "description": "Cuddle a member.",
+      "description": "کسی ممبر سے گلے ملنا۔",
       "example_image_url": null,
       "syntax": "%cuddle [user]",
       "example_syntax": null,
@@ -626,7 +606,7 @@
       "aliases": null
     },
     "hug": {
-      "description": "Hug a member.",
+      "description": "ایک رکن کو گلے لگائیں۔",
       "example_image_url": null,
       "syntax": "%hug [user]",
       "example_syntax": null,
@@ -634,7 +614,7 @@
       "aliases": null
     },
     "kiss": {
-      "description": "Kiss a member.",
+      "description": "کسی ممبر کو چومو۔",
       "example_image_url": null,
       "syntax": "%kiss [user]",
       "example_syntax": null,
@@ -642,7 +622,7 @@
       "aliases": null
     },
     "lick": {
-      "description": "Lick a member.",
+      "description": "کسی ممبر کو چاٹنا۔",
       "example_image_url": null,
       "syntax": "%lick [user]",
       "example_syntax": null,
@@ -650,7 +630,7 @@
       "aliases": null
     },
     "pat": {
-      "description": "Pat a member.",
+      "description": "ایک ممبر کو تھپتھپائیں۔",
       "example_image_url": null,
       "syntax": "%pat [user]",
       "example_syntax": null,
@@ -658,7 +638,7 @@
       "aliases": null
     },
     "punch": {
-      "description": "Punch a member.",
+      "description": "کسی ممبر کو گھونسہ ماریں۔",
       "example_image_url": null,
       "syntax": "%punch [user]",
       "example_syntax": null,
@@ -666,7 +646,7 @@
       "aliases": null
     },
     "pullhair": {
-      "description": "Pull hair of a member.",
+      "description": "کسی ممبر کے بال کھینچیں۔۔",
       "example_image_url": null,
       "syntax": "%pullhair [user]",
       "example_syntax": null,
@@ -674,7 +654,7 @@
       "aliases": null
     },
     "slap": {
-      "description": "Slap a member.",
+      "description": "کسی ممبر کو تھپڑ ماریں۔",
       "example_image_url": null,
       "syntax": "%slap [user]",
       "example_syntax": null,
@@ -682,7 +662,7 @@
       "aliases": null
     },
     "spit": {
-      "description": "Spit at a member.",
+      "description": "کسی ممبر پر تھوکیں۔",
       "example_image_url": null,
       "syntax": "%spit [user]",
       "example_syntax": null,
@@ -690,7 +670,7 @@
       "aliases": null
     },
     "stab": {
-      "description": "Stab a member.",
+      "description": "ایک ممبر پر وار کریں۔",
       "example_image_url": null,
       "syntax": "%stab [user]",
       "example_syntax": null,
@@ -698,7 +678,7 @@
       "aliases": null
     },
     "stepon": {
-      "description": "Step on a member.",
+      "description": "کسی ممبر پر قدم رکھیں۔",
       "example_image_url": null,
       "syntax": "%stepon [user]",
       "example_syntax": null,
@@ -708,7 +688,7 @@
   },
   "Logging": {
     "logadd": {
-      "description": "Start logging a text channel.",
+      "description": "ٹیکسٹ چینل کو لاگ کرنا شروع کریں۔",
       "example_image_url": null,
       "syntax": "%logadd [text channel]",
       "example_syntax": null,
@@ -718,7 +698,7 @@
       "aliases": null
     },
     "logremove": {
-      "description": "Stop logging a text channel",
+      "description": "ٹیکسٹ چینل کو لاگ کرنا بند کریں۔",
       "example_image_url": null,
       "syntax": "%logremove [text channel]",
       "example_syntax": null,
@@ -728,7 +708,7 @@
       "aliases": null
     },
     "sendall": {
-      "description": "Toggle all messages going to log channel. Will only send edited and edited messages if turned off.",
+      "description": "لاگ چینل پر جانے والے تمام پیغامات کو ٹوگل کریں۔ صرف بند اور ترمیم شدہ پیغامات بھیجیں گے اگر بند کر دیا جائے۔",
       "example_image_url": null,
       "syntax": "%sendall",
       "example_syntax": null,
@@ -738,7 +718,7 @@
       "aliases": null
     },
     "startlogging": {
-      "description": "Start sending log messages in the current server and channel.",
+      "description": "موجودہ سرور اور چینل میں لاگ پیغامات بھیجنا شروع کریں۔",
       "example_image_url": null,
       "syntax": "%startlogging",
       "example_syntax": null,
@@ -748,7 +728,7 @@
       "aliases": null
     },
     "stoplogging": {
-      "description": "Stop sending log messages in the current server.",
+      "description": "موجودہ سرور میں لاگ پیغامات بھیجنا بند کریں۔",
       "example_image_url": null,
       "syntax": "%stoplogging",
       "example_syntax": null,
@@ -760,7 +740,7 @@
   },
   "Miscellaneous": {
     "8ball": {
-      "description": "Ask the 8ball a yes or no question.",
+      "description": "8 بال سے ہاں یا نہیں سوال پوچھیں۔",
       "example_image_url": null,
       "syntax": "%8ball [question]",
       "example_syntax": null,
@@ -770,7 +750,7 @@
       ]
     },
     "addnoti": {
-      "description": "Receive a DM whenever a phrase/word is said in the server.",
+      "description": "جب بھی کوئی جملہ/لفظ سرور میں کہا جائے تو ڈی ایم وصول کریں۔",
       "example_image_url": null,
       "syntax": "%addnoti <phrase>",
       "example_syntax": null,
@@ -778,7 +758,7 @@
       "aliases": null
     },
     "botinfo": {
-      "description": "Displays general information about the Bot.",
+      "description": "بوٹ کے بارے میں عمومی معلومات دکھاتا ہے۔",
       "example_image_url": null,
       "syntax": "%botinfo",
       "example_syntax": null,
@@ -786,25 +766,25 @@
       "aliases": null
     },
     "checkprefix": {
-      "description": "Check the current prefix.",
+      "description": "موجودہ سابقہ ​​چیک کریں۔",
       "example_image_url": null,
       "syntax": "%checkprefix",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null,
-      "note": "This command will always work with the bot's default prefix."
+      "note": "یہ کمانڈ ہمیشہ بوٹ کے ڈیفالٹ سابقے کے ساتھ کام کرے گی۔"
     },
     "choose": {
-      "description": "Choose between a selection of options.",
+      "description": "اختیارات کے انتخاب کے درمیان انتخاب کریں۔",
       "example_image_url": null,
       "syntax": "%choose <options>",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null,
-      "note": "Underscores are used for spaces between words. Spaces are used to separate choices."
+      "note": "انڈر سکور الفاظ کے درمیان خالی جگہوں کے لیے استعمال ہوتے ہیں۔ خالی جگہوں کو انتخاب کو الگ کرنے کے لیے استعمال کیا جاتا ہے۔"
     },
     "displayemoji": {
-      "description": "Displays an emoji at a larger size.",
+      "description": "بڑے سائز میں ایک ایموجی دکھاتا ہے۔",
       "example_image_url": null,
       "syntax": "%displayemoji <emoji>",
       "example_syntax": null,
@@ -812,7 +792,7 @@
       "aliases": null
     },
     "flip": {
-      "description": "Flip a coin.",
+      "description": "سکہ اچھالو.",
       "example_image_url": null,
       "syntax": "%flip",
       "example_syntax": null,
@@ -823,7 +803,7 @@
       ]
     },
     "invite": {
-      "description": "Invite link to add the Bot to a server.",
+      "description": "بوٹ کو سرور میں شامل کرنے کے لیے لنک کی دعوت دیں۔",
       "example_image_url": null,
       "syntax": "%invite",
       "example_syntax": null,
@@ -831,7 +811,7 @@
       "aliases": null
     },
     "listnoti": {
-      "description": "List all your notification phrases for the current server.",
+      "description": "موجودہ سرور کے لیے اپنے تمام نوٹیفکیشن جملے درج کریں۔",
       "example_image_url": null,
       "syntax": "%listnoti",
       "example_syntax": null,
@@ -839,7 +819,7 @@
       "aliases": null
     },
     "patreon": {
-      "description": "Displays link to Patreon.",
+      "description": "پیٹرون کا لنک دکھاتا ہے۔",
       "example_image_url": null,
       "syntax": "%patreon",
       "example_syntax": null,
@@ -849,7 +829,7 @@
       ]
     },
     "ping": {
-      "description": "Shows Overall Latency to Discord.",
+      "description": "تضاد پر مجموعی تاخیر دکھاتا ہے۔",
       "example_image_url": null,
       "syntax": "%ping",
       "example_syntax": null,
@@ -859,7 +839,7 @@
       ]
     },
     "random": {
-      "description": "Choose a random integer from a to b.",
+      "description": "ایک سے ب تک بے ترتیب انٹیگر کا انتخاب کریں.",
       "example_image_url": null,
       "syntax": "%random <a> <b>",
       "example_syntax": null,
@@ -869,10 +849,10 @@
         "rand",
         "randint"
       ],
-      "note": "Random integer may include b."
+      "note": "بے ترتیب انٹیگر میں بی شامل ہو سکتا ہے۔"
     },
     "removenoti": {
-      "description": "Remove a phrase/word from notifying you when it is said in the current server.",
+      "description": "جب حالیہ پیش کار میں کہا جائے تو آپ کو مطلع کرنے سے ایک فقرہ/لفظ ہٹائیں۔.",
       "example_image_url": null,
       "syntax": "%removenoti <phrase/word>",
       "example_syntax": null,
@@ -882,7 +862,7 @@
       ]
     },
     "report": {
-      "description": "Report an issue with the Bot.",
+      "description": "بوٹ کے ساتھ کسی مسئلے کی اطلاع دیں۔",
       "example_image_url": null,
       "syntax": "%report <issue>",
       "example_syntax": null,
@@ -890,7 +870,7 @@
       "aliases": null
     },
     "servercount": {
-      "description": "Shows the amount of servers connected to the Bot.",
+      "description": "بوٹ سے منسلک سرورز کی مقدار دکھاتا ہے۔",
       "example_image_url": null,
       "syntax": "%servercount",
       "example_syntax": null,
@@ -898,7 +878,7 @@
       "aliases": null
     },
     "serverinfo": {
-      "description": "View information about the current server.",
+      "description": "موجودہ سرور کے بارے میں معلومات دیکھیں۔",
       "example_image_url": null,
       "syntax": "%serverinfo",
       "example_syntax": null,
@@ -906,7 +886,7 @@
       "aliases": null
     },
     "setlanguage": {
-      "description": "Changes language of the Bot.",
+      "description": "بوٹ کا زبان بدلتی ہے۔",
       "example_image_url": null,
       "syntax": "%setlanguage <language choice>",
       "example_syntax": null,
@@ -914,7 +894,7 @@
       "aliases": null
     },
     "shard": {
-      "description": "Gets shard information about the current server.",
+      "description": "حالیہ پیش کار کے بارے میں سخت معلومات حاصل کرتا ہے۔.",
       "example_image_url": null,
       "syntax": "%shard",
       "example_syntax": null,
@@ -924,7 +904,7 @@
       ]
     },
     "stopgames": {
-      "description": "End all games that you are hosting or that are in the channel.",
+      "description": "وہ تمام کھیل ختم کریں جو آپ میزبانی کر رہے ہیں یا جو چینل میں ہیں۔.",
       "example_image_url": null,
       "syntax": "%stopgames",
       "example_syntax": null,
@@ -939,7 +919,7 @@
       ]
     },
     "suggest": {
-      "description": "Suggest a feature for the Bot.",
+      "description": "بوٹ کے لیے کوئی فیچر تجویز کریں۔",
       "example_image_url": null,
       "syntax": "%suggest <suggestion>",
       "example_syntax": null,
@@ -947,7 +927,7 @@
       "aliases": null
     },
     "support": {
-      "description": "Discord Invite link to the Bot's Support Server.",
+      "description": "بوٹ کے سپورٹ سرور سے ڈسکورڈ انوائٹ لنک۔",
       "example_image_url": null,
       "syntax": "%support",
       "example_syntax": null,
@@ -955,7 +935,7 @@
       "aliases": null
     },
     "translate": {
-      "description": "Translate between languages using Papago.",
+      "description": "پاپاگو کا استعمال کرتے ہوئے زبانوں کے درمیان ترجمہ کریں۔",
       "example_image_url": null,
       "syntax": "%translate <from language> <to language> <message>",
       "example_syntax": null,
@@ -966,7 +946,7 @@
       ]
     },
     "vote": {
-      "description": "Direct link to vote for the Bot.",
+      "description": "بوٹ کو ووٹ دینے کے لیے براہ راست لنک۔",
       "example_image_url": null,
       "syntax": "%vote",
       "example_syntax": null,
@@ -976,7 +956,7 @@
   },
   "Moderator": {
     "addalias": {
-      "description": "Add an alias to an idol/group.",
+      "description": "آئیڈیل/گروپ میں ایک عرف شامل کریں۔",
       "example_image_url": null,
       "syntax": "%addalias <alias> <idol/group id> [mode=idol/group]",
       "example_syntax": null,
@@ -984,10 +964,10 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "Underscores for the alias are spaces. If a Bot Moderator uses this command, it will be a global (not local) alias."
+      "note": "عرف کے لیے انڈر سکور خالی جگہیں ہیں۔ اگر کوئی بوٹ ماڈریٹر یہ کمانڈ استعمال کرتا ہے تو یہ عالمی (مقامی نہیں) عرف ہوگا۔"
     },
     "addemoji": {
-      "description": "Adds emojis to the server.",
+      "description": "سرور میں ایموجیز شامل کرتا ہے۔",
       "example_image_url": null,
       "syntax": "%addemoji <urls/emojis> [emoji_name]",
       "example_syntax": null,
@@ -1000,7 +980,7 @@
       ]
     },
     "ban": {
-      "description": "Ban a member.",
+      "description": "ممبر پر پابندی لگائیں۔",
       "example_image_url": null,
       "syntax": "%ban [user] [reason=No Reason]",
       "example_syntax": null,
@@ -1010,7 +990,7 @@
       "aliases": null
     },
     "clear": {
-      "description": "Prunes messages in the text channel.",
+      "description": "ٹیکسٹ چینل میں پیغامات کو چھپاتا ہے۔",
       "example_image_url": null,
       "syntax": "%clear <amount> [user]",
       "example_syntax": null,
@@ -1020,10 +1000,10 @@
       "aliases": [
         "prune"
       ],
-      "note": "Amount limit is 1000."
+      "note": "رقم کی حد 1000 ہے۔"
     },
     "deletealias": {
-      "description": "Delete an alias from an idol/group.",
+      "description": "ایک آئیڈیل/گروپ سے ایک عرف حذف کریں۔",
       "example_image_url": null,
       "syntax": "%deletealias <alias> <idol/group id> [mode=idol/group]",
       "example_syntax": null,
@@ -1033,10 +1013,10 @@
       "aliases": [
         "removealias"
       ],
-      "note": "Underscores for the alias are spaces. If a Bot Moderator uses this command, it will be a global (not local) alias."
+      "note": "عرف کے لیے انڈر سکور خالی جگہیں ہیں۔ اگر کوئی بوٹ ماڈریٹر یہ کمانڈ استعمال کرتا ہے تو یہ عالمی (مقامی نہیں) عرف ہوگا۔"
     },
     "disableinteraction": {
-      "description": "Disable an interaction on the server.",
+      "description": "سرور پر تعامل کو غیر فعال کریں۔",
       "example_image_url": null,
       "syntax": "%disableinteraction <interaction>",
       "example_syntax": null,
@@ -1044,10 +1024,10 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "To re-enable, use the same command again."
+      "note": "دوبارہ فعال کرنے کے لیے ، وہی کمانڈ دوبارہ استعمال کریں۔"
     },
     "kick": {
-      "description": "Kick a member.",
+      "description": "ایک ممبر کو باہر نکالنیں۔",
       "example_image_url": null,
       "syntax": "%kick [user] [reason=No Reason]",
       "example_syntax": null,
@@ -1057,7 +1037,7 @@
       "aliases": null
     },
     "mute": {
-      "description": "Mutes a member.",
+      "description": "کسی ممبر کو خاموش کرتا ہے۔",
       "example_image_url": null,
       "syntax": "%mute [user] [reason]",
       "example_syntax": null,
@@ -1068,7 +1048,7 @@
       "aliases": null
     },
     "say": {
-      "description": "Make the Bot say a message.",
+      "description": "بوٹ کو ایک پیغام کہنے پر مجبور کریں۔",
       "example_image_url": null,
       "syntax": "%say [text channel] [message]",
       "example_syntax": null,
@@ -1076,10 +1056,10 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "If a text channel is not provided, it will send the message in the current channel."
+      "note": "اگر کوئی ٹیکسٹ چینل فراہم نہیں کیا جاتا ہے تو ، یہ پیغام موجودہ چینل میں بھیجے گا۔"
     },
     "sayembed": {
-      "description": "Make the Bot say an embed message.",
+      "description": "بوٹ کو ایک ایمبیڈ پیغام بنائیں۔",
       "example_image_url": null,
       "syntax": "%sayembed [text channel] [embed format]",
       "example_syntax": null,
@@ -1087,10 +1067,10 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "Follows the format from https://embedbuilder.nadekobot.me/. If a text channel is not provided, it will send the message in the current channel."
+      "note": "https://embedbuilder.nadekobot.me/ سے فارمیٹ کی پیروی کرتا ہے۔ اگر کوئی ٹیکسٹ چینل فراہم نہیں کیا جاتا ہے تو ، یہ پیغام موجودہ چینل میں بھیجے گا۔"
     },
     "setprefix": {
-      "description": "Set the server prefix.",
+      "description": "سرور کا سابقہ ​​سیٹ کریں۔",
       "example_image_url": null,
       "syntax": "%setprefix [prefix=%]",
       "example_syntax": null,
@@ -1098,10 +1078,10 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "Using the command with the default prefix (and no new prefix) will set it back to the default."
+      "note": "پہلے سے طے شدہ سابقہ ​​(اور کوئی نیا سابقہ) کے ساتھ کمانڈ کا استعمال اسے پہلے سے طے شدہ پر سیٹ کر دے گا۔"
     },
     "tempchannel": {
-      "description": "Make the current channel a temporary channel deleting messages after a delay.",
+      "description": "تاخیر کے بعد موجودہ چینل کو پیغامات کو حذف کرنے والا عارضی چینل بنائیں۔",
       "example_image_url": null,
       "syntax": "%tempchannel [delay=-1]",
       "example_syntax": null,
@@ -1109,10 +1089,10 @@
       "aliases": [
         "temp"
       ],
-      "note": "The time delay must be greater than a minute. If the delay is -1, it will remove the channel as a temp channel. The delay must be put in seconds."
+      "note": "وقت کی تاخیر ایک منٹ سے زیادہ ہونی چاہیے۔ اگر تاخیر -1 ہے تو ، یہ چینل کو عارضی چینل کے طور پر ہٹا دے گا۔ تاخیر کو سیکنڈ میں ڈالنا چاہیے۔"
     },
     "togglegames": {
-      "description": "Toggle the ability to play games in a text channel.",
+      "description": "ٹیکسٹ چینل میں گیم کھیلنے کی صلاحیت کو ٹوگل کریں۔",
       "example_image_url": null,
       "syntax": "%togglegames [text channel]",
       "example_syntax": null,
@@ -1122,7 +1102,7 @@
       "aliases": null
     },
     "unban": {
-      "description": "Unban a user.",
+      "description": "صارف پر سے پابندی ہٹائیں۔",
       "example_image_url": null,
       "syntax": "%unban [user] [reason=No Reason]",
       "example_syntax": null,
@@ -1132,7 +1112,7 @@
       "aliases": null
     },
     "unmute": {
-      "description": "Unmute a member.",
+      "description": "ممبر سے گونگا ہٹائیں۔",
       "example_image_url": null,
       "syntax": "%unmute [user]",
       "example_syntax": null,
@@ -1143,7 +1123,7 @@
       "aliases": null
     },
     "welcome": {
-      "description": "Set a welcome message in the current channel.",
+      "description": "موجودہ چینل میں ایک خوش آمدید پیغام مقرر کریں۔",
       "example_image_url": null,
       "syntax": "%welcome [message]",
       "example_syntax": null,
@@ -1151,10 +1131,10 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "Use the command with no message to disable the welcome message. If the message contains %user, it will mention the user. If the message contains %guild_name, the server name will be added."
+      "note": "خوش آمدید پیغام کو غیر فعال کرنے کے لیے کمانڈ کو بغیر کسی پیغام کے استعمال کریں۔ اگر پیغام میں %user ہے تو یہ صارف کا ذکر کرے گا۔ اگر پیغام میں %guild_name ہے ، سرور کا نام شامل کیا جائے گا۔"
     },
     "welcomerole": {
-      "description": "The role to give a user when they first join the server.",
+      "description": "جب وہ پہلی بار سرور میں شامل ہوتا ہے تو اسے دینے کا کردار۔",
       "example_image_url": null,
       "syntax": "%welcomerole [role]",
       "example_syntax": null,
@@ -1166,7 +1146,7 @@
   },
   "Music": {
     "join": {
-      "description": "Makes the Bot join the current voice channel.",
+      "description": "بوٹ کو موجودہ صوتی چینل میں شامل کرتا ہے۔",
       "example_image_url": null,
       "syntax": "%join",
       "example_syntax": null,
@@ -1176,7 +1156,7 @@
       ]
     },
     "move": {
-      "description": "Make a song the next to play without skipping the current song.",
+      "description": "موجودہ گانے کو چھوڑے بغیر چلانے کے لیے اگلا گانا بنائیں۔",
       "example_image_url": null,
       "syntax": "%move <song number>",
       "example_syntax": null,
@@ -1186,7 +1166,7 @@
       ]
     },
     "pause": {
-      "description": "Pause the player.",
+      "description": "گانے کو روکیں۔",
       "example_image_url": null,
       "syntax": "%pause",
       "example_syntax": null,
@@ -1194,7 +1174,7 @@
       "aliases": null
     },
     "play": {
-      "description": "Play a song based on a search query.",
+      "description": "تلاش کے سوال پر مبنی گانا چلائیں۔",
       "example_image_url": null,
       "syntax": "%play <url/song/query>",
       "example_syntax": null,
@@ -1204,7 +1184,7 @@
       ]
     },
     "queue": {
-      "description": "Displays the currently queued songs in the player.",
+      "description": "پلیئر میں فی الحال قطار میں لگے گانے دکھاتا ہے۔",
       "example_image_url": null,
       "syntax": "%queue [page number=1]",
       "example_syntax": null,
@@ -1215,7 +1195,7 @@
       ]
     },
     "remove": {
-      "description": "Remove a song from the queue.",
+      "description": "قطار سے ایک گانا ہٹا دیں۔",
       "example_image_url": null,
       "syntax": "%remove <song number>",
       "example_syntax": null,
@@ -1223,7 +1203,7 @@
       "aliases": null
     },
     "resume": {
-      "description": "Resume a paused player.",
+      "description": "ایک رکا ہوا گانا دوبارہ شروع کریں۔",
       "example_image_url": null,
       "syntax": "%resume",
       "example_syntax": null,
@@ -1233,7 +1213,7 @@
       ]
     },
     "shuffle": {
-      "description": "Shuffle the playlist/queue.",
+      "description": "پلے لسٹ/قطار کو شفل کریں۔",
       "example_image_url": null,
       "syntax": "%shuffle ",
       "example_syntax": null,
@@ -1241,7 +1221,7 @@
       "aliases": null
     },
     "skip": {
-      "description": "Skip the current song.",
+      "description": "موجودہ گانا چھوڑیں۔",
       "example_image_url": null,
       "syntax": "%skip",
       "example_syntax": null,
@@ -1249,7 +1229,7 @@
       "aliases": null
     },
     "stop": {
-      "description": "Disconnects from the voice channel and resets the queue.",
+      "description": "صوتی چینل سے منقطع ہوجاتا ہے اور قطار کو ختم کرتا ہے۔",
       "example_image_url": null,
       "syntax": "%stop",
       "example_syntax": null,
@@ -1260,7 +1240,7 @@
       ]
     },
     "volume": {
-      "description": "Change the player's volume.",
+      "description": "گانے کا حجم تبدیل کریں۔",
       "example_image_url": null,
       "syntax": "%volume <volume>",
       "example_syntax": null,
@@ -1270,18 +1250,18 @@
       ]
     },
     "lyrics": {
-      "description": "Get the lyrics of a song.",
+      "description": "ایک گانے کی دھن حاصل کریں۔",
       "example_image_url": null,
       "syntax": "%lyrics <song query>",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null,
-      "note": "The lyrics are retrieved from https://api.ksoft.si/"
+      "note": "دھن https://api.ksoft.si/ سے حاصل کی گئی ہے"
     }
   },
   "Profile": {
     "avatar": {
-      "description": "View a member's avatar.",
+      "description": "ممبر کا اوتار دیکھیں۔",
       "example_image_url": null,
       "syntax": "%avatar [user]",
       "example_syntax": null,
@@ -1289,7 +1269,7 @@
       "aliases": null
     },
     "profile": {
-      "description": "View a member's profile.",
+      "description": "کسی ممبر کا پروفائل دیکھیں۔",
       "example_image_url": null,
       "syntax": "%profile [user]",
       "example_syntax": null,
@@ -1299,7 +1279,7 @@
   },
   "LastFM": {
     "fm": {
-      "description": "Get information about a Last FM account.",
+      "description": "Last FM اکاؤنٹ کے بارے میں معلومات حاصل کریں۔",
       "example_image_url": null,
       "syntax": "%fm [user/lastfm username]",
       "example_syntax": null,
@@ -1307,7 +1287,7 @@
       "aliases": null
     },
     "recenttracks": {
-      "description": "Get the recent tracks of a Last FM Account.",
+      "description": "Last FM اکاؤنٹ کے حالیہ ٹریک حاصل کریں۔",
       "example_image_url": null,
       "syntax": "%recenttracks [user/lastfm username]",
       "example_syntax": null,
@@ -1318,7 +1298,7 @@
       ]
     },
     "recent": {
-      "description": "Get the most recent track of a Last FM Account.",
+      "description": "Last FM اکاؤنٹ کا تازہ ترین ٹریک حاصل کریں۔",
       "example_image_url": null,
       "syntax": "%recent [user/lastfm username]",
       "example_syntax": null,
@@ -1328,7 +1308,7 @@
       ]
     },
     "topalbums": {
-      "description": "See the top albums of a Last FM Account.",
+      "description": "Last FM اکاؤنٹ کے ٹاپ البمز دیکھیں۔",
       "example_image_url": null,
       "syntax": "%topalbums [user/lastfm username]",
       "example_syntax": null,
@@ -1338,7 +1318,7 @@
       ]
     },
     "topartists": {
-      "description": "See the top artists of a Last FM Account.",
+      "description": "Last FM اکاؤنٹ کے سرفہرست فنکار دیکھیں۔",
       "example_image_url": null,
       "syntax": "%topartists [user/lastfm username]",
       "example_syntax": null,
@@ -1348,7 +1328,7 @@
       ]
     },
     "toptracks": {
-      "description": "See the top tracks of a Last FM Account.",
+      "description": "Last FM اکاؤنٹ کے ٹاپ ٹریک دیکھیں۔",
       "example_image_url": null,
       "syntax": "%toptracks [user/lastfm username]",
       "example_syntax": null,
@@ -1358,7 +1338,7 @@
       ]
     },
     "setfm": {
-      "description": "Attach a LastFM username to your Discord account.",
+      "description": "اپنے Discord اکاؤنٹ میں LastFM صارف نام منسلک کریں۔",
       "example_image_url": null,
       "syntax": "%setfm <lastfm username>",
       "example_syntax": null,
@@ -1368,7 +1348,7 @@
   },
   "Wolfram": {
     "w": {
-      "description": "Send a request to Wolfram",
+      "description": "وولفرم کو ایک درخواست بھیجیں۔",
       "example_image_url": null,
       "syntax": "%w <query>",
       "example_syntax": null,
@@ -1378,7 +1358,7 @@
   },
   "Twitter": {
     "deletetweet": {
-      "description": "Delete a tweet by it's ID.",
+      "description": "اس کی آئی ڈی سے ٹویٹ ڈیلیٹ کریں۔",
       "example_image_url": null,
       "syntax": "%deletetweet <tweet id>",
       "example_syntax": null,
@@ -1388,7 +1368,7 @@
       "aliases": null
     },
     "recenttweets": {
-      "description": "View the recent tweets.",
+      "description": "حالیہ ٹویٹس دیکھیں۔",
       "example_image_url": null,
       "syntax": "%recenttweets [amount of tweets=20]",
       "example_syntax": null,
@@ -1398,7 +1378,7 @@
       "aliases": null
     },
     "tweet": {
-      "description": "Tweets a status update on Twitter.",
+      "description": "ٹویٹر پر اسٹیٹس اپ ڈیٹ ٹویٹس۔",
       "example_image_url": null,
       "syntax": "%tweet <tweet>",
       "example_syntax": null,
@@ -1408,13 +1388,13 @@
       "aliases": null
     },
     "twitterupdates": {
-      "description": "Receive Updates for Twitter.",
+      "description": "ٹویٹر کے لیے اپ ڈیٹس حاصل کریں۔",
       "example_image_url": null,
       "syntax": "%twitterupdates <code/group/idol/list> <account username, group id, idol id> [role id]",
       "example_syntax": null,
       "sub_commands": {
         "code": {
-          "description": "Follow a Twitter channel based on the account username.",
+          "description": "اکاؤنٹ کے صارف نام کی بنیاد پر ایک ٹویٹر چینل پر عمل کریں۔",
           "example_image_url": null,
           "syntax": "%twitterupdates code <channel username> [role]",
           "example_syntax": null,
@@ -1427,7 +1407,7 @@
           ]
         },
         "group": {
-          "description": "Follow a Twitter channel belonging to a Group ID If they have one.",
+          "description": "ایک ٹوئٹر چینل کو فالو کریں جس کا تعلق گروپ آئی ڈی سے ہے اگر ان کے پاس ہے۔",
           "example_image_url": null,
           "syntax": "%twitterupdates group <group id> [role]",
           "example_syntax": null,
@@ -1437,7 +1417,7 @@
           "aliases": null
         },
         "idol": {
-          "description": "Follow a Twitter channel belonging to an Idol ID If they have one.",
+          "description": "آئیڈل آئی ڈی سے تعلق رکھنے والے ٹویٹر چینل کو فالو کریں اگر ان کے پاس ہے۔",
           "example_image_url": null,
           "syntax": "%twitterupdates idol <idol id> [role]",
           "example_syntax": null,
@@ -1447,7 +1427,7 @@
           "aliases": null
         },
         "list": {
-          "description": "Lists the Twitter channels currently being followed in the text channel.",
+          "description": "فی الحال ٹیکسٹ چینل میں فالو والے ٹویٹر چینلز کی فہرست۔",
           "example_image_url": null,
           "syntax": "%twitterupdates list",
           "example_syntax": null,
@@ -1463,12 +1443,12 @@
       "aliases": [
         "twitter"
       ],
-      "note": "This command contains sub-commands. This means any following arguments are respective to the first argument."
+      "note": "یہ کمانڈ ذیلی کمانڈز پر مشتمل ہے۔ اس کا مطلب ہے کہ مندرجہ ذیل دلائل پہلی دلیل سے متعلق ہیں۔"
     }
   },
   "UnScramble": {
     "unscramble": {
-      "description": "Start an Idol Unscramble Game in the current channel.",
+      "description": "موجودہ چینل میں آئیڈل ان سکرمبل گیم شروع کریں۔",
       "example_image_url": null,
       "syntax": "%unscramble [gender=all] [difficulty=medium] [rounds=20] [timeout=20]",
       "example_syntax": null,
@@ -1476,10 +1456,10 @@
       "aliases": [
         "us"
       ],
-      "note": "The host of the game can type stop or end to end the game or skip to skip the current round without affecting the round number."
+      "note": "گیم کا میزبان گیم کو ختم کرنے کے لیے سٹاپ یا اینڈ ٹائپ کرسکتا ہے یا راؤنڈ نمبر کو متاثر کیے بغیر موجودہ راؤنڈ کو چھوڑ سکتا ہے۔"
     },
     "usleaderboard": {
-      "description": "Shows Server/Global leaderboards for the Unscramble Game.",
+      "description": "Unscramble گیم کے لیے سرور/گلوبل لیڈر بورڈ دکھاتا ہے۔",
       "example_image_url": null,
       "syntax": "%usleaderboard [difficulty=easy/medium/hard] [mode=server/global]",
       "example_syntax": null,
@@ -1490,7 +1470,7 @@
       ]
     },
     "stopus": {
-      "description": "Force-end an Unscramble Game.",
+      "description": "ایک انسکرامبل گیم کو زبردستی ختم کریں۔",
       "example_image_url": null,
       "syntax": "%stopus",
       "example_syntax": null,
@@ -1503,7 +1483,7 @@
   },
   "SelfAssignRoles": {
     "addrole": {
-      "description": "Add a role to be self-assignable.",
+      "description": "خود تفویض ہونے کے لیے ایک کردار شامل کریں۔",
       "example_image_url": null,
       "syntax": "%addrole <role> <role name>",
       "example_syntax": null,
@@ -1513,7 +1493,7 @@
       "aliases": null
     },
     "listroles": {
-      "description": "List all of the self-assignable roles in the server.",
+      "description": "سرور میں تمام خود مختار کرداروں کی فہرست بنائیں۔",
       "example_image_url": null,
       "syntax": "%listroles",
       "example_syntax": null,
@@ -1523,7 +1503,7 @@
       "aliases": null
     },
     "removerole": {
-      "description": "Remove a self-assignable role based on the role name given.",
+      "description": "دیئے گئے رول کے نام کی بنیاد پر ایک خود مختار رول کو ہٹا دیں۔",
       "example_image_url": null,
       "syntax": "%removerole <role name>",
       "example_syntax": null,
@@ -1533,7 +1513,7 @@
       "aliases": null
     },
     "sendrolemessage": {
-      "description": "Sends the default role message in the current channel.",
+      "description": "موجودہ چینل میں ڈیفالٹ رول پیغام بھیجتا ہے۔",
       "example_image_url": null,
       "syntax": "%sendrolemessage",
       "example_syntax": null,
@@ -1541,10 +1521,10 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "The roles will work without this command, but should be used to have a list of roles."
+      "note": "کردار اس حکم کے بغیر کام کریں گے ، لیکن کرداروں کی فہرست رکھنے کے لیے استعمال کیا جانا چاہیے۔"
     },
     "setrolechannel": {
-      "description": "Set the channel for self-assignable roles to be used in.",
+      "description": "استعمال ہونے والے خود مختار کرداروں کے لیے چینل سیٹ کریں۔",
       "example_image_url": null,
       "syntax": "%setrolechannel [text channel]",
       "example_syntax": null,
@@ -1552,12 +1532,12 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "Since this command will erase all future messages, it is suggested to use %sendrolemessage before this one."
+      "note": "چونکہ یہ کمانڈ مستقبل کے تمام پیغامات کو مٹا دے گی ، اس لیے اس سے پہلےsendrolemessage%s استعمال کرنے کی تجویز ہے-"
     }
   },
   "Reminder": {
     "gettimezone": {
-      "description": "Get your current set timezone.",
+      "description": "اپنا موجودہ سیٹ ٹائم زون حاصل کریں۔",
       "example_image_url": null,
       "syntax": "%gettz [timezone]",
       "example_syntax": null,
@@ -1568,7 +1548,7 @@
       ]
     },
     "listreminders": {
-      "description": "List out your reminders.",
+      "description": "اپنی یاد دہانیوں کی فہرست بنائیں۔",
       "example_image_url": null,
       "syntax": "%listreminders",
       "example_syntax": null,
@@ -1580,7 +1560,7 @@
       ]
     },
     "remindme": {
-      "description": "Create a reminder to do a task at a certain time.",
+      "description": "ایک خاص وقت پر کام کرنے کے لیے ایک یاد دہانی بنائیں۔",
       "example_image_url": null,
       "syntax": "%remindme to ______ at 9PM or %remindme to ____ in 6hrs 30mins",
       "example_syntax": null,
@@ -1588,10 +1568,10 @@
       "aliases": [
         "remind"
       ],
-      "note": "The user input is fairly flexible for this command."
+      "note": "اس کمانڈ کے لیے صارف کا ان پٹ کافی لچکدار ہے۔"
     },
     "removereminder": {
-      "description": "Remove a reminder based on it's index.",
+      "description": "اس کے انڈیکس کی بنیاد پر ایک یاد دہانی کو ہٹا دیں۔",
       "example_image_url": null,
       "syntax": "%removereminder <reminder index>",
       "example_syntax": null,
@@ -1601,7 +1581,7 @@
       ]
     },
     "settimezone": {
-      "description": "Set your local timezone with a timezone abbreviation and country code.",
+      "description": "اپنے مقامی ٹائم زون کو ٹائم زون مخفف اور کنٹری کوڈ کے ساتھ سیٹ کریں۔",
       "example_image_url": null,
       "syntax": "%settimezone (timezone name) (country code)",
       "example_syntax": null,
@@ -1609,12 +1589,12 @@
       "aliases": [
         "settz"
       ],
-      "note": "The country code is the short-handed version of the location (ex: USA)."
+      "note": "ملک کا کوڈ محل وقوع کا مختصر ہاتھ والا ورژن ہے (سابقہ: امریکہ)۔"
     }
   },
   "Twitch": {
     "addtwitch": {
-      "description": "Adds a Twitch username to keep track of.",
+      "description": "ٹریک رکھنے کے لیے ایک Twitch صارف نام شامل کرتا ہے۔",
       "example_image_url": null,
       "syntax": "%addtwitch <twitch username>",
       "example_syntax": null,
@@ -1622,10 +1602,10 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "Maximum 2 Twitch channels per server."
+      "note": "فی سرور زیادہ سے زیادہ 2 ٹوئچ چینلز۔"
     },
     "listtwitch": {
-      "description": "List the Twitch channels the server follows.",
+      "description": "سرور کی پیروی کرنے والے ٹوئچ چینلز کی فہرست بنائیں۔",
       "example_image_url": null,
       "syntax": "%listtwitch",
       "example_syntax": null,
@@ -1635,7 +1615,7 @@
       "aliases": null
     },
     "removetwitch": {
-      "description": "Remove a Twitch username that is being kept track of.",
+      "description": "ایک Twitch صارف نام کو ہٹا دیں جس کا ٹریک رکھا جا رہا ہے۔",
       "example_image_url": null,
       "syntax": "%removetwitch <twitch username>",
       "example_syntax": null,
@@ -1645,7 +1625,7 @@
       "aliases": null
     },
     "settwitchchannel": {
-      "description": "Set the Discord channel that the Twitch announcements will be posted on.",
+      "description": "ڈسکارڈ چینل سیٹ کریں جس پر ٹوئچ اعلانات شائع کیے جائیں گے۔",
       "example_image_url": null,
       "syntax": "%settwitchchannel [text channel]",
       "example_syntax": null,
@@ -1655,7 +1635,7 @@
       "aliases": null
     },
     "settwitchrole": {
-      "description": "Set the Discord Role that will be mentioned on Twitch announcements.",
+      "description": "ڈسکارڈ رول سیٹ کریں جس کا ذکر ٹوئچ کے اعلانات پر کیا جائے گا۔",
       "example_image_url": null,
       "syntax": "%settwitchrole [role]",
       "example_syntax": null,
@@ -1667,7 +1647,7 @@
   },
   "BotOwner": {
     "addcards": {
-      "description": "Fill the cards table with the default card names.",
+      "description": "کارڈ ٹیبل کو ڈیفالٹ کارڈ کے ناموں سے پُر کریں۔",
       "example_image_url": null,
       "syntax": "%addcards",
       "example_syntax": null,
@@ -1677,7 +1657,7 @@
       "aliases": null
     },
     "addpatreon": {
-      "description": "Adds a permanent patron",
+      "description": "ایک مستقل پیٹرون شامل کرتا ہے۔",
       "example_image_url": null,
       "syntax": "%addpatreon <user ids>",
       "example_syntax": null,
@@ -1685,20 +1665,10 @@
         "Bot Owner"
       ],
       "aliases": null,
-      "note": "Use commas to separate user ids."
-    },
-    "approve": {
-      "description": "Approve a query id for an unregistered Group or Idol.",
-      "example_image_url": null,
-      "syntax": "%approve <query id> [mode=idol/group]",
-      "example_syntax": null,
-      "permissions_needed": [
-        "Bot Owner"
-      ],
-      "aliases": null
+      "note": "صارف آئی ڈی کو الگ کرنے کے لیے کوما استعمال کریں۔"
     },
     "generateplayingcards": {
-      "description": "Generate Custom Playing Cards with Idol Avatars.",
+      "description": "آئیڈل اوتار کے ساتھ کسٹم پلےنگ کارڈز بنائیں۔",
       "example_image_url": null,
       "syntax": "%generateplayingcards",
       "example_syntax": null,
@@ -1708,7 +1678,7 @@
       "aliases": null
     },
     "removepatreon": {
-      "description": "Removes a permanent patron.",
+      "description": "ایک مستقل پیٹرون کو ہٹا دیتا ہے۔",
       "example_image_url": null,
       "syntax": "%removepatreon <user ids>",
       "example_syntax": null,
@@ -1716,10 +1686,10 @@
         "Bot Owner"
       ],
       "aliases": null,
-      "note": "Use commas to separate user ids."
+      "note": "صارف آئی ڈی کو الگ کرنے کے لیے کوما استعمال کریں۔"
     },
     "resetcache": {
-      "description": "Reset Cache",
+      "description": "کیش کو دوبارہ ترتیب دیں۔",
       "example_image_url": null,
       "syntax": "%resetcache",
       "example_syntax": null,
@@ -1729,7 +1699,7 @@
       "aliases": null
     },
     "send": {
-      "description": "Send a message to a text channel.",
+      "description": "ٹیکسٹ چینل کو پیغام بھیجیں۔",
       "example_image_url": null,
       "syntax": "%send <channel id> <message>",
       "example_syntax": null,
@@ -1739,7 +1709,7 @@
       "aliases": null
     },
     "reload": {
-      "description": "Will hot reload all of IreneBot, IreneUtility, and any other self-made packages.",
+      "description": "آئیرین بوٹ ، آئرین یوٹیلٹی ، اور کسی بھی دوسرے خود ساختہ پیکیج کو دوبارہ لوڈ کریں گے۔",
       "example_image_url": null,
       "syntax": "%reload",
       "example_syntax": null,
@@ -1749,7 +1719,7 @@
       "aliases": null
     },
     "reloadmodule": {
-      "description": "Reload a module from it's name.",
+      "description": "اس کے نام سے ایک ماڈیول دوبارہ لوڈ کریں۔",
       "example_image_url": null,
       "syntax": "%reloadmodule <module name>",
       "example_syntax": null,
@@ -1761,7 +1731,7 @@
       ]
     },
     "reloadmodules": {
-      "description": "Reload all modules.",
+      "description": "تمام ماڈیولز کو دوبارہ لوڈ کریں۔",
       "example_image_url": null,
       "syntax": "%reloadmodules",
       "example_syntax": null,
@@ -1773,7 +1743,7 @@
       ]
     },
     "reloadutility": {
-      "description": "Reloads the utility package for the bot.",
+      "description": "بوٹ کے لیے یوٹیلیٹی پیکیج کو دوبارہ لوڈ کرتا ہے۔",
       "example_image_url": null,
       "syntax": "%reloadutility",
       "example_syntax": null,
@@ -1783,7 +1753,7 @@
       "aliases": null
     },
     "resetgroupcache": {
-      "description": "Reset Group Object Cache.",
+      "description": "گروپ آبجیکٹ کیشے کو ری سیٹ کریں۔",
       "example_image_url": null,
       "syntax": "%resetgroupcache",
       "example_syntax": null,
@@ -1793,7 +1763,7 @@
       "aliases": null
     },
     "resetidolcache": {
-      "description": "Reset Idol Object Cache.",
+      "description": "آئیڈل آبجیکٹ کیشے کو ری سیٹ کریں۔",
       "example_image_url": null,
       "syntax": "%resetidolcache",
       "example_syntax": null,
@@ -1803,7 +1773,7 @@
       "aliases": null
     },
     "speak": {
-      "description": "Owner to Bot TTS",
+      "description": "بوٹ ٹی ٹی ایس کا مالک۔",
       "example_image_url": null,
       "syntax": "%speak <message>",
       "example_syntax": null,
@@ -1813,7 +1783,7 @@
       "aliases": null
     },
     "uploadfromhost": {
-      "description": "Toggles whether images are uploaded from the host or are used through an image url.",
+      "description": "ٹوگل کرتا ہے کہ تصاویر میزبان سے اپ لوڈ کی گئی ہیں یا امیج یو آر ایل کے ذریعے استعمال کی گئی ہیں۔",
       "example_image_url": null,
       "syntax": "%uploadfromhost",
       "example_syntax": null,
@@ -1825,13 +1795,13 @@
   },
   "Vlive": {
     "vliveupdates": {
-      "description": "Receive Updates for VLive.",
+      "description": "VLive کے لیے اپ ڈیٹس حاصل کریں۔",
       "example_image_url": null,
       "syntax": "%vliveupdates <code/group/idol/list> <channel code, group id, idol id> [role id]",
       "example_syntax": null,
       "sub_commands": {
         "code": {
-          "description": "Follow a VLIVE channel based on the channel code.",
+          "description": "چینل کوڈ پر مبنی ایک VLIVE چینل پر عمل کریں۔",
           "example_image_url": null,
           "syntax": "%vliveupdates code <channel code> [role]",
           "example_syntax": null,
@@ -1841,7 +1811,7 @@
           "aliases": null
         },
         "group": {
-          "description": "Follow a VLIVE channel belonging to a Group ID If they have one.",
+          "description": "گروپ ID سے تعلق رکھنے والے VLIVE چینل کی پیروی کریں اگر ان کے پاس ہے۔",
           "example_image_url": null,
           "syntax": "%vliveupdates group <group id> [role]",
           "example_syntax": null,
@@ -1851,7 +1821,7 @@
           "aliases": null
         },
         "idol": {
-          "description": "Follow a VLIVE channel belonging to an Idol ID If they have one.",
+          "description": "آئیڈل آئی ڈی سے متعلق ایک VLIVE چینل کو فالو کریں اگر ان کے پاس ہے۔",
           "example_image_url": null,
           "syntax": "%vliveupdates idol <idol id> [role]",
           "example_syntax": null,
@@ -1861,7 +1831,7 @@
           "aliases": null
         },
         "list": {
-          "description": "Lists the VLIVE channels currently being followed in the text channel.",
+          "description": "فی الحال ٹیکسٹ چینل میں چلنے والے VLIVE چینلز کی فہرست۔",
           "example_image_url": null,
           "syntax": "%vliveupdates list",
           "example_syntax": null,
@@ -1877,12 +1847,12 @@
       "aliases": [
         "vlive"
       ],
-      "note": "This command contains sub-commands. This means any following arguments are respective to the first argument."
+      "note": "یہ کمانڈ ذیلی کمانڈز پر مشتمل ہے۔ اس کا مطلب ہے کہ مندرجہ ذیل دلائل پہلی دلیل سے متعلق ہیں۔"
     }
   },
   "DataMod": {
     "addidol": {
-      "description": "Adds an Unregistered Idol using the syntax from https://irenebot.com/addidol.html/.",
+      "description": "https://irenebot.com/addidol.html/ سے نحو کا استعمال کرتے ہوئے ایک غیر رجسٹرڈ آئیڈیل شامل کرتا ہے۔",
       "example_image_url": null,
       "syntax": "%addidol <JSON>",
       "example_syntax": null,
@@ -1890,10 +1860,20 @@
         "Data Moderator"
       ],
       "aliases": null,
-      "note": "Command should only be used if the card does not exist for the Idol."
+      "note": "کمانڈ صرف اس صورت میں استعمال کی جانی چاہیے جب آئیڈل کے لیے کارڈ موجود نہ ہو۔"
+    },
+    "addidoltogroup": {
+      "description": "ایک گروپ میں ایک آئیڈیل شامل کرتا ہے۔",
+      "example_image_url": null,
+      "syntax": "%addidoltogroup <idol id> <group id>",
+      "example_syntax": null,
+      "permissions_needed": [
+        "بوٹ ماڈریٹر"
+      ],
+      "aliases": null
     },
     "addgroup": {
-      "description": "Adds an Unregistered Group using the syntax from https://irenebot.com/addgroup.html/.",
+      "description": "https://irenebot.com/addgroup.html/ سے نحو کا استعمال کرتے ہوئے ایک غیر رجسٹرڈ گروپ کو شامل کرتا ہے۔",
       "example_image_url": null,
       "syntax": "%addgroup <JSON>",
       "example_syntax": null,
@@ -1901,7 +1881,45 @@
         "Data Moderator"
       ],
       "aliases": null,
-      "note": "Command should only be used if the card does not exist for the Group."
+      "note": "کمانڈ کو صرف اس صورت میں استعمال کیا جانا چاہیے جب گروپ کے لیے کارڈ موجود نہ ہو۔"
+    },
+    "edit": {
+      "description": "آئیڈل یا گروپ کی معلومات میں ترمیم کریں۔",
+      "example_image_url": null,
+      "syntax": "%edit <idol/group> <group/idol id> <column> <content>",
+      "example_syntax": null,
+      "sub_commands": {
+        "idol": {
+          "description": "آئیڈل کے لیے ڈیٹا میں ترمیم کریں۔",
+          "example_image_url": null,
+          "syntax": "%edit idol <idol id> <column> <content>",
+          "example_syntax": null,
+          "permissions_needed": [
+            "Data Moderator"
+          ],
+          "aliases": null
+        },
+        "group": {
+          "description": "کسی گروپ کے ڈیٹا میں ترمیم کریں۔",
+          "example_image_url": null,
+          "syntax": "%edit group <group id> <column> <content>",
+          "example_syntax": null,
+          "permissions_needed": [
+            "Data Moderator"
+          ],
+          "aliases": null
+        }
+      }
+    },
+    "deleteidolfromgroup": {
+      "description": "ایک گروپ سے ایک آئیڈیل کو حذف کرتا ہے۔",
+      "example_image_url": null,
+      "syntax": "%deleteidolfromgroup <idol id> <group iid>\n",
+      "example_syntax": null,
+      "permissions_needed": [
+        "بوٹ ماڈریٹر"
+      ],
+      "aliases": null
     }
   }
 }

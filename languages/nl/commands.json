@@ -38,16 +38,6 @@
     }
   },
   "BotMod": {
-    "addidoltogroup": {
-      "description": "Voegt een Idol toe aan een groep.",
-      "example_image_url": null,
-      "syntax": "%addidoltogroup <idol id> <group id>",
-      "example_syntax": null,
-      "permissions_needed": [
-        "Bot Moderator"
-      ],
-      "aliases": null
-    },
     "addinteraction": {
       "description": "Voeg een GIF toe aan een interactie.",
       "example_image_url": null,
@@ -132,16 +122,6 @@
       "description": "Verwijdert een Idol.",
       "example_image_url": null,
       "syntax": "%deleteidol <idol id>",
-      "example_syntax": null,
-      "permissions_needed": [
-        "Bot Moderator"
-      ],
-      "aliases": null
-    },
-    "deleteidolfromgroup": {
-      "description": "Verwijdert een Idol van een groep.",
-      "example_image_url": null,
-      "syntax": "%deleteidolfromgroup <idol id> <group iid>\n",
       "example_syntax": null,
       "permissions_needed": [
         "Bot Moderator"
@@ -1687,16 +1667,6 @@
       "aliases": null,
       "note": "Gebruik komma's om gebruikers-id's te scheiden."
     },
-    "approve": {
-      "description": "Keur een query id goed voor een niet-geregistreerde groep of Idol.",
-      "example_image_url": null,
-      "syntax": "%approve <query id> [mode=idol/group]",
-      "example_syntax": null,
-      "permissions_needed": [
-        "Bot Owner"
-      ],
-      "aliases": null
-    },
     "generateplayingcards": {
       "description": "Genereer aangepaste speelkaarten met Idol Avatars.",
       "example_image_url": null,
@@ -1825,13 +1795,13 @@
   },
   "Vlive": {
     "vliveupdates": {
-      "description": "Receive Updates for VLive.",
+      "description": "Updates ontvangen voor VLive.",
       "example_image_url": null,
       "syntax": "%vliveupdates <code/group/idol/list> <channel code, group id, idol id> [role id]",
       "example_syntax": null,
       "sub_commands": {
         "code": {
-          "description": "Follow a VLIVE channel based on the channel code.",
+          "description": "Volg een VLIVE channel gebaseerd op de kanaalcode.",
           "example_image_url": null,
           "syntax": "%vliveupdates code <channel code> [role]",
           "example_syntax": null,
@@ -1841,7 +1811,7 @@
           "aliases": null
         },
         "group": {
-          "description": "Follow a VLIVE channel belonging to a Group ID If they have one.",
+          "description": "Volg een VLIVE channel van een Group ID als deze er een heeft.",
           "example_image_url": null,
           "syntax": "%vliveupdates group <group id> [role]",
           "example_syntax": null,
@@ -1851,7 +1821,7 @@
           "aliases": null
         },
         "idol": {
-          "description": "Follow a VLIVE channel belonging to an Idol ID If they have one.",
+          "description": "Volg een VLIVE channel van een Idol ID als deze er een heeft.",
           "example_image_url": null,
           "syntax": "%vliveupdates idol <idol id> [role]",
           "example_syntax": null,
@@ -1861,7 +1831,7 @@
           "aliases": null
         },
         "list": {
-          "description": "Lists the VLIVE channels currently being followed in the text channel.",
+          "description": "Geeft een lijst van de VLIVE-kanalen die momenteel worden gevolgd in het tekstkanaal.",
           "example_image_url": null,
           "syntax": "%vliveupdates list",
           "example_syntax": null,
@@ -1877,12 +1847,12 @@
       "aliases": [
         "vlive"
       ],
-      "note": "This command contains sub-commands. This means any following arguments are respective to the first argument."
+      "note": "Dit command bevat subcommands. Dit betekent dat alle volgende argumenten zijn gerelateerd aan het eerste argument."
     }
   },
   "DataMod": {
     "addidol": {
-      "description": "Adds an Unregistered Idol using the syntax from https://irenebot.com/addidol.html/.",
+      "description": "Voegt een niet-geregistreerde Idol toe met behulp van de syntaxis van https://irenebot.com/addidol.html.",
       "example_image_url": null,
       "syntax": "%addidol <JSON>",
       "example_syntax": null,
@@ -1890,10 +1860,20 @@
         "Data Moderator"
       ],
       "aliases": null,
-      "note": "Command should only be used if the card does not exist for the Idol."
+      "note": "Command mag alleen worden gebruikt als de kaart niet bestaat voor de Idol."
+    },
+    "addidoltogroup": {
+      "description": "Adds an Idol to a Group.",
+      "example_image_url": null,
+      "syntax": "%addidoltogroup <idol id> <group id>",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
+      "aliases": null
     },
     "addgroup": {
-      "description": "Adds an Unregistered Group using the syntax from https://irenebot.com/addgroup.html/.",
+      "description": "Voegt een niet-geregistreerde groep toe met behulp van de syntaxis van https://irenebot.com/addgroup.html.",
       "example_image_url": null,
       "syntax": "%addgroup <JSON>",
       "example_syntax": null,
@@ -1901,7 +1881,45 @@
         "Data Moderator"
       ],
       "aliases": null,
-      "note": "Command should only be used if the card does not exist for the Group."
+      "note": "Command mag alleen worden gebruikt als de kaart niet bestaat voor de groep."
+    },
+    "edit": {
+      "description": "Bewerk een Idol of groep informatie.",
+      "example_image_url": null,
+      "syntax": "%edit <idol/group> <group/idol id> <column> <content>",
+      "example_syntax": null,
+      "sub_commands": {
+        "idol": {
+          "description": "Bewerk gegevens voor een idol.",
+          "example_image_url": null,
+          "syntax": "%edit idol <idol id> <column> <content>",
+          "example_syntax": null,
+          "permissions_needed": [
+            "Data Moderator"
+          ],
+          "aliases": null
+        },
+        "group": {
+          "description": "Bewerk de gegevens van een groep.",
+          "example_image_url": null,
+          "syntax": "%edit group <group id> <column> <content>",
+          "example_syntax": null,
+          "permissions_needed": [
+            "Data Moderator"
+          ],
+          "aliases": null
+        }
+      }
+    },
+    "deleteidolfromgroup": {
+      "description": "Deletes an Idol from a Group.",
+      "example_image_url": null,
+      "syntax": "%deleteidolfromgroup <idol id> <group iid>\n",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
+      "aliases": null
     }
   }
 }

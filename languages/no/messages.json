@@ -79,6 +79,9 @@
     "custom_command_deleted": "{command_name} has been removed if it existed.",
     "no_custom_commands": "There are no custom commands for your server."
   },
+  "datamod": {
+    "column_not_found": "That column does not exist!"
+  },
   "miscellaneous": {
     "set_language_fail": "{name}, that is not an available language. Use one of the following: {languages}.",
     "set_language_success": "{name}, your language is now set to {language}.",
@@ -192,9 +195,7 @@
     "patrons_removed": "Removed {users} as a patron!",
     "cleared": "Cleared.",
     "message_sent": "Message Sent.",
-    "group_fail": "Failed to add Group {group_id}. Proceeding to add idol.",
-    "idol_query_approved": "Added Query ID {query_id} as an Idol ({idol_id}).\nThis idol has been added to the following groups: {group_ids}.\nThe cache is now refreshing.",
-    "group_query_approved": "Added Query ID {query_id} as a Group ({group_id}).\nThe cache is now refreshing."
+    "group_fail": "Failed to add Group {group_id}. Proceeding to add idol."
   },
   "moderator": {
     "welcome_role_delete": "The welcome role you had set was removed.",

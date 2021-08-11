@@ -11,7 +11,7 @@
       ]
     },
     "stopbj": {
-      "description": "Termino el juego actual de BlackJack.",
+      "description": "Termina el juego actual de BlackJack.",
       "example_image_url": null,
       "syntax": "%blackjack [bet=0]",
       "example_syntax": null,
@@ -38,16 +38,6 @@
     }
   },
   "BotMod": {
-    "addidoltogroup": {
-      "description": "Agrega un Ídolo a un grupo.",
-      "example_image_url": null,
-      "syntax": "%addidoltogroup <idol id> <group id>",
-      "example_syntax": null,
-      "permissions_needed": [
-        "Bot Moderator"
-      ],
-      "aliases": null
-    },
     "addinteraction": {
       "description": "Agrega un GIF a una interacción.",
       "example_image_url": null,
@@ -69,7 +59,7 @@
       "aliases": null
     },
     "botban": {
-      "description": "Bloquea que un usauario use el Bot.",
+      "description": "Banea a un usuario de usar el bot.",
       "example_image_url": null,
       "syntax": "%botban <user id>",
       "example_syntax": null,
@@ -79,7 +69,7 @@
       "aliases": null
     },
     "botunban": {
-      "description": "Desbancea a un usuario del us del Bot.",
+      "description": "Desbanea a un usuario que no podía usar el Bot.",
       "example_image_url": null,
       "syntax": "%botunban <user id>",
       "example_syntax": null,
@@ -89,7 +79,7 @@
       "aliases": null
     },
     "botwarn": {
-      "description": "Advierta a un usuario a través de Bot DMs.",
+      "description": "Advierta a un usuario a través de los mensajes privados del Bot.",
       "example_image_url": null,
       "syntax": "%botwarn <user> [reason]",
       "example_syntax": null,
@@ -132,16 +122,6 @@
       "description": "Eliminar un Ídolo.",
       "example_image_url": null,
       "syntax": "%deleteidol <idol id>",
-      "example_syntax": null,
-      "permissions_needed": [
-        "Bot Moderator"
-      ],
-      "aliases": null
-    },
-    "deleteidolfromgroup": {
-      "description": "Elimina un Ídolo de un Grupo.",
-      "example_image_url": null,
-      "syntax": "%deleteidolfromgroup <idol id> <group iid>\n",
       "example_syntax": null,
       "permissions_needed": [
         "Bot Moderator"
@@ -906,7 +886,7 @@
       "aliases": null
     },
     "setlanguage": {
-      "description": "Cambia el lenguage del bot.",
+      "description": "Cambia el idioma del bot.",
       "example_image_url": null,
       "syntax": "%setlanguage <language choice>",
       "example_syntax": null,
@@ -1523,7 +1503,7 @@
       "aliases": null
     },
     "removerole": {
-      "description": "Remove a self-assignable role based on the role name given.",
+      "description": "Elimina un rol auto-asignable basado en el nombre del rol dado.",
       "example_image_url": null,
       "syntax": "%removerole <role name>",
       "example_syntax": null,
@@ -1533,7 +1513,7 @@
       "aliases": null
     },
     "sendrolemessage": {
-      "description": "Sends the default role message in the current channel.",
+      "description": "Envía el mensaje de rol predeterminado en el canal actual.",
       "example_image_url": null,
       "syntax": "%sendrolemessage",
       "example_syntax": null,
@@ -1541,10 +1521,10 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "The roles will work without this command, but should be used to have a list of roles."
+      "note": "Los roles funcionarán sin este comando, pero pueden deberían de usarse para tener una lista de roles."
     },
     "setrolechannel": {
-      "description": "Set the channel for self-assignable roles to be used in.",
+      "description": "Establece el canal para los roles auto-asignables en los que serán utilizados.",
       "example_image_url": null,
       "syntax": "%setrolechannel [text channel]",
       "example_syntax": null,
@@ -1552,12 +1532,12 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "Since this command will erase all future messages, it is suggested to use %sendrolemessage before this one."
+      "note": "Puesto que este comando borrará todos los futuros mensajes, se sugiere usar %sendrolemessage antes de este."
     }
   },
   "Reminder": {
     "gettimezone": {
-      "description": "Get your current set timezone.",
+      "description": "Obtén tu zona horaria actual.",
       "example_image_url": null,
       "syntax": "%gettz [timezone]",
       "example_syntax": null,
@@ -1568,7 +1548,7 @@
       ]
     },
     "listreminders": {
-      "description": "List out your reminders.",
+      "description": "Lista tus recordatorios.",
       "example_image_url": null,
       "syntax": "%listreminders",
       "example_syntax": null,
@@ -1580,7 +1560,7 @@
       ]
     },
     "remindme": {
-      "description": "Create a reminder to do a task at a certain time.",
+      "description": "Crear un recordatorio para hacer una tarea en un momento determinado.",
       "example_image_url": null,
       "syntax": "%remindme to ______ at 9PM or %remindme to ____ in 6hrs 30mins",
       "example_syntax": null,
@@ -1588,7 +1568,7 @@
       "aliases": [
         "remind"
       ],
-      "note": "The user input is fairly flexible for this command."
+      "note": "El input del usuario es bastante flexible para este comando."
     },
     "removereminder": {
       "description": "Remover un recordatorio basado en su índice.",
@@ -1687,16 +1667,6 @@
       "aliases": null,
       "note": "Usa comas para separar IDs de los usuarios."
     },
-    "approve": {
-      "description": "Approve a query id for an unregistered Group or Idol.",
-      "example_image_url": null,
-      "syntax": "%approve <query id> [mode=idol/group]",
-      "example_syntax": null,
-      "permissions_needed": [
-        "Bot Owner"
-      ],
-      "aliases": null
-    },
     "generateplayingcards": {
       "description": "Generar tarjetas de juego personalizadas con avatares de idols.",
       "example_image_url": null,
@@ -1783,7 +1753,7 @@
       "aliases": null
     },
     "resetgroupcache": {
-      "description": "Reset Group Object Cache.",
+      "description": "Reiniciar el Caché de Objetos Grupales.",
       "example_image_url": null,
       "syntax": "%resetgroupcache",
       "example_syntax": null,
@@ -1793,7 +1763,7 @@
       "aliases": null
     },
     "resetidolcache": {
-      "description": "Reset Idol Object Cache.",
+      "description": "Reiniciar el caché de Idol.",
       "example_image_url": null,
       "syntax": "%resetidolcache",
       "example_syntax": null,
@@ -1803,7 +1773,7 @@
       "aliases": null
     },
     "speak": {
-      "description": "Owner to Bot TTS",
+      "description": "Dueño para el Bot TTS",
       "example_image_url": null,
       "syntax": "%speak <message>",
       "example_syntax": null,
@@ -1813,7 +1783,7 @@
       "aliases": null
     },
     "uploadfromhost": {
-      "description": "Toggles whether images are uploaded from the host or are used through an image url.",
+      "description": "Cambia si las imágenes se suben desde el host o se utilizan a través de un enlace de la imagen.",
       "example_image_url": null,
       "syntax": "%uploadfromhost",
       "example_syntax": null,
@@ -1825,13 +1795,13 @@
   },
   "Vlive": {
     "vliveupdates": {
-      "description": "Receive Updates for VLive.",
+      "description": "Recibe las actualizaciones de VLive.",
       "example_image_url": null,
       "syntax": "%vliveupdates <code/group/idol/list> <channel code, group id, idol id> [role id]",
       "example_syntax": null,
       "sub_commands": {
         "code": {
-          "description": "Follow a VLIVE channel based on the channel code.",
+          "description": "Sigue a un canal de VLive basado en el código del canal.",
           "example_image_url": null,
           "syntax": "%vliveupdates code <channel code> [role]",
           "example_syntax": null,
@@ -1841,7 +1811,7 @@
           "aliases": null
         },
         "group": {
-          "description": "Follow a VLIVE channel belonging to a Group ID If they have one.",
+          "description": "Sigue a un canal de VLive que pertenezca a un Group ID si ellos tienen uno.",
           "example_image_url": null,
           "syntax": "%vliveupdates group <group id> [role]",
           "example_syntax": null,
@@ -1851,7 +1821,7 @@
           "aliases": null
         },
         "idol": {
-          "description": "Follow a VLIVE channel belonging to an Idol ID If they have one.",
+          "description": "Sigue a un canal de VLive que pertenezca a un Group ID si ellos tienen uno.",
           "example_image_url": null,
           "syntax": "%vliveupdates idol <idol id> [role]",
           "example_syntax": null,
@@ -1861,7 +1831,7 @@
           "aliases": null
         },
         "list": {
-          "description": "Lists the VLIVE channels currently being followed in the text channel.",
+          "description": "Muestra los canales VLive que se están siguiendo actualmente en el canal de texto.",
           "example_image_url": null,
           "syntax": "%vliveupdates list",
           "example_syntax": null,
@@ -1877,12 +1847,12 @@
       "aliases": [
         "vlive"
       ],
-      "note": "This command contains sub-commands. This means any following arguments are respective to the first argument."
+      "note": "Este comando contiene sub-comandos. Esto significa que cualquiera de los siguientes argumentos son respectivos del primer argumento."
     }
   },
   "DataMod": {
     "addidol": {
-      "description": "Adds an Unregistered Idol using the syntax from https://irenebot.com/addidol.html/.",
+      "description": "Añade un Idol no registrado usando la sintaxis de https://irenebot.com/addidol.html/.",
       "example_image_url": null,
       "syntax": "%addidol <JSON>",
       "example_syntax": null,
@@ -1890,10 +1860,20 @@
         "Data Moderator"
       ],
       "aliases": null,
-      "note": "Command should only be used if the card does not exist for the Idol."
+      "note": "El comando sólo se debe utilizar si la tarjeta no existe para el Idol."
+    },
+    "addidoltogroup": {
+      "description": "Añade un idol a un grupo.",
+      "example_image_url": null,
+      "syntax": "%addidoltogroup <id de idol> <id de grupo>",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Moderador del bot"
+      ],
+      "aliases": null
     },
     "addgroup": {
-      "description": "Adds an Unregistered Group using the syntax from https://irenebot.com/addgroup.html/.",
+      "description": "Añade un Grupo no registrado usando la sintaxis de https://irenebot.com/addgroup.html/.",
       "example_image_url": null,
       "syntax": "%addgroup <JSON>",
       "example_syntax": null,
@@ -1901,7 +1881,45 @@
         "Data Moderator"
       ],
       "aliases": null,
-      "note": "Command should only be used if the card does not exist for the Group."
+      "note": "El comando sólo se debe utilizar si la tarjeta no existe para el Grupo."
+    },
+    "edit": {
+      "description": "Edita la información de un grupo o idol.",
+      "example_image_url": null,
+      "syntax": "%edit <idol/group> <group/idol id> <column> <content>",
+      "example_syntax": null,
+      "sub_commands": {
+        "idol": {
+          "description": "Edita datos de un idol.",
+          "example_image_url": null,
+          "syntax": "%edit idol <idol id> <column> <content>",
+          "example_syntax": null,
+          "permissions_needed": [
+            "Data Moderator"
+          ],
+          "aliases": null
+        },
+        "group": {
+          "description": "Edita datos de un grupo.",
+          "example_image_url": null,
+          "syntax": "%edit group <group id> <column> <content>",
+          "example_syntax": null,
+          "permissions_needed": [
+            "Data Moderator"
+          ],
+          "aliases": null
+        }
+      }
+    },
+    "deleteidolfromgroup": {
+      "description": "Elimina un idol de un grupo.",
+      "example_image_url": null,
+      "syntax": "%deleteidolfromgroup <id de idol> <id de grupo>\n",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Moderador del bot"
+      ],
+      "aliases": null
     }
   }
 }

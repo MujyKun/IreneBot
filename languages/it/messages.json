@@ -79,6 +79,9 @@
     "custom_command_deleted": "{command_name} è stato rimosso se esisteva.",
     "no_custom_commands": "Non ci sono comandi personalizzati per il tuo server."
   },
+  "datamod": {
+    "column_not_found": "That column does not exist!"
+  },
   "miscellaneous": {
     "set_language_fail": "{name}, quella non è una lingua disponibile. Usa una delle seguenti: {languages}.",
     "set_language_success": "{name}, la tua lingua è stata impostata a {language}.",
@@ -149,7 +152,7 @@
     "invalid_input": "{name}, quell'opzione non è valida. Si prega di consultare {server_prefix}help {command_name}.",
     "game_disabled": "{name}, i game sono stati disabilitati in questo canale usando {server_prefix}togglegames.",
     "gen_error": "ERRORE - {e}",
-    "may_take_time": "This command may take a few minutes to respond since it relies on a third-party application."
+    "may_take_time": "Questo comando potrebbe richiedere alcuni minuti per rispondere dato che si basa so un'applicazione di terze parti."
   },
   "twitch": {
     "follow_limit": "Sei solo autorizzato ad avere {follow_limit} canali seguiti.",
@@ -192,9 +195,7 @@
     "patrons_removed": "Removed {users} as a patron!",
     "cleared": "Eliminati.",
     "message_sent": "Messaggio Inviato.",
-    "group_fail": "Fallito ad aggiungere Gruppo {group_id}. Procedendo per aggiungere idol.",
-    "idol_query_approved": "Aggiunto ID query {query_id} come Idol ({idol_id}).\nQuest* idol è stat* aggiunt* ai seguenti gruppi: {group_ids}.\nIl cache è ora in aggiornamento.",
-    "group_query_approved": "Aggiunto ID query {query_id} come Gruppo ({group_id}).\nIl cache è ora in aggiornamento."
+    "group_fail": "Fallito ad aggiungere Gruppo {group_id}. Procedendo per aggiungere idol."
   },
   "moderator": {
     "welcome_role_delete": "Il ruolo di benvenuto che hai impostato è stato rimosso.",

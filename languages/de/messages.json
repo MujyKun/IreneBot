@@ -79,6 +79,9 @@
     "custom_command_deleted": "{command_name} wurde entfernt, wenn es existierte.",
     "no_custom_commands": "Es gibt keine benutzerdefinierten Befehle für dein Server."
   },
+  "datamod": {
+    "column_not_found": "That column does not exist!"
+  },
   "miscellaneous": {
     "set_language_fail": "{name}, das ist keine verfügbare Sprache. Benutze eins der folgenden Sprachen: {languages}.",
     "set_language_success": "{name}, deine Sprache ist jetzt auch {language} gesetzt.",
@@ -192,9 +195,7 @@
     "patrons_removed": "{users} wurde als Patron entfernt!",
     "cleared": "Gelöscht.",
     "message_sent": "Nachricht wurde gesendet.",
-    "group_fail": "Hinzufügen der Gruppe {group_id} wurde fehlgeschlagen. Weiter geht es mit dem Hinzufügen von Idolen.",
-    "idol_query_approved": "Query ID {query_id} als Idol ({idol_id}) wurde hinzugefügt.\nDieses Idol wurde zu den folgenden Gruppen hinzugefügt: {group_ids}.\nDer Cache wird nun aktualisiert.",
-    "group_query_approved": "Query ID {query_id} wurde als Gruppe ({group_id}) hinzugefügt.\nDer Cache wird nun aktualisiert."
+    "group_fail": "Hinzufügen der Gruppe {group_id} wurde fehlgeschlagen. Weiter geht es mit dem Hinzufügen von Idolen."
   },
   "moderator": {
     "welcome_role_delete": "Die Willkommens Rolle, die du gesetzt hast, wurde entfernt.",

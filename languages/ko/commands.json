@@ -38,16 +38,6 @@
     }
   },
   "BotMod": {
-    "addidoltogroup": {
-      "description": "그룹에 아이돌을 추가합니다.",
-      "example_image_url": null,
-      "syntax": "%addidoltogroup <idol id> <group id>",
-      "example_syntax": null,
-      "permissions_needed": [
-        "Bot Moderator"
-      ],
-      "aliases": null
-    },
     "addinteraction": {
       "description": "상호 작용에 GIF를 추가합니다.",
       "example_image_url": null,
@@ -132,16 +122,6 @@
       "description": "아이돌을 삭제합니다.",
       "example_image_url": null,
       "syntax": "%deleteidol <idol id>",
-      "example_syntax": null,
-      "permissions_needed": [
-        "Bot Moderator"
-      ],
-      "aliases": null
-    },
-    "deleteidolfromgroup": {
-      "description": "그룹에서 아이돌을 삭제합니다.",
-      "example_image_url": null,
-      "syntax": "%deleteidolfromgroup <idol id> <group iid>\n",
       "example_syntax": null,
       "permissions_needed": [
         "Bot Moderator"
@@ -490,19 +470,19 @@
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null,
-      "note": "To a Bot Moderator, this will also display Groups with no photos and show their ID."
+      "note": "봇 중재자에게는 사진이 없는 그룹도 표시되고 ID도 표시됩니다."
     },
     "members": {
-      "description": "List the names of idols the Bot has photos of.",
+      "description": "봇에 사진이 있는 아이돌의 이름을 나열합니다.",
       "example_image_url": null,
       "syntax": "%members [page number/group name]",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null,
-      "note": "To a Bot Moderator, this will also display Idols with no photos and show their ID."
+      "note": "봇 중재자에게는 사진이 없는 아이돌도 표시되고 ID도 표시됩니다."
     },
     "randomidol": {
-      "description": "Posts media of a random Idol.",
+      "description": "임의 아이돌의 미디어를 게시합니다.",
       "example_image_url": null,
       "syntax": "%randomidol",
       "example_syntax": null,
@@ -512,7 +492,7 @@
       ]
     },
     "sendidol": {
-      "description": "Have an Idol Photo sent to a text channel every 12 hours.",
+      "description": "봇은 12시간마다 문자 채널로 아이돌 사진을 보냅니다.",
       "example_image_url": null,
       "syntax": "%sendidol [idol id] [text channel]",
       "example_syntax": null,
@@ -520,10 +500,10 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "Using the command without an Idol ID will remove all existing idols from the channel."
+      "note": "아이돌 ID 없이 명령어를 사용하면 채널에서 기존의 모든 아이돌이 제거됩니다."
     },
     "sendimages": {
-      "description": "Have all of the Idol Photos appear in a specific text channel.",
+      "description": "모든 아이돌 사진이 특정 텍스트 채널에 나타나도록 합니다.",
       "example_image_url": null,
       "syntax": "%sendimages [text channel]",
       "example_syntax": null,
@@ -533,7 +513,7 @@
       "aliases": null
     },
     "stopimages": {
-      "description": "Stops the Bot from posting idol photos in a specific text channel.",
+      "description": "봇이 특정 텍스트 채널에 아이돌 사진을 게시하는 것을 중지합니다.",
       "example_image_url": null,
       "syntax": "%stopimages [text channel]",
       "example_syntax": null,
@@ -546,7 +526,7 @@
   },
   "GuessingGame": {
     "guessinggame": {
-      "description": "Start an Idol GuessingGame in the current channel.",
+      "description": "현재 채널에서 '좋아하는 멤버' 게임 시작합니다.",
       "example_image_url": null,
       "syntax": "%guessinggame [gender=all] [difficulty=medium] [rounds=20] [timeout=20]",
       "example_syntax": null,
@@ -554,10 +534,10 @@
       "aliases": [
         "gg"
       ],
-      "note": "The host of the game can type stop or end to end the game or skip to skip the current round without affecting the round number."
+      "note": "게임 호스트는 stop 또는 end를 입력하여 게임을 종료하거나 skip을 입력하여 라운드 번호에 영향을 주지 않고 현재 라운드를 건너뛸 수 있습니다."
     },
     "groupguessinggame": {
-      "description": "Start a Group GuessingGame in the current channel.",
+      "description": "현재 채널에서 GuessingGame 그룹을 시작합니다.",
       "example_image_url": null,
       "syntax": "%groupguessinggame [gender=all] [difficulty=medium] [rounds=20] [timeout=20]",
       "example_syntax": null,
@@ -566,7 +546,7 @@
         "ggg",
         "groupgg"
       ],
-      "note": "The host of the game can type stop or end to end the game or skip to skip the current round without affecting the round number."
+      "note": "게임 호스트는 stop 또는 end를 입력하여 게임을 종료하거나 skip을 입력하여 라운드 번호에 영향을 주지 않고 현재 라운드를 건너뛸 수 있습니다."
     },
     "ggfilter": {
       "description": "Guessing 게임에 필터 추가합니다.",
@@ -882,7 +862,7 @@
       ]
     },
     "report": {
-      "description": "Report an issue with the Bot.",
+      "description": "봇의 문제를 보고합니다.",
       "example_image_url": null,
       "syntax": "%report <issue>",
       "example_syntax": null,
@@ -906,7 +886,7 @@
       "aliases": null
     },
     "setlanguage": {
-      "description": "Changes language of the Bot.",
+      "description": "봇의 언어를 바꿥니다.",
       "example_image_url": null,
       "syntax": "%setlanguage <language choice>",
       "example_syntax": null,
@@ -947,7 +927,7 @@
       "aliases": null
     },
     "support": {
-      "description": "Discord Invite link to the Bot's Support Server.",
+      "description": "봇의 지원 서버 디스코드 링크를 보냅니다.",
       "example_image_url": null,
       "syntax": "%support",
       "example_syntax": null,
@@ -987,7 +967,7 @@
       "note": "Underscores for the alias are spaces. If a Bot Moderator uses this command, it will be a global (not local) alias."
     },
     "addemoji": {
-      "description": "Adds emojis to the server.",
+      "description": "서버에 이모티콘을 추가합니다.",
       "example_image_url": null,
       "syntax": "%addemoji <urls/emojis> [emoji_name]",
       "example_syntax": null,
@@ -1020,7 +1000,7 @@
       "aliases": [
         "prune"
       ],
-      "note": "Amount limit is 1000."
+      "note": "액수 제한은 1000입니다."
     },
     "deletealias": {
       "description": "Delete an alias from an idol/group.",
@@ -1122,7 +1102,7 @@
       "aliases": null
     },
     "unban": {
-      "description": "Unban a user.",
+      "description": "사용자 금령을 풉니다.",
       "example_image_url": null,
       "syntax": "%unban [user] [reason=No Reason]",
       "example_syntax": null,
@@ -1270,7 +1250,7 @@
       ]
     },
     "lyrics": {
-      "description": "Get the lyrics of a song.",
+      "description": "노래에 가사 받습니다.",
       "example_image_url": null,
       "syntax": "%lyrics <song query>",
       "example_syntax": null,
@@ -1289,7 +1269,7 @@
       "aliases": null
     },
     "profile": {
-      "description": "View a member's profile.",
+      "description": "멤버의 프로파일 보여줍니다.",
       "example_image_url": null,
       "syntax": "%profile [user]",
       "example_syntax": null,
@@ -1358,7 +1338,7 @@
       ]
     },
     "setfm": {
-      "description": "Attach a LastFM username to your Discord account.",
+      "description": "디스코드 계정에 LastFM 사용자 이름을 연결합니다.",
       "example_image_url": null,
       "syntax": "%setfm <lastfm username>",
       "example_syntax": null,
@@ -1687,16 +1667,6 @@
       "aliases": null,
       "note": "Use commas to separate user ids."
     },
-    "approve": {
-      "description": "Approve a query id for an unregistered Group or Idol.",
-      "example_image_url": null,
-      "syntax": "%approve <query id> [mode=idol/group]",
-      "example_syntax": null,
-      "permissions_needed": [
-        "Bot Owner"
-      ],
-      "aliases": null
-    },
     "generateplayingcards": {
       "description": "Generate Custom Playing Cards with Idol Avatars.",
       "example_image_url": null,
@@ -1729,7 +1699,7 @@
       "aliases": null
     },
     "send": {
-      "description": "Send a message to a text channel.",
+      "description": "텍스트 채널에 메시지 보냅니다.",
       "example_image_url": null,
       "syntax": "%send <channel id> <message>",
       "example_syntax": null,
@@ -1882,7 +1852,7 @@
   },
   "DataMod": {
     "addidol": {
-      "description": "Adds an Unregistered Idol using the syntax from https://irenebot.com/addidol.html/.",
+      "description": "Adds an Unregistered Idol using the syntax from https://irenebot.com/addidol.html.",
       "example_image_url": null,
       "syntax": "%addidol <JSON>",
       "example_syntax": null,
@@ -1892,8 +1862,18 @@
       "aliases": null,
       "note": "Command should only be used if the card does not exist for the Idol."
     },
+    "addidoltogroup": {
+      "description": "Adds an Idol to a Group.",
+      "example_image_url": null,
+      "syntax": "%addidoltogroup <idol id> <group id>",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
+      "aliases": null
+    },
     "addgroup": {
-      "description": "Adds an Unregistered Group using the syntax from https://irenebot.com/addgroup.html/.",
+      "description": "Adds an Unregistered Group using the syntax from https://irenebot.com/addgroup.html.",
       "example_image_url": null,
       "syntax": "%addgroup <JSON>",
       "example_syntax": null,
@@ -1902,6 +1882,44 @@
       ],
       "aliases": null,
       "note": "Command should only be used if the card does not exist for the Group."
+    },
+    "edit": {
+      "description": "Edit an Idol or Group's information.",
+      "example_image_url": null,
+      "syntax": "%edit <idol/group> <group/idol id> <column> <content>",
+      "example_syntax": null,
+      "sub_commands": {
+        "idol": {
+          "description": "Edit data for an idol.",
+          "example_image_url": null,
+          "syntax": "%edit idol <idol id> <column> <content>",
+          "example_syntax": null,
+          "permissions_needed": [
+            "Data Moderator"
+          ],
+          "aliases": null
+        },
+        "group": {
+          "description": "Edit data for a group.",
+          "example_image_url": null,
+          "syntax": "%edit group <group id> <column> <content>",
+          "example_syntax": null,
+          "permissions_needed": [
+            "Data Moderator"
+          ],
+          "aliases": null
+        }
+      }
+    },
+    "deleteidolfromgroup": {
+      "description": "Deletes an Idol from a Group.",
+      "example_image_url": null,
+      "syntax": "%deleteidolfromgroup <idol id> <group iid>\n",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
+      "aliases": null
     }
   }
 }

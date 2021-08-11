@@ -79,6 +79,9 @@
     "custom_command_deleted": "تم إزالة {command_name} إذا كانت موجودة.",
     "no_custom_commands": "لا توجد أوامر مخصصة للخادم الخاص بك."
   },
+  "datamod": {
+    "column_not_found": "That column does not exist!"
+  },
   "miscellaneous": {
     "set_language_fail": "{name}، هذه ليست لغة متاحة. استخدم أحد ما يلي: {languages}.",
     "set_language_success": "{name}، تم تعيين لغتك الآن إلى {language}.",
@@ -192,9 +195,7 @@
     "patrons_removed": "تم إضافة {users} كرابط!",
     "cleared": "تمت المعاملة.",
     "message_sent": "تـمّ الإرسال.",
-    "group_fail": "فشل في إضافة مجموعة {group_id}. المضي قدما في إضافة أيدول.",
-    "idol_query_approved": "تم إضافة معرف الاستعلام {query_id} كـ Idol ({idol_id}).\nتم إضافة هذا الروبوت إلى المجموعات التالية: {group_ids}.\nالذاكرة المؤقتة قيد التحديث الآن.",
-    "group_query_approved": "تم إضافة معرف استعلام {query_id} كمجموعة ({group_id}).\nذاكرة التخزين المؤقت يتم تحديثها الآن."
+    "group_fail": "فشل في إضافة مجموعة {group_id}. المضي قدما في إضافة أيدول."
   },
   "moderator": {
     "welcome_role_delete": "تم إزالة الدور الترحيبي الذي قمت بتعيينه.",

@@ -79,6 +79,9 @@
     "custom_command_deleted": "{command_name} został usunięty, jeśli istniał.",
     "no_custom_commands": "Brak niestandardowych poleceń dla Twojego serwera."
   },
+  "datamod": {
+    "column_not_found": "That column does not exist!"
+  },
   "miscellaneous": {
     "set_language_fail": "{name}, to nie jest dostępny język. Użyj jednego z następujących: {languages}.",
     "set_language_success": "{name}, Twój język został ustawiony na {language}.",
@@ -192,9 +195,7 @@
     "patrons_removed": "Usunięto {users} jako patron!",
     "cleared": "Wyczyszczone.",
     "message_sent": "Wiadomość została wysłana.",
-    "group_fail": "Nie udało się dodać grupy {group_id}. Kontynuowanie dodawania idola.",
-    "idol_query_approved": "Dodano ID zapytania {query_id} jako Idol ({idol_id}).\nTen idol został dodany do następujących zespołów: {group_ids}.\nPamięć podręczna się odświeża.",
-    "group_query_approved": "Dodano ID zapytania {query_id} jako grupę ({group_id}).\nPamięć podręczna jest teraz odświeżana."
+    "group_fail": "Nie udało się dodać grupy {group_id}. Kontynuowanie dodawania idola."
   },
   "moderator": {
     "welcome_role_delete": "Ustawiona rola powitalna została usunięta.",

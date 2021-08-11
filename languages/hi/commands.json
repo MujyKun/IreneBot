@@ -38,18 +38,8 @@
     }
   },
   "BotMod": {
-    "addidoltogroup": {
-      "description": "Adds an Idol to a Group.",
-      "example_image_url": null,
-      "syntax": "%addidoltogroup <idol id> <group id>",
-      "example_syntax": null,
-      "permissions_needed": [
-        "Bot Moderator"
-      ],
-      "aliases": null
-    },
     "addinteraction": {
-      "description": "Add a GIF to an interaction.",
+      "description": "किसी इंटरैक्शन में GIF जोड़ें।",
       "example_image_url": null,
       "syntax": "%addinteraction <interaction_type> <link1,link2,...>",
       "example_syntax": null,
@@ -99,7 +89,7 @@
       "aliases": null
     },
     "closedm": {
-      "description": "Closes a DM",
+      "description": "एक DM बंद करता है",
       "example_image_url": null,
       "syntax": "%closedm [user id]",
       "example_syntax": null,
@@ -109,7 +99,7 @@
       "aliases": null
     },
     "createdm": {
-      "description": "Creates a DM between you and the user with the Bot as the middleman.",
+      "description": "बिचौलिए के रूप में बॉट के साथ आपके और उपयोगकर्ता के बीच एक डीएम बनाता है।",
       "example_image_url": null,
       "syntax": "%createdm <user id>",
       "example_syntax": null,
@@ -119,7 +109,7 @@
       "aliases": null
     },
     "deletegroup": {
-      "description": "Deletes a Group",
+      "description": "एक समूह हटाता है",
       "example_image_url": null,
       "syntax": "%deletegroup <group id>",
       "example_syntax": null,
@@ -132,16 +122,6 @@
       "description": "Deletes an Idol.",
       "example_image_url": null,
       "syntax": "%deleteidol <idol id>",
-      "example_syntax": null,
-      "permissions_needed": [
-        "Bot Moderator"
-      ],
-      "aliases": null
-    },
-    "deleteidolfromgroup": {
-      "description": "Deletes an Idol from a Group.",
-      "example_image_url": null,
-      "syntax": "%deleteidolfromgroup <idol id> <group iid>\n",
       "example_syntax": null,
       "permissions_needed": [
         "Bot Moderator"
@@ -378,7 +358,7 @@
       ]
     },
     "upgrade": {
-      "description": "Upgrades a command to the next level.",
+      "description": "एक कमांड को अगले स्तर पर अपग्रेड करता है।",
       "example_image_url": null,
       "syntax": "%upgrade <rob/daily/beg>",
       "example_syntax": null,
@@ -390,7 +370,7 @@
   },
   "CustomCommands": {
     "createcommand": {
-      "description": "Create a custom command.",
+      "description": "एक कस्टम कमांड बनाएं।",
       "example_image_url": null,
       "syntax": "%createcommand <command name> <message>",
       "example_syntax": null,
@@ -402,7 +382,7 @@
       ]
     },
     "deletecommand": {
-      "description": "Delete a custom command.",
+      "description": "एक कस्टम कमांड हटाएं।",
       "example_image_url": null,
       "syntax": "%deletecommand <command name>",
       "example_syntax": null,
@@ -1687,16 +1667,6 @@
       "aliases": null,
       "note": "Use commas to separate user ids."
     },
-    "approve": {
-      "description": "Approve a query id for an unregistered Group or Idol.",
-      "example_image_url": null,
-      "syntax": "%approve <query id> [mode=idol/group]",
-      "example_syntax": null,
-      "permissions_needed": [
-        "Bot Owner"
-      ],
-      "aliases": null
-    },
     "generateplayingcards": {
       "description": "Generate Custom Playing Cards with Idol Avatars.",
       "example_image_url": null,
@@ -1882,7 +1852,7 @@
   },
   "DataMod": {
     "addidol": {
-      "description": "Adds an Unregistered Idol using the syntax from https://irenebot.com/addidol.html/.",
+      "description": "Adds an Unregistered Idol using the syntax from https://irenebot.com/addidol.html.",
       "example_image_url": null,
       "syntax": "%addidol <JSON>",
       "example_syntax": null,
@@ -1892,8 +1862,18 @@
       "aliases": null,
       "note": "Command should only be used if the card does not exist for the Idol."
     },
+    "addidoltogroup": {
+      "description": "Adds an Idol to a Group.",
+      "example_image_url": null,
+      "syntax": "%addidoltogroup <idol id> <group id>",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
+      "aliases": null
+    },
     "addgroup": {
-      "description": "Adds an Unregistered Group using the syntax from https://irenebot.com/addgroup.html/.",
+      "description": "Adds an Unregistered Group using the syntax from https://irenebot.com/addgroup.html.",
       "example_image_url": null,
       "syntax": "%addgroup <JSON>",
       "example_syntax": null,
@@ -1902,6 +1882,44 @@
       ],
       "aliases": null,
       "note": "Command should only be used if the card does not exist for the Group."
+    },
+    "edit": {
+      "description": "Edit an Idol or Group's information.",
+      "example_image_url": null,
+      "syntax": "%edit <idol/group> <group/idol id> <column> <content>",
+      "example_syntax": null,
+      "sub_commands": {
+        "idol": {
+          "description": "Edit data for an idol.",
+          "example_image_url": null,
+          "syntax": "%edit idol <idol id> <column> <content>",
+          "example_syntax": null,
+          "permissions_needed": [
+            "Data Moderator"
+          ],
+          "aliases": null
+        },
+        "group": {
+          "description": "Edit data for a group.",
+          "example_image_url": null,
+          "syntax": "%edit group <group id> <column> <content>",
+          "example_syntax": null,
+          "permissions_needed": [
+            "Data Moderator"
+          ],
+          "aliases": null
+        }
+      }
+    },
+    "deleteidolfromgroup": {
+      "description": "Deletes an Idol from a Group.",
+      "example_image_url": null,
+      "syntax": "%deleteidolfromgroup <idol id> <group iid>\n",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
+      "aliases": null
     }
   }
 }

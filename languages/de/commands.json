@@ -38,16 +38,6 @@
     }
   },
   "BotMod": {
-    "addidoltogroup": {
-      "description": "Fügt ein Idol zu einer Gruppe hinzu.",
-      "example_image_url": null,
-      "syntax": "%addidoltogroup <idol id> <group id>",
-      "example_syntax": null,
-      "permissions_needed": [
-        "Bot Moderator"
-      ],
-      "aliases": null
-    },
     "addinteraction": {
       "description": "Füge ein GIF einer Interaktion hinzu.",
       "example_image_url": null,
@@ -132,16 +122,6 @@
       "description": "Löscht ein Idol.",
       "example_image_url": null,
       "syntax": "%deleteidol <idol id>",
-      "example_syntax": null,
-      "permissions_needed": [
-        "Bot Moderator"
-      ],
-      "aliases": null
-    },
-    "deleteidolfromgroup": {
-      "description": "Löscht ein Idol aus einer Gruppe.",
-      "example_image_url": null,
-      "syntax": "%deleteidolfromgroup <idol id> <group iid>\n",
       "example_syntax": null,
       "permissions_needed": [
         "Bot Moderator"
@@ -586,7 +566,7 @@
       "aliases": null
     },
     "ggleaderboard": {
-      "description": "Shows Server/Global leaderboards for the GuessingGame.",
+      "description": "Zeige Server/globale Ranglisten für das GuessingGame.",
       "example_image_url": null,
       "syntax": "%ggleaderboard [difficulty=easy/medium/hard] [mode=server/global]",
       "example_syntax": null,
@@ -738,7 +718,7 @@
       "aliases": null
     },
     "startlogging": {
-      "description": "Start sending log messages in the current server and channel.",
+      "description": "Starten das Senden die Logmeldungen in dem aktuellen Server und Kanal.",
       "example_image_url": null,
       "syntax": "%startlogging",
       "example_syntax": null,
@@ -823,7 +803,7 @@
       ]
     },
     "invite": {
-      "description": "Invite link to add the Bot to a server.",
+      "description": "Lade den Link ein, um den Bot zu einem Server hinzuzufügen.",
       "example_image_url": null,
       "syntax": "%invite",
       "example_syntax": null,
@@ -1687,16 +1667,6 @@
       "aliases": null,
       "note": "Benutze Kommas um die Benutzer IDs zu trennen."
     },
-    "approve": {
-      "description": "Approve a query id for an unregistered Group or Idol.",
-      "example_image_url": null,
-      "syntax": "%approve <query id> [mode=idol/group]",
-      "example_syntax": null,
-      "permissions_needed": [
-        "Bot Owner"
-      ],
-      "aliases": null
-    },
     "generateplayingcards": {
       "description": "Generate Custom Playing Cards with Idol Avatars.",
       "example_image_url": null,
@@ -1882,7 +1852,7 @@
   },
   "DataMod": {
     "addidol": {
-      "description": "Adds an Unregistered Idol using the syntax from https://irenebot.com/addidol.html/.",
+      "description": "Adds an Unregistered Idol using the syntax from https://irenebot.com/addidol.html.",
       "example_image_url": null,
       "syntax": "%addidol <JSON>",
       "example_syntax": null,
@@ -1892,8 +1862,18 @@
       "aliases": null,
       "note": "Command should only be used if the card does not exist for the Idol."
     },
+    "addidoltogroup": {
+      "description": "Adds an Idol to a Group.",
+      "example_image_url": null,
+      "syntax": "%addidoltogroup <idol id> <group id>",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
+      "aliases": null
+    },
     "addgroup": {
-      "description": "Adds an Unregistered Group using the syntax from https://irenebot.com/addgroup.html/.",
+      "description": "Adds an Unregistered Group using the syntax from https://irenebot.com/addgroup.html.",
       "example_image_url": null,
       "syntax": "%addgroup <JSON>",
       "example_syntax": null,
@@ -1902,6 +1882,44 @@
       ],
       "aliases": null,
       "note": "Command should only be used if the card does not exist for the Group."
+    },
+    "edit": {
+      "description": "Edit an Idol or Group's information.",
+      "example_image_url": null,
+      "syntax": "%edit <idol/group> <group/idol id> <column> <content>",
+      "example_syntax": null,
+      "sub_commands": {
+        "idol": {
+          "description": "Edit data for an idol.",
+          "example_image_url": null,
+          "syntax": "%edit idol <idol id> <column> <content>",
+          "example_syntax": null,
+          "permissions_needed": [
+            "Data Moderator"
+          ],
+          "aliases": null
+        },
+        "group": {
+          "description": "Edit data for a group.",
+          "example_image_url": null,
+          "syntax": "%edit group <group id> <column> <content>",
+          "example_syntax": null,
+          "permissions_needed": [
+            "Data Moderator"
+          ],
+          "aliases": null
+        }
+      }
+    },
+    "deleteidolfromgroup": {
+      "description": "Deletes an Idol from a Group.",
+      "example_image_url": null,
+      "syntax": "%deleteidolfromgroup <idol id> <group iid>\n",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
+      "aliases": null
     }
   }
 }

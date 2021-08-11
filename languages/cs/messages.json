@@ -79,6 +79,9 @@
     "custom_command_deleted": "{command_name} byl odebrán, pokud existuje.",
     "no_custom_commands": "Nejsou zde žádné vlastní příkazy pro Váš server."
   },
+  "datamod": {
+    "column_not_found": "That column does not exist!"
+  },
   "miscellaneous": {
     "set_language_fail": "{name}, to není dostupný jazyk. Použijte jeden z následujících: {languages}.",
     "set_language_success": "{name}, Váš jazyk je nyní nastaven na {language}.",
@@ -149,7 +152,7 @@
     "invalid_input": "{name}, tato možnost není platná. Podívejte se prosím na {server_prefix}help {command_name}.",
     "game_disabled": "{name}, Hry byly zakázány v tomto textovém kanálu pomocí {server_prefix}togglegames.",
     "gen_error": "CHYBA - {e}",
-    "may_take_time": "This command may take a few minutes to respond since it relies on a third-party application."
+    "may_take_time": "Reakce tohoto příkazu může trvat několik minut, protože se spoléhá na aplikaci třetí strany."
   },
   "twitch": {
     "follow_limit": "Je Vám pouze povoleno sledovat {follow_limit} kanálů.",
@@ -192,9 +195,7 @@
     "patrons_removed": "{users} odebrán jako patron!",
     "cleared": "Vyprázdněno.",
     "message_sent": "Zpráva Odeslána.",
-    "group_fail": "Nezdařilo se přidat Skupinu {group_id}. Pokračuje se v přidávání idola.",
-    "idol_query_approved": "Přidán ID dotazu {query_id} jako Idol ({idol_id}). \nTento idol byl přidán do následujících skupin: {group_ids}.\nMezipaměť se nyní obnovuje.",
-    "group_query_approved": "Přidán ID dotazu {query_id} jako skupina ({group_id}).\nMezipaměť se nyní obnovuje."
+    "group_fail": "Nezdařilo se přidat Skupinu {group_id}. Pokračuje se v přidávání idola."
   },
   "moderator": {
     "welcome_role_delete": "Uvítací role, kterou jste měli nastavenou, byla odebrána.",

@@ -79,6 +79,9 @@
     "custom_command_deleted": "{command_name} telah dihapus jika ada.",
     "no_custom_commands": "Tidak ada perintah kustom untuk server Anda."
   },
+  "datamod": {
+    "column_not_found": "That column does not exist!"
+  },
   "miscellaneous": {
     "set_language_fail": "{name}, itu bukan bahasa yang tersedia. Gunakan salah satu hal berikut ini: {languages}.",
     "set_language_success": "{name}, bahasa Anda sekarang diatur ke {language}.",
@@ -192,9 +195,7 @@
     "patrons_removed": "Dihapus {users} sebagai patron!",
     "cleared": "Dibersihkan.",
     "message_sent": "Pesan Terkirim.",
-    "group_fail": "Gagal menambahkan Grup {group_id}. Melanjutkan untuk menambahkan idola.",
-    "idol_query_approved": "Menambahkan ID Kueri {query_id} sebagai Idol ({idol_id}). Idol ini telah ditambahkan ke grup-grup berikut: {group_ids}. Cache sekarang menyegarkan.",
-    "group_query_approved": "Menambahkan ID Kueri {query_id} sebagai Grup ({group_id}). Cache sekarang menyegarkan."
+    "group_fail": "Gagal menambahkan Grup {group_id}. Melanjutkan untuk menambahkan idola."
   },
   "moderator": {
     "welcome_role_delete": "Peran selamat datang yang telah Anda tetapkan telah dihapus.",

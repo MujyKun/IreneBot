@@ -1852,7 +1852,7 @@
   },
   "DataMod": {
     "addidol": {
-      "description": "Adds an Unregistered Idol using the syntax from https://irenebot.com/addidol.html.",
+      "description": "Adds an Unregistered Idol using the syntax from https://irenebot.com/addidol.html/.",
       "example_image_url": null,
       "syntax": "%addidol <JSON>",
       "example_syntax": null,
@@ -1873,7 +1873,7 @@
       "aliases": null
     },
     "addgroup": {
-      "description": "Adds an Unregistered Group using the syntax from https://irenebot.com/addgroup.html.",
+      "description": "Adds an Unregistered Group using the syntax from https://irenebot.com/addgroup.html/.",
       "example_image_url": null,
       "syntax": "%addgroup <JSON>",
       "example_syntax": null,

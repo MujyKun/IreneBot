@@ -79,6 +79,9 @@
     "custom_command_deleted": "{command_name} a été supprimé s'il existait.",
     "no_custom_commands": "Il n'y a aucune commande personnalisée pour votre serveur."
   },
+  "datamod": {
+    "column_not_found": "Cette colonne n'existe pas !"
+  },
   "miscellaneous": {
     "set_language_fail": "{name}, ce n'est pas une langue disponible. Utilisez l'une des langues suivantes : {languages}.",
     "set_language_success": "{name}, votre langue est maintenant définie à {language}.",
@@ -149,7 +152,7 @@
     "invalid_input": "{name}, cette option n'est pas valide. Veuillez consulter l'aide {server_prefix} {command_name}.",
     "game_disabled": "{name}, Les jeux ont été désactivés dans ce salon textuel en utilisant les onglets {server_prefix}.",
     "gen_error": "ERREUR - {e}",
-    "may_take_time": "This command may take a few minutes to respond since it relies on a third-party application."
+    "may_take_time": "Cette commande pourrait prendre quelques minutes à répondre car elle dépend d'une application tierce."
   },
   "twitch": {
     "follow_limit": "Vous n'êtes autorisé à suivre que {follow_limit} chaînes.",
@@ -192,9 +195,7 @@
     "patrons_removed": "{users} a été supprimé en tant que client !",
     "cleared": "Supprimé.",
     "message_sent": "Message envoyé.",
-    "group_fail": "Impossible d'ajouter le groupe {group_id}. Poursuivre pour ajouter l'idol.",
-    "idol_query_approved": "Ajout de Query ID {query_id} en tant qu'Idole ({idol_id}).\nCette idole a été ajoutée aux groupes suivants : {group_ids}.\nLe cache est maintenant en cours d'actualisation.",
-    "group_query_approved": "Ajout de l'ID de requête {query_id} en tant que groupe ({group_id}).\nLe cache est maintenant actualisé."
+    "group_fail": "Impossible d'ajouter le groupe {group_id}. Poursuivre pour ajouter l'idol."
   },
   "moderator": {
     "welcome_role_delete": "Le rôle de bienvenue que vous avez défini a été supprimé.",

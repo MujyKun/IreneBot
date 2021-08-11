@@ -38,16 +38,6 @@
     }
   },
   "BotMod": {
-    "addidoltogroup": {
-      "description": "Adiciona um idol para um grupo.",
-      "example_image_url": null,
-      "syntax": "%addidoltogroup <idol id> <group id>",
-      "example_syntax": null,
-      "permissions_needed": [
-        "Bot Moderator"
-      ],
-      "aliases": null
-    },
     "addinteraction": {
       "description": "Adicionar um GIF a uma interação.",
       "example_image_url": null,
@@ -138,18 +128,8 @@
       ],
       "aliases": null
     },
-    "deleteidolfromgroup": {
-      "description": "Deletes an Idol from a Group.",
-      "example_image_url": null,
-      "syntax": "%deleteidolfromgroup <idol id> <group iid>\n",
-      "example_syntax": null,
-      "permissions_needed": [
-        "Bot Moderator"
-      ],
-      "aliases": null
-    },
     "deleteinteraction": {
-      "description": "Remove URL from an interaction.",
+      "description": "Remova o URL de uma interação.",
       "example_image_url": null,
       "syntax": "%deleteinteraction <urls>",
       "example_syntax": null,
@@ -157,10 +137,10 @@
         "Bot Moderator"
       ],
       "aliases": null,
-      "note": "Separate urls with commas."
+      "note": "Separe os urls com vírgulas."
     },
     "fixlinks": {
-      "description": "Fix Invalid Thumbnails/Avatars/Banners of Idols/Groups and puts them on the host.",
+      "description": "Corrige Miniaturas/Avatares/Banners inválidos de Idolos/Grupos e põe-os no Host.",
       "example_image_url": null,
       "syntax": "%fixlinks",
       "example_syntax": null,
@@ -170,7 +150,7 @@
       "aliases": null
     },
     "getstatuses": {
-      "description": "List all of the statuses of the Bot.",
+      "description": "Lista de todos os status do Bot.",
       "example_image_url": null,
       "syntax": "%getstatuses",
       "example_syntax": null,
@@ -180,7 +160,7 @@
       "aliases": null
     },
     "kill": {
-      "description": "Kills the Bot.",
+      "description": "Mate o Bot.",
       "example_image_url": null,
       "syntax": "%kill",
       "example_syntax": null,
@@ -190,7 +170,7 @@
       "aliases": null
     },
     "killapi": {
-      "description": "Kills the API.",
+      "description": "Mate o API.",
       "example_image_url": null,
       "syntax": "%killapi",
       "example_syntax": null,
@@ -200,7 +180,7 @@
       "aliases": null
     },
     "maintenance": {
-      "description": "Toggles Maintenance Mode",
+      "description": "Habilitar Modo de Manutenção",
       "example_image_url": null,
       "syntax": "%maintenance",
       "example_syntax": null,
@@ -210,7 +190,7 @@
       "aliases": null
     },
     "mergeidol": {
-      "description": "Merge a duplicated idol with the original idol.",
+      "description": "Combina um ídol duplicado com o ídol original.",
       "example_image_url": null,
       "syntax": "%mergeidol <original_idol_id> <duplicate_idol_id>",
       "example_syntax": null,
@@ -220,7 +200,7 @@
       "aliases": null
     },
     "mergegroup": {
-      "description": "Merge a duplicated group with the original group.",
+      "description": "Combina um grupo duplicado com o grupo original.",
       "example_image_url": null,
       "syntax": "%mergegroup <original_group_id> <duplicate_group_id>",
       "example_syntax": null,
@@ -230,7 +210,7 @@
       "aliases": null
     },
     "moveto": {
-      "description": "Moves an image to another idol.",
+      "description": "Move uma imagem para um outro ídolo.",
       "example_image_url": null,
       "syntax": "%moveto <idol_id> <link>",
       "example_syntax": null,
@@ -252,7 +232,7 @@
   },
   "BiasGame": {
     "biasgame": {
-      "description": "Start a BiasGame in the current channel.",
+      "description": "Inicie um BiasGame no canal atual.",
       "example_image_url": null,
       "syntax": "%biasgame [gender=Male/Female/All] [bracket_size=4/8/16/32]",
       "example_syntax": null,
@@ -262,7 +242,7 @@
       ]
     },
     "stopbg": {
-      "description": "Force-End a BiasGame.",
+      "description": "Cancele um BiasGame.",
       "example_image_url": null,
       "syntax": "%stopbg",
       "example_syntax": null,
@@ -305,7 +285,7 @@
   },
   "Currency": {
     "balance": {
-      "description": "View a user's balance.",
+      "description": "Ver o saldo de um usuário.",
       "example_image_url": null,
       "syntax": "%balance [member]",
       "example_syntax": null,
@@ -325,7 +305,7 @@
       "aliases": null
     },
     "bet": {
-      "description": "Bet your money.",
+      "description": "Aposte seu dinheiro.",
       "example_image_url": null,
       "syntax": "%bet <amount>",
       "example_syntax": null,
@@ -333,7 +313,7 @@
       "aliases": null
     },
     "daily": {
-      "description": "Get the daily reward.",
+      "description": "Receba a recompensa diária.",
       "example_image_url": null,
       "syntax": "%daily",
       "example_syntax": null,
@@ -341,7 +321,7 @@
       "aliases": null
     },
     "give": {
-      "description": "Give a user money.",
+      "description": "Dê dinheiro a um usuário.",
       "example_image_url": null,
       "syntax": "%give <member> <amount>",
       "example_syntax": null,
@@ -349,7 +329,7 @@
       "aliases": null
     },
     "leaderboard": {
-      "description": "Shows the Top 10 users server/global wide.",
+      "description": "Mostra os Top 10 usuários do servidor/global.",
       "example_image_url": null,
       "syntax": "%leaderboard [mode=server/global]",
       "example_syntax": null,
@@ -360,7 +340,7 @@
       ]
     },
     "rob": {
-      "description": "Rob a member.",
+      "description": "Robe um usuário.",
       "example_image_url": null,
       "syntax": "%rob <member>",
       "example_syntax": null,
@@ -368,7 +348,7 @@
       "aliases": null
     },
     "rps": {
-      "description": "Play Rock Paper Scissors.",
+      "description": "Jogue Pedra, Papel e Tesoura.",
       "example_image_url": null,
       "syntax": "%rps <rock/paper/scissors> [amount to bet=0]",
       "example_syntax": null,
@@ -378,7 +358,7 @@
       ]
     },
     "upgrade": {
-      "description": "Upgrades a command to the next level.",
+      "description": "Atualize um comando para o próximo nível.",
       "example_image_url": null,
       "syntax": "%upgrade <rob/daily/beg>",
       "example_syntax": null,
@@ -390,7 +370,7 @@
   },
   "CustomCommands": {
     "createcommand": {
-      "description": "Create a custom command.",
+      "description": "Cria um comando personalizado.",
       "example_image_url": null,
       "syntax": "%createcommand <command name> <message>",
       "example_syntax": null,
@@ -402,7 +382,7 @@
       ]
     },
     "deletecommand": {
-      "description": "Delete a custom command.",
+      "description": "Exclui um comando personalizado.",
       "example_image_url": null,
       "syntax": "%deletecommand <command name>",
       "example_syntax": null,
@@ -414,7 +394,7 @@
       ]
     },
     "listcommands": {
-      "description": "List all custom commands for the server.",
+      "description": "Lista todos os comandos personalizados para o servidor.",
       "example_image_url": null,
       "syntax": "%listcommands",
       "example_syntax": null,
@@ -475,7 +455,7 @@
       "aliases": null
     },
     "fullnames": {
-      "description": "List the full names of Idols the bot has photos of.",
+      "description": "Lista os nomes de ídolos que o Bot tem fotos.",
       "example_image_url": null,
       "syntax": "%fullnames [page number/group name]",
       "example_syntax": null,
@@ -493,7 +473,7 @@
       "note": "To a Bot Moderator, this will also display Groups with no photos and show their ID."
     },
     "members": {
-      "description": "List the names of idols the Bot has photos of.",
+      "description": "Lista os nomes de ídolos que o Bot tem fotos.",
       "example_image_url": null,
       "syntax": "%members [page number/group name]",
       "example_syntax": null,
@@ -502,7 +482,7 @@
       "note": "To a Bot Moderator, this will also display Idols with no photos and show their ID."
     },
     "randomidol": {
-      "description": "Posts media of a random Idol.",
+      "description": "Mostra a foto de um Ídolo aleatório.",
       "example_image_url": null,
       "syntax": "%randomidol",
       "example_syntax": null,
@@ -541,7 +521,7 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "Type the command again to re-enable."
+      "note": "Digite o comando novamente para reativá-lo."
     }
   },
   "GuessingGame": {
@@ -554,7 +534,7 @@
       "aliases": [
         "gg"
       ],
-      "note": "The host of the game can type stop or end to end the game or skip to skip the current round without affecting the round number."
+      "note": "O anfitrião do jogo pode digitar stop ou end para terminar o jogo ou skip para pular a rodada atual sem afetar o número da rodada."
     },
     "groupguessinggame": {
       "description": "Start a Group GuessingGame in the current channel.",
@@ -578,7 +558,7 @@
       "note": "Only the groups filtered will appear on the GuessingGame. If you do not specify a Group ID or Name, it will toggle the filter. Group IDs and Names must be split by commas. Group Names with more than one word must have an underscore used as a space."
     },
     "ggfilteredlist": {
-      "description": "View the current groups that are filtered.",
+      "description": "Exibir os grupos atuais que estão filtrados.",
       "example_image_url": null,
       "syntax": "%ggfilteredlist",
       "example_syntax": null,
@@ -626,7 +606,7 @@
       "aliases": null
     },
     "hug": {
-      "description": "Hug a member.",
+      "description": "Abrace um usuário.",
       "example_image_url": null,
       "syntax": "%hug [user]",
       "example_syntax": null,
@@ -634,7 +614,7 @@
       "aliases": null
     },
     "kiss": {
-      "description": "Kiss a member.",
+      "description": "Beije um usuário.",
       "example_image_url": null,
       "syntax": "%kiss [user]",
       "example_syntax": null,
@@ -642,7 +622,7 @@
       "aliases": null
     },
     "lick": {
-      "description": "Lick a member.",
+      "description": "Lamba um membro.",
       "example_image_url": null,
       "syntax": "%lick [user]",
       "example_syntax": null,
@@ -658,7 +638,7 @@
       "aliases": null
     },
     "punch": {
-      "description": "Punch a member.",
+      "description": "Golpeie um usuário.",
       "example_image_url": null,
       "syntax": "%punch [user]",
       "example_syntax": null,
@@ -666,7 +646,7 @@
       "aliases": null
     },
     "pullhair": {
-      "description": "Pull hair of a member.",
+      "description": "Puxe o cabelo de um usuário.",
       "example_image_url": null,
       "syntax": "%pullhair [user]",
       "example_syntax": null,
@@ -674,7 +654,7 @@
       "aliases": null
     },
     "slap": {
-      "description": "Slap a member.",
+      "description": "Dê um tapa em um usuário.",
       "example_image_url": null,
       "syntax": "%slap [user]",
       "example_syntax": null,
@@ -698,7 +678,7 @@
       "aliases": null
     },
     "stepon": {
-      "description": "Step on a member.",
+      "description": "Pise em um membro.",
       "example_image_url": null,
       "syntax": "%stepon [user]",
       "example_syntax": null,
@@ -738,7 +718,7 @@
       "aliases": null
     },
     "startlogging": {
-      "description": "Start sending log messages in the current server and channel.",
+      "description": "Comece a enviar mensagens de registro no servidor atual e no canal.",
       "example_image_url": null,
       "syntax": "%startlogging",
       "example_syntax": null,
@@ -748,7 +728,7 @@
       "aliases": null
     },
     "stoplogging": {
-      "description": "Stop sending log messages in the current server.",
+      "description": "Parar de enviar mensagens de registro no servidor atual.",
       "example_image_url": null,
       "syntax": "%stoplogging",
       "example_syntax": null,
@@ -770,7 +750,7 @@
       ]
     },
     "addnoti": {
-      "description": "Receive a DM whenever a phrase/word is said in the server.",
+      "description": "Receba uma DM sempre que uma frase/palavra for dita no servidor.",
       "example_image_url": null,
       "syntax": "%addnoti <phrase>",
       "example_syntax": null,
@@ -778,7 +758,7 @@
       "aliases": null
     },
     "botinfo": {
-      "description": "Displays general information about the Bot.",
+      "description": "Exibe informações gerais sobre o Bot.",
       "example_image_url": null,
       "syntax": "%botinfo",
       "example_syntax": null,
@@ -786,16 +766,16 @@
       "aliases": null
     },
     "checkprefix": {
-      "description": "Check the current prefix.",
+      "description": "Verifique o prefixo atual.",
       "example_image_url": null,
       "syntax": "%checkprefix",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null,
-      "note": "This command will always work with the bot's default prefix."
+      "note": "Este comando sempre funcionará com o prefixo padrão do bot."
     },
     "choose": {
-      "description": "Choose between a selection of options.",
+      "description": "Escolha entre uma seleção de opções.",
       "example_image_url": null,
       "syntax": "%choose <options>",
       "example_syntax": null,
@@ -804,7 +784,7 @@
       "note": "Underscores are used for spaces between words. Spaces are used to separate choices."
     },
     "displayemoji": {
-      "description": "Displays an emoji at a larger size.",
+      "description": "Exibe um emoji em um tamanho maior.",
       "example_image_url": null,
       "syntax": "%displayemoji <emoji>",
       "example_syntax": null,
@@ -812,7 +792,7 @@
       "aliases": null
     },
     "flip": {
-      "description": "Flip a coin.",
+      "description": "Jogue cara ou coroa.",
       "example_image_url": null,
       "syntax": "%flip",
       "example_syntax": null,
@@ -823,7 +803,7 @@
       ]
     },
     "invite": {
-      "description": "Invite link to add the Bot to a server.",
+      "description": "Link de convite para adicionar o Bot a um servidor.",
       "example_image_url": null,
       "syntax": "%invite",
       "example_syntax": null,
@@ -831,7 +811,7 @@
       "aliases": null
     },
     "listnoti": {
-      "description": "List all your notification phrases for the current server.",
+      "description": "Liste todas as frases de notificação para o servidor atual.",
       "example_image_url": null,
       "syntax": "%listnoti",
       "example_syntax": null,
@@ -839,7 +819,7 @@
       "aliases": null
     },
     "patreon": {
-      "description": "Displays link to Patreon.",
+      "description": "Exibe link para o Patreon.",
       "example_image_url": null,
       "syntax": "%patreon",
       "example_syntax": null,
@@ -849,7 +829,7 @@
       ]
     },
     "ping": {
-      "description": "Shows Overall Latency to Discord.",
+      "description": "Mostra Latência Geral para o Discord.",
       "example_image_url": null,
       "syntax": "%ping",
       "example_syntax": null,
@@ -872,7 +852,7 @@
       "note": "Random integer may include b."
     },
     "removenoti": {
-      "description": "Remove a phrase/word from notifying you when it is said in the current server.",
+      "description": "Remova uma frase/palavra da notificação quando for dita no servidor atual.",
       "example_image_url": null,
       "syntax": "%removenoti <phrase/word>",
       "example_syntax": null,
@@ -882,7 +862,7 @@
       ]
     },
     "report": {
-      "description": "Report an issue with the Bot.",
+      "description": "Relatar um problema com o Bot.",
       "example_image_url": null,
       "syntax": "%report <issue>",
       "example_syntax": null,
@@ -898,7 +878,7 @@
       "aliases": null
     },
     "serverinfo": {
-      "description": "View information about the current server.",
+      "description": "Ver informações sobre o servidor atual.",
       "example_image_url": null,
       "syntax": "%serverinfo",
       "example_syntax": null,
@@ -906,7 +886,7 @@
       "aliases": null
     },
     "setlanguage": {
-      "description": "Changes language of the Bot.",
+      "description": "Altera o idioma do Bot.",
       "example_image_url": null,
       "syntax": "%setlanguage <language choice>",
       "example_syntax": null,
@@ -924,7 +904,7 @@
       ]
     },
     "stopgames": {
-      "description": "End all games that you are hosting or that are in the channel.",
+      "description": "Termine todos os jogos que você está comandando ou que estão no canal.",
       "example_image_url": null,
       "syntax": "%stopgames",
       "example_syntax": null,
@@ -939,7 +919,7 @@
       ]
     },
     "suggest": {
-      "description": "Suggest a feature for the Bot.",
+      "description": "Sugira um recurso para o Bot.",
       "example_image_url": null,
       "syntax": "%suggest <suggestion>",
       "example_syntax": null,
@@ -955,7 +935,7 @@
       "aliases": null
     },
     "translate": {
-      "description": "Translate between languages using Papago.",
+      "description": "Traduzir entre idiomas usando Papago.",
       "example_image_url": null,
       "syntax": "%translate <from language> <to language> <message>",
       "example_syntax": null,
@@ -966,7 +946,7 @@
       ]
     },
     "vote": {
-      "description": "Direct link to vote for the Bot.",
+      "description": "Link direto para votar no Bot.",
       "example_image_url": null,
       "syntax": "%vote",
       "example_syntax": null,
@@ -987,7 +967,7 @@
       "note": "Underscores for the alias are spaces. If a Bot Moderator uses this command, it will be a global (not local) alias."
     },
     "addemoji": {
-      "description": "Adds emojis to the server.",
+      "description": "Adiciona emojis ao servidor.",
       "example_image_url": null,
       "syntax": "%addemoji <urls/emojis> [emoji_name]",
       "example_syntax": null,
@@ -1000,7 +980,7 @@
       ]
     },
     "ban": {
-      "description": "Ban a member.",
+      "description": "Bane um membro.",
       "example_image_url": null,
       "syntax": "%ban [user] [reason=No Reason]",
       "example_syntax": null,
@@ -1020,7 +1000,7 @@
       "aliases": [
         "prune"
       ],
-      "note": "Amount limit is 1000."
+      "note": "O limite de valor é 1.000."
     },
     "deletealias": {
       "description": "Delete an alias from an idol/group.",
@@ -1036,7 +1016,7 @@
       "note": "Underscores for the alias are spaces. If a Bot Moderator uses this command, it will be a global (not local) alias."
     },
     "disableinteraction": {
-      "description": "Disable an interaction on the server.",
+      "description": "Desativar uma interação no servidor.",
       "example_image_url": null,
       "syntax": "%disableinteraction <interaction>",
       "example_syntax": null,
@@ -1047,7 +1027,7 @@
       "note": "To re-enable, use the same command again."
     },
     "kick": {
-      "description": "Kick a member.",
+      "description": "Expulsar um membro.",
       "example_image_url": null,
       "syntax": "%kick [user] [reason=No Reason]",
       "example_syntax": null,
@@ -1057,7 +1037,7 @@
       "aliases": null
     },
     "mute": {
-      "description": "Mutes a member.",
+      "description": "Silencia um membro.",
       "example_image_url": null,
       "syntax": "%mute [user] [reason]",
       "example_syntax": null,
@@ -1068,7 +1048,7 @@
       "aliases": null
     },
     "say": {
-      "description": "Make the Bot say a message.",
+      "description": "Faça o Bot dizer uma mensagem.",
       "example_image_url": null,
       "syntax": "%say [text channel] [message]",
       "example_syntax": null,
@@ -1079,7 +1059,7 @@
       "note": "If a text channel is not provided, it will send the message in the current channel."
     },
     "sayembed": {
-      "description": "Make the Bot say an embed message.",
+      "description": "Faça o Bot dizer uma mensagem incorporada.",
       "example_image_url": null,
       "syntax": "%sayembed [text channel] [embed format]",
       "example_syntax": null,
@@ -1087,10 +1067,10 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "Follows the format from https://embedbuilder.nadekobot.me/. If a text channel is not provided, it will send the message in the current channel."
+      "note": "Siga o formato https://embedbuilder.nadekobot.me/. Se um canal de texto não for fornecido, a mensagem será enviada para o canal atual."
     },
     "setprefix": {
-      "description": "Set the server prefix.",
+      "description": "Defina o prefixo do servidor.",
       "example_image_url": null,
       "syntax": "%setprefix [prefix=%]",
       "example_syntax": null,
@@ -1122,7 +1102,7 @@
       "aliases": null
     },
     "unban": {
-      "description": "Unban a user.",
+      "description": "Desbanir usuário.",
       "example_image_url": null,
       "syntax": "%unban [user] [reason=No Reason]",
       "example_syntax": null,
@@ -1132,7 +1112,7 @@
       "aliases": null
     },
     "unmute": {
-      "description": "Unmute a member.",
+      "description": "Desmutar um membro.",
       "example_image_url": null,
       "syntax": "%unmute [user]",
       "example_syntax": null,
@@ -1143,7 +1123,7 @@
       "aliases": null
     },
     "welcome": {
-      "description": "Set a welcome message in the current channel.",
+      "description": "Define uma mensagem de boas-vindas no canal atual.",
       "example_image_url": null,
       "syntax": "%welcome [message]",
       "example_syntax": null,
@@ -1151,10 +1131,10 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "Use the command with no message to disable the welcome message. If the message contains %user, it will mention the user. If the message contains %guild_name, the server name will be added."
+      "note": "Use o comando com nenhuma mensagem para desativar a mensagem de boas-vindas. Se a mensagem contiver %user, ele mencionará o usuário. Se a mensagem contiver %guild_name, o nome do servidor será adicionado."
     },
     "welcomerole": {
-      "description": "The role to give a user when they first join the server.",
+      "description": "O cargo para dar a um usuário quando ele entrar pela primeira vez no servidor.",
       "example_image_url": null,
       "syntax": "%welcomerole [role]",
       "example_syntax": null,
@@ -1166,7 +1146,7 @@
   },
   "Music": {
     "join": {
-      "description": "Makes the Bot join the current voice channel.",
+      "description": "Fazer o Bot entrar no seu canal de voz atual.",
       "example_image_url": null,
       "syntax": "%join",
       "example_syntax": null,
@@ -1186,7 +1166,7 @@
       ]
     },
     "pause": {
-      "description": "Pause the player.",
+      "description": "Pausa o reprodutor.",
       "example_image_url": null,
       "syntax": "%pause",
       "example_syntax": null,
@@ -1194,7 +1174,7 @@
       "aliases": null
     },
     "play": {
-      "description": "Play a song based on a search query.",
+      "description": "Reproduza uma música baseada em uma pesquisa de busca.",
       "example_image_url": null,
       "syntax": "%play <url/song/query>",
       "example_syntax": null,
@@ -1204,7 +1184,7 @@
       ]
     },
     "queue": {
-      "description": "Displays the currently queued songs in the player.",
+      "description": "Exibe as músicas na fila no reprodutor.",
       "example_image_url": null,
       "syntax": "%queue [page number=1]",
       "example_syntax": null,
@@ -1215,7 +1195,7 @@
       ]
     },
     "remove": {
-      "description": "Remove a song from the queue.",
+      "description": "Remove uma música da fila.",
       "example_image_url": null,
       "syntax": "%remove <song number>",
       "example_syntax": null,
@@ -1223,7 +1203,7 @@
       "aliases": null
     },
     "resume": {
-      "description": "Resume a paused player.",
+      "description": "Retoma à música pausada.",
       "example_image_url": null,
       "syntax": "%resume",
       "example_syntax": null,
@@ -1233,7 +1213,7 @@
       ]
     },
     "shuffle": {
-      "description": "Shuffle the playlist/queue.",
+      "description": "Embaralha a lista de reprodução.",
       "example_image_url": null,
       "syntax": "%shuffle ",
       "example_syntax": null,
@@ -1241,7 +1221,7 @@
       "aliases": null
     },
     "skip": {
-      "description": "Skip the current song.",
+      "description": "Pula a música atual.",
       "example_image_url": null,
       "syntax": "%skip",
       "example_syntax": null,
@@ -1260,7 +1240,7 @@
       ]
     },
     "volume": {
-      "description": "Change the player's volume.",
+      "description": "Define o volume do reprodutor.",
       "example_image_url": null,
       "syntax": "%volume <volume>",
       "example_syntax": null,
@@ -1270,7 +1250,7 @@
       ]
     },
     "lyrics": {
-      "description": "Get the lyrics of a song.",
+      "description": "Encontra a letra de uma música.",
       "example_image_url": null,
       "syntax": "%lyrics <song query>",
       "example_syntax": null,
@@ -1281,7 +1261,7 @@
   },
   "Profile": {
     "avatar": {
-      "description": "View a member's avatar.",
+      "description": "Ver o avatar de um membro.",
       "example_image_url": null,
       "syntax": "%avatar [user]",
       "example_syntax": null,
@@ -1289,7 +1269,7 @@
       "aliases": null
     },
     "profile": {
-      "description": "View a member's profile.",
+      "description": "Ver perfil de um membro.",
       "example_image_url": null,
       "syntax": "%profile [user]",
       "example_syntax": null,
@@ -1299,7 +1279,7 @@
   },
   "LastFM": {
     "fm": {
-      "description": "Get information about a Last FM account.",
+      "description": "Obter informações sobre uma conta do Last FM.",
       "example_image_url": null,
       "syntax": "%fm [user/lastfm username]",
       "example_syntax": null,
@@ -1307,7 +1287,7 @@
       "aliases": null
     },
     "recenttracks": {
-      "description": "Get the recent tracks of a Last FM Account.",
+      "description": "Obtenha as músicas tocadas recentemente em uma conta do Last FM.",
       "example_image_url": null,
       "syntax": "%recenttracks [user/lastfm username]",
       "example_syntax": null,
@@ -1318,7 +1298,7 @@
       ]
     },
     "recent": {
-      "description": "Get the most recent track of a Last FM Account.",
+      "description": "Obtenha as músicas mais tocadas recentemente em uma conta do Last FM.",
       "example_image_url": null,
       "syntax": "%recent [user/lastfm username]",
       "example_syntax": null,
@@ -1328,7 +1308,7 @@
       ]
     },
     "topalbums": {
-      "description": "See the top albums of a Last FM Account.",
+      "description": "Veja os principais álbuns de uma conta do Last FM.",
       "example_image_url": null,
       "syntax": "%topalbums [user/lastfm username]",
       "example_syntax": null,
@@ -1338,7 +1318,7 @@
       ]
     },
     "topartists": {
-      "description": "See the top artists of a Last FM Account.",
+      "description": "Veja os principais álbuns de uma conta do Last FM.",
       "example_image_url": null,
       "syntax": "%topartists [user/lastfm username]",
       "example_syntax": null,
@@ -1348,7 +1328,7 @@
       ]
     },
     "toptracks": {
-      "description": "See the top tracks of a Last FM Account.",
+      "description": "Veja as músicas mais populares de uma conta no Last FM.",
       "example_image_url": null,
       "syntax": "%toptracks [user/lastfm username]",
       "example_syntax": null,
@@ -1358,7 +1338,7 @@
       ]
     },
     "setfm": {
-      "description": "Attach a LastFM username to your Discord account.",
+      "description": "Anexe um nome de usuário do LastFM à sua conta do Discord.",
       "example_image_url": null,
       "syntax": "%setfm <lastfm username>",
       "example_syntax": null,
@@ -1368,7 +1348,7 @@
   },
   "Wolfram": {
     "w": {
-      "description": "Send a request to Wolfram",
+      "description": "Enviar um pedido para Wolfram",
       "example_image_url": null,
       "syntax": "%w <query>",
       "example_syntax": null,
@@ -1388,7 +1368,7 @@
       "aliases": null
     },
     "recenttweets": {
-      "description": "View the recent tweets.",
+      "description": "Ver os tweets recentes.",
       "example_image_url": null,
       "syntax": "%recenttweets [amount of tweets=20]",
       "example_syntax": null,
@@ -1476,7 +1456,7 @@
       "aliases": [
         "us"
       ],
-      "note": "The host of the game can type stop or end to end the game or skip to skip the current round without affecting the round number."
+      "note": "O anfitrião do jogo pode digitar parar ou terminar para terminar o jogo ou pular para a rodada atual sem afetar o número da rodada."
     },
     "usleaderboard": {
       "description": "Shows Server/Global leaderboards for the Unscramble Game.",
@@ -1513,7 +1493,7 @@
       "aliases": null
     },
     "listroles": {
-      "description": "List all of the self-assignable roles in the server.",
+      "description": "Lista todas as funções auto-atribuíveis no servidor.",
       "example_image_url": null,
       "syntax": "%listroles",
       "example_syntax": null,
@@ -1557,7 +1537,7 @@
   },
   "Reminder": {
     "gettimezone": {
-      "description": "Get your current set timezone.",
+      "description": "Obtenha o seu fuso horário atual.",
       "example_image_url": null,
       "syntax": "%gettz [timezone]",
       "example_syntax": null,
@@ -1568,7 +1548,7 @@
       ]
     },
     "listreminders": {
-      "description": "List out your reminders.",
+      "description": "Liste os seus lembretes.",
       "example_image_url": null,
       "syntax": "%listreminders",
       "example_syntax": null,
@@ -1580,7 +1560,7 @@
       ]
     },
     "remindme": {
-      "description": "Create a reminder to do a task at a certain time.",
+      "description": "Crie um lembrete para fazer uma tarefa em um determinado momento.",
       "example_image_url": null,
       "syntax": "%remindme to ______ at 9PM or %remindme to ____ in 6hrs 30mins",
       "example_syntax": null,
@@ -1609,7 +1589,7 @@
       "aliases": [
         "settz"
       ],
-      "note": "The country code is the short-handed version of the location (ex: USA)."
+      "note": "O código do país é a versão abreviada do local (ex: EUA)."
     }
   },
   "Twitch": {
@@ -1622,10 +1602,10 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "Maximum 2 Twitch channels per server."
+      "note": "Máximo de 2 canais da Twitch por servidor."
     },
     "listtwitch": {
-      "description": "List the Twitch channels the server follows.",
+      "description": "Liste os canais da Twitch que o servidor segue.",
       "example_image_url": null,
       "syntax": "%listtwitch",
       "example_syntax": null,
@@ -1645,7 +1625,7 @@
       "aliases": null
     },
     "settwitchchannel": {
-      "description": "Set the Discord channel that the Twitch announcements will be posted on.",
+      "description": "Defina o canal do Discord no qual os anúncios da Twitch serão publicados.",
       "example_image_url": null,
       "syntax": "%settwitchchannel [text channel]",
       "example_syntax": null,
@@ -1655,7 +1635,7 @@
       "aliases": null
     },
     "settwitchrole": {
-      "description": "Set the Discord Role that will be mentioned on Twitch announcements.",
+      "description": "Defina o Papel do Discord que será mencionado em anúncios da Twitch.",
       "example_image_url": null,
       "syntax": "%settwitchrole [role]",
       "example_syntax": null,
@@ -1677,7 +1657,7 @@
       "aliases": null
     },
     "addpatreon": {
-      "description": "Adds a permanent patron",
+      "description": "Adiciona um patrono permanente",
       "example_image_url": null,
       "syntax": "%addpatreon <user ids>",
       "example_syntax": null,
@@ -1685,17 +1665,7 @@
         "Bot Owner"
       ],
       "aliases": null,
-      "note": "Use commas to separate user ids."
-    },
-    "approve": {
-      "description": "Approve a query id for an unregistered Group or Idol.",
-      "example_image_url": null,
-      "syntax": "%approve <query id> [mode=idol/group]",
-      "example_syntax": null,
-      "permissions_needed": [
-        "Bot Owner"
-      ],
-      "aliases": null
+      "note": "Use vírgulas para separar os ids dos usuários."
     },
     "generateplayingcards": {
       "description": "Generate Custom Playing Cards with Idol Avatars.",
@@ -1708,7 +1678,7 @@
       "aliases": null
     },
     "removepatreon": {
-      "description": "Removes a permanent patron.",
+      "description": "Remove um patrono permanente.",
       "example_image_url": null,
       "syntax": "%removepatreon <user ids>",
       "example_syntax": null,
@@ -1716,7 +1686,7 @@
         "Bot Owner"
       ],
       "aliases": null,
-      "note": "Use commas to separate user ids."
+      "note": "Use vírgulas para separar os ids dos usuários."
     },
     "resetcache": {
       "description": "Reset Cache",
@@ -1729,7 +1699,7 @@
       "aliases": null
     },
     "send": {
-      "description": "Send a message to a text channel.",
+      "description": "Envia uma mensagem para um canal de texto.",
       "example_image_url": null,
       "syntax": "%send <channel id> <message>",
       "example_syntax": null,
@@ -1749,7 +1719,7 @@
       "aliases": null
     },
     "reloadmodule": {
-      "description": "Reload a module from it's name.",
+      "description": "Recarrega um módulo de seu nome.",
       "example_image_url": null,
       "syntax": "%reloadmodule <module name>",
       "example_syntax": null,
@@ -1761,7 +1731,7 @@
       ]
     },
     "reloadmodules": {
-      "description": "Reload all modules.",
+      "description": "Recarregar todos os módulos.",
       "example_image_url": null,
       "syntax": "%reloadmodules",
       "example_syntax": null,
@@ -1892,6 +1862,16 @@
       "aliases": null,
       "note": "Comando só deve ser usado se a carta não existir para o idol."
     },
+    "addidoltogroup": {
+      "description": "Adds an Idol to a Group.",
+      "example_image_url": null,
+      "syntax": "%addidoltogroup <idol id> <group id>",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
+      "aliases": null
+    },
     "addgroup": {
       "description": "Adiciona um grupo não registrado usando a sintaxe de https://irenebot.com/addgroup.html/.",
       "example_image_url": null,
@@ -1902,6 +1882,44 @@
       ],
       "aliases": null,
       "note": "Comando só deve ser usado se a carta não existir para o grupo."
+    },
+    "edit": {
+      "description": "Editar Ídolo ou Informações do Grupo.",
+      "example_image_url": null,
+      "syntax": "%edit <idol/group> <group/idol id> <column> <content>",
+      "example_syntax": null,
+      "sub_commands": {
+        "idol": {
+          "description": "Editar dados para um ídolo.",
+          "example_image_url": null,
+          "syntax": "%edit idol <idol id> <column> <content>",
+          "example_syntax": null,
+          "permissions_needed": [
+            "Data Moderator"
+          ],
+          "aliases": null
+        },
+        "group": {
+          "description": "Editar dados para um grupo.",
+          "example_image_url": null,
+          "syntax": "%edit group <group id> <column> <content>",
+          "example_syntax": null,
+          "permissions_needed": [
+            "Data Moderator"
+          ],
+          "aliases": null
+        }
+      }
+    },
+    "deleteidolfromgroup": {
+      "description": "Deletes an Idol from a Group.",
+      "example_image_url": null,
+      "syntax": "%deleteidolfromgroup <idol id> <group iid>\n",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
+      "aliases": null
     }
   }
 }

@@ -79,6 +79,9 @@
     "custom_command_deleted": "{command_name} 已被删除，如果它存在。",
     "no_custom_commands": "您的服务器没有自定义命令。"
   },
+  "datamod": {
+    "column_not_found": "That column does not exist!"
+  },
   "miscellaneous": {
     "set_language_fail": "{name}，这不是可用的语言。请使用以下语言之一： {languages}。",
     "set_language_success": "{name}，您的语言现在设置为 {language}。",
@@ -149,7 +152,7 @@
     "invalid_input": "{name}，该选项无效。请查看{server_prefix}帮助{command_name}。",
     "game_disabled": "{name}，已使用 {server_prefix}togglegames 在此文本频道中禁用游戏。",
     "gen_error": "错误 - {e}",
-    "may_take_time": "This command may take a few minutes to respond since it relies on a third-party application."
+    "may_take_time": "此命令可能需要几分钟才能回应，因为它依赖于第三方的申请。"
   },
   "twitch": {
     "follow_limit": "您只能关注 {follow_limit} 个频道。",
@@ -192,9 +195,7 @@
     "patrons_removed": "已删除 {users} 的赞助者身份!",
     "cleared": "已清除。",
     "message_sent": "消息已发送。",
-    "group_fail": "无法添加团体 {group_id}。正在进行添加偶像的工作。",
-    "idol_query_approved": "添加查询ID {query_id} 作为偶像 ({idol_id})。\n这个偶像已被添加到以下团体：{group_ids}。\n缓存正在刷新。",
-    "group_query_approved": "添加查询ID {query_id} 作为团体 ({group_id})。\n缓存正在刷新。"
+    "group_fail": "无法添加团体 {group_id}。正在进行添加偶像的工作。"
   },
   "moderator": {
     "welcome_role_delete": "您设置的欢迎角色已被删除。",

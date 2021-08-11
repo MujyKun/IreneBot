@@ -79,6 +79,9 @@
     "custom_command_deleted": "존재하는 경우 {command_name} 이가 제거되었습니다.",
     "no_custom_commands": "서버에 대한 사용자 지정 명령이 없습니다."
   },
+  "datamod": {
+    "column_not_found": "That column does not exist!"
+  },
   "miscellaneous": {
     "set_language_fail": "{name}, 사용 가능한 언어가 아닙니다. {languages} 중 하나를 사용하세요",
     "set_language_success": "{name}, 귀하의 언어는 이제 {language} 로 설정되었습니다.",
@@ -192,9 +195,7 @@
     "patrons_removed": "{users} 후원자로 제거 됐습니다!",
     "cleared": "클리어.",
     "message_sent": "메세지 전송됨",
-    "group_fail": "그룹 {group_id} 을를 추가하지 못했습니다. 아이돌을 추가하는 중입니다.",
-    "idol_query_approved": "쿼리 ID {query_id} 를 아이돌({idol_id}) 로 추가했습니다.\n 이 아이돌은 {group_ids} 그룹에 추가되었습니다.\n 이제 캐시가 새로 고쳐집니다.",
-    "group_query_approved": "쿼리 ID {query_id} 를 그룹({group_id}) 으로 추가했습니다.\n 이제 캐시가 새로 고쳐집니다."
+    "group_fail": "그룹 {group_id} 을를 추가하지 못했습니다. 아이돌을 추가하는 중입니다."
   },
   "moderator": {
     "welcome_role_delete": "설정된 환영 역할이 제거 됐습니다!",

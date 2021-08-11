@@ -144,6 +144,57 @@ class DataMod(commands.Cog):
                 ["e", e], ["server_prefix", server_prefix], ["command_name", "addgroup"]])
             await ctx.send(msg)
 
+    @commands.command()
+    async def addidoltogroup(self, ctx, idol_id: int, group_id: int):
+        """
+        Adds idol to group.
+
+        [Format: %addidoltogroup (idol id) (group id)]
+        """
+        try:
+            member = await self.ex.u_group_members.get_member(idol_id)
+            group = await self.ex.u_group_members.get_group(group_id)
+            if member.id in group.members:
+                return await ctx.send(f'> **{member.stage_name} ({idol_id}) is already in {group.name} ({group_id}).**')
+            else:
+                await self.ex.u_group_members.add_idol_to_group(idol_id, group_id)
+                desc = f"**Added {member.stage_name} ({idol_id}) to {group.name} ({group_id}).**"
+                await ctx.send(desc)
+                public_embed = await self.ex.create_embed(f"Info Change by {ctx.author.display_name} ({ctx.author.id})",
+                                                          title_desc=desc)
+                public_channel = self.ex.client.get_channel(self.ex.keys.datamod_log_channel_id) or await \
+                    self.ex.client.fetch_channel(self.ex.keys.datamod_log_channel_id)
+                return await public_channel.send(embed=public_embed)
+        except Exception as e:
+            await ctx.send(await self.ex.get_msg(ctx, "general", "gen_error", ["e", e]))
+            log.console(e)
+
+    @commands.command(aliases=['removeidolfromgroup'])
+    async def deleteidolfromgroup(self, ctx, idol_id: int, group_id: int):
+        """
+        Deletes idol from group.
+
+        [Format: %deleteidolfromgroup (idol id) (group id)]
+        """
+        try:
+            member = await self.ex.u_group_members.get_member(idol_id)
+            group = await self.ex.u_group_members.get_group(group_id)
+
+            if member.id not in group.members:
+                await ctx.send(f"> **{member.stage_name} ({idol_id}) is not in {group.name} ({group_id}).**")
+            else:
+                await self.ex.u_group_members.remove_idol_from_group(idol_id, group_id)
+                desc = f"**Removed {member.stage_name} ({idol_id}) from {group.name} ({group_id}).**"
+                await ctx.send(desc)
+                public_embed = await self.ex.create_embed(f"Info Change by {ctx.author.display_name} ({ctx.author.id})",
+                                                          title_desc=desc)
+                public_channel = self.ex.client.get_channel(self.ex.keys.datamod_log_channel_id) or await \
+                    self.ex.client.fetch_channel(self.ex.keys.datamod_log_channel_id)
+                return await public_channel.send(embed=public_embed)
+        except Exception as e:
+            await ctx.send(await self.ex.get_msg(ctx, "general", "gen_error", ["e", e]))
+            log.console(e)
+
     @commands.group()
     async def edit(self, ctx):
         """Edit an Idol or Group's information.

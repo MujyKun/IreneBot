@@ -242,6 +242,7 @@ To find out more, look at the `GroupMembers` category.
 | twitterupdates group | Follow a Twitter channel belonging to a Group ID If they have one. (Requires Manage Messages)  | %twitterupdates group (group id) [role id] | twitter group |
 | twitterupdates idol | Follow a Twitter channel belonging to an Idol ID If they have one. (Requires Manage Messages)  | %twitterupdates idol (idol id) [role id] | twitter idol |
 | twitterupdates list | Lists the Twitter channels currently being followed in the text channel. (Requires Manage Messages)  | %twitterupdates list | twitter list |
+| twitterupdates reset | Unfollows all Twitter accounts in the server. (Requires Manage Messages)  | %twitterupdates reset | twitter reset |
 
 
 #### UnScramble:

@@ -140,6 +140,21 @@ class Twitter(commands.Cog):
         msg = await self.ex.get_msg(ctx, "twitter", "list_channel_codes", ["result", ", ".join(channel_codes)])
         return await ctx.send(msg)
 
+    @twitterupdates.command()
+    async def reset(self, ctx):
+        """Unfollow all twitter accounts in the server."""
+        channel_ids = [channel.id for channel in ctx.guild.channels]
+
+        try:
+            for channel_id in channel_ids:
+                for _, role_id, twitter_id in await self.ex.sql.s_twitter.fetch_followed_channels(channel_id):
+                    await self.ex.u_twitter.unfollow_twitter(channel_id, twitter_id)
+                    msg = await self.ex.get_msg(ctx, "twitter", "unfollowed", ["result", twitter_id])
+                    await ctx.send(msg)
+        except Exception as e:
+            msg = await self.ex.get_msg(ctx, "general", "gen_error", ["e", e])
+            await ctx.send(msg)
+
     # notification loop
     @tasks.loop(seconds=0, minutes=5, hours=0, reconnect=True)
     async def twitter_notification_updates(self):

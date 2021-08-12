@@ -1435,6 +1435,16 @@
             "Manage Messages"
           ],
           "aliases": null
+        },
+        "reset": {
+          "description": "Unfollows all Twitter accounts in the server.",
+          "example_image_url": null,
+          "syntax": "%twitterupdates reset",
+          "example_syntax": null,
+          "permissions_needed": [
+            "Manage Messages"
+          ],
+          "aliases": null
         }
       },
       "permissions_needed": [

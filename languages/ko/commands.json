@@ -718,7 +718,7 @@
       "aliases": null
     },
     "startlogging": {
-      "description": "Start sending log messages in the current server and channel.",
+      "description": "현재 서버와 채널에서 로그 메시지 보내기를 시작합니다.",
       "example_image_url": null,
       "syntax": "%startlogging",
       "example_syntax": null,
@@ -728,7 +728,7 @@
       "aliases": null
     },
     "stoplogging": {
-      "description": "Stop sending log messages in the current server.",
+      "description": "현재 서버에서 로그 메시지 전송을 중지합니다.",
       "example_image_url": null,
       "syntax": "%stoplogging",
       "example_syntax": null,
@@ -758,7 +758,7 @@
       "aliases": null
     },
     "botinfo": {
-      "description": "Displays general information about the Bot.",
+      "description": "봇에 대한 일반 정보를 표시합니다.",
       "example_image_url": null,
       "syntax": "%botinfo",
       "example_syntax": null,
@@ -772,7 +772,7 @@
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null,
-      "note": "This command will always work with the bot's default prefix."
+      "note": "이 명령은 항상 봇의 기본 접두사와 함께 작동합니다."
     },
     "choose": {
       "description": "선택 옵션 중에서 선택합니다.",
@@ -781,7 +781,7 @@
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null,
-      "note": "Underscores are used for spaces between words. Spaces are used to separate choices."
+      "note": "밑줄은 단어 사이의 공백에 사용됩니다. 공백은 선택 항목을 구분하는 데 사용됩니다."
     },
     "displayemoji": {
       "description": "이모티콘을 더 크게 표시합니다.",
@@ -811,7 +811,7 @@
       "aliases": null
     },
     "listnoti": {
-      "description": "List all your notification phrases for the current server.",
+      "description": "현재 서버에 대한 모든 알림 문구를 나열하십시오.",
       "example_image_url": null,
       "syntax": "%listnoti",
       "example_syntax": null,
@@ -819,7 +819,7 @@
       "aliases": null
     },
     "patreon": {
-      "description": "Displays link to Patreon.",
+      "description": "Patreon에 대한 링크를 표시합니다.",
       "example_image_url": null,
       "syntax": "%patreon",
       "example_syntax": null,
@@ -829,7 +829,7 @@
       ]
     },
     "ping": {
-      "description": "Shows Overall Latency to Discord.",
+      "description": "Discord에 대한 전체 대기 시간을 표시합니다.",
       "example_image_url": null,
       "syntax": "%ping",
       "example_syntax": null,
@@ -839,7 +839,7 @@
       ]
     },
     "random": {
-      "description": "Choose a random integer from a to b.",
+      "description": "b에서 임의의 정수를 선택하십시오.",
       "example_image_url": null,
       "syntax": "%random <a> <b>",
       "example_syntax": null,
@@ -849,10 +849,10 @@
         "rand",
         "randint"
       ],
-      "note": "Random integer may include b."
+      "note": "임의의 정수는 다음을 포함할 수 있습니다."
     },
     "removenoti": {
-      "description": "Remove a phrase/word from notifying you when it is said in the current server.",
+      "description": "현재 서버에서 말했을 때 알려주는 문구/단어를 제거합니다.",
       "example_image_url": null,
       "syntax": "%removenoti <phrase/word>",
       "example_syntax": null,
@@ -870,7 +870,7 @@
       "aliases": null
     },
     "servercount": {
-      "description": "Shows the amount of servers connected to the Bot.",
+      "description": "Bot으로 연결된 서버의 수를 보여줍니다.",
       "example_image_url": null,
       "syntax": "%servercount",
       "example_syntax": null,
@@ -878,7 +878,7 @@
       "aliases": null
     },
     "serverinfo": {
-      "description": "View information about the current server.",
+      "description": "현재 서버에 대한 정보를 봅니다.",
       "example_image_url": null,
       "syntax": "%serverinfo",
       "example_syntax": null,
@@ -894,7 +894,7 @@
       "aliases": null
     },
     "shard": {
-      "description": "Gets shard information about the current server.",
+      "description": "현재 서버에 대한 샤드 정보를 가져옵니다.",
       "example_image_url": null,
       "syntax": "%shard",
       "example_syntax": null,
@@ -904,7 +904,7 @@
       ]
     },
     "stopgames": {
-      "description": "End all games that you are hosting or that are in the channel.",
+      "description": "귀하가 호스팅하거나 채널에 있는 모든 게임을 종료하십시오.",
       "example_image_url": null,
       "syntax": "%stopgames",
       "example_syntax": null,
@@ -919,7 +919,7 @@
       ]
     },
     "suggest": {
-      "description": "Suggest a feature for the Bot.",
+      "description": "봇을 위한 기능을 제안하세요.",
       "example_image_url": null,
       "syntax": "%suggest <suggestion>",
       "example_syntax": null,
@@ -935,7 +935,7 @@
       "aliases": null
     },
     "translate": {
-      "description": "Translate between languages using Papago.",
+      "description": "Papago를 사용하여 언어 간 번역.",
       "example_image_url": null,
       "syntax": "%translate <from language> <to language> <message>",
       "example_syntax": null,
@@ -946,7 +946,7 @@
       ]
     },
     "vote": {
-      "description": "Direct link to vote for the Bot.",
+      "description": "봇에 투표할 수 있는 직접 링크입니다.",
       "example_image_url": null,
       "syntax": "%vote",
       "example_syntax": null,
@@ -956,7 +956,7 @@
   },
   "Moderator": {
     "addalias": {
-      "description": "Add an alias to an idol/group.",
+      "description": "아이돌/그룹에 별칭을 추가합니다.",
       "example_image_url": null,
       "syntax": "%addalias <alias> <idol/group id> [mode=idol/group]",
       "example_syntax": null,
@@ -964,7 +964,7 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "Underscores for the alias are spaces. If a Bot Moderator uses this command, it will be a global (not local) alias."
+      "note": "별칭의 밑줄은 공백입니다. 봇 중재자가 이 명령을 사용하는 경우 전역(로컬 아님) 별칭이 됩니다."
     },
     "addemoji": {
       "description": "서버에 이모티콘을 추가합니다.",
@@ -980,7 +980,7 @@
       ]
     },
     "ban": {
-      "description": "Ban a member.",
+      "description": "회원을 금지합니다.",
       "example_image_url": null,
       "syntax": "%ban [user] [reason=No Reason]",
       "example_syntax": null,
@@ -990,7 +990,7 @@
       "aliases": null
     },
     "clear": {
-      "description": "Prunes messages in the text channel.",
+      "description": "텍스트 채널에서 메시지를 정리합니다.",
       "example_image_url": null,
       "syntax": "%clear <amount> [user]",
       "example_syntax": null,
@@ -1003,7 +1003,7 @@
       "note": "액수 제한은 1000입니다."
     },
     "deletealias": {
-      "description": "Delete an alias from an idol/group.",
+      "description": "아이돌/그룹의 가명을 삭제합니다.",
       "example_image_url": null,
       "syntax": "%deletealias <alias> <idol/group id> [mode=idol/group]",
       "example_syntax": null,
@@ -1013,10 +1013,10 @@
       "aliases": [
         "removealias"
       ],
-      "note": "Underscores for the alias are spaces. If a Bot Moderator uses this command, it will be a global (not local) alias."
+      "note": "밑줄은 별칭이 공백입니다. 봇 중재자가 이 명령을 사용하는 경우 전역(로컬 아님) 별칭이 됩니다."
     },
     "disableinteraction": {
-      "description": "Disable an interaction on the server.",
+      "description": "서버에서 상호 작용을 비활성화합니다.",
       "example_image_url": null,
       "syntax": "%disableinteraction <interaction>",
       "example_syntax": null,
@@ -1024,7 +1024,7 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "To re-enable, use the same command again."
+      "note": "다시 활성화하려면 동일한 명령을 다시 사용하십시오."
     },
     "kick": {
       "description": "멤버를 쫓겨났다.",
@@ -1037,7 +1037,7 @@
       "aliases": null
     },
     "mute": {
-      "description": "Mutes a member.",
+      "description": "회원을 음소거합니다.",
       "example_image_url": null,
       "syntax": "%mute [user] [reason]",
       "example_syntax": null,
@@ -1048,7 +1048,7 @@
       "aliases": null
     },
     "say": {
-      "description": "Make the Bot say a message.",
+      "description": "봇이 메시지를 말하게 합니다.",
       "example_image_url": null,
       "syntax": "%say [text channel] [message]",
       "example_syntax": null,
@@ -1056,10 +1056,10 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "If a text channel is not provided, it will send the message in the current channel."
+      "note": "텍스트 채널이 제공되지 않으면 현재 채널에서 메시지를 보냅니다."
     },
     "sayembed": {
-      "description": "Make the Bot say an embed message.",
+      "description": "봇이 임베드 메시지를 말하도록 합니다.",
       "example_image_url": null,
       "syntax": "%sayembed [text channel] [embed format]",
       "example_syntax": null,
@@ -1067,10 +1067,10 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "Follows the format from https://embedbuilder.nadekobot.me/. If a text channel is not provided, it will send the message in the current channel."
+      "note": "Https://embedbuilder.nadekobot.me/의 형식을 따릅니다. 텍스트 채널이 제공되지 않으면 현재 채널에서 메시지를 보냅니다."
     },
     "setprefix": {
-      "description": "Set the server prefix.",
+      "description": "서버 접두사를 설정합니다.",
       "example_image_url": null,
       "syntax": "%setprefix [prefix=%]",
       "example_syntax": null,
@@ -1078,10 +1078,10 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "Using the command with the default prefix (and no new prefix) will set it back to the default."
+      "note": "기본 접두어 (그리고 새 접두어 없음) 와 함께 명령을 사용하면 기본값으로 다시 설정됩니다."
     },
     "tempchannel": {
-      "description": "Make the current channel a temporary channel deleting messages after a delay.",
+      "description": "현재 채널을 지연 후 메시지를 삭제하는 임시 채널로 만듭니다.",
       "example_image_url": null,
       "syntax": "%tempchannel [delay=-1]",
       "example_syntax": null,
@@ -1089,10 +1089,10 @@
       "aliases": [
         "temp"
       ],
-      "note": "The time delay must be greater than a minute. If the delay is -1, it will remove the channel as a temp channel. The delay must be put in seconds."
+      "note": "시간 지연은 1분 이상이어야 합니다. 지연이 -1이면 채널을 임시 채널로 제거합니다. 지연은 초 단위로 입력해야 합니다."
     },
     "togglegames": {
-      "description": "Toggle the ability to play games in a text channel.",
+      "description": "텍스트 채널에서 게임을 플레이하는 기능을 토글합니다.",
       "example_image_url": null,
       "syntax": "%togglegames [text channel]",
       "example_syntax": null,
@@ -1112,7 +1112,7 @@
       "aliases": null
     },
     "unmute": {
-      "description": "Unmute a member.",
+      "description": "회원의 음소거를 해제합니다.",
       "example_image_url": null,
       "syntax": "%unmute [user]",
       "example_syntax": null,
@@ -1123,7 +1123,7 @@
       "aliases": null
     },
     "welcome": {
-      "description": "Set a welcome message in the current channel.",
+      "description": "현재 채널에 환영 메시지를 설정합니다.",
       "example_image_url": null,
       "syntax": "%welcome [message]",
       "example_syntax": null,
@@ -1131,10 +1131,10 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "Use the command with no message to disable the welcome message. If the message contains %user, it will mention the user. If the message contains %guild_name, the server name will be added."
+      "note": "환영 메시지를 비활성화하려면 메시지 없이 명령을 사용하십시오. 메시지에 %user가 포함되어 있으면 사용자가 언급됩니다. 메시지에 %guild_name이 포함되어 있으면 서버 이름이 추가됩니다."
     },
     "welcomerole": {
-      "description": "The role to give a user when they first join the server.",
+      "description": "사용자가 처음 서버에 가입할 때 사용자에게 부여할 역할입니다.",
       "example_image_url": null,
       "syntax": "%welcomerole [role]",
       "example_syntax": null,
@@ -1146,7 +1146,7 @@
   },
   "Music": {
     "join": {
-      "description": "Makes the Bot join the current voice channel.",
+      "description": "봇이 현재 음성 채널에 참여하도록 합니다.",
       "example_image_url": null,
       "syntax": "%join",
       "example_syntax": null,
@@ -1156,7 +1156,7 @@
       ]
     },
     "move": {
-      "description": "Make a song the next to play without skipping the current song.",
+      "description": "현재 노래를 건너뛰지 않고 다음에 재생할 노래를 만듭니다.",
       "example_image_url": null,
       "syntax": "%move <song number>",
       "example_syntax": null,
@@ -1166,7 +1166,7 @@
       ]
     },
     "pause": {
-      "description": "Pause the player.",
+      "description": "플레이어를 일시 중지합니다.",
       "example_image_url": null,
       "syntax": "%pause",
       "example_syntax": null,
@@ -1174,7 +1174,7 @@
       "aliases": null
     },
     "play": {
-      "description": "Play a song based on a search query.",
+      "description": "검색어를 기반으로 노래를 재생합니다.",
       "example_image_url": null,
       "syntax": "%play <url/song/query>",
       "example_syntax": null,
@@ -1184,7 +1184,7 @@
       ]
     },
     "queue": {
-      "description": "Displays the currently queued songs in the player.",
+      "description": "플레이어에서 현재 대기 중인 노래를 표시합니다.",
       "example_image_url": null,
       "syntax": "%queue [page number=1]",
       "example_syntax": null,
@@ -1195,7 +1195,7 @@
       ]
     },
     "remove": {
-      "description": "Remove a song from the queue.",
+      "description": "대기열에서 노래를 제거합니다.",
       "example_image_url": null,
       "syntax": "%remove <song number>",
       "example_syntax": null,
@@ -1203,7 +1203,7 @@
       "aliases": null
     },
     "resume": {
-      "description": "Resume a paused player.",
+      "description": "일시 중지된 플레이어를 다시 시작합니다.",
       "example_image_url": null,
       "syntax": "%resume",
       "example_syntax": null,
@@ -1213,7 +1213,7 @@
       ]
     },
     "shuffle": {
-      "description": "Shuffle the playlist/queue.",
+      "description": "재생 목록/대기열을 섞습니다.",
       "example_image_url": null,
       "syntax": "%shuffle ",
       "example_syntax": null,
@@ -1221,7 +1221,7 @@
       "aliases": null
     },
     "skip": {
-      "description": "Skip the current song.",
+      "description": "현재 노래를 건너뜁니다.",
       "example_image_url": null,
       "syntax": "%skip",
       "example_syntax": null,
@@ -1229,7 +1229,7 @@
       "aliases": null
     },
     "stop": {
-      "description": "Disconnects from the voice channel and resets the queue.",
+      "description": "음성 채널 연결을 끊고 대기열을 재설정합니다.",
       "example_image_url": null,
       "syntax": "%stop",
       "example_syntax": null,
@@ -1240,7 +1240,7 @@
       ]
     },
     "volume": {
-      "description": "Change the player's volume.",
+      "description": "플레이어의 볼륨 변경",
       "example_image_url": null,
       "syntax": "%volume <volume>",
       "example_syntax": null,
@@ -1256,12 +1256,12 @@
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null,
-      "note": "The lyrics are retrieved from https://api.ksoft.si/"
+      "note": "가사는 https://api.ksoft.si/에서 가져옵니다."
     }
   },
   "Profile": {
     "avatar": {
-      "description": "View a member's avatar.",
+      "description": "회원의 아바타를 봅니다.",
       "example_image_url": null,
       "syntax": "%avatar [user]",
       "example_syntax": null,
@@ -1279,7 +1279,7 @@
   },
   "LastFM": {
     "fm": {
-      "description": "Get information about a Last FM account.",
+      "description": "Last FM 계정에 대한 정보를 얻습니다.",
       "example_image_url": null,
       "syntax": "%fm [user/lastfm username]",
       "example_syntax": null,
@@ -1287,7 +1287,7 @@
       "aliases": null
     },
     "recenttracks": {
-      "description": "Get the recent tracks of a Last FM Account.",
+      "description": "마지막 FM 계정의 최근 트랙을 가져옵니다.",
       "example_image_url": null,
       "syntax": "%recenttracks [user/lastfm username]",
       "example_syntax": null,
@@ -1298,7 +1298,7 @@
       ]
     },
     "recent": {
-      "description": "Get the most recent track of a Last FM Account.",
+      "description": "마지막 FM 계정의 가장 최근 트랙을 가져옵니다.",
       "example_image_url": null,
       "syntax": "%recent [user/lastfm username]",
       "example_syntax": null,
@@ -1308,7 +1308,7 @@
       ]
     },
     "topalbums": {
-      "description": "See the top albums of a Last FM Account.",
+      "description": "마지막 FM 계정의 상위 앨범을 봅니다.",
       "example_image_url": null,
       "syntax": "%topalbums [user/lastfm username]",
       "example_syntax": null,
@@ -1318,7 +1318,7 @@
       ]
     },
     "topartists": {
-      "description": "See the top artists of a Last FM Account.",
+      "description": "마지막 FM 계정의 최고 아티스트를 참조하십시오.",
       "example_image_url": null,
       "syntax": "%topartists [user/lastfm username]",
       "example_syntax": null,
@@ -1328,7 +1328,7 @@
       ]
     },
     "toptracks": {
-      "description": "See the top tracks of a Last FM Account.",
+      "description": "마지막 FM 계정의 상위 트랙을 참조하십시오.",
       "example_image_url": null,
       "syntax": "%toptracks [user/lastfm username]",
       "example_syntax": null,
@@ -1348,7 +1348,7 @@
   },
   "Wolfram": {
     "w": {
-      "description": "Send a request to Wolfram",
+      "description": "Wolfram에 요청 ​​보내기",
       "example_image_url": null,
       "syntax": "%w <query>",
       "example_syntax": null,
@@ -1358,7 +1358,7 @@
   },
   "Twitter": {
     "deletetweet": {
-      "description": "Delete a tweet by it's ID.",
+      "description": "해당 ID로 트윗을 삭제합니다.",
       "example_image_url": null,
       "syntax": "%deletetweet <tweet id>",
       "example_syntax": null,
@@ -1368,7 +1368,7 @@
       "aliases": null
     },
     "recenttweets": {
-      "description": "View the recent tweets.",
+      "description": "최근 트윗을 봅니다.",
       "example_image_url": null,
       "syntax": "%recenttweets [amount of tweets=20]",
       "example_syntax": null,
@@ -1378,7 +1378,7 @@
       "aliases": null
     },
     "tweet": {
-      "description": "Tweets a status update on Twitter.",
+      "description": "Twitter에서 상태 업데이트를 트윗합니다.",
       "example_image_url": null,
       "syntax": "%tweet <tweet>",
       "example_syntax": null,
@@ -1388,13 +1388,13 @@
       "aliases": null
     },
     "twitterupdates": {
-      "description": "Receive Updates for Twitter.",
+      "description": "Twitter에 대한 업데이트를 수신합니다.",
       "example_image_url": null,
       "syntax": "%twitterupdates <code/group/idol/list> <account username, group id, idol id> [role id]",
       "example_syntax": null,
       "sub_commands": {
         "code": {
-          "description": "Follow a Twitter channel based on the account username.",
+          "description": "계정 사용자 이름을 기반으로 Twitter 채널을 팔로우합니다.",
           "example_image_url": null,
           "syntax": "%twitterupdates code <channel username> [role]",
           "example_syntax": null,
@@ -1407,7 +1407,7 @@
           ]
         },
         "group": {
-          "description": "Follow a Twitter channel belonging to a Group ID If they have one.",
+          "description": "그룹 ID가 있는 경우 해당 그룹 ID에 속한 Twitter 채널을 팔로우하세요.",
           "example_image_url": null,
           "syntax": "%twitterupdates group <group id> [role]",
           "example_syntax": null,
@@ -1417,7 +1417,7 @@
           "aliases": null
         },
         "idol": {
-          "description": "Follow a Twitter channel belonging to an Idol ID If they have one.",
+          "description": "아이돌 ID에 속한 트위터 채널이 있다면 팔로우하세요.",
           "example_image_url": null,
           "syntax": "%twitterupdates idol <idol id> [role]",
           "example_syntax": null,
@@ -1427,9 +1427,19 @@
           "aliases": null
         },
         "list": {
-          "description": "Lists the Twitter channels currently being followed in the text channel.",
+          "description": "텍스트 채널에서 현재 팔로우 중인 Twitter 채널을 나열합니다.",
           "example_image_url": null,
           "syntax": "%twitterupdates list",
+          "example_syntax": null,
+          "permissions_needed": [
+            "Manage Messages"
+          ],
+          "aliases": null
+        },
+        "reset": {
+          "description": "Unfollows all Twitter accounts in the server.",
+          "example_image_url": null,
+          "syntax": "%twitterupdates reset",
           "example_syntax": null,
           "permissions_needed": [
             "Manage Messages"
@@ -1443,12 +1453,12 @@
       "aliases": [
         "twitter"
       ],
-      "note": "This command contains sub-commands. This means any following arguments are respective to the first argument."
+      "note": "이 명령에는 하위 명령이 포함되어 있습니다. 이는 다음 인수가 첫 번째 인수에 해당됨을 의미합니다."
     }
   },
   "UnScramble": {
     "unscramble": {
-      "description": "Start an Idol Unscramble Game in the current channel.",
+      "description": "현재 채널에서 아이돌 언스크램블 게임을 시작하세요.",
       "example_image_url": null,
       "syntax": "%unscramble [gender=all] [difficulty=medium] [rounds=20] [timeout=20]",
       "example_syntax": null,
@@ -1456,10 +1466,10 @@
       "aliases": [
         "us"
       ],
-      "note": "The host of the game can type stop or end to end the game or skip to skip the current round without affecting the round number."
+      "note": "게임 호스트는 stop 또는 end를 입력하여 게임을 종료하거나 skip을 입력하여 라운드 번호에 영향을 주지 않고 현재 라운드를 건너뛸 수 있습니다."
     },
     "usleaderboard": {
-      "description": "Shows Server/Global leaderboards for the Unscramble Game.",
+      "description": "언스크램블 게임의 서버/글로벌 리더보드를 보여줍니다.",
       "example_image_url": null,
       "syntax": "%usleaderboard [difficulty=easy/medium/hard] [mode=server/global]",
       "example_syntax": null,
@@ -1470,7 +1480,7 @@
       ]
     },
     "stopus": {
-      "description": "Force-end an Unscramble Game.",
+      "description": "언스크램블 게임을 강제 종료합니다.",
       "example_image_url": null,
       "syntax": "%stopus",
       "example_syntax": null,
@@ -1483,7 +1493,7 @@
   },
   "SelfAssignRoles": {
     "addrole": {
-      "description": "Add a role to be self-assignable.",
+      "description": "자체 할당할 역할을 추가합니다.",
       "example_image_url": null,
       "syntax": "%addrole <role> <role name>",
       "example_syntax": null,
@@ -1493,7 +1503,7 @@
       "aliases": null
     },
     "listroles": {
-      "description": "List all of the self-assignable roles in the server.",
+      "description": "서버에서 자체 할당 가능한 모든 역할을 나열합니다.",
       "example_image_url": null,
       "syntax": "%listroles",
       "example_syntax": null,
@@ -1503,7 +1513,7 @@
       "aliases": null
     },
     "removerole": {
-      "description": "Remove a self-assignable role based on the role name given.",
+      "description": "지정된 역할 이름에 따라 자체 할당 가능한 역할을 제거합니다.",
       "example_image_url": null,
       "syntax": "%removerole <role name>",
       "example_syntax": null,
@@ -1513,7 +1523,7 @@
       "aliases": null
     },
     "sendrolemessage": {
-      "description": "Sends the default role message in the current channel.",
+      "description": "현재 채널에서 기본 역할 메시지를 보냅니다.",
       "example_image_url": null,
       "syntax": "%sendrolemessage",
       "example_syntax": null,
@@ -1521,10 +1531,10 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "The roles will work without this command, but should be used to have a list of roles."
+      "note": "역할은 이 명령 없이 작동하지만 역할 목록을 갖는 데 사용해야 합니다."
     },
     "setrolechannel": {
-      "description": "Set the channel for self-assignable roles to be used in.",
+      "description": "자체 할당 가능한 역할에 사용할 채널을 설정합니다.",
       "example_image_url": null,
       "syntax": "%setrolechannel [text channel]",
       "example_syntax": null,
@@ -1532,12 +1542,12 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "Since this command will erase all future messages, it is suggested to use %sendrolemessage before this one."
+      "note": "이 명령은 이후의 모든 메시지를 지우므로 이 명령보다 먼저 %sendrolemessage를 사용하는 것이 좋습니다."
     }
   },
   "Reminder": {
     "gettimezone": {
-      "description": "Get your current set timezone.",
+      "description": "현재 설정된 시간대 가져오기",
       "example_image_url": null,
       "syntax": "%gettz [timezone]",
       "example_syntax": null,
@@ -1548,7 +1558,7 @@
       ]
     },
     "listreminders": {
-      "description": "List out your reminders.",
+      "description": "알림을 나열하십시오.",
       "example_image_url": null,
       "syntax": "%listreminders",
       "example_syntax": null,
@@ -1560,7 +1570,7 @@
       ]
     },
     "remindme": {
-      "description": "Create a reminder to do a task at a certain time.",
+      "description": "특정 시간에 작업을 수행하도록 미리 알림을 만듭니다.",
       "example_image_url": null,
       "syntax": "%remindme to ______ at 9PM or %remindme to ____ in 6hrs 30mins",
       "example_syntax": null,
@@ -1568,10 +1578,10 @@
       "aliases": [
         "remind"
       ],
-      "note": "The user input is fairly flexible for this command."
+      "note": "이 명령에 대한 사용자 입력은 상당히 유연합니다."
     },
     "removereminder": {
-      "description": "Remove a reminder based on it's index.",
+      "description": "색인에 따라 미리 알림을 제거합니다.",
       "example_image_url": null,
       "syntax": "%removereminder <reminder index>",
       "example_syntax": null,
@@ -1581,7 +1591,7 @@
       ]
     },
     "settimezone": {
-      "description": "Set your local timezone with a timezone abbreviation and country code.",
+      "description": "시간대 약어와 국가 코드로 현지 시간대를 설정합니다.",
       "example_image_url": null,
       "syntax": "%settimezone (timezone name) (country code)",
       "example_syntax": null,
@@ -1589,12 +1599,12 @@
       "aliases": [
         "settz"
       ],
-      "note": "The country code is the short-handed version of the location (ex: USA)."
+      "note": "국가 코드는 위치의 축약형 버전입니다(예: 미국)."
     }
   },
   "Twitch": {
     "addtwitch": {
-      "description": "Adds a Twitch username to keep track of.",
+      "description": "추적하기 위해 Twitch 사용자 이름을 추가합니다.",
       "example_image_url": null,
       "syntax": "%addtwitch <twitch username>",
       "example_syntax": null,
@@ -1602,10 +1612,10 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "Maximum 2 Twitch channels per server."
+      "note": "서버당 최대 2개의 Twitch 채널."
     },
     "listtwitch": {
-      "description": "List the Twitch channels the server follows.",
+      "description": "서버가 팔로우하는 Twitch 채널을 나열합니다.",
       "example_image_url": null,
       "syntax": "%listtwitch",
       "example_syntax": null,
@@ -1615,7 +1625,7 @@
       "aliases": null
     },
     "removetwitch": {
-      "description": "Remove a Twitch username that is being kept track of.",
+      "description": "추적 중인 Twitch 사용자 이름을 제거합니다.",
       "example_image_url": null,
       "syntax": "%removetwitch <twitch username>",
       "example_syntax": null,
@@ -1625,7 +1635,7 @@
       "aliases": null
     },
     "settwitchchannel": {
-      "description": "Set the Discord channel that the Twitch announcements will be posted on.",
+      "description": "Twitch 공지사항이 게시될 Discord 채널을 설정합니다.",
       "example_image_url": null,
       "syntax": "%settwitchchannel [text channel]",
       "example_syntax": null,
@@ -1635,7 +1645,7 @@
       "aliases": null
     },
     "settwitchrole": {
-      "description": "Set the Discord Role that will be mentioned on Twitch announcements.",
+      "description": "Twitch 공지사항에 언급될 Discord 역할을 설정하세요.",
       "example_image_url": null,
       "syntax": "%settwitchrole [role]",
       "example_syntax": null,
@@ -1647,7 +1657,7 @@
   },
   "BotOwner": {
     "addcards": {
-      "description": "Fill the cards table with the default card names.",
+      "description": "기본 카드 이름으로 카드 테이블을 채웁니다.",
       "example_image_url": null,
       "syntax": "%addcards",
       "example_syntax": null,
@@ -1657,7 +1667,7 @@
       "aliases": null
     },
     "addpatreon": {
-      "description": "Adds a permanent patron",
+      "description": "영구 후원자 추가",
       "example_image_url": null,
       "syntax": "%addpatreon <user ids>",
       "example_syntax": null,
@@ -1665,10 +1675,10 @@
         "Bot Owner"
       ],
       "aliases": null,
-      "note": "Use commas to separate user ids."
+      "note": "쉼표를 사용하여 사용자 ID를 구분하십시오."
     },
     "generateplayingcards": {
-      "description": "Generate Custom Playing Cards with Idol Avatars.",
+      "description": "아이돌 아바타로 맞춤형 플레잉 카드를 생성하세요.",
       "example_image_url": null,
       "syntax": "%generateplayingcards",
       "example_syntax": null,
@@ -1678,7 +1688,7 @@
       "aliases": null
     },
     "removepatreon": {
-      "description": "Removes a permanent patron.",
+      "description": "영구 후원자를 제거합니다.",
       "example_image_url": null,
       "syntax": "%removepatreon <user ids>",
       "example_syntax": null,
@@ -1686,10 +1696,10 @@
         "Bot Owner"
       ],
       "aliases": null,
-      "note": "Use commas to separate user ids."
+      "note": "쉼표를 사용하여 사용자 ID를 구분하십시오."
     },
     "resetcache": {
-      "description": "Reset Cache",
+      "description": "캐시 재설정",
       "example_image_url": null,
       "syntax": "%resetcache",
       "example_syntax": null,
@@ -1709,7 +1719,7 @@
       "aliases": null
     },
     "reload": {
-      "description": "Will hot reload all of IreneBot, IreneUtility, and any other self-made packages.",
+      "description": "모든 IreneBot, IreneUtility 및 기타 자체 제작 패키지를 핫 리로드합니다.",
       "example_image_url": null,
       "syntax": "%reload",
       "example_syntax": null,
@@ -1719,7 +1729,7 @@
       "aliases": null
     },
     "reloadmodule": {
-      "description": "Reload a module from it's name.",
+      "description": "이름에서 모듈을 다시 로드합니다.",
       "example_image_url": null,
       "syntax": "%reloadmodule <module name>",
       "example_syntax": null,
@@ -1731,7 +1741,7 @@
       ]
     },
     "reloadmodules": {
-      "description": "Reload all modules.",
+      "description": "모든 모듈을 다시 로드합니다.",
       "example_image_url": null,
       "syntax": "%reloadmodules",
       "example_syntax": null,
@@ -1743,7 +1753,7 @@
       ]
     },
     "reloadutility": {
-      "description": "Reloads the utility package for the bot.",
+      "description": "봇의 유틸리티 패키지를 다시 로드합니다.",
       "example_image_url": null,
       "syntax": "%reloadutility",
       "example_syntax": null,
@@ -1753,7 +1763,7 @@
       "aliases": null
     },
     "resetgroupcache": {
-      "description": "Reset Group Object Cache.",
+      "description": "그룹 개체 캐시를 재설정합니다.",
       "example_image_url": null,
       "syntax": "%resetgroupcache",
       "example_syntax": null,
@@ -1763,7 +1773,7 @@
       "aliases": null
     },
     "resetidolcache": {
-      "description": "Reset Idol Object Cache.",
+      "description": "아이돌 개체 캐시를 재설정합니다.",
       "example_image_url": null,
       "syntax": "%resetidolcache",
       "example_syntax": null,
@@ -1773,7 +1783,7 @@
       "aliases": null
     },
     "speak": {
-      "description": "Owner to Bot TTS",
+      "description": "봇 TTS의 소유자",
       "example_image_url": null,
       "syntax": "%speak <message>",
       "example_syntax": null,
@@ -1783,7 +1793,7 @@
       "aliases": null
     },
     "uploadfromhost": {
-      "description": "Toggles whether images are uploaded from the host or are used through an image url.",
+      "description": "이미지가 호스트에서 업로드되는지 또는 이미지 URL을 통해 사용되는지 여부를 토글합니다.",
       "example_image_url": null,
       "syntax": "%uploadfromhost",
       "example_syntax": null,
@@ -1795,13 +1805,13 @@
   },
   "Vlive": {
     "vliveupdates": {
-      "description": "Receive Updates for VLive.",
+      "description": "Vlive에 대한 업데이트를 수신합니다.",
       "example_image_url": null,
       "syntax": "%vliveupdates <code/group/idol/list> <channel code, group id, idol id> [role id]",
       "example_syntax": null,
       "sub_commands": {
         "code": {
-          "description": "Follow a VLIVE channel based on the channel code.",
+          "description": "채널 코드에 따라 VLIVE 채널을 팔로우하세요.",
           "example_image_url": null,
           "syntax": "%vliveupdates code <channel code> [role]",
           "example_syntax": null,
@@ -1811,7 +1821,7 @@
           "aliases": null
         },
         "group": {
-          "description": "Follow a VLIVE channel belonging to a Group ID If they have one.",
+          "description": "그룹 ID가 있는 VLIVE 채널을 팔로우하세요.",
           "example_image_url": null,
           "syntax": "%vliveupdates group <group id> [role]",
           "example_syntax": null,
@@ -1821,7 +1831,7 @@
           "aliases": null
         },
         "idol": {
-          "description": "Follow a VLIVE channel belonging to an Idol ID If they have one.",
+          "description": "아이돌 아이디가 있다면 VLIVE 채널을 팔로우하세요.",
           "example_image_url": null,
           "syntax": "%vliveupdates idol <idol id> [role]",
           "example_syntax": null,
@@ -1831,7 +1841,7 @@
           "aliases": null
         },
         "list": {
-          "description": "Lists the VLIVE channels currently being followed in the text channel.",
+          "description": "텍스트 채널에서 현재 팔로우 중인 VLIVE 채널을 나열합니다.",
           "example_image_url": null,
           "syntax": "%vliveupdates list",
           "example_syntax": null,
@@ -1847,12 +1857,12 @@
       "aliases": [
         "vlive"
       ],
-      "note": "This command contains sub-commands. This means any following arguments are respective to the first argument."
+      "note": "이 명령에는 하위 명령이 포함되어 있습니다. 이는 다음 인수가 첫 번째 인수에 해당됨을 의미합니다."
     }
   },
   "DataMod": {
     "addidol": {
-      "description": "Adds an Unregistered Idol using the syntax from https://irenebot.com/addidol.html.",
+      "description": "https://irenebot.com/addidol.html의 구문을 사용하여 미등록 아이돌을 추가합니다.",
       "example_image_url": null,
       "syntax": "%addidol <JSON>",
       "example_syntax": null,
@@ -1860,20 +1870,20 @@
         "Data Moderator"
       ],
       "aliases": null,
-      "note": "Command should only be used if the card does not exist for the Idol."
+      "note": "명령어는 아이돌용 카드가 없는 경우에만 사용해야 합니다."
     },
     "addidoltogroup": {
-      "description": "Adds an Idol to a Group.",
+      "description": "그룹에 아이돌을 추가합니다.",
       "example_image_url": null,
       "syntax": "%addidoltogroup <idol id> <group id>",
       "example_syntax": null,
       "permissions_needed": [
-        "Bot Moderator"
+        "봇 중재자"
       ],
       "aliases": null
     },
     "addgroup": {
-      "description": "Adds an Unregistered Group using the syntax from https://irenebot.com/addgroup.html.",
+      "description": "https://irenebot.com/addgroup.html의 구문을 사용하여 미등록 그룹을 추가합니다.",
       "example_image_url": null,
       "syntax": "%addgroup <JSON>",
       "example_syntax": null,
@@ -1881,16 +1891,16 @@
         "Data Moderator"
       ],
       "aliases": null,
-      "note": "Command should only be used if the card does not exist for the Group."
+      "note": "그룹에 대한 카드가 없는 경우에만 명령을 사용해야 합니다."
     },
     "edit": {
-      "description": "Edit an Idol or Group's information.",
+      "description": "아이돌 또는 그룹의 정보를 수정합니다.",
       "example_image_url": null,
       "syntax": "%edit <idol/group> <group/idol id> <column> <content>",
       "example_syntax": null,
       "sub_commands": {
         "idol": {
-          "description": "Edit data for an idol.",
+          "description": "아이돌에 대한 데이터를 수정합니다.",
           "example_image_url": null,
           "syntax": "%edit idol <idol id> <column> <content>",
           "example_syntax": null,
@@ -1900,7 +1910,7 @@
           "aliases": null
         },
         "group": {
-          "description": "Edit data for a group.",
+          "description": "그룹 데이터 수정",
           "example_image_url": null,
           "syntax": "%edit group <group id> <column> <content>",
           "example_syntax": null,
@@ -1912,12 +1922,12 @@
       }
     },
     "deleteidolfromgroup": {
-      "description": "Deletes an Idol from a Group.",
+      "description": "그룹에서 아이돌을 삭제합니다.",
       "example_image_url": null,
       "syntax": "%deleteidolfromgroup <idol id> <group iid>\n",
       "example_syntax": null,
       "permissions_needed": [
-        "Bot Moderator"
+        "봇 중재자"
       ],
       "aliases": null
     }

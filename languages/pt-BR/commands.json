@@ -220,7 +220,7 @@
       "aliases": null
     },
     "removestatus": {
-      "description": "Removes a playing status based on it's index.",
+      "description": "Remove um status de reprodução baseado em seu índice.",
       "example_image_url": null,
       "syntax": null,
       "example_syntax": "%removestatus <status index>",
@@ -253,7 +253,7 @@
       "aliases": null
     },
     "listbg": {
-      "description": "List a user's BiasGame Leaderboards.",
+      "description": "Lista as pontuações no Bias Game de um usuário.",
       "example_image_url": null,
       "syntax": "%listbg [user]",
       "example_syntax": null,
@@ -263,7 +263,7 @@
   },
   "BlockingManager": {
     "bmon start": {
-      "description": "Starts the Blocking Manager.",
+      "description": "Inicia o gerenciador de bloqueio.",
       "example_image_url": null,
       "syntax": "%bmon start",
       "example_syntax": null,
@@ -273,7 +273,7 @@
       "aliases": null
     },
     "bmon stop": {
-      "description": "Turns off the Blocking Manager.",
+      "description": "Desativa o gerenciador de bloqueio.",
       "example_image_url": null,
       "syntax": "%bmon stop",
       "example_syntax": null,
@@ -297,7 +297,7 @@
       ]
     },
     "beg": {
-      "description": "Beg a homeless man for money.",
+      "description": "Implore dinheiro a um sem-teto.",
       "example_image_url": null,
       "syntax": "%beg",
       "example_syntax": null,
@@ -413,7 +413,7 @@
       "note": "Underscores are spaces and commas are used to split Idol/Group names."
     },
     "card": {
-      "description": "Display an Idol/Group's Profile Card.",
+      "description": "Exibe o cartão de perfil de um idol/grupo.",
       "example_image_url": null,
       "syntax": "%card <Idol/Group ID/Name>",
       "example_syntax": null,
@@ -421,7 +421,7 @@
       "aliases": null
     },
     "count": {
-      "description": "Displays amount of times an Idol has been called.",
+      "description": "Exibe a quantidade de vezes que um idol foi chamado.",
       "example_image_url": null,
       "syntax": "%count (idol name/all)",
       "example_syntax": null,
@@ -429,7 +429,7 @@
       "aliases": null
     },
     "countleaderboard": {
-      "description": "Displays leaderboard for times an Idol has been called.",
+      "description": "Exibe quantas vezes um idol foi chamado.",
       "example_image_url": null,
       "syntax": "%countleaderboard",
       "example_syntax": null,
@@ -439,7 +439,7 @@
       ]
     },
     "countgroup": {
-      "description": "Displays the number of photos a Group has.",
+      "description": "Exibe o número de fotos que um grupo possui.",
       "example_image_url": null,
       "syntax": "%countgroup <group name>",
       "example_syntax": null,
@@ -447,7 +447,7 @@
       "aliases": null
     },
     "countmember": {
-      "description": "Displays the number of photos an Idol has.",
+      "description": "Exibe o número de fotos que um idol possui.",
       "example_image_url": null,
       "syntax": "%countmember <idol name/all>",
       "example_syntax": null,
@@ -461,16 +461,16 @@
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null,
-      "note": "To a Bot Moderator, this will also display Idols with no photos and show their ID."
+      "note": "Para um moderador de bot, isso também exibirá idols sem fotos e mostrará seu ID."
     },
     "groups": {
-      "description": "Lists the groups of idols the Bot has photos of.",
+      "description": "Lista os grupos de idols dos quais o bot tem fotos.",
       "example_image_url": null,
       "syntax": "%groups",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null,
-      "note": "To a Bot Moderator, this will also display Groups with no photos and show their ID."
+      "note": "Para um moderador de bot, isso também exibirá grupos sem fotos e mostrará seus IDs."
     },
     "members": {
       "description": "Lista os nomes de ídolos que o Bot tem fotos.",
@@ -479,7 +479,7 @@
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null,
-      "note": "To a Bot Moderator, this will also display Idols with no photos and show their ID."
+      "note": "Para um moderador de bot, isso também exibirá idols sem fotos e mostrará seu ID."
     },
     "randomidol": {
       "description": "Mostra a foto de um Ídolo aleatório.",
@@ -492,7 +492,7 @@
       ]
     },
     "sendidol": {
-      "description": "Have an Idol Photo sent to a text channel every 12 hours.",
+      "description": "Envia uma foto do idol para um canal de texto a cada 12 horas.",
       "example_image_url": null,
       "syntax": "%sendidol [idol id] [text channel]",
       "example_syntax": null,
@@ -500,10 +500,10 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "Using the command without an Idol ID will remove all existing idols from the channel."
+      "note": "Usar o comando sem um ID de idol removerá todos os idols existentes no canal."
     },
     "sendimages": {
-      "description": "Have all of the Idol Photos appear in a specific text channel.",
+      "description": "Faça com que todas as fotos do idol apareçam em um canal de texto específico.",
       "example_image_url": null,
       "syntax": "%sendimages [text channel]",
       "example_syntax": null,
@@ -513,7 +513,7 @@
       "aliases": null
     },
     "stopimages": {
-      "description": "Stops the Bot from posting idol photos in a specific text channel.",
+      "description": "Impede o bot de postar fotos de idols em um canal de texto específico.",
       "example_image_url": null,
       "syntax": "%stopimages [text channel]",
       "example_syntax": null,
@@ -526,7 +526,7 @@
   },
   "GuessingGame": {
     "guessinggame": {
-      "description": "Start an Idol GuessingGame in the current channel.",
+      "description": "Comece um logo de adivinhação de idols no canal atual.",
       "example_image_url": null,
       "syntax": "%guessinggame [gender=all] [difficulty=medium] [rounds=20] [timeout=20]",
       "example_syntax": null,
@@ -537,7 +537,7 @@
       "note": "O anfitrião do jogo pode digitar stop ou end para terminar o jogo ou skip para pular a rodada atual sem afetar o número da rodada."
     },
     "groupguessinggame": {
-      "description": "Start a Group GuessingGame in the current channel.",
+      "description": "Inicie um jogo de adivinhação de grupo no canal atual.",
       "example_image_url": null,
       "syntax": "%groupguessinggame [gender=all] [difficulty=medium] [rounds=20] [timeout=20]",
       "example_syntax": null,
@@ -546,16 +546,16 @@
         "ggg",
         "groupgg"
       ],
-      "note": "The host of the game can type stop or end to end the game or skip to skip the current round without affecting the round number."
+      "note": "O anfitrião do jogo pode digitar parar ou terminar para encerrar o jogo ou pular para pular a rodada atual sem afetar o número da rodada."
     },
     "ggfilter": {
-      "description": "Add a filter to your GuessingGame.",
+      "description": "Adiciona um filtro ao seu jogo de adivinhação.",
       "example_image_url": null,
       "syntax": "%ggfilter [group id/name, ...]",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null,
-      "note": "Only the groups filtered will appear on the GuessingGame. If you do not specify a Group ID or Name, it will toggle the filter. Group IDs and Names must be split by commas. Group Names with more than one word must have an underscore used as a space."
+      "note": "Apenas os grupos filtrados aparecerão no jogo de adivinhação. Se você não especificar um ID ou o nome do grupo, o filtro será alternado. Os IDs e nomes dos grupos devem ser separados por vírgulas. Nomes de grupos com mais de uma palavra devem ter um sublinhado usado como um espaço."
     },
     "ggfilteredlist": {
       "description": "Exibir os grupos atuais que estão filtrados.",
@@ -566,7 +566,7 @@
       "aliases": null
     },
     "ggleaderboard": {
-      "description": "Shows Server/Global leaderboards for the GuessingGame.",
+      "description": "Mostra as tabelas de classificação do servidor/global para o jogo de adivinhação.",
       "example_image_url": null,
       "syntax": "%ggleaderboard [difficulty=easy/medium/hard] [mode=server/global]",
       "example_syntax": null,
@@ -577,7 +577,7 @@
       ]
     },
     "stopgg": {
-      "description": "Force-end a GuessingGame.",
+      "description": "Força o fim de um jogo de adivinhação.",
       "example_image_url": null,
       "syntax": "%stopgg",
       "example_syntax": null,
@@ -590,7 +590,7 @@
   },
   "Interactions": {
     "choke": {
-      "description": "Choke a member.",
+      "description": "Enforque um membro.",
       "example_image_url": null,
       "syntax": "%choke [user]",
       "example_syntax": null,
@@ -598,7 +598,7 @@
       "aliases": null
     },
     "cuddle": {
-      "description": "Cuddle a member.",
+      "description": "Abrace um membro.",
       "example_image_url": null,
       "syntax": "%cuddle [user]",
       "example_syntax": null,
@@ -630,7 +630,7 @@
       "aliases": null
     },
     "pat": {
-      "description": "Pat a member.",
+      "description": "Acaricie um membro.",
       "example_image_url": null,
       "syntax": "%pat [user]",
       "example_syntax": null,
@@ -662,7 +662,7 @@
       "aliases": null
     },
     "spit": {
-      "description": "Spit at a member.",
+      "description": "Cuspa em um membro.",
       "example_image_url": null,
       "syntax": "%spit [user]",
       "example_syntax": null,
@@ -670,7 +670,7 @@
       "aliases": null
     },
     "stab": {
-      "description": "Stab a member.",
+      "description": "Esfaqueie um membro.",
       "example_image_url": null,
       "syntax": "%stab [user]",
       "example_syntax": null,
@@ -688,7 +688,7 @@
   },
   "Logging": {
     "logadd": {
-      "description": "Start logging a text channel.",
+      "description": "Comece a registrar um canal de texto.",
       "example_image_url": null,
       "syntax": "%logadd [text channel]",
       "example_syntax": null,
@@ -698,7 +698,7 @@
       "aliases": null
     },
     "logremove": {
-      "description": "Stop logging a text channel",
+      "description": "Pare de registrar um canal de texto",
       "example_image_url": null,
       "syntax": "%logremove [text channel]",
       "example_syntax": null,
@@ -708,7 +708,7 @@
       "aliases": null
     },
     "sendall": {
-      "description": "Toggle all messages going to log channel. Will only send edited and edited messages if turned off.",
+      "description": "Alterne todas as mensagens que vão para o canal de registro. Só enviará mensagens editadas se estiver desativado.",
       "example_image_url": null,
       "syntax": "%sendall",
       "example_syntax": null,
@@ -740,7 +740,7 @@
   },
   "Miscellaneous": {
     "8ball": {
-      "description": "Ask the 8ball a yes or no question.",
+      "description": "Faça uma pergunta de sim ou não ao 8ball.",
       "example_image_url": null,
       "syntax": "%8ball [question]",
       "example_syntax": null,
@@ -781,7 +781,7 @@
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null,
-      "note": "Underscores are used for spaces between words. Spaces are used to separate choices."
+      "note": "Os sublinhados são usados ​​para espaços entre as palavras. Os espaços são usados ​​para separar escolhas."
     },
     "displayemoji": {
       "description": "Exibe um emoji em um tamanho maior.",
@@ -870,7 +870,7 @@
       "aliases": null
     },
     "servercount": {
-      "description": "Shows the amount of servers connected to the Bot.",
+      "description": "Mostra a quantidade de servidores conectados ao bot.",
       "example_image_url": null,
       "syntax": "%servercount",
       "example_syntax": null,
@@ -894,7 +894,7 @@
       "aliases": null
     },
     "shard": {
-      "description": "Gets shard information about the current server.",
+      "description": "Obtém informações de shard sobre o servidor atual.",
       "example_image_url": null,
       "syntax": "%shard",
       "example_syntax": null,
@@ -927,7 +927,7 @@
       "aliases": null
     },
     "support": {
-      "description": "Discord Invite link to the Bot's Support Server.",
+      "description": "Link de convite do Discord para o servidor de suporte do bot.",
       "example_image_url": null,
       "syntax": "%support",
       "example_syntax": null,
@@ -956,7 +956,7 @@
   },
   "Moderator": {
     "addalias": {
-      "description": "Add an alias to an idol/group.",
+      "description": "Adicione um apelido a um idol/grupo.",
       "example_image_url": null,
       "syntax": "%addalias <alias> <idol/group id> [mode=idol/group]",
       "example_syntax": null,
@@ -964,7 +964,7 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "Underscores for the alias are spaces. If a Bot Moderator uses this command, it will be a global (not local) alias."
+      "note": "Os sublinhados para os apelidos são espaços. Se um moderador de bot usa este comando, será um apelido global (não local)."
     },
     "addemoji": {
       "description": "Adiciona emojis ao servidor.",
@@ -990,7 +990,7 @@
       "aliases": null
     },
     "clear": {
-      "description": "Prunes messages in the text channel.",
+      "description": "Remove mensagens no canal de texto.",
       "example_image_url": null,
       "syntax": "%clear <amount> [user]",
       "example_syntax": null,
@@ -1003,7 +1003,7 @@
       "note": "O limite de valor é 1.000."
     },
     "deletealias": {
-      "description": "Delete an alias from an idol/group.",
+      "description": "Exclua um apelido de um idol/grupo.",
       "example_image_url": null,
       "syntax": "%deletealias <alias> <idol/group id> [mode=idol/group]",
       "example_syntax": null,
@@ -1013,7 +1013,7 @@
       "aliases": [
         "removealias"
       ],
-      "note": "Underscores for the alias are spaces. If a Bot Moderator uses this command, it will be a global (not local) alias."
+      "note": "Os sublinhados para o apelido são espaços. Se um moderador de bot usa este comando, será um apelido global (não local)."
     },
     "disableinteraction": {
       "description": "Desativar uma interação no servidor.",
@@ -1024,7 +1024,7 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "To re-enable, use the same command again."
+      "note": "Para reativar, use o mesmo comando novamente."
     },
     "kick": {
       "description": "Expulsar um membro.",
@@ -1056,7 +1056,7 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "If a text channel is not provided, it will send the message in the current channel."
+      "note": "Se um canal de texto não for informado, a mensagem será enviada no canal atual."
     },
     "sayembed": {
       "description": "Faça o Bot dizer uma mensagem incorporada.",
@@ -1078,10 +1078,10 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "Using the command with the default prefix (and no new prefix) will set it back to the default."
+      "note": "Usar o comando com o prefixo padrão (sem prefixo novo) irá fazê-lo voltar ao padrão."
     },
     "tempchannel": {
-      "description": "Make the current channel a temporary channel deleting messages after a delay.",
+      "description": "Transforma o canal atual em um canal temporário, excluindo mensagens após um certo atraso.",
       "example_image_url": null,
       "syntax": "%tempchannel [delay=-1]",
       "example_syntax": null,
@@ -1089,7 +1089,7 @@
       "aliases": [
         "temp"
       ],
-      "note": "The time delay must be greater than a minute. If the delay is -1, it will remove the channel as a temp channel. The delay must be put in seconds."
+      "note": "O atraso de tempo deve ser maior que um minuto. Se o atraso for -1, o canal será removido como um canal temporário. O intervalo deve ser colocado em segundos."
     },
     "togglegames": {
       "description": "Toggle the ability to play games in a text channel.",
@@ -1156,7 +1156,7 @@
       ]
     },
     "move": {
-      "description": "Make a song the next to play without skipping the current song.",
+      "description": "Faça com que uma música seja a próxima a ser reproduzida sem pular a música atual.",
       "example_image_url": null,
       "syntax": "%move <song number>",
       "example_syntax": null,
@@ -1229,7 +1229,7 @@
       "aliases": null
     },
     "stop": {
-      "description": "Disconnects from the voice channel and resets the queue.",
+      "description": "Desconecta-se do canal de voz e reseta a fila.",
       "example_image_url": null,
       "syntax": "%stop",
       "example_syntax": null,
@@ -1256,7 +1256,7 @@
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null,
-      "note": "The lyrics are retrieved from https://api.ksoft.si/"
+      "note": "As letras são obtidas em https://api.ksoft.si/"
     }
   },
   "Profile": {
@@ -1358,7 +1358,7 @@
   },
   "Twitter": {
     "deletetweet": {
-      "description": "Delete a tweet by it's ID.",
+      "description": "Exclua um tweet pelo seu ID.",
       "example_image_url": null,
       "syntax": "%deletetweet <tweet id>",
       "example_syntax": null,
@@ -1378,7 +1378,7 @@
       "aliases": null
     },
     "tweet": {
-      "description": "Tweets a status update on Twitter.",
+      "description": "Posta uma atualização de status no Twitter.",
       "example_image_url": null,
       "syntax": "%tweet <tweet>",
       "example_syntax": null,
@@ -1435,6 +1435,16 @@
             "Manage Messages"
           ],
           "aliases": null
+        },
+        "reset": {
+          "description": "Unfollows all Twitter accounts in the server.",
+          "example_image_url": null,
+          "syntax": "%twitterupdates reset",
+          "example_syntax": null,
+          "permissions_needed": [
+            "Manage Messages"
+          ],
+          "aliases": null
         }
       },
       "permissions_needed": [
@@ -1448,7 +1458,7 @@
   },
   "UnScramble": {
     "unscramble": {
-      "description": "Start an Idol Unscramble Game in the current channel.",
+      "description": "Comece um jogo de decifrar idols no canal atual.",
       "example_image_url": null,
       "syntax": "%unscramble [gender=all] [difficulty=medium] [rounds=20] [timeout=20]",
       "example_syntax": null,
@@ -1459,7 +1469,7 @@
       "note": "O anfitrião do jogo pode digitar parar ou terminar para terminar o jogo ou pular para a rodada atual sem afetar o número da rodada."
     },
     "usleaderboard": {
-      "description": "Shows Server/Global leaderboards for the Unscramble Game.",
+      "description": "Mostra as tabelas de classificação globais/do servidor para o jogo de decifrar.",
       "example_image_url": null,
       "syntax": "%usleaderboard [difficulty=easy/medium/hard] [mode=server/global]",
       "example_syntax": null,
@@ -1483,7 +1493,7 @@
   },
   "SelfAssignRoles": {
     "addrole": {
-      "description": "Add a role to be self-assignable.",
+      "description": "Adicione um cargo para ser auto-atribuível.",
       "example_image_url": null,
       "syntax": "%addrole <role> <role name>",
       "example_syntax": null,
@@ -1503,7 +1513,7 @@
       "aliases": null
     },
     "removerole": {
-      "description": "Remove a self-assignable role based on the role name given.",
+      "description": "Remove um cargo auto-atribuível com base no nome do cargo fornecido.",
       "example_image_url": null,
       "syntax": "%removerole <role name>",
       "example_syntax": null,
@@ -1513,7 +1523,7 @@
       "aliases": null
     },
     "sendrolemessage": {
-      "description": "Sends the default role message in the current channel.",
+      "description": "Envia a mensagem de cargo padrão no canal atual.",
       "example_image_url": null,
       "syntax": "%sendrolemessage",
       "example_syntax": null,
@@ -1521,10 +1531,10 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "The roles will work without this command, but should be used to have a list of roles."
+      "note": "Os cargos funcionarão sem este comando, mas devem ser usados para ter uma lista de cargos."
     },
     "setrolechannel": {
-      "description": "Set the channel for self-assignable roles to be used in.",
+      "description": "Defina o canal para os cargos auto-atribuíveis serem usados.",
       "example_image_url": null,
       "syntax": "%setrolechannel [text channel]",
       "example_syntax": null,
@@ -1532,7 +1542,7 @@
         "Manage Messages"
       ],
       "aliases": null,
-      "note": "Since this command will erase all future messages, it is suggested to use %sendrolemessage before this one."
+      "note": "Já que este comando apagará todas as mensagens futuras, sugere-se usar %sendrolemessage antes."
     }
   },
   "Reminder": {

@@ -137,7 +137,8 @@
     "unfollowed": "Ce salon ne suit plus le canal {result}.",
     "followed": "Ce canal suit maintenant {result}.",
     "unknown_code": "Le nom d'utilisateur de ce {result} n'est pas connu. N'hésitez pas à utiliser la commande utilisateur à la place.",
-    "update_limit": "Vous avez uniquement accès aux mises à jour des comptes Twitter {integer} . Un patreon {server_prefix}est en mesure de recevoir des mises à jour de comptes {integer2}."
+    "update_limit": "Vous avez uniquement accès aux mises à jour des comptes Twitter {integer} . Un patreon {server_prefix}est en mesure de recevoir des mises à jour de comptes {integer2}.",
+    "no_followed_accounts": "There are no accounts being followed."
   },
   "general": {
     "out_of_range": "Le nombre que vous avez entré est hors de la plage disponible.",

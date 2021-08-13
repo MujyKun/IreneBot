@@ -137,7 +137,8 @@
     "unfollowed": "Dit kanaal volgt niet langer {result}.",
     "followed": "Dit kanaal volgt nu {result}.",
     "unknown_code": "De gebruikersnaam van {result} is niet bekend. Voel je vrij om in plaats daarvan het gebruikerscommando te gebruiken.",
-    "update_limit": "U heeft alleen toegang tot updates van {integer} twitter accounts. Een {server_prefix}patreon kan updates van {integer2} accounts ontvangen."
+    "update_limit": "U heeft alleen toegang tot updates van {integer} twitter accounts. Een {server_prefix}patreon kan updates van {integer2} accounts ontvangen.",
+    "no_followed_accounts": "There are no accounts being followed."
   },
   "general": {
     "out_of_range": "Het nummer dat je hebt ingevoerd valt buiten het beschikbare bereik.",

@@ -80,7 +80,7 @@
     "no_custom_commands": "Nejsou zde žádné vlastní příkazy pro Váš server."
   },
   "datamod": {
-    "column_not_found": "That column does not exist!"
+    "column_not_found": "Tento sloupec neexistuje!"
   },
   "miscellaneous": {
     "set_language_fail": "{name}, to není dostupný jazyk. Použijte jeden z následujících: {languages}.",
@@ -137,7 +137,8 @@
     "unfollowed": "Tento kanál již nesleduje {result}.",
     "followed": "Tento kanál již sleduje {result}.",
     "unknown_code": "Uživatelské jméno toho {result} není známo. Nebojte se použít uživatelský příkaz místo toho.",
-    "update_limit": "Máte pouze přístup dostat aktualizace od {integer} twitter účtů. {server_prefix}patreon je schopen dostat aktualizace od {integer2} účtů."
+    "update_limit": "Máte pouze přístup dostat aktualizace od {integer} twitter účtů. {server_prefix}patreon je schopen dostat aktualizace od {integer2} účtů.",
+    "no_followed_accounts": "There are no accounts being followed."
   },
   "general": {
     "out_of_range": "Číslo, které jste zadali, je mimo dostupný rozsah.",

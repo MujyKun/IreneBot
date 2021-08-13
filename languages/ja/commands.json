@@ -190,7 +190,7 @@
       "aliases": null
     },
     "mergeidol": {
-      "description": "Merge a duplicated idol with the original idol.",
+      "description": "複製されたアイドルを元のアイドルとマージします。",
       "example_image_url": null,
       "syntax": "%mergeidol <original_idol_id> <duplicate_idol_id>",
       "example_syntax": null,
@@ -200,7 +200,7 @@
       "aliases": null
     },
     "mergegroup": {
-      "description": "Merge a duplicated group with the original group.",
+      "description": "複製されたグループを元のグループとマージします。",
       "example_image_url": null,
       "syntax": "%mergegroup <original_group_id> <duplicate_group_id>",
       "example_syntax": null,

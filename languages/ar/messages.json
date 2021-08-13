@@ -137,7 +137,8 @@
     "unfollowed": "هذه القناة لم تعد تتابع {result}.",
     "followed": "هذه القناة لم تعد تتابع {result}.",
     "unknown_code": "اسم المستخدم لذلك {result} غير معروف. لا تتردد في استخدام أمر المستخدم بدلا من ذلك.",
-    "update_limit": "لديك حق الوصول فقط للحصول على التحديثات من حساب تويتر {integer} . براءة اختراع {server_prefix}قادرة على تلقي التحديثات من حسابات {integer2}."
+    "update_limit": "لديك حق الوصول فقط للحصول على التحديثات من حساب تويتر {integer} . براءة اختراع {server_prefix}قادرة على تلقي التحديثات من حسابات {integer2}.",
+    "no_followed_accounts": "There are no accounts being followed."
   },
   "general": {
     "out_of_range": "الرقم الذي أدخلته خارج النطاق المتاح.",

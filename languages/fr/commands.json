@@ -1437,7 +1437,7 @@
           "aliases": null
         },
         "reset": {
-          "description": "Unfollows all Twitter accounts in the server.",
+          "description": "Se désabonne de tous les comptes Twitter du serveur.",
           "example_image_url": null,
           "syntax": "%twitterupdates reset",
           "example_syntax": null,

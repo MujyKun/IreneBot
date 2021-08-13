@@ -1437,7 +1437,7 @@
           "aliases": null
         },
         "reset": {
-          "description": "Unfollows all Twitter accounts in the server.",
+          "description": "سرور میں موجود تمام ٹوئٹر اکاؤنٹس کو انفالو کرتا ہے۔",
           "example_image_url": null,
           "syntax": "%twitterupdates reset",
           "example_syntax": null,

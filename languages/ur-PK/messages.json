@@ -137,7 +137,8 @@
     "unfollowed": "یہ چینل اب {result} کی فالو نہیں کر رہا ہے۔",
     "followed": "یہ چینل اب {result} کی فالو کر رہا ہے۔",
     "unknown_code": "اس {result} کا صارف نام معلوم نہیں ہے۔ اس کے بجائے یوزر کمانڈ استعمال کر سکتے ہیں۔",
-    "update_limit": "آپ کو صرف {integer} ٹویٹر اکاؤنٹس سے اپ ڈیٹس حاصل کرنے کی رسائی ہے۔ ایک {server_prefix} patron{integer2} اکاؤنٹس سے اپ ڈیٹس حاصل کرنے کے قابل ہے۔"
+    "update_limit": "آپ کو صرف {integer} ٹویٹر اکاؤنٹس سے اپ ڈیٹس حاصل کرنے کی رسائی ہے۔ ایک {server_prefix} patron{integer2} اکاؤنٹس سے اپ ڈیٹس حاصل کرنے کے قابل ہے۔",
+    "no_followed_accounts": "There are no accounts being followed."
   },
   "general": {
     "out_of_range": "آپ کا درج کردہ نمبر دستیاب رینج سے باہر ہے۔",

@@ -137,7 +137,8 @@
     "unfollowed": "Acest canal nu mai urmează {result}.",
     "followed": "Acest canal acum urmează {result}.",
     "unknown_code": "Numele de utilizator al acelui {result} nu este cunoscut. Simte-te liber să folosești comanda utilizatorului în schimb.",
-    "update_limit": "Ai acces să primești actualizări doar de la {integer} conturi de twitter. Un {server_prefix}patreon este capabil să primească actualizări de la {integer2} conturi."
+    "update_limit": "Ai acces să primești actualizări doar de la {integer} conturi de twitter. Un {server_prefix}patreon este capabil să primească actualizări de la {integer2} conturi.",
+    "no_followed_accounts": "There are no accounts being followed."
   },
   "general": {
     "out_of_range": "Numărul pe care l-ai introdus este în afara intervalului disponibil.",

@@ -137,7 +137,8 @@
     "unfollowed": "Dieser Kanal folgt nicht mehr {result}.",
     "followed": "Dieser Kanal folgt nun {result}.",
     "unknown_code": "Der Benutzername von {result} ist nicht bekannt. Verwenden Sie stattdessen den Benutzerbefehl.",
-    "update_limit": "Du hast nur Zugriff auf Updates von {integer} Twitter Account(s). Ein {server_prefix}patreon kann Updates von {integer2} Account(s) erhalten."
+    "update_limit": "Du hast nur Zugriff auf Updates von {integer} Twitter Account(s). Ein {server_prefix}patreon kann Updates von {integer2} Account(s) erhalten.",
+    "no_followed_accounts": "There are no accounts being followed."
   },
   "general": {
     "out_of_range": "Die eingegebene Nummer liegt außerhalb des verfügbaren Bereiches.",

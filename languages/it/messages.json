@@ -80,7 +80,7 @@
     "no_custom_commands": "Non ci sono comandi personalizzati per il tuo server."
   },
   "datamod": {
-    "column_not_found": "That column does not exist!"
+    "column_not_found": "Quella colonna non esiste!"
   },
   "miscellaneous": {
     "set_language_fail": "{name}, quella non è una lingua disponibile. Usa una delle seguenti: {languages}.",
@@ -137,7 +137,8 @@
     "unfollowed": "Questo canale non sta più seguendo {result}.",
     "followed": "Questo canale ora sta seguendo {result}.",
     "unknown_code": "Il nome utente di quel {result} è sconosciuto. Sentiti libero di usare il comando utente.",
-    "update_limit": "Hai solo accesso per ottenere aggiornamenti da account twitter {integer}. A {server_prefix}patreon è in grado di ricevere aggiornamenti da account {integer2}."
+    "update_limit": "Hai solo accesso per ottenere aggiornamenti da account twitter {integer}. A {server_prefix}patreon è in grado di ricevere aggiornamenti da account {integer2}.",
+    "no_followed_accounts": "There are no accounts being followed."
   },
   "general": {
     "out_of_range": "Il numero che hai inserito è fuori dall'intervallo disponibile.",

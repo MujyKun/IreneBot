@@ -137,7 +137,8 @@
     "unfollowed": "यह चैनल अब {result} को फ़ॉलो नहीं कर रहा है.",
     "followed": "यह चैनल अब {result} का अनुसरण कर रहा है।",
     "unknown_code": "उस {result} का उपयोगकर्ता नाम ज्ञात नहीं है। इसके बजाय उपयोगकर्ता कमांड का उपयोग करने के लिए स्वतंत्र महसूस करें।",
-    "update_limit": "आपके पास केवल {integer} ट्विटर खातों से अपडेट प्राप्त करने की पहुंच है। एक {server_prefix}patreon {integer2} खातों से अपडेट प्राप्त करने में सक्षम है।"
+    "update_limit": "आपके पास केवल {integer} ट्विटर खातों से अपडेट प्राप्त करने की पहुंच है। एक {server_prefix}patreon {integer2} खातों से अपडेट प्राप्त करने में सक्षम है।",
+    "no_followed_accounts": "There are no accounts being followed."
   },
   "general": {
     "out_of_range": "आपके द्वारा दर्ज किया गया नंबर उपलब्ध सीमा से बाहर है।",

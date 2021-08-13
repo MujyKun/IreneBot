@@ -137,7 +137,8 @@
     "unfollowed": "Este canal não está mais seguindo {result}.",
     "followed": "Este canal agora está seguindo {result}.",
     "unknown_code": "O nome de usuário daquele {result} não é conhecido. Ao invés disso, sinta-se livre para usar o comando do usuário.",
-    "update_limit": "Você só tem acesso para receber atualizações de contas de twitter de {integer}. Um {server_prefix}patreon é capaz de receber atualizações de contas de {integer2}."
+    "update_limit": "Você só tem acesso para receber atualizações de contas de twitter de {integer}. Um {server_prefix}patreon é capaz de receber atualizações de contas de {integer2}.",
+    "no_followed_accounts": "There are no accounts being followed."
   },
   "general": {
     "out_of_range": "O número que você inseriu está fora do intervalo disponível.",

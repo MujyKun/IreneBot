@@ -137,7 +137,8 @@
     "unfollowed": "此频道不再关注{result}。",
     "followed": "此频道正在关注{result}。",
     "unknown_code": "该 {result} 的用户名未知。随意使用用户命令。",
-    "update_limit": "您只能从 {integer} 推特帐户获取更新。 {server_prefix}patreon 能够从 {integer2} 帐户接收更新。"
+    "update_limit": "您只能从 {integer} 推特帐户获取更新。 {server_prefix}patreon 能够从 {integer2} 帐户接收更新。",
+    "no_followed_accounts": "There are no accounts being followed."
   },
   "general": {
     "out_of_range": "您输入的数字超出了可用范围。",

@@ -839,7 +839,7 @@
       ]
     },
     "random": {
-      "description": "b에서 임의의 정수를 선택하십시오.",
+      "description": "A에서 B까지 임의의 정수를 선택하십시오.",
       "example_image_url": null,
       "syntax": "%random <a> <b>",
       "example_syntax": null,

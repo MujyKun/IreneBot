@@ -1213,7 +1213,7 @@
       ]
     },
     "shuffle": {
-      "description": "Shuffle the playlist/queue.",
+      "description": "随机播放列表。",
       "example_image_url": null,
       "syntax": "%shuffle ",
       "example_syntax": null,
@@ -1221,7 +1221,7 @@
       "aliases": null
     },
     "skip": {
-      "description": "Skip the current song.",
+      "description": "跳过目前播放的歌曲",
       "example_image_url": null,
       "syntax": "%skip",
       "example_syntax": null,

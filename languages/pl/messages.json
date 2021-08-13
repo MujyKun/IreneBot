@@ -137,7 +137,8 @@
     "unfollowed": "Ten kanał nie obserwuje już {result}.",
     "followed": "Ten kanał obserwuje teraz {result}.",
     "unknown_code": "Nazwa użytkownika {result} nie jest znana. Zamiast tego możesz użyć komendy użytkownika.",
-    "update_limit": "Masz dostęp tylko do aktualizacji z {integer} kont twittera. {server_prefix}patreon może otrzymywać aktualizacje z kont {integer2}."
+    "update_limit": "Masz dostęp tylko do aktualizacji z {integer} kont twittera. {server_prefix}patreon może otrzymywać aktualizacje z kont {integer2}.",
+    "no_followed_accounts": "There are no accounts being followed."
   },
   "general": {
     "out_of_range": "Wprowadzony numer jest poza dostępnym zakresem.",

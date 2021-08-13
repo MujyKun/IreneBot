@@ -1437,7 +1437,7 @@
           "aliases": null
         },
         "reset": {
-          "description": "Unfollows all Twitter accounts in the server.",
+          "description": "Zruší sledování všech Twitter účtů na serveru.",
           "example_image_url": null,
           "syntax": "%twitterupdates reset",
           "example_syntax": null,
@@ -1873,12 +1873,12 @@
       "note": "Příkaz by měl být použit pouze v případě, že karta neexistuje pro Idola."
     },
     "addidoltogroup": {
-      "description": "Adds an Idol to a Group.",
+      "description": "Přidá Idola do Skupiny.",
       "example_image_url": null,
-      "syntax": "%addidoltogroup <idol id> <group id>",
+      "syntax": "%addidoltogroup <id idola> <id skupiny>",
       "example_syntax": null,
       "permissions_needed": [
-        "Bot Moderator"
+        "Bot Moderátor"
       ],
       "aliases": null
     },
@@ -1894,13 +1894,13 @@
       "note": "Příkaz by měl být použit pouze v případě, že karta neexistuje pro Skupinu."
     },
     "edit": {
-      "description": "Edit an Idol or Group's information.",
+      "description": "Editovat informace Idola nebo Skupiny.",
       "example_image_url": null,
       "syntax": "%edit <idol/group> <group/idol id> <column> <content>",
       "example_syntax": null,
       "sub_commands": {
         "idol": {
-          "description": "Edit data for an idol.",
+          "description": "Editovat data pro idola.",
           "example_image_url": null,
           "syntax": "%edit idol <idol id> <column> <content>",
           "example_syntax": null,
@@ -1910,7 +1910,7 @@
           "aliases": null
         },
         "group": {
-          "description": "Edit data for a group.",
+          "description": "Editovat data pro skupinu.",
           "example_image_url": null,
           "syntax": "%edit group <group id> <column> <content>",
           "example_syntax": null,
@@ -1922,12 +1922,12 @@
       }
     },
     "deleteidolfromgroup": {
-      "description": "Deletes an Idol from a Group.",
+      "description": "Odstraní Idola ze Skupiny.",
       "example_image_url": null,
-      "syntax": "%deleteidolfromgroup <idol id> <group iid>\n",
+      "syntax": "%deleteidolfromgroup <id idola> <id skupiny>\n",
       "example_syntax": null,
       "permissions_needed": [
-        "Bot Moderator"
+        "Bot Moderátor"
       ],
       "aliases": null
     }

@@ -137,7 +137,8 @@
     "unfollowed": "이 채널은 더 이상 {result}을(를) 팔로우하지 않습니다.",
     "followed": "이 채널은  {result}을(를) 팔로우 합니다.",
     "unknown_code": "{result} 의 사용자 이름을 알 수 없습니다. 대신, user 명령을 사용하세요.",
-    "update_limit": "{integer}에 트위터 계정에서만 업데이트를 받을 수 있습니다. {server_prefix}patreon 는 {integer2} 계정에서 업데이트를 받을 수 있습니다."
+    "update_limit": "{integer}에 트위터 계정에서만 업데이트를 받을 수 있습니다. {server_prefix}patreon 는 {integer2} 계정에서 업데이트를 받을 수 있습니다.",
+    "no_followed_accounts": "There are no accounts being followed."
   },
   "general": {
     "out_of_range": "입력한 번호가 사용 가능한 범위를 벗어났습니다.",

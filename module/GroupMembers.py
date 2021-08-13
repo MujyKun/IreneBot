@@ -216,7 +216,6 @@ class GroupMembers(commands.Cog):
             idol = await self.ex.u_group_members.get_random_idol()
             photo_msg, api_url, posted = await self.ex.u_group_members.request_image_post(ctx.message, idol, channel)
             if posted:
-                self.ex.u_group_members.add_user_limit(ctx.author)
                 if api_url:
                     await self.ex.u_group_members.check_idol_post_reactions(photo_msg, ctx.message, idol.id, api_url)
 

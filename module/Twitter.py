@@ -144,13 +144,18 @@ class Twitter(commands.Cog):
     async def reset(self, ctx):
         """Unfollow all twitter accounts in the server."""
         channel_ids = [channel.id for channel in ctx.guild.channels]
-
+        followed = False
         try:
             for channel_id in channel_ids:
                 for _, role_id, twitter_id in await self.ex.sql.s_twitter.fetch_followed_channels(channel_id):
-                    await self.ex.u_twitter.unfollow_twitter(channel_id, twitter_id)
+                    if not followed:
+                        followed = True
+                    await self.ex.u_twitter.unfollow_twitter(int(channel_id), twitter_id.lower())
                     msg = await self.ex.get_msg(ctx, "twitter", "unfollowed", ["result", twitter_id])
-                    await ctx.send(msg)
+                    await ctx.send(f"{msg} - <#{channel_id}>")
+            if not followed:
+                msg = await self.ex.get_msg(ctx, "twitter", "no_followed_accounts")
+                await ctx.send(msg)
         except Exception as e:
             msg = await self.ex.get_msg(ctx, "general", "gen_error", ["e", e])
             await ctx.send(msg)

@@ -35,11 +35,7 @@ class GroupMembers(commands.Cog):
         api_url = None
         try:
             self.ex.u_group_members.check_reset_limits()
-            if message.author.id in self.ex.cache.commands_used:
-                time_difference = time.time() - self.ex.cache.commands_used[message.author.id][1]
-                if time_difference < 2:
-                    # await asyncio.sleep(1)
-                    pass
+
             if self.ex.u_miscellaneous.check_message_not_empty(message):
                 random_member = False
                 # since this is a listener, the prefix is put back to the default

@@ -72,7 +72,6 @@ class GroupMembers(commands.Cog):
                     self.ex.u_group_members.log_idol_command(message)
                     await self.ex.u_miscellaneous.add_command_count(f"Idol {random_member.id}")
                     await self.ex.u_miscellaneous.add_session_count()
-                    self.ex.u_group_members.add_user_limit(message.author)
                     if api_url:
                         await self.ex.u_group_members.check_idol_post_reactions(photo_msg, message, random_member,
                                                                                 api_url)

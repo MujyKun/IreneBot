@@ -1437,7 +1437,7 @@
           "aliases": null
         },
         "reset": {
-          "description": "Unfollows all Twitter accounts in the server.",
+          "description": "서버의 모든 트위터 계정을 언팔로우합니다.",
           "example_image_url": null,
           "syntax": "%twitterupdates reset",
           "example_syntax": null,

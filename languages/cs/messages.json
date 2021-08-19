@@ -138,7 +138,7 @@
     "followed": "Tento kanál již sleduje {result}.",
     "unknown_code": "Uživatelské jméno toho {result} není známo. Nebojte se použít uživatelský příkaz místo toho.",
     "update_limit": "Máte pouze přístup dostat aktualizace od {integer} twitter účtů. {server_prefix}patreon je schopen dostat aktualizace od {integer2} účtů.",
-    "no_followed_accounts": "There are no accounts being followed."
+    "no_followed_accounts": "Neexistují žádné sledované účty."
   },
   "general": {
     "out_of_range": "Číslo, které jste zadali, je mimo dostupný rozsah.",

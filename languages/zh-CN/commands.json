@@ -1229,7 +1229,7 @@
       "aliases": null
     },
     "stop": {
-      "description": "Disconnects from the voice channel and resets the queue.",
+      "description": "断开与语音通道的连接并重置队列。",
       "example_image_url": null,
       "syntax": "%stop",
       "example_syntax": null,
@@ -1240,7 +1240,7 @@
       ]
     },
     "volume": {
-      "description": "Change the player's volume.",
+      "description": "更改玩家的音量。",
       "example_image_url": null,
       "syntax": "%volume <volume>",
       "example_syntax": null,
@@ -1250,18 +1250,18 @@
       ]
     },
     "lyrics": {
-      "description": "Get the lyrics of a song.",
+      "description": "获取一首歌的歌词。",
       "example_image_url": null,
       "syntax": "%lyrics <song query>",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": null,
-      "note": "The lyrics are retrieved from https://api.ksoft.si/"
+      "note": "歌词检索自https://api.ksoft.si/"
     }
   },
   "Profile": {
     "avatar": {
-      "description": "View a member's avatar.",
+      "description": "查看成员头像。",
       "example_image_url": null,
       "syntax": "%avatar [user]",
       "example_syntax": null,
@@ -1269,7 +1269,7 @@
       "aliases": null
     },
     "profile": {
-      "description": "View a member's profile.",
+      "description": "查看成员的资料。",
       "example_image_url": null,
       "syntax": "%profile [user]",
       "example_syntax": null,
@@ -1279,7 +1279,7 @@
   },
   "LastFM": {
     "fm": {
-      "description": "Get information about a Last FM account.",
+      "description": "获取有关一个Last FM账户的信息。",
       "example_image_url": null,
       "syntax": "%fm [user/lastfm username]",
       "example_syntax": null,
@@ -1287,7 +1287,7 @@
       "aliases": null
     },
     "recenttracks": {
-      "description": "Get the recent tracks of a Last FM Account.",
+      "description": "获取一个Last FM账户的最新曲目。",
       "example_image_url": null,
       "syntax": "%recenttracks [user/lastfm username]",
       "example_syntax": null,
@@ -1298,7 +1298,7 @@
       ]
     },
     "recent": {
-      "description": "Get the most recent track of a Last FM Account.",
+      "description": "获得一个Last FM账户的最新轨迹。",
       "example_image_url": null,
       "syntax": "%recent [user/lastfm username]",
       "example_syntax": null,
@@ -1308,7 +1308,7 @@
       ]
     },
     "topalbums": {
-      "description": "See the top albums of a Last FM Account.",
+      "description": "查看一个Last FM账户的顶级专辑。",
       "example_image_url": null,
       "syntax": "%topalbums [user/lastfm username]",
       "example_syntax": null,
@@ -1924,7 +1924,7 @@
     "deleteidolfromgroup": {
       "description": "Deletes an Idol from a Group.",
       "example_image_url": null,
-      "syntax": "%deleteidolfromgroup <idol id> <group iid>\n",
+      "syntax": "%deleteidolfromgroup <idol id> <group id>\n",
       "example_syntax": null,
       "permissions_needed": [
         "Bot Moderator"

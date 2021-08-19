@@ -839,7 +839,7 @@
       ]
     },
     "random": {
-      "description": "Choose a random integer from a to b.",
+      "description": "Escolha um inteiro aleatório de a para b.",
       "example_image_url": null,
       "syntax": "%random <a> <b>",
       "example_syntax": null,
@@ -849,7 +849,7 @@
         "rand",
         "randint"
       ],
-      "note": "Random integer may include b."
+      "note": "Inteiros aleatórios podem incluir b."
     },
     "removenoti": {
       "description": "Remova uma frase/palavra da notificação quando for dita no servidor atual.",
@@ -1092,7 +1092,7 @@
       "note": "O atraso de tempo deve ser maior que um minuto. Se o atraso for -1, o canal será removido como um canal temporário. O intervalo deve ser colocado em segundos."
     },
     "togglegames": {
-      "description": "Toggle the ability to play games in a text channel.",
+      "description": "Alterna a capacidade de jogar jogos em um canal de texto.",
       "example_image_url": null,
       "syntax": "%togglegames [text channel]",
       "example_syntax": null,
@@ -1437,7 +1437,7 @@
           "aliases": null
         },
         "reset": {
-          "description": "Unfollows all Twitter accounts in the server.",
+          "description": "Não seguir todas as contas do Twitter no servidor.",
           "example_image_url": null,
           "syntax": "%twitterupdates reset",
           "example_syntax": null,
@@ -1480,7 +1480,7 @@
       ]
     },
     "stopus": {
-      "description": "Force-end an Unscramble Game.",
+      "description": "Força o fim de um Unscramble Game.",
       "example_image_url": null,
       "syntax": "%stopus",
       "example_syntax": null,
@@ -1578,10 +1578,10 @@
       "aliases": [
         "remind"
       ],
-      "note": "The user input is fairly flexible for this command."
+      "note": "O valor inserido pelo usuário é bastante flexível para este comando."
     },
     "removereminder": {
-      "description": "Remove a reminder based on it's index.",
+      "description": "Remover um lembrete baseado no seu conteúdo.",
       "example_image_url": null,
       "syntax": "%removereminder <reminder index>",
       "example_syntax": null,
@@ -1591,7 +1591,7 @@
       ]
     },
     "settimezone": {
-      "description": "Set your local timezone with a timezone abbreviation and country code.",
+      "description": "Defina seu fuso horário local com uma abreviação de fuso horário e código do país.",
       "example_image_url": null,
       "syntax": "%settimezone (timezone name) (country code)",
       "example_syntax": null,
@@ -1604,7 +1604,7 @@
   },
   "Twitch": {
     "addtwitch": {
-      "description": "Adds a Twitch username to keep track of.",
+      "description": "Adiciona um nome de usuário da Twitch para acompanhar o conteúdo.",
       "example_image_url": null,
       "syntax": "%addtwitch <twitch username>",
       "example_syntax": null,
@@ -1625,7 +1625,7 @@
       "aliases": null
     },
     "removetwitch": {
-      "description": "Remove a Twitch username that is being kept track of.",
+      "description": "Remova um nome de usuário da Twitch que está sendo seguido.",
       "example_image_url": null,
       "syntax": "%removetwitch <twitch username>",
       "example_syntax": null,
@@ -1657,7 +1657,7 @@
   },
   "BotOwner": {
     "addcards": {
-      "description": "Fill the cards table with the default card names.",
+      "description": "Preencha a tabela de cartões com os nomes padrão do cartão.",
       "example_image_url": null,
       "syntax": "%addcards",
       "example_syntax": null,
@@ -1678,7 +1678,7 @@
       "note": "Use vírgulas para separar os ids dos usuários."
     },
     "generateplayingcards": {
-      "description": "Generate Custom Playing Cards with Idol Avatars.",
+      "description": "Gerar cartas personalizadas de jogo com o Avatar dos Idols.",
       "example_image_url": null,
       "syntax": "%generateplayingcards",
       "example_syntax": null,
@@ -1699,7 +1699,7 @@
       "note": "Use vírgulas para separar os ids dos usuários."
     },
     "resetcache": {
-      "description": "Reset Cache",
+      "description": "Zerar cache",
       "example_image_url": null,
       "syntax": "%resetcache",
       "example_syntax": null,
@@ -1753,7 +1753,7 @@
       ]
     },
     "reloadutility": {
-      "description": "Reloads the utility package for the bot.",
+      "description": "Recarrega o pacote de utilidade para o bot.",
       "example_image_url": null,
       "syntax": "%reloadutility",
       "example_syntax": null,
@@ -1763,7 +1763,7 @@
       "aliases": null
     },
     "resetgroupcache": {
-      "description": "Reset Group Object Cache.",
+      "description": "Redefinir Cache do Objeto Group.",
       "example_image_url": null,
       "syntax": "%resetgroupcache",
       "example_syntax": null,
@@ -1773,7 +1773,7 @@
       "aliases": null
     },
     "resetidolcache": {
-      "description": "Reset Idol Object Cache.",
+      "description": "Redefinir Cache do Objeto Idol.",
       "example_image_url": null,
       "syntax": "%resetidolcache",
       "example_syntax": null,
@@ -1783,7 +1783,7 @@
       "aliases": null
     },
     "speak": {
-      "description": "Owner to Bot TTS",
+      "description": "Proprietário para o Bot TTS",
       "example_image_url": null,
       "syntax": "%speak <message>",
       "example_syntax": null,
@@ -1793,7 +1793,7 @@
       "aliases": null
     },
     "uploadfromhost": {
-      "description": "Toggles whether images are uploaded from the host or are used through an image url.",
+      "description": "Alterna se as imagens são enviadas do host ou são usadas através de uma url da imagem.",
       "example_image_url": null,
       "syntax": "%uploadfromhost",
       "example_syntax": null,
@@ -1805,13 +1805,13 @@
   },
   "Vlive": {
     "vliveupdates": {
-      "description": "Receive Updates for VLive.",
+      "description": "Receber atualizações do VLive.",
       "example_image_url": null,
       "syntax": "%vliveupdates <code/group/idol/list> <channel code, group id, idol id> [role id]",
       "example_syntax": null,
       "sub_commands": {
         "code": {
-          "description": "Follow a VLIVE channel based on the channel code.",
+          "description": "Siga um canal VLIVE baseado no código do canal.",
           "example_image_url": null,
           "syntax": "%vliveupdates code <channel code> [role]",
           "example_syntax": null,
@@ -1821,7 +1821,7 @@
           "aliases": null
         },
         "group": {
-          "description": "Follow a VLIVE channel belonging to a Group ID If they have one.",
+          "description": "Siga um canal VLIVE pertencente a um Grupo ID se ele possuir um.",
           "example_image_url": null,
           "syntax": "%vliveupdates group <group id> [role]",
           "example_syntax": null,
@@ -1873,12 +1873,12 @@
       "note": "Comando só deve ser usado se a carta não existir para o idol."
     },
     "addidoltogroup": {
-      "description": "Adds an Idol to a Group.",
+      "description": "Adiciona um idol para um grupo.",
       "example_image_url": null,
       "syntax": "%addidoltogroup <idol id> <group id>",
       "example_syntax": null,
       "permissions_needed": [
-        "Bot Moderator"
+        "Moderador de Bot"
       ],
       "aliases": null
     },
@@ -1922,12 +1922,12 @@
       }
     },
     "deleteidolfromgroup": {
-      "description": "Deletes an Idol from a Group.",
+      "description": "Exclui um Ídolo de um grupo.",
       "example_image_url": null,
-      "syntax": "%deleteidolfromgroup <idol id> <group iid>\n",
+      "syntax": "%deleteidolfromgroup <idol id> <group id>\n",
       "example_syntax": null,
       "permissions_needed": [
-        "Bot Moderator"
+        "Moderador de Bot"
       ],
       "aliases": null
     }

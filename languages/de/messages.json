@@ -80,7 +80,7 @@
     "no_custom_commands": "Es gibt keine benutzerdefinierten Befehle für dein Server."
   },
   "datamod": {
-    "column_not_found": "That column does not exist!"
+    "column_not_found": "Diese Spalte existiert nicht!"
   },
   "miscellaneous": {
     "set_language_fail": "{name}, das ist keine verfügbare Sprache. Benutze eins der folgenden Sprachen: {languages}.",
@@ -138,7 +138,7 @@
     "followed": "Dieser Kanal folgt nun {result}.",
     "unknown_code": "Der Benutzername von {result} ist nicht bekannt. Verwenden Sie stattdessen den Benutzerbefehl.",
     "update_limit": "Du hast nur Zugriff auf Updates von {integer} Twitter Account(s). Ein {server_prefix}patreon kann Updates von {integer2} Account(s) erhalten.",
-    "no_followed_accounts": "There are no accounts being followed."
+    "no_followed_accounts": "Es werden keine Accounts verfolgt."
   },
   "general": {
     "out_of_range": "Die eingegebene Nummer liegt außerhalb des verfügbaren Bereiches.",
@@ -153,7 +153,7 @@
     "invalid_input": "{name}, diese Option is nicht gültig. Bitte schaue in den {server_prefix}help {command_name}.",
     "game_disabled": "{name}, Spiele wurden in diesem Text Kanal mit {server_prefix}togglegames deaktiviert.",
     "gen_error": "ERROR - {e}",
-    "may_take_time": "This command may take a few minutes to respond since it relies on a third-party application."
+    "may_take_time": "Dieser Befehl kann einige Minuten brauchen um zu antworten, da er auf eine Anwendung von Drittanbietern angewiesen ist."
   },
   "twitch": {
     "follow_limit": "Du darfst nur {follow_limit} Kanälen folgen.",

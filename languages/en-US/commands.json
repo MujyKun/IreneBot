@@ -1437,7 +1437,7 @@
           "aliases": null
         },
         "reset": {
-          "description": "Unfollows all Twitter accounts in the server.",
+          "description": "Unfollows all the Twitter accounts in the server.",
           "example_image_url": null,
           "syntax": "%twitterupdates reset",
           "example_syntax": null,
@@ -1873,7 +1873,7 @@
       "note": "Command should only be used if the card does not exist for the Idol."
     },
     "addidoltogroup": {
-      "description": "Adds an Idol to a Group.",
+      "description": "Adds an idol to a Group.",
       "example_image_url": null,
       "syntax": "%addidoltogroup <idol id> <group id>",
       "example_syntax": null,
@@ -1924,7 +1924,7 @@
     "deleteidolfromgroup": {
       "description": "Deletes an Idol from a Group.",
       "example_image_url": null,
-      "syntax": "%deleteidolfromgroup <idol id> <group iid>\n",
+      "syntax": "%deleteidolfromgroup <idol id> <group id>\n",
       "example_syntax": null,
       "permissions_needed": [
         "Bot Moderator"

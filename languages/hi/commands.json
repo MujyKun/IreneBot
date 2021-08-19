@@ -1922,12 +1922,12 @@
       }
     },
     "deleteidolfromgroup": {
-      "description": "Deletes an Idol from a Group.",
+      "description": "एक समूह से एक Idol हटाता है।",
       "example_image_url": null,
-      "syntax": "%deleteidolfromgroup <idol id> <group iid>\n",
+      "syntax": "%deleteidolfromgroup <idol id> <group id>\n",
       "example_syntax": null,
       "permissions_needed": [
-        "Bot Moderator"
+        "बॉट मॉडरेटर"
       ],
       "aliases": null
     }

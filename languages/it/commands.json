@@ -1875,7 +1875,7 @@
     "addidoltogroup": {
       "description": "Aggiunge un Idol a un gruppo.",
       "example_image_url": null,
-      "syntax": "%addidoltogroup <idol id> <group id>",
+      "syntax": "%addidoltogroup <id idol> <id gruppo>",
       "example_syntax": null,
       "permissions_needed": [
         "Moderatore Bot"
@@ -1924,7 +1924,7 @@
     "deleteidolfromgroup": {
       "description": "Elimina un Idol da un gruppo.",
       "example_image_url": null,
-      "syntax": "%deleteidolfromgroup <idol id> <group iid>",
+      "syntax": "%deleteidolfromgroup <id idol> <id gruppo>",
       "example_syntax": null,
       "permissions_needed": [
         "Moderatore Bot"

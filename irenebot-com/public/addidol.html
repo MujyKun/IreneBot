@@ -28,9 +28,9 @@
         <label for="bcity">Birth City [Can include more specific location]:</label><br>
         <input type="text" id="bcity" name="Birth City" placeholder="ex: Yangsan, Gyeongsangnam-do"><br>
 
-        <label for="gender">Gender:</label><br>
-        <input type="radio" id="gender" name="Gender" value="m" required>Male<br>
-        <input type="radio" id="gender" name="Gender" value="f" required>Female <br>
+        <label for="male">Gender:</label><br>
+        <input type="radio" id="male" name="Gender" value="m" required>Male<br>
+        <input type="radio" id="female" name="Gender" value="f" required>Female <br>
 
         <label for="description">Description:</label><br>
         <textarea id="description" name="Description" cols="50" rows="5"></textarea><br>
@@ -81,11 +81,20 @@
         <input type="text" id="tags" name="Tags" value="kpop"><br>
 
         <label for="groupids">Group IDs [separated by commas, group id can be found by %card (group name)]:</label><br>
-        <input type="text" id="groupids" name="Group IDs" placeholder="group name also works" required><br>
+        <input type="text" id="groupids" name="Group IDs" placeholder="1,4,12" required><br>
 
-        <label for="notes">Notes:</label><br>
-        <textarea id="notes" name="Approver Notes" cols="50" rows="5" placeholder="Any notes you have for the person reviewing this."></textarea><br>
-        
+        <label for="aliases">Aliases [separate by commas, do not put spaces before or after commas.]:</label><br>
+        <input type="text" id="aliases" name="Aliases" value="" placeholder="irene,bae joo hyun,bae joo-hyun"><br>
+
+
+        <label for="difficulty">Difficulty:</label><br>
+        <select id="difficulty" name="Difficulty">
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+        </select>
+
+
         <br>
         <strong>After clicking submit, copy the JSON you see on the screen and paste it on discord under the command %addidol.</strong><br>
         <input type="submit" value="Submit">

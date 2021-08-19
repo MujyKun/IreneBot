@@ -40,8 +40,6 @@ class Events(commands.Cog):
             ex.cache.messages_received_per_minute += 1
             # delete messages that are in temp channels
             await Events.catch_on_message_errors(ex.u_miscellaneous.delete_temp_messages, message)
-            # check for the n word
-            await Events.catch_on_message_errors(ex.u_miscellaneous.check_for_nword, message)
             # check for self-assignable roles and process it.
             await Events.catch_on_message_errors(ex.u_self_assign_roles.check_for_self_assignable_role, message)
             # process the commands with their prefixes.
@@ -52,7 +50,7 @@ class Events(commands.Cog):
     @staticmethod
     async def error(ctx, error):
         try:
-            embed = discord.Embed(title="Error", description=error, color=0xff00f6)
+            embed = discord.Embed(title="Error", description=f"{error}", color=0xff00f6)
             await ctx.send(embed=embed)
             log.console(f"{error}")
             # increment general error count per minute -> Does not include unable to send messages to people.
@@ -82,11 +80,12 @@ class Events(commands.Cog):
         if isinstance(error, commands.errors.CommandNotFound):
             pass
         elif isinstance(error, commands.errors.CommandInvokeError):
-            try:
-                if error.original.status == 403:
-                    return
-            except AttributeError:
-                pass  # do not need to log as useless
+            if hasattr(error, "original"):
+                if hasattr(error.original, "status"):
+                    if error.original.status == 403:
+                        return
+                if isinstance(error.original, ex.exceptions.Limit):
+                    return await ctx.send(error.original.args[0])
 
             log.console(f"Command Invoke Error -- {error} -- {ctx.command.name}")
             ex.cache.errors_per_minute += 1
@@ -99,8 +98,10 @@ class Events(commands.Cog):
         elif isinstance(error, commands.errors.BadArgument):
             await Events.error(ctx, error)
             ctx.command.reset_cooldown(ctx)
-        elif isinstance(error, commands.errors.MissingPermissions) or isinstance(error, commands.errors.UserInputError):
+        elif isinstance(error, (commands.errors.MissingPermissions, commands.errors.UserInputError)):
             await Events.error(ctx, error)
+        elif isinstance(error, commands.NoPrivateMessage):
+            await ctx.send(await ex.get_msg(ctx, "general", "no_dm"))
 
     @staticmethod
     @client.event
@@ -135,8 +136,10 @@ class Events(commands.Cog):
     @staticmethod
     @client.event
     async def on_command(ctx):
+        """Routine for every command."""
+        # We will log attempted commands as well.
         msg_content = ctx.message.clean_content
-        if not ex.check_if_mod(ctx.author.id, 1):
+        if not ex.check_if_mod(ctx.author.id):
             log.console(
                 f"CMD LOG: ChannelID = {ctx.channel.id} - {ctx.author} ({ctx.author.id})|| {msg_content} ")
         else:
@@ -189,7 +192,7 @@ class Events(commands.Cog):
                     log.console(err)
                 return None, None, None, None
 
-            if ex.check_if_mod(user_id, mode=1):
+            if ex.check_if_mod(user_id):
                 if str(emoji) == ex.keys.trash_emoji:
                     msg, link, idol_id, _ = await get_msg_and_image()
                     if link:
@@ -227,17 +230,26 @@ class Events(commands.Cog):
             if added_roles:
                 for role in added_roles:
                     await asyncio.sleep(0)
+                    if role.id in [ex.keys.patreon_role_id, ex.keys.datamod_role_id, ex.keys.proofreader_role_id,
+                                   ex.keys.translator_role_id, ex.keys.patreon_super_role_id]:
+                        user.patron = True
                     if role.id == ex.keys.patreon_super_role_id:
-                        user.patron = True
                         user.super_patron = True
-                    if role.id == ex.keys.patreon_role_id:
-                        user.patron = True
+                    if role.id == ex.keys.datamod_role_id:
+                        user.is_data_mod = True
+                    if role.id == ex.keys.translator_role_id:
+                        user.is_translator = True
+                    if role.id == ex.keys.proofreader_role_id:
+                        user.is_proofreader = True
             # if the user was removed from patron or super patron role, update cache
             after_role_ids = [after_role.id for after_role in after_roles]
             if removed_roles:
                 # only update if there were removed roles
                 user.super_patron = ex.keys.patreon_super_role_id in after_role_ids
                 user.patron = ex.keys.patreon_role_id in after_role_ids
+                user.is_translator = ex.keys.translator_role_id in after_role_ids
+                user.is_proofreader = ex.keys.proofreader_role_id in after_role_ids
+                user.is_data_mod = ex.keys.datamod_role_id in after_role_ids
 
     @staticmethod
     @client.event

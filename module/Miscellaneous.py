@@ -56,7 +56,7 @@ Message Author: {message.author}
             await user.set_language(language_choice)
             msg_str = self.ex.cache.languages[language_choice]['miscellaneous']['set_language_success']
         else:
-            msg_str = self.ex.cache.languages[language_choice]['miscellaneous']['set_language_fail']
+            msg_str = await self.ex.get_msg(user, "miscellaneous", "set_language_fail")
 
         msg_str = await self.ex.replace(msg_str, [["name", ctx.author.display_name], ["language", user.language],
                                                   ["languages", ", ".join(self.ex.cache.languages.keys())]])
@@ -102,6 +102,8 @@ Message Author: {message.author}
         [Format: %addnoti (phrase/word)]
         """
         try:
+            if len(phrase) < 2:
+                return await ctx.send("> Your phrase must be at least two characters long.")
             check_exists = self.ex.first_result(
                 await self.ex.conn.fetchrow("SELECT COUNT(*) FROM general.notifications WHERE guildid = $1 AND "
                                             "userid = $2 AND phrase = $3", ctx.guild.id, ctx.author.id, phrase.lower()))
@@ -125,6 +127,9 @@ Message Author: {message.author}
 
         [Format: %removenoti (phrase/word)]
         """
+        if isinstance(ctx.channel, discord.DMChannel):
+            raise commands.NoPrivateMessage
+
         try:
             await self.ex.conn.execute("DELETE FROM general.notifications WHERE guildid=$1 AND userid=$2 AND phrase=$3",
                                        ctx.guild.id, ctx.author.id, phrase.lower())
@@ -132,16 +137,12 @@ Message Author: {message.author}
                 user = await self.ex.get_user(ctx.author.id)
                 user.notifications.remove([ctx.guild.id, phrase.lower()])
                 self.ex.cache.user_notifications.remove([ctx.guild.id, ctx.author.id, phrase.lower()])  # full list
-            except AttributeError:
-                return await ctx.send(
-                    f"> **{ctx.author.display_name}, You are not allowed to use this command in DMs.**")
             except Exception as e:
                 log.useless(f"{e} (Exception) - Failed to remove user phrase", method=self.removenoti)
-            await ctx.send(f"> **{ctx.author.display_name}, if you were receiving notifications for that phrase, "
-                           f"it has been removed.**")
+            await ctx.send(await self.ex.get_msg(ctx, "miscellaneous", "noti_removed"))
         except Exception as e:
             log.console(e)
-            await ctx.send(f"> **Something Went Wrong, please {await self.ex.get_server_prefix(ctx)}report it.**")
+            await ctx.send(await self.ex.get_msg(ctx, "general", "error", ["e", e]))
 
     @commands.command()
     async def listnoti(self, ctx):
@@ -168,11 +169,10 @@ Message Author: {message.author}
                     final_list += f"**{phrase}**"
             await ctx.send(final_list)
         except AttributeError:
-            return await ctx.send(
-                f"> **{ctx.author.display_name}, You do not have any notification phrases on this server.**")
+            await ctx.send(await self.ex.get_msg(ctx, "miscellaneous", "no_notis"))
         except Exception as e:
             log.console(e)
-            await ctx.send(f"> **Something Went Wrong, please {await self.ex.get_server_prefix(ctx)}report it.**")
+            await ctx.send(await self.ex.get_msg(ctx, "general", "error", ["e", e]))
 
     @commands.command(aliases=['patron'])
     async def patreon(self, ctx):
@@ -186,7 +186,7 @@ Message Author: {message.author}
     @commands.command()
     async def botinfo(self, ctx):
         """Get information about the bot."""
-        maintenance_status = api_status = db_status = images_status = weverse_status = d_py_status = \
+        maintenance_status = api_status = db_status = images_status = d_py_status = \
             irene_cache_status = ":red_circle:"
 
         working = ":green_circle:"
@@ -198,8 +198,6 @@ Message Author: {message.author}
             images_status = working
         if self.ex.cache.maintenance_mode:
             maintenance_status = working
-        if await self.ex.weverse_client.check_token_works():
-            weverse_status = working
         if self.ex.discord_cache_loaded:
             d_py_status = working
         if self.ex.irene_cache_loaded:
@@ -232,13 +230,13 @@ Message Author: {message.author}
 API Status: {api_status} 
 Images Status: {images_status} 
 Database Status: {db_status} 
-Weverse Status: {weverse_status}
 Irene Cache: {irene_cache_status}
 discord.py Cache: {d_py_status}
 Maintenance Status: {maintenance_status}
 """
         embed = await self.ex.create_embed(title=f"I am {app_name}! ({app_id})", title_desc=title_desc)
         embed.set_thumbnail(url=app_icon_url)
+
         embed.add_field(name="Servers Connected", value=f"{self.ex.u_miscellaneous.get_server_count()} Servers",
                         inline=True)
         embed.add_field(name="Text/Voice Channels Watched",
@@ -251,10 +249,12 @@ Maintenance Status: {maintenance_status}
         embed.add_field(name="Total Commands Used", value=f"{self.ex.cache.total_used} Commands", inline=True)
         embed.add_field(name=f"This Session ({self.ex.cache.session_id} | {date.today()})",
                         value=f"{self.ex.cache.current_session} Commands", inline=True)
-        embed.add_field(name="Playing Music", value=f"{len(self.ex.client.voice_clients)} Voice Clients", inline=True)
-        embed.add_field(name="Playing Guessing/Bias/Unscramble",
+        embed.add_field(name="Playing Music", value=f"{len(self.ex.client.voice_clients)} Wavelink Players",
+                        inline=True)
+        embed.add_field(name="Playing Guessing/Bias/Unscramble/BlackJack",
                         value=f"{len(self.ex.cache.guessing_games)}/{len(self.ex.cache.bias_games)}"
-                              f"/{len(self.ex.cache.unscramble_games)} Games", inline=True)
+                              f"/{len(self.ex.cache.unscramble_games)}/{len(self.ex.cache.blackjack_games)} Games",
+                        inline=True)
         embed.add_field(name="Ping", value=f"{self.ex.get_ping()} ms", inline=True)
         embed.add_field(name="Shards", value=f"{self.ex.client.shard_count}", inline=True)
         embed.add_field(name="Bot Owner", value=f"<@{app_owner.id}>", inline=True)
@@ -303,7 +303,7 @@ Maintenance Status: {maintenance_status}
             msg = f"Original ({target_lang}): {message} \nTranslated ({to_language}): {text} "
             return await ctx.send(msg)
         except Exception as e:
-            await ctx.send("An error has occurred with the Translation.")
+            await ctx.send(await self.ex.get_msg(ctx, "general", "error", ["e", e]))
             log.console(e)
 
     @commands.command()
@@ -324,13 +324,14 @@ Maintenance Status: {maintenance_status}
             # 403 error ( no access ) on testing
             channel = await self.ex.client.fetch_channel(self.ex.keys.report_channel_id)
             msg = await channel.send(embed=embed)
-            await ctx.send("> **Your bug report has been sent.**")
+            await ctx.send(await self.ex.get_msg(ctx, "miscellaneous", "bug_sent"))
             await msg.add_reaction("\U0001f44d")  # thumbs up
             await msg.add_reaction("\U0001f44e")  # thumbs down
         except:
             # Error would occur on test bot if the client does not have access to a certain channel id
             # this try-except will also be useful if a server removed the bot.
-            await ctx.send("Could not fetch channel to report to.")
+            await ctx.send(await self.ex.get_msg(ctx, "general", "error",
+                                                 ["e", "Could not fetch channel to report to."]))
 
     @commands.command()
     async def suggest(self, ctx, *, suggestion):
@@ -349,76 +350,21 @@ Maintenance Status: {maintenance_status}
         try:
             channel = await self.ex.client.fetch_channel(self.ex.keys.suggest_channel_id)  # 403 error on testing
             msg = await channel.send(embed=embed)
-            await ctx.send("> **Your suggestion has been sent.**")
+            await ctx.send(await self.ex.get_msg(ctx, "miscellaneous", "suggestion_sent"))
             await msg.add_reaction("\U0001f44d")  # thumbs up
             await msg.add_reaction("\U0001f44e")  # thumbs down
         except Exception as e:
             log.console(e)
-            await ctx.send("Could not fetch channel to suggest to.")
-
-    @commands.command()
-    async def nword(self, ctx, user: discord.Member = None):
-        """
-        Checks how many times a user has said the N Word
-
-        [Format: %nword @user]
-        """
-        if not user:
-            user = ctx.author
-        current_amount = (await self.ex.get_user(user.id)).n_word
-        if not current_amount:
-            return await ctx.send(f"> **<@{user.id}> has not said the N-Word a single time!**")
-        else:
-            await ctx.send(f"> **<@{user.id}> has said the N-Word {current_amount} time(s)!**")
-
-    @commands.command(aliases=["nwl"])
-    async def nwordleaderboard(self, ctx, mode="server"):
-        """
-        Shows leaderboards for how many times the nword has been said.
-
-        [Format: %nwl (server/global)]
-        """
-        embed = discord.Embed(title=f"NWord Leaderboard", color=0xffb6c1)
-        embed.set_author(name="Irene", url=self.ex.keys.bot_website, icon_url=self.ex.keys.icon_url)
-        embed.set_footer(
-            text=f"Type {await self.ex.get_server_prefix(ctx)}nword (user) to view their individual stats.",
-            icon_url=self.ex.keys.footer_url)
-
-        guild_id = await self.ex.get_server_id(ctx)
-        if not guild_id:
-            # server rankings can not be accessed from DMs.
-            mode = "global"
-
-        guild = self.ex.client.get_guild(guild_id)
-        member_list = [member.id for member in guild.members]
-
-        embed_field_counter = 0  # do not use enumerate for this.
-
-        # fastest way to bring up the organized leaderboard is actually through the DB instead of cache.
-        for user_id, n_word_count in await self.ex.sql.s_general.fetch_n_word(ordered_by_greatest=True):
-            await asyncio.sleep(0)
-            if embed_field_counter >= 10:
-                break
-
-            try:
-                user_name = (self.ex.client.get_user(user_id)).name
-            except:
-                # if the user is not in discord.py's member cache, then set the user's name to null.
-                user_name = "NULL"
-
-            if mode.lower() == "global" or user_id in member_list:
-                embed.add_field(name=f"{embed_field_counter + 1}) {user_name} ({user_id})", value=n_word_count)
-                embed_field_counter += 1
-
-        await ctx.send(embed=embed)
+            await ctx.send(await self.ex.get_msg(ctx, "general", "error",
+                                                 ["e", "Could not fetch channel to report to."]))
 
     @commands.command(aliases=['rand', 'randint', 'r'])
     async def random(self, ctx, a: int, b: int):
         """Choose a random number from a range (a,b)."""
         try:
-            await ctx.send(f"> **Your random number is {randint(a, b)}.**")
+            await ctx.send(await self.ex.get_msg(ctx, "miscellaneous", "random_number", ["result", randint(a, b)]))
         except Exception as e:
-            await ctx.send(f"> **{e}**")
+            await ctx.send(await self.ex.get_msg(ctx, "general", "error", ["e", e]))
 
     @commands.command(aliases=['coinflip', 'f'])
     async def flip(self, ctx):
@@ -428,7 +374,7 @@ Maintenance Status: {maintenance_status}
         [Format: %flip]
         [Aliases: coinflip, f]
         """
-        await ctx.send(f"> **You flipped {choice(['Heads', 'Tails'])}.**")
+        await ctx.send(await self.ex.get_msg(ctx, "miscellaneous", "coin_flip", ["result", choice(['Heads', 'Tails'])]))
 
     @commands.command(aliases=['define', 'u'])
     async def urban(self, ctx, term=None, number=1, override=0):
@@ -533,7 +479,7 @@ Maintenance Status: {maintenance_status}
             await ctx.send(embed=embed)
         except Exception as e:
             log.console(e)
-            await ctx.send("> This server has not yet been loaded into my cache (takes about an hour from restart).")
+            await ctx.send(await self.ex.get_msg(ctx, "miscellaneous", "not_in_cache"))
 
     @commands.command(name="8ball", aliases=['8'])
     async def _8ball(self, ctx, *, question=None):
@@ -543,9 +489,11 @@ Maintenance Status: {maintenance_status}
         [Format: %8ball Question]
         """
         if question:
-            await ctx.send(f">>> **Question: {question} \nAnswer: {choice(self.ex.cache.eight_ball_responses)}**")
+            await ctx.send(await self.ex.get_msg(ctx, "miscellaneous", "prompt_answer",
+                                                 [["result", question],
+                                                  ["result2", choice(self.ex.cache.eight_ball_responses)]]))
         else:
-            await ctx.send("> **Please enter an 8ball prompt.**")
+            await ctx.send(await self.ex.get_msg(ctx, "miscellaneous", "prompt"))
 
     @commands.command(aliases=['stopgame', 'endgame', 'endgames'])
     async def stopgames(self, ctx):
@@ -580,3 +528,26 @@ Maintenance Status: {maintenance_status}
             await ctx.send(f"> **My ping is currently {self.ex.get_ping()}ms.**")
         except:
             await ctx.send("> Cannot determine ping at this time.")
+
+    @commands.command(aliases=["shardinfo"])
+    async def shard(self, ctx):
+        """
+        Shows information about the current shard.
+
+        [Format: %shard]
+        """
+        if not ctx.guild:
+            no_dm_msg = await self.ex.get_msg(ctx, "general", "no_dm")
+            return await ctx.send(no_dm_msg)
+        shard_id = ctx.guild.shard_id
+        shard = self.ex.client.get_shard(shard_id)
+        embed_title = f"Shard Details for {ctx.guild.name}"
+        embed = await self.ex.create_embed(title=embed_title)
+        embed.add_field(name="Shard ID", value=shard_id)
+        embed.add_field(name="Latency", value=f"{int(shard.latency * 1000)} ms")
+        embed.add_field(name="Closed", value=f"{shard.is_closed()}")
+        embed.add_field(name="Rate-Limited", value=f"{shard.is_ws_ratelimited()}")
+        await ctx.send(embed=embed)
+
+
+

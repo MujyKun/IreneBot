@@ -1,15 +1,9 @@
 import asyncio
 
+import discord
 from discord.ext import commands
 from IreneUtility.util import u_logger as log
 from IreneUtility.Utility import Utility
-
-
-def check_user_in_support_server():
-    """Decorator for checking if a user is in the support server"""
-    def predicate(ctx):
-        return ctx.cog.ex.check_user_in_support_server(ctx)
-    return commands.check(predicate)
 
 
 # noinspection PyPep8,PyBroadException
@@ -22,6 +16,12 @@ class GuessingGame(commands.Cog):
         self.ex: Utility = t_ex
         self.possible_game_options = ["idol", "group"]
 
+    async def cog_check(self, ctx):
+        """A local check for this cog. Checks if the user is in the support server."""
+        if ctx.invoked_with and ctx.invoked_with == 'help':
+            return True
+        return await self.ex.check_user_in_support_server(ctx)
+
     @commands.command(aliases=['ggl', 'gglb'])
     async def ggleaderboard(self, ctx, difficulty="medium", mode="server"):
         """
@@ -29,6 +29,9 @@ class GuessingGame(commands.Cog):
 
         [Format: %ggleaderboard (easy/medium/hard) (server/global)]
         """
+        if isinstance(ctx.channel, discord.DMChannel):
+            raise commands.NoPrivateMessage
+
         if difficulty.lower() not in ['easy', 'medium', 'hard']:
             difficulty = "medium"
 
@@ -37,8 +40,6 @@ class GuessingGame(commands.Cog):
                 mode = "server"
             if mode == "server":
                 server_id = await self.ex.get_server_id(ctx)
-                if not server_id:
-                    return await ctx.send("> You should not use this command in DMs.")
                 members = f"({', '.join([str(member.id) for member in self.ex.client.get_guild(server_id).members])})"
                 top_user_scores = await self.ex.u_guessinggame.get_guessing_game_top_ten(difficulty, members=members)
 
@@ -55,12 +56,12 @@ class GuessingGame(commands.Cog):
             await ctx.send(embed=m_embed)
         except Exception as e:
             log.console(e)
-            return await ctx.send(f"> You may not understand this error. Please report it -> {e}")
+            await ctx.send(await self.ex.get_msg(ctx, "general", "gen_error", ["e", e]))
 
     async def manage_gg_cmd(self, ctx, gender="all", difficulty="medium", rounds=20, timeout=20, game_mode="idol"):
         """Manages the guessing game commands."""
-        if not ctx.guild:
-            return await ctx.send("> You are not allowed to play guessing game in DMs.")
+        if isinstance(ctx.channel, discord.DMChannel):
+            raise commands.NoPrivateMessage
         server_prefix = await self.ex.get_server_prefix(ctx)
         if ctx.channel.id in self.ex.cache.channels_with_disabled_games:
             msg = await self.ex.get_msg(ctx.author.id, "general", "game_disabled", [
@@ -78,7 +79,6 @@ class GuessingGame(commands.Cog):
 
         await self.start_game(ctx, rounds, timeout, gender, difficulty, game_mode=game_mode)
 
-    @check_user_in_support_server()
     @commands.command(aliases=['gg'])
     async def guessinggame(self, ctx, gender="all", difficulty="medium", rounds=20, timeout=20):
         """
@@ -92,7 +92,6 @@ class GuessingGame(commands.Cog):
         """
         await self.manage_gg_cmd(ctx, gender, difficulty, rounds, timeout, game_mode="idol")
 
-    @check_user_in_support_server()
     @commands.command(aliases=['ggg', 'groupgg'])
     async def groupguessinggame(self, ctx, gender="all", difficulty="medium", rounds=20, timeout=20):
         """

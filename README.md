@@ -1,4 +1,4 @@
-# [IreneBot V1.04.1](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=1609956823)
+# [IreneBot V1.04.2](https://discordapp.com/oauth2/authorize?client_id=520369375325454371&scope=bot&permissions=1609956823)
 
 ## [Support Irene by becoming a Patron!](https://www.patreon.com/bePatron?u=38971435)  
 **[Become a Patron!](https://www.patreon.com/bePatron?u=38971435)**
@@ -25,24 +25,13 @@ To find out more, look at the `GroupMembers` category.
 
 ## COMMANDS
 
-#### Archive: ★★★
-| Command               | Description                                                                                           | Format                               |
-|-----------------------|-------------------------------------------------------------------------------------------------------|--------------------------------------|
-| addchannel            | REQUIRES BOT OWNER PRESENCE TO ADD -- Make the current channel start archiving images to google drive | %addchannel (drive_folder_id) (name) |
-| addhistory            | Add all of the previous images from a text channel to google drive.                                   | %addhistory (year) (month) (day)     |
-| deletechannel         | Stop the current channel from being archived                                                          | %deletechannel                       |
-| listchannels          | List the channels in your server that are being archived.                                             | %listchannels                        |
-
-
 #### BlackJack:
 | Command           | Description                                                                                           | Format                               | Aliases |
 |-------------------|-------------------------------------------------------------------------------------------------------|--------------------------------------|---------|
 | blackjack         | Start a game of BlackJack                                                                             | %blackjack (amount)                  | bj      |
 | stopbj           | End your current blackjack game                                                                                 | %stopbj                             |       |
-| hit               | Pick A Card                                                                                           | %hit                                 |         |
-| joingame          | Join a game                                                                                           | %joingame (gameid) (bid)             | jg      |
+| joingame          | Join a game                                                                                           | %joingame (@user) (bid)             | jg      |
 | rules          | View the rules of BlackJack.                                                                                           | %rules             |       |
-| stand             | Keep Your Cards                                                                                       | %stand                               |         |
 
 #### BotMod: 😇😇😇  
 | Command           | Description                                                                                           | Format                               | Aliases |
@@ -65,10 +54,14 @@ To find out more, look at the `GroupMembers` category.
 | maintenance             | Enable/Disable Maintenance Mode. | %maintenance (reason)                          |               |
 | mergeidol | Merges a duplicate Idol with it's original | %mergeidol (original idol id) (duplicate idol id) | |
 | mergegroup | Merges a duplicate Group with it's original | %mergegroup (original group id) (duplicate group id) | |
+| moveto | Moves an image to another idol. | %moveto (idol id) (url) | |
 | removestatus             | Remove a status based on it's index. The index can be found using %getstatuses | %removestatus (status index)                           |               |
-| repost             | Reposts a certain post from the DC APP to all channels.                                                  | %repost (post_number)                           |               |
-| weverseauth      | Updates Weverse Authentication Token without restarting bot. Only use this in DMs or a private channel for security purposes. | %weverseauth (token)                           |               |
 
+#### BlockingManager: ♥♥♥
+| Command           | Description                                                                                           | Format                               | Aliases |
+|-------------------|-------------------------------------------------------------------------------------------------------|--------------------------------------|---------|
+| bmon start         | Starts the blocking manager.                                                              | %bmon start                                                                                                     |                       |
+| bmon stop       | Stops the blocking manager.                                   | %bmon stop               |               |
 
 #### BiasGame:
 | Command     | Description                          | Format                 | Aliases           |
@@ -100,8 +93,6 @@ To find out more, look at the `GroupMembers` category.
 #### GroupMembers:
 | Command          | Description                                                                        | Format                                                                                                         | Aliases                |
 |------------------|------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|------------------------|
-| addidol         | Adds an idol using the syntax from https://irenebot.com/addidol.html | %addidol (json)                                                                                                      |                      |
-| addgroup         | Adds a group using the syntax from https://irenebot.com/addgroup.html | %addgroup (json)                                                                                                      |                       |
 | aliases          | Lists the aliases of idols or groups that have one. Underscores are spaces and commas are to split idol or group names                                        | %aliases (name of idol or group) [page number] ex: %aliases irene,seulgi,red_velvet                                                                                                       |                        |
 | card | Displays an Idol/Group's profile card. | %card (Idol/Group Name/ID) | |
 | count            | Shows howmany times an idol has been called.                                       | %count (name)                                                                                                  |                        |
@@ -164,8 +155,6 @@ To find out more, look at the `GroupMembers` category.
 | flip             | Flips a Coin                                                   | %flip                           |                |
 | invite           | Invite Link for Irene                                          | %invite                         |                |
 | listnoti          | list all your notification phrases that exist in the current server.| %listnoti     |               |
-| nword            | Checks how many times a user has said the N Word               | %nword @user                    |                |
-| nwordleaderboard | Shows leaderboards for how many times the nword has been said. | %nwl (server/global)                           | nwl            |
 | patreon             | Displays Patreon Information.                                       | %patreon                           |   patron         |
 | ping             | Shows Latency to Discord                                       | %ping                           | pong           |
 | random           | Choose a random number from a range (a,b)                      | %random a b [Ex: %random 1 100] | r,rand,randint |
@@ -174,10 +163,11 @@ To find out more, look at the `GroupMembers` category.
 | servercount      | Shows how many servers Irene is on.                            | %servercount                    |                |
 | serverinfo      | View information about the current server.                            | %serverinfo                   |                |
 | setlanguage          | Changes language of Irene. Available Choices: en_us  | %setlanguage (language choice)                         |               |
-| stopgames          | End all games that you are hosting or that may exist in the text channel.  | %stopgames |  stopgame, endgame, endames             |
+| shard          | Gives shard info about the current server.  | %shard | shardinfo              |
+| stopgames          | End all games that you are hosting or that may exist in the text channel.  | %stopgames |  stopgame, endgame, endgames             |
 | suggest          | Suggest a feature for Irene                                    | %suggest (feature)              |               |
 | support          | Support Discord Server for Irene                               | %support                        |                |
-| translate          | Translate between languages using Papago                              | %translate English Korean this is a test phrase.                       |                |
+| translate          | Translate between languages using Papago                              | %translate English Korean this is a test phrase.                       |   t, trans             |
 | vote          | Link to Voting for Irene on Top.gg | %vote                       |                |
 
 #### Moderator: ★★★
@@ -188,7 +178,7 @@ To find out more, look at the `GroupMembers` category.
 | ban              | Ban A User (Ban Members)                                                                                                                           | %ban @user                      |               |
 | clear            | Prune Messages (LIMIT 1000) (Manage Messages)                                                                                                                      | %clear (amount)                 |  prune        |
 | deletealias         | Remove alias from an idol/group. (Underscores are spaces)                                                               | %deletealias (alias) (ID of idol/group) ("idol" or "group")                                                                                                     |  removealias                      |
-| disableinteraction            | Disable an interaction on your server. Redo to enable again (Manage Messages)                                                                                                                      | %deleteinteraction (interaction)                 |  |
+| disableinteraction            | Disable an interaction on your server. Redo to enable again (Manage Messages)                                                                                                                      | %disableinteraction (interaction)                 |  |
 | kick             | Kick A User. (Kick Members)                                                                                                                          | %kick @user                     |               |
 | mute             | Mute A User. (Manage Messages & Manage Roles)                                                                                                                          | %mute @user (reason)                     |               |
 | say              | Make Irene say a message. (Manage Messages)                                          | %say #[text-channel] (message)                  |               |
@@ -197,7 +187,7 @@ To find out more, look at the `GroupMembers` category.
 | tempchannel      | Makes Current Channel a temporary channel deleting messages after a certain time period (greater than 1 minute). If delay is -1, it will remove the channel. (Manage Messages)| %tempchannel [delay=-1]         | temp         |
 | togglegames      | Choose to enable/disable games in a text channel. (Manage Messages)| %togglegames [#channel]         |          |
 | unban            | UnBan A User (Ban Members)                                                                                                                      | %unban @user                    |               |
-| unmute            | UnMute A User (Manage Messages & Manage Roles)                                                                                                                      | %unmute @user (reason)                    |               |
+| unmute            | UnMute A User (Manage Messages & Manage Roles)                                                                                                                      | %unmute @user                   |               |
 | welcome            | Set a welcome message or disable welcome in the current channel. Use %user where they should be mentioned. Use %guild_name if the server name should be added. (Manage Messages)  | %welcome (Welcome %user to %guild_name!)                    |               |
 | welcomerole            | The role to give a user when they first join the server. Use command without role to delete the welcome role set to the guild. (Manage Messages)  | %welcomerole @role                    |               |
 
@@ -233,26 +223,27 @@ To find out more, look at the `GroupMembers` category.
 | topalbums            | See the top albums of a Last FM Account by a discord user or a Last FM username                                       | %topalbums (username or @user)       |   tal                     |
 | topartists            | See the top artists of a Last FM Account by a discord user or a Last FM username.                                       | %topartists (username or @user)  |  ta                      |
 | toptracks            | See the top tracks of a Last FM Account by a discord user or a Last FM username                                       | %toptracks (username or @user)  | tt                        |
+| setfm            | Attach a LastFM username to your discord account.                                       | %setfm (LastFM username)  |                         |
 
 
-#### Wolfram: 
-
+#### Wolfram:
 | Command          | Description                                                                                                                          | Format                                       |
 |------------------|--------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------|
 | w           | Send a request to Wolfram.                                                                                                            | %wolfram (query)                               |
 
 
-#### Testing ♥♥♥
-| Command          | Description                                                                                                                          | Format                          |
-|------------------|--------------------------------------------------------------------------------------------------------------------------------------|---------------------------------|
-| testcommands      | Tests all commands (Use this while in a voice channel)                                                                                                            | %testcommands               |
+#### Twitter:  
+| Command          | Description                                                                                                                          | Format                          | Aliases        |
+|------------------|--------------------------------------------------------------------------------------------------------------------------------------|---------------------------------|----------------|
+| deletetweet      | Delete a Tweet by it's ID                                                                                                            | %deletetweet (id)               | ♥  |
+| recenttweets     | Show Most Recents Tweets                                                                                                             | %recenttweets (amount)          | ♥  |
+| tweet            | Tweets a status update on Twitter                                                                                                    | %tweet (status)                 | ♥  |
+| twitterupdates code | Follow a Twitter channel based on the account username. (Requires Manage Messages) | %twitterupdates code (twitter username) [role id] | twitter code, twitter user, twitter username |
+| twitterupdates group | Follow a Twitter channel belonging to a Group ID If they have one. (Requires Manage Messages)  | %twitterupdates group (group id) [role id] | twitter group |
+| twitterupdates idol | Follow a Twitter channel belonging to an Idol ID If they have one. (Requires Manage Messages)  | %twitterupdates idol (idol id) [role id] | twitter idol |
+| twitterupdates list | Lists the Twitter channels currently being followed in the text channel. (Requires Manage Messages)  | %twitterupdates list | twitter list |
+| twitterupdates reset | Unfollows all Twitter accounts in the server. (Requires Manage Messages)  | %twitterupdates reset | twitter reset |
 
-#### Twitter: ♥♥♥
-| Command          | Description                                                                                                                          | Format                          |
-|------------------|--------------------------------------------------------------------------------------------------------------------------------------|---------------------------------|
-| deletetweet      | Delete a Tweet by it's ID                                                                                                            | %deletetweet (id)               |
-| recenttweets     | Show Most Recents Tweets                                                                                                             | %recenttweets (amount)          |
-| tweet            | Tweets a status update on Twitter                                                                                                    | %tweet (status)                 |
 
 #### UnScramble:
 | Command          | Description                                                                                                                          | Format                          | Aliases        |
@@ -260,26 +251,6 @@ To find out more, look at the `GroupMembers` category.
 | unscramble | Start an idol unscrambing game in the current channel. The host of the game can use `stop` to end the game | %unscramble (Male/Female/All) (easy/medium/hard) (# of rounds - default 20) (timeout for each round - default 20s) | us |
 | usleaderboard | Shows leaderboards for unscramble game. | %uslb (easy/medium/hard) (server/global)| usl, uslb |
 | stopus | Force-end an unscramble game if you are a moderator or host of the game. This command is meant for any issues or if a game happens to be stuck. Must be game host or access to manage messages. | %stopus | ★/Host|
-
-
-#### Youtube: ♥♥♥
-
-| Command          | Description                                                                                                                          | Format                                       |
-|------------------|--------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------|
-| addurl           | Add url to youtube videos                                                                                                            | %addurl (link)                               |
-| removeurl        | Remove url from youtube videos                                                                                                       | %removeurl (link)                            |
-| scrapeyoutube    | Scrape the views from the Youtube Videos in the DB                                                                                                          | %scrapeyoutube                               |
-| startloop        | Starts scraping youtube videos.                                                                                                      | %startloop (seconds until it starts looping) |
-| stoploop         | Stops scraping youtube videos                                                                                                        | %stoploop                                    |
-
-
-#### Weverse (This is now disabled for normal users, but join the support server and follow the announcement channels to your text channels):
-| Command     | Description                          | Format                 | Aliases           |
-|-------------|--------------------------------------|------------------------|-------------------|
-| updates | Receive Weverse Updates of a specific Weverse community in the current text channel. Use again to disable for a specific community. Available Communities -> [TXT, BTS, GFRIEND, SEVENTEEN, ENHYPEN, NU'EST, CL, P1Harmony, Weeekly, SUNMI, HENRY, Dreamcatcher, CherryBullet, MIRAE, TREASURE, LETTEAMOR, EVERGLOW, FTISLAND, woo!ah!, IKON, JUST B, BLACKPINK] | %updates (community name) [role to notify] |  |
-| disablecomments | Disable updates for comments on a community. | %disablecomments (community name) |  |
-| disablemedia | Disable updates for media on a community. | %disablecomments (community name) |  |
-
 
 #### SelfAssignRoles:
 | Command     | Description                          | Format                 | Aliases           |
@@ -313,12 +284,28 @@ To find out more, look at the `GroupMembers` category.
 |-----------------------|-------------------------------------------------------------------------------------------------------|--------------------------------------|
 | addcards          | Fill The CardValues Table with Cards                                                                  | %addcards                            |       |
 | addpatreon         | Adds a patreon.                           | %addpatreon (userid,userid,userid)             |               |
-| approve       | Approve a query id for an unregistered group or idol. | %approve (query id) ('idol' or 'group') |    |
-| clearnword       | Clear A User's Nword Counter                                   | %clearnword @user               |               |
 | generateplayingcards       | Generate custom playing cards with idol avatars. | %generateplayingcards  |               |
-| removepatreon         | Removes a patreon.                           | %removepatreon (userid,userid,userid)             |               |
+| reload         | Will hot reload all of IreneBot, IreneUtility, and any other self-made packages.     | %reload            |               |
+| reloadmodule         |    Reload a module/cog from it's name.            | %reloadmodule (module name)            |    cog           |
+| reloadutility         |   Reloads the utility package for the bot.          | %reloadutility             |               |
+| removepatreon         |          | %removepatreon (userid,userid,userid)             |               |
 | resetcache          | Reset the cache.  | %resetcache                        |              |
 | scandrive        | Scan DriveIDs Table and update other tables.                                       | %scandrive (name=NULL) (member_id=0)                                                                           |                       |
 | send              | Send a message to a text channel.                                             | %send (channelid) (message)                  |               |
 | speak            | Owner to Bot TTS                                               | %speak (message)                |              |
 | uploadfromhost            | Toggles whether images are uploaded from host or not.            | %uploadfromhost |              |
+
+#### Vlive: ★★★
+| Command     | Description                          | Format                 | Aliases           |
+|-------------|--------------------------------------|------------------------|-------------------|
+| vliveupdates code | Follow a VLIVE channel based on the channel code. | %vliveupdates code (vlive channel code) [role id] | vlive code |
+| vliveupdates group | Follow a VLIVE channel belonging to a Group ID If they have one. | %vliveupdates group (group id) [role id] | vlive group |
+| vliveupdates idol | Follow a VLIVE channel belonging to an Idol ID If they have one. | %vliveupdates idol (idol id) [role id] | vlive idol |
+| vliveupdates list | Lists the VLIVE channels currently being followed in the text channel. | %vliveupdates list | vlive list |
+
+#### DataMod: 😇😇😇
+| Command          | Description                                                                        | Format                                                                                                         | Aliases                |
+|------------------|------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|------------------------|
+| addidol         | Adds an idol using the syntax from https://irenebot.com/addidol.html | %addidol (json)                                                                                                      |                      |
+| addgroup         | Adds a group using the syntax from https://irenebot.com/addgroup.html | %addgroup (json)                                                                                                      |                       |
+| edit         | Edit information about a Idol/Group | %edit (idol/group) (idol/group id) (column name) (content)                                                                                                    |                       |

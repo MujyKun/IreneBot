@@ -196,6 +196,9 @@ class Gacha(commands.Cog):
 
     @tasks.loop(seconds=0, minutes=5, hours=0, reconnect=True)
     async def album_loop(self):
+        while not self.ex.irene_cache_loaded:
+            await asyncio.sleep(1)
+
         for user in self.ex.cache.users:
             await asyncio.sleep(0)
             if not user.gacha_albums:

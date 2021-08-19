@@ -45,8 +45,16 @@ CREATE SCHEMA testdb;
 ALTER SCHEMA testdb OWNER TO postgres;
 CREATE SCHEMA twitch;
 ALTER SCHEMA twitch OWNER TO postgres;
+CREATE SCHEMA twitter;
+ALTER SCHEMA twitter OWNER TO postgres;
+CREATE SCHEMA ucubebot;
+ALTER SCHEMA ucubebot OWNER TO mujy;
+CREATE SCHEMA vlive;
+ALTER SCHEMA vlive OWNER TO postgres;
 CREATE SCHEMA weverse;
 ALTER SCHEMA weverse OWNER TO postgres;
+CREATE SCHEMA weversebot;
+ALTER SCHEMA weversebot OWNER TO mujy;
 CREATE SCHEMA youtube;
 ALTER SCHEMA youtube OWNER TO postgres;
 CREATE EXTENSION IF NOT EXISTS adminpack WITH SCHEMA pg_catalog;
@@ -652,6 +660,12 @@ CREATE TABLE groupmembers.restricted (
     sendhere integer
 );
 ALTER TABLE groupmembers.restricted OWNER TO postgres;
+CREATE TABLE groupmembers.sendidolphotos (
+    channelid bigint NOT NULL,
+    idolids integer[]
+);
+ALTER TABLE groupmembers.sendidolphotos OWNER TO postgres;
+COMMENT ON TABLE groupmembers.sendidolphotos IS 'Send Idol Photos to a text channel after t time.';
 CREATE TABLE groupmembers.subfolders (
     id integer NOT NULL,
     folderid text,
@@ -989,12 +1003,50 @@ CREATE TABLE twitch.guilds (
     roleid bigint
 );
 ALTER TABLE twitch.guilds OWNER TO postgres;
+CREATE TABLE twitter.mediauploaded (
+    imageid bigint NOT NULL,
+    mediaid bigint
+);
+ALTER TABLE twitter.mediauploaded OWNER TO postgres;
+CREATE TABLE ucubebot.channels (
+    id integer NOT NULL,
+    channelid bigint,
+    communityname text,
+    roleid bigint
+);
+ALTER TABLE ucubebot.channels OWNER TO mujy;
+CREATE SEQUENCE ucubebot.channels_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+ALTER TABLE ucubebot.channels_id_seq OWNER TO mujy;
+ALTER SEQUENCE ucubebot.channels_id_seq OWNED BY ucubebot.channels.id;
+CREATE TABLE vlive.followers (
+    id integer NOT NULL,
+    channelid bigint,
+    roleid bigint,
+    vliveid text
+);
+ALTER TABLE vlive.followers OWNER TO postgres;
+CREATE SEQUENCE vlive.followers_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+ALTER TABLE vlive.followers_id_seq OWNER TO postgres;
+ALTER SEQUENCE vlive.followers_id_seq OWNED BY vlive.followers.id;
 CREATE TABLE weverse.channels (
     id integer NOT NULL,
     channelid bigint,
     communityname text,
     roleid bigint,
-    commentsdisabled integer
+    commentsdisabled integer,
+    mediadisabled integer
 );
 ALTER TABLE weverse.channels OWNER TO postgres;
 CREATE SEQUENCE weverse.channels_id_seq
@@ -1006,6 +1058,24 @@ CREATE SEQUENCE weverse.channels_id_seq
     CACHE 1;
 ALTER TABLE weverse.channels_id_seq OWNER TO postgres;
 ALTER SEQUENCE weverse.channels_id_seq OWNED BY weverse.channels.id;
+CREATE TABLE weversebot.channels (
+    id integer NOT NULL,
+    channelid bigint,
+    communityname text,
+    roleid bigint,
+    comments boolean,
+    media boolean
+);
+ALTER TABLE weversebot.channels OWNER TO mujy;
+CREATE SEQUENCE weversebot.channels_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+ALTER TABLE weversebot.channels_id_seq OWNER TO mujy;
+ALTER SEQUENCE weversebot.channels_id_seq OWNED BY weversebot.channels.id;
 CREATE TABLE youtube.links (
     id integer NOT NULL,
     link text,
@@ -1073,7 +1143,10 @@ ALTER TABLE ONLY stats.commands ALTER COLUMN id SET DEFAULT nextval('stats.comma
 ALTER TABLE ONLY stats.sessions ALTER COLUMN sessionid SET DEFAULT nextval('stats.sessions_sessionid_seq'::regclass);
 ALTER TABLE ONLY twitch.alreadyposted ALTER COLUMN id SET DEFAULT nextval('twitch.alreadyposted_id_seq'::regclass);
 ALTER TABLE ONLY twitch.channels ALTER COLUMN id SET DEFAULT nextval('twitch.channels_id_seq'::regclass);
+ALTER TABLE ONLY ucubebot.channels ALTER COLUMN id SET DEFAULT nextval('ucubebot.channels_id_seq'::regclass);
+ALTER TABLE ONLY vlive.followers ALTER COLUMN id SET DEFAULT nextval('vlive.followers_id_seq'::regclass);
 ALTER TABLE ONLY weverse.channels ALTER COLUMN id SET DEFAULT nextval('weverse.channels_id_seq'::regclass);
+ALTER TABLE ONLY weversebot.channels ALTER COLUMN id SET DEFAULT nextval('weversebot.channels_id_seq'::regclass);
 ALTER TABLE ONLY youtube.links ALTER COLUMN id SET DEFAULT nextval('youtube.links_id_seq'::regclass);
 ALTER TABLE ONLY youtube.views ALTER COLUMN id SET DEFAULT nextval('youtube.views_id_seq'::regclass);
 ALTER TABLE ONLY archive.channellist
@@ -1214,6 +1287,8 @@ ALTER TABLE ONLY groupmembers.member
     ADD CONSTRAINT member_pkey PRIMARY KEY (id);
 ALTER TABLE ONLY groupmembers.restricted
     ADD CONSTRAINT restricted_pkey PRIMARY KEY (channelid);
+ALTER TABLE ONLY groupmembers.sendidolphotos
+    ADD CONSTRAINT sendidolphotos_pkey PRIMARY KEY (channelid);
 ALTER TABLE ONLY groupmembers.subfolders
     ADD CONSTRAINT subfolders_pkey PRIMARY KEY (id);
 ALTER TABLE ONLY groupmembers.unregisteredgroups
@@ -1268,7 +1343,15 @@ ALTER TABLE ONLY twitch.channels
     ADD CONSTRAINT channels_pkey PRIMARY KEY (id);
 ALTER TABLE ONLY twitch.guilds
     ADD CONSTRAINT guilds_pkey PRIMARY KEY (guildid);
+ALTER TABLE ONLY twitter.mediauploaded
+    ADD CONSTRAINT mediauploaded_pkey PRIMARY KEY (imageid);
+ALTER TABLE ONLY ucubebot.channels
+    ADD CONSTRAINT channels_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY vlive.followers
+    ADD CONSTRAINT followers_pkey PRIMARY KEY (id);
 ALTER TABLE ONLY weverse.channels
+    ADD CONSTRAINT channels_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY weversebot.channels
     ADD CONSTRAINT channels_pkey PRIMARY KEY (id);
 ALTER TABLE ONLY youtube.links
     ADD CONSTRAINT links_pkey PRIMARY KEY (id);

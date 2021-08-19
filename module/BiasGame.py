@@ -6,19 +6,17 @@ from IreneUtility.util import u_logger as log
 from IreneUtility.Utility import Utility
 
 
-def check_user_in_support_server():
-    """Decorator for checking if a user is in the support server"""
-    def predicate(ctx):
-        return ctx.cog.ex.check_user_in_support_server(ctx)
-    return commands.check(predicate)
-
-
 # noinspection PyPep8
 class BiasGame(commands.Cog):
     def __init__(self, t_ex):
         self.ex: Utility = t_ex
 
-    @check_user_in_support_server()
+    async def cog_check(self, ctx):
+        """A local check for this cog. Checks if the user is in the support server."""
+        if ctx.invoked_with and ctx.invoked_with == 'help':
+            return True
+        return await self.ex.check_user_in_support_server(ctx)
+
     @commands.command(aliases=['bg'])
     async def biasgame(self, ctx, gender="all", bracket_size=8):
         """
@@ -75,17 +73,25 @@ class BiasGame(commands.Cog):
         """
         if not user:
             user = ctx.author
-        user_wins = await self.ex.conn.fetch(
-            "SELECT idolid, wins FROM biasgame.winners WHERE userid = $1 ORDER BY WINS DESC LIMIT $2", user.id, 15)
-        if user_wins:
-            msg_string = await self.ex.get_msg(user.id, 'biasgame', 'lb_title', ['name', user.display_name])
+        user_wins = await self.ex.sql.s_biasgame.fetch_user_wins(user.id)
+        if not user_wins:
+            return await ctx.send(await self.ex.get_msg(user.id, 'biasgame', 'no_wins', ['name', user.display_name]))
 
-            counter = 1
-            for idol_id, wins in user_wins:
-                await asyncio.sleep(0)
-                member = await self.ex.u_group_members.get_member(idol_id)
-                msg_string += f"{counter}) {member.full_name} ({member.stage_name}) -> {wins} Win(s).\n"
-                counter += 1
-        else:
-            msg_string = await self.ex.get_msg(user.id, 'biasgame', 'no_wins', ['name', user.display_name])
-        await ctx.send(msg_string)
+        title = await self.ex.get_msg(user.id, 'biasgame', 'lb_title', ['name', user.display_name])
+        embed_list = []
+        msg_string = ""
+        for counter, idol_win_info in enumerate(user_wins, 1):
+            await asyncio.sleep(0)
+            idol_id = idol_win_info[0]
+            wins = idol_win_info[1]
+            member = await self.ex.u_group_members.get_member(idol_id)
+            msg_string += f"{counter}) {member.full_name} ({member.stage_name}) -> {wins} Win(s).\n"
+            if counter % 15 == 0:
+                embed_list.append(await self.ex.create_embed(title=title, title_desc=msg_string))
+                msg_string = ""
+
+        if msg_string:
+            embed_list.append(await self.ex.create_embed(title=title, title_desc=msg_string))
+        msg = await ctx.send(embed=embed_list[0])
+        if len(embed_list) > 1:
+            await self.ex.check_left_or_right_reaction_embed(msg, embed_list)

@@ -1,9 +1,12 @@
-import IreneUtility.Base
+from typing import List, Dict
 import dbl
+import discord.ext.commands
+from discord.ext.tasks import Loop
 import module
 from IreneUtility.Utility import Utility
 from IreneUtility.util import u_logger as log
-
+import importlib  # used for reloading packages or modules.
+from sys import modules as system_module  # used for getting references to modules.
 
 ex: Utility = Utility(keys=module.keys.keys_obj, d_py_client=module.keys.keys_obj.client,
                       aiohttp_session=module.keys.keys_obj.client_session)
@@ -13,70 +16,30 @@ class Irene:
     """
     Startup Client for Irene.
 
-    We are not subclassing an AutoShardedClient, but will rather define it directly in keys.
+    We are not subclassing an AutoShardedClient, but will rather define it directly in the keys module.
     """
+
     def __init__(self):
-        # Set to True if running a test bot (AKA DEV MODE) .
-        ex.test_bot = True
-        # Set to True if not on the production server (useful if ex.test_bot as False).
-        # This was initially created to not flood datadog with incorrect input while ex.test_bot was False
-        ex.dev_mode = True
-        # Set to True if you want the bot to upload its images from host rather than using url.
-        ex.upload_from_host = False
-        # Set to True if you need the db structure created.
-        ex.create_db_structure = False
-        # Set to True if you intend to have announcement text channels on the support server and would like
-        # the weverse updates command to be private only to the bot owner.
-        ex.weverse_announcements = False
-        # Set to False if you do not want the cache to reset itself every 12 hours.
-        ex.reset_cache = False
+        self.define_start_up_criteria(test_bot=True, dev_mode=True, upload_from_host=False, reset_cache=False)
+        # Whether to Run Twitter
+        self.run_twitter_uploads = not ex.test_bot
 
-        # define the modules for reuse
-        self.miscellaneous = module.Miscellaneous.Miscellaneous(ex)
-        self.twitter = module.Twitter.Twitter(ex)
-        self.currency = module.Currency.Currency(ex)
-        self.blackjack = module.BlackJack.BlackJack(ex)
-        self.youtube = module.Youtube.Youtube(ex)
-        self.groupmembers = module.GroupMembers.GroupMembers(ex)
-        self.archive = module.Archive.Archive(ex)
-        self.moderator = module.Moderator.Moderator(ex)
-        self.profile = module.Profile.Profile(ex)
-        self.help = module.Help.Help(ex)
-        self.logging = module.Logging.Logging(ex)
-        self.music = module.Music.Music(ex)
-        self.botmod = module.BotMod.BotMod(ex)
-        self.events = module.events.Events(ex)
-        self.lastfm = module.LastFM.LastFM(ex)
-        self.interactions = module.Interactions.Interactions(ex)
-        self.wolfram = module.Wolfram.Wolfram(ex)
-        self.guessinggame = module.GuessingGame.GuessingGame(ex)
-        self.customcommands = module.CustomCommands.CustomCommands(ex)
-        self.biasgame = module.BiasGame.BiasGame(ex)
-        self.weverse = module.Weverse.Weverse(ex)
-        self.selfassignroles = module.SelfAssignRoles.SelfAssignRoles(ex)
-        self.reminder = module.Reminder.Reminder(ex)
-        self.twitch = module.Twitch.Twitch(ex)
-        self.botowner = module.BotOwner.BotOwner(ex)
-        self.unscramble = module.UnScramble.UnScramble(ex)
-        # self.gacha = module.Gacha.Gacha()
-        self.status = module.status.Status(ex)  # not a command cog
-        self.blocking_monitor = module.blockingcog.BlockingMonitor(ex)
+        self.cog_names = ["miscellaneous", "twitter", "currency", "blackjack", "youtube", "groupmembers",
+                          "moderator", "profile", "help", "logging", "botmod", "events", "lastfm", "interactions",
+                          "wolfram", "guessinggame", "customcommands", "biasgame", "selfassignroles",
+                          "reminder", "twitch", "botowner", "unscramble", "vlive", "music", "blocking_monitor",
+                          "data_mod",  "status"]
 
-        self.cogs = [self.miscellaneous, self.twitter, self.currency, self.blackjack, self.youtube, self.groupmembers,
-                     self.archive, self.moderator, self.profile, self.help, self.logging, self.music, self.botmod,
-                     self.events, self.lastfm, self.interactions, self.wolfram, self.guessinggame, self.customcommands,
-                     self.biasgame, self.weverse, self.selfassignroles, self.reminder, self.twitch,
-                     self.botowner, self.unscramble, self.blocking_monitor]
+        # define the cogs & modules for reuse
+        self.cogs = {}
+        self.set_cogs()
 
-        # Modules/Cogs that contain 'ex' (Utility) and the 'conn' (DB connection).
-        # AKA -> Classes that are have inherited IreneUtility.Base.Base()
-        self.base_modules: [IreneUtility.Base.Base] = self.cogs + [self.status]
+        self.loops: Dict[str, List[Loop]] = {}  # Contains dict of loops that may be started/stopped {cog_name: [Loops]}
 
     def run(self):
         """Start the bot."""
         # should define the needed properties of Utility before anything else.
-        ex.define_unique_properties(weverse=True, data_dog=True, twitter=True, db_connection=True,
-                                    base_modules=self.base_modules, events=self.events)
+        self.define_utility_properties()
 
         # start the connection to the bot
         if ex.test_bot:
@@ -84,21 +47,90 @@ class Irene:
         else:
             self.run_live_bot()
 
+    @staticmethod
+    def get_cog_classes() -> dict:
+        """Will get classes for the modules/cogs for fresh imports. This is very important for hot-reloading."""
+        import module  # needs to be reimported for future hot-reloading.
+        return {
+            "miscellaneous": module.Miscellaneous.Miscellaneous,
+            "twitter": module.Twitter.Twitter,
+            "currency": module.Currency.Currency,
+            "blackjack": module.BlackJack.BlackJack,
+            "groupmembers": module.GroupMembers.GroupMembers,
+            "moderator": module.Moderator.Moderator,
+            "profile": module.Profile.Profile,
+            "help": module.Help.Help,
+            "logging": module.Logging.Logging,
+            "botmod": module.BotMod.BotMod,
+            "events": module.events.Events,
+            "lastfm": module.LastFM.LastFM,
+            "interactions": module.Interactions.Interactions,
+            "wolfram": module.Wolfram.Wolfram,
+            "guessinggame": module.GuessingGame.GuessingGame,
+            "customcommands": module.CustomCommands.CustomCommands,
+            "biasgame": module.BiasGame.BiasGame,
+            "selfassignroles": module.SelfAssignRoles.SelfAssignRoles,
+            "reminder": module.Reminder.Reminder,
+            "twitch": module.Twitch.Twitch,
+            "botowner": module.BotOwner.BotOwner,
+            "unscramble": module.UnScramble.UnScramble,
+            "vlive": module.Vlive.Vlive,
+            "music": module.Music.Music,
+            "blockingmonitor": module.blockingmonitor.BlockingMonitor,
+            "datamod": module.DataMod.DataMod,
+            "status": module.status.Status,
+            # "gacha":  module.Gacha.Gacha
+        }
+
+    def set_cogs(self, specific_cog_name=None):
+        """Set Cogs
+
+        :param specific_cog_name: Cog Name to specifically update.
+        """
+        for key, value in self.get_cog_classes().items():
+            if specific_cog_name and key != specific_cog_name:
+                continue
+
+            if key == "botowner":
+                self.cogs[key] = value(ex, self)
+            else:
+                self.cogs[key] = value(ex)
+
+        if specific_cog_name:
+            return self.cogs.get(specific_cog_name)
+
+    def define_utility_properties(self):
+        """Defines essential attributes and properties for the Utility lib."""
+        ex.define_unique_properties(data_dog=True, twitter=True, db_connection=True, events=self.cogs.get("events"))
+
     def run_live_bot(self):
         """Run Production Ver. of the the bot."""
         # set top.gg client
         module.keys.keys_obj.top_gg = dbl.DBLClient(ex.client, module.keys.keys_obj.top_gg_key, autopost=True)
         self.start_up()
-        self.start_loops(run_twitter=True)
+        self.start_loops()
         ex.client.run(module.keys.keys_obj.client_token)
 
     def run_test_bot(self):
         """Run Test Ver. of the the bot."""
         self.start_up()
         # background loops are optional with test bot.
-        self.start_loops(run_weverse=False, run_twitter=False)
+        self.start_loops()
         log.console("--TEST BOT--")
         ex.client.run(module.keys.keys_obj.test_client_token)
+
+    @staticmethod
+    def define_start_up_criteria(test_bot=False, dev_mode=False, upload_from_host=True, reset_cache=False):
+        """Settings for running the bot."""
+        # Set to True if running a test bot (Not equivalent to dev mode).
+        ex.test_bot = test_bot
+        # Set to True if not on the production server (useful if ex.test_bot is False).
+        # This was initially created to not flood datadog with incorrect input while ex.test_bot was False
+        ex.dev_mode = dev_mode
+        # Set to True if you want the bot to upload its images from host rather than using url.
+        ex.upload_from_host = upload_from_host
+        # Set to False if you do not want the cache to reset itself every 12 hours.
+        ex.reset_cache = reset_cache
 
     def start_up(self):
         # Add all cogs
@@ -111,56 +143,148 @@ class Irene:
         # For Debugging
         # module.log.debug()
 
-    def start_loops(self, run_weverse=True, run_twitter=True):
+    def reload(self):
+        """Will hot reload all of IreneBot, IreneUtility, and any other self-made packages."""
+        # we want to reload the cogs first because we want to make sure the loops are updated before creating new ones
+        # in reload_utility.
+        self.stop_loops()  # stop all loops.
+
+        for cog in self.cogs.values():
+            print(cog)
+            self.reload_cog(cog)
+
+        self.reload_utility()
+
+    def reload_utility(self):
+        """Reloads the utility package for the bot."""
+
+        # First lets save the data of
+        import IreneUtility
+        importlib.reload(IreneUtility)
+
+        self.stop_loops(safe_cancel=False)  # we need all loops to stop.
+
+        global ex
+        ex = Utility(keys=module.keys.keys_obj, d_py_client=module.keys.keys_obj.client,
+                     aiohttp_session=module.keys.keys_obj.client_session)
+        self.define_utility_properties()
+
+        # we only need to replace the Utility object in every Base object that uses it.
+        for cog in self.cogs.values():
+            cog.ex = ex
+
+        # cache will be reset when starting loops.
+        self.start_loops()  # we can start loops again.
+
+    def reload_cogs(self):
+        """Reloads all cogs."""
+        for cog in self.cogs.values():
+            self.reload_cog(cog)
+
+    def reload_cog(self, cog: discord.ext.commands.Cog):
+        """Reload a cog."""
+        # The reason we can use __module__ to extract the exact dot path in this case is
+        # because the cogs/modules were created in this class.
+        file_dot_path = cog.__module__
+        module_to_reload = system_module[file_dot_path]  # sys.modules
+        importlib.reload(module_to_reload)
+
+        # d.py's concept of extensions do not fit what we are looking for in this bot in regards to
+        # having a third party utility package, so we will reload it ourselves.
+        # this is also why none of our modules have setup functions.
+        ex.client.remove_cog(cog.qualified_name)
+
+        new_cog = self.set_cogs(cog.qualified_name.lower())
+
+        try:
+            ex.client.add_cog(new_cog)
+        except Exception as e:
+            log.console(f"Failed to add Cog {cog} (Exception) - {e}", self.reload_cog)
+
+        self.start_loops(cog_name=cog.qualified_name.lower())
+
+    def reset_loops(self, cog_name: str = None):
+        # [[cog name, [loops]]]
+        loop_lists = [
+            ["database", [ex.u_database.show_irene_alive]],
+            ["cache", [ex.u_cache.update_patron_and_guild_cache, ex.u_cache.update_cache,
+                       ex.u_cache.send_cache_data_to_data_dog]],
+            ["vlive", [self.cogs["vlive"].vlive_notification_updates]],
+            ["groupmembers", [self.cogs["groupmembers"].send_idol_photo_loop]],
+            ["status", [self.cogs["status"].change_bot_status_loop]],
+            ["twitch", [self.cogs["twitch"].twitch_updates]],
+            ["reminder", [self.cogs["reminder"].reminder_loop]],
+            ["twitter", [self.cogs["twitter"].twitter_notification_updates]],
+        ]
+
+        for loop_list in loop_lists:
+            list_cog_name = loop_list[0]
+
+            if cog_name and list_cog_name.lower() != cog_name.lower():
+                continue
+
+            self.loops[list_cog_name.lower()] = loop_list[1]
+
+            twitter_cog_name_check = True if not cog_name else cog_name.lower() == "twitter"
+
+            if (list_cog_name.lower() == "twitter" and self.run_twitter_uploads) and twitter_cog_name_check:
+                self.loops["twitter"].append(self.cogs["twitter"].send_photos_to_twitter)
+
+    def start_loops(self, cog_name: str = None):
         """Start Loops (Optional)"""
-        # Start checking for Weverse Updates
-        if run_weverse:
-            self.weverse.weverse_updates.start()
-        # Check for Reminders
-        self.reminder.reminder_loop.start()
-        # Check if twitch channels go live and send the announcements to discord channels.
-        self.twitch.twitch_updates.start()
-        # Start Automatic Youtube Scrape Loop
-        ex.cache.main_youtube_instance = module.Youtube.YoutubeLoop(ex)
-        ex.cache.main_youtube_instance.loop_youtube_videos.start()
-        # Start Status Change Loop
-        self.status.change_bot_status_loop.start()
-        # Start Voice Client Loop
-        self.music.check_voice_clients.start()
-        # Start Idol Posting to text channels that requested it after t time.
-        self.groupmembers.send_idol_photo_loop.start()
-        # Start Automatic Twitter Posts
-        if run_twitter:
-            self.twitter.send_photos_to_twitter.start()
-        # Update Cache Every 12 hours
-        ex.u_cache.update_cache.start()
-        # Start a loop that sends cache information to DataDog.
-        ex.u_cache.send_cache_data_to_data_dog.start()
-        # after intents was pushed in place, d.py cache loaded a lot slower and patrons are not added properly.
-        # therefore patron cache must be looped instead.
-        ex.u_cache.update_patron_and_guild_cache.start()
-        # Send Packets to localhost:5123 to show Irene is alive. This is meant for auto restarting Irene
-        # This feature is essential in case of any overload or crashes by external sources.
-        # This also avoids having to manually restart Irene.
-        ex.u_database.show_irene_alive.start()
+        self.stop_loops(safe_cancel=False, cog_name=cog_name)  # stop the loops just incase.
+        self.reset_loops(cog_name=cog_name)
+        for loop_cog_name, loop_list in self.loops.items():
+            if cog_name and loop_cog_name.lower() != cog_name.lower():
+                continue
+            for loop in loop_list:
+                log.useless(f"Starting Loop: {loop} -> Cog Name: {cog_name}", method=self.start_loops)
+                try:
+                    loop.start()
+                except Exception as e:
+                    log.console(f"{e} (Exception)", self.start_loops)
+
+    def stop_loops(self, safe_cancel=False, cog_name: str = None):
+        """Stop all loops.
+
+        :param safe_cancel: (bool) Whether to cancel a loop safely or not.
+        :param cog_name: (str) The cog name to stop loops for.
+        """
+        for loop_cog_name, loop_list in self.loops.items():
+            if cog_name and loop_cog_name.lower() != cog_name.lower():
+                continue
+
+            for loop in loop_list:
+                if loop.is_running():
+                    log.useless(f"Stopping Loop: {loop} -> Cog Name: {cog_name}", method=self.stop_loops)
+                    try:
+                        loop.cancel() if not safe_cancel else loop.stop()
+                    except Exception as e:
+                        log.console(f"{e} (Exception)", self.start_loops)
 
     def add_listeners(self):
         """Add Listener Events."""
-        module.keys.keys_obj.client.add_listener(self.groupmembers.idol_photo_on_message, 'on_message')
-        module.keys.keys_obj.client.add_listener(self.archive.on_message, 'on_message')
-        module.keys.keys_obj.client.add_listener(self.logging.on_message_log, 'on_message')
-        module.keys.keys_obj.client.add_listener(self.logging.logging_on_message_edit, 'on_message_edit')
-        module.keys.keys_obj.client.add_listener(self.logging.logging_on_message_delete, 'on_message_delete')
-        module.keys.keys_obj.client.add_listener(self.miscellaneous.on_message_user_notifications, 'on_message')
-        module.keys.keys_obj.client.add_listener(self.botmod.mod_mail_on_message, 'on_message')
-        module.keys.keys_obj.client.add_listener(self.customcommands.process_custom_commands, 'on_message')
-        module.keys.keys_obj.client.add_listener(self.profile.increase_profile_level, 'on_message')
+        on_message_events = [self.cogs["groupmembers"].idol_photo_on_message,
+                             self.cogs["logging"].on_message_log,
+                             self.cogs["miscellaneous"].on_message_user_notifications,
+                             self.cogs["botmod"].mod_mail_on_message,
+                             self.cogs["customcommands"].process_custom_commands,
+                             self.cogs["profile"].increase_profile_level]
+        on_edit_events = [self.cogs["logging"].logging_on_message_edit]
+        on_delete_events = [self.cogs["logging"].logging_on_message_delete]
+
+        for method in on_message_events:
+            module.keys.keys_obj.client.add_listener(method, 'on_message')
+        for method in on_edit_events:
+            module.keys.keys_obj.client.add_listener(method, 'on_message_edit')
+        for method in on_delete_events:
+            module.keys.keys_obj.client.add_listener(method, 'on_message_delete')
 
     def add_cogs(self):
         """Add the cogs to the bot client."""
-        for cog in self.cogs:
+        for cog in self.cogs.values():
             ex.client.add_cog(cog)
-            log.console(f"Loaded Module {cog.__class__.__name__}.")
+            log.console(f"Loaded Cog {cog.__class__.__name__}.")
 
 
 if __name__ == '__main__':

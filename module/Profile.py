@@ -19,6 +19,10 @@ class Profile(commands.Cog):
 
     @commands.command()
     async def avatar(self, ctx, user: discord.Member = None):
+        """View a member's avatar.
+
+        [Format: %avatar [@user]]
+        """
         try:
             if not user:
                 user_id = ctx.author.id
@@ -33,6 +37,10 @@ class Profile(commands.Cog):
 
     @commands.command()
     async def profile(self, ctx, user: discord.Member = None):
+        """View a member's profile.
+
+        [Format: %profile [@user]]
+        """
         try:
             if not user:
                 user_id = ctx.author.id
@@ -65,9 +73,12 @@ class Profile(commands.Cog):
             shortened_money = await irene_user.get_shortened_balance()
             rob_beg_daily_level = f"{irene_user.rob_level}/{irene_user.beg_level}/{irene_user.daily_level}"
 
-            user_scores = f"{await self.ex.u_guessinggame.get_user_score('easy', user_id)}/" \
+            gg_user_scores = f"{await self.ex.u_guessinggame.get_user_score('easy', user_id)}/" \
                 f"{await self.ex.u_guessinggame.get_user_score('medium', user_id)}/" \
                 f"{await self.ex.u_guessinggame.get_user_score('hard', user_id)}"
+            us_user_scores = f"{await self.ex.u_unscramblegame.get_user_score('easy', user_id)}/" \
+                             f"{await self.ex.u_unscramblegame.get_user_score('medium', user_id)}/" \
+                             f"{await self.ex.u_unscramblegame.get_user_score('hard', user_id)}"
             user_timezone = await self.ex.u_reminder.get_user_timezone(user_id)
 
             try:
@@ -108,7 +119,8 @@ class Profile(commands.Cog):
             if user_timezone:
                 embed.add_field(name="Timezone", value=f"{user_timezone} ({timezone_utc})", inline=True)
 
-            embed.add_field(name="GuessingGame [Easy/Medium/Hard]", value=user_scores, inline=True)
+            embed.add_field(name="GuessingGame [Easy/Medium/Hard]", value=gg_user_scores, inline=True)
+            embed.add_field(name="UnscrambleGame [Easy/Medium/Hard]", value=us_user_scores, inline=True)
 
             await ctx.send(embed=embed)
 

@@ -74,7 +74,7 @@ class Wolfram(commands.Cog):
                                     sub_pod_result = f"**{sub_pod_result}**"
                                 results.append(sub_pod_result)
                         except Exception as e:
-                            log.useless(f"{e} (Exception) - Failed to go through a weverse pod", method=self.w)
+                            log.useless(f"{e} (Exception) - Failed to go through a wolfram pod", method=self.w)
 
                 if not results:
                     return await ctx.send(f"> **{ctx.author.display_name}, I could not find an answer to that.**")

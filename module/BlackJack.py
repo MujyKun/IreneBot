@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 from IreneUtility.Utility import Utility
+from IreneUtility.util import u_logger as log
 
 
 # noinspection PyPep8
@@ -85,6 +86,8 @@ class BlackJack(commands.Cog):
         blackjack_game.second_player_bet = bet
         blackjack_game.second_player_ctx = ctx
         await blackjack_game.process_game()  # start the blackjack game.
+        await self.ex.stop_game(ctx, self.ex.cache.blackjack_games)
+        log.console(f"Ended BlackJack Game in {ctx.channel.id}")
 
     @commands.command()
     async def stopbj(self, ctx):
@@ -98,7 +101,6 @@ class BlackJack(commands.Cog):
             # user is not in a game.
             return await ctx.send(await self.ex.get_msg(ctx, "blackjack", "not_in_game",
                                                         ["name", ctx.author.display_name]))
-
         # find the game and end it.
         blackjack_game = await self.ex.u_blackjack.find_game(user)
         if blackjack_game:
@@ -113,20 +115,10 @@ class BlackJack(commands.Cog):
     async def rules(self, ctx):
         """View the rules of BlackJack."""
         server_prefix = await self.ex.get_server_prefix(ctx)
-        msg = f"""Each Player gets 2 cards at the start.\n
-        In order to get blackjack, your final value must equal 21.\n
-        If Player1 exceeds 21 and Player2 does not, Player1 busts and Player2 wins the game.\n
-        You will have two options.\n
-        The first option is to `hit`, which means to grab another card.\n
-        The second option is to `stand` to finalize your deck.\n
-        If both players bust, Player closest to 21 wins!\n
-        Number cards are their face values.\n
-        Aces can be 1 or 11 depending on the situation you're in.\n
-        Jack, Queen, and King are all worth 10.\n
-        If you go over 35 points, the bot will automatically stand you.\n
-        MOST IMPORTANTLY!!! DO NOT peek at your opponent's cards or points!\n
-        """
-        embed = discord.Embed(title="BlackJack Rules", description=msg)
+        msg = await self.ex.get_msg(ctx, "blackjack", "rules")
+        embed_title = await self.ex.get_msg(ctx, "blackjack", "rules_title")
+        embed_footer = await self.ex.get_msg(ctx, "blackjack", "rules_footer", ["server_prefix", server_prefix])
+        embed = discord.Embed(title=embed_title, description=msg)
         embed = await self.ex.set_embed_author_and_footer(
-            embed, f"{server_prefix}help BlackJack for the available commands.")
+            embed, embed_footer)
         await ctx.send(embed=embed)

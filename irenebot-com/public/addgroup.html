@@ -16,10 +16,10 @@
         <label for="disbanddate">Disband Date:</label><br>
         <input type="date" id="disbanddate" name="Disband Date"><br>
 
-        <label for="gender">Gender:</label><br>
-        <input type="radio" id="gender" name="Gender" value="m" required>Male<br>
-        <input type="radio" id="gender" name="Gender" value="f" required>Female<br>
-        <input type="radio" id="gender" name="Gender" value="mixed" required>Mixed<br>
+        <label for="male">Gender:</label><br>
+        <input type="radio" id="male" name="Gender" value="m" required>Male<br>
+        <input type="radio" id="female" name="Gender" value="f" required>Female<br>
+        <input type="radio" id="mixed" name="Gender" value="mixed" required>Mixed<br>
 
         <label for="description">Description:</label><br>
         <textarea id="description" name="Description" cols="50" rows="5"></textarea><br>
@@ -69,9 +69,9 @@
         <label for="tags">Tags [If unsure, just put kpop, separate by commas]:</label><br>
         <input type="text" id="tags" name="Tags" value="kpop"><br>
 
-        <label for="notes">Notes:</label><br>
-        <textarea id="notes" name="Approver Notes" cols="50" rows="5" placeholder="Any notes you have for the person reviewing this."></textarea><br>
-        
+        <label for="aliases">Aliases [separate by commas, do not put spaces before or after commas.]:</label><br>
+        <input type="text" id="aliases" name="Aliases" value="" placeholder="irene,bae joo hyun,bae joo-hyun"><br>
+
         <br>
         <strong>After clicking submit, copy the JSON you see on the screen and paste it on discord under the command %addgroup.</strong><br>
         <input type="submit" value="Submit">

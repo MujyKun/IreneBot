@@ -121,6 +121,9 @@ class Twitch(commands.Cog):
     @tasks.loop(seconds=0, minutes=1, hours=0, reconnect=True)
     async def twitch_updates(self):
         """Process for checking for Twitch channels that are live and sending to discord channels."""
+        if not self.ex.irene_cache_loaded:
+            return
+
         try:
             if not self.ex.twitch_token:
                 await self.ex.u_twitch.reset_twitch_token()

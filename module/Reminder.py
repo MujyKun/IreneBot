@@ -210,6 +210,8 @@ class Reminder(commands.Cog):
     @tasks.loop(seconds=5, minutes=0, hours=0, reconnect=True)
     async def reminder_loop(self):
         """Process for checking for reminders and sending them out if they are past overdue."""
+        while not self.ex.irene_cache_loaded:
+            await asyncio.sleep(1)
         try:
             # we do not want dictionary to change size during iteration, so we will make a copy.
             users_copy = self.ex.cache.users.copy()

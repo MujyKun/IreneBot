@@ -1,0 +1,1935 @@
+{
+  "BlackJack": {
+    "blackjack": {
+      "description": "开始黑杰克游戏。",
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "bj"
+      ]
+    },
+    "stopbj": {
+      "description": "结束当前的黑杰克游戏。",
+      "example_image_url": null,
+      "syntax": "%blackjack [bet=0]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "joingame": {
+      "description": "加入已有的黑杰克游戏。",
+      "example_image_url": null,
+      "syntax": "%joingame <opponent> [bet=0]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "jg"
+      ]
+    },
+    "rules": {
+      "description": "查看黑杰克的规则。",
+      "example_image_url": null,
+      "syntax": "%rules",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    }
+  },
+  "BotMod": {
+    "addinteraction": {
+      "description": "将一个GIF添加到交互中。",
+      "example_image_url": null,
+      "syntax": "%addinteraction <interaction_type> <link1,link2,...>",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
+      "aliases": null
+    },
+    "addstatus": {
+      "description": "将bot而添加播放状态角色。",
+      "example_image_url": null,
+      "syntax": "%addstatus <status message>",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
+      "aliases": null
+    },
+    "botban": {
+      "description": "禁止用户使用 Bot。",
+      "example_image_url": null,
+      "syntax": "%botban <user id>",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
+      "aliases": null
+    },
+    "botunban": {
+      "description": "取消禁止无法使用bot的用户。",
+      "example_image_url": null,
+      "syntax": "%botunban <user id>",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
+      "aliases": null
+    },
+    "botwarn": {
+      "description": "通过Bot DM而警告用户。",
+      "example_image_url": null,
+      "syntax": "%botwarn <user> [reason]",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
+      "aliases": null
+    },
+    "closedm": {
+      "description": "关闭私信",
+      "example_image_url": null,
+      "syntax": "%closedm [user id]",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
+      "aliases": null
+    },
+    "createdm": {
+      "description": "以机器人作为中间人，在您和用户之间创建一个DM。",
+      "example_image_url": null,
+      "syntax": "%createdm <user id>",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
+      "aliases": null
+    },
+    "deletegroup": {
+      "description": "删除组",
+      "example_image_url": null,
+      "syntax": "%deletegroup <group id>",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
+      "aliases": null
+    },
+    "deleteidol": {
+      "description": "删除明星。",
+      "example_image_url": null,
+      "syntax": "%deleteidol <idol id>",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
+      "aliases": null
+    },
+    "deleteinteraction": {
+      "description": "从交互中删除 URL。",
+      "example_image_url": null,
+      "syntax": "%deleteinteraction <urls>",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
+      "aliases": null,
+      "note": "以逗号分隔 URL"
+    },
+    "fixlinks": {
+      "description": "修复无效的缩略图明星/组的个人资料图片/横幅，并将它们放在主机上。",
+      "example_image_url": null,
+      "syntax": "%fixlinks",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Owner"
+      ],
+      "aliases": null
+    },
+    "getstatuses": {
+      "description": "列出机器人的所有状态。",
+      "example_image_url": null,
+      "syntax": "%getstatuses",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
+      "aliases": null
+    },
+    "kill": {
+      "description": "击杀机器人。",
+      "example_image_url": null,
+      "syntax": "%kill",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
+      "aliases": null
+    },
+    "killapi": {
+      "description": "击杀API。",
+      "example_image_url": null,
+      "syntax": "%killapi",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
+      "aliases": null
+    },
+    "maintenance": {
+      "description": "启用维护模式",
+      "example_image_url": null,
+      "syntax": "%maintenance",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
+      "aliases": null
+    },
+    "mergeidol": {
+      "description": "合并一个重复的明星和原生的明星。",
+      "example_image_url": null,
+      "syntax": "%mergeidol <original_idol_id> <duplicate_idol_id>",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
+      "aliases": null
+    },
+    "mergegroup": {
+      "description": "将重复的组与原组合并。",
+      "example_image_url": null,
+      "syntax": "%mergegroup <original_group_id> <duplicate_group_id>",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
+      "aliases": null
+    },
+    "moveto": {
+      "description": "将图像移动到另一个明星位置。",
+      "example_image_url": null,
+      "syntax": "%moveto <idol_id> <link>",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
+      "aliases": null
+    },
+    "removestatus": {
+      "description": "移除基于其索引的播放状态。",
+      "example_image_url": null,
+      "syntax": null,
+      "example_syntax": "%removestatus <status index>",
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
+      "aliases": null
+    }
+  },
+  "BiasGame": {
+    "biasgame": {
+      "description": "在当前频道开始一局Bias游戏。",
+      "example_image_url": null,
+      "syntax": "%biasgame [gender=Male/Female/All] [bracket_size=4/8/16/32]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "bg"
+      ]
+    },
+    "stopbg": {
+      "description": "立刻结束一局Bias游戏。",
+      "example_image_url": null,
+      "syntax": "%stopbg",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Host",
+        "Manage Messages"
+      ],
+      "aliases": null
+    },
+    "listbg": {
+      "description": "列出用户 Bias游戏排行榜。",
+      "example_image_url": null,
+      "syntax": "%listbg [user]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    }
+  },
+  "BlockingManager": {
+    "bmon start": {
+      "description": "启动黑名单管理员。",
+      "example_image_url": null,
+      "syntax": "%bmon start",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Owner"
+      ],
+      "aliases": null
+    },
+    "bmon stop": {
+      "description": "关闭阻止管理员。",
+      "example_image_url": null,
+      "syntax": "%bmon stop",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Owner"
+      ],
+      "aliases": null
+    }
+  },
+  "Currency": {
+    "balance": {
+      "description": "查看用户余额。",
+      "example_image_url": null,
+      "syntax": "%balance [member]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "b",
+        "bal",
+        "$"
+      ]
+    },
+    "beg": {
+      "description": "向无家可归的人乞讨钱。",
+      "example_image_url": null,
+      "syntax": "%beg",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "bet": {
+      "description": "赌钱。",
+      "example_image_url": null,
+      "syntax": "%bet <amount>",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "daily": {
+      "description": "获取每日奖励。",
+      "example_image_url": null,
+      "syntax": "%daily",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "give": {
+      "description": "馈赠给用户钱。",
+      "example_image_url": null,
+      "syntax": "%give <member> <amount>",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "leaderboard": {
+      "description": "显示最高级的10位用户全国排行榜。",
+      "example_image_url": null,
+      "syntax": "%leaderboard [mode=server/global]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "lb",
+        "leaderboards"
+      ]
+    },
+    "rob": {
+      "description": "向为用户抢钱。",
+      "example_image_url": null,
+      "syntax": "%rob <member>",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "rps": {
+      "description": "和bot玩一局石头剪刀布。",
+      "example_image_url": null,
+      "syntax": "%rps <rock/paper/scissors> [amount to bet=0]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "rockpaperscissors"
+      ]
+    },
+    "upgrade": {
+      "description": "升级命令。",
+      "example_image_url": null,
+      "syntax": "%upgrade <rob/daily/beg>",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "levelup"
+      ]
+    }
+  },
+  "CustomCommands": {
+    "createcommand": {
+      "description": "创建自定义角色。",
+      "example_image_url": null,
+      "syntax": "%createcommand <command name> <message>",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": [
+        "addcommand"
+      ]
+    },
+    "deletecommand": {
+      "description": "输入自定义命令。",
+      "example_image_url": null,
+      "syntax": "%deletecommand <command name>",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": [
+        "removecommand"
+      ]
+    },
+    "listcommands": {
+      "description": "列出服务器所有自定义命令。",
+      "example_image_url": null,
+      "syntax": "%listcommands",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    }
+  },
+  "GroupMembers": {
+    "aliases": {
+      "description": "Lists the aliases of Idols/Groups that have one.",
+      "example_image_url": null,
+      "syntax": "%aliases [Idol/Group names] [page number=1]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null,
+      "note": "Underscores are spaces and commas are used to split Idol/Group names."
+    },
+    "card": {
+      "description": "显示偶像/群组个人资料卡。",
+      "example_image_url": null,
+      "syntax": "%card <Idol/Group ID/Name>",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "count": {
+      "description": "显示一位偶像被调用的次数。",
+      "example_image_url": null,
+      "syntax": "%count (idol name/all)",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "countleaderboard": {
+      "description": "显示偶像调用次数排行榜。",
+      "example_image_url": null,
+      "syntax": "%countleaderboard",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "clb"
+      ]
+    },
+    "countgroup": {
+      "description": "显示组拥有的照片数量。",
+      "example_image_url": null,
+      "syntax": "%countgroup <group name>",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "countmember": {
+      "description": "显示 偶像照片数量。",
+      "example_image_url": null,
+      "syntax": "%countmember <idol name/all>",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "fullnames": {
+      "description": "列出bot所应有照片的偶像全名称呼。",
+      "example_image_url": null,
+      "syntax": "%fullnames [page number/group name]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null,
+      "note": "对于机器人版主，这也将显示没有照片的偶像并显示的ID。"
+    },
+    "groups": {
+      "description": "列出机器人有明星照片的团体。",
+      "example_image_url": null,
+      "syntax": "%groups",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null,
+      "note": "对于机器人版主，这也将显示没有照片的偶像，并显示他们的ID。"
+    },
+    "members": {
+      "description": "列出机器人有照片的偶像的名字。",
+      "example_image_url": null,
+      "syntax": "%members [page number/group name]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null,
+      "note": "对于机器人版主，这也将显示没有照片的偶像并显示他们的ID。"
+    },
+    "randomidol": {
+      "description": "发布随机偶像的媒体。",
+      "example_image_url": null,
+      "syntax": "%randomidol",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "%"
+      ]
+    },
+    "sendidol": {
+      "description": "每隔12小时有一张偶像照片发送到文字频道。",
+      "example_image_url": null,
+      "syntax": "%sendidol [idol id] [text channel]",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": null,
+      "note": "使用没有偶像ID的命令将从频道中删除所有现有的偶像。"
+    },
+    "sendimages": {
+      "description": "让所有的偶像照片出现在一个特定的文字频道。",
+      "example_image_url": null,
+      "syntax": "%sendimages [text channel]",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": null
+    },
+    "stopimages": {
+      "description": "阻止机器人在特定的文字频道中发布偶像照片。",
+      "example_image_url": null,
+      "syntax": "%stopimages [text channel]",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": null,
+      "note": "再次输入命令以重新启用。"
+    }
+  },
+  "GuessingGame": {
+    "guessinggame": {
+      "description": "在当前频道启动一个偶像GuessingGame游戏。",
+      "example_image_url": null,
+      "syntax": "%guessinggame [gender=all] [difficulty=medium] [rounds=20] [timeout=20]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "gg"
+      ],
+      "note": "游戏的主人可以输入停止或结束来结束游戏，或输入跳过来跳过当前回合，而不影响回合数。"
+    },
+    "groupguessinggame": {
+      "description": "在当前频道中开始一个团体GuessingGame游戏。",
+      "example_image_url": null,
+      "syntax": "%groupguessinggame [gender=all] [difficulty=medium] [rounds=20] [timeout=20]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "ggg",
+        "groupgg"
+      ],
+      "note": "游戏的主人可以输入停止或结束来结束游戏，或输入跳过来跳过当前回合，而不影响回合数。"
+    },
+    "ggfilter": {
+      "description": "给您的GuessingGame添加一个过滤器。",
+      "example_image_url": null,
+      "syntax": "%ggfilter [group id/name, ...]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null,
+      "note": "只有被过滤的t团体才会出现在GuessingGame上。如果你不指定团体ID或名称，它将切换过滤器。团体的ID和名称必须用逗号分割。有一个以上单词的组名必须有一个下划线作为空格。"
+    },
+    "ggfilteredlist": {
+      "description": "查看当前已被过滤的团体。",
+      "example_image_url": null,
+      "syntax": "%ggfilteredlist",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "ggleaderboard": {
+      "description": "显示 GuessingGame 服务器/全球的排行榜。",
+      "example_image_url": null,
+      "syntax": "%ggleaderboard [difficulty=easy/medium/hard] [mode=server/global]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "gglb",
+        "ggl"
+      ]
+    },
+    "stopgg": {
+      "description": "强制结束一个GuessingGame。",
+      "example_image_url": null,
+      "syntax": "%stopgg",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Host",
+        "Manage Messages"
+      ],
+      "aliases": null
+    }
+  },
+  "Interactions": {
+    "choke": {
+      "description": "掐死一个成员。",
+      "example_image_url": null,
+      "syntax": "%choke [user]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "cuddle": {
+      "description": "楼抱一个成员。",
+      "example_image_url": null,
+      "syntax": "%cuddle [user]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "hug": {
+      "description": "拥抱一个成员。",
+      "example_image_url": null,
+      "syntax": "%hug [user]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "kiss": {
+      "description": "亲一个成员。",
+      "example_image_url": null,
+      "syntax": "%kiss [user]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "lick": {
+      "description": "舔一个成员。",
+      "example_image_url": null,
+      "syntax": "%lick [user]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "pat": {
+      "description": "轻轻的拍一个成员。",
+      "example_image_url": null,
+      "syntax": "%pat [user]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "punch": {
+      "description": "打一个成员。",
+      "example_image_url": null,
+      "syntax": "%punch [user]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "pullhair": {
+      "description": "拉扯成员的头发。",
+      "example_image_url": null,
+      "syntax": "%pullhair [user]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "slap": {
+      "description": "给一个成员一巴掌。",
+      "example_image_url": null,
+      "syntax": "%slap [user]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "spit": {
+      "description": "向一个成员吐口水。",
+      "example_image_url": null,
+      "syntax": "%spit [user]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "stab": {
+      "description": "刺伤一名成员。",
+      "example_image_url": null,
+      "syntax": "%stab [user]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "stepon": {
+      "description": "踩一名成员。",
+      "example_image_url": null,
+      "syntax": "%stepon [user]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    }
+  },
+  "Logging": {
+    "logadd": {
+      "description": "开始记录文字频道。",
+      "example_image_url": null,
+      "syntax": "%logadd [text channel]",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": null
+    },
+    "logremove": {
+      "description": "停止记录文字频道。",
+      "example_image_url": null,
+      "syntax": "%logremove [text channel]",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": null
+    },
+    "sendall": {
+      "description": "切换所有消息到日志通告。如果闭关，只发送编辑的消息。",
+      "example_image_url": null,
+      "syntax": "%sendall",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": null
+    },
+    "startlogging": {
+      "description": "开始在当前服务器和频道中发送日志信息。",
+      "example_image_url": null,
+      "syntax": "%startlogging",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": null
+    },
+    "stoplogging": {
+      "description": "停止在当前服务器上发送日志消息。",
+      "example_image_url": null,
+      "syntax": "%stoplogging",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": null
+    }
+  },
+  "Miscellaneous": {
+    "8ball": {
+      "description": "向8ball提出一个是或不是的问题。",
+      "example_image_url": null,
+      "syntax": "%8ball [question]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "8"
+      ]
+    },
+    "addnoti": {
+      "description": "每当服务器中的一个短语/词被说出来时，就会收到一个DM。",
+      "example_image_url": null,
+      "syntax": "%addnoti <phrase>",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "botinfo": {
+      "description": "显示有关机器人的一般信息。",
+      "example_image_url": null,
+      "syntax": "%botinfo",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "checkprefix": {
+      "description": "检查目前的前缀。",
+      "example_image_url": null,
+      "syntax": "%checkprefix",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null,
+      "note": "这条命令将始终以机器人的默认前缀工作。"
+    },
+    "choose": {
+      "description": "在一系列的选项中选择一个。",
+      "example_image_url": null,
+      "syntax": "%choose <options>",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null,
+      "note": "下划线用于单词之间的空格。空格用于来分隔选择。"
+    },
+    "displayemoji": {
+      "description": "以更大的尺寸显示一个表情。",
+      "example_image_url": null,
+      "syntax": "%displayemoji <emoji>",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "flip": {
+      "description": "翻一个硬币。",
+      "example_image_url": null,
+      "syntax": "%flip",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "coinflip",
+        "f"
+      ]
+    },
+    "invite": {
+      "description": "邀请链接添加机器到服务器。",
+      "example_image_url": null,
+      "syntax": "%invite",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "listnoti": {
+      "description": "列出当前服务器的所有通知短语。",
+      "example_image_url": null,
+      "syntax": "%listnoti",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "patreon": {
+      "description": "显示到Patreon的链接。",
+      "example_image_url": null,
+      "syntax": "%patreon",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "patron"
+      ]
+    },
+    "ping": {
+      "description": "显示Discord的总体延迟。",
+      "example_image_url": null,
+      "syntax": "%ping",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "pong"
+      ]
+    },
+    "random": {
+      "description": "选择一个从a到b的随机整数。",
+      "example_image_url": null,
+      "syntax": "%random <a> <b>",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "r",
+        "rand",
+        "randint"
+      ],
+      "note": "随机整数可包含b。"
+    },
+    "removenoti": {
+      "description": "在当前服务器中使用时，删除短语/单词而通知您。",
+      "example_image_url": null,
+      "syntax": "%removenoti <phrase/word>",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "deletenoti"
+      ]
+    },
+    "report": {
+      "description": "报告与bot有关的问题。",
+      "example_image_url": null,
+      "syntax": "%report <issue>",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "servercount": {
+      "description": "显示连接到 Bot 的服务器数量。",
+      "example_image_url": null,
+      "syntax": "%servercount",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "serverinfo": {
+      "description": "查看当前服务器的信息。",
+      "example_image_url": null,
+      "syntax": "%serverinfo",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "setlanguage": {
+      "description": "更改Bot当前而使用的语言。",
+      "example_image_url": null,
+      "syntax": "%setlanguage <language choice>",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "shard": {
+      "description": "查看当前服务器shard信息。",
+      "example_image_url": null,
+      "syntax": "%shard",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "shardinfo"
+      ]
+    },
+    "stopgames": {
+      "description": "结束您正在托管或在频道中的所有游戏。",
+      "example_image_url": null,
+      "syntax": "%stopgames",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Host",
+        "Manage Messages"
+      ],
+      "aliases": [
+        "stopgame",
+        "endgame",
+        "endgames"
+      ]
+    },
+    "suggest": {
+      "description": "为机器人建议个功能。",
+      "example_image_url": null,
+      "syntax": "%suggest <suggestion>",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "support": {
+      "description": "邀请用户到bot的支持服务器。",
+      "example_image_url": null,
+      "syntax": "%support",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "translate": {
+      "description": "使用 Papago 进行语言翻译。",
+      "example_image_url": null,
+      "syntax": "%translate <from language> <to language> <message>",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "t",
+        "trans"
+      ]
+    },
+    "vote": {
+      "description": "为bot而投票的直接链接。",
+      "example_image_url": null,
+      "syntax": "%vote",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    }
+  },
+  "Moderator": {
+    "addalias": {
+      "description": "将别名添加到idol/群组。",
+      "example_image_url": null,
+      "syntax": "%addalias <alias> <idol/group id> [mode=idol/group]",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": null,
+      "note": "下划分别名是空格。如果一个Bot 版主使用此命令，本别名将成为国际(非本地)别名。"
+    },
+    "addemoji": {
+      "description": "将表情添加到服务器。",
+      "example_image_url": null,
+      "syntax": "%addemoji <urls/emojis> [emoji_name]",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Manage Messages",
+        "Manage Emojis"
+      ],
+      "aliases": [
+        "yoink"
+      ]
+    },
+    "ban": {
+      "description": "禁止一位用户",
+      "example_image_url": null,
+      "syntax": "%ban [user] [reason=No Reason]",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Ban Members"
+      ],
+      "aliases": null
+    },
+    "clear": {
+      "description": "删减文字频道中的信息。",
+      "example_image_url": null,
+      "syntax": "%clear <amount> [user]",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": [
+        "prune"
+      ],
+      "note": "限量维持1000。"
+    },
+    "deletealias": {
+      "description": "从偶像/群组删除别名。",
+      "example_image_url": null,
+      "syntax": "%deletealias <alias> <idol/group id> [mode=idol/group]",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": [
+        "removealias"
+      ],
+      "note": "下划分别名是空格。如果一个Bot 版主使用此命令，本别名将成为国际(非本地)别名。"
+    },
+    "disableinteraction": {
+      "description": "在服务器中禁用某个交互。",
+      "example_image_url": null,
+      "syntax": "%disableinteraction <interaction>",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": null,
+      "note": "若要重新启用，请再次使用相同的命令。"
+    },
+    "kick": {
+      "description": "删除一位用户。",
+      "example_image_url": null,
+      "syntax": "%kick [user] [reason=No Reason]",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Kick Members"
+      ],
+      "aliases": null
+    },
+    "mute": {
+      "description": "禁言一位用户。",
+      "example_image_url": null,
+      "syntax": "%mute [user] [reason]",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Manage Messages",
+        "Manage Roles"
+      ],
+      "aliases": null
+    },
+    "say": {
+      "description": "命令bot转发信息。",
+      "example_image_url": null,
+      "syntax": "%say [text channel] [message]",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": null,
+      "note": "如果用户未提供文本频道，bot将会在当前频道中发送消息。"
+    },
+    "sayembed": {
+      "description": "命令bot转发一条嵌入消息。",
+      "example_image_url": null,
+      "syntax": "%sayembed [text channel] [embed format]",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": null,
+      "note": "题随从https://embedbuilder.nadekobot.me/的格式。如果用户没有提供文本通道，bot将会在当前通道发送消息。"
+    },
+    "setprefix": {
+      "description": "设置服务器前缀。",
+      "example_image_url": null,
+      "syntax": "%setprefix [prefix=%]",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": null,
+      "note": "使用默认前缀的命令(和没有新的前缀) 将会将其恢复为默认。"
+    },
+    "tempchannel": {
+      "description": "在延迟后使当前频道成为一个临时频道删除消息。",
+      "example_image_url": null,
+      "syntax": "%tempchannel [delay=-1]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "temp"
+      ],
+      "note": "时间延迟必须大于1分钟。 如果延迟是 -1，它将会移除作为临时频道的频道。延迟必须放入秒数。"
+    },
+    "togglegames": {
+      "description": "切换在文本频道中玩游戏的能力。",
+      "example_image_url": null,
+      "syntax": "%togglegames [text channel]",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": null
+    },
+    "unban": {
+      "description": "解封用户",
+      "example_image_url": null,
+      "syntax": "%unban [user] [reason=No Reason]",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Ban Members"
+      ],
+      "aliases": null
+    },
+    "unmute": {
+      "description": "取消成员的键入限制。",
+      "example_image_url": null,
+      "syntax": "%unmute [user]",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Manage Messages",
+        "Manage Roles"
+      ],
+      "aliases": null
+    },
+    "welcome": {
+      "description": "在当前频道中发送默认角色信息。",
+      "example_image_url": null,
+      "syntax": "%welcome [message]",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": null,
+      "note": "使用没有消息的命令来禁用欢迎消息。如果消息包含 %u发送，它会提及用户。 如果消息包含 %guild_name, 服务器名称将被添加。"
+    },
+    "welcomerole": {
+      "description": "当用户第一次加入服务器时要给他们的角色。",
+      "example_image_url": null,
+      "syntax": "%welcomerole [role]",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": null
+    }
+  },
+  "Music": {
+    "join": {
+      "description": "使机器人加入当前的语音频道。",
+      "example_image_url": null,
+      "syntax": "%join",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "connect"
+      ]
+    },
+    "move": {
+      "description": "在不跳过当前歌曲的情况下，使一首歌曲成为下一首要播放的歌曲。",
+      "example_image_url": null,
+      "syntax": "%move <song number>",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "skipto"
+      ]
+    },
+    "pause": {
+      "description": "暂停播放。",
+      "example_image_url": null,
+      "syntax": "%pause",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "play": {
+      "description": "根据搜索查询，播放一首歌曲。",
+      "example_image_url": null,
+      "syntax": "%play <url/song/query>",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "p"
+      ]
+    },
+    "queue": {
+      "description": "显示播放器中当前排队的歌曲。",
+      "example_image_url": null,
+      "syntax": "%queue [page number=1]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "list",
+        "q"
+      ]
+    },
+    "remove": {
+      "description": "从队列中删除一首歌曲。",
+      "example_image_url": null,
+      "syntax": "%remove <song number>",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "resume": {
+      "description": "恢复暂停的播放器。",
+      "example_image_url": null,
+      "syntax": "%resume",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "unpause"
+      ]
+    },
+    "shuffle": {
+      "description": "随机播放列表。",
+      "example_image_url": null,
+      "syntax": "%shuffle ",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "skip": {
+      "description": "跳过目前播放的歌曲",
+      "example_image_url": null,
+      "syntax": "%skip",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "stop": {
+      "description": "断开与语音通道的连接并重置队列。",
+      "example_image_url": null,
+      "syntax": "%stop",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "leave",
+        "disconnect"
+      ]
+    },
+    "volume": {
+      "description": "更改玩家的音量。",
+      "example_image_url": null,
+      "syntax": "%volume <volume>",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "vol"
+      ]
+    },
+    "lyrics": {
+      "description": "获取一首歌的歌词。",
+      "example_image_url": null,
+      "syntax": "%lyrics <song query>",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null,
+      "note": "歌词检索自https://api.ksoft.si/"
+    }
+  },
+  "Profile": {
+    "avatar": {
+      "description": "查看成员头像。",
+      "example_image_url": null,
+      "syntax": "%avatar [user]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "profile": {
+      "description": "查看成员的资料。",
+      "example_image_url": null,
+      "syntax": "%profile [user]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    }
+  },
+  "LastFM": {
+    "fm": {
+      "description": "获取有关一个Last FM账户的信息。",
+      "example_image_url": null,
+      "syntax": "%fm [user/lastfm username]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    },
+    "recenttracks": {
+      "description": "获取一个Last FM账户的最新曲目。",
+      "example_image_url": null,
+      "syntax": "%recenttracks [user/lastfm username]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "rt",
+        "recents"
+      ]
+    },
+    "recent": {
+      "description": "获得一个Last FM账户的最新轨迹。",
+      "example_image_url": null,
+      "syntax": "%recent [user/lastfm username]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "np"
+      ]
+    },
+    "topalbums": {
+      "description": "查看一个Last FM账户的顶级专辑。",
+      "example_image_url": null,
+      "syntax": "%topalbums [user/lastfm username]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "tal"
+      ]
+    },
+    "topartists": {
+      "description": "See the top artists of a Last FM Account.",
+      "example_image_url": null,
+      "syntax": "%topartists [user/lastfm username]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "ta"
+      ]
+    },
+    "toptracks": {
+      "description": "See the top tracks of a Last FM Account.",
+      "example_image_url": null,
+      "syntax": "%toptracks [user/lastfm username]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "tt"
+      ]
+    },
+    "setfm": {
+      "description": "Attach a LastFM username to your Discord account.",
+      "example_image_url": null,
+      "syntax": "%setfm <lastfm username>",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    }
+  },
+  "Wolfram": {
+    "w": {
+      "description": "Send a request to Wolfram",
+      "example_image_url": null,
+      "syntax": "%w <query>",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": null
+    }
+  },
+  "Twitter": {
+    "deletetweet": {
+      "description": "Delete a tweet by it's ID.",
+      "example_image_url": null,
+      "syntax": "%deletetweet <tweet id>",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Owner"
+      ],
+      "aliases": null
+    },
+    "recenttweets": {
+      "description": "View the recent tweets.",
+      "example_image_url": null,
+      "syntax": "%recenttweets [amount of tweets=20]",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Owner"
+      ],
+      "aliases": null
+    },
+    "tweet": {
+      "description": "Tweets a status update on Twitter.",
+      "example_image_url": null,
+      "syntax": "%tweet <tweet>",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Owner"
+      ],
+      "aliases": null
+    },
+    "twitterupdates": {
+      "description": "Receive Updates for Twitter.",
+      "example_image_url": null,
+      "syntax": "%twitterupdates <code/group/idol/list> <account username, group id, idol id> [role id]",
+      "example_syntax": null,
+      "sub_commands": {
+        "code": {
+          "description": "Follow a Twitter channel based on the account username.",
+          "example_image_url": null,
+          "syntax": "%twitterupdates code <channel username> [role]",
+          "example_syntax": null,
+          "permissions_needed": [
+            "Manage Messages"
+          ],
+          "aliases": [
+            "user",
+            "username"
+          ]
+        },
+        "group": {
+          "description": "Follow a Twitter channel belonging to a Group ID If they have one.",
+          "example_image_url": null,
+          "syntax": "%twitterupdates group <group id> [role]",
+          "example_syntax": null,
+          "permissions_needed": [
+            "Manage Messages"
+          ],
+          "aliases": null
+        },
+        "idol": {
+          "description": "Follow a Twitter channel belonging to an Idol ID If they have one.",
+          "example_image_url": null,
+          "syntax": "%twitterupdates idol <idol id> [role]",
+          "example_syntax": null,
+          "permissions_needed": [
+            "Manage Messages"
+          ],
+          "aliases": null
+        },
+        "list": {
+          "description": "Lists the Twitter channels currently being followed in the text channel.",
+          "example_image_url": null,
+          "syntax": "%twitterupdates list",
+          "example_syntax": null,
+          "permissions_needed": [
+            "Manage Messages"
+          ],
+          "aliases": null
+        },
+        "reset": {
+          "description": "Unfollows all Twitter accounts in the server.",
+          "example_image_url": null,
+          "syntax": "%twitterupdates reset",
+          "example_syntax": null,
+          "permissions_needed": [
+            "Manage Messages"
+          ],
+          "aliases": null
+        }
+      },
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": [
+        "twitter"
+      ],
+      "note": "This command contains sub-commands. This means any following arguments are respective to the first argument."
+    }
+  },
+  "UnScramble": {
+    "unscramble": {
+      "description": "Start an Idol Unscramble Game in the current channel.",
+      "example_image_url": null,
+      "syntax": "%unscramble [gender=all] [difficulty=medium] [rounds=20] [timeout=20]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "us"
+      ],
+      "note": "The host of the game can type stop or end to end the game or skip to skip the current round without affecting the round number."
+    },
+    "usleaderboard": {
+      "description": "Shows Server/Global leaderboards for the Unscramble Game.",
+      "example_image_url": null,
+      "syntax": "%usleaderboard [difficulty=easy/medium/hard] [mode=server/global]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "uslb",
+        "usl"
+      ]
+    },
+    "stopus": {
+      "description": "Force-end an Unscramble Game.",
+      "example_image_url": null,
+      "syntax": "%stopus",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Host",
+        "Manage Messages"
+      ],
+      "aliases": null
+    }
+  },
+  "SelfAssignRoles": {
+    "addrole": {
+      "description": "Add a role to be self-assignable.",
+      "example_image_url": null,
+      "syntax": "%addrole <role> <role name>",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": null
+    },
+    "listroles": {
+      "description": "List all of the self-assignable roles in the server.",
+      "example_image_url": null,
+      "syntax": "%listroles",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": null
+    },
+    "removerole": {
+      "description": "Remove a self-assignable role based on the role name given.",
+      "example_image_url": null,
+      "syntax": "%removerole <role name>",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": null
+    },
+    "sendrolemessage": {
+      "description": "在当前频道中发送默认角色信息。",
+      "example_image_url": null,
+      "syntax": "%sendrolemessage",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": null,
+      "note": "The roles will work without this command, but should be used to have a list of roles."
+    },
+    "setrolechannel": {
+      "description": "Set the channel for self-assignable roles to be used in.",
+      "example_image_url": null,
+      "syntax": "%setrolechannel [text channel]",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": null,
+      "note": "Since this command will erase all future messages, it is suggested to use %sendrolemessage before this one."
+    }
+  },
+  "Reminder": {
+    "gettimezone": {
+      "description": "Get your current set timezone.",
+      "example_image_url": null,
+      "syntax": "%gettz [timezone]",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "gettz",
+        "time"
+      ]
+    },
+    "listreminders": {
+      "description": "List out your reminders.",
+      "example_image_url": null,
+      "syntax": "%listreminders",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "listreminds",
+        "reminders",
+        "reminds"
+      ]
+    },
+    "remindme": {
+      "description": "Create a reminder to do a task at a certain time.",
+      "example_image_url": null,
+      "syntax": "%remindme to ______ at 9PM or %remindme to ____ in 6hrs 30mins",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "remind"
+      ],
+      "note": "The user input is fairly flexible for this command."
+    },
+    "removereminder": {
+      "description": "Remove a reminder based on it's index.",
+      "example_image_url": null,
+      "syntax": "%removereminder <reminder index>",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "removeremind"
+      ]
+    },
+    "settimezone": {
+      "description": "Set your local timezone with a timezone abbreviation and country code.",
+      "example_image_url": null,
+      "syntax": "%settimezone (timezone name) (country code)",
+      "example_syntax": null,
+      "permissions_needed": null,
+      "aliases": [
+        "settz"
+      ],
+      "note": "The country code is the short-handed version of the location (ex: USA)."
+    }
+  },
+  "Twitch": {
+    "addtwitch": {
+      "description": "Adds a Twitch username to keep track of.",
+      "example_image_url": null,
+      "syntax": "%addtwitch <twitch username>",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": null,
+      "note": "Maximum 2 Twitch channels per server."
+    },
+    "listtwitch": {
+      "description": "List the Twitch channels the server follows.",
+      "example_image_url": null,
+      "syntax": "%listtwitch",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": null
+    },
+    "removetwitch": {
+      "description": "Remove a Twitch username that is being kept track of.",
+      "example_image_url": null,
+      "syntax": "%removetwitch <twitch username>",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": null
+    },
+    "settwitchchannel": {
+      "description": "Set the Discord channel that the Twitch announcements will be posted on.",
+      "example_image_url": null,
+      "syntax": "%settwitchchannel [text channel]",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": null
+    },
+    "settwitchrole": {
+      "description": "设置 Twitch 通知中将提及的 Discord 角色。",
+      "example_image_url": null,
+      "syntax": "%settwitchrole [role]",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": null
+    }
+  },
+  "BotOwner": {
+    "addcards": {
+      "description": "用默认卡片名称填充卡表。",
+      "example_image_url": null,
+      "syntax": "%addcards",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Owner"
+      ],
+      "aliases": null
+    },
+    "addpatreon": {
+      "description": "Adds a permanent patron",
+      "example_image_url": null,
+      "syntax": "%addpatreon <user ids>",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Owner"
+      ],
+      "aliases": null,
+      "note": "Use commas to separate user ids."
+    },
+    "generateplayingcards": {
+      "description": "Generate Custom Playing Cards with Idol Avatars.",
+      "example_image_url": null,
+      "syntax": "%generateplayingcards",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Owner"
+      ],
+      "aliases": null
+    },
+    "removepatreon": {
+      "description": "Removes a permanent patron.",
+      "example_image_url": null,
+      "syntax": "%removepatreon <user ids>",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Owner"
+      ],
+      "aliases": null,
+      "note": "Use commas to separate user ids."
+    },
+    "resetcache": {
+      "description": "Reset Cache",
+      "example_image_url": null,
+      "syntax": "%resetcache",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Owner"
+      ],
+      "aliases": null
+    },
+    "send": {
+      "description": "Send a message to a text channel.",
+      "example_image_url": null,
+      "syntax": "%send <channel id> <message>",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Owner"
+      ],
+      "aliases": null
+    },
+    "reload": {
+      "description": "Will hot reload all of IreneBot, IreneUtility, and any other self-made packages.",
+      "example_image_url": null,
+      "syntax": "%reload",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Owner"
+      ],
+      "aliases": null
+    },
+    "reloadmodule": {
+      "description": "Reload a module from it's name.",
+      "example_image_url": null,
+      "syntax": "%reloadmodule <module name>",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Owner"
+      ],
+      "aliases": [
+        "reloadcog"
+      ]
+    },
+    "reloadmodules": {
+      "description": "Reload all modules.",
+      "example_image_url": null,
+      "syntax": "%reloadmodules",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Owner"
+      ],
+      "aliases": [
+        "reloadcogs"
+      ]
+    },
+    "reloadutility": {
+      "description": "Reloads the utility package for the bot.",
+      "example_image_url": null,
+      "syntax": "%reloadutility",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Owner"
+      ],
+      "aliases": null
+    },
+    "resetgroupcache": {
+      "description": "Reset Group Object Cache.",
+      "example_image_url": null,
+      "syntax": "%resetgroupcache",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Owner"
+      ],
+      "aliases": null
+    },
+    "resetidolcache": {
+      "description": "Reset Idol Object Cache.",
+      "example_image_url": null,
+      "syntax": "%resetidolcache",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Owner"
+      ],
+      "aliases": null
+    },
+    "speak": {
+      "description": "Owner to Bot TTS",
+      "example_image_url": null,
+      "syntax": "%speak <message>",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Owner"
+      ],
+      "aliases": null
+    },
+    "uploadfromhost": {
+      "description": "Toggles whether images are uploaded from the host or are used through an image url.",
+      "example_image_url": null,
+      "syntax": "%uploadfromhost",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Owner"
+      ],
+      "aliases": null
+    }
+  },
+  "Vlive": {
+    "vliveupdates": {
+      "description": "Receive Updates for VLive.",
+      "example_image_url": null,
+      "syntax": "%vliveupdates <code/group/idol/list> <channel code, group id, idol id> [role id]",
+      "example_syntax": null,
+      "sub_commands": {
+        "code": {
+          "description": "Follow a VLIVE channel based on the channel code.",
+          "example_image_url": null,
+          "syntax": "%vliveupdates code <channel code> [role]",
+          "example_syntax": null,
+          "permissions_needed": [
+            "Manage Messages"
+          ],
+          "aliases": null
+        },
+        "group": {
+          "description": "Follow a VLIVE channel belonging to a Group ID If they have one.",
+          "example_image_url": null,
+          "syntax": "%vliveupdates group <group id> [role]",
+          "example_syntax": null,
+          "permissions_needed": [
+            "Manage Messages"
+          ],
+          "aliases": null
+        },
+        "idol": {
+          "description": "Follow a VLIVE channel belonging to an Idol ID If they have one.",
+          "example_image_url": null,
+          "syntax": "%vliveupdates idol <idol id> [role]",
+          "example_syntax": null,
+          "permissions_needed": [
+            "Manage Messages"
+          ],
+          "aliases": null
+        },
+        "list": {
+          "description": "Lists the VLIVE channels currently being followed in the text channel.",
+          "example_image_url": null,
+          "syntax": "%vliveupdates list",
+          "example_syntax": null,
+          "permissions_needed": [
+            "Manage Messages"
+          ],
+          "aliases": null
+        }
+      },
+      "permissions_needed": [
+        "Manage Messages"
+      ],
+      "aliases": [
+        "vlive"
+      ],
+      "note": "此命令包含子命令。这意味着任何以下参数都与第一个参数相关。"
+    }
+  },
+  "DataMod": {
+    "addidol": {
+      "description": "从 https://irenebot.com/adddol.html/中使用语法添加一个未注册的 Idol。",
+      "example_image_url": null,
+      "syntax": "%addidol <JSON>",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Data Moderator"
+      ],
+      "aliases": null,
+      "note": "只有在Idol卡不存在的情况下才能使用命令。"
+    },
+    "addidoltogroup": {
+      "description": "Adds an Idol to a Group.",
+      "example_image_url": null,
+      "syntax": "%addidoltogroup <idol id> <group id>",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
+      "aliases": null
+    },
+    "addgroup": {
+      "description": "从 https://irenebot.com/addgroup.html/添加未注册的组。",
+      "example_image_url": null,
+      "syntax": "%addgroup <JSON>",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Data Moderator"
+      ],
+      "aliases": null,
+      "note": "只有当该卡片不存在给该组时，命令才能使用。"
+    },
+    "edit": {
+      "description": "Edit an Idol or Group's information.",
+      "example_image_url": null,
+      "syntax": "%edit <idol/group> <group/idol id> <column> <content>",
+      "example_syntax": null,
+      "sub_commands": {
+        "idol": {
+          "description": "Edit data for an idol.",
+          "example_image_url": null,
+          "syntax": "%edit idol <idol id> <column> <content>",
+          "example_syntax": null,
+          "permissions_needed": [
+            "Data Moderator"
+          ],
+          "aliases": null
+        },
+        "group": {
+          "description": "Edit data for a group.",
+          "example_image_url": null,
+          "syntax": "%edit group <group id> <column> <content>",
+          "example_syntax": null,
+          "permissions_needed": [
+            "Data Moderator"
+          ],
+          "aliases": null
+        }
+      }
+    },
+    "deleteidolfromgroup": {
+      "description": "Deletes an Idol from a Group.",
+      "example_image_url": null,
+      "syntax": "%deleteidolfromgroup <idol id> <group id>\n",
+      "example_syntax": null,
+      "permissions_needed": [
+        "Bot Moderator"
+      ],
+      "aliases": null
+    }
+  }
+}

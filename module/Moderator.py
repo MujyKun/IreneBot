@@ -16,13 +16,21 @@ class Moderator(commands.Cog):
         self.ex: Utility = ex
 
     @commands.command()
-    @commands.has_guild_permissions(manage_messages=True)
     async def addalias(self, ctx, alias, mem_id: int, mode="idol"):
         """
         Add alias to an idol/group (Underscores are spaces)
 
         [Format: %addalias (alias) (ID of idol/group) ('idol' or 'group')]
         """
+        if not ctx.guild:
+            raise commands.NoPrivateMessage
+
+        is_moderator = await self.ex.u_miscellaneous.check_if_moderator(ctx)
+        is_data_mod = self.ex.check_if_mod(ctx, data_mod=True)
+
+        if not is_moderator and not is_data_mod:
+            return await ctx.send("No Permissions to use this command.")
+
         alias = alias.replace("_", " ")
         if mode.lower() in ["idol", "member", "members", "idols"]:
             obj = await self.ex.u_group_members.get_member(mem_id)
@@ -36,9 +44,15 @@ class Moderator(commands.Cog):
             return await ctx.send(f"> {mem_id} is not associated with an idol or group.")
         if alias in obj.aliases:
             return await ctx.send(f"> {alias} is already a global alias for {name}.")
-        if self.ex.check_if_mod(ctx):  # checks if the user is a bot mod.
+        if is_data_mod:  # checks if the user is a bot mod.
             await self.ex.u_group_members.set_global_alias(obj, alias.lower())
-            return await ctx.send(f"> {alias} has been added as a global alias for {mode} {mem_id}")
+            desc = f"{alias} has been added as a global alias for {mode} {mem_id}"
+            await ctx.send(desc)
+            public_embed = await self.ex.create_embed(f"Info Change by {ctx.author.display_name} ({ctx.author.id})",
+                                                      title_desc=desc)
+            public_channel = self.ex.client.get_channel(self.ex.keys.datamod_log_channel_id) or await \
+                self.ex.client.fetch_channel(self.ex.keys.datamod_log_channel_id)
+            return await public_channel.send(embed=public_embed)
         else:
             server_aliases = obj.local_aliases.get(ctx.guild.id)
             if server_aliases:
@@ -48,13 +62,21 @@ class Moderator(commands.Cog):
             return await ctx.send(f"> {alias} has been added as a server alias for {name}.")
 
     @commands.command(aliases=['removealias'])
-    @commands.has_guild_permissions(manage_messages=True)
     async def deletealias(self, ctx, alias, mem_id: int, mode="idol"):
         """
         Remove alias from an idol/group (Underscores are spaces)
 
         [Format: %deletealias (alias) (ID of idol/group) ('idol' or 'group')]
         """
+        if not ctx.guild:
+            raise commands.NoPrivateMessage
+
+        is_moderator = await self.ex.u_miscellaneous.check_if_moderator(ctx)
+        is_data_mod = self.ex.check_if_mod(ctx, data_mod=True)
+
+        if not is_moderator and not is_data_mod:
+            return await ctx.send("No Permissions to use this command.")
+
         alias = alias.replace("_", " ")
         if mode.lower() in ["idol", "member", "members", "idols"]:
             obj = await self.ex.u_group_members.get_member(mem_id)
@@ -66,11 +88,17 @@ class Moderator(commands.Cog):
             return await ctx.send("> Please select whether you want to add an idol or group alias.")
         if not obj:
             return await ctx.send(f"> {mem_id} is not associated with an idol or group.")
-        if self.ex.check_if_mod(ctx):  # checks if the user is a bot mod.
+        if is_data_mod:  # checks if the user is a bot mod.
             if alias not in obj.aliases:
                 return await ctx.send(f"> {alias} is not a global alias for {name}.")
             await self.ex.u_group_members.remove_global_alias(obj, alias.lower())
-            return await ctx.send(f"> {alias} has been removed from the global aliases for {mode} {mem_id}")
+            desc = f"{alias} has been removed from the global aliases for {mode} {mem_id}"
+            await ctx.send(desc)
+            public_embed = await self.ex.create_embed(f"Info Change by {ctx.author.display_name} ({ctx.author.id})",
+                                                      title_desc=desc)
+            public_channel = self.ex.client.get_channel(self.ex.keys.datamod_log_channel_id) or await \
+                self.ex.client.fetch_channel(self.ex.keys.datamod_log_channel_id)
+            return await public_channel.send(embed=public_embed)
         else:
             server_aliases = obj.local_aliases.get(ctx.guild.id)
             if server_aliases:

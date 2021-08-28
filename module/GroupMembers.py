@@ -37,6 +37,12 @@ class GroupMembers(commands.Cog):
             self.ex.u_group_members.check_reset_limits()
 
             if self.ex.u_miscellaneous.check_message_not_empty(message):
+                if "twice" in message.clean_content:
+                    try:
+                        await message.add_reaction("<:twice:881189720506388551>")
+                    except:
+                        pass
+
                 random_member = False
                 # since this is a listener, the prefix is put back to the default
                 # (from the original on_message)

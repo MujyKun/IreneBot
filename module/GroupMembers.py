@@ -39,7 +39,9 @@ class GroupMembers(commands.Cog):
             if self.ex.u_miscellaneous.check_message_not_empty(message):
                 if "twice" in message.clean_content:
                     try:
-                        await message.add_reaction("<:twice:881189720506388551>")
+                        # hardcoded twice reaction for a specific guild :)
+                        if message.guild.id == 689682763246469129:
+                            await message.add_reaction("<:twice:881189720506388551>")
                     except:
                         pass
 

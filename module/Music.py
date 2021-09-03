@@ -5,6 +5,7 @@ from IreneUtility.Utility import Utility
 from ksoftapi import NoResults
 import wavelink
 from random import shuffle
+from . import disabled_command
 
 
 class Music(commands.Cog):
@@ -25,6 +26,7 @@ class Music(commands.Cog):
 
         if not ctx.guild:
             raise commands.NoPrivateMessage
+
         return True
 
     @commands.Cog.listener()
@@ -42,6 +44,7 @@ class Music(commands.Cog):
         print(track, threshold)
 
     @commands.command(aliases=["connect"])
+    @disabled_command
     async def join(self, ctx):
         """
         Makes the Bot join the current voice channel.
@@ -51,6 +54,7 @@ class Music(commands.Cog):
         await self.ex.u_music.connect_to_vc(ctx)
 
     @commands.command(aliases=["vol"])
+    @disabled_command
     async def volume(self, ctx, volume: int):
         """Change the player's volume.
 
@@ -68,6 +72,7 @@ class Music(commands.Cog):
         return await ctx.send(msg)
 
     @commands.command(aliases=["leave", "disconnect"])
+    @disabled_command
     async def stop(self, ctx):
         """
         Makes the bot leave the current voice channel.
@@ -86,6 +91,7 @@ class Music(commands.Cog):
         return await ctx.send(msg)
 
     @commands.command(aliases=["p"])
+    @disabled_command
     async def play(self, ctx, *, source: str):
         """Play a song based on a search query.
 
@@ -150,6 +156,7 @@ class Music(commands.Cog):
             log.console(e, method=self.play)
 
     @commands.command()
+    @disabled_command
     async def pause(self, ctx):
         """Pause the player.
 
@@ -158,6 +165,7 @@ class Music(commands.Cog):
         await self.ex.u_music.toggle_pause(ctx, pause=True)
 
     @commands.command(aliases=["unpause"])
+    @disabled_command
     async def resume(self, ctx):
         """Resume a paused player.
 
@@ -167,6 +175,7 @@ class Music(commands.Cog):
         await self.ex.u_music.toggle_pause(ctx, pause=False)
 
     @commands.command()
+    @disabled_command
     async def skip(self, ctx):
         """Skip the current song on the player.
 
@@ -177,6 +186,7 @@ class Music(commands.Cog):
         controller.next.set()
 
     @commands.command()
+    @disabled_command
     async def lyrics(self, ctx, *, song_query: str):
         """
         Get the lyrics of a song (From https://api.ksoft.si)
@@ -227,6 +237,7 @@ class Music(commands.Cog):
                 return await self.ex.check_left_or_right_reaction_embed(msg, embed_list)
 
     @commands.command()
+    @disabled_command
     async def shuffle(self, ctx):
         """
         Shuffle the current playlist.
@@ -244,6 +255,7 @@ class Music(commands.Cog):
         return await ctx.send(msg)
 
     @commands.command(aliases=["q", "list"])
+    @disabled_command
     async def queue(self, ctx):
         """
         Displays the currently queued songs in the player.
@@ -266,6 +278,7 @@ class Music(commands.Cog):
             await self.ex.check_left_or_right_reaction_embed(msg, embed_list)
 
     @commands.command()
+    @disabled_command
     async def remove(self, ctx, song_number: int):
         """
         Remove a song from the queue.
@@ -288,6 +301,7 @@ class Music(commands.Cog):
             return await ctx.send(msg)
 
     @commands.command(aliases=["skipto"])
+    @disabled_command
     async def move(self, ctx, song_number: int):
         """
         Make a song the next to play without skipping the current song.
@@ -315,6 +329,7 @@ class Music(commands.Cog):
             return await ctx.send(msg)
 
     @commands.command()
+    @disabled_command
     async def loop(self, ctx):
         """Loop the current playlist and any songs added.
 

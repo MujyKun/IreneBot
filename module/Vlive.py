@@ -4,6 +4,10 @@ from IreneUtility.util import u_logger as log
 from IreneUtility.Utility import Utility
 from IreneUtility.models import VliveChannel
 import asyncio
+from . import disabled_command
+
+
+VLIVE_DISABLED = True
 
 
 class Vlive(commands.Cog):
@@ -12,6 +16,7 @@ class Vlive(commands.Cog):
 
     @commands.group(aliases=["vlive"])
     @commands.has_guild_permissions(manage_messages=True)
+    @disabled_command
     async def vliveupdates(self, ctx):
         """Follow a Vlive Channel and get announcements.
 
@@ -84,6 +89,10 @@ class Vlive(commands.Cog):
     @tasks.loop(seconds=0, minutes=1, hours=0, reconnect=True)
     async def vlive_notification_updates(self):
         """Send vlive announcements for live channels."""
+        if VLIVE_DISABLED:
+            self.vlive_notification_updates.stop()
+            return
+
         if not self.ex.irene_cache_loaded:
             return
 

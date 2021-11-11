@@ -1570,15 +1570,15 @@
       ]
     },
     "remindme": {
-      "description": "Create a reminder to do a task at a certain time.",
+      "description": "Create a reminder to do a task at a certain time. Place the remind time at the end with the key words \"at\" or \"in\".",
       "example_image_url": null,
-      "syntax": "%remindme to ______ at 9PM or %remindme to ____ in 6hrs 30mins",
+      "syntax": "%remindme to ______ at 9PM Oct 21st or %remindme to ____ in 6hrs 30mins",
       "example_syntax": null,
       "permissions_needed": null,
       "aliases": [
         "remind"
       ],
-      "note": "The user input is fairly flexible for this command."
+      "note": "After \"at\", the time parsing is fairly flexible so you can specify a date and/or time."
     },
     "removereminder": {
       "description": "Remove a reminder based on it's index.",

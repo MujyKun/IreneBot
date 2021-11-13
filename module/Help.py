@@ -120,6 +120,8 @@ class Help(commands.Cog):
                 f"``{server_prefix}help [category]`` (CASE-SENSITIVE) for more info on a category.\nTo reset a " \
                 f"server prefix, you may type ``{ex.keys.bot_prefix}setprefix``.\n\n " \
                 f"**Support Server:** {ex.keys.bot_support_server_link}\n\n" \
+                f"**Please note that a server may choose to log your messages and you can opt out by " \
+                   f"leaving the server.**\n\n"\
                 f"**[Link to Commands](https://irenebot.com/commands)**"
 
         async def send_bot_help(self, mapping):

@@ -85,6 +85,11 @@ class BiasGame(commands.Cog):
             idol_id = idol_win_info[0]
             wins = idol_win_info[1]
             member = await self.ex.u_group_members.get_member(idol_id)
+
+            # came across a bug that where a deleted idol will crash the entire command.
+            if not member:
+                continue
+
             msg_string += f"{counter}) {member.full_name} ({member.stage_name}) -> {wins} Win(s).\n"
             if counter % 15 == 0:
                 embed_list.append(await self.ex.create_embed(title=title, title_desc=msg_string))

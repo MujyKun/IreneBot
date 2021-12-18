@@ -1,1 +1,0 @@
-git+git://github.com/MujyKun/IreneUtility@dev#IreneUtility

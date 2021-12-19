@@ -1,7 +1,4 @@
-import asyncio
-
 from discord.ext.commands import AutoShardedBot, errors
-from models import PgConnection
 from keys import Keys
 import discord
 
@@ -12,11 +9,8 @@ class Bot(AutoShardedBot):
     def __init__(self, bot_prefix, keys, **settings):
         super(Bot, self).__init__(bot_prefix, **settings)
         self.keys = keys
-        self.db = PgConnection(**keys.get_keys("db_host", "db_name", "db_user", "db_pass", "db_port"))
-        self.keys.__delattr__("db_pass")  # we no longer need the db pass stored in keys mem.
-
         try:
-            self.loop.run_until_complete(self.db.connect())
+            # login and connect to bot.
             self.loop.run_until_complete(self.start(t_keys.prod_bot_token if not DEV_MODE else t_keys.dev_bot_token))
 
         except KeyboardInterrupt:

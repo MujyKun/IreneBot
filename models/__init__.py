@@ -12,7 +12,3 @@ logger.setLevel(logging.DEBUG)
 handler = logging.FileHandler(filename=f'{log_folder_name}/{date.today()}-info.log', encoding='utf-8')
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 logger.addHandler(handler)
-
-
-from .DbConn import DbConnection
-from .PgConn import PgConnection

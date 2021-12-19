@@ -1,4 +1,5 @@
 from discord import AutoShardedClient
+from models import PgConnection
 
 
 class Bot(AutoShardedClient):
@@ -7,4 +8,14 @@ class Bot(AutoShardedClient):
 
 
 if __name__ == '__main__':
+    # generate db
+    db = PgConnection
+
+
+
+    # migration
+    #
     ...
+
+
+

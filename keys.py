@@ -1,13 +1,146 @@
 from dotenv import load_dotenv
 from os import getenv
+from models import logger
 
 
 class Keys:
     def __init__(self):
-        self.keys = self.refresh_env()
+        # Bot Info
+        self.prod_bot_token: str = ''
+        self.prod_bot_token: str = ''
+        self.dev_bot_token: str = ''
+        self.bot_id: int = 0
+        self.bot_owner_id: int = 0
+        self.bot_name: str = ''
+        self.bot_prefix: str = ''
 
-    def __getitem__(self, item):
-        return self.keys[item]
+        # Database Server (DB) (Preferred PostgreSQL)
+        self.db_host: str = ''
+        self.db_name: str = ''
+        self.db_user: str = ''
+        self.db_pass: str = ''
+
+        # Support Server
+        self.support_server_id: str = ''
+
+        # URLS
+        self.bot_invite_url: str = ''
+        self.bot_website_url: str = ''
+        self.bot_image_host_url: str = ''
+        self.support_server_invite_url: str = ''
+        self.embed_icon_url: str = ''
+        self.embed_footer_url: str = ''
+        self.vlive_base_url: str = ''
+
+        # Channel IDS (CID)
+        self.add_idol_channel_id: int = 0
+        self.add_group_channel_id: int = 0
+        self.twitter_channel_id: int = 0
+        self.data_mod_channel_id: int = 0
+
+        # PORTS
+        self.db_port: int = 0
+        self.site_port: str = ''
+        self.api_port: int = 0
+
+        # Role IDS (RID)
+        self.patron_role_id: int = 0
+        self.super_patron_role_id: int = 0
+        self.translator_role_id: int = 0
+        self.proofreader_role_id: int = 0
+        self.data_mod_role_id: int = 0
+
+        # Directories (DIR) (Include / at end)
+        self.avatar_directory: str = ''
+        self.banner_directory: str = ''
+        self.biasgame_directory: str = ''
+        self.blackjack_directory: str = ''
+
+        # Restrictions (LIM  LIMIT) (TWT  Twitter) (RMD = REMINDER)
+        self.post_limit: int = 0
+        self.no_vote_limit: int = 0
+        self.auto_send_limit: int = 0
+        self.twitter_update_limit: int = 0
+        self.reminder_limit: int = 0
+
+        # Reactions/Emotes - Accepts xxxxxxxx and discord supported emojis (never include the U at the start)
+        self.trash_emoji: str = ''
+        self.checkmark_emoji: str = ''
+        self.f_emoji: str = ''
+        self.caution_emoji: str = ''
+        self.previous_emoji: str = ''
+        self.next_emoji: str = ''
+
+        # Twitter (TWT) Bot Information
+        self.twitter_account_id: str = ''
+        self.twitter_username: str = ''
+        self.twitter_consumer_key: str = ''
+        self.twitter_consumer_secret: str = ''
+        self.twitter_access_key: str = ''
+        self.twitter_access_secret: str  = ''
+
+        # Spotify (SPO)
+        self.spotify_id: str = ''
+        self.spotify_secret: str = ''
+
+        # Oxford Dictionary (OX)
+        self.oxford_id: str = ''
+        self.oxford_key: str = ''
+
+        # Urban Dictionary (URB)
+        self.urban_host: str = ''
+        self.urban_key: str = ''
+
+        # Tenor (TNR)
+        self.tenor_key: str = ''
+
+        # Top.gg (TOP)
+        self.top_key: str = ''
+        self.top_webhook_key: str = ''
+
+        # Discord Boats (BOATS)
+        self.boats_key: str = ''
+
+        # Papago (PAP)
+        self.papago_id: str = ''
+        self.papago_secret: str = ''
+
+        # LastFM (FM)
+        self.fm_key: str = ''
+        self.fm_secret: str = ''
+        self.fm_url: str = ''
+        self.fm_agent: str = ''
+
+        # Patreon (PAT)
+        self.patreon_link: str = ''
+
+        # Wolfram
+        self.wolfram_id: str = ''
+
+        # KSoftAPI Lyrics (LYR)
+        self.lyrics_key: str = ''
+
+        # DataDog (DD)
+        self.datadog_api_key: str = ''
+        self.datadog_app_key: str = ''
+
+        # Twitch (TWCH)
+        self.twitch_id: str = ''
+        self.twitch_secret: str = ''
+        self.refresh_env()
+
+    def get_keys(self, *args) -> dict:
+        """Return a list of key arguments as a dictionary.
+
+        :param args: List of key arguments
+        :return dict: Dictionary with the values of the key arguments passed in.
+        """
+        keys = dict()
+
+        for arg in args:
+            keys[arg] = self.__dict__[arg]
+
+        return keys
 
     def refresh_env(self):
         """Update the values in the .env file."""
@@ -15,7 +148,7 @@ class Keys:
         self.__define_keys()
 
     def __define_keys(self):
-        self.keys = dict({
+        keys = dict({
             # Bot Info
             'prod_bot_token': getenv('PROD_BOT_TOKEN'),
             'dev_bot_token': getenv('DEV_BOT_TOKEN'),
@@ -49,7 +182,7 @@ class Keys:
             'data_mod_channel_id': getenv('DM_LOG_CID'),
 
             # PORTS
-            'database_port': getenv('PRT_DB'),
+            'db_port': getenv('PRT_DB'),
             'site_port': getenv('PRT_SITE'),
             'api_port': getenv('PRT_API'),
 
@@ -139,5 +272,8 @@ class Keys:
             'twitch_secret': getenv('TWCH_SECRET'),
         })
 
+        for key, val in keys.items():
+            self.__setattr__(key, val)
 
-
+        no_vals = [key for key, value in keys.items() if not value]
+        logger.warn(f"Could not find an environment value for keys: {', '.join(no_vals)}.")

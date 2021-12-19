@@ -1,15 +1,29 @@
-from os import getenv
+import asyncio
+
 from discord.ext.commands import AutoShardedBot, errors
 from models import PgConnection
+from keys import Keys
 import discord
+
+DEV_MODE = True
 
 
 class Bot(AutoShardedBot):
-    def __init__(self, command_prefix, **settings):
-        super(Bot, self).__init__(command_prefix, **settings.get("options"))
+    def __init__(self, bot_prefix, keys, **settings):
+        super(Bot, self).__init__(bot_prefix, **settings)
+        self.keys = keys
+        self.db = PgConnection(**keys.get_keys("db_host", "db_name", "db_user", "db_pass", "db_port"))
+        self.keys.__delattr__("db_pass")  # we no longer need the db pass stored in keys mem.
 
-        # self.conn:
-        top_gg_key = getenv("TOP_GG_KEY")
+        try:
+            self.loop.run_until_complete(self.db.connect())
+            self.loop.run_until_complete(self.start(t_keys.prod_bot_token if not DEV_MODE else t_keys.dev_bot_token))
+
+        except KeyboardInterrupt:
+            self.loop.run_until_complete(self.close())
+            # cancel all tasks lingering
+        finally:
+            self.loop.close()
 
     async def on_command_error(self, context, exception):
         if isinstance(exception, errors.CommandNotFound):
@@ -28,37 +42,23 @@ class Bot(AutoShardedBot):
 
 
 if __name__ == '__main__':
-    # generate db
-    db = PgConnection
-
-    # migration
-    #
-    ...
-
     intents = discord.Intents.default()
-    # intents.members = True  # turn on privileged members intent
+    intents.members = True  # turn on privileged members intent
     # intents.presences = True  # turn on presences intent
 
-    kwargs = {
-        "options": {
-            "case_insensitive": True,
-            "owner_id": int(getenv("BOT_OWNER_ID")),
-            "intents": intents
-        },
-        "db_kwargs": {
-            "host": getenv("POSTGRES_HOST"),
-            "database": getenv("POSTGRES_DATABASE"),
-            "user": getenv("POSTGRES_USER"),
-            "password": getenv("POSTGRES_PASSWORD"),
-            "port": getenv("POSTGRES_PORT")
-        }
+    t_keys = Keys()
+
+    options = {
+        "case_insensitive": True,
+        "owner_id": t_keys.bot_owner_id,
+        "intents": intents
     }
 
-    bot = Bot(getenv("BOT_PREFIX"), **kwargs)
+    bot = Bot(t_keys.bot_prefix, t_keys, **options)
 
-    cogs = ["BotInfo", "Weverse"]
+    cogs = []
 
     for cog in cogs:
         bot.load_extension(f"cogs.{cog}")
 
-    bot.run(getenv("BOT_TOKEN"))
+

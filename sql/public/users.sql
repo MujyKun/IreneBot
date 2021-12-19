@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS public.users
 (
     userid bigint,
     sessionkey text,
+    balance text,
     PRIMARY KEY (userid)
 );
 

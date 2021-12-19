@@ -1,5 +1,6 @@
 from os import getenv
 from discord.ext.commands import AutoShardedBot, errors
+from models import PgConnection
 import discord
 
 class Bot(AutoShardedBot):
@@ -26,6 +27,15 @@ class Bot(AutoShardedBot):
 
 
 if __name__ == '__main__':
+    # generate db
+    db = PgConnection
+
+
+
+    # migration
+    #
+    ...
+
     intents = discord.Intents.default()
     # intents.members = True  # turn on privileged members intent
     # intents.presences = True  # turn on presences intent

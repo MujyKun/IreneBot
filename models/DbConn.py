@@ -1,6 +1,14 @@
 
 class DbConnection:
-    def __init__(self, db_host, db_name, db_user, db_pass):
+    def __init__(self, db_host: str, db_name: str, db_user: str, db_pass: str):
+        """
+        Abstract version for a database connection.
+
+        :param db_host: The database host to connect to.
+        :param db_name: Database Name to connect to.
+        :param db_user: Database User to log in as.
+        :param db_pass: Password of the Database User.
+        """
         ...
 
     async def connect(self):

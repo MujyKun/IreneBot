@@ -3,6 +3,7 @@ from discord.ext.commands import AutoShardedBot, errors
 from models import PgConnection
 import discord
 
+
 class Bot(AutoShardedBot):
     def __init__(self, command_prefix, **settings):
         super(Bot, self).__init__(command_prefix, **settings.get("options"))
@@ -29,8 +30,6 @@ class Bot(AutoShardedBot):
 if __name__ == '__main__':
     # generate db
     db = PgConnection
-
-
 
     # migration
     #

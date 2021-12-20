@@ -1,12 +1,8 @@
-from discord.ext import commands
+from ...models.BiasGame import BiasGame
+
+async def create_bias_game_image():
+    ...
 
 
-class BiasGame(commands.Cog):
-    @staticmethod
-    def setup(bot: commands.AutoShardedBot):
-        bot.add_cog(BiasGame(bot))
-
-    def __init__(self, bot):
-        self.bot = bot
-
+def create_bias_game_bracket():
     ...

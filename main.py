@@ -1,6 +1,8 @@
 from discord.ext.commands import AutoShardedBot, errors
 from keys import Keys
 import discord
+from dislash import InteractionClient
+from cogs import cogs
 
 DEV_MODE = True
 
@@ -9,9 +11,12 @@ class Bot(AutoShardedBot):
     def __init__(self, bot_prefix, keys, **settings):
         super(Bot, self).__init__(bot_prefix, **settings)
         self.keys = keys
+        self.inter_client = InteractionClient(self, test_guilds=[int(t_keys.support_server_id)])
+        for cog in cogs:
+            self.load_extension(f"cogs.{cog}")
         try:
             # login and connect to bot.
-            self.loop.run_until_complete(self.start(t_keys.prod_bot_token if not DEV_MODE else t_keys.dev_bot_token))
+            self.loop.run_until_complete(self.run(t_keys.prod_bot_token if not DEV_MODE else t_keys.dev_bot_token))
 
         except KeyboardInterrupt:
             self.loop.run_until_complete(self.close())
@@ -49,10 +54,3 @@ if __name__ == '__main__':
     }
 
     bot = Bot(t_keys.bot_prefix, t_keys, **options)
-
-    cogs = []
-
-    for cog in cogs:
-        bot.load_extension(f"cogs.{cog}")
-
-

@@ -38,7 +38,7 @@ class MiscellaneousCog(commands.Cog):
                       isAnimated, emoji_id in emoji_info]
         await inter.respond("\n".join(emoji_urls))
 
-    @slash_command(name="displayemoji", desc="Display png or gif of the emoji.")
+    @slash_command(name="displayemoji", description="Display png or gif of the emoji.")
     async def displayemoji_command(self, inter: SlashInteraction,
                                    emoji_content: str = OptionParam(desc="Emoji to be displayed")):
         if not emoji_content:
@@ -52,17 +52,17 @@ class MiscellaneousCog(commands.Cog):
                       isAnimated, emoji_id in emoji_info]
         await inter.respond("\n".join(emoji_urls))
 
-    @slash_command(desc="Flip a coin.")
+    @slash_command(description="Flip a coin.")
     async def flip(self, inter: SlashInteraction):
         await inter.respond(f"You flipped **{choice(['Tails', 'Heads'])}**.")
 
-    @slash_command(desc="Pick a random number between start_number and end_number.")
+    @slash_command(description="Pick a random number between start_number and end_number.")
     async def random(self, inter: SlashInteraction,
                      start_number: int = OptionParam(desc="start of range"),
                      end_number: int = OptionParam(desc="end of range")):
         await inter.respond(randint(start_number, end_number))
 
-    @slash_command(desc="Display server info.")
+    @slash_command(description="Display server info.")
     async def serverinfo(self, inter: SlashInteraction):
         try:
             guild = inter.guild

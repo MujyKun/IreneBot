@@ -1,9 +1,9 @@
 from discord.ext import commands
-from discord import Embed
 from dislash import slash_command, message_command, \
     SlashInteraction, ContextMenuInteraction, OptionParam
 from random import choice, randint
 from re import findall
+from util.BotEmbed import create_embed, add_embed_fields
 
 
 class MiscellaneousCog(commands.Cog):
@@ -66,22 +66,18 @@ class MiscellaneousCog(commands.Cog):
     async def serverinfo(self, inter: SlashInteraction):
         try:
             guild = inter.guild
-            embed = Embed(title=f"{guild.name} ({guild.id})", color=0xffb6c1, url=f"{guild.icon_url}")
-            embed.set_author(name="Irene", url=self.bot.keys.bot_website_url,
-                             icon_url='https://cdn.discordapp.com/emojis/693392862611767336.gif?v=1')
-            embed.set_footer(text="Thanks for using Irene.",
-                             icon_url='https://cdn.discordapp.com/emojis/683932986818822174.gif?v=1')
+            embed = await create_embed(self.bot.keys, title=f"{guild.name} ({guild.id})", url=f"{guild.icon_url}")
             embed.set_thumbnail(url=guild.icon_url)
-            embed.add_field(name="Owner", value=f"{guild.owner} ({guild.owner.id})", inline=True)
-            embed.add_field(name="Region", value=guild.region, inline=True)
-            embed.add_field(name="Users", value=guild.member_count, inline=True)
-            embed.add_field(name="Roles", value=f"{len(guild.roles)}", inline=True)
-            embed.add_field(name="Emojis", value=f"{len(guild.emojis)}", inline=True)
-            embed.add_field(name="Description", value=guild.description, inline=True)
-            embed.add_field(name="Channels", value=f"{len(guild.channels)}", inline=True)
-            embed.add_field(name="AFK Timeout", value=f"{guild.afk_timeout / 60} minutes", inline=True)
-            embed.add_field(name="Since", value=guild.created_at, inline=True)
-
+            fields = {"Owner": f"{guild.owner} ({guild.owner.id})",
+                      "Users": guild.member_count,
+                      "Roles": f"{len(guild.roles)}",
+                      "Emojis": f"{len(guild.emojis)}",
+                      "Description": guild.description,
+                      "Channels": f"{len(guild.channels)}",
+                      "AFK Timeout": f"{guild.afk_timeout / 60} minutes",
+                      "Since": guild.created_at
+                      }
+            embed = await add_embed_fields(embed, fields)
             await inter.respond(embed=embed)
         except Exception as e:
             pass

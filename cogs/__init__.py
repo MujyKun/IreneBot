@@ -1,1 +1,2 @@
-cogs = ["groupmembers.GroupMembersCog", "miscellaneous.MiscellaneousCog"]
+cogs = ["groupmembers.GroupMembersCog", "miscellaneous.MiscellaneousCog", "profile.ProfileCog"]
+

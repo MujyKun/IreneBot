@@ -3,7 +3,7 @@ from dislash import slash_command, message_command, \
     SlashInteraction, ContextMenuInteraction, OptionParam
 from random import choice, randint
 from re import findall
-from util.BotEmbed import create_embed, add_embed_fields
+from util.BotEmbed import create_bot_author_embed, add_embed_inline_fields
 
 
 class MiscellaneousCog(commands.Cog):
@@ -21,7 +21,7 @@ class MiscellaneousCog(commands.Cog):
                      choices: str = OptionParam(desc="List the different options with spaces between choices")):
         random_selection = choice(choices.split(" "))
         possible_choices = choices.split(" ")
-        possible_choices = ", ".join(["`" + my_choice + "`" for my_choice in possible_choices])
+        possible_choices = str.join(", ", ["`" + my_choice + "`" for my_choice in possible_choices])
         await inter.respond(f"**Possible Choices**: {possible_choices}\n" + f"**Selection**: `{random_selection}`")
 
     @message_command(name="Display Emoji")
@@ -66,7 +66,7 @@ class MiscellaneousCog(commands.Cog):
     async def serverinfo(self, inter: SlashInteraction):
         try:
             guild = inter.guild
-            embed = await create_embed(self.bot.keys, title=f"{guild.name} ({guild.id})", url=f"{guild.icon_url}")
+            embed = await create_bot_author_embed(self.bot.keys, title=f"{guild.name} ({guild.id})", url=f"{guild.icon_url}")
             embed.set_thumbnail(url=guild.icon_url)
             fields = {"Owner": f"{guild.owner} ({guild.owner.id})",
                       "Users": guild.member_count,
@@ -77,7 +77,7 @@ class MiscellaneousCog(commands.Cog):
                       "AFK Timeout": f"{guild.afk_timeout / 60} minutes",
                       "Since": guild.created_at
                       }
-            embed = await add_embed_fields(embed, fields)
+            embed = await add_embed_inline_fields(embed, fields)
             await inter.respond(embed=embed)
         except Exception as e:
             pass

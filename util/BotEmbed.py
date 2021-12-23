@@ -1,9 +1,9 @@
-from discord import Embed as disEmbed
+from discord import Embed as disEmbed, User as disUser
 from random import randint
 from keys import Keys
 
 
-async def create_embed(botkeys: Keys, **kwargs) -> disEmbed:
+async def create_bot_author_embed(botkeys: Keys, **kwargs) -> disEmbed:
     """Create a bot specific discord Embed with bot author and footer."""
     embed = disEmbed(**kwargs)
     if not embed.color:
@@ -14,22 +14,35 @@ async def create_embed(botkeys: Keys, **kwargs) -> disEmbed:
     return embed
 
 
+async def create_user_embed(user: disUser, **kwargs) -> disEmbed:
+    """Create a bot specific discord Embed with bot author and footer."""
+    embed = disEmbed(**kwargs)
+    if not embed.color:
+        embed.colour = _get_random_color()
+    embed.set_author(name=user.display_name,
+                     icon_url=user.avatar_url)
+    return embed
+
+
 def _get_random_color():
     """Retrieves a random hex color."""
     r = lambda: randint(0, 255)
     return int(('%02X%02X%02X' % (r(), r(), r())), 16)  # must be specified to base 16 since 0x is not present
 
 
-async def add_embed_fields(embed: disEmbed, fields: dict, all_inline: bool = True, inline_list: list[bool] = None):
-    """Easily add fields to an embed through a dictionary of the field names and values. To set some of these fields to
-    not be inline, define allInLine as False and pass a list of boolean values to set values as not inline."""
-    if all_inline:
-        for f_name, f_value in fields.items():
-            embed.add_field(name=f_name, value=f_value)
-    else:
-        for f_name, f_value, f_inline in zip(fields.keys(), fields.values(), inline_list):
-            embed.add_field(name=f_name, value=f_value, inline=f_inline)
-    # TODO: Add error exception when there are not enough fields
+async def add_embed_inline_fields(embed: disEmbed, fields: dict):
+    """Easily add fields to an embed through a dictionary of the field names and values. {name : value}
+    All fields will be inline"""
+    for f_name, f_value in fields.items():
+        embed.add_field(name=f_name, value=f_value)
+    return embed
+
+
+async def add_embed_listed_fields(embed: disEmbed, fields: dict):
+    """Easily add fields to an embed through a dictionary of the field names and values. {name : value}
+    All fields will be not be inline."""
+    for f_name, f_value in fields.items():
+        embed.add_field(name=f_name, value=f_value, inline=False)
     return embed
 
 

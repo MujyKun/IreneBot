@@ -2,7 +2,7 @@ from discord import Embed as disEmbed, User as disUser
 from random import randint
 from keys import Keys
 from dislash import ActionRow, Button, ButtonStyle, SlashInteraction
-
+from main import Bot
 
 async def create_bot_author_embed(botkeys: Keys, **kwargs) -> disEmbed:
     """Create a bot specific discord Embed with bot author and footer."""
@@ -108,6 +108,37 @@ async def get_page_buttons(num_pages: int, current_page: int) -> list[ActionRow]
         return [many_page_buttons]
     else:
         return [few_page_buttons]
+
+
+async def get_bot_info_buttons(bot: Bot) -> list[ActionRow]:
+    """Generate bot link buttons for the support server, patreon link, website, and invite link."""
+    info_buttons = ActionRow(
+        Button(
+            style=ButtonStyle.link,
+            label="Get Help",
+            url=bot.keys.support_server_invite_url,
+            emoji="🤝"
+        ),
+        Button(
+            style=ButtonStyle.link,
+            label="Become a Patron",
+            url=bot.keys.patreon_link,
+            emoji="💰"
+        ),
+        Button(
+            style=ButtonStyle.link,
+            label="Bot Website",
+            url=bot.keys.bot_website_url,
+            emoji="🌐"
+        ),
+        Button(
+            style=ButtonStyle.link,
+            label="Bot Invite",
+            url=bot.keys.bot_invite_url,
+            emoji="🤖"
+        ),
+    )
+    return [info_buttons]
 
 
 async def create_paginated_embed(inter: SlashInteraction, embeds: list[disEmbed]) -> disEmbed:

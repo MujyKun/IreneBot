@@ -3,7 +3,8 @@ from dislash import slash_command, message_command, \
     SlashInteraction, ContextMenuInteraction, OptionParam, SelectMenu, SelectOption, user_command
 from random import choice, randint
 from re import findall
-from util.BotEmbed import create_bot_author_embed, add_embed_inline_fields, create_paginated_embed
+from util.BotEmbed import create_bot_author_embed, add_embed_inline_fields, create_paginated_embed, get_bot_info_buttons
+import util.BotStatus as botstatus
 
 class MiscellaneousCog(commands.Cog):
     def __init__(self, bot):
@@ -81,6 +82,23 @@ class MiscellaneousCog(commands.Cog):
         except Exception as e:
             pass
             # TODO: Add exception handling
+
+    @slash_command(description="Get bot ping.")
+    async def ping(self, inter: SlashInteraction):
+        await inter.respond(f"> My ping is currently {int(self.bot.latency*1000)}ms")
+
+    @slash_command(description="Show information about the bot and its creator.")
+    async def botinfo(self, inter: SlashInteraction):
+        bot = self.bot
+        embed = await create_bot_author_embed(bot.keys, title=f"I am {bot.keys.bot_name}!")
+        inline_fields = {"Servers Connected": f"{botstatus.get_server_count(bot)}",
+                         "Playing Guessing/Bias/Unscramble/Blackjack": "Not Implemented",
+                         "Ping": f"{botstatus.get_bot_ping(bot)}ms",
+                         "Shards": f"{bot.shard_count}",
+                         "Bot Owner": f"<@{bot.keys.bot_owner_id}>"}
+        embed = await add_embed_inline_fields(embed, inline_fields)
+        buttons = await get_bot_info_buttons(bot)
+        await inter.respond(embed=embed, components=buttons)
 
     @slash_command(description="Test command")
     async def test_pages(self, inter: SlashInteraction, num_pages: int):

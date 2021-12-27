@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "IreneBot"
+version = "2.0"
+description = "The client for the discord bot Irene."
+authors = ["A-Phamfam <alextampham3000@gmail.com>", "MujyKun <mujy@irenebot.com>"]
+classifiers = [
+        "Development Status :: 5 - Production/Stable",
+        "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python",
+]
+readme = "README.md"
+homepage = "https://irenebot.com/"
+repository = "https://github.com/MujyKun/IreneBot"
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+asyncpg = "0.25.0"
+python-dotenv = "0.19.2"
+disnake = "2.3.0"
+black = "21.12b0"
+pre-commit = "2.16.0"
+mypy = "^0.930"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

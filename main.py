@@ -1,8 +1,10 @@
-from discord.ext.commands import AutoShardedBot, errors
+import disnake
+from disnake.ext import commands
+from disnake.ext.commands import AutoShardedBot, errors
 from keys import Keys
-import discord
-from dislash import InteractionClient
 from cogs import cogs
+from datetime import datetime
+import traceback
 
 DEV_MODE = True
 
@@ -11,18 +13,37 @@ class Bot(AutoShardedBot):
     def __init__(self, bot_prefix, keys, **settings):
         super(Bot, self).__init__(bot_prefix, **settings)
         self.keys = keys
-        self.inter_client = InteractionClient(self, test_guilds=[int(t_keys.support_server_id)])
         for cog in cogs:
             self.load_extension(f"cogs.{cog}")
-        try:
-            # login and connect to bot.
-            self.loop.run_until_complete(self.run(t_keys.prod_bot_token if not DEV_MODE else t_keys.dev_bot_token))
 
-        except KeyboardInterrupt:
-            self.loop.run_until_complete(self.close())
-            # cancel all tasks lingering
-        finally:
-            self.loop.close()
+        self.run(self.keys.prod_bot_token if not DEV_MODE else self.keys.dev_bot_token)
+
+    async def on_ready(self):
+        print(f"{self.keys.bot_name} is now ready at {datetime.now()}.\n"
+              f"{self.keys.bot_name} is now active in test guild {t_keys.support_server_id}.")
+
+    async def on_slash_command_error(
+        self,
+        inter: disnake.AppCmdInter,
+        error: commands.CommandError,
+    ) -> None:
+        # TODO: Remove later when done with bot and debugging
+
+        def fancy_traceback(exc: Exception) -> str:
+            """May not fit the message content limit"""
+            text = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+            return f"```py\n{text[-4086:]}\n```"
+
+        embed = disnake.Embed(
+            title=f"Slash command `{inter.data.name}` failed due to `{error}`",
+            description=fancy_traceback(error),
+            color=disnake.Color.red(),
+        )
+        if inter.response._responded:
+            send = inter.channel.send
+        else:
+            send = inter.response.send_message
+        await send(embed=embed)
 
     async def on_command_error(self, context, exception):
         if isinstance(exception, errors.CommandNotFound):
@@ -41,7 +62,7 @@ class Bot(AutoShardedBot):
 
 
 if __name__ == '__main__':
-    intents = discord.Intents.default()
+    intents = disnake.Intents.default()
     intents.members = True  # turn on privileged members intent
     # intents.presences = True  # turn on presences intent
 
@@ -50,7 +71,9 @@ if __name__ == '__main__':
     options = {
         "case_insensitive": True,
         "owner_id": t_keys.bot_owner_id,
-        "intents": intents
+        "intents": intents,
+        "test_guilds": [t_keys.support_server_id],
+        "sync_commands_debug": True
     }
 
     bot = Bot(t_keys.bot_prefix, t_keys, **options)

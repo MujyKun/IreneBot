@@ -3,6 +3,27 @@ from os import getenv
 from models import logger
 
 
+def make_int(var):
+    # noinspection PyBroadException,PyPep8
+    if not var:
+        return None
+    try:
+        return int(var)
+    except Exception as exc:
+        logger.warn(f"{exc} (Exception) -> Failed to turn {var} of type {type(var)} into an integer. -> module.keys.make_int")
+        return None
+
+
+def get_emoji(string):
+    """Manages string input with unicode chars and turns them into Unicode Strings."""
+    if len(string) != 0:
+        if string[0] == "<":
+            return string
+        else:
+            string = chr(int(string, 16))
+    return string
+
+
 class Keys:
     def __init__(self):
         # Bot Info
@@ -21,7 +42,7 @@ class Keys:
         self.db_pass: str = ''
 
         # Support Server
-        self.support_server_id: str = ''
+        self.support_server_id: int = 0
 
         # URLS
         self.bot_invite_url: str = ''
@@ -152,8 +173,8 @@ class Keys:
             # Bot Info
             'prod_bot_token': getenv('PROD_BOT_TOKEN'),
             'dev_bot_token': getenv('DEV_BOT_TOKEN'),
-            'bot_id': getenv('BOT_ID'),
-            'bot_owner_id': getenv('BOT_OWNER_ID'),
+            'bot_id': make_int(getenv('BOT_ID')),
+            'bot_owner_id': make_int(getenv('BOT_OWNER_ID')),
             'bot_name': getenv('BOT_NAME'),
             'bot_prefix': getenv('BOT_DEFAULT_PREFIX'),
 
@@ -164,7 +185,7 @@ class Keys:
             'db_pass': getenv('DB_PASS'),
 
             # Support Server
-            'support_server_id': getenv('SUPPORT_SERVER_ID'),
+            'support_server_id': make_int(getenv('SUPPORT_SERVER_ID')),
 
             # URLS
             'bot_invite_url': getenv('BOT_INVITE_URL'),
@@ -176,22 +197,22 @@ class Keys:
             'vlive_base_url': getenv('VLIVE_BASE_URL'),
 
             # Channel IDS (CID)
-            'add_idol_channel_id': getenv('ADD_IDOL_CID'),
-            'add_group_channel_id': getenv('ADD_GROUP_CID'),
-            'twitter_channel_id': getenv('TWITTER_CID'),
-            'data_mod_channel_id': getenv('DM_LOG_CID'),
+            'add_idol_channel_id': make_int(getenv('ADD_IDOL_CID')),
+            'add_group_channel_id': make_int(getenv('ADD_GROUP_CID')),
+            'twitter_channel_id': make_int(getenv('TWITTER_CID')),
+            'data_mod_channel_id': make_int(getenv('DM_LOG_CID')),
 
             # PORTS
-            'db_port': getenv('PRT_DB'),
+            'db_port': make_int(getenv('PRT_DB')),
             'site_port': getenv('PRT_SITE'),
-            'api_port': getenv('PRT_API'),
+            'api_port': make_int(getenv('PRT_API')),
 
             # Role IDS (RID)
-            'patron_role_id': getenv('RID_PAT'),
-            'super_patron_role_id': getenv('RID_SUPER_PAT'),
-            'translator_role_id': getenv('RID_TL'),
-            'proofreader_role_id': getenv('RID_PR'),
-            'data_mod_role_id': getenv('RID_DM'),
+            'patron_role_id': make_int(getenv('RID_PAT')),
+            'super_patron_role_id': make_int(getenv('RID_SUPER_PAT')),
+            'translator_role_id': make_int(getenv('RID_TL')),
+            'proofreader_role_id': make_int(getenv('RID_PR')),
+            'data_mod_role_id': make_int(getenv('RID_DM')),
 
             # Directories (DIR) (Include / at end)
             'avatar_directory': getenv('DIR_AVATARS'),
@@ -200,19 +221,19 @@ class Keys:
             'blackjack_directory': getenv('DIR_BJ'),
 
             # Restrictions (LIM  LIMIT) (TWT  Twitter) (RMD = REMINDER)
-            'post_limit': getenv('LIM_POST'),
-            'no_vote_limit': getenv('LIM_NO_VOTE'),
-            'auto_send_limit': getenv('LIM_AUTO_SEND'),
-            'twitter_update_limit': getenv('LIM_TWT_UPDATE'),
-            'reminder_limit': getenv('LIM_RMD'),
+            'post_limit': make_int(getenv('LIM_POST')),
+            'no_vote_limit': make_int(getenv('LIM_NO_VOTE')),
+            'auto_send_limit': make_int(getenv('LIM_AUTO_SEND')),
+            'twitter_update_limit': make_int(getenv('LIM_TWT_UPDATE')),
+            'reminder_limit': make_int(getenv('LIM_RMD')),
 
             # Reactions/Emotes - Accepts xxxxxxxx and discord supported emojis (never include the U at the start)
-            'trash_emoji': getenv('TRASH_EM'),
-            'checkmark_emoji': getenv('CHECKMARK_EM'),
-            'f_emoji': getenv('F_EM'),
-            'caution_emoji': getenv('CAUTION_EM'),
-            'previous_emoji': getenv('PREVIOUS_EM'),
-            'next_emoji': getenv('NEXT_EM'),
+            'trash_emoji': get_emoji(getenv('TRASH_EM')),
+            'checkmark_emoji': get_emoji(getenv('CHECKMARK_EM')),
+            'f_emoji': get_emoji(getenv('F_EM')),
+            'caution_emoji': get_emoji(getenv('CAUTION_EM')),
+            'previous_emoji': get_emoji(getenv('PREVIOUS_EM')),
+            'next_emoji': get_emoji(getenv('NEXT_EM')),
 
             # Twitter (TWT) Bot Information
             'twitter_account_id': getenv('TWT_ACCOUNT_ID'),
@@ -273,6 +294,9 @@ class Keys:
         })
 
         for key, val in keys.items():
+            if val is not None and type(self.__getattribute__(key)) != type(val):
+                logger.warn(f"Environment variable {key} has type {type(val)}"
+                            f" when type {type(self.__getattribute__(key))} was expected.")
             self.__setattr__(key, val)
 
         no_vals = [key for key, value in keys.items() if not value]

@@ -1,4 +1,6 @@
-discord.py==1.7.3
+disnake==2.3.0
 asyncpg==0.25.0
 python-dotenv==0.19.2
-git+git://github.com/EQUENOS/dislash.py@main
+black==21.12b0
+pre-commit==2.16.0
+mypy==0.930

@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 from os import getenv
-from models import logger
+from util import logger
 
 
 def make_int(var):

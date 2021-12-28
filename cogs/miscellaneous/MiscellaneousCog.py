@@ -8,18 +8,25 @@ class MiscellaneousCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.slash_command(name="8ball")
+    @commands.slash_command(name="8ball", description="Ask the 8ball a question.")
     async def _8ball(self, inter: AppCmdInter,
-                     question: str):
-        """
-        Ask the 8ball a question.
-
-        Parameters
-        ----------
-        question: Question to ask the 8ball.
-        """
-        await inter.respond(f"**Question**: {question}\n" + f"**Answer**: Not implemented yet.")
+                     question: str = commands.Param("Question to ask the 8ball.")):
+        await inter.send(f"**Question**: {question}\n" + f"**Answer**: Not implemented yet.")
         # TODO: add 8ball responses from the database
+
+    @commands.slash_command(description="Display Emoji")
+    async def displayemoji(self, inter: AppCmdInter, emoji_content: str = commands.Param(description="Emoji to be displayed")):
+        if not emoji_content:
+            await inter.send("No emote detected.", ephemeral=True)
+            return
+        emoji_info = findall(r"<(a?):?\w+:([0-9]{18})>", emoji_content)
+        if not emoji_info:
+            await inter.send("No emote content detected. It may be a default system emote.", ephemeral=True)
+            return
+        emoji_urls = [f"https://cdn.discordapp.com/emojis/{emoji_id}.{'gif' if isAnimated else 'png'}" for
+                      isAnimated, emoji_id in emoji_info]
+        await inter.send("\n".join(emoji_urls))
+
 
     #
     # @slash_command(description="Choose between a selection of options.")

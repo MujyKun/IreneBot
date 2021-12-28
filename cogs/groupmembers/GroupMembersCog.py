@@ -1,5 +1,4 @@
-from discord.ext import commands
-from dislash import slash_command, message_command, ActionRow, Button, ButtonStyle, ResponseType, SlashInteraction, ContextMenuInteraction
+from disnake.ext import commands
 
 class GroupMembersCog(commands.Cog):
     def __init__(self, bot):

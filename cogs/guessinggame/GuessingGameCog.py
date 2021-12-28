@@ -7,5 +7,6 @@ class GuessingGameCog(commands.Cog):
 
     ...
 
+
 def setup(bot: commands.AutoShardedBot):
     bot.add_cog(GuessingGameCog(bot))

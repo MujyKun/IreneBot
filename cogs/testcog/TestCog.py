@@ -2,6 +2,11 @@ import disnake
 from disnake import ApplicationCommandInteraction as AppCmdInter
 from disnake.ext import commands
 
+loona_members = ["Haseul", "Vivi", "Yves", "JinSoul", "Kim Lip", "Chuu", "Heejin", "Hyunjin", "Go Won",
+                      "Choerry", "Olivia Hye", "Yeojin", "V"]
+
+async def autocomp_loona(inter: AppCmdInter, user_input: str):
+    return [member for member in loona_members if user_input.lower() in member.lower()]
 
 class TestCog(commands.Cog):
     def __init__(self, bot):
@@ -10,6 +15,14 @@ class TestCog(commands.Cog):
     @commands.slash_command(description="Test command.")
     async def test(self, inter: AppCmdInter):
         await inter.response.send_message("test")
+        await inter.channel.send("test2")
+        await inter.channel.send("test3")
+
+    @commands.slash_command(description="Test Loona Autocomplete")
+    async def test_autocomplete(self, inter: AppCmdInter, member: str = commands.Param(autocomplete=autocomp_loona)):
+        await inter.response.send_message(f"You selected {member}.")
+
+
 
     # @slash_command(description="Test command")
     # async def test_pages(self, inter: SlashInteraction, num_pages: int):

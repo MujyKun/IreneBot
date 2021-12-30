@@ -10,32 +10,33 @@ class MiscellaneousCog(commands.Cog):
 
     @commands.slash_command(name="8ball", description="Ask the 8ball a question.")
     async def _8ball(self, inter: AppCmdInter,
-                     question: str = commands.Param("Question to ask the 8ball.")):
+                     question: str = commands.Param(description="Question to ask the 8ball.")):
         await inter.send(f"**Question**: {question}\n" + f"**Answer**: Not implemented yet.")
         # TODO: add 8ball responses from the database
 
+    @commands.slash_command(description="Choose between a selection of options.")
+    async def choose(self,
+                     inter: AppCmdInter,
+                     choices: str = commands.Param(description="List the different options with `|` between choices")):
+        random_selection = choice(choices.split("|"))
+        possible_choices = choices.split("|")
+        possible_choices = str.join(", ", ["`" + my_choice + "`" for my_choice in possible_choices])
+        await inter.send(f"**Possible Choices**: {possible_choices}\n" + f"**Selection**: `{random_selection}`")
+
     @commands.slash_command(description="Display Emoji")
-    async def displayemoji(self, inter: AppCmdInter, emoji_content: str = commands.Param(description="Emoji to be displayed")):
+    async def displayemoji(self,
+                           inter: AppCmdInter,
+                           emoji_content: str = commands.Param(description="Emoji to be displayed")):
         if not emoji_content:
             await inter.send("No emote detected.", ephemeral=True)
             return
-        emoji_info = findall(r"<(a?):?\w+:([0-9]{18})>", emoji_content)
-        if not emoji_info:
+        emoji_infos = findall(r"<a?:?\w+:[0-9]{18}>", emoji_content)
+        if not emoji_infos:
             await inter.send("No emote content detected. It may be a default system emote.", ephemeral=True)
             return
-        emoji_urls = [f"https://cdn.discordapp.com/emojis/{emoji_id}.{'gif' if isAnimated else 'png'}" for
-                      isAnimated, emoji_id in emoji_info]
+        emoji_urls = [disnake.PartialEmoji.from_str(emoji_info).url for emoji_info in emoji_infos]
         await inter.send("\n".join(emoji_urls))
 
-
-    #
-    # @slash_command(description="Choose between a selection of options.")
-    # async def choose(self, inter: SlashInteraction,
-    #                  choices: str = OptionParam(desc="List the different options with spaces between choices")):
-    #     random_selection = choice(choices.split(" "))
-    #     possible_choices = choices.split(" ")
-    #     possible_choices = str.join(", ", ["`" + my_choice + "`" for my_choice in possible_choices])
-    #     await inter.respond(f"**Possible Choices**: {possible_choices}\n" + f"**Selection**: `{random_selection}`")
     #
     # @message_command(name="Display Emoji")
     # async def displayemoji_app(self, inter: ContextMenuInteraction):
@@ -113,45 +114,7 @@ class MiscellaneousCog(commands.Cog):
     #     buttons = await get_bot_info_buttons(bot)
     #     await inter.respond(embed=embed, components=buttons)
     #
-    # @slash_command(description="Test command")
-    # async def test_pages(self, inter: SlashInteraction, num_pages: int):
-    #     embeds = []
-    #     for i in range(0, num_pages):
-    #         embeds.append(await create_bot_author_embed(self.bot.keys, title=f"test{i + 1}"))
     #
-    #     await create_paginated_embed(inter, embeds)
-    #
-    # @slash_command(description="Test command")
-    # async def test_menu(self, inter: SlashInteraction):
-    #     menu = [
-    #         SelectMenu(
-    #             custom_id="test",
-    #             placeholder="Choose up to 2 options",
-    #             max_values=2,
-    #             options=[
-    #                 SelectOption("Option 1", "value 1"),
-    #                 SelectOption("Option 2", "value 2"),
-    #                 SelectOption("Option 3", "value 3")
-    #             ]
-    #         )
-    #     ]
-    #     msg = await inter.reply("This message has a select menu!", components=menu)
-    #
-    #     def check(menu_inter):
-    #         nonlocal inter
-    #         return menu_inter.author == inter.author
-    #
-    #     menu_inter = await msg.wait_for_dropdown(check)
-    #     labels = [option.label for option in menu_inter.select_menu.selected_options]
-    #     await menu_inter.reply(f"Your choices: {', '.join(labels)}")
-    #
-    # @user_command(name="Created at")
-    # async def created_at(self, inter: ContextMenuInteraction):
-    #     # User commands always have only this ^ argument
-    #     await inter.respond(
-    #         f"{inter.user} was created at {inter.user.created_at}",
-    #         ephemeral=True # Make the message visible only to the author
-    #     )
 
 
 def setup(bot: commands.AutoShardedBot):

@@ -1,6 +1,8 @@
 import disnake
 from disnake import ApplicationCommandInteraction as AppCmdInter
 from disnake.ext import commands
+from models.views import create_embed_paged_view
+from util.botembed import create_embeds_from_list
 
 loona_members = ["Haseul", "Vivi", "Yves", "JinSoul", "Kim Lip", "Chuu", "Heejin", "Hyunjin", "Go Won",
                       "Choerry", "Olivia Hye", "Yeojin", "V"]
@@ -22,17 +24,26 @@ class TestCog(commands.Cog):
     async def test_autocomplete(self, inter: AppCmdInter, member: str = commands.Param(autocomplete=autocomp_loona)):
         await inter.response.send_message(f"You selected {member}.")
 
+    @commands.slash_command(description="Test pagination")
+    async def test_pagination(self, inter: AppCmdInter, num_pages: int):
+        # Creates the embeds as a list.
+        embeds = [
+            disnake.Embed(title=f"Test{i+1}") for i in range(num_pages)
+        ]
 
+        pages = await create_embed_paged_view(inter.author, embeds)
+        await inter.response.send_message(embed=pages.embeds[0], view=pages)
 
-    # @slash_command(description="Test command")
-    # async def test_pages(self, inter: SlashInteraction, num_pages: int):
-    #     embeds = []
-    #     for i in range(0, num_pages):
-    #         embeds.append(
-    #             await create_bot_author_embed(self.bot.keys, title=f"testcog{i + 1}")
-    #         )
-    #
-    #     await create_paginated_embed(inter, embeds)
+    @commands.slash_command(description="Test pagination")
+    async def test_numbered(self, inter: AppCmdInter, num_users: int):
+        # Creates the embeds as a list.
+        users = [f"User#{i+1}" for i in range(0, num_users)]
+
+        embeds = await create_embeds_from_list(users, title="Test Users")
+
+        pages = await create_embed_paged_view(inter.author, embeds, timeout=5)
+        await inter.response.send_message(embed=pages.embeds[0], view=pages)
+
     #
     # @slash_command(description="Test command")
     # async def test_menu(self, inter: SlashInteraction):

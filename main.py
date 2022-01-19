@@ -22,28 +22,6 @@ class Bot(AutoShardedBot):
         print(f"{self.keys.bot_name} is now ready at {datetime.now()}.\n"
               f"{self.keys.bot_name} is now active in test guild {t_keys.support_server_id}.")
 
-    async def on_slash_command_error(
-        self,
-        inter: disnake.AppCmdInter,
-        error: commands.CommandError,
-    ) -> None:
-        # TODO: Remove later when done with bot and debugging
-
-        def fancy_traceback(exc: Exception) -> str:
-            """May not fit the message content limit"""
-            text = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
-            return f"```py\n{text[-4086:]}\n```"
-
-        embed = disnake.Embed(
-            title=f"Slash command `{inter.data.name}` failed due to `{error}`",
-            description=fancy_traceback(error),
-            color=disnake.Color.red(),
-        )
-        if inter.response._responded:
-            send = inter.channel.send
-        else:
-            send = inter.response.send_message
-        await send(embed=embed, ephemeral=True)
 
     async def on_command_error(self, context, exception):
         if isinstance(exception, errors.CommandNotFound):

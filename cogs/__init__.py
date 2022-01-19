@@ -3,7 +3,7 @@ cogs = [
         # "groupmembers.GroupMembersCog",
         "miscellaneous.MiscellaneousCog",
         "profile.ProfileCog",
-        # "wolfram.WolframCog",
+        "wolfram.WolframCog",
         "testcog.TestCog",
 ]
 

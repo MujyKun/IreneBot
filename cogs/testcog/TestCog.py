@@ -1,14 +1,58 @@
 import disnake
 from disnake import ApplicationCommandInteraction as AppCmdInter
 from disnake.ext import commands
-from models.views import create_embed_paged_view
+from models.views import create_embed_paged_view, create_paged_select_dropwdown
 from util.botembed import create_embeds_from_list
 
 loona_members = ["Haseul", "Vivi", "Yves", "JinSoul", "Kim Lip", "Chuu", "Heejin", "Hyunjin", "Go Won",
                       "Choerry", "Olivia Hye", "Yeojin", "V"]
 
+loona_members_dict = {member: member for member in loona_members}
+
 async def autocomp_loona(inter: AppCmdInter, user_input: str):
     return [member for member in loona_members if user_input.lower() in member.lower()]
+
+
+class Dropdown(disnake.ui.Select):
+    def __init__(self):
+
+        # Set the options that will be presented inside the dropdown
+        options = [
+            disnake.SelectOption(
+                label="Red"
+            ),
+            disnake.SelectOption(
+                label="Green"
+            ),
+            disnake.SelectOption(
+                label="Blue"
+            ),
+        ]
+
+        # The placeholder is what will be shown when no option is chosen
+        # The min and max values indicate we can only pick one of the three options
+        # The options parameter defines the dropdown options. We defined this above
+        super().__init__(
+            placeholder="Choose your favourite colour...",
+            min_values=1,
+            max_values=1,
+            options=options,
+        )
+
+    async def callback(self, interaction: disnake.MessageInteraction):
+        # Use the interaction object to send a response message containing
+        # the user's favourite colour or choice. The self object refers to the
+        # Select object, and the values attribute gets a list of the user's
+        # selected options. We only want the first one.
+        await interaction.response.send_message(f"Your favourite colour is {self.values[0]}")
+
+
+class DropdownView(disnake.ui.View):
+    def __init__(self):
+        super().__init__()
+
+        # Adds the dropdown to our view object.
+        self.add_item(Dropdown())
 
 class TestCog(commands.Cog):
     def __init__(self, bot):
@@ -44,7 +88,23 @@ class TestCog(commands.Cog):
         pages = await create_embed_paged_view(inter.author, embeds, timeout=5)
         await inter.response.send_message(embed=pages.embeds[0], view=pages)
 
-    #
+    @commands.slash_command()
+    async def colour(self, inter):
+        """Sends a message with our dropdown containing colours"""
+
+        # Create the view containing our dropdown
+        view = DropdownView()
+
+        # Sending a message containing our view
+        await inter.send("Pick your favourite colour:", view=view)
+
+    @commands.slash_command()
+    async def test_select(self, inter: AppCmdInter):
+        await inter.response.defer()
+        select_view = await create_paged_select_dropwdown(inter.author, loona_members_dict)
+        await inter.followup.send(view=select_view)
+
+
     # @slash_command(description="Test command")
     # async def test_menu(self, inter: SlashInteraction):
     #     menu = [

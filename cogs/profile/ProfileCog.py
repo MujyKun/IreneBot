@@ -32,6 +32,24 @@ class ProfileCog(commands.Cog):
         # TODO: Add footer and add source option parameter
         # source: AvatarSource = commands.Param("both", description="User avatar sources.")
 
+    @commands.user_command(name="Avatar", description="Display user avatar")
+    async def user_avatar(
+            self, inter: AppCmdInter):
+        user = inter.author
+        avatar_embed = disnake.Embed(
+            title=f"{user.display_name}'s Avatar ({user.id})", url=user.avatar.url
+        )
+        avatar_embed.set_image(url=user.avatar.url)
+        if user.guild_avatar:
+            guild_avatar_embed = disnake.Embed(
+                title=f"{user.display_name}'s Avatar ({user.id})",
+                url=user.guild_avatar.url,
+            )
+            guild_avatar_embed.set_image(url=user.guild_avatar.url)
+            avatar_embeds = [avatar_embed, guild_avatar_embed]
+            return await inter.response.send_message(embeds=avatar_embeds)
+        await inter.response.send_message(embed=avatar_embed)
+
     @commands.slash_command(description="Display user profile banner.")
     async def banner(
         self,

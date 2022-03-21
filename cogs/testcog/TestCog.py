@@ -1,7 +1,7 @@
 import disnake
 from disnake import ApplicationCommandInteraction as AppCmdInter
 from disnake.ext import commands
-from models.views import create_embed_paged_view, create_paged_select_dropwdown
+from views.views import create_embed_paged_view, create_paged_select_dropwdown
 from util.botembed import create_embeds_from_list
 
 loona_members = ["Haseul", "Vivi", "Yves", "JinSoul", "Kim Lip", "Chuu", "Heejin", "Hyunjin", "Go Won",
@@ -64,6 +64,10 @@ class TestCog(commands.Cog):
         await inter.channel.send("test2")
         await inter.channel.send("test3")
 
+    @commands.slash_command(description="Min Max test")
+    async def min_max_test(self, inter: AppCmdInter, num: int = commands.Param(min_value=1, max_value=10)):
+        await inter.response.send_message(f"You chose {num}")
+
     @commands.slash_command(description="Test Loona Autocomplete")
     async def test_autocomplete(self, inter: AppCmdInter, member: str = commands.Param(autocomplete=autocomp_loona)):
         await inter.response.send_message(f"You selected {member}.")
@@ -103,6 +107,12 @@ class TestCog(commands.Cog):
         await inter.response.defer()
         select_view = await create_paged_select_dropwdown(inter.author, loona_members_dict)
         await inter.followup.send(view=select_view)
+
+    #TODO: remove this since this was for the memes
+    @commands.slash_command()
+    async def say(self, inter: AppCmdInter, msg):
+        await inter.response.send_message("h", ephemeral=True)
+        await inter.channel.send(msg)
 
 
     # @slash_command(description="Test command")

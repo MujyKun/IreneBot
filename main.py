@@ -5,6 +5,7 @@ from keys import Keys
 from cogs import cogs
 from datetime import datetime
 import traceback
+from util import logger
 
 DEV_MODE = True
 
@@ -22,10 +23,11 @@ class Bot(AutoShardedBot):
         print(f"{self.keys.bot_name} is now ready at {datetime.now()}.\n"
               f"{self.keys.bot_name} is now active in test guild {t_keys.support_server_id}.")
 
-
     async def on_command_error(self, context, exception):
+        return_error_to_user = [errors.BotMissingPermissions, errors.BadArgument, errors.Cooldown,
+                                 errors.MemberNotFound, errors.UserNotFound, errors.EmojiNotFound]
         if isinstance(exception, errors.CommandNotFound):
-            ...
+            return
         elif isinstance(exception, errors.CommandInvokeError):
             try:
                 if exception.original.status == 403:
@@ -33,10 +35,10 @@ class Bot(AutoShardedBot):
             except AttributeError:
                 return
             return await context.send(f"{exception}")
-        elif isinstance(exception, errors.BadArgument):
+        if any(isinstance(exception, error) for error in return_error_to_user):
             return await context.send(f"{exception}")
         else:
-            ...
+            logger.error(exception)
 
 
 if __name__ == '__main__':

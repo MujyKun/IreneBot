@@ -20,7 +20,7 @@ python-dotenv = "0.19.2"
 disnake = "2.3.0"
 black = "21.12b0"
 pre-commit = "2.16.0"
-mypy = "^0.930"
+mypy = "0.930"
 numexpr = "^2.8.1"
 
 [tool.poetry.dev-dependencies]

@@ -3,9 +3,6 @@ from disnake.ext import commands
 from typing import Union, List, Dict, Any
 
 
-# If this file starts to get long, it might be good to abstract out different types of views such as
-# buttons, embeds, select menus, etc.
-
 class SingleEmbedPages(disnake.ui.View):
     def __init__(
             self, author: Union[disnake.User, disnake.Member], embeds: List[disnake.Embed]

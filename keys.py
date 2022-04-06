@@ -51,7 +51,7 @@ class Keys:
         self.support_server_invite_url: str = ''
         self.embed_icon_url: str = ''
         self.embed_footer_url: str = ''
-        self.vlive_base_url: str = ''
+        self.api_url: str = ''
 
         # Channel IDS (CID)
         self.add_idol_channel_id: int = 0
@@ -62,7 +62,7 @@ class Keys:
         # PORTS
         self.db_port: int = 0
         self.site_port: str = ''
-        self.api_port: int = 0
+        self.api_port: int = 5454
 
         # Role IDS (RID)
         self.patron_role_id: int = 0
@@ -148,6 +148,10 @@ class Keys:
         # Twitch (TWCH)
         self.twitch_id: str = ''
         self.twitch_secret: str = ''
+
+        # IreneAPI
+        self.api_token: str = ''
+
         self.refresh_env()
 
     def get_keys(self, *args) -> dict:
@@ -194,7 +198,7 @@ class Keys:
             'support_server_invite_url': getenv('SUPPORT_SERVER_INVITE_URL'),
             'embed_icon_url': getenv('EMBED_ICON_URL'),
             'embed_footer_url': getenv('EMBED_FOOTER_URL'),
-            'vlive_base_url': getenv('VLIVE_BASE_URL'),
+            'api_url': getenv('API_URL'),
 
             # Channel IDS (CID)
             'add_idol_channel_id': make_int(getenv('ADD_IDOL_CID')),
@@ -291,6 +295,9 @@ class Keys:
             # Twitch (TWCH)
             'twitch_id': getenv('TWCH_ID'),
             'twitch_secret': getenv('TWCH_SECRET'),
+
+            # IreneAPI
+            'api_token': getenv("API_TOKEN")
         })
 
         for key, val in keys.items():

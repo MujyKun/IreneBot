@@ -1,3 +1,5 @@
+import asyncio
+
 import disnake
 from disnake.ext import commands
 from disnake.ext.commands import AutoShardedBot, errors
@@ -6,6 +8,7 @@ from cogs import cogs
 from datetime import datetime
 import traceback
 from util import logger
+from IreneAPIWrapper.models import IreneAPIClient
 
 DEV_MODE = True
 
@@ -16,6 +19,13 @@ class Bot(AutoShardedBot):
         self.keys = keys
         for cog in cogs:
             self.load_extension(f"cogs.{cog}")
+
+        self.api = IreneAPIClient(token=keys.api_token,
+                                  user_id=keys.bot_owner_id,
+                                  api_url=keys.api_url,
+                                  port=keys.api_port)
+
+        self.loop.create_task(self.api.connect())
 
         self.run(self.keys.prod_bot_token if not DEV_MODE else self.keys.dev_bot_token)
 

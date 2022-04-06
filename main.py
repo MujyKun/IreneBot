@@ -44,6 +44,7 @@ class Bot(AutoShardedBot):
 if __name__ == '__main__':
     intents = disnake.Intents.default()
     intents.members = True  # turn on privileged members intent
+    intents.messages = True
     # intents.presences = True  # turn on presences intent
 
     t_keys = Keys()

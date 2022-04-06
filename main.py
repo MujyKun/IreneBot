@@ -20,14 +20,22 @@ class Bot(AutoShardedBot):
         for cog in cogs:
             self.load_extension(f"cogs.{cog}")
 
-        self.api = IreneAPIClient(token=keys.api_token,
-                                  user_id=keys.bot_owner_id,
-                                  api_url=keys.api_url,
-                                  port=keys.api_port)
+        api = IreneAPIClient(token=keys.api_token, user_id=keys.bot_owner_id,
+                             api_url=keys.api_url, port=keys.api_port)
+
+        self.api = api
+
+    async def run_api_before_bot(self):
+        """Run the API and the Bot afterwards."""
 
         self.loop.create_task(self.api.connect())
 
-        self.run(self.keys.prod_bot_token if not DEV_MODE else self.keys.dev_bot_token)
+        while not self.api.connected:
+            await asyncio.sleep(0)
+
+        print(f"Connected to IreneAPI at {datetime.now()}")
+
+        await self.start(self.keys.prod_bot_token if not DEV_MODE else self.keys.dev_bot_token)
 
     async def on_ready(self):
         print(f"{self.keys.bot_name} is now ready at {datetime.now()}.\n"
@@ -56,7 +64,6 @@ if __name__ == '__main__':
     intents.members = True  # turn on privileged members intent
     intents.messages = True
     # intents.presences = True  # turn on presences intent
-
     t_keys = Keys()
 
     options = {
@@ -66,5 +73,19 @@ if __name__ == '__main__':
         "test_guilds": [t_keys.support_server_id],
         "sync_commands_debug": True
     }
+    loop = asyncio.get_event_loop()
 
     bot = Bot(t_keys.bot_prefix, t_keys, **options)
+
+    try:
+        loop.run_until_complete(bot.run_api_before_bot())
+    except KeyboardInterrupt:
+        # cancel all tasks lingering.
+        loop.run_until_complete(bot.close())
+        # disconnect from the api.
+        loop.run_until_complete(bot.api.disconnect())
+    finally:
+        ...  # we want the API to finish everything in the queue before closing the loop.
+        # loop.close()
+
+

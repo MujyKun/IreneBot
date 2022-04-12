@@ -218,7 +218,7 @@ black = "^21.12b0"
 type = "git"
 url = "https://github.com/MujyKun/IreneAPIWrapper.git"
 reference = "master"
-resolved_reference = "1d64dfea30803f130d71d0fbcaac660aac4cb145"
+resolved_reference = "fdbc7239a025e4d8d16fcdebc999c88aca541b85"
 
 [[package]]
 name = "multidict"

@@ -85,7 +85,5 @@ class MiscellaneousCog(commands.Cog):
         await inter.respond(embed=embed, components=buttons)
 
 
-
-
 def setup(bot: commands.AutoShardedBot):
     bot.add_cog(MiscellaneousCog(bot))

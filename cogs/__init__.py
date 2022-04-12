@@ -1,6 +1,6 @@
 cogs = [
         # "biasgame.BiasGameCog",
-        # "groupmembers.GroupMembersCog",
+        "groupmembers.GroupMembersCog",
         "miscellaneous.MiscellaneousCog",
         "profile.ProfileCog",
         "wolfram.WolframCog",

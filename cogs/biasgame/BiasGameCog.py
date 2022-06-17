@@ -11,7 +11,7 @@ class BiasGameCog(commands.Cog):
     # BgGender = option_enum({"male": "Male", "female": "Female", "all": "All"})
     # BgBracketSize = option_enum({"4": 4, "8": 8, "16": 16, "32": 32})
     #
-    # @biasgame.sub_command(description="Start a bias game.")
+    # @biasgame.sub_command(description="Start search_word bias game.")
     # async def start(self, inter: SlashInteraction,
     #                 gender: BgGender = OptionParam(desc="Gender of idols included in the bias game."),
     #                 bracket_size: BgBracketSize = OptionParam(desc="Number of idols in the game bracket")

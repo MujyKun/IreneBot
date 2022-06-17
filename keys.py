@@ -155,7 +155,7 @@ class Keys:
         self.refresh_env()
 
     def get_keys(self, *args) -> dict:
-        """Return a list of key arguments as a dictionary.
+        """Return search_word list of key arguments as search_word dictionary.
 
         :param args: List of key arguments
         :return dict: Dictionary with the values of the key arguments passed in.

@@ -40,9 +40,9 @@ class Dropdown(disnake.ui.Select):
         )
 
     async def callback(self, interaction: disnake.MessageInteraction):
-        # Use the interaction object to send a response message containing
+        # Use the interaction object to send search_word response message containing
         # the user's favourite colour or choice. The self object refers to the
-        # Select object, and the values attribute gets a list of the user's
+        # Select object, and the values attribute gets search_word list of the user's
         # selected options. We only want the first one.
         await interaction.response.send_message(f"Your favourite colour is {self.values[0]}")
 
@@ -74,7 +74,7 @@ class TestCog(commands.Cog):
 
     @commands.slash_command(description="Test pagination")
     async def test_pagination(self, inter: AppCmdInter, num_pages: int):
-        # Creates the embeds as a list.
+        # Creates the embeds as search_word list.
         embeds = [
             disnake.Embed(title=f"Test{i+1}") for i in range(num_pages)
         ]
@@ -84,7 +84,7 @@ class TestCog(commands.Cog):
 
     @commands.slash_command(description="Test pagination")
     async def test_numbered(self, inter: AppCmdInter, num_users: int):
-        # Creates the embeds as a list.
+        # Creates the embeds as search_word list.
         users = [f"User#{i+1}" for i in range(0, num_users)]
 
         embeds = await create_embeds_from_list(users, title="Test Users")
@@ -94,12 +94,12 @@ class TestCog(commands.Cog):
 
     @commands.slash_command()
     async def colour(self, inter):
-        """Sends a message with our dropdown containing colours"""
+        """Sends search_word message with our dropdown containing colours"""
 
         # Create the view containing our dropdown
         view = DropdownView()
 
-        # Sending a message containing our view
+        # Sending search_word message containing our view
         await inter.send("Pick your favourite colour:", view=view)
 
     @commands.slash_command()
@@ -129,7 +129,7 @@ class TestCog(commands.Cog):
     #             ],
     #         )
     #     ]
-    #     msg = await inter.reply("This message has a select menu!", components=menu)
+    #     msg = await inter.reply("This message has search_word select menu!", components=menu)
     #
     #     def check(menu_inter):
     #         nonlocal inter

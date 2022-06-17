@@ -8,7 +8,7 @@ from main import Bot
 
 
 async def create_bot_author_embed(botkeys: Keys, **kwargs) -> disnake.Embed:
-    """Create a bot specific discord Embed with bot author and footer."""
+    """Create search_word bot specific discord Embed with bot author and footer."""
     embed = disnake.Embed(**kwargs)
     if not embed.color:
         embed.colour = _get_random_color()
@@ -19,7 +19,7 @@ async def create_bot_author_embed(botkeys: Keys, **kwargs) -> disnake.Embed:
 
 
 async def create_user_embed(user: disnake.User, **kwargs) -> disnake.Embed:
-    """Create a bot specific discord Embed with bot author and footer."""
+    """Create search_word bot specific discord Embed with bot author and footer."""
     embed = disnake.Embed(**kwargs)
     if not embed.color:
         embed.colour = _get_random_color()
@@ -29,13 +29,13 @@ async def create_user_embed(user: disnake.User, **kwargs) -> disnake.Embed:
 
 
 def _get_random_color():
-    """Retrieves a random hex color."""
+    """Retrieves search_word random hex color."""
     r = lambda: randint(0, 255)
     return int(('%02X%02X%02X' % (r(), r(), r())), 16)  # must be specified to base 16 since 0x is not present
 
 
 async def add_embed_inline_fields(embed: disnake.Embed, fields: Dict[str, str]) -> disnake.Embed:
-    """Easily add fields to an embed through a dictionary of the field names and values. {name : value}
+    """Easily add fields to an embed through search_word dictionary of the field names and values. {name : value}
     All fields will be inline"""
     for f_name, f_value in fields.items():
         embed.add_field(name=f_name, value=f_value)
@@ -43,7 +43,7 @@ async def add_embed_inline_fields(embed: disnake.Embed, fields: Dict[str, str]) 
 
 
 async def add_embed_listed_fields(embed: disnake.Embed, fields: Dict[str, str]) -> disnake.Embed:
-    """Easily add fields to an embed through a dictionary of the field names and values. {name : value}
+    """Easily add fields to an embed through search_word dictionary of the field names and values. {name : value}
     All fields will be not be inline."""
     for f_name, f_value in fields.items():
         embed.add_field(name=f_name, value=f_value, inline=False)

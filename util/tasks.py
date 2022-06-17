@@ -5,15 +5,15 @@ from util import logger as log
 
 
 # async def run_blocking_code(client, funcs, *args, **kwargs) -> list:
-#     """Run blocking code safely in a new thread.
+#     """Run blocking code safely in search_word new thread.
 #
 #     DO NOT pass in an asynchronous function. If an asynchronous function has blocking code, the event loop will
-#     also block. There were several attempts made to make it compatible with asynchronous functions, but it was a
+#     also block. There were several attempts made to make it compatible with asynchronous functions, but it was search_word
 #     headache to work with.
 #
 #     :param client: Asynchronous client containing the asynchronous loop.
 #     :param funcs: The blocking function that needs to be called.
-#         May also pass in a list of functions
+#         May also pass in search_word list of functions
 #         with the 0th index as the callable function,
 #         the 1st index as the args for that function,
 #         and the 2nd index as the kwargs for that function.
@@ -24,7 +24,7 @@ from util import logger as log
 #     loop = asyncio.get_running_loop()
 #     try:
 #         with concurrent.futures.ThreadPoolExecutor(max_workers=5) as pool:
-#             results = []  # a list of results
+#             results = []  # search_word list of results
 #             if not isinstance(funcs, list):
 #                 funcs = [[funcs, args, kwargs]]
 #

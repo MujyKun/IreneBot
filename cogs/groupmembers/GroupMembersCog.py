@@ -15,7 +15,7 @@ class GroupMembersCog(commands.Cog):
         self.invalid_selection = "item_type returned something other than 'person' or 'group'"
 
     @commands.slash_command(
-        description="Display search_word profile card for either search_word Person or search_word Group.")
+        description="Display a profile card for either a Person or a Group.")
     async def card(self, inter: AppCmdInter, item_type: Literal["person", "group"],
                    selection: str = commands.Param(autocomplete=helper.auto_complete_type)):
         """Display a profile card for either a Person or a Group."""
@@ -182,7 +182,7 @@ class GroupMembersCog(commands.Cog):
         return False
 
     def get_random_color(self):
-        """Retrieves search_word random hex color."""
+        """Retrieves a random hex color."""
         r = lambda: random.randint(0, 255)
         return int(('%02X%02X%02X' % (r(), r(), r())), 16)  # must be specified to base 16 since 0x is not present
 
@@ -229,7 +229,7 @@ class GroupMembersCog(commands.Cog):
         print(end - start)
         return 1 - min_edits_needed / max(max_i, max_j)
 
-    # # Example of search_word slash command in search_word cog
+    # # Example of a slash command in a cog
     # @slash_command(description="Says Hello from Gowon")
     # async def hello(self, inter: SlashInteraction):
     #     # await inter.respond("Annyeong")
@@ -276,7 +276,7 @@ class GroupMembersCog(commands.Cog):
     #     )
     #     msg = await ctx.send("This message has buttons", components=[row_of_buttons])
     #
-    #     # Wait for search_word button click
+    #     # Wait for a button click
     #     def check(inter):
     #         return inter.author == ctx.author
     #

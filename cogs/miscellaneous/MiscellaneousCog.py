@@ -10,13 +10,13 @@ class MiscellaneousCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.slash_command(name="8ball", description="Ask the 8ball search_word question.")
+    @commands.slash_command(name="8ball", description="Ask the 8ball a question.")
     async def _8ball(self, inter: AppCmdInter,
                      question: str = commands.Param(description="Question to ask the 8ball.")):
         await inter.send(f"**Question**: {question}\n" + f"**Answer**: Not implemented yet.")
         # TODO: add 8ball responses from the database
 
-    @commands.slash_command(description="Choose between search_word selection of options.")
+    @commands.slash_command(description="Choose between a selection of options.")
     async def choose(self,
                      inter: AppCmdInter,
                      choices: str = commands.Param(
@@ -36,11 +36,11 @@ class MiscellaneousCog(commands.Cog):
             return
         await send_emojis_from_string(inter, message.content)
 
-    @commands.slash_command(description="Flip search_word coin.")
+    @commands.slash_command(description="Flip a coin.")
     async def flip(self, inter: AppCmdInter):
         await inter.send(f"You flipped **{choice(['Tails', 'Heads'])}**.")
 
-    @commands.slash_command(description="Pick search_word random number between start_number and end_number.")
+    @commands.slash_command(description="Pick a random number between start_number and end_number.")
     async def random(self, inter: AppCmdInter,
                      start_number: int = commands.Param(desc="start of range"),
                      end_number: int = commands.Param(desc="end of range")):

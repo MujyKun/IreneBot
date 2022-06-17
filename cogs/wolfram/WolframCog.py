@@ -25,9 +25,9 @@ class WolframCog(commands.Cog):
             logger.warning(f"{e} (Exception) - Failed to evaluate numexpr expression {query}.")
             return False
 
-    @commands.slash_command(description="Ask search_word question to WolframAlpha")
+    @commands.slash_command(description="Ask a question to WolframAlpha")
     async def wolfram(self, inter: AppCmdInter,
-                      query: str = commands.Param(desc="WolframAlpha question as search_word string")):
+                      query: str = commands.Param(desc="WolframAlpha question as a string")):
         result = self.evaluate_math(query)
         if result:
             return await inter.send(f"**Input:** {query}\n" + f"**Result:** {result}")

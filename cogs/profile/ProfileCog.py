@@ -36,7 +36,7 @@ class ProfileCog(commands.Cog):
     async def user_banner( self, inter: AppCmdInter, user: disnake.Member ):
         await display_banner(self.bot, inter, user)
 
-    # @slash_command(description="View search_word user's profile information.")
+    # @slash_command(description="View a user's profile information.")
     # async def profile(self, inter: SlashInteraction,
     #                   user: disMember = OptionParam(lambda inter: inter.author)):
     #     embed = await create_bot_author_embed(self.bot.keys, title=f"{user.name} ({user.id})")

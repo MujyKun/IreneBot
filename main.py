@@ -9,6 +9,7 @@ if __name__ == '__main__':
     intents = disnake.Intents.default()
     intents.members = True  # turn on privileged members intent
     intents.messages = True
+    intents.message_content = True
     # intents.presences = True  # turn on presences intent
     t_keys = Keys()
 

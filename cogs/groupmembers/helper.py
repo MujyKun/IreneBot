@@ -8,13 +8,21 @@ from typing import List, Union, Optional, Tuple, Dict
 async def auto_complete_type(inter: AppCmdInter, user_input: str) -> List[str]:
     item_type = inter.filled_options['item_type']
     if item_type == "person":
-        return [f"{person.id}) {str(person.name)}" for person in await Person.get_all()
-                if user_input.lower() in str(person.name).lower()]
+        return await auto_complete_person(inter, user_input)
     elif item_type == "group":
-        return [f"{group.id}) {group.name}" for group in await Group.get_all()
-                if user_input.lower() in group.name.lower()]
+        return await auto_complete_group(inter, user_input)
     else:
         raise RuntimeError("item_type returned something other than 'person' or 'group'")
+
+
+async def auto_complete_person(inter: AppCmdInter, user_input: str) -> List[str]:
+    return [f"{person.id}) {str(person.name)}" for person in await Person.get_all()
+            if user_input.lower() in str(person.name).lower()]
+
+
+async def auto_complete_group(inter: AppCmdInter, user_input: str) -> List[str]:
+    return [f"{group.id}) {group.name}" for group in await Group.get_all()
+            if user_input.lower() in group.name.lower()]
 
 
 async def get_call_count_leaderboard(objects: Union[List[Person], List[Group]]) -> Optional[List[Tuple[Union[Person, Group], int]]]:

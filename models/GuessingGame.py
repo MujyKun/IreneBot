@@ -2,7 +2,7 @@ import asyncio
 from typing import List, Dict, Optional, Union
 
 import disnake.ext.commands
-from IreneAPIWrapper.models import User, Affiliation, Media
+from IreneAPIWrapper.models import User, Affiliation, Media, Person, Group
 from IreneAPIWrapper.exceptions import Empty
 from dataclasses import dataclass
 
@@ -25,8 +25,9 @@ class PlayerScore:
 
 
 class GuessingGame:
-    def __init__(self, ctx, bot, max_rounds, timeout, gender, difficulty, is_nsfw):
+    def __init__(self, ctx, bot, max_rounds, timeout, gender, difficulty, is_nsfw, user: User):
         self.ctx: disnake.ext.commands.Context = ctx
+        self.host_user = user
         self.bot: Bot = bot
         self.max_rounds = max_rounds
         self.players: Dict[int, PlayerScore] = {}
@@ -37,7 +38,7 @@ class GuessingGame:
         self.correct_answers: List[str] = []
         self.current_affiliation: Optional[Affiliation] = None
         self.current_media: Optional[Media] = None
-        self.is_nsfw = False
+        self.is_nsfw = is_nsfw
 
         self.pool: List[Media] = []
 
@@ -51,8 +52,31 @@ class GuessingGame:
         """Start a guessing game."""
         await self._generate_new_question()
 
+    async def _determine_filter_pool(self):
+        """Determine the filtered media pool for a user."""
+        person_ids = self.host_user.gg_filter_person_ids
+        persons = [await Person.get(person_id) for person_id in person_ids]
+        affiliations_ = []
+        for person in persons:
+            affiliations_ += person.affiliations
+
+        affiliations = []
+        [affiliations.append(aff) for aff in affiliations if aff not in affiliations]
+
+        media_pool = await Media.get_all(affiliations)
+
+        if not media_pool:
+            raise Empty
+
+        self.pool = media_pool
+
     async def _determine_pool(self):
+        """Determine the media pool for a user."""
         aff_pool = []
+
+        if self.host_user.gg_filter_active:
+            return await self._determine_filter_pool()
+
         for aff in await Affiliation.get_all():
             # check gender
             if self.gender != "mixed":
@@ -69,6 +93,9 @@ class GuessingGame:
 
         medias: List[Media] = await Media.get_all(affiliations=aff_pool)
         for media in medias:
+            if media.is_nsfw and not self.is_nsfw:
+                continue
+
             difficulty = media.difficulty
             if not difficulty:
                 media_pool.append(media)
@@ -200,6 +227,54 @@ class GroupGuessingGame(GuessingGame):
     """
     A GuessingGame, but instead of guessing Persons, you guess a Group name.
     """
-    def __init__(self, ctx, bot, max_rounds, timeout, gender, difficulty, is_nsfw):
-        super(GroupGuessingGame, self).__init__(ctx, bot, max_rounds, timeout, gender, difficulty, is_nsfw)
+    def __init__(self, ctx, bot, max_rounds, timeout, gender, difficulty, is_nsfw, user: User):
+        super(GroupGuessingGame, self).__init__(ctx, bot, max_rounds, timeout, gender, difficulty, is_nsfw, user)
         ...
+
+    async def _send_results(self, winner: disnake.User = None):
+        """Send the results of a round and continue/finish the game.
+
+        :param winner: Optional[:ref:`disnake.User`]
+            The winner of the round if there is one.
+        """
+        await self.current_media.upsert_guesses(correct=bool(winner))
+
+        win_msg = "No one guessed correctly." if not winner else f"{winner.display_name} won the round."
+        correct_answer_msg = f"The correct answer was {self.current_affiliation.group.name}."
+        possible_answer_msg = f"Possible answers: {self.correct_answers}"
+        result_message = win_msg + "\n" + correct_answer_msg + "\n" + possible_answer_msg
+        await self.ctx.send(result_message)
+
+        if self.rounds < self.max_rounds and not self._complete:
+            await self._generate_new_question()
+        else:
+            await self._print_final_winners()
+            self._complete = True
+
+    async def _generate_correct_answers(self):
+        possible_names = [str(self.current_affiliation.group.name)] + \
+                         await self.current_affiliation.group.get_aliases_as_strings()
+
+        possible_names_no_dupes = []
+        [possible_names_no_dupes.append(name.lower()) for name in possible_names if name.lower()
+            not in possible_names_no_dupes]
+
+        self.correct_answers = possible_names_no_dupes
+
+    async def _determine_filter_pool(self):
+        """Determine the filtered media pool for a user."""
+        group_ids = self.host_user.gg_filter_group_ids
+        groups = [await Group.get(group_id) for group_id in group_ids]
+        affiliations_ = []
+        for group in groups:
+            affiliations_ += group.affiliations
+
+        affiliations = []
+        [affiliations.append(aff) for aff in affiliations if aff not in affiliations]
+
+        media_pool = await Media.get_all(affiliations)
+
+        if not media_pool:
+            raise Empty
+
+        self.pool = media_pool

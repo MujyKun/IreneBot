@@ -5,6 +5,7 @@ cogs = [
         "profile.ProfileCog",
         "wolfram.WolframCog",
         "testcog.TestCog",
-        "guessinggame.GuessingGameCog"
+        "guessinggame.GuessingGameCog",
+        "unscramblegame.UnscrambleGameCog"
 ]
 

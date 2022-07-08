@@ -7,6 +7,10 @@ from cogs.groupmembers import helper as gm_helper
 from IreneAPIWrapper.models import User, Group, Person
 
 
+# TODO:
+# When accrediting a user, upsert to the database.
+# When a game finishes, make an update to the stats in the database.
+
 class GuessingGameCog(commands.Cog):
     def __init__(self, bot: Bot):
         self.bot = bot

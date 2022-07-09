@@ -1,9 +1,11 @@
 import asyncio
 import random
+from datetime import datetime
 from typing import List, Dict, Optional, Union
 
 import disnake.ext.commands
-from IreneAPIWrapper.models import User, Affiliation, Media, Person, Group
+from IreneAPIWrapper.models import User, Affiliation, Media, Person, Group, Date, \
+    UnscrambleGame as UnscrambleGameModel
 from IreneAPIWrapper.exceptions import Empty
 
 from random import choice
@@ -20,6 +22,7 @@ class UnscrambleGame(BaseScoreGame):
         super(UnscrambleGame, self).__init__(ctx, bot, user, max_rounds, difficulty, gender, timeout)
         self.current_question: Optional[str] = None  # scrambled
         self.current_affiliation: Optional[Affiliation] = None
+        self.__us: Optional[UnscrambleGameModel] = None
 
         self.pool: List[Affiliation] = []
         self.__pool_was_set = False  # confirm if we've already set the initial pool.
@@ -111,5 +114,32 @@ class UnscrambleGame(BaseScoreGame):
         if not self.current_question:
             raise Empty
 
-    async def _update_game_in_db(self):
-        ...
+    async def _update_game_in_db(self, finished=False, status=True):
+        """
+        Update the game in the database.
+
+        :param finished: bool
+            Whether the game is finished.
+        :param status: bool
+            Whether to update the status IDs to the database.
+        """
+        if not self._date or not self.__us:
+            date_id = await Date.insert(self.start_time, self.end_time)
+            self._date = await Date.get(date_id)
+
+            us_id = await UnscrambleGameModel.insert(
+                date_id=date_id,
+                status_ids=[],
+                mode_id=self._mode.id,
+                difficulty_id=self.difficulty.id)
+            self.__us = await UnscrambleGameModel.get(us_id)
+
+        if status and self.__us:
+            status_ids = [player.status.id for player in self.players.values()]
+            await self.__us.update_status(status_ids)
+
+        if finished:
+            self.end_time = datetime.now()
+
+            if self._date:
+                await self._date.update_end_date(end_date=self.end_time)

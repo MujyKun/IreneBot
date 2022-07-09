@@ -1,14 +1,13 @@
-import asyncio
 import datetime
-from typing import List, Dict, Optional, Union
+from typing import List, Optional, Union
 
 import disnake.ext.commands
 from IreneAPIWrapper.models import User, Affiliation, Media, Person, Group, Date, \
-    GuessingGame as GuessingGameModel, NORMAL, GROUP, Mode
+    GuessingGame as GuessingGameModel
 from IreneAPIWrapper.exceptions import Empty
 
 from random import choice
-from . import PlayerScore, BaseScoreGame
+from . import BaseScoreGame
 
 
 class GuessingGame(BaseScoreGame):
@@ -18,9 +17,7 @@ class GuessingGame(BaseScoreGame):
         self.current_media: Optional[Media] = None
         self.is_nsfw = is_nsfw
         self.__played_media_ids: List[int] = []
-        self.__date: Optional[Date] = None
         self.__gg: Optional[GuessingGameModel] = None
-        self._mode: Mode = NORMAL
 
         self.pool: List[Media] = []
 
@@ -141,22 +138,18 @@ class GuessingGame(BaseScoreGame):
             await self._print_final_winners()
             self._complete = True
 
-    async def _update_game_in_db(self, finished=False):
+    async def _update_game_in_db(self, finished=False, media_and_status=True):
         """
         Update the game in the database.
 
         :param finished: bool
             Whether the game is finished.
+        :param media_and_status: bool
+            Whether to update the media and status IDs to the database.
         """
-        if finished:
-            self.end_time = datetime.datetime.now()
-            if self.__date:
-                await self.__date.update_end_date(end_date=self.end_time)
-            return
-
-        if not self.__date or not self.__gg:
+        if not self._date or not self.__gg:
             date_id = await Date.insert(self.start_time, self.end_time)
-            self.__date = await Date.get(date_id)
+            self._date = await Date.get(date_id)
 
             gg_id = await GuessingGameModel.insert(
                 date_id=date_id,
@@ -167,6 +160,15 @@ class GuessingGame(BaseScoreGame):
                 is_nsfw=self.is_nsfw)
             self.__gg = await GuessingGameModel.get(gg_id)
 
+        if media_and_status and self.__gg:
+            status_ids = [player.status.id for player in self.players.values()]
+            media_ids = self.__played_media_ids
+            await self.__gg.update_media_and_status(media_ids, status_ids)
+
+        if finished:
+            self.end_time = datetime.datetime.now()
+            if self._date:
+                await self._date.update_end_date(end_date=self.end_time)
 
 
 

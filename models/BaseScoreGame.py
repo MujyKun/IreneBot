@@ -1,6 +1,6 @@
 from . import PlayerScore, Game, User
-from typing import List
-from IreneAPIWrapper.models import UserStatus, get_difficulty
+from typing import List, Optional
+from IreneAPIWrapper.models import UserStatus, get_difficulty, Date, Mode, NORMAL
 import asyncio
 import disnake
 
@@ -15,6 +15,8 @@ class BaseScoreGame(Game):
         self.gender = gender  # male / female / mixed
         self.timeout = timeout
         self.correct_answers: List[str] = []
+        self._date: Optional[Date] = None
+        self._mode: Mode = NORMAL
 
         # default difficulty - May differ in concrete objects.
         self.easy = 0.8

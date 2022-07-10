@@ -30,4 +30,3 @@ def get_user_count(bot: Bot) -> int:
     """Get the amount of users that the bot is watching over."""
     member_count = sum([guild.member_count for guild in bot.guilds])
     return member_count
-

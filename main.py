@@ -2,10 +2,11 @@ import asyncio
 import disnake
 from keys import Keys
 from models import Bot
+
 DEV_MODE = True
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     intents = disnake.Intents.default()
     intents.members = True  # turn on privileged members intent
     intents.messages = True
@@ -17,8 +18,9 @@ if __name__ == '__main__':
         "case_insensitive": True,
         "owner_id": t_keys.bot_owner_id,
         "intents": intents,
-        "test_guilds": [t_keys.support_server_id],
-        "sync_commands_debug": True
+        "test_guilds": [t_keys.support_server_id, 703549827044343858],
+        "sync_commands_debug": True,
+        "sync_commands": True,
     }
     loop = asyncio.get_event_loop()
 
@@ -34,5 +36,3 @@ if __name__ == '__main__':
     finally:
         ...  # we want the API to finish everything in the queue before closing the loop.
         # loop.close()
-
-

@@ -10,15 +10,23 @@ class UnscrambleGameCog(commands.Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
 
-    @commands.slash_command(name="unscramblegame", description="Play an unscramble game.")
-    async def unscramblegame(self, inter: AppCmdInter,
-                           max_rounds: commands.Range[3, 60] = 20,
-                           timeout: commands.Range[5, 60] = 20,
-                           gender: Literal["male", "female", "mixed"] = "mixed",
-                           difficulty: Literal["easy", "medium", "hard"] = "medium"):
+    @commands.slash_command(
+        name="unscramblegame", description="Play an unscramble game."
+    )
+    @commands.guild_only()
+    async def unscramblegame(
+        self,
+        inter: AppCmdInter,
+        max_rounds: commands.Range[3, 60] = 20,
+        timeout: commands.Range[5, 60] = 20,
+        gender: Literal["male", "female", "mixed"] = "mixed",
+        difficulty: Literal["easy", "medium", "hard"] = "medium",
+    ):
         """Plays a guessing game."""
         user = await User.get(inter.user.id)
-        us = UnscrambleGame(inter, self.bot, max_rounds, timeout, gender, difficulty, user=user)
+        us = UnscrambleGame(
+            inter, self.bot, max_rounds, timeout, gender, difficulty, user=user
+        )
 
         await inter.send("Starting unscramble game")
         await us.start()

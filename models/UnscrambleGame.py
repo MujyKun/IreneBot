@@ -4,8 +4,15 @@ from datetime import datetime
 from typing import List, Dict, Optional, Union
 
 import disnake.ext.commands
-from IreneAPIWrapper.models import User, Affiliation, Media, Person, Group, Date, \
-    UnscrambleGame as UnscrambleGameModel
+from IreneAPIWrapper.models import (
+    User,
+    Affiliation,
+    Media,
+    Person,
+    Group,
+    Date,
+    UnscrambleGame as UnscrambleGameModel,
+)
 from IreneAPIWrapper.exceptions import Empty
 
 from random import choice
@@ -19,7 +26,9 @@ if TYPE_CHECKING:
 
 class UnscrambleGame(BaseScoreGame):
     def __init__(self, ctx, bot, max_rounds, timeout, gender, difficulty, user: User):
-        super(UnscrambleGame, self).__init__(ctx, bot, user, max_rounds, difficulty, gender, timeout)
+        super(UnscrambleGame, self).__init__(
+            ctx, bot, user, max_rounds, difficulty, gender, timeout
+        )
         self.current_question: Optional[str] = None  # scrambled
         self.current_affiliation: Optional[Affiliation] = None
         self.__us: Optional[UnscrambleGameModel] = None
@@ -33,7 +42,9 @@ class UnscrambleGame(BaseScoreGame):
                 await self._determine_pool()
             except Empty:
                 self._complete = True
-                await self.ctx.send("There are no available affiliations for your unscramble game.")
+                await self.ctx.send(
+                    "There are no available affiliations for your unscramble game."
+                )
                 if self.players:
                     await self._print_final_winners()
                 return
@@ -43,9 +54,13 @@ class UnscrambleGame(BaseScoreGame):
         try:
             await self._generate_correct_answers()
         except Empty:
-            return await self._generate_new_question()  # recursion until we run out of questions.
+            return (
+                await self._generate_new_question()
+            )  # recursion until we run out of questions.
 
-        await self.ctx.send(f"The name I want you to unscramble is {self.current_question}.")
+        await self.ctx.send(
+            f"The name I want you to unscramble is {self.current_question}."
+        )
         await self._wait_for_answer()
 
     async def _send_results(self, winner: disnake.User = None):
@@ -54,7 +69,11 @@ class UnscrambleGame(BaseScoreGame):
         :param winner: Optional[:ref:`disnake.User`]
             The winner of the round if there is one.
         """
-        win_msg = "No one guessed correctly." if not winner else f"{winner.display_name} won the round."
+        win_msg = (
+            "No one guessed correctly."
+            if not winner
+            else f"{winner.display_name} won the round."
+        )
         correct_answer_msg = f"The correct answer was {self.correct_answers[0]}."
         result_message = win_msg + "\n" + correct_answer_msg
         await self.ctx.send(result_message)
@@ -85,9 +104,13 @@ class UnscrambleGame(BaseScoreGame):
 
         if self.difficulty == "hard":
             if self.current_affiliation.person.former_name:
-                possible_questions.append(str(self.current_affiliation.person.former_name))
+                possible_questions.append(
+                    str(self.current_affiliation.person.former_name)
+                )
             if self.current_affiliation.person.aliases:
-                possible_questions += [alias.name for alias in self.current_affiliation.person.aliases]
+                possible_questions += [
+                    alias.name for alias in self.current_affiliation.person.aliases
+                ]
 
         if not possible_questions:
             raise Empty
@@ -131,7 +154,8 @@ class UnscrambleGame(BaseScoreGame):
                 date_id=date_id,
                 status_ids=[],
                 mode_id=self._mode.id,
-                difficulty_id=self.difficulty.id)
+                difficulty_id=self.difficulty.id,
+            )
             self.__us = await UnscrambleGameModel.get(us_id)
 
         if status and self.__us:

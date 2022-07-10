@@ -2,8 +2,15 @@ import datetime
 from typing import List, Optional, Union
 
 import disnake.ext.commands
-from IreneAPIWrapper.models import User, Affiliation, Media, Person, Group, Date, \
-    GuessingGame as GuessingGameModel
+from IreneAPIWrapper.models import (
+    User,
+    Affiliation,
+    Media,
+    Person,
+    Group,
+    Date,
+    GuessingGame as GuessingGameModel,
+)
 from IreneAPIWrapper.exceptions import Empty
 
 from random import choice
@@ -11,8 +18,12 @@ from . import BaseScoreGame
 
 
 class GuessingGame(BaseScoreGame):
-    def __init__(self, ctx, bot, max_rounds, timeout, gender, difficulty, is_nsfw, user: User):
-        super(GuessingGame, self).__init__(ctx, bot, user, max_rounds, difficulty, gender, timeout)
+    def __init__(
+        self, ctx, bot, max_rounds, timeout, gender, difficulty, is_nsfw, user: User
+    ):
+        super(GuessingGame, self).__init__(
+            ctx, bot, user, max_rounds, difficulty, gender, timeout
+        )
         self.current_affiliation: Optional[Affiliation] = None
         self.current_media: Optional[Media] = None
         self.is_nsfw = is_nsfw
@@ -89,7 +100,9 @@ class GuessingGame(BaseScoreGame):
                 await self._determine_pool()
             except Empty:
                 self._complete = True
-                await self.ctx.channel.send("There is no media available for your guessing game. Try changing your selections.")
+                await self.ctx.channel.send(
+                    "There is no media available for your guessing game. Try changing your selections."
+                )
                 return
 
         media = choice(self.pool)
@@ -106,14 +119,22 @@ class GuessingGame(BaseScoreGame):
         await self._wait_for_answer()
 
     async def _generate_correct_answers(self):
-        possible_names = [str(self.current_affiliation.person.name).lower(), self.current_affiliation.stage_name.lower()] + \
-                         await self.current_affiliation.person.get_aliases_as_strings()
+        possible_names = [
+            str(self.current_affiliation.person.name).lower(),
+            self.current_affiliation.stage_name.lower(),
+        ] + await self.current_affiliation.person.get_aliases_as_strings()
 
         if self.current_media.affiliation.person.former_name:
-            possible_names.append(str(self.current_media.affiliation.person.former_name).lower())
+            possible_names.append(
+                str(self.current_media.affiliation.person.former_name).lower()
+            )
 
         possible_names_no_dupes = []
-        [possible_names_no_dupes.append(name) for name in possible_names if name not in possible_names_no_dupes]
+        [
+            possible_names_no_dupes.append(name)
+            for name in possible_names
+            if name not in possible_names_no_dupes
+        ]
 
         self.correct_answers = possible_names_no_dupes
 
@@ -125,11 +146,19 @@ class GuessingGame(BaseScoreGame):
         """
         await self.current_media.upsert_guesses(correct=bool(winner))
 
-        win_msg = "No one guessed correctly." if not winner else f"{winner.display_name} won the round."
-        correct_answer_msg = f"The correct answer was {self.current_affiliation.stage_name} from " \
-                             f"{self.current_affiliation.group.name}"
+        win_msg = (
+            "No one guessed correctly."
+            if not winner
+            else f"{winner.display_name} won the round."
+        )
+        correct_answer_msg = (
+            f"The correct answer was {self.current_affiliation.stage_name} from "
+            f"{self.current_affiliation.group.name}"
+        )
         possible_answer_msg = f"Possible answers: {self.correct_answers}"
-        result_message = win_msg + "\n" + correct_answer_msg + "\n" + possible_answer_msg
+        result_message = (
+            win_msg + "\n" + correct_answer_msg + "\n" + possible_answer_msg
+        )
         await self.ctx.channel.send(result_message)
 
         if not self.is_complete:
@@ -157,7 +186,8 @@ class GuessingGame(BaseScoreGame):
                 status_ids=[],
                 mode_id=self._mode.id,
                 difficulty_id=self.difficulty.id,
-                is_nsfw=self.is_nsfw)
+                is_nsfw=self.is_nsfw,
+            )
             self.__gg = await GuessingGameModel.get(gg_id)
 
         if media_and_status and self.__gg:
@@ -169,8 +199,3 @@ class GuessingGame(BaseScoreGame):
             self.end_time = datetime.datetime.now()
             if self._date:
                 await self._date.update_end_date(end_date=self.end_time)
-
-
-
-
-

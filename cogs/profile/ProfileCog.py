@@ -19,10 +19,10 @@ class ProfileCog(commands.Cog):
         await display_avatar(inter, user)
 
     @commands.user_command(name="Avatar", description="Display user avatar")
-    async def user_avatar( self, inter: AppCmdInter, user: disnake.Member ):
+    async def user_avatar(self, inter: AppCmdInter, user: disnake.Member):
         await display_avatar(inter, user)
 
-    @commands.slash_command(name="banner",description="Display user's profile banner.")
+    @commands.slash_command(name="banner", description="Display user's profile banner.")
     async def slash_banner(
         self,
         inter: AppCmdInter,
@@ -32,8 +32,10 @@ class ProfileCog(commands.Cog):
     ):
         await display_banner(self.bot, inter, user)
 
-    @commands.user_command(name="User Banner", description="Display user's profile banner.")
-    async def user_banner( self, inter: AppCmdInter, user: disnake.Member ):
+    @commands.user_command(
+        name="User Banner", description="Display user's profile banner."
+    )
+    async def user_banner(self, inter: AppCmdInter, user: disnake.Member):
         await display_banner(self.bot, inter, user)
 
     # @slash_command(description="View a user's profile information.")

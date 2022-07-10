@@ -1,5 +1,3 @@
-
-
 async def create_bias_game_image():
     ...
 

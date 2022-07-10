@@ -8,8 +8,13 @@ class GroupGuessingGame(GuessingGame):
     """
     A GuessingGame, but instead of guessing Persons, you guess a Group name.
     """
-    def __init__(self, ctx, bot, max_rounds, timeout, gender, difficulty, is_nsfw, user: User):
-        super(GroupGuessingGame, self).__init__(ctx, bot, max_rounds, timeout, gender, difficulty, is_nsfw, user)
+
+    def __init__(
+        self, ctx, bot, max_rounds, timeout, gender, difficulty, is_nsfw, user: User
+    ):
+        super(GroupGuessingGame, self).__init__(
+            ctx, bot, max_rounds, timeout, gender, difficulty, is_nsfw, user
+        )
         self._mode: Mode = GROUP
         ...
 
@@ -21,10 +26,18 @@ class GroupGuessingGame(GuessingGame):
         """
         await self.current_media.upsert_guesses(correct=bool(winner))
 
-        win_msg = "No one guessed correctly." if not winner else f"{winner.display_name} won the round."
-        correct_answer_msg = f"The correct answer was {self.current_affiliation.group.name}."
+        win_msg = (
+            "No one guessed correctly."
+            if not winner
+            else f"{winner.display_name} won the round."
+        )
+        correct_answer_msg = (
+            f"The correct answer was {self.current_affiliation.group.name}."
+        )
         possible_answer_msg = f"Possible answers: {self.correct_answers}"
-        result_message = win_msg + "\n" + correct_answer_msg + "\n" + possible_answer_msg
+        result_message = (
+            win_msg + "\n" + correct_answer_msg + "\n" + possible_answer_msg
+        )
         await self.ctx.send(result_message)
 
         if self.rounds < self.max_rounds and not self._complete:
@@ -34,12 +47,16 @@ class GroupGuessingGame(GuessingGame):
             self._complete = True
 
     async def _generate_correct_answers(self):
-        possible_names = [str(self.current_affiliation.group.name)] + \
-                         await self.current_affiliation.group.get_aliases_as_strings()
+        possible_names = [
+            str(self.current_affiliation.group.name)
+        ] + await self.current_affiliation.group.get_aliases_as_strings()
 
         possible_names_no_dupes = []
-        [possible_names_no_dupes.append(name.lower()) for name in possible_names if name.lower()
-            not in possible_names_no_dupes]
+        [
+            possible_names_no_dupes.append(name.lower())
+            for name in possible_names
+            if name.lower() not in possible_names_no_dupes
+        ]
 
         self.correct_answers = possible_names_no_dupes
 

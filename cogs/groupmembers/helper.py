@@ -6,26 +6,36 @@ from typing import List, Union, Optional, Tuple, Dict
 
 
 async def auto_complete_type(inter: AppCmdInter, user_input: str) -> List[str]:
-    item_type = inter.filled_options['item_type']
+    item_type = inter.filled_options["item_type"]
     if item_type == "person":
         return await auto_complete_person(inter, user_input)
     elif item_type == "group":
         return await auto_complete_group(inter, user_input)
     else:
-        raise RuntimeError("item_type returned something other than 'person' or 'group'")
+        raise RuntimeError(
+            "item_type returned something other than 'person' or 'group'"
+        )
 
 
 async def auto_complete_person(inter: AppCmdInter, user_input: str) -> List[str]:
-    return [f"{person.id}) {str(person.name)}" for person in await Person.get_all()
-            if user_input.lower() in str(person.name).lower()]
+    return [
+        f"{person.id}) {str(person.name)}"
+        for person in await Person.get_all()
+        if user_input.lower() in str(person.name).lower()
+    ]
 
 
 async def auto_complete_group(inter: AppCmdInter, user_input: str) -> List[str]:
-    return [f"{group.id}) {group.name}" for group in await Group.get_all()
-            if user_input.lower() in group.name.lower()]
+    return [
+        f"{group.id}) {group.name}"
+        for group in await Group.get_all()
+        if user_input.lower() in group.name.lower()
+    ]
 
 
-async def get_call_count_leaderboard(objects: Union[List[Person], List[Group]]) -> Optional[List[Tuple[Union[Person, Group], int]]]:
+async def get_call_count_leaderboard(
+    objects: Union[List[Person], List[Group]]
+) -> Optional[List[Tuple[Union[Person, Group], int]]]:
     """
     Get a list of sorted (descending) values for the call count of a Person or Group.
 
@@ -52,16 +62,21 @@ async def get_call_count_leaderboard(objects: Union[List[Person], List[Group]]) 
         for obj in objects:
             persons = [affiliation.person for affiliation in obj.affiliations]
             group_called_amounts[obj] = sum(person.call_count for person in persons)
-        group_called_amounts_sorted = sorted(group_called_amounts, key=lambda x: group_called_amounts[x],
-                                             reverse=True)
+        group_called_amounts_sorted = sorted(
+            group_called_amounts, key=lambda x: group_called_amounts[x], reverse=True
+        )
         for obj in group_called_amounts_sorted:
             group_called_amounts_final.append((obj, group_called_amounts[obj]))
         return group_called_amounts_final
     else:
-        raise NotImplementedError(f"An entity aside from a person or object has not been implemented.")
+        raise NotImplementedError(
+            f"An entity aside from a person or object has not been implemented."
+        )
 
 
-async def search_for_obj_by_alias(search_name, persons=True) -> Union[List[Person], List[Group]]:
+async def search_for_obj_by_alias(
+    search_name, persons=True
+) -> Union[List[Person], List[Group]]:
     """
     Check if a name matches with an alias or a Person/Group's full name.
 
@@ -75,7 +90,9 @@ async def search_for_obj_by_alias(search_name, persons=True) -> Union[List[Perso
     """
     if persons:
         persons: List[Person] = await Person.get_all()
-        filtered = [item for item in persons if await _filter_by_name(item, search_name)]
+        filtered = [
+            item for item in persons if await _filter_by_name(item, search_name)
+        ]
     else:
         groups: List[Group] = await Group.get_all()
         filtered = [item for item in groups if await _filter_by_name(item, search_name)]
@@ -96,7 +113,12 @@ async def _filter_by_name(obj: Union[Person, Group], name: str):
     similarity_required = 0.75
 
     # check for matching aliases
-    if any([levenshtein_distance(name, alias.lower()) >= similarity_required for alias in aliases]):
+    if any(
+        [
+            levenshtein_distance(name, alias.lower()) >= similarity_required
+            for alias in aliases
+        ]
+    ):
         return True
 
     # check for matching group names or person full names.
@@ -106,7 +128,10 @@ async def _filter_by_name(obj: Union[Person, Group], name: str):
     # check for matching stage names
     if isinstance(obj, Person):
         for aff in obj.affiliations:
-            if levenshtein_distance(name, aff.stage_name.lower()) >= similarity_required:
+            if (
+                levenshtein_distance(name, aff.stage_name.lower())
+                >= similarity_required
+            ):
                 return True
 
     return False
@@ -115,7 +140,9 @@ async def _filter_by_name(obj: Union[Person, Group], name: str):
 def get_random_color():
     """Retrieves a random hex color."""
     r = lambda: random.randint(0, 255)
-    return int(('%02X%02X%02X' % (r(), r(), r())), 16)  # must be specified to base 16 since 0x is not present
+    return int(
+        ("%02X%02X%02X" % (r(), r(), r())), 16
+    )  # must be specified to base 16 since 0x is not present
 
 
 def levenshtein_distance(search_word: str, target_word: str) -> float:
@@ -150,9 +177,11 @@ def levenshtein_distance(search_word: str, target_word: str) -> float:
 
             else:
                 edit_cost = 1
-            edits[(i, j)] = min(edits[(i - 1, j)] + 1,
-                                edits[(i, j - 1)] + 1,
-                                edits[(i - 1, j - 1)] + edit_cost)
+            edits[(i, j)] = min(
+                edits[(i - 1, j)] + 1,
+                edits[(i, j - 1)] + 1,
+                edits[(i - 1, j - 1)] + edit_cost,
+            )
 
     min_edits_needed = edits[(max_i, max_j)]
     return 1 - min_edits_needed / max(max_i, max_j)

@@ -15,8 +15,12 @@ class Bot(AutoShardedBot):
 
         self.dev_mode = dev_mode
 
-        api = IreneAPIClient(token=keys.api_token, user_id=keys.bot_owner_id,
-                             api_url=keys.api_url, port=keys.api_port)
+        api = IreneAPIClient(
+            token=keys.api_token,
+            user_id=keys.bot_owner_id,
+            api_url=keys.api_url,
+            port=keys.api_port,
+        )
 
         self.api: IreneAPIClient = api
 
@@ -30,19 +34,29 @@ class Bot(AutoShardedBot):
 
         print(f"Connected to IreneAPI at {datetime.now()}")
 
-        await self.start(self.keys.prod_bot_token if not self.dev_mode else self.keys.dev_bot_token)
+        await self.start(
+            self.keys.prod_bot_token if not self.dev_mode else self.keys.dev_bot_token
+        )
 
     async def on_ready(self):
-        print(f"{self.keys.bot_name} is now ready at {datetime.now()}.\n"
-              f"{self.keys.bot_name} is now active in test guild {self.keys.support_server_id}.")
+        print(
+            f"{self.keys.bot_name} is now ready at {datetime.now()}.\n"
+            f"{self.keys.bot_name} is now active in test guild {self.keys.support_server_id}."
+        )
 
     async def on_command_error(self, context, exception):
         # TODO: errors.Cooldown was not found - causes an AttributeError when put in return_error_to_user
-        return_error_to_user = [errors.BotMissingPermissions, errors.BadArgument, errors.MemberNotFound,
-                                errors.UserNotFound, errors.EmojiNotFound]
+        return_error_to_user = [
+            errors.BotMissingPermissions,
+            errors.BadArgument,
+            errors.MemberNotFound,
+            errors.UserNotFound,
+            errors.EmojiNotFound,
+        ]
         if isinstance(exception, errors.CommandNotFound):
             return
         elif isinstance(exception, errors.CommandInvokeError):
+            print(exception)
             try:
                 if exception.original.status == 403:
                     return
@@ -53,3 +67,6 @@ class Bot(AutoShardedBot):
             return await context.send(f"{exception}")
         else:
             logger.error(exception)
+
+    async def on_message(self, message):
+        await self.process_commands(message)

@@ -5,6 +5,7 @@ from util import logger
 import numexpr
 import urllib.parse
 
+
 class WolframCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -13,7 +14,7 @@ class WolframCog(commands.Cog):
     def evaluate_math(query):
         try:
             # do not allow user input to use any python functions.
-            query = query.replace("^", '**')
+            query = query.replace("^", "**")
             # switched to third party library for simpler evaluations.
             result = numexpr.evaluate(query).item()
             return float(result)
@@ -22,12 +23,17 @@ class WolframCog(commands.Cog):
         except SyntaxError:
             return False
         except Exception as e:
-            logger.warning(f"{e} (Exception) - Failed to evaluate numexpr expression {query}.")
+            logger.warning(
+                f"{e} (Exception) - Failed to evaluate numexpr expression {query}."
+            )
             return False
 
     @commands.slash_command(description="Ask a question to WolframAlpha")
-    async def wolfram(self, inter: AppCmdInter,
-                      query: str = commands.Param(desc="WolframAlpha question as a string")):
+    async def wolfram(
+        self,
+        inter: AppCmdInter,
+        query: str = commands.Param(desc="WolframAlpha question as a string"),
+    ):
         result = self.evaluate_math(query)
         if result:
             return await inter.send(f"**Input:** {query}\n" + f"**Result:** {result}")

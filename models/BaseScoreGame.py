@@ -9,6 +9,7 @@ class BaseScoreGame(Game):
     """
     Is an abstract model for a game with a competition & point system
     """
+
     def __init__(self, ctx, bot, user, max_rounds, difficulty, gender, timeout):
         super(BaseScoreGame, self).__init__(ctx, bot, user, max_rounds)
         self.difficulty = get_difficulty(difficulty)  # easy / medium / hard
@@ -39,7 +40,11 @@ class BaseScoreGame(Game):
         :returns: List[:ref:`PlayerScore`]
             A list of PlayerScores.
         """
-        sorted_user_ids = sorted(self.players, key=lambda user_id: (self.players[user_id]).status.score, reverse=True)
+        sorted_user_ids = sorted(
+            self.players,
+            key=lambda user_id: (self.players[user_id]).status.score,
+            reverse=True,
+        )
         return [self.players[user_id] for user_id in sorted_user_ids]
 
     async def _accredit_player(self, user_id: int):
@@ -72,7 +77,9 @@ class BaseScoreGame(Game):
         """Print the final winners of the game"""
         player_scores = self._get_sorted_player_scores()
         if player_scores:
-            scores = '\n'.join([f"{str(player_score)}" for player_score in player_scores])
+            scores = "\n".join(
+                [f"{str(player_score)}" for player_score in player_scores]
+            )
             msg = f"The final scores are:\n\n{scores}"
         else:
             msg = "The Game has finished! No one has received a point in the Game. "
@@ -87,13 +94,17 @@ class BaseScoreGame(Game):
 
     async def _wait_for_answer(self):
         """Wait for the correct guessing game answer."""
+
         def check_for_answer(message):
             """Check if a message contains the correct answer."""
             same_channel = message.channel == self.ctx.channel
             correct_answer = message.content.lower() in self.correct_answers
             return same_channel and correct_answer
+
         try:
-            msg = await self.bot.wait_for('message', check=check_for_answer, timeout=self.timeout)
+            msg = await self.bot.wait_for(
+                "message", check=check_for_answer, timeout=self.timeout
+            )
             await self._accredit_player(msg.author.id)
             await self._send_results(msg.author)
         except asyncio.TimeoutError:

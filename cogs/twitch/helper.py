@@ -1,10 +1,11 @@
 import random
-from typing import List, Union
+from typing import List, Union, Optional
 
 import disnake
-from IreneAPIWrapper.models.twitchaccount import TwitchAccount
+from IreneAPIWrapper.models import TwitchAccount, AbstractModel
 from IreneAPIWrapper.models import Person, Group, Channel, Guild
 from disnake.ext import commands
+from models import Bot
 
 
 async def _subscribe(twitch_username, guild: disnake.Guild, channel_id, role_id=None):
@@ -152,3 +153,46 @@ async def auto_complete_type_subbed_guild(
     """Auto-complete typing for the twitch accounts subscribed to in a guild."""
     accounts: List[TwitchAccount] = await get_subscribed(inter.guild)
     return [account.name for account in accounts]
+
+
+async def get_discord_channel(bot: Bot, channel: Channel) -> Optional[disnake.TextChannel]:
+    """Get a discord channel without worrying about errors."""
+    discord_channel = bot.get_channel(channel.id)
+    try:
+        if not discord_channel:
+            discord_channel = await bot.fetch_channel(channel.id)
+    except Exception as e:
+        print(f"Failed to fetch channel {channel.id} - {e}")
+    return discord_channel
+
+
+async def send_twitch_notifications(bot: Bot, channels: List[Channel], twitch_account: TwitchAccount):
+    """Send twitch notifications to discord channels that need it."""
+    failed_channels = []
+    success_channels = []
+
+    for channel in channels:
+        role_id = await twitch_account.get_role_id(channel)
+        role_msg = "Hey " + "@everyone" if not role_id else f"<@&{role_id}>"
+        msg = role_msg + f", {twitch_account.id} is now live on https://www.twitch.tv/{twitch_account.id} ! " \
+                         f"Make sure to go check it out!"
+        discord_channel = await get_discord_channel(bot, channel)
+        if discord_channel is None:
+            failed_channels.append(channel)
+            continue
+        try:
+            await discord_channel.send(msg)
+            success_channels.append(channel)
+        except Exception as e:
+            failed_channels.append(channel)
+            print(f"send_twitch_notifications - {discord_channel.id} - {e}")
+
+    for channel in failed_channels:
+        # getting and fetching the channel did not work.
+        # or failed to send a message.
+        # remove it from our subscriptions.
+        await twitch_account.unsubscribe(channel)
+        print(f"Unsubscribed Channel {channel.id} from Twitch Account {twitch_account.id} "
+              f"due to a fetching or message send failure.")
+
+    return success_channels

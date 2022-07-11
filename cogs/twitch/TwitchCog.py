@@ -4,10 +4,10 @@ from IreneAPIWrapper.models.twitchaccount import TwitchAccount
 
 from models import Bot
 from IreneAPIWrapper.models import Media, Person, Group, Channel
-from disnake.ext import commands
+from disnake.ext import commands, tasks
 from disnake import ApplicationCommandInteraction as AppCmdInter
 from . import helper
-from typing import Literal, List, Optional
+from typing import Literal, List, Optional, Dict
 from disnake import Permissions
 
 
@@ -115,6 +115,42 @@ class TwitchCog(commands.Cog):
     async def list(self, inter: AppCmdInter):
         await inter.send(await helper.get_subbed_msg(inter.guild))
 
+    @tasks.loop(minutes=1, seconds=30, reconnect=True)
+    async def twitch_updates(self):
+        """
+        Send updates to discord channels when a twitch channel goes live.
+        """
+        if not self.bot.api.connected:
+            return
+
+        accounts = await TwitchAccount.get_all()
+        _live_statuses: Dict[str, bool] = await TwitchAccount.check_live_bulk(accounts=accounts)
+        twitch_accounts: List[TwitchAccount] = [await TwitchAccount.get(username) for username in _live_statuses.keys()]
+
+        for subscription in twitch_accounts:
+            update_posted_to_true = []
+            update_posted_to_false = []
+            if subscription.is_live:
+                already_posted = await subscription.get_posted()
+                channels_needing_posts = [channel for channel in subscription
+                                          if channel not in already_posted]
+
+                success_channels = await helper.send_twitch_notifications(bot=self.bot,
+                                                                          channels=channels_needing_posts,
+                                                                          twitch_account=subscription)
+                update_posted_to_true = [channel.id for channel in success_channels]
+            else:
+                # set all update posted to False.
+                update_posted_to_false = [channel.id for channel in subscription]
+
+            await subscription.update_posted(update_posted_to_false, False)
+            await subscription.update_posted(update_posted_to_true, True)
+
 
 def setup(bot: Bot):
-    bot.add_cog(TwitchCog(bot))
+    cog = TwitchCog(bot)
+    bot.add_cog(cog)
+    cog.twitch_updates.start()
+
+
+

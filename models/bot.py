@@ -3,7 +3,7 @@ from disnake.ext.commands import AutoShardedBot, errors
 from cogs import cogs
 from datetime import datetime
 from util import logger
-from IreneAPIWrapper.models import IreneAPIClient
+from IreneAPIWrapper.models import IreneAPIClient, Preload
 
 
 class Bot(AutoShardedBot):
@@ -15,11 +15,15 @@ class Bot(AutoShardedBot):
 
         self.dev_mode = dev_mode
 
+        preload = Preload()
+        preload.twitch_subscriptions = True
+
         api = IreneAPIClient(
             token=keys.api_token,
             user_id=keys.bot_owner_id,
             api_url=keys.api_url,
             port=keys.api_port,
+            preload_cache=preload,
         )
 
         self.api: IreneAPIClient = api

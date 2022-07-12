@@ -1,4 +1,3 @@
-import random
 from typing import List, Union, Optional
 
 import disnake
@@ -155,7 +154,9 @@ async def auto_complete_type_subbed_guild(
     return [account.name for account in accounts]
 
 
-async def get_discord_channel(bot: Bot, channel: Channel) -> Optional[disnake.TextChannel]:
+async def get_discord_channel(
+    bot: Bot, channel: Channel
+) -> Optional[disnake.TextChannel]:
     """Get a discord channel without worrying about errors."""
     discord_channel = bot.get_channel(channel.id)
     try:
@@ -166,7 +167,9 @@ async def get_discord_channel(bot: Bot, channel: Channel) -> Optional[disnake.Te
     return discord_channel
 
 
-async def send_twitch_notifications(bot: Bot, channels: List[Channel], twitch_account: TwitchAccount):
+async def send_twitch_notifications(
+    bot: Bot, channels: List[Channel], twitch_account: TwitchAccount
+):
     """Send twitch notifications to discord channels that need it."""
     failed_channels = []
     success_channels = []
@@ -174,8 +177,11 @@ async def send_twitch_notifications(bot: Bot, channels: List[Channel], twitch_ac
     for channel in channels:
         role_id = await twitch_account.get_role_id(channel)
         role_msg = "Hey " + "@everyone" if not role_id else f"<@&{role_id}>"
-        msg = role_msg + f", {twitch_account.id} is now live on https://www.twitch.tv/{twitch_account.id} ! " \
-                         f"Make sure to go check it out!"
+        msg = (
+            role_msg
+            + f", {twitch_account.id} is now live on https://www.twitch.tv/{twitch_account.id} ! "
+            f"Make sure to go check it out!"
+        )
         discord_channel = await get_discord_channel(bot, channel)
         if discord_channel is None:
             failed_channels.append(channel)
@@ -192,7 +198,9 @@ async def send_twitch_notifications(bot: Bot, channels: List[Channel], twitch_ac
         # or failed to send a message.
         # remove it from our subscriptions.
         await twitch_account.unsubscribe(channel)
-        print(f"Unsubscribed Channel {channel.id} from Twitch Account {twitch_account.id} "
-              f"due to a fetching or message send failure.")
+        print(
+            f"Unsubscribed Channel {channel.id} from Twitch Account {twitch_account.id} "
+            f"due to a fetching or message send failure."
+        )
 
     return success_channels

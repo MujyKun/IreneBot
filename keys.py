@@ -1,3 +1,5 @@
+from typing import Optional
+
 from dotenv import load_dotenv
 from os import getenv
 from util import logger
@@ -24,6 +26,8 @@ def get_emoji(string):
         else:
             string = chr(int(string, 16))
     return string
+
+
 
 
 class Keys:
@@ -60,6 +64,8 @@ class Keys:
         self.add_group_channel_id: int = 0
         self.twitter_channel_id: int = 0
         self.data_mod_channel_id: int = 0
+        self.bug_channel_id: int = 0
+        self.suggest_channel_id: int = 0
 
         # PORTS
         self.db_port: int = 0
@@ -204,6 +210,8 @@ class Keys:
                 "add_group_channel_id": make_int(getenv("ADD_GROUP_CID")),
                 "twitter_channel_id": make_int(getenv("TWITTER_CID")),
                 "data_mod_channel_id": make_int(getenv("DM_LOG_CID")),
+                "bug_channel_id": make_int(getenv("BUG_CID")),
+                "suggest_channel_id": make_int(getenv("SUGGEST_CID")),
                 # PORTS
                 "db_port": make_int(getenv("PRT_DB")),
                 "site_port": getenv("PRT_SITE"),
@@ -292,3 +300,15 @@ class Keys:
         logger.warn(
             f"Could not find an environment value for keys: {', '.join(no_vals)}."
         )
+
+
+_keys: Optional[Keys] = None
+
+
+def get_keys():
+    global _keys
+    if not _keys:
+        _keys = Keys()
+    return _keys
+
+

@@ -1,6 +1,6 @@
 import asyncio
 import disnake
-from keys import Keys
+from keys import get_keys
 from models import Bot
 
 DEV_MODE = True
@@ -12,7 +12,7 @@ if __name__ == "__main__":
     intents.messages = True
     intents.message_content = True
     # intents.presences = True  # turn on presences intent
-    t_keys = Keys()
+    t_keys = get_keys()
 
     options = {
         "case_insensitive": True,

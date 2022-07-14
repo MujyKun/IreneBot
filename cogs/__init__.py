@@ -8,4 +8,6 @@ cogs = [
     "guessinggame.GuessingGameCog",
     "unscramblegame.UnscrambleGameCog",
     "twitch.TwitchCog",
+    "twitter.TwitterCog",
 ]
+

@@ -4,6 +4,9 @@ from cogs import cogs
 from datetime import datetime
 from util import logger
 from IreneAPIWrapper.models import IreneAPIClient, Preload
+from IreneAPIWrapper.exceptions import APIError
+import disnake
+from pprint import pformat
 
 
 class Bot(AutoShardedBot):
@@ -17,6 +20,7 @@ class Bot(AutoShardedBot):
 
         preload = Preload()
         preload.twitch_subscriptions = True
+        preload.twitter_accounts = True
 
         api = IreneAPIClient(
             token=keys.api_token,
@@ -60,6 +64,18 @@ class Bot(AutoShardedBot):
         if isinstance(exception, errors.CommandNotFound):
             return
         elif isinstance(exception, errors.CommandInvokeError):
+            if isinstance(exception.original, APIError):
+                logger.error(exception)
+                bug_channel_id = self.keys.bug_channel_id
+                embed = disnake.Embed(title='API Error',
+                                      description=exception.original.get_detailed_report(),
+                                      color=disnake.Color.dark_red())
+
+                if bug_channel_id:
+                    channel = self.get_channel(bug_channel_id)
+                    if channel:
+                        await channel.send(embed=embed)
+                return await context.channel.send(embed=embed)
             print(exception)
             try:
                 if exception.original.status == 403:

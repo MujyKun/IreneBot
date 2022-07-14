@@ -67,9 +67,11 @@ class Bot(AutoShardedBot):
             if isinstance(exception.original, APIError):
                 logger.error(exception)
                 bug_channel_id = self.keys.bug_channel_id
-                embed = disnake.Embed(title='API Error',
-                                      description=exception.original.get_detailed_report(),
-                                      color=disnake.Color.dark_red())
+                embed = disnake.Embed(
+                    title="API Error",
+                    description=exception.original.get_detailed_report(),
+                    color=disnake.Color.dark_red(),
+                )
 
                 if bug_channel_id:
                     channel = self.get_channel(bug_channel_id)

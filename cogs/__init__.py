@@ -10,4 +10,3 @@ cogs = [
     "twitch.TwitchCog",
     "twitter.TwitterCog",
 ]
-

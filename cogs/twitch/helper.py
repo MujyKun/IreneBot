@@ -45,7 +45,8 @@ async def get_subbed_msg(guild: disnake.Guild):
     """Get a message containing a list of subscriptions belonging to the guild."""
     accounts: List[TwitchAccount] = await get_subscribed(guild)
     channels = [
-        await get_channel_model(t_channel.id, guild_id=guild.id) for t_channel in guild.text_channels
+        await get_channel_model(t_channel.id, guild_id=guild.id)
+        for t_channel in guild.text_channels
     ]
     msg = f"These are the twitch subscriptions in {guild.name}:\n\n"
 
@@ -101,7 +102,11 @@ async def process_remove(
 ):
     """Unsubscribe from a twitch account."""
     twitch_username = twitch_username.lower()
-    await _unsubscribe(twitch_username, channel_id=channel_to_notify.id, guild_id=channel_to_notify.guild.id)
+    await _unsubscribe(
+        twitch_username,
+        channel_id=channel_to_notify.id,
+        guild_id=channel_to_notify.guild.id,
+    )
     msg = f"{channel_to_notify.mention} is no longer subscribed to {twitch_username}."
     if ctx:
         await ctx.reply(msg, allowed_mentions=allowed_mentions)

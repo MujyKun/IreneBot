@@ -28,8 +28,6 @@ def get_emoji(string):
     return string
 
 
-
-
 class Keys:
     def __init__(self):
         # Bot Info
@@ -310,5 +308,3 @@ def get_keys():
     if not _keys:
         _keys = Keys()
     return _keys
-
-

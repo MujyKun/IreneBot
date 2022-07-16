@@ -9,4 +9,5 @@ cogs = [
     "unscramblegame.UnscrambleGameCog",
     "twitch.TwitchCog",
     "twitter.TwitterCog",
+    "moderator.ModeratorCog",
 ]

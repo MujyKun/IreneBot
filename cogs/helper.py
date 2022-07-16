@@ -1,6 +1,9 @@
-from IreneAPIWrapper.models import Channel, Guild
+from IreneAPIWrapper.models import Channel, Guild, User, Language, PackMessage
+from IreneAPIWrapper.exceptions import IncorrectNumberOfItems
 from models import Bot
 from typing import Optional
+from disnake.ext import commands
+from util import logger
 import disnake
 
 
@@ -53,3 +56,83 @@ async def get_discord_channel(
     except Exception as e:
         print(f"Failed to fetch channel {channel.id} - {e}")
     return discord_channel
+
+
+async def get_message(user, key, *custom_args):
+    """Get a message from a user's language pack.
+
+    :param user: IreneAPIWrapper.models.User
+        A IreneAPIWrapper User Object
+    :param key: str
+        The PackMessage label/key for modification.
+    :param custom_args:
+        All custom args to replace
+    """
+    lang = Language.get_lang(user.language)
+    pack_message = None
+    if lang:
+        pack_message: Optional[PackMessage] = lang[key.lower()]
+
+    if not lang or not pack_message:
+        lang = Language.get_english()
+        pack_message: Optional[PackMessage] = lang[key.lower()]
+
+    if pack_message:
+        try:
+            msg = pack_message.get(*custom_args)
+        except IncorrectNumberOfItems as e:
+            logger.error(f"ERROR: {e} -- ARGS: {custom_args}")
+            # we will send the message without custom inputs filled in.
+            msg = pack_message.message
+        return msg
+
+
+async def send_message(
+    *custom_args,
+    msg: str = None,
+    ctx: commands.Context = None,
+    inter: disnake.AppCmdInter = None,
+    channel: disnake.TextChannel = None,
+    allowed_mentions: disnake.AllowedMentions = None,
+    user: User = None,
+    key: str = None,
+):
+    """Send a message to a discord channel/interaction.
+    :param custom_args:
+        All custom args to replace
+    :param msg: str
+        The message to send.
+    :param ctx: commands.Context
+        Context of the command.
+    :param inter: AppCmdInter
+        App Command Context
+    :param channel: disnake.TextChannel
+        A discord Channel.
+    :param allowed_mentions: disnake.AllowedMentions
+        The settings for allowed mentions.
+    :param user: IreneAPIWrapper.models.User
+        A IreneAPIWrapper User Object
+    :param key: str
+        The PackMessage label/key for modification.
+    """
+    if (user and key) and not msg:
+        msg = await get_message(user, key, *custom_args)
+
+    if not msg:
+        logger.error(
+            f"No message to send -> "
+            f"Custom Args: {custom_args}, "
+            f"Message: {msg}, "
+            f"CTX: {ctx}, "
+            f"INTER: {inter}, "
+            f"Allowed Mentions: {allowed_mentions}, "
+            f"Key: {key}"
+        )
+        return
+
+    if ctx:
+        await ctx.send(msg, allowed_mentions=allowed_mentions)
+    if inter:
+        await inter.send(msg, allowed_mentions=allowed_mentions)
+    if channel:
+        await channel.send(msg, allowed_mentions=allowed_mentions)

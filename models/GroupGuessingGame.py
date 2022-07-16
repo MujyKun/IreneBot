@@ -1,4 +1,4 @@
-from . import GuessingGame, User
+from . import GuessingGame, User, add_to_cache
 import disnake.ext.commands
 from IreneAPIWrapper.models import User, Media, Group, GROUP, Mode
 from IreneAPIWrapper.exceptions import Empty
@@ -10,11 +10,29 @@ class GroupGuessingGame(GuessingGame):
     """
 
     def __init__(
-        self, ctx, bot, max_rounds, timeout, gender, difficulty, is_nsfw, user: User
+        self,
+        bot,
+        max_rounds,
+        timeout,
+        gender,
+        difficulty,
+        is_nsfw,
+        user: User,
+        ctx=None,
+        inter=None,
     ):
         super(GroupGuessingGame, self).__init__(
-            ctx, bot, max_rounds, timeout, gender, difficulty, is_nsfw, user
+            bot,
+            max_rounds,
+            timeout,
+            gender,
+            difficulty,
+            is_nsfw,
+            user,
+            ctx=ctx,
+            inter=inter,
         )
+        add_to_cache(self)
         self._mode: Mode = GROUP
         ...
 
@@ -38,7 +56,7 @@ class GroupGuessingGame(GuessingGame):
         result_message = (
             win_msg + "\n" + correct_answer_msg + "\n" + possible_answer_msg
         )
-        await self.ctx.send(result_message)
+        await self.send_message(result_message)
 
         if self.rounds < self.max_rounds and not self._complete:
             await self._generate_new_question()

@@ -4,7 +4,12 @@ import disnake
 from IreneAPIWrapper.models import TwitterAccount, Channel, Tweet
 from disnake.ext import commands
 from models import Bot
-from ..helper import get_channel_model, create_guild_model, get_discord_channel
+from ..helper import (
+    get_channel_model,
+    create_guild_model,
+    get_discord_channel,
+    send_message,
+)
 
 
 async def _subscribe(twitter_username, guild: disnake.Guild, channel_id, role_id=None):
@@ -48,10 +53,9 @@ async def process_add(
     twitter_username = twitter_username.lower()
     if not await TwitterAccount.check_user_exists(twitter_username):
         msg = "That username does not exist on Twitter."
-        if ctx:
-            await ctx.send(msg)
-        if inter:
-            await inter.send(msg)
+        await send_message(
+            msg=msg, ctx=ctx, inter=inter, allowed_mentions=allowed_mentions
+        )
         return
 
     await _subscribe(
@@ -62,10 +66,7 @@ async def process_add(
     )
 
     msg = f"{channel_to_notify.mention} is now subscribed to {twitter_username} on Twitter."
-    if ctx:
-        await ctx.send(msg, allowed_mentions=allowed_mentions)
-    if inter:
-        await inter.send(msg, allowed_mentions=allowed_mentions)
+    await send_message(msg=msg, ctx=ctx, inter=inter, allowed_mentions=allowed_mentions)
 
 
 async def get_subscribed(guild):
@@ -108,10 +109,7 @@ async def process_remove(
         guild_id=channel_to_notify.guild.id,
     )
     msg = f"{channel_to_notify.mention} is no longer subscribed to {twitter_username}."
-    if ctx:
-        await ctx.reply(msg, allowed_mentions=allowed_mentions)
-    if inter:
-        await inter.send(msg, allowed_mentions=allowed_mentions)
+    await send_message(msg=msg, ctx=ctx, inter=inter, allowed_mentions=allowed_mentions)
 
 
 async def auto_complete_type_subbed_guild(
@@ -136,7 +134,7 @@ async def send_twitter_notifications(
             role_msg = "Hey " + "@everyone" if not role_id else f"<@&{role_id}>"
             msg = (
                 role_msg
-                + f", A new tweet from {twitter_account.name} is available: {twitter_link}"
+                + f", A new tweet from {twitter_account.name} is available:\n {twitter_link}"
             )
             discord_channel = await get_discord_channel(bot, channel)
             if discord_channel is None:

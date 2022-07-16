@@ -5,7 +5,12 @@ from IreneAPIWrapper.models import TwitchAccount, AbstractModel
 from IreneAPIWrapper.models import Person, Group, Channel, Guild
 from disnake.ext import commands
 from models import Bot
-from ..helper import get_channel_model, create_guild_model, get_discord_channel
+from ..helper import (
+    get_channel_model,
+    create_guild_model,
+    get_discord_channel,
+    send_message,
+)
 
 
 async def _subscribe(twitch_username, guild: disnake.Guild, channel_id, role_id=None):
@@ -87,10 +92,7 @@ async def process_add(
     )
 
     msg = f"{channel_to_notify.mention} is now subscribed to {twitch_username}."
-    if ctx:
-        await ctx.send(msg, allowed_mentions=allowed_mentions)
-    if inter:
-        await inter.send(msg, allowed_mentions=allowed_mentions)
+    await send_message(msg=msg, ctx=ctx, inter=inter, allowed_mentions=allowed_mentions)
 
 
 async def process_remove(
@@ -108,10 +110,7 @@ async def process_remove(
         guild_id=channel_to_notify.guild.id,
     )
     msg = f"{channel_to_notify.mention} is no longer subscribed to {twitch_username}."
-    if ctx:
-        await ctx.reply(msg, allowed_mentions=allowed_mentions)
-    if inter:
-        await inter.send(msg, allowed_mentions=allowed_mentions)
+    await send_message(msg=msg, ctx=ctx, inter=inter, allowed_mentions=allowed_mentions)
 
 
 async def auto_complete_type_subbed_guild(

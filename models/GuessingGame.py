@@ -14,16 +14,26 @@ from IreneAPIWrapper.models import (
 from IreneAPIWrapper.exceptions import Empty
 
 from random import choice
-from . import BaseScoreGame
+from . import BaseScoreGame, add_to_cache
 
 
 class GuessingGame(BaseScoreGame):
     def __init__(
-        self, ctx, bot, max_rounds, timeout, gender, difficulty, is_nsfw, user: User
+        self,
+        bot,
+        max_rounds,
+        timeout,
+        gender,
+        difficulty,
+        is_nsfw,
+        user: User,
+        ctx=None,
+        inter=None,
     ):
         super(GuessingGame, self).__init__(
-            ctx, bot, user, max_rounds, difficulty, gender, timeout
+            bot, user, max_rounds, difficulty, gender, timeout, ctx=ctx, inter=inter
         )
+        add_to_cache(self)
         self.current_affiliation: Optional[Affiliation] = None
         self.current_media: Optional[Media] = None
         self.is_nsfw = is_nsfw
@@ -100,10 +110,10 @@ class GuessingGame(BaseScoreGame):
                 await self._determine_pool()
             except Empty:
                 self._complete = True
-                await self.ctx.channel.send(
-                    "There is no media available for your guessing game. Try changing your selections."
+                return await self.send_message(
+                    "There is no media available for your guessing game. "
+                    "Try changing your selections."
                 )
-                return
 
         media = choice(self.pool)
         self.current_media = media
@@ -115,7 +125,7 @@ class GuessingGame(BaseScoreGame):
             self._complete = True
 
         await self._generate_correct_answers()
-        await self.ctx.channel.send(media.source.url)
+        await self.send_message(media.source.url)
         await self._wait_for_answer()
 
     async def _generate_correct_answers(self):
@@ -159,7 +169,7 @@ class GuessingGame(BaseScoreGame):
         result_message = (
             win_msg + "\n" + correct_answer_msg + "\n" + possible_answer_msg
         )
-        await self.ctx.channel.send(result_message)
+        await self.send_message(result_message)
 
         if not self.is_complete:
             await self._generate_new_question()

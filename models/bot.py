@@ -1,4 +1,7 @@
 import asyncio
+from typing import List
+
+import IreneAPIWrapper.models
 from disnake.ext.commands import AutoShardedBot, errors
 from cogs import cogs
 from datetime import datetime
@@ -6,12 +9,12 @@ from util import logger
 from IreneAPIWrapper.models import IreneAPIClient, Preload
 from IreneAPIWrapper.exceptions import APIError
 import disnake
-from pprint import pformat
 
 
 class Bot(AutoShardedBot):
-    def __init__(self, bot_prefix, keys, dev_mode=False, **settings):
-        super(Bot, self).__init__(bot_prefix, **settings)
+    def __init__(self, default_bot_prefix, keys, dev_mode=False, **settings):
+        super(Bot, self).__init__(self.prefix_check, **settings)
+        self.default_prefix = default_bot_prefix
         self.keys = keys
         for cog in cogs:
             self.load_extension(f"cogs.{cog}")
@@ -31,6 +34,25 @@ class Bot(AutoShardedBot):
         )
 
         self.api: IreneAPIClient = api
+
+    async def prefix_check(
+        self, bot: AutoShardedBot, msg: disnake.Message
+    ) -> List[str]:
+        """Get a list of prefixes for a Guild."""
+        default = [self.default_prefix]
+        if not hasattr(msg, "guild"):
+            return default
+
+        guild_id = msg.guild.id
+
+        from cogs.helper import create_guild_model
+
+        await create_guild_model(msg.guild)
+        guild = await IreneAPIWrapper.models.Guild.get(guild_id)
+        if guild and guild.prefixes:
+            return guild.prefixes
+
+        return [self.default_prefix]
 
     async def run_api_before_bot(self):
         """Run the API and the Bot afterwards."""

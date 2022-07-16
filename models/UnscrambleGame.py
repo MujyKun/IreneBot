@@ -16,7 +16,7 @@ from IreneAPIWrapper.models import (
 from IreneAPIWrapper.exceptions import Empty
 
 from random import choice
-from . import PlayerScore, BaseScoreGame
+from . import PlayerScore, BaseScoreGame, add_to_cache
 
 from typing import TYPE_CHECKING
 
@@ -25,10 +25,21 @@ if TYPE_CHECKING:
 
 
 class UnscrambleGame(BaseScoreGame):
-    def __init__(self, ctx, bot, max_rounds, timeout, gender, difficulty, user: User):
+    def __init__(
+        self,
+        bot,
+        max_rounds,
+        timeout,
+        gender,
+        difficulty,
+        user: User,
+        ctx=None,
+        inter=None,
+    ):
         super(UnscrambleGame, self).__init__(
-            ctx, bot, user, max_rounds, difficulty, gender, timeout
+            bot, user, max_rounds, difficulty, gender, timeout, ctx=ctx, inter=inter
         )
+        add_to_cache(self)
         self.current_question: Optional[str] = None  # scrambled
         self.current_affiliation: Optional[Affiliation] = None
         self.__us: Optional[UnscrambleGameModel] = None
@@ -42,7 +53,7 @@ class UnscrambleGame(BaseScoreGame):
                 await self._determine_pool()
             except Empty:
                 self._complete = True
-                await self.ctx.send(
+                await self.send_message(
                     "There are no available affiliations for your unscramble game."
                 )
                 if self.players:
@@ -58,7 +69,7 @@ class UnscrambleGame(BaseScoreGame):
                 await self._generate_new_question()
             )  # recursion until we run out of questions.
 
-        await self.ctx.send(
+        await self.send_message(
             f"The name I want you to unscramble is {self.current_question}."
         )
         await self._wait_for_answer()
@@ -76,7 +87,7 @@ class UnscrambleGame(BaseScoreGame):
         )
         correct_answer_msg = f"The correct answer was {self.correct_answers[0]}."
         result_message = win_msg + "\n" + correct_answer_msg
-        await self.ctx.send(result_message)
+        await self.send_message(result_message)
 
         if not self.is_complete:
             await self._generate_new_question()

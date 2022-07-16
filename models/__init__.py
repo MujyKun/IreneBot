@@ -1,3 +1,21 @@
+def add_to_cache(obj):
+    if isinstance(obj, GroupGuessingGame):
+        gggs.append(obj)
+    elif isinstance(obj, GuessingGame):
+        ggs.append(obj)
+    elif isinstance(obj, UnscrambleGame):
+        uss.append(obj)
+    else:
+        others.append(obj)
+
+
+ggs = []  # GuessingGame
+gggs = []  # GroupGuessingGame
+uss = []  # UnscrambleGame
+bgs = []  # BiasGame
+bjs = []  # BlackJack
+others = []  # etc
+
 from dataclasses import dataclass
 from IreneAPIWrapper.models import User, UserStatus
 import disnake

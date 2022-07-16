@@ -9,10 +9,11 @@ from datetime import datetime
 
 
 class Game:
-    def __init__(self, ctx, bot, user, max_rounds):
+    def __init__(self, bot, user, max_rounds, ctx=None, inter=None):
         self.start_time = datetime.now()
         self.end_time = None
         self.ctx: disnake.ext.commands.Context = ctx
+        self.inter: disnake.AppCmdInter = inter
         self.bot: Bot = bot
         self.host_user = user
         self.max_rounds = max_rounds
@@ -30,3 +31,11 @@ class Game:
     async def start(self):
         """Start the game."""
         ...
+
+    async def send_message(self, msg):
+        """Send a message using the Context and AppCmdInter objects in the game."""
+        from cogs.helper import (
+            send_message,
+        )  # need to import here to avoid circular imports.
+
+        await send_message(msg=msg, ctx=self.ctx, inter=self.inter)

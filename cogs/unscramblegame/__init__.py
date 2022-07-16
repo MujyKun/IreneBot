@@ -1,1 +1,1 @@
-from . import UnscrambleGameCog
+from . import helper, UnscrambleGameCog

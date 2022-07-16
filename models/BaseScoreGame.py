@@ -10,8 +10,10 @@ class BaseScoreGame(Game):
     Is an abstract model for a game with a competition & point system
     """
 
-    def __init__(self, ctx, bot, user, max_rounds, difficulty, gender, timeout):
-        super(BaseScoreGame, self).__init__(ctx, bot, user, max_rounds)
+    def __init__(
+        self, bot, user, max_rounds, difficulty, gender, timeout, ctx=None, inter=None
+    ):
+        super(BaseScoreGame, self).__init__(bot, user, max_rounds, ctx=ctx, inter=inter)
         self.difficulty = get_difficulty(difficulty)  # easy / medium / hard
         self.gender = gender  # male / female / mixed
         self.timeout = timeout
@@ -83,7 +85,7 @@ class BaseScoreGame(Game):
             msg = f"The final scores are:\n\n{scores}"
         else:
             msg = "The Game has finished! No one has received a point in the Game. "
-        await self.ctx.send(msg)
+        await self.send_message(msg)
 
     async def _send_results(self, winner: disnake.User = None):
         """Send the results of a round and continue/finish the game.
@@ -97,7 +99,8 @@ class BaseScoreGame(Game):
 
         def check_for_answer(message):
             """Check if a message contains the correct answer."""
-            same_channel = message.channel == self.ctx.channel
+            context = self.ctx if self.ctx else self.inter
+            same_channel = message.channel == context.channel
             correct_answer = message.content.lower() in self.correct_answers
             return same_channel and correct_answer
 

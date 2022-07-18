@@ -9,7 +9,8 @@ from ..helper import (
     get_channel_model,
     create_guild_model,
     get_discord_channel,
-    send_message, get_message
+    send_message,
+    get_message,
 )
 from util import logger
 
@@ -82,8 +83,13 @@ async def process_add(
 
     twitch_username = twitch_username.lower()
     if not await TwitchAccount.check_user_exists(twitch_username):
-        return await send_message(ctx=ctx, inter=inter, allowed_mentions=allowed_mentions, user=user,
-                                  key="error_twitch_username")
+        return await send_message(
+            ctx=ctx,
+            inter=inter,
+            allowed_mentions=allowed_mentions,
+            user=user,
+            key="error_twitch_username",
+        )
 
     await _subscribe(
         twitch_username,
@@ -92,8 +98,15 @@ async def process_add(
         role_id=role_id,
     )
 
-    return await send_message(channel_to_notify.mention, twitch_username, ctx=ctx, inter=inter,
-                              allowed_mentions=allowed_mentions, user=user, key="twitch_subscribed")
+    return await send_message(
+        channel_to_notify.mention,
+        twitch_username,
+        ctx=ctx,
+        inter=inter,
+        allowed_mentions=allowed_mentions,
+        user=user,
+        key="twitch_subscribed",
+    )
 
 
 async def process_remove(
@@ -112,8 +125,15 @@ async def process_remove(
         channel_id=channel_to_notify.id,
         guild_id=channel_to_notify.guild.id,
     )
-    return await send_message(channel_to_notify.mention, twitch_username, ctx=ctx, inter=inter,
-                              allowed_mentions=allowed_mentions, user=user, key="twitch_unsubscribed")
+    return await send_message(
+        channel_to_notify.mention,
+        twitch_username,
+        ctx=ctx,
+        inter=inter,
+        allowed_mentions=allowed_mentions,
+        user=user,
+        key="twitch_unsubscribed",
+    )
 
 
 async def auto_complete_type_subbed_guild(

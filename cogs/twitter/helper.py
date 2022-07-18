@@ -8,7 +8,8 @@ from ..helper import (
     get_channel_model,
     create_guild_model,
     get_discord_channel,
-    send_message, get_message
+    send_message,
+    get_message,
 )
 from util import logger
 
@@ -56,8 +57,13 @@ async def process_add(
     user = await User.get(user_id)
     twitter_username = twitter_username.lower()
     if not await TwitterAccount.check_user_exists(twitter_username):
-        return await send_message(ctx=ctx, inter=inter, allowed_mentions=allowed_mentions, user=user,
-                                  key="error_twitter_username")
+        return await send_message(
+            ctx=ctx,
+            inter=inter,
+            allowed_mentions=allowed_mentions,
+            user=user,
+            key="error_twitter_username",
+        )
 
     await _subscribe(
         twitter_username,
@@ -66,8 +72,15 @@ async def process_add(
         role_id=role_id,
     )
 
-    return await send_message(channel_to_notify.mention, twitter_username, ctx=ctx, inter=inter,
-                              allowed_mentions=allowed_mentions, user=user, key="twitter_subscribed")
+    return await send_message(
+        channel_to_notify.mention,
+        twitter_username,
+        ctx=ctx,
+        inter=inter,
+        allowed_mentions=allowed_mentions,
+        user=user,
+        key="twitter_subscribed",
+    )
 
 
 async def get_subscribed(guild):
@@ -94,7 +107,9 @@ async def get_subbed_msg(guild: disnake.Guild, user_id: int):
         )
         subscription_msg += f"{account.name} is subscribed in: {display_channels}\n"
 
-    return await get_message(user, "twitter_list", guild.name, f"\n\n{subscription_msg}")
+    return await get_message(
+        user, "twitter_list", guild.name, f"\n\n{subscription_msg}"
+    )
 
 
 async def process_remove(
@@ -114,8 +129,15 @@ async def process_remove(
         guild_id=channel_to_notify.guild.id,
     )
 
-    return await send_message(channel_to_notify.mention, twitter_username, ctx=ctx, inter=inter,
-                              allowed_mentions=allowed_mentions, user=user, key="twitter_unsubscribed")
+    return await send_message(
+        channel_to_notify.mention,
+        twitter_username,
+        ctx=ctx,
+        inter=inter,
+        allowed_mentions=allowed_mentions,
+        user=user,
+        key="twitter_unsubscribed",
+    )
 
 
 async def auto_complete_type_subbed_guild(

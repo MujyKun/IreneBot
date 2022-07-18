@@ -9,9 +9,16 @@ class WolframCog(commands.Cog):
         self.bot = bot
         self.allowed_mentions = disnake.AllowedMentions(everyone=False, roles=False)
 
-    @commands.command(name="wolfram", description="Ask a question to WolframAlpha", aliases=["w"])
+    @commands.command(
+        name="wolfram", description="Ask a question to WolframAlpha", aliases=["w"]
+    )
     async def regular_wolfram(self, ctx, *, query: str):
-        await helper.process_wolfram_query(query, user_id=ctx.author.id, ctx=ctx, allowed_mentions=self.allowed_mentions)
+        await helper.process_wolfram_query(
+            query,
+            user_id=ctx.author.id,
+            ctx=ctx,
+            allowed_mentions=self.allowed_mentions,
+        )
 
     @commands.slash_command(description="Ask a question to WolframAlpha")
     async def wolfram(
@@ -19,7 +26,12 @@ class WolframCog(commands.Cog):
         inter: AppCmdInter,
         query: str = commands.Param(desc="WolframAlpha query"),
     ):
-        await helper.process_wolfram_query(query, user_id=inter.user.id, inter=inter, allowed_mentions=self.allowed_mentions)
+        await helper.process_wolfram_query(
+            query,
+            user_id=inter.user.id,
+            inter=inter,
+            allowed_mentions=self.allowed_mentions,
+        )
 
 
 def setup(bot: commands.AutoShardedBot):

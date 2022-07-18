@@ -8,7 +8,8 @@ from ..helper import (
     get_channel_model,
     create_guild_model,
     get_discord_channel,
-    send_message, get_message
+    send_message,
+    get_message,
 )
 from util import logger
 import numexpr
@@ -17,7 +18,8 @@ from ..helper import (
     get_channel_model,
     create_guild_model,
     get_discord_channel,
-    send_message, get_message
+    send_message,
+    get_message,
 )
 
 
@@ -40,26 +42,51 @@ async def evaluate_math(query, user: User):
         return False
 
 
-async def process_wolfram_query(query, user_id, ctx=None, inter=None, allowed_mentions=None):
+async def process_wolfram_query(
+    query, user_id, ctx=None, inter=None, allowed_mentions=None
+):
     user = await User.get(user_id)
     result = await evaluate_math(query, user)
     if result:
-        return await send_message(query, result, user=user, ctx=ctx, inter=inter,
-                                  allowed_mentions=allowed_mentions, key="wolfram_query")
+        return await send_message(
+            query,
+            result,
+            user=user,
+            ctx=ctx,
+            inter=inter,
+            allowed_mentions=allowed_mentions,
+            key="wolfram_query",
+        )
     if not user.is_patron:
-        return await send_message(user=user, ctx=ctx, inter=inter, allowed_mentions=allowed_mentions,
-                                  key="error_wolfram_patron")
+        return await send_message(
+            user=user,
+            ctx=ctx,
+            inter=inter,
+            allowed_mentions=allowed_mentions,
+            key="error_wolfram_patron",
+        )
 
     parsed_query = urllib.parse.quote(query)
     results = await Wolfram.query(parsed_query)
     num_of_pods = results.get("@numpods")
     if not num_of_pods or num_of_pods == "0":
-        return await send_message(user=user, ctx=ctx, inter=inter, allowed_mentions=allowed_mentions,
-                                  key="wolfram_no_results")
+        return await send_message(
+            user=user,
+            ctx=ctx,
+            inter=inter,
+            allowed_mentions=allowed_mentions,
+            key="wolfram_no_results",
+        )
 
     list_of_pods = results.get("pod")
-    primary_result_pods = [pod_dict for pod_dict in list_of_pods if (pod_dict['@title'] in ['Result', 'Results']
-                                                             and pod_dict['@primary'] == 'true')]
+    primary_result_pods = [
+        pod_dict
+        for pod_dict in list_of_pods
+        if (
+            pod_dict["@title"] in ["Result", "Results"]
+            and pod_dict["@primary"] == "true"
+        )
+    ]
 
     result_image = None
     result_text = None
@@ -78,5 +105,12 @@ async def process_wolfram_query(query, user_id, ctx=None, inter=None, allowed_me
 
         result = f"{result_text} {result_image if result_image else ''}"
 
-        return await send_message(query, result, user=user, ctx=ctx, inter=inter,
-                                  allowed_mentions=allowed_mentions, key="wolfram_query")
+        return await send_message(
+            query,
+            result,
+            user=user,
+            ctx=ctx,
+            inter=inter,
+            allowed_mentions=allowed_mentions,
+            key="wolfram_query",
+        )

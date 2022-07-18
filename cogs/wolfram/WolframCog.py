@@ -1,47 +1,25 @@
 import disnake
 from disnake.ext import commands
 from disnake import ApplicationCommandInteraction as AppCmdInter
-from util import logger
-import numexpr
-import urllib.parse
+from . import helper
 
 
 class WolframCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.allowed_mentions = disnake.AllowedMentions(everyone=False, roles=False)
 
-    @staticmethod
-    def evaluate_math(query):
-        try:
-            # do not allow user input to use any python functions.
-            query = query.replace("^", "**")
-            # switched to third party library for simpler evaluations.
-            result = numexpr.evaluate(query).item()
-            return float(result)
-        except ZeroDivisionError:
-            return "It is not possible to divide by zero."
-        except SyntaxError:
-            return False
-        except Exception as e:
-            logger.warning(
-                f"{e} (Exception) - Failed to evaluate numexpr expression {query}."
-            )
-            return False
+    @commands.command(name="wolfram", description="Ask a question to WolframAlpha", aliases=["w"])
+    async def regular_wolfram(self, ctx, *, query: str):
+        await helper.process_wolfram_query(query, user_id=ctx.author.id, ctx=ctx, allowed_mentions=self.allowed_mentions)
 
     @commands.slash_command(description="Ask a question to WolframAlpha")
     async def wolfram(
         self,
         inter: AppCmdInter,
-        query: str = commands.Param(desc="WolframAlpha question as a string"),
+        query: str = commands.Param(desc="WolframAlpha query"),
     ):
-        result = self.evaluate_math(query)
-        if result:
-            return await inter.send(f"**Input:** {query}\n" + f"**Result:** {result}")
-        # TODO: Add patreon support
-        query = urllib.parse.quote(query)
-        # TODO: Add IreneAPIWrapper call for query
-        # query_link = f"http://api.wolframalpha.com/v2/query?input={query}&appid={self.bot.keys.wolfram_id}"
-        await inter.send("Querying Wolfram not implemented.")
+        await helper.process_wolfram_query(query, user_id=inter.user.id, inter=inter, allowed_mentions=self.allowed_mentions)
 
 
 def setup(bot: commands.AutoShardedBot):

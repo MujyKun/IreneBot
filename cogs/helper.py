@@ -1,10 +1,17 @@
 from IreneAPIWrapper.models import Channel, Guild, User, Language, PackMessage
 from IreneAPIWrapper.exceptions import IncorrectNumberOfItems
 from models import Bot
-from typing import Optional
+from typing import Optional, Union
 from disnake.ext import commands
 from util import logger
 import disnake
+
+
+LIMIT_ROUNDS = [3, 60]
+LIMIT_TIMEOUT = [5, 60]
+DIFFICULTY_OPTIONS = ["easy", "medium", "hard"]
+GENDER_OPTIONS = ["male", "female", "mixed"]
+NSFW_OPTIONS = ["yes", "no"]
 
 
 async def get_channel_model(channel_id, guild_id) -> Channel:
@@ -130,9 +137,51 @@ async def send_message(
         )
         return
 
+    msg = msg.replace("\\n", "\n")
     if ctx:
         await ctx.send(msg, allowed_mentions=allowed_mentions)
     if inter:
         await inter.send(msg, allowed_mentions=allowed_mentions)
     if channel:
         await channel.send(msg, allowed_mentions=allowed_mentions)
+
+
+async def check_game_input(
+    user, max_rounds, timeout, gender, difficulty, contains_nsfw=None
+) -> Union[str, bool]:
+    """Check the inputs for a guessing game and return a string with all errors."""
+    input_err_msgs = [await get_message(user, "error_invalid_input")]
+
+    if not LIMIT_ROUNDS[0] <= max_rounds <= LIMIT_ROUNDS[1]:
+        input_err_msgs.append(
+            await get_message(
+                user, "error_limit_rounds", LIMIT_ROUNDS[0], LIMIT_ROUNDS[1]
+            )
+        )
+    if difficulty.lower() not in DIFFICULTY_OPTIONS:
+        input_err_msgs.append(
+            await get_message(
+                user, "error_difficulty_options", ", ".join(DIFFICULTY_OPTIONS)
+            )
+        )
+    if gender.lower() not in GENDER_OPTIONS:
+        input_err_msgs.append(
+            await get_message(user, "error_gender_options", ", ".join(GENDER_OPTIONS))
+        )
+    if not LIMIT_TIMEOUT[0] <= timeout <= LIMIT_TIMEOUT[1]:
+        input_err_msgs.append(
+            await get_message(
+                user, "error_timeout_options", LIMIT_TIMEOUT[0], LIMIT_TIMEOUT[1]
+            )
+        )
+    if contains_nsfw:
+        if contains_nsfw.lower() not in NSFW_OPTIONS:
+            input_err_msgs.append(
+                await get_message(
+                    user, "error_nsfw_options", NSFW_OPTIONS[0], NSFW_OPTIONS[1]
+                )
+            )
+
+    if len(input_err_msgs) > 1:
+        return "\n".join(input_err_msgs)
+    return True

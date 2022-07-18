@@ -1,15 +1,16 @@
 from typing import List, Union, Optional
 
 import disnake
-from IreneAPIWrapper.models import TwitterAccount, Channel, Tweet
+from IreneAPIWrapper.models import TwitterAccount, Channel, Tweet, User
 from disnake.ext import commands
 from models import Bot
 from ..helper import (
     get_channel_model,
     create_guild_model,
     get_discord_channel,
-    send_message,
+    send_message, get_message
 )
+from util import logger
 
 
 async def _subscribe(twitter_username, guild: disnake.Guild, channel_id, role_id=None):
@@ -43,6 +44,7 @@ async def _unsubscribe(twitter_username, channel_id, guild_id):
 async def process_add(
     channel_to_notify: disnake.TextChannel,
     guild: disnake.Guild,
+    user_id: int,
     twitter_username: str,
     role_id: int = None,
     allowed_mentions=None,
@@ -50,13 +52,12 @@ async def process_add(
     inter: disnake.AppCmdInter = None,
 ):
     """Subscribe to a twitch account."""
+
+    user = await User.get(user_id)
     twitter_username = twitter_username.lower()
     if not await TwitterAccount.check_user_exists(twitter_username):
-        msg = "That username does not exist on Twitter."
-        await send_message(
-            msg=msg, ctx=ctx, inter=inter, allowed_mentions=allowed_mentions
-        )
-        return
+        return await send_message(ctx=ctx, inter=inter, allowed_mentions=allowed_mentions, user=user,
+                                  key="error_twitter_username")
 
     await _subscribe(
         twitter_username,
@@ -65,8 +66,8 @@ async def process_add(
         role_id=role_id,
     )
 
-    msg = f"{channel_to_notify.mention} is now subscribed to {twitter_username} on Twitter."
-    await send_message(msg=msg, ctx=ctx, inter=inter, allowed_mentions=allowed_mentions)
+    return await send_message(channel_to_notify.mention, twitter_username, ctx=ctx, inter=inter,
+                              allowed_mentions=allowed_mentions, user=user, key="twitter_subscribed")
 
 
 async def get_subscribed(guild):
@@ -75,41 +76,46 @@ async def get_subscribed(guild):
     return await TwitterAccount.subbed_in(guild_id=guild.id)
 
 
-async def get_subbed_msg(guild: disnake.Guild):
+async def get_subbed_msg(guild: disnake.Guild, user_id: int):
     """Get a message containing a list of subscriptions belonging to the guild."""
+    user = await User.get(user_id)
     accounts: List[TwitterAccount] = await get_subscribed(guild)
     channels = [
         await get_channel_model(t_channel.id, guild_id=guild.id)
         for t_channel in guild.text_channels
     ]
-    msg = f"These are the Twitter subscriptions in {guild.name}:\n\n"
+
+    subscription_msg = ""
 
     for account in accounts:
         subbed_channels = account.check_subscribed(channels)
         display_channels = ", ".join(
             ["<#{}>".format(_ch.id) for _ch in subbed_channels]
         )
-        msg += f"{account.name} is subscribed in: {display_channels}\n"
+        subscription_msg += f"{account.name} is subscribed in: {display_channels}\n"
 
-    return msg
+    return await get_message(user, "twitter_list", guild.name, f"\n\n{subscription_msg}")
 
 
 async def process_remove(
     channel_to_notify: disnake.TextChannel,
     twitter_username: str,
+    user_id: int,
     allowed_mentions=None,
     ctx: commands.Context = None,
     inter: disnake.AppCmdInter = None,
 ):
     """Unsubscribe from a Twitter account."""
+    user = await User.get(user_id)
     twitter_username = twitter_username.lower()
     await _unsubscribe(
         twitter_username,
         channel_id=channel_to_notify.id,
         guild_id=channel_to_notify.guild.id,
     )
-    msg = f"{channel_to_notify.mention} is no longer subscribed to {twitter_username}."
-    await send_message(msg=msg, ctx=ctx, inter=inter, allowed_mentions=allowed_mentions)
+
+    return await send_message(channel_to_notify.mention, twitter_username, ctx=ctx, inter=inter,
+                              allowed_mentions=allowed_mentions, user=user, key="twitter_unsubscribed")
 
 
 async def auto_complete_type_subbed_guild(
@@ -145,14 +151,14 @@ async def send_twitter_notifications(
                 success_channels.append(channel)
             except Exception as e:
                 failed_channels.append(channel)
-                print(f"send_twitter_notifications - {discord_channel.id} - {e}")
+                logger.error(f"send_twitter_notifications - {discord_channel.id} - {e}")
 
     for channel in failed_channels:
         # getting and fetching the channel did not work.
         # or failed to send a message.
         # remove it from our subscriptions.
         await twitter_account.unsubscribe(channel)
-        print(
+        logger.info(
             f"Unsubscribed Channel {channel.id} from Twitter Account {twitter_account.id} - {twitter_account.name} "
             f"due to a fetching or message send failure."
         )

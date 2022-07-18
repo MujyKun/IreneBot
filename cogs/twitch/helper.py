@@ -2,15 +2,16 @@ from typing import List, Union, Optional
 
 import disnake
 from IreneAPIWrapper.models import TwitchAccount, AbstractModel
-from IreneAPIWrapper.models import Person, Group, Channel, Guild
+from IreneAPIWrapper.models import Person, Group, Channel, Guild, User
 from disnake.ext import commands
 from models import Bot
 from ..helper import (
     get_channel_model,
     create_guild_model,
     get_discord_channel,
-    send_message,
+    send_message, get_message
 )
+from util import logger
 
 
 async def _subscribe(twitch_username, guild: disnake.Guild, channel_id, role_id=None):
@@ -46,43 +47,43 @@ async def get_subscribed(guild):
     return await TwitchAccount.subbed_in(guild_id=guild.id)
 
 
-async def get_subbed_msg(guild: disnake.Guild):
+async def get_subbed_msg(guild: disnake.Guild, user_id: int):
     """Get a message containing a list of subscriptions belonging to the guild."""
+    user = await User.get(user_id)
     accounts: List[TwitchAccount] = await get_subscribed(guild)
     channels = [
         await get_channel_model(t_channel.id, guild_id=guild.id)
         for t_channel in guild.text_channels
     ]
-    msg = f"These are the twitch subscriptions in {guild.name}:\n\n"
+    sub_msg = ""
 
     for account in accounts:
         subbed_channels = account.check_subscribed(channels)
         display_channels = ", ".join(
             ["<#{}>".format(_ch.id) for _ch in subbed_channels]
         )
-        msg += f"{account.name} is subscribed in: {display_channels}\n"
+        sub_msg += f"{account.name} is subscribed in: {display_channels}\n"
 
-    return msg
+    return await get_message(user, "twitch_list", guild.name, sub_msg)
 
 
 async def process_add(
     channel_to_notify: disnake.TextChannel,
     guild: disnake.Guild,
     twitch_username: str,
+    user_id: int,
     role_id: int = None,
     allowed_mentions=None,
     ctx: commands.Context = None,
     inter: disnake.AppCmdInter = None,
 ):
     """Subscribe to a twitch account."""
+    user = await User.get(user_id)
+
     twitch_username = twitch_username.lower()
     if not await TwitchAccount.check_user_exists(twitch_username):
-        msg = "That username does not exist on Twitch."
-        if ctx:
-            await ctx.send(msg)
-        if inter:
-            await inter.send(msg)
-        return
+        return await send_message(ctx=ctx, inter=inter, allowed_mentions=allowed_mentions, user=user,
+                                  key="error_twitch_username")
 
     await _subscribe(
         twitch_username,
@@ -91,26 +92,28 @@ async def process_add(
         role_id=role_id,
     )
 
-    msg = f"{channel_to_notify.mention} is now subscribed to {twitch_username}."
-    await send_message(msg=msg, ctx=ctx, inter=inter, allowed_mentions=allowed_mentions)
+    return await send_message(channel_to_notify.mention, twitch_username, ctx=ctx, inter=inter,
+                              allowed_mentions=allowed_mentions, user=user, key="twitch_subscribed")
 
 
 async def process_remove(
     channel_to_notify: disnake.TextChannel,
     twitch_username: str,
+    user_id: int,
     allowed_mentions=None,
     ctx: commands.Context = None,
     inter: disnake.AppCmdInter = None,
 ):
     """Unsubscribe from a twitch account."""
+    user = await User.get(user_id)
     twitch_username = twitch_username.lower()
     await _unsubscribe(
         twitch_username,
         channel_id=channel_to_notify.id,
         guild_id=channel_to_notify.guild.id,
     )
-    msg = f"{channel_to_notify.mention} is no longer subscribed to {twitch_username}."
-    await send_message(msg=msg, ctx=ctx, inter=inter, allowed_mentions=allowed_mentions)
+    return await send_message(channel_to_notify.mention, twitch_username, ctx=ctx, inter=inter,
+                              allowed_mentions=allowed_mentions, user=user, key="twitch_unsubscribed")
 
 
 async def auto_complete_type_subbed_guild(
@@ -145,14 +148,14 @@ async def send_twitch_notifications(
             success_channels.append(channel)
         except Exception as e:
             failed_channels.append(channel)
-            print(f"send_twitch_notifications - {discord_channel.id} - {e}")
+            logger.error(f"send_twitch_notifications - {discord_channel.id} - {e}")
 
     for channel in failed_channels:
         # getting and fetching the channel did not work.
         # or failed to send a message.
         # remove it from our subscriptions.
         await twitch_account.unsubscribe(channel)
-        print(
+        logger.info(
             f"Unsubscribed Channel {channel.id} from Twitch Account {twitch_account.id} "
             f"due to a fetching or message send failure."
         )

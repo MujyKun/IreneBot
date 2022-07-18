@@ -33,6 +33,7 @@ class TwitterCog(commands.Cog):
         await helper.process_add(
             ctx=ctx,
             channel_to_notify=channel if channel else ctx.channel,
+            user_id=ctx.author.id,
             guild=ctx.guild,
             twitter_username=twitter_username,
             role_id=role.id if role else None,
@@ -43,7 +44,7 @@ class TwitterCog(commands.Cog):
         name="list", description="List the Twitter accounts subscribed to."
     )
     async def regular_list(self, ctx: commands.Context):
-        await ctx.send(await helper.get_subbed_msg(ctx.guild))
+        await ctx.send(await helper.get_subbed_msg(ctx.guild, ctx.author.id))
 
     @regular_twitter.command(
         name="remove", description="Unsubscribe from a Twitter account."
@@ -57,6 +58,7 @@ class TwitterCog(commands.Cog):
         await helper.process_remove(
             ctx=ctx,
             channel_to_notify=channel if channel else ctx.channel,
+            user_id=ctx.author.id,
             twitter_username=twitter_username,
             allowed_mentions=self.allowed_mentions,
         )
@@ -83,6 +85,7 @@ class TwitterCog(commands.Cog):
         await helper.process_add(
             inter=inter,
             channel_to_notify=channel if channel else inter.channel,
+            user_id=inter.user.id,
             guild=inter.guild,
             twitter_username=twitter_username,
             role_id=role.id if role else None,
@@ -93,7 +96,7 @@ class TwitterCog(commands.Cog):
         name="list", description="List the Twitter accounts subscribed to."
     )
     async def list(self, inter: AppCmdInter):
-        await inter.send(await helper.get_subbed_msg(inter.guild))
+        await inter.send(await helper.get_subbed_msg(inter.guild, inter.user.id))
 
     @twitter.sub_command(
         name="remove", description="Unsubscribe from a Twitter account."
@@ -109,6 +112,7 @@ class TwitterCog(commands.Cog):
         await helper.process_remove(
             inter=inter,
             channel_to_notify=channel if channel else inter.channel,
+            user_id=inter.user.id,
             twitter_username=twitter_username,
             allowed_mentions=self.allowed_mentions,
         )

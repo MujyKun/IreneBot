@@ -43,7 +43,7 @@ class TwitchCog(commands.Cog):
         name="list", description="List the Twitch accounts subscribed to."
     )
     async def regular_list(self, ctx: commands.Context):
-        await ctx.send(await helper.get_subbed_msg(ctx.guild))
+        await ctx.send(await helper.get_subbed_msg(ctx.guild, ctx.author.id))
 
     @regular_twitch.command(
         name="remove", description="Unsubscribe from a twitch account."
@@ -57,6 +57,7 @@ class TwitchCog(commands.Cog):
         await helper.process_remove(
             ctx=ctx,
             channel_to_notify=channel if channel else ctx.channel,
+            user_id=ctx.author.id,
             twitch_username=twitch_username,
             allowed_mentions=self.allowed_mentions,
         )
@@ -84,6 +85,7 @@ class TwitchCog(commands.Cog):
         await helper.process_add(
             inter=inter,
             channel_to_notify=channel if channel else inter.channel,
+            user_id=inter.user.id,
             guild=inter.guild,
             twitch_username=twitch_username,
             role_id=role.id if role else None,
@@ -102,6 +104,7 @@ class TwitchCog(commands.Cog):
         await helper.process_remove(
             inter=inter,
             channel_to_notify=channel if channel else inter.channel,
+            user_id=inter.user.id,
             twitch_username=twitch_username,
             allowed_mentions=self.allowed_mentions,
         )
@@ -111,7 +114,7 @@ class TwitchCog(commands.Cog):
         description="List all Twitch channels being followed in this guild.",
     )
     async def list(self, inter: AppCmdInter):
-        await inter.send(await helper.get_subbed_msg(inter.guild))
+        await inter.send(await helper.get_subbed_msg(inter.guild, inter.user.id))
 
     @tasks.loop(minutes=1, reconnect=True)
     async def twitch_updates(self):

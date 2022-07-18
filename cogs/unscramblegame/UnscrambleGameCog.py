@@ -3,8 +3,7 @@ from typing import Literal
 import disnake
 from disnake import AppCmdInter
 from disnake.ext import commands
-from models import Bot, UnscrambleGame
-from IreneAPIWrapper.models import User
+from models import Bot
 from . import helper
 
 

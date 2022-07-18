@@ -34,6 +34,7 @@ class TwitchCog(commands.Cog):
             ctx=ctx,
             channel_to_notify=channel if channel else ctx.channel,
             guild=ctx.guild,
+            user_id=ctx.author.id,
             twitch_username=twitch_username,
             role_id=role.id if role else None,
             allowed_mentions=self.allowed_mentions,

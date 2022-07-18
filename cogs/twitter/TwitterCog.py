@@ -5,7 +5,7 @@ from models import Bot
 from disnake.ext import commands, tasks
 from disnake import ApplicationCommandInteraction as AppCmdInter
 from . import helper
-from typing import List, Optional, Dict
+from typing import List, Optional
 
 
 class TwitterCog(commands.Cog):

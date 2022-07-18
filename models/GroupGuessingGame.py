@@ -1,4 +1,4 @@
-from . import GuessingGame, User, add_to_cache
+from . import GuessingGame, add_to_cache
 import disnake.ext.commands
 from IreneAPIWrapper.models import User, Media, Group, GROUP, Mode
 from IreneAPIWrapper.exceptions import Empty

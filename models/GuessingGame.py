@@ -1,5 +1,5 @@
 import datetime
-from typing import List, Optional, Union
+from typing import List, Optional
 
 import disnake.ext.commands
 from IreneAPIWrapper.models import (
@@ -7,7 +7,6 @@ from IreneAPIWrapper.models import (
     Affiliation,
     Media,
     Person,
-    Group,
     Date,
     GuessingGame as GuessingGameModel,
 )

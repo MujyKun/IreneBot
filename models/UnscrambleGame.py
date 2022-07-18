@@ -1,27 +1,20 @@
-import asyncio
 import random
 from datetime import datetime
-from typing import List, Dict, Optional, Union
+from typing import List, Optional
 
 import disnake.ext.commands
 from IreneAPIWrapper.models import (
     User,
     Affiliation,
-    Media,
-    Person,
-    Group,
     Date,
     UnscrambleGame as UnscrambleGameModel,
 )
 from IreneAPIWrapper.exceptions import Empty
 
 from random import choice
-from . import PlayerScore, BaseScoreGame, add_to_cache
+from . import BaseScoreGame, add_to_cache
 
 from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from . import Bot
 
 
 class UnscrambleGame(BaseScoreGame):

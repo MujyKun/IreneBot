@@ -1,7 +1,6 @@
 import disnake
-from disnake.ext import commands
 from disnake import ApplicationCommandInteraction as AppCmdInter
-from random import choice, randint
+from random import choice
 from re import findall
 
 

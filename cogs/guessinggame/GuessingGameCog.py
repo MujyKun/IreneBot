@@ -3,10 +3,9 @@ from typing import Literal
 import disnake
 from disnake import AppCmdInter
 from disnake.ext import commands
-from models import Bot, GuessingGame, GroupGuessingGame
+from models import Bot
 from cogs.groupmembers import helper as gm_helper
 from cogs.guessinggame import helper
-from IreneAPIWrapper.models import User, Group, Person
 
 
 class GuessingGameCog(commands.Cog):

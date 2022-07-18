@@ -1,7 +1,7 @@
-from typing import List, Union, Optional
+from typing import List
 
 import disnake
-from IreneAPIWrapper.models import TwitterAccount, Channel, Tweet, User
+from IreneAPIWrapper.models import TwitterAccount, Tweet, User
 from disnake.ext import commands
 from models import Bot
 from ..helper import (
@@ -151,7 +151,7 @@ async def auto_complete_type_subbed_guild(
 async def send_twitter_notifications(
     bot: Bot, twitter_account: TwitterAccount, tweets: List[Tweet]
 ):
-    """Send twitter notifications to discord channels that need it."""
+    """Send Twitter notifications to discord channels that need it."""
     failed_channels = []
     success_channels = []
 

@@ -1,8 +1,8 @@
-from typing import List, Union, Optional
+from typing import List
 
 import disnake
-from IreneAPIWrapper.models import TwitchAccount, AbstractModel
-from IreneAPIWrapper.models import Person, Group, Channel, Guild, User
+from IreneAPIWrapper.models import TwitchAccount
+from IreneAPIWrapper.models import Channel, User
 from disnake.ext import commands
 from models import Bot
 from ..helper import (

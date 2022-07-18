@@ -1,23 +1,8 @@
-from typing import List, Union, Optional
-
-import disnake
-from IreneAPIWrapper.models import TwitterAccount, Channel, Tweet, User, Wolfram
-from disnake.ext import commands
-from models import Bot
-from ..helper import (
-    get_channel_model,
-    create_guild_model,
-    get_discord_channel,
-    send_message,
-    get_message,
-)
+from IreneAPIWrapper.models import User, Wolfram
 from util import logger
 import numexpr
 import urllib.parse
 from ..helper import (
-    get_channel_model,
-    create_guild_model,
-    get_discord_channel,
     send_message,
     get_message,
 )

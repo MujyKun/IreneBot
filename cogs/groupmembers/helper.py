@@ -92,9 +92,11 @@ async def idol_send_on_message(bot, message: disnake.Message, prefixes: List):
     random_obj_choice = random.choice(obj_pool)
 
     user = await User.get(message.author.id)
-    if not user.is_patron:
-        if _user_requests.get(user.id) > get_keys().post_limit:
-            await send_message(key="become_a_patron_limited", channel=message.channel, user=user, delete_after=15)
+    # if not user.is_patron:
+    #     user_request = _user_requests.get(user.id)
+    #     if user_request and user_request > get_keys().post_limit:
+    #         return await send_message(key="become_a_patron_limited", channel=message.channel, user=user,
+    #                                   delete_after=60)
 
     try:
         media = await Media.get_random(random_obj_choice.id,

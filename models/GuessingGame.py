@@ -1,5 +1,5 @@
 import datetime
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import disnake.ext.commands
 from IreneAPIWrapper.models import (
@@ -45,28 +45,31 @@ class GuessingGame(BaseScoreGame):
         """Determine the filtered media pool for a user."""
         person_ids = self.host_user.gg_filter_person_ids
         persons = [await Person.get(person_id) for person_id in person_ids]
+
         affiliations_ = []
+
         for person in persons:
             affiliations_ += person.affiliations
 
-        affiliations = []
-        [affiliations.append(aff) for aff in affiliations if aff not in affiliations]
+        affiliations = list(dict.fromkeys(affiliations_))
 
-        media_pool = await Media.get_all(affiliations)
+        media_pool = await Media.get_all(affiliations, limit=1000)
 
         if not media_pool:
             raise Empty
 
         self.pool = media_pool
 
-    async def _determine_pool(self):
+    async def _determine_pool(self, ):
         """Determine the media pool for a user."""
         aff_pool = []
 
         if self.host_user.gg_filter_active:
             return await self._determine_filter_pool()
 
-        for aff in await Affiliation.get_all():
+        _affs = await Affiliation.get_all()
+
+        for aff in _affs:
             # check gender
             if self.gender != "mixed":
                 if aff.person.gender.lower() != self.gender[0]:
@@ -74,10 +77,10 @@ class GuessingGame(BaseScoreGame):
             aff_pool.append(aff)
 
         media_pool: List[Media] = []
+        medias: List[Media] = await Media.get_all(affiliations=aff_pool, limit=1000)
 
-        medias: List[Media] = await Media.get_all(affiliations=aff_pool)
         for media in medias:
-            if media.is_nsfw and not self.is_nsfw:
+            if (media.is_nsfw and not self.is_nsfw) and media.faces > 2:
                 continue
 
             difficulty = media.difficulty
@@ -124,7 +127,8 @@ class GuessingGame(BaseScoreGame):
             self._complete = True
 
         await self._generate_correct_answers()
-        await self.send_message(media.source.url)
+        media_url = await media.fetch_image_host_url()
+        await self.send_message(msg=media_url, delete_after=self.timeout + 3)
         await self._wait_for_answer()
 
     async def _generate_correct_answers(self):
@@ -155,20 +159,14 @@ class GuessingGame(BaseScoreGame):
         """
         await self.current_media.upsert_guesses(correct=bool(winner))
 
-        win_msg = (
-            "No one guessed correctly."
-            if not winner
-            else f"{winner.display_name} won the round."
-        )
-        correct_answer_msg = (
-            f"The correct answer was {self.current_affiliation.stage_name} from "
-            f"{self.current_affiliation.group.name}"
-        )
-        possible_answer_msg = f"Possible answers: {self.correct_answers}"
+        win_msg = await self.get_message('incorrect_answer_gg') if not winner else \
+            await self.get_message('winner_gg_msg', f"{winner.display_name}")
+        correct_answer_msg = await self.get_message('correct_answer_gg', f"{self.current_affiliation.stage_name}", f"{self.current_affiliation.group.name}")
+        possible_answer_msg = await self.get_message('all_answers_gg', f"{self.correct_answers}")
         result_message = (
             win_msg + "\n" + correct_answer_msg + "\n" + possible_answer_msg
         )
-        await self.send_message(result_message)
+        await self.send_message(msg=result_message, delete_after=self.timeout)
 
         if not self.is_complete:
             await self._generate_new_question()

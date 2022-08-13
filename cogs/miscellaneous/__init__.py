@@ -1,1 +1,1 @@
-from . import MiscellaneousCog
+from . import helper, MiscellaneousCog

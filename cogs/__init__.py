@@ -1,5 +1,5 @@
 cogs = [
-    # "biasgame.BiasGameCog",
+    "biasgame.BiasGameCog",
     "groupmembers.GroupMembersCog",
     "miscellaneous.MiscellaneousCog",
     "profile.ProfileCog",
@@ -10,4 +10,5 @@ cogs = [
     "twitch.TwitchCog",
     "twitter.TwitterCog",
     "moderator.ModeratorCog",
+    "blockingmonitor.BlockingMonitorCog"
 ]

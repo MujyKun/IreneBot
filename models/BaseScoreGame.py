@@ -1,11 +1,11 @@
-from . import PlayerScore, Game, User
+from . import PlayerScore, Game, User, BaseRoundGame
 from typing import List, Optional
 from IreneAPIWrapper.models import UserStatus, get_difficulty, Date, Mode, NORMAL
 import asyncio
 import disnake
 
 
-class BaseScoreGame(Game):
+class BaseScoreGame(BaseRoundGame):
     """
     Is an abstract model for a game with a competition & point system
     """
@@ -82,10 +82,10 @@ class BaseScoreGame(Game):
             scores = "\n".join(
                 [f"{str(player_score)}" for player_score in player_scores]
             )
-            msg = f"The final scores are:\n\n{scores}"
+            msg = await self.get_message('final_scores_games', scores)
         else:
-            msg = "The Game has finished! No one has received a point in the Game. "
-        await self.send_message(msg)
+            msg = await self.get_message('game_finished_no_scores')
+        await self.send_message(msg=msg)
 
     async def _send_results(self, winner: disnake.User = None):
         """Send the results of a round and continue/finish the game.
@@ -108,6 +108,7 @@ class BaseScoreGame(Game):
             msg = await self.bot.wait_for(
                 "message", check=check_for_answer, timeout=self.timeout
             )
+            await msg.add_reaction("👍")
             await self._accredit_player(msg.author.id)
             await self._send_results(msg.author)
         except asyncio.TimeoutError:

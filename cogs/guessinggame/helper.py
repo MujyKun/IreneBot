@@ -2,7 +2,7 @@ from IreneAPIWrapper.models import User, Group, Person
 from models import GuessingGame, GroupGuessingGame
 from disnake.ext import commands
 from disnake import AppCmdInter
-from ..helper import send_message, check_game_input
+from ..helper import send_message, check_game_input, in_game
 
 
 async def process_gg(
@@ -19,6 +19,9 @@ async def process_gg(
     group_mode=False,
 ):
     user = await User.get(user_id)
+    if await in_game(user):
+        return await send_message(
+            key='already_in_game', ctx=ctx, inter=inter, allowed_mentions=allowed_mentions, user=user)
 
     input_check = await check_game_input(
         user=user,
@@ -30,6 +33,7 @@ async def process_gg(
     )
     # inputs did not pass.
     if input_check is not True:
+        # no need to pass in a user/key since we used get_message in our game input check.
         return await send_message(
             msg=input_check, ctx=ctx, inter=inter, allowed_mentions=allowed_mentions
         )
@@ -60,7 +64,7 @@ async def process_gg(
         inter=inter,
         allowed_mentions=allowed_mentions,
         key="start_gg",
-        user=user,
+        user=user
     )
     await game_obj.start()
 

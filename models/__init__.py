@@ -5,8 +5,11 @@ def add_to_cache(obj):
         ggs.append(obj)
     elif isinstance(obj, UnscrambleGame):
         uss.append(obj)
+    elif isinstance(obj, BiasGame):
+        bgs.append(obj)
     else:
         others.append(obj)
+    all.append(obj)
 
 
 ggs = []  # GuessingGame
@@ -15,6 +18,7 @@ uss = []  # UnscrambleGame
 bgs = []  # BiasGame
 bjs = []  # BlackJack
 others = []  # etc
+all = []
 
 from dataclasses import dataclass
 from IreneAPIWrapper.models import User, UserStatus
@@ -31,10 +35,13 @@ class PlayerScore(UserStatus):
         return f"{self.disnake_user.display_name} -> {self.status.score}."
 
 
+from .Bracket import Bracket, PvP
 from .Game import Game
+from .BaseRoundGame import BaseRoundGame
 from .BaseScoreGame import BaseScoreGame
 
 from .bot import Bot
 from .GuessingGame import GuessingGame
 from .GroupGuessingGame import GroupGuessingGame
 from .UnscrambleGame import UnscrambleGame
+from .BiasGame import BiasGame

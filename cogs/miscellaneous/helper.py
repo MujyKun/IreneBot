@@ -1,7 +1,30 @@
+from IreneAPIWrapper.models import User
 import disnake
 from disnake import ApplicationCommandInteraction as AppCmdInter
 from random import choice
 from re import findall
+from disnake.ext import commands
+from ..helper import send_message
+from models import all as all_games
+
+
+async def process_stop_games(
+    user_id: int,
+    ctx: commands.Context = None,
+    inter: AppCmdInter = None,
+    allowed_mentions=None,
+):
+    user = await User.get(user_id)
+    if not user:
+        return
+
+    games = [game for game in all_games if game.host_user == user and not game.is_complete]
+    for game in games:
+        await game.stop()
+
+    await send_message(
+        key="stop_games", ctx=ctx, inter=inter, allowed_mentions=allowed_mentions, user=user
+    )
 
 
 async def get_choose_answer(choices: str):

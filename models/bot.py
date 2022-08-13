@@ -22,8 +22,11 @@ class Bot(AutoShardedBot):
         self.dev_mode = dev_mode
 
         preload = Preload()
+        preload.all_false()
         preload.twitch_subscriptions = True
         preload.twitter_accounts = True
+        preload.languages = True
+        preload.affiliations = True
 
         api = IreneAPIClient(
             token=keys.api_token,
@@ -94,12 +97,14 @@ class Bot(AutoShardedBot):
                     description=exception.original.get_detailed_report(),
                     color=disnake.Color.dark_red(),
                 )
-
-                if bug_channel_id:
-                    channel = self.get_channel(bug_channel_id)
-                    if channel:
-                        await channel.send(embed=embed)
-                return await context.channel.send(embed=embed)
+                try:
+                    if bug_channel_id:
+                        channel = self.get_channel(bug_channel_id)
+                        if channel:
+                            await channel.send(embed=embed)
+                        return await context.channel.send(embed=embed)
+                except disnake.errors.HTTPException as e:
+                    logger.error(f"Could not send embedded error to channel - {e}")
             print(exception)
             try:
                 if exception.original.status == 403:

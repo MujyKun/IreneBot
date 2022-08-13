@@ -78,7 +78,7 @@ async def create_embeds_from_list(
 ) -> List[disnake.Embed]:
     numbered_items = [f"{i+1}) {items[i]}" for i in range(0, len(items))]
     grouped_items = [
-        "\n".join(numbered_items[i: i + groupings])
+        "\n".join(numbered_items[i : i + groupings])
         for i in range(0, len(numbered_items), groupings)
     ]
     embeds = [

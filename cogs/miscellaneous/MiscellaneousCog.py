@@ -1,4 +1,4 @@
-from cogs.miscellaneous.helper import *
+from . import helper
 import disnake
 from disnake.ext import commands
 from disnake import ApplicationCommandInteraction as AppCmdInter
@@ -9,6 +9,21 @@ from util import botembed, botinfo
 class MiscellaneousCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.allowed_mentions = disnake.AllowedMentions(everyone=False, roles=False)
+
+    @commands.command(name="stopgames", description="Stop all games you are hosting.")
+    async def regular_stop_games(self, ctx: commands.Context):
+        await helper.process_stop_games(
+            user_id=ctx.author.id, ctx=ctx, allowed_mentions=self.allowed_mentions
+        )
+
+    @commands.slash_command(
+        name="stopgames", description="Stop all games you are hosting."
+    )
+    async def stop_games(self, inter: AppCmdInter):
+        await helper.process_stop_games(
+            user_id=inter.user.id, inter=inter, allowed_mentions=self.allowed_mentions
+        )
 
     @commands.slash_command(name="8ball", description="Ask the 8ball a question.")
     async def _8ball(

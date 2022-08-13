@@ -6,9 +6,9 @@ from disnake.ext import commands
 from util import logger
 import disnake
 
-
 LIMIT_ROUNDS = [3, 60]
 LIMIT_TIMEOUT = [5, 60]
+BRACKET_SIZE_OPTIONS = [8, 16, 32, 64]
 DIFFICULTY_OPTIONS = ["easy", "medium", "hard"]
 GENDER_OPTIONS = ["male", "female", "mixed"]
 NSFW_OPTIONS = ["yes", "no"]
@@ -34,7 +34,7 @@ async def create_guild_model(guild):
             afk_timeout=guild.afk_timeout,
             icon=guild.icon.url,
             owner_id=guild.owner_id,
-            banner=guild.banner.url,
+            banner=None if not guild.banner else guild.banner.url,
             description=guild.description,
             mfa_level=guild.mfa_level,
             splash=guild.splash.url,
@@ -53,7 +53,7 @@ async def create_guild_model(guild):
 
 
 async def get_discord_channel(
-    bot: Bot, channel: Channel
+        bot: Bot, channel: Channel
 ) -> Optional[disnake.TextChannel]:
     """Get a discord channel without worrying about errors."""
     discord_channel = bot.get_channel(channel.id)
@@ -95,14 +95,16 @@ async def get_message(user, key, *custom_args):
 
 
 async def send_message(
-    *custom_args,
-    msg: str = None,
-    ctx: commands.Context = None,
-    inter: disnake.AppCmdInter = None,
-    channel: disnake.TextChannel = None,
-    allowed_mentions: disnake.AllowedMentions = None,
-    user: User = None,
-    key: str = None,
+        *custom_args,
+        msg: str = None,
+        ctx: commands.Context = None,
+        inter: disnake.AppCmdInter = None,
+        channel: disnake.TextChannel = None,
+        allowed_mentions: disnake.AllowedMentions = None,
+        user: User = None,
+        key: str = None,
+        view: disnake.ui.View = None,
+        delete_after: int = None,
 ):
     """Send a message to a discord channel/interaction.
     :param custom_args:
@@ -121,6 +123,10 @@ async def send_message(
         A IreneAPIWrapper User Object
     :param key: str
         The PackMessage label/key for modification.
+    :param view: disnake.ui.View
+        The view for the message.
+    :param delete_after: int
+        Howmany seconds to delete the message after.
     """
     if (user and key) and not msg:
         msg = await get_message(user, key, *custom_args)
@@ -138,50 +144,95 @@ async def send_message(
         return
 
     msg = msg.replace("\\n", "\n")
+
+    final_msgs = []
     if ctx:
-        await ctx.send(msg, allowed_mentions=allowed_mentions)
+        final_msgs.append(
+            await ctx.send(
+                msg,
+                allowed_mentions=allowed_mentions,
+                view=view,
+                delete_after=delete_after,
+            )
+        )
     if inter:
-        await inter.send(msg, allowed_mentions=allowed_mentions)
+        if not view:
+            view = disnake.utils.MISSING
+        if not allowed_mentions:
+            allowed_mentions = disnake.utils.MISSING
+        if not delete_after:
+            delete_after = disnake.utils.MISSING
+        final_msgs.append(
+            await inter.send(
+                msg,
+                allowed_mentions=allowed_mentions,
+                view=view,
+                delete_after=delete_after,
+            )
+        )
     if channel:
-        await channel.send(msg, allowed_mentions=allowed_mentions)
+        final_msgs.append(
+            await channel.send(
+                msg,
+                allowed_mentions=allowed_mentions,
+                view=view,
+                delete_after=delete_after,
+            )
+        )
+
+    return final_msgs
 
 
 async def check_game_input(
-    user, max_rounds, timeout, gender, difficulty, contains_nsfw=None
+        user,
+        bracket_size=None,
+        max_rounds=None,
+        timeout=None,
+        difficulty=None,
+        gender=None,
+        contains_nsfw=None,
 ) -> Union[str, bool]:
     """Check the inputs for a guessing game and return a string with all errors."""
     input_err_msgs = [await get_message(user, "error_invalid_input")]
 
-    if not LIMIT_ROUNDS[0] <= max_rounds <= LIMIT_ROUNDS[1]:
+    if bracket_size and bracket_size not in BRACKET_SIZE_OPTIONS:
+        input_err_msgs.append(
+            await get_message(user, "error_bracket_size", BRACKET_SIZE_OPTIONS)
+        )
+    if max_rounds and not LIMIT_ROUNDS[0] <= max_rounds <= LIMIT_ROUNDS[1]:
         input_err_msgs.append(
             await get_message(
                 user, "error_limit_rounds", LIMIT_ROUNDS[0], LIMIT_ROUNDS[1]
             )
         )
-    if difficulty.lower() not in DIFFICULTY_OPTIONS:
+    if difficulty and difficulty.lower() not in DIFFICULTY_OPTIONS:
         input_err_msgs.append(
             await get_message(
                 user, "error_difficulty_options", ", ".join(DIFFICULTY_OPTIONS)
             )
         )
-    if gender.lower() not in GENDER_OPTIONS:
+    if gender and gender.lower() not in GENDER_OPTIONS:
         input_err_msgs.append(
             await get_message(user, "error_gender_options", ", ".join(GENDER_OPTIONS))
         )
-    if not LIMIT_TIMEOUT[0] <= timeout <= LIMIT_TIMEOUT[1]:
+    if timeout and not LIMIT_TIMEOUT[0] <= timeout <= LIMIT_TIMEOUT[1]:
         input_err_msgs.append(
             await get_message(
                 user, "error_timeout_options", LIMIT_TIMEOUT[0], LIMIT_TIMEOUT[1]
             )
         )
-    if contains_nsfw:
-        if contains_nsfw.lower() not in NSFW_OPTIONS:
-            input_err_msgs.append(
-                await get_message(
-                    user, "error_nsfw_options", NSFW_OPTIONS[0], NSFW_OPTIONS[1]
-                )
+    if contains_nsfw and contains_nsfw.lower() not in NSFW_OPTIONS:
+        input_err_msgs.append(
+            await get_message(
+                user, "error_nsfw_options", NSFW_OPTIONS[0], NSFW_OPTIONS[1]
             )
+        )
 
     if len(input_err_msgs) > 1:
         return "\n".join(input_err_msgs)
     return True
+
+
+async def in_game(user: User):
+    from models import all as all_games
+    return any([game for game in all_games if game.host_user == user and not game.is_complete])

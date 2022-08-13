@@ -2,7 +2,7 @@
 name = "IreneBot"
 version = "2.0"
 description = "The client for the discord bot Irene."
-authors = ["MujyKun <mujy@irenebot.com>"]
+authors = ["MujyKun <mujy@irenebot.com>", "A-Phamfam <alextampham3000@gmail.com>"]
 classifiers = [
         "Development Status :: 5 - Production/Stable",
         "License :: OSI Approved :: MIT License",

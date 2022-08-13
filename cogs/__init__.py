@@ -1,4 +1,4 @@
-cogs = [
+cogs_list = [
     "biasgame.BiasGameCog",
     "groupmembers.GroupMembersCog",
     "miscellaneous.MiscellaneousCog",

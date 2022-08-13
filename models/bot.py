@@ -1,9 +1,10 @@
 import asyncio
-from typing import List
+from typing import List, Union
 
 import IreneAPIWrapper.models
 from disnake.ext.commands import AutoShardedBot, errors
-from cogs import cogs
+
+from cogs import cogs_list
 from datetime import datetime
 from util import logger
 from IreneAPIWrapper.models import IreneAPIClient, Preload
@@ -16,7 +17,7 @@ class Bot(AutoShardedBot):
         super(Bot, self).__init__(self.prefix_check, **settings)
         self.default_prefix = default_bot_prefix
         self.keys = keys
-        for cog in cogs:
+        for cog in cogs_list:
             self.load_extension(f"cogs.{cog}")
 
         self.dev_mode = dev_mode
@@ -72,10 +73,28 @@ class Bot(AutoShardedBot):
         )
 
     async def on_ready(self):
-        print(
-            f"{self.keys.bot_name} is now ready at {datetime.now()}.\n"
-            f"{self.keys.bot_name} is now active in test guild {self.keys.support_server_id}."
+        msg = f"{self.keys.bot_name} is now ready at {datetime.now()}.\n" \
+              f"{self.keys.bot_name} is now active in test guild {self.keys.support_server_id}."
+        print(msg)
+        logger.info(msg)
+
+    async def handle_api_error(self, context: Union[disnake.Message, disnake.ext.commands.Context],
+                               exception: APIError):
+        logger.error(f"{exception}")
+        bug_channel_id = self.keys.bug_channel_id
+        embed = disnake.Embed(
+            title="API Error",
+            description=exception.get_detailed_report(),
+            color=disnake.Color.dark_red(),
         )
+        try:
+            if bug_channel_id:
+                channel = self.get_channel(bug_channel_id)
+                if channel:
+                    await channel.send(embed=embed)
+            return await context.channel.send(embed=embed)
+        except disnake.errors.HTTPException as e:
+            logger.error(f"Could not send embedded error to channel - {e}")
 
     async def on_command_error(self, context, exception):
         # TODO: errors.Cooldown was not found - causes an AttributeError when put in return_error_to_user
@@ -90,22 +109,8 @@ class Bot(AutoShardedBot):
             return
         elif isinstance(exception, errors.CommandInvokeError):
             if isinstance(exception.original, APIError):
-                logger.error(exception)
-                bug_channel_id = self.keys.bug_channel_id
-                embed = disnake.Embed(
-                    title="API Error",
-                    description=exception.original.get_detailed_report(),
-                    color=disnake.Color.dark_red(),
-                )
-                try:
-                    if bug_channel_id:
-                        channel = self.get_channel(bug_channel_id)
-                        if channel:
-                            await channel.send(embed=embed)
-                        return await context.channel.send(embed=embed)
-                except disnake.errors.HTTPException as e:
-                    logger.error(f"Could not send embedded error to channel - {e}")
-            print(exception)
+                return await self.handle_api_error(context, exception.original)
+            logger.error(exception)
             try:
                 if exception.original.status == 403:
                     return
@@ -118,4 +123,6 @@ class Bot(AutoShardedBot):
             logger.error(exception)
 
     async def on_message(self, message):
+        from cogs.groupmembers.helper import idol_send_on_message  # avoids circular import
+        await idol_send_on_message(self, message, await self.prefix_check(self, message))
         await self.process_commands(message)

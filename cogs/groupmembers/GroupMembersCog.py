@@ -91,8 +91,8 @@ class GroupMembersCog(commands.Cog):
     )
     async def aliases(self, inter: AppCmdInter, name):
         name = name.lower()
-        persons = await helper.search_for_obj_by_alias(name)
-        groups = await helper.search_for_obj_by_alias(name, False)
+        persons = await helper.search_for_obj(name)
+        groups = await helper.search_for_obj(name, False)
 
         persons_aliases = []
         for person in persons:

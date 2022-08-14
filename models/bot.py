@@ -44,7 +44,7 @@ class Bot(AutoShardedBot):
     ) -> List[str]:
         """Get a list of prefixes for a Guild."""
         default = [self.default_prefix]
-        if not hasattr(msg, "guild"):
+        if not hasattr(msg, "guild") or msg.guild is None:
             return default
 
         guild_id = msg.guild.id

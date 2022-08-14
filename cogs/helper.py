@@ -32,7 +32,7 @@ async def create_guild_model(guild):
             name=guild.name,
             emoji_count=len(guild.emojis),
             afk_timeout=guild.afk_timeout,
-            icon=guild.icon.url,
+            icon=None if not guild.icon else guild.icon.url,
             owner_id=guild.owner_id,
             banner=None if not guild.banner else guild.banner.url,
             description=guild.description,

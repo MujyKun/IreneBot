@@ -37,7 +37,7 @@ async def create_guild_model(guild):
             banner=None if not guild.banner else guild.banner.url,
             description=guild.description,
             mfa_level=guild.mfa_level,
-            splash=guild.splash.url,
+            splash=None if not guild.splash else guild.splash.url,
             nitro_level=guild.premium_tier,
             boosts=guild.premium_subscription_count,
             text_channel_count=len(guild.text_channels),

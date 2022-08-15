@@ -21,9 +21,9 @@ python-dotenv = "0.20.0"
 pre-commit = "2.19.0"
 mypy = "0.961"
 numexpr = "^2.8.1"
-ireneapiwrapper = "^2.0"
+# ireneapiwrapper = "2.2"
 
-# ireneapiwrapper = {git = "https://github.com/MujyKun/IreneAPIWrapper.git"}
+ireneapiwrapper = {git = "https://github.com/MujyKun/IreneAPIWrapper.git"}
 disnake = "^2.5.1"
 
 [tool.poetry.dev-dependencies]

@@ -82,6 +82,9 @@ async def idol_send_on_message(bot, message: disnake.Message, prefixes: List):
             if not has_person:
                 # add the group to the pool. if there is no person found for the group.
                 obj_pool.append(group)
+    elif len(group_comparisons) >= 1:
+        # groups with no people
+        obj_pool += [group_comp.obj for group_comp in group_comparisons]
     else:
         raise NotImplementedError()
 
@@ -92,6 +95,9 @@ async def idol_send_on_message(bot, message: disnake.Message, prefixes: List):
     random_obj_choice = random.choice(obj_pool)
 
     user = await User.get(message.author.id)
+    if not user:
+        await User.insert(message.author.id)
+        user = await User.get(message.author.id)
     # if not user.is_patron:
     #     user_request = _user_requests.get(user.id)
     #     if user_request and user_request > get_keys().post_limit:

@@ -18,7 +18,7 @@ if __name__ == "__main__":
         "case_insensitive": True,
         "owner_id": t_keys.bot_owner_id,
         "intents": intents,
-        "test_guilds": [t_keys.support_server_id],
+        "test_guilds": None if not DEV_MODE else [t_keys.support_server_id],
         # "test_guilds": [703549827044343858],
         "sync_commands_debug": True,
         "sync_commands": True,

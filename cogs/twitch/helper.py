@@ -24,8 +24,7 @@ async def _subscribe(twitch_username, guild: disnake.Guild, channel_id, role_id=
     twitch_account = await TwitchAccount.get(twitch_username)
     if not twitch_account:
         await TwitchAccount.insert(
-            twitch_username, guild_id=guild.id, channel_id=channel_id, role_id=role_id
-        )
+            twitch_username, channel_id=channel_id, role_id=role_id)
         return
     else:
         await twitch_account.subscribe(channel=channel_model, role_id=role_id)

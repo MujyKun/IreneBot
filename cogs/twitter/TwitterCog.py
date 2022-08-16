@@ -105,7 +105,7 @@ class TwitterCog(commands.Cog):
         self,
         inter: AppCmdInter,
         twitter_username: str = commands.Param(
-            autocomplete=helper.auto_complete_type_subbed_guild
+            autocomplete=helper.auto_complete_type_subbed_channel
         ),
         channel: Optional[disnake.TextChannel] = None,
     ):

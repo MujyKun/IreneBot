@@ -1,7 +1,7 @@
 from typing import List
 
 import disnake
-from IreneAPIWrapper.models import TwitterAccount, Tweet, User
+from IreneAPIWrapper.models import TwitterAccount, Tweet, User, Channel
 from disnake.ext import commands
 from models import Bot
 from ..helper import (
@@ -12,6 +12,7 @@ from ..helper import (
     get_message,
 )
 from util import logger
+from keys import get_keys
 
 
 async def _subscribe(twitter_username, guild: disnake.Guild, channel_id, role_id=None):
@@ -53,8 +54,22 @@ async def process_add(
     inter: disnake.AppCmdInter = None,
 ):
     """Subscribe to a twitch account."""
-
     user = await User.get(user_id)
+    if ctx:
+        guild = ctx.guild
+    else:
+        guild = inter.guild
+    accounts: List[TwitterAccount] = await get_subscribed(guild)
+    if len(accounts) >= get_keys().twitter_update_limit:
+        return await send_message(
+            ctx=ctx,
+            inter=inter,
+            allowed_mentions=allowed_mentions,
+            user=user,
+            key="become_a_patron_limited",
+        )
+
+
     twitter_username = twitter_username.lower()
     if not await TwitterAccount.check_user_exists(twitter_username):
         return await send_message(
@@ -140,7 +155,7 @@ async def process_remove(
     )
 
 
-async def auto_complete_type_subbed_guild(
+async def auto_complete_type_subbed_channel(
     inter: disnake.AppCmdInter, user_input: str
 ) -> List[str]:
     """Auto-complete typing for the twitch accounts subscribed to in a guild."""

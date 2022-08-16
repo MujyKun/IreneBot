@@ -73,13 +73,18 @@ class Bot(AutoShardedBot):
         )
 
     async def on_ready(self):
-        msg = f"{self.keys.bot_name} is now ready at {datetime.now()}.\n" \
-              f"{self.keys.bot_name} is now active in test guild {self.keys.support_server_id}."
+        msg = (
+            f"{self.keys.bot_name} is now ready at {datetime.now()}.\n"
+            f"{self.keys.bot_name} is now active in test guild {self.keys.support_server_id}."
+        )
         print(msg)
         logger.info(msg)
 
-    async def handle_api_error(self, context: Union[disnake.Message, disnake.ext.commands.Context],
-                               exception: APIError):
+    async def handle_api_error(
+        self,
+        context: Union[disnake.Message, disnake.ext.commands.Context],
+        exception: APIError,
+    ):
         logger.error(f"{exception}")
         bug_channel_id = self.keys.bug_channel_id
         embed = disnake.Embed(
@@ -123,6 +128,11 @@ class Bot(AutoShardedBot):
             logger.error(exception)
 
     async def on_message(self, message):
-        from cogs.groupmembers.helper import idol_send_on_message  # avoids circular import
-        await idol_send_on_message(self, message, await self.prefix_check(self, message))
+        from cogs.groupmembers.helper import (
+            idol_send_on_message,
+        )  # avoids circular import
+
+        await idol_send_on_message(
+            self, message, await self.prefix_check(self, message)
+        )
         await self.process_commands(message)

@@ -18,12 +18,18 @@ async def process_stop_games(
     if not user:
         return
 
-    games = [game for game in all_games if game.host_user == user and not game.is_complete]
+    games = [
+        game for game in all_games if game.host_user == user and not game.is_complete
+    ]
     for game in games:
         await game.stop()
 
     await send_message(
-        key="stop_games", ctx=ctx, inter=inter, allowed_mentions=allowed_mentions, user=user
+        key="stop_games",
+        ctx=ctx,
+        inter=inter,
+        allowed_mentions=allowed_mentions,
+        user=user,
     )
 
 

@@ -69,7 +69,6 @@ async def process_add(
             key="become_a_patron_limited",
         )
 
-
     twitter_username = twitter_username.lower()
     if not await TwitterAccount.check_user_exists(twitter_username):
         return await send_message(

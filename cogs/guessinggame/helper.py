@@ -21,7 +21,12 @@ async def process_gg(
     user = await User.get(user_id)
     if await in_game(user):
         return await send_message(
-            key='already_in_game', ctx=ctx, inter=inter, allowed_mentions=allowed_mentions, user=user)
+            key="already_in_game",
+            ctx=ctx,
+            inter=inter,
+            allowed_mentions=allowed_mentions,
+            user=user,
+        )
 
     input_check = await check_game_input(
         user=user,
@@ -64,7 +69,7 @@ async def process_gg(
         inter=inter,
         allowed_mentions=allowed_mentions,
         key="start_gg",
-        user=user
+        user=user,
     )
     await game_obj.start()
 

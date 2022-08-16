@@ -53,7 +53,7 @@ async def create_guild_model(guild):
 
 
 async def get_discord_channel(
-        bot: Bot, channel: Channel
+    bot: Bot, channel: Channel
 ) -> Optional[disnake.TextChannel]:
     """Get a discord channel without worrying about errors."""
     discord_channel = bot.get_channel(channel.id)
@@ -95,16 +95,16 @@ async def get_message(user, key, *custom_args):
 
 
 async def send_message(
-        *custom_args,
-        msg: str = None,
-        ctx: commands.Context = None,
-        inter: disnake.AppCmdInter = None,
-        channel: disnake.TextChannel = None,
-        allowed_mentions: disnake.AllowedMentions = None,
-        user: User = None,
-        key: str = None,
-        view: disnake.ui.View = None,
-        delete_after: int = None,
+    *custom_args,
+    msg: str = None,
+    ctx: commands.Context = None,
+    inter: disnake.AppCmdInter = None,
+    channel: disnake.TextChannel = None,
+    allowed_mentions: disnake.AllowedMentions = None,
+    user: User = None,
+    key: str = None,
+    view: disnake.ui.View = None,
+    delete_after: int = None,
 ):
     """Send a message to a discord channel/interaction.
     :param custom_args:
@@ -184,13 +184,13 @@ async def send_message(
 
 
 async def check_game_input(
-        user,
-        bracket_size=None,
-        max_rounds=None,
-        timeout=None,
-        difficulty=None,
-        gender=None,
-        contains_nsfw=None,
+    user,
+    bracket_size=None,
+    max_rounds=None,
+    timeout=None,
+    difficulty=None,
+    gender=None,
+    contains_nsfw=None,
 ) -> Union[str, bool]:
     """Check the inputs for a guessing game and return a string with all errors."""
     input_err_msgs = [await get_message(user, "error_invalid_input")]
@@ -235,4 +235,7 @@ async def check_game_input(
 
 async def in_game(user: User):
     from models import all as all_games
-    return any([game for game in all_games if game.host_user == user and not game.is_complete])
+
+    return any(
+        [game for game in all_games if game.host_user == user and not game.is_complete]
+    )

@@ -44,10 +44,17 @@ class GroupGuessingGame(GuessingGame):
         """
         await self.current_media.upsert_guesses(correct=bool(winner))
 
-        win_msg = await self.get_message('incorrect_answer_gg') if not winner else \
-            await self.get_message('winner_gg_msg', f"{winner.display_name}")
-        correct_answer_msg = await self.get_message('correct_answer_ggg', f"{self.current_affiliation.group.name}")
-        possible_answer_msg = await self.get_message('all_answers_gg', f"{self.correct_answers}")
+        win_msg = (
+            await self.get_message("incorrect_answer_gg")
+            if not winner
+            else await self.get_message("winner_gg_msg", f"{winner.display_name}")
+        )
+        correct_answer_msg = await self.get_message(
+            "correct_answer_ggg", f"{self.current_affiliation.group.name}"
+        )
+        possible_answer_msg = await self.get_message(
+            "all_answers_gg", f"{self.correct_answers}"
+        )
         result_message = (
             win_msg + "\n" + correct_answer_msg + "\n" + possible_answer_msg
         )

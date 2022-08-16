@@ -47,10 +47,12 @@ async def idol_send_on_message(bot, message: disnake.Message, prefixes: List):
     if not content_replaced:
         return
 
-    person_comparisons: List[Comparison] = await search_for_obj(content, persons=True, split_name=True,
-                                                                return_similarity=True)
-    group_comparisons: List[Comparison] = await search_for_obj(content, persons=False, split_name=True,
-                                                               return_similarity=True)
+    person_comparisons: List[Comparison] = await search_for_obj(
+        content, persons=True, split_name=True, return_similarity=True
+    )
+    group_comparisons: List[Comparison] = await search_for_obj(
+        content, persons=False, split_name=True, return_similarity=True
+    )
 
     obj_pool: List[Union[Person, Group]] = []
     if not (person_comparisons or group_comparisons):
@@ -105,9 +107,11 @@ async def idol_send_on_message(bot, message: disnake.Message, prefixes: List):
     #                                   delete_after=60)
 
     try:
-        media = await Media.get_random(random_obj_choice.id,
-                                       person=isinstance(random_obj_choice, Person),
-                                       group=isinstance(random_obj_choice, Group))
+        media = await Media.get_random(
+            random_obj_choice.id,
+            person=isinstance(random_obj_choice, Person),
+            group=isinstance(random_obj_choice, Group),
+        )
         if media:
             media_url = await media.fetch_image_host_url()
         else:
@@ -130,7 +134,13 @@ async def idol_send_on_message(bot, message: disnake.Message, prefixes: List):
 
 
 async def person_in_group(person, group):
-    return any([person_aff == group_aff for person_aff in person.affiliations for group_aff in group.affiliations])
+    return any(
+        [
+            person_aff == group_aff
+            for person_aff in person.affiliations
+            for group_aff in group.affiliations
+        ]
+    )
 
 
 async def auto_complete_type(inter: AppCmdInter, user_input: str) -> List[str]:
@@ -206,6 +216,7 @@ class Comparison:
     """
     Comparison a source object's search word with its target word using levenshtein distance.
     """
+
     def __init__(self, obj: Union[Person, Group], search_word: str, target_word: str):
         self.obj = obj
         self.search_word = search_word
@@ -221,15 +232,27 @@ class Comparison:
         return self.similarity
 
     def __eq__(self, other):
-        return (self.obj == other.obj) and (self.search_word == other.search_word) and \
-               (self.target_word == other.target_word)
+        return (
+            (self.obj == other.obj)
+            and (self.search_word == other.search_word)
+            and (self.target_word == other.target_word)
+        )
 
     def __lt__(self, other):
         """Check if the similarity is less than another comparison object."""
         return self.__float__() < other.__float__()
 
     def __hash__(self):
-        return hash(('obj', self.obj, 'search_word', self.search_word, 'target_word', self.target_word))
+        return hash(
+            (
+                "obj",
+                self.obj,
+                "search_word",
+                self.search_word,
+                "target_word",
+                self.target_word,
+            )
+        )
 
 
 async def search_for_obj(
@@ -250,21 +273,41 @@ async def search_for_obj(
     :returns: Union[List[:ref:`Person`], List[:ref:`Group`]]
         A list of persons or groups that match the search filter.
     """
-    objects: Union[List[Person], List[Group]] = await Person.get_all() if persons else await Group.get_all()
+    objects: Union[List[Person], List[Group]] = (
+        await Person.get_all() if persons else await Group.get_all()
+    )
     if not return_similarity:
         filtered = [
-            item for item in objects if await _filter_by_name(item, search_name, split_name=split_name,
-                                                              return_similarity=return_similarity)
+            item
+            for item in objects
+            if await _filter_by_name(
+                item,
+                search_name,
+                split_name=split_name,
+                return_similarity=return_similarity,
+            )
         ]
         return filtered
     else:
-        filtered = [await _filter_by_name(item, search_name, split_name=split_name,
-                                          return_similarity=return_similarity) for item in objects]
+        filtered = [
+            await _filter_by_name(
+                item,
+                search_name,
+                split_name=split_name,
+                return_similarity=return_similarity,
+            )
+            for item in objects
+        ]
         return [comp for list_of_comps in filtered for comp in list_of_comps]
 
 
-async def _filter_by_name(obj: Union[Person, Group], name: str, similarity_required=0.75, split_name=False,
-                          return_similarity=True):
+async def _filter_by_name(
+    obj: Union[Person, Group],
+    name: str,
+    similarity_required=0.75,
+    split_name=False,
+    return_similarity=True,
+):
     """
     Uses levenshtein distance against person/group aliases.
     Any aliases/names with a default 75% or greater similarity will count as a result.
@@ -279,46 +322,74 @@ async def _filter_by_name(obj: Union[Person, Group], name: str, similarity_requi
     if similarity_required < 0 or similarity_required > 100:
         similarity_required = 0.75
     elif 1 < similarity_required <= 100:
-        similarity_required = similarity_required / 100  # putting as decimal between 0 and 1.
+        similarity_required = (
+            similarity_required / 100
+        )  # putting as decimal between 0 and 1.
 
     final_results: List[Comparison] = []
     aliases = await obj.get_aliases_as_strings()
     name = name.lower()
-    names = [name] if not split_name else name.split(' ') + [name]
+    names = [name] if not split_name else name.split(" ") + [name]
 
     # check for matching aliases
     if not return_similarity:
         if any(
             [
                 levenshtein_distance(sub_name, alias.lower()) >= similarity_required
-                for sub_name in names for alias in aliases
+                for sub_name in names
+                for alias in aliases
             ]
         ):
             return True
     else:
-        alias_comparisons = [Comparison(obj, sub_name, alias.lower()) for sub_name in names for alias in aliases]
-        final_results += [comp for comp in alias_comparisons if comp.similarity >= similarity_required]
+        alias_comparisons = [
+            Comparison(obj, sub_name, alias.lower())
+            for sub_name in names
+            for alias in aliases
+        ]
+        final_results += [
+            comp for comp in alias_comparisons if comp.similarity >= similarity_required
+        ]
 
     # check for matching group names or person full names.
     if not return_similarity:
-        if any([levenshtein_distance(sub_name, str(obj).lower()) >= similarity_required for sub_name in names]):
+        if any(
+            [
+                levenshtein_distance(sub_name, str(obj).lower()) >= similarity_required
+                for sub_name in names
+            ]
+        ):
             return True
     else:
-        name_comparisons = [Comparison(obj, sub_name, str(obj).lower()) for sub_name in names]
-        final_results += [comp for comp in name_comparisons if comp.similarity >= similarity_required]
+        name_comparisons = [
+            Comparison(obj, sub_name, str(obj).lower()) for sub_name in names
+        ]
+        final_results += [
+            comp for comp in name_comparisons if comp.similarity >= similarity_required
+        ]
 
     # check for matching stage names
     if isinstance(obj, Person):
         for aff in obj.affiliations:
             if not return_similarity:
-                if any([
-                    levenshtein_distance(sub_name, aff.stage_name.lower())
-                    >= similarity_required for sub_name in names]
+                if any(
+                    [
+                        levenshtein_distance(sub_name, aff.stage_name.lower())
+                        >= similarity_required
+                        for sub_name in names
+                    ]
                 ):
                     return True
             else:
-                aff_comparisons = [Comparison(obj, sub_name, aff.stage_name.lower()) for sub_name in names]
-                final_results += [comp for comp in aff_comparisons if comp.similarity >= similarity_required]
+                aff_comparisons = [
+                    Comparison(obj, sub_name, aff.stage_name.lower())
+                    for sub_name in names
+                ]
+                final_results += [
+                    comp
+                    for comp in aff_comparisons
+                    if comp.similarity >= similarity_required
+                ]
 
     if return_similarity:
         # check if the object's name is in the name and do a comparison check. Only works if returning similarity.

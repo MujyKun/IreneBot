@@ -10,5 +10,5 @@ cogs_list = [
     "twitch.TwitchCog",
     "twitter.TwitterCog",
     "moderator.ModeratorCog",
-    "blockingmonitor.BlockingMonitorCog"
+    "blockingmonitor.BlockingMonitorCog",
 ]

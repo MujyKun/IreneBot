@@ -82,9 +82,9 @@ class BaseScoreGame(BaseRoundGame):
             scores = "\n".join(
                 [f"{str(player_score)}" for player_score in player_scores]
             )
-            msg = await self.get_message('final_scores_games', scores)
+            msg = await self.get_message("final_scores_games", scores)
         else:
-            msg = await self.get_message('game_finished_no_scores')
+            msg = await self.get_message("game_finished_no_scores")
         await self.send_message(msg=msg)
 
     async def _send_results(self, winner: disnake.User = None):

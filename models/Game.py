@@ -38,15 +38,19 @@ class Game:
         from cogs.helper import (
             get_message,
         )  # need to import here to avoid circular imports.
+
         return await get_message(self.host_user, key, *custom_args)
 
-    async def send_message(self, *custom_args, key=None, msg=None, view=None, delete_after=None):
+    async def send_message(
+        self, *custom_args, key=None, msg=None, view=None, delete_after=None
+    ):
         """Send a message using the Context and AppCmdInter objects in the game."""
         from cogs.helper import (
             send_message,
         )  # need to import here to avoid circular imports.
 
-        return await send_message(*custom_args,
+        return await send_message(
+            *custom_args,
             key=key,
             ctx=self.ctx,
             inter=self.inter,

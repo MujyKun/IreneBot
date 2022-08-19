@@ -45,10 +45,6 @@ class BiasGame(Game):
     async def _generate_pool(self):
         self._pool = []
 
-        test_person = await Person.get(1)
-        self._pool = [test_person for i in range(1, 16)]
-        return
-
         persons: List[Person] = list(await Person.get_all())
         for person in persons:
             if self.gender != "mixed":
@@ -89,14 +85,9 @@ class BiasGame(Game):
     async def generate_question(self, pvp: PvP):
         person_one: Person = pvp.player_one
         person_two: Person = pvp.player_two
-        first_file_name = person_one.display.avatar.url[
-            person_one.display.avatar.url.find(str(pvp.player_one.id)) : :
-        ]
-        second_file_name = person_two.display.avatar.url[
-            person_two.display.avatar.url.find(str(pvp.player_two.id)) : :
-        ]
+
         img_url = await BiasGameModel.generate_pvp(
-            first_file_name=first_file_name, second_file_name=second_file_name
+            first_image_url=person_one.display.avatar.url, second_image_url=person_two.display.avatar.url
         )
         await self.send_message(msg=img_url, view=PersonViews(pvp))
 

@@ -177,7 +177,7 @@ class GuessingGame(BaseScoreGame):
         result_message = (
             win_msg + "\n" + correct_answer_msg + "\n" + possible_answer_msg
         )
-        await self.send_message(msg=result_message, delete_after=self.timeout)
+        await self.send_message(msg=result_message, delete_after=self.timeout + 3)
 
         if not self.is_complete:
             await self._generate_new_question()

@@ -89,7 +89,7 @@ class BiasGame(Game):
         img_url = await BiasGameModel.generate_pvp(
             first_image_url=person_one.display.avatar.url, second_image_url=person_two.display.avatar.url
         )
-        await self.send_message(msg=img_url, view=PersonViews(pvp))
+        await self.send_message(msg=img_url, view=PersonViews(pvp, self.host_user))
 
     async def send_results(self):
         bracket_img_url = await BiasGameModel.generate_bracket(self.bracket.get_dict())
@@ -97,28 +97,33 @@ class BiasGame(Game):
 
 
 class PersonViews(disnake.ui.View):
-    def __init__(self, pvp):
+    def __init__(self, pvp, host_user):
         super(PersonViews, self).__init__(timeout=None)
         self.pvp = pvp
         self.first_person: Person = pvp.player_one
         self.second_person: Person = pvp.player_two
 
+        self.host_user = host_user
         fp_label = str(self.first_person.name)
         sp_label = str(self.second_person.name)
-        left_button = Button(label=fp_label, person=self.first_person, pvp=pvp)
-        right_button = Button(label=sp_label, person=self.second_person, pvp=pvp)
+        left_button = Button(label=fp_label, person=self.first_person, pvp=pvp, host_user=self.host_user)
+        right_button = Button(label=sp_label, person=self.second_person, pvp=pvp, host_user=self.host_user)
         self.add_item(left_button)
         self.add_item(right_button)
 
 
 class Button(disnake.ui.Button):
-    def __init__(self, label, person, pvp):
+    def __init__(self, label, person, pvp, host_user):
         self.done = False
         self.pvp = pvp
         self.person = person
+        self.host_user = host_user
         super(Button, self).__init__(label=label, style=disnake.ButtonStyle.blurple)
 
     async def callback(self, interaction: disnake.MessageInteraction, /):
+        if interaction.user.id != self.host_user.id:
+            return
+
         self.done = True
         self.pvp.winner = self.person
         await interaction.message.delete()

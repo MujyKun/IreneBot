@@ -2,6 +2,7 @@ import datetime
 import random
 
 import IreneAPIWrapper.exceptions
+import asyncio
 import disnake
 from disnake import ApplicationCommandInteraction as AppCmdInter
 from IreneAPIWrapper.models import Person, Group, Media, User
@@ -9,6 +10,7 @@ from typing import List, Union, Optional, Tuple, Dict
 from util import logger
 from keys import get_keys
 from ..helper import send_message
+from concurrent.futures import ThreadPoolExecutor
 
 _requests_today = 0
 _user_requests: Dict[int, int] = {}
@@ -217,15 +219,21 @@ class Comparison:
     Comparison a source object's search word with its target word using levenshtein distance.
     """
 
-    def __init__(self, obj: Union[Person, Group], search_word: str, target_word: str):
+    def __init__(self, obj: Union[Person, Group] = None, search_word: str = None, target_word: str = None):
         self.obj = obj
         self.search_word = search_word
         self.target_word = target_word
-        self.similarity: float = self.calculate()
+        self.similarity: Optional[float] = None
 
-    def calculate(self):
+    @staticmethod
+    async def create(obj: Union[Person, Group], search_word: str, target_word: str):
+        obj = Comparison(obj, search_word, target_word)
+        obj.similarity = await obj.calculate()
+        return obj
+
+    async def calculate(self):
         """Calculate the levenshtein distance."""
-        return levenshtein_distance(self.search_word, self.target_word)
+        return await unblock_levenshtein_distance(self.search_word, self.target_word)
 
     def __float__(self):
         """Returns similarity."""
@@ -335,7 +343,7 @@ async def _filter_by_name(
     if not return_similarity:
         if any(
             [
-                levenshtein_distance(sub_name, alias.lower()) >= similarity_required
+                await unblock_levenshtein_distance(sub_name, alias.lower()) >= similarity_required
                 for sub_name in names
                 for alias in aliases
             ]
@@ -343,7 +351,7 @@ async def _filter_by_name(
             return True
     else:
         alias_comparisons = [
-            Comparison(obj, sub_name, alias.lower())
+            await Comparison.create(obj, sub_name, alias.lower())
             for sub_name in names
             for alias in aliases
         ]
@@ -355,14 +363,14 @@ async def _filter_by_name(
     if not return_similarity:
         if any(
             [
-                levenshtein_distance(sub_name, str(obj).lower()) >= similarity_required
+                await unblock_levenshtein_distance(sub_name, str(obj).lower()) >= similarity_required
                 for sub_name in names
             ]
         ):
             return True
     else:
         name_comparisons = [
-            Comparison(obj, sub_name, str(obj).lower()) for sub_name in names
+            await Comparison.create(obj, sub_name, str(obj).lower()) for sub_name in names
         ]
         final_results += [
             comp for comp in name_comparisons if comp.similarity >= similarity_required
@@ -374,7 +382,7 @@ async def _filter_by_name(
             if not return_similarity:
                 if any(
                     [
-                        levenshtein_distance(sub_name, aff.stage_name.lower())
+                        await unblock_levenshtein_distance(sub_name, aff.stage_name.lower())
                         >= similarity_required
                         for sub_name in names
                     ]
@@ -382,7 +390,7 @@ async def _filter_by_name(
                     return True
             else:
                 aff_comparisons = [
-                    Comparison(obj, sub_name, aff.stage_name.lower())
+                    await Comparison.create(obj, sub_name, aff.stage_name.lower())
                     for sub_name in names
                 ]
                 final_results += [
@@ -394,7 +402,7 @@ async def _filter_by_name(
     if return_similarity:
         # check if the object's name is in the name and do a comparison check. Only works if returning similarity.
         if str(obj).lower() in name:
-            final_results.append(Comparison(obj, name, str(obj).lower()))
+            final_results.append(await Comparison.create(obj, name, str(obj).lower()))
 
         final_results.sort(reverse=True)
         return list(dict.fromkeys(final_results))  # remove duplicates
@@ -410,7 +418,38 @@ def get_random_color():
     )  # must be specified to base 16 since 0x is not present
 
 
-def levenshtein_distance(search_word: str, target_word: str) -> float:
+async def unblock_levenshtein_distance(search_word: str, target_word: str):
+    """
+    Calculate the levenshtein distance without being blocked. Checks cache first.
+
+    The process may sometimes take a while, so we will avoid the event loop being stalled.
+    """
+    similarity = search_distance_in_cache(search_word, target_word)
+    if similarity:
+        return similarity
+
+    with ThreadPoolExecutor() as pool:
+        future = pool.submit(_levenshtein_distance, search_word, target_word)
+        while not future.done():
+            await asyncio.sleep(0)
+        return future.result()
+
+
+def search_distance_in_cache(search_word: str, target_word: str) -> Optional[float]:
+    search_cache = _distance_cache.get(search_word)
+    if search_cache:
+        similarity = search_cache.get(target_word)
+        if similarity:
+            return similarity
+
+    target_cache = _distance_cache.get(target_word)
+    if target_cache:
+        similarity = target_cache.get(search_word)
+        if similarity:
+            return similarity
+
+
+def _levenshtein_distance(search_word: str, target_word: str) -> float:
     """
     Compute levenshtein's distance and get the percentage back.
 
@@ -449,4 +488,15 @@ def levenshtein_distance(search_word: str, target_word: str) -> float:
             )
 
     min_edits_needed = edits[(max_i, max_j)]
-    return 1 - min_edits_needed / max(max_i, max_j)
+    similarity = 1 - min_edits_needed / max(max_i, max_j)
+
+    # add to cache
+    if _distance_cache.get(search_word):
+        _distance_cache[search_word][target_word] = similarity
+    else:
+        _distance_cache[search_word] = {target_word: similarity}
+
+    return similarity
+
+
+_distance_cache: Dict[str, Dict[str, float]] = dict()

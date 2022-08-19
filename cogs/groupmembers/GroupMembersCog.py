@@ -1,7 +1,7 @@
 import random
 import disnake
 from models import Bot
-from IreneAPIWrapper.models import Media, Person, Group
+from IreneAPIWrapper.models import Media, Person, Group, User
 from disnake.ext import commands
 from disnake import ApplicationCommandInteraction as AppCmdInter
 from . import helper
@@ -35,6 +35,11 @@ class GroupMembersCog(commands.Cog):
         else:
             raise RuntimeError(self.invalid_selection)
 
+    @commands.command(name="call", description="Call Media for an Idol/Group")
+    async def regular_call_person_or_group(self, ctx: commands.Context, item_type: Literal["person", "group"],
+                                           item_id: int):
+        await helper.process_call(item_type, item_id, ctx.author.id, ctx=ctx)
+
     @commands.slash_command(name="call", description="Call Media for an Idol/Group.")
     async def call_person_or_group(
         self,
@@ -44,15 +49,8 @@ class GroupMembersCog(commands.Cog):
     ):
         """Display the media for a specific Person or Group."""
         object_id = int(selection.split(")")[0])
-        if item_type == "person":
-            person = await Person.get(object_id)
-            medias: List[Media] = await Media.get_all(person.affiliations)
-        elif item_type == "group":
-            group = await Group.get(object_id)
-            medias: List[Media] = await Media.get_all(group.affiliations)
-        else:
-            raise RuntimeError(self.invalid_selection)
-        await inter.send((random.choice(medias)).source.url)
+        await helper.process_call(item_type, object_id, inter.user.id, inter=inter)
+
 
     @commands.slash_command(
         name="randomperson", description="Display random media for a random Person."

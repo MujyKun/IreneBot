@@ -132,7 +132,10 @@ class Bot(AutoShardedBot):
             idol_send_on_message,
         )  # avoids circular import
 
-        await idol_send_on_message(
-            self, message, await self.prefix_check(self, message)
-        )
-        await self.process_commands(message)
+        ctx = await self.get_context(message)
+        if not ctx.command:
+            await idol_send_on_message(
+                self, message, await self.prefix_check(self, message)
+            )
+        else:
+            await self.process_commands(message)

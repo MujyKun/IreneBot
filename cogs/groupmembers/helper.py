@@ -8,7 +8,6 @@ from disnake import ApplicationCommandInteraction as AppCmdInter
 from IreneAPIWrapper.models import Person, Group, Media, User
 from typing import List, Union, Optional, Tuple, Dict
 from util import logger
-from keys import get_keys
 from ..helper import send_message
 from concurrent.futures import ThreadPoolExecutor
 
@@ -32,6 +31,9 @@ async def check_user_requests():
 async def idol_send_on_message(bot, message: disnake.Message, prefixes: List):
     """Detect an idol call and send media."""
     if not hasattr(message, "guild"):
+        return
+
+    if not message.guild:
         return
 
     content_replaced = False
@@ -60,8 +62,21 @@ async def idol_send_on_message(bot, message: disnake.Message, prefixes: List):
     if not (person_comparisons or group_comparisons):
         return  # no results
     elif len(person_comparisons) >= 1 and not group_comparisons:
+        # add based on highest similarity
+        _max_comps: Optional[List[Comparison]] = None
+        for person_comp in person_comparisons:
+            if not _max_comps:
+                _max_comps = [person_comp]
+                continue
+
+            if person_comp.similarity == _max_comps[0].similarity:
+                _max_comps.append(person_comp)
+            elif person_comp.similarity > _max_comps[0].similarity:
+                _max_comps = [person_comp]
+        obj_pool += [comp.obj for comp in person_comparisons]
+
         # people with no group. -> Add them all to pool instead of only highest similarity.
-        obj_pool.append(person_comparisons[0].obj)
+        # obj_pool.append(person_comparisons[0].obj)
     elif len(person_comparisons) > 1 and not group_comparisons:
         obj_pool += [comp.obj for comp in person_comparisons]
     elif len(person_comparisons) == 1 and len(group_comparisons) == 1:
@@ -74,18 +89,23 @@ async def idol_send_on_message(bot, message: disnake.Message, prefixes: List):
             obj_pool.append(group)
     elif len(person_comparisons) >= 1 and len(group_comparisons) >= 1:
         # several persons and groups found in a message.
+        groups_tried = []  # avoid duplicate checks.
         for group_comp in group_comparisons:
             has_person = False
             group = group_comp.obj
+            if group in groups_tried:
+                continue
+            groups_tried.append(group)
             for person_comp in person_comparisons:
                 person = person_comp.obj
                 in_group = await person_in_group(person, group)
                 if in_group:
                     has_person = True
                     obj_pool.append(person)
-            if not has_person:
-                # add the group to the pool. if there is no person found for the group.
-                obj_pool.append(group)
+            # this has been disabled since there are solo groups that may cause a messed up filter.
+            # if not has_person:
+            #     # add the group to the pool. if there is no person found for the group.
+            #     obj_pool.append(group)
     elif len(group_comparisons) >= 1:
         # groups with no people
         obj_pool += [group_comp.obj for group_comp in group_comparisons]
@@ -95,8 +115,6 @@ async def idol_send_on_message(bot, message: disnake.Message, prefixes: List):
     obj_pool = list(dict.fromkeys(obj_pool))  # remove duplicates
     if not obj_pool:
         return
-
-    random_obj_choice = random.choice(obj_pool)
 
     user = await User.get(message.author.id)
     if not user:
@@ -109,14 +127,8 @@ async def idol_send_on_message(bot, message: disnake.Message, prefixes: List):
     #                                   delete_after=60)
 
     try:
-        media = await Media.get_random(
-            random_obj_choice.id,
-            person=isinstance(random_obj_choice, Person),
-            group=isinstance(random_obj_choice, Group),
-        )
-        if media:
-            media_url = await media.fetch_image_host_url()
-        else:
+        media_url = await get_media_from_pool(obj_pool)
+        if not media_url:
             return
     except IreneAPIWrapper.exceptions.APIError as e:
         return await bot.handle_api_error(message, e)
@@ -135,10 +147,25 @@ async def idol_send_on_message(bot, message: disnake.Message, prefixes: List):
         logger.error(f"Failed to send photo to channel ID: {message.channel.id} - {e}")
 
 
+async def get_media_from_pool(object_pool: List[Union[Person, Group]]):
+    random_obj_choice = random.choice(object_pool)
+    media = await Media.get_random(
+        random_obj_choice.id,
+        person=isinstance(random_obj_choice, Person),
+        group=isinstance(random_obj_choice, Group),
+    )
+    if media:
+        return await media.fetch_image_host_url()
+    else:
+        object_pool.remove(random_obj_choice)
+        if object_pool:
+            return await get_media_from_pool(object_pool)
+
+
 async def person_in_group(person, group):
     return any(
         [
-            person_aff == group_aff
+            person_aff == group_aff and len(group.affiliations) > 1
             for person_aff in person.affiliations
             for group_aff in group.affiliations
         ]
@@ -148,9 +175,15 @@ async def person_in_group(person, group):
 async def auto_complete_type(inter: AppCmdInter, user_input: str) -> List[str]:
     item_type = inter.filled_options["item_type"]
     if item_type == "person":
-        return await auto_complete_person(inter, user_input)
+        persons = await auto_complete_person(inter, user_input)
+        if len(persons) > 24:
+            persons = persons[0:24]
+        return persons
     elif item_type == "group":
-        return await auto_complete_group(inter, user_input)
+        groups = await auto_complete_group(inter, user_input)
+        if len(groups) > 24:
+            groups = groups[0:24]
+        return groups
     else:
         raise RuntimeError(
             "item_type returned something other than 'person' or 'group'"
@@ -238,6 +271,9 @@ class Comparison:
     def __float__(self):
         """Returns similarity."""
         return self.similarity
+
+    def __str__(self):
+        return f"{str(self.obj)} - {self.search_word} - {self.target_word} - {self.similarity}"
 
     def __eq__(self, other):
         return (
@@ -497,6 +533,21 @@ def _levenshtein_distance(search_word: str, target_word: str) -> float:
         _distance_cache[search_word] = {target_word: similarity}
 
     return similarity
+
+
+async def process_call(item_type, item_id, user_id, ctx=None, inter=None):
+    user = await User.get(user_id)
+    if item_type == "group":
+        group = await Group.get(item_id)
+        medias: List[Media] = await Media.get_all(group.affiliations)
+    else:
+        person = await Person.get(item_id)
+        medias: List[Media] = await Media.get_all(person.affiliations)
+
+    if not medias:
+        return await send_message(key="no_results", user=user, ctx=ctx, inter=inter)
+
+    await send_message(msg=(random.choice(medias)).source.url, user=user, ctx=ctx, inter=inter)
 
 
 _distance_cache: Dict[str, Dict[str, float]] = dict()

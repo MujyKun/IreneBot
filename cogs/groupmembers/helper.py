@@ -399,15 +399,15 @@ async def _filter_by_name(
                     if comp.similarity >= similarity_required
                 ]
 
-    if return_similarity:
-        # check if the object's name is in the name and do a comparison check. Only works if returning similarity.
-        if str(obj).lower() in name:
-            final_results.append(await Comparison.create(obj, name, str(obj).lower()))
+    if not return_similarity:
+        return False
 
-        final_results.sort(reverse=True)
-        return list(dict.fromkeys(final_results))  # remove duplicates
+    # check if the object's name is in the name and do a comparison check. Only works if returning similarity.
+    if str(obj).lower() in name:
+        final_results.append(await Comparison.create(obj, name, str(obj).lower()))
 
-    return False
+    final_results.sort(reverse=True)
+    return list(dict.fromkeys(final_results))  # remove duplicates
 
 
 def get_random_color():

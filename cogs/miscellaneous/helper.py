@@ -1,4 +1,4 @@
-from IreneAPIWrapper.models import User
+from IreneAPIWrapper.models import User, EightBallResponse
 import disnake
 from disnake import ApplicationCommandInteraction as AppCmdInter
 from random import choice
@@ -33,41 +33,65 @@ async def process_stop_games(
     )
 
 
-async def get_choose_answer(choices: str):
-    if "|" in choices:
-        possible_choices = choices.split("|")
-        possible_choices = [
-            m_choice for m_choice in possible_choices if m_choice != " "
-        ]
-        possible_choices_string = str.join(
-            ", ", ["`" + my_choice + "`" for my_choice in possible_choices]
-        )
-    elif "," in choices:
-        possible_choices = choices.split(",")
-        possible_choices = [
-            m_choice for m_choice in possible_choices if m_choice != " "
-        ]
-        possible_choices = [
-            m_choice[1:] if m_choice.startswith(" ") else m_choice
-            for m_choice in possible_choices
-        ]
-        possible_choices_string = str.join(
-            ", ", ["`" + my_choice + "`" for my_choice in possible_choices]
-        )
-    else:
-        possible_choices = choices.split(" ")
-        possible_choices = [
-            m_choice.replace("_", " ")
-            for m_choice in possible_choices
-            if m_choice != ""
-        ]
-        possible_choices_string = str.join(
-            ", ", ["`" + my_choice + "`" for my_choice in possible_choices]
-        )
-    return (
-        f"**Possible Choices**: {possible_choices_string}\n"
-        + f"**Selection**: `{choice(possible_choices)}`"
+async def process_choose(
+    choices: str,
+    user_id: int,
+    ctx: commands.Context = None,
+    inter: AppCmdInter = None,
+    allowed_mentions=None,
+):
+    """
+    Process the choose command.
+    """
+    user = await User.get(user_id)
+    possible_choices = await get_possible_choices(choices)
+
+    await send_message(
+        ",".join(possible_choices),
+        choice(possible_choices),
+        key="choose_options",
+        ctx=ctx,
+        inter=inter,
+        allowed_mentions=allowed_mentions,
+        user=user,
     )
+
+
+async def process_8ball(
+    prompt: str,
+    user_id: int,
+    ctx: commands.Context = None,
+    inter: AppCmdInter = None,
+    allowed_mentions=None,
+):
+    """
+    Process the 8ball command.
+    """
+    user = await User.get(user_id=user_id)
+    answer = await EightBallResponse.get_random_response(fetch=False)
+
+    await send_message(
+        prompt,
+        answer.response,
+        key="8ball_response",
+        ctx=ctx,
+        inter=inter,
+        allowed_mentions=allowed_mentions,
+        user=user,
+    )
+
+
+async def get_possible_choices(choices: str):
+    """Get the choices possible in a user's input string."""
+    modified_choices = choices.replace(",", "|")
+    possible_choices = modified_choices.split("|")
+
+    possible_choices = [
+        f"`{m_choice.replace('_', ' ')}`"
+        for m_choice in possible_choices
+        if m_choice not in [" ", ""]
+    ]
+    return possible_choices
 
 
 async def send_emojis_from_string(inter: AppCmdInter, emoji_content: str):

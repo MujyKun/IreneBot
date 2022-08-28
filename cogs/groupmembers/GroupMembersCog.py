@@ -36,8 +36,9 @@ class GroupMembersCog(commands.Cog):
             raise RuntimeError(self.invalid_selection)
 
     @commands.command(name="call", description="Call Media for an Idol/Group")
-    async def regular_call_person_or_group(self, ctx: commands.Context, item_type: Literal["person", "group"],
-                                           item_id: int):
+    async def regular_call_person_or_group(
+        self, ctx: commands.Context, item_type: Literal["person", "group"], item_id: int
+    ):
         await helper.process_call(item_type, item_id, ctx.author.id, ctx=ctx)
 
     @commands.slash_command(name="call", description="Call Media for an Idol/Group.")
@@ -50,7 +51,6 @@ class GroupMembersCog(commands.Cog):
         """Display the media for a specific Person or Group."""
         object_id = int(selection.split(")")[0])
         await helper.process_call(item_type, object_id, inter.user.id, inter=inter)
-
 
     @commands.slash_command(
         name="randomperson", description="Display random media for a random Person."

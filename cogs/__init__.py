@@ -1,4 +1,5 @@
 cogs_list = [
+    "botowner.BotOwnerCog",
     "biasgame.BiasGameCog",
     "groupmembers.GroupMembersCog",
     "miscellaneous.MiscellaneousCog",

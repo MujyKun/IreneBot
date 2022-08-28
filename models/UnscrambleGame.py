@@ -62,7 +62,9 @@ class UnscrambleGame(BaseScoreGame):
                 await self._generate_new_question()
             )  # recursion until we run out of questions.
 
-        await self.send_message(self.current_question, key='us_question', delete_after=self.timeout + 3)
+        await self.send_message(
+            self.current_question, key="us_question", delete_after=self.timeout + 3
+        )
         await self._wait_for_answer()
 
     async def _send_results(self, winner: disnake.User = None):
@@ -78,8 +80,7 @@ class UnscrambleGame(BaseScoreGame):
         )
 
         correct_answer_msg = await self.get_message(
-            "correct_answer_ggg",
-            f"{self.correct_answers[0]}"
+            "correct_answer_ggg", f"{self.correct_answers[0]}"
         )
 
         result_message = win_msg + "\n" + correct_answer_msg

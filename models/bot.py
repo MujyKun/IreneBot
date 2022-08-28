@@ -22,22 +22,28 @@ class Bot(AutoShardedBot):
 
         self.dev_mode = dev_mode
 
+        api = IreneAPIClient(
+            token=keys.api_token,
+            user_id=keys.bot_owner_id,
+            api_url=keys.api_url,
+            port=keys.api_port,
+            preload_cache=Bot.get_preload(),
+            verbose=True,
+            logger=logger,
+        )
+
+        self.api: IreneAPIClient = api
+
+    @staticmethod
+    def get_preload():
         preload = Preload()
         preload.all_false()
         preload.twitch_subscriptions = True
         preload.twitter_accounts = True
         preload.languages = True
         preload.affiliations = True
-
-        api = IreneAPIClient(
-            token=keys.api_token,
-            user_id=keys.bot_owner_id,
-            api_url=keys.api_url,
-            port=keys.api_port,
-            preload_cache=preload,
-        )
-
-        self.api: IreneAPIClient = api
+        preload.eight_ball_responses = True
+        return preload
 
     async def prefix_check(
         self, bot: AutoShardedBot, msg: disnake.Message
@@ -65,8 +71,6 @@ class Bot(AutoShardedBot):
 
         while not self.api.connected:
             await asyncio.sleep(0)
-
-        print(f"Connected to IreneAPI at {datetime.now()}")
 
         await self.start(
             self.keys.prod_bot_token if not self.dev_mode else self.keys.dev_bot_token

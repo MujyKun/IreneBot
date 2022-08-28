@@ -17,6 +17,30 @@ class MiscellaneousCog(commands.Cog):
             user_id=ctx.author.id, ctx=ctx, allowed_mentions=self.allowed_mentions
         )
 
+    @commands.command(
+        name="choose", description="Choose between a selection of options."
+    )
+    async def regular_choose(self, ctx: commands.Context, *, choices: str):
+        await helper.process_choose(
+            choices=choices,
+            user_id=ctx.author.id,
+            ctx=ctx,
+            allowed_mentions=self.allowed_mentions,
+        )
+
+    @commands.command(name="8ball", description="Ask the 8ball a question.")
+    async def regular_eightball(self, ctx: commands.Context, *, question: str):
+        await helper.process_8ball(
+            prompt=question,
+            ctx=ctx,
+            user_id=ctx.author.id,
+            allowed_mentions=self.allowed_mentions,
+        )
+
+    ################
+    # SLASH COMMANDS
+    ################
+
     @commands.slash_command(
         name="stopgames", description="Stop all games you are hosting."
     )
@@ -26,25 +50,32 @@ class MiscellaneousCog(commands.Cog):
         )
 
     @commands.slash_command(name="8ball", description="Ask the 8ball a question.")
-    async def _8ball(
+    async def eight_ball(
         self,
         inter: AppCmdInter,
         question: str = commands.Param(description="Question to ask the 8ball."),
     ):
-        await inter.send(
-            f"**Question**: {question}\n" + f"**Answer**: Not implemented yet."
+        await helper.process_8ball(
+            prompt=question,
+            inter=inter,
+            user_id=inter.author.id,
+            allowed_mentions=self.allowed_mentions,
         )
-        # TODO: add 8ball responses from the database
 
     @commands.slash_command(description="Choose between a selection of options.")
     async def choose(
         self,
         inter: AppCmdInter,
         choices: str = commands.Param(
-            description="List the different options with spaces, commas, or `|` between choices"
+            description="List the different options with commas, or '|' between choices."
         ),
     ):
-        await inter.send(await get_choose_answer(choices))
+        await helper.process_choose(
+            choices=choices,
+            user_id=inter.author.id,
+            inter=inter,
+            allowed_mentions=self.allowed_mentions,
+        )
 
     @commands.slash_command(description="Display Emoji")
     async def displayemoji(

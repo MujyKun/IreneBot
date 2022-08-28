@@ -87,7 +87,8 @@ class BiasGame(Game):
         person_two: Person = pvp.player_two
 
         img_url = await BiasGameModel.generate_pvp(
-            first_image_url=person_one.display.avatar.url, second_image_url=person_two.display.avatar.url
+            first_image_url=person_one.display.avatar.url,
+            second_image_url=person_two.display.avatar.url,
         )
         await self.send_message(msg=img_url, view=PersonViews(pvp, self.host_user))
 
@@ -106,8 +107,12 @@ class PersonViews(disnake.ui.View):
         self.host_user = host_user
         fp_label = str(self.first_person.name)
         sp_label = str(self.second_person.name)
-        left_button = Button(label=fp_label, person=self.first_person, pvp=pvp, host_user=self.host_user)
-        right_button = Button(label=sp_label, person=self.second_person, pvp=pvp, host_user=self.host_user)
+        left_button = Button(
+            label=fp_label, person=self.first_person, pvp=pvp, host_user=self.host_user
+        )
+        right_button = Button(
+            label=sp_label, person=self.second_person, pvp=pvp, host_user=self.host_user
+        )
         self.add_item(left_button)
         self.add_item(right_button)
 

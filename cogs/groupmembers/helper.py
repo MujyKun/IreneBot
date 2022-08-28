@@ -252,7 +252,12 @@ class Comparison:
     Comparison a source object's search word with its target word using levenshtein distance.
     """
 
-    def __init__(self, obj: Union[Person, Group] = None, search_word: str = None, target_word: str = None):
+    def __init__(
+        self,
+        obj: Union[Person, Group] = None,
+        search_word: str = None,
+        target_word: str = None,
+    ):
         self.obj = obj
         self.search_word = search_word
         self.target_word = target_word
@@ -379,7 +384,8 @@ async def _filter_by_name(
     if not return_similarity:
         if any(
             [
-                await unblock_levenshtein_distance(sub_name, alias.lower()) >= similarity_required
+                await unblock_levenshtein_distance(sub_name, alias.lower())
+                >= similarity_required
                 for sub_name in names
                 for alias in aliases
             ]
@@ -399,14 +405,16 @@ async def _filter_by_name(
     if not return_similarity:
         if any(
             [
-                await unblock_levenshtein_distance(sub_name, str(obj).lower()) >= similarity_required
+                await unblock_levenshtein_distance(sub_name, str(obj).lower())
+                >= similarity_required
                 for sub_name in names
             ]
         ):
             return True
     else:
         name_comparisons = [
-            await Comparison.create(obj, sub_name, str(obj).lower()) for sub_name in names
+            await Comparison.create(obj, sub_name, str(obj).lower())
+            for sub_name in names
         ]
         final_results += [
             comp for comp in name_comparisons if comp.similarity >= similarity_required
@@ -418,7 +426,9 @@ async def _filter_by_name(
             if not return_similarity:
                 if any(
                     [
-                        await unblock_levenshtein_distance(sub_name, aff.stage_name.lower())
+                        await unblock_levenshtein_distance(
+                            sub_name, aff.stage_name.lower()
+                        )
                         >= similarity_required
                         for sub_name in names
                     ]
@@ -547,7 +557,9 @@ async def process_call(item_type, item_id, user_id, ctx=None, inter=None):
     if not medias:
         return await send_message(key="no_results", user=user, ctx=ctx, inter=inter)
 
-    await send_message(msg=(random.choice(medias)).source.url, user=user, ctx=ctx, inter=inter)
+    await send_message(
+        msg=(random.choice(medias)).source.url, user=user, ctx=ctx, inter=inter
+    )
 
 
 _distance_cache: Dict[str, Dict[str, float]] = dict()

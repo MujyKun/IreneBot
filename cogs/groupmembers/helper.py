@@ -546,7 +546,9 @@ def _levenshtein_distance(search_word: str, target_word: str) -> float:
     return similarity
 
 
-async def process_call(item_type, item_id, user_id, ctx=None, inter=None):
+async def process_call(
+    item_type, item_id, user_id, ctx=None, inter=None, allowed_mentions=None
+):
     user = await User.get(user_id)
     if item_type == "group":
         group = await Group.get(item_id)
@@ -556,11 +558,57 @@ async def process_call(item_type, item_id, user_id, ctx=None, inter=None):
         medias: List[Media] = await Media.get_all(person.affiliations)
 
     if not medias:
-        return await send_message(key="no_results", user=user, ctx=ctx, inter=inter)
+        return await send_message(
+            key="no_results",
+            user=user,
+            ctx=ctx,
+            inter=inter,
+            allowed_mentions=allowed_mentions,
+        )
 
     await send_message(
-        msg=(random.choice(medias)).source.url, user=user, ctx=ctx, inter=inter
+        msg=(random.choice(medias)).source.url,
+        user=user,
+        ctx=ctx,
+        inter=inter,
+        allowed_mentions=allowed_mentions,
     )
+
+
+async def process_card(
+    item_type, item_id, user_id, ctx=None, inter=None, allowed_mentions=None
+):
+    """Process a person/group card."""
+    user = await User.get(user_id)
+    obj: Optional[Union[Person, Group]] = (
+        await Group.get(item_id)
+        if item_type.lower() == "group"
+        else await Person.get(item_id)
+    )
+    if not obj:
+        return await send_message(user=user, key="no_results", ctx=ctx, inter=inter)
+
+    card_data = await obj.get_card(markdown=True, extra=True)
+    avatar = None if not obj.display else obj.display.avatar
+    banner = None if not obj.display else obj.display.banner
+    embed = await get_card_embed(card_info=card_data, avatar=avatar, banner=banner, title=str(obj))
+    await send_message(user=user, ctx=ctx, inter=inter, embed=embed)
+
+
+async def get_card_embed(card_info, avatar, banner, title):
+    avatar = None if not avatar else avatar.url
+    banner = None if not banner else banner.url
+    embed = disnake.Embed(
+        color=disnake.Color.brand_green(),
+        title=title,
+        description="\n".join(card_info)
+    )
+    if avatar:
+        embed.set_thumbnail(avatar)
+    if banner:
+        embed.set_image(banner)
+    return embed
+
 
 
 async def process_who_is(
@@ -574,7 +622,10 @@ async def process_who_is(
     Process the whois command.
     """
     user = await User.get(user_id=user_id)
-    media = await Media.get(media_id)  # refresh objs
+    try:
+        media = await Media.get(media_id)  # refresh objs
+    except IreneAPIWrapper.exceptions.APIError as e:  # over int64
+        media = None
     if not media:
         return await send_message(
             media_id,
@@ -589,9 +640,11 @@ async def process_who_is(
     person = aff.person
     group = aff.group
 
-    result = f":\nAffiliation: {aff.id} - {aff.stage_name}\n" \
-             f"Person: {person.id} - {str(person.name)}\n" \
-             f"Group: {group.id} - {str(group)}"
+    result = (
+        f":\nAffiliation: {aff.id} - {aff.stage_name}\n"
+        f"Person: {person.id} - {str(person.name)}\n"
+        f"Group: {group.id} - {str(group)}"
+    )
 
     await send_message(
         media_id,

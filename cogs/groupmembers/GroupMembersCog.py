@@ -16,17 +16,48 @@ class GroupMembersCog(commands.Cog):
             "item_type returned something other than 'person' or 'group'"
         )
 
-    @commands.command(name="whois", description="Figure out who a media object belongs to.")
+    @commands.command(
+        name="whois", description="Figure out who a media object belongs to."
+    )
     async def regular_whois(
         self,
         ctx: commands.Context,
         media_id: int,
     ):
         """Figure out who a media object belongs to."""
-        await helper.process_who_is(media_id=media_id,
-                                    user_id=ctx.author.id,
-                                    ctx=ctx,
-                                    allowed_mentions=self.allowed_mentions)
+        await helper.process_who_is(
+            media_id=media_id,
+            user_id=ctx.author.id,
+            ctx=ctx,
+            allowed_mentions=self.allowed_mentions,
+        )
+
+    @commands.command(name="call", description="Call Media for an Idol/Group")
+    async def regular_call_person_or_group(
+        self, ctx: commands.Context, item_type: Literal["person", "group"], item_id: int
+    ):
+        await helper.process_call(
+            item_type,
+            item_id,
+            ctx.author.id,
+            ctx=ctx,
+            allowed_mentions=self.allowed_mentions,
+        )
+
+    @commands.command(
+        name="card",
+        description="Display a profile card for either a Person or a Group.",
+    )
+    async def regular_card(
+        self, ctx, item_type: Literal["person", "group"], item_id: int
+    ):
+        await helper.process_card(
+            item_type=item_type,
+            item_id=item_id,
+            user_id=ctx.author.id,
+            ctx=ctx,
+            allowed_mentions=self.allowed_mentions,
+        )
 
     ################
     # SLASH COMMANDS
@@ -38,10 +69,12 @@ class GroupMembersCog(commands.Cog):
         media_id: int = commands.Param("Media ID"),
     ):
         """Figure out who a media object belongs to."""
-        await helper.process_who_is(media_id=media_id,
-                                    user_id=inter.author.id,
-                                    inter=inter,
-                                    allowed_mentions=self.allowed_mentions)
+        await helper.process_who_is(
+            media_id=media_id,
+            user_id=inter.author.id,
+            inter=inter,
+            allowed_mentions=self.allowed_mentions,
+        )
 
     @commands.slash_command(
         description="Display a profile card for either a Person or a Group."
@@ -54,20 +87,13 @@ class GroupMembersCog(commands.Cog):
     ):
         """Display a profile card for either a Person or a Group."""
         object_id = int(selection.split(")")[0])
-        if item_type == "person":
-            person = await Person.get(object_id)
-            await inter.send(str(person.name))
-        elif item_type == "group":
-            group = await Group.get(object_id)
-            await inter.send(str(group.name))
-        else:
-            raise RuntimeError(self.invalid_selection)
-
-    @commands.command(name="call", description="Call Media for an Idol/Group")
-    async def regular_call_person_or_group(
-        self, ctx: commands.Context, item_type: Literal["person", "group"], item_id: int
-    ):
-        await helper.process_call(item_type, item_id, ctx.author.id, ctx=ctx)
+        await helper.process_card(
+            item_type=item_type,
+            item_id=object_id,
+            user_id=inter.author.id,
+            inter=inter,
+            allowed_mentions=self.allowed_mentions,
+        )
 
     @commands.slash_command(name="call", description="Call Media for an Idol/Group.")
     async def call_person_or_group(
@@ -78,7 +104,13 @@ class GroupMembersCog(commands.Cog):
     ):
         """Display the media for a specific Person or Group."""
         object_id = int(selection.split(")")[0])
-        await helper.process_call(item_type, object_id, inter.user.id, inter=inter)
+        await helper.process_call(
+            item_type,
+            object_id,
+            inter.user.id,
+            inter=inter,
+            allowed_mentions=self.allowed_mentions,
+        )
 
     @commands.slash_command(
         name="randomperson", description="Display random media for a random Person."

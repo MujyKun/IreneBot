@@ -105,6 +105,7 @@ async def send_message(
     key: str = None,
     view: disnake.ui.View = None,
     delete_after: int = None,
+    embed: disnake.Embed = None
 ):
     """Send a message to a discord channel/interaction.
     :param custom_args:
@@ -127,11 +128,13 @@ async def send_message(
         The view for the message.
     :param delete_after: int
         Howmany seconds to delete the message after.
+    :param embed: disnake.Embed
+        Embedded message to send.
     """
     if (user and key) and not msg:
         msg = await get_message(user, key, *custom_args)
 
-    if not msg:
+    if not msg and not embed:
         logger.error(
             f"No message to send -> "
             f"Custom Args: {custom_args}, "
@@ -143,7 +146,8 @@ async def send_message(
         )
         return
 
-    msg = msg.replace("\\n", "\n")
+    if msg:
+        msg = msg.replace("\\n", "\n")
 
     final_msgs = []
     if ctx:
@@ -153,6 +157,7 @@ async def send_message(
                 allowed_mentions=allowed_mentions,
                 view=view,
                 delete_after=delete_after,
+                embed=embed
             )
         )
     if inter:
@@ -162,12 +167,15 @@ async def send_message(
             allowed_mentions = disnake.utils.MISSING
         if not delete_after:
             delete_after = disnake.utils.MISSING
+        if not embed:
+            embed = disnake.utils.MISSING
         final_msgs.append(
             await inter.send(
                 msg,
                 allowed_mentions=allowed_mentions,
                 view=view,
                 delete_after=delete_after,
+                embed=embed
             )
         )
     if channel:
@@ -177,6 +185,7 @@ async def send_message(
                 allowed_mentions=allowed_mentions,
                 view=view,
                 delete_after=delete_after,
+                embed=embed
             )
         )
 

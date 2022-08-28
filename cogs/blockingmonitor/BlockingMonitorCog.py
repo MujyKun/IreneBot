@@ -18,7 +18,10 @@ class BlockingMonitorCog(commands.Cog):
     def cog_unload(self):
         self.monitor_thread.stop()
 
-    @commands.is_owner()
+    async def cog_check(self, ctx: commands.Context) -> bool:
+        """A local cog check to confirm the right owner."""
+        return await ctx.bot.is_owner(ctx.author)
+
     @commands.group(invoke_without_command=True)
     async def bmon(self, ctx):
         ...

@@ -10,6 +10,7 @@ from typing import List, Union, Optional, Tuple, Dict
 from util import logger
 from ..helper import send_message
 from concurrent.futures import ThreadPoolExecutor
+from disnake.ext import commands
 
 _requests_today = 0
 _user_requests: Dict[int, int] = {}
@@ -559,6 +560,47 @@ async def process_call(item_type, item_id, user_id, ctx=None, inter=None):
 
     await send_message(
         msg=(random.choice(medias)).source.url, user=user, ctx=ctx, inter=inter
+    )
+
+
+async def process_who_is(
+    media_id: int,
+    user_id: int,
+    ctx: commands.Context = None,
+    inter: AppCmdInter = None,
+    allowed_mentions=None,
+):
+    """
+    Process the whois command.
+    """
+    user = await User.get(user_id=user_id)
+    media = await Media.get(media_id)  # refresh objs
+    if not media:
+        return await send_message(
+            media_id,
+            key="media_not_found",
+            ctx=ctx,
+            inter=inter,
+            allowed_mentions=allowed_mentions,
+            user=user,
+        )
+
+    aff = media.affiliation
+    person = aff.person
+    group = aff.group
+
+    result = f":\nAffiliation: {aff.id} - {aff.stage_name}\n" \
+             f"Person: {person.id} - {str(person.name)}\n" \
+             f"Group: {group.id} - {str(group)}"
+
+    await send_message(
+        media_id,
+        result,
+        key="media_who_is",
+        ctx=ctx,
+        inter=inter,
+        allowed_mentions=allowed_mentions,
+        user=user,
     )
 
 

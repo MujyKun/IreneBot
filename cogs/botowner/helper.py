@@ -70,7 +70,7 @@ async def process_list_eight_ball_responses(
     responses = list(await EightBallResponse.fetch_all())  # refresh objs
 
     await send_message(
-        '\n'.join([f"{response.id} -> {response.response}" for response in responses]),
+        "\n".join([f"{response.id} -> {response.response}" for response in responses]),
         key="8ball_list_response",
         ctx=ctx,
         inter=inter,

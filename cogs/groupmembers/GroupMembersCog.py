@@ -11,9 +11,37 @@ from typing import Literal, List
 class GroupMembersCog(commands.Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
+        self.allowed_mentions = disnake.AllowedMentions(everyone=False, roles=False)
         self.invalid_selection = (
             "item_type returned something other than 'person' or 'group'"
         )
+
+    @commands.command(name="whois", description="Figure out who a media object belongs to.")
+    async def regular_whois(
+        self,
+        ctx: commands.Context,
+        media_id: int,
+    ):
+        """Figure out who a media object belongs to."""
+        await helper.process_who_is(media_id=media_id,
+                                    user_id=ctx.author.id,
+                                    ctx=ctx,
+                                    allowed_mentions=self.allowed_mentions)
+
+    ################
+    # SLASH COMMANDS
+    ################
+    @commands.slash_command(description="Figure out who a media object belongs to.")
+    async def whois(
+        self,
+        inter: AppCmdInter,
+        media_id: int = commands.Param("Media ID"),
+    ):
+        """Figure out who a media object belongs to."""
+        await helper.process_who_is(media_id=media_id,
+                                    user_id=inter.author.id,
+                                    inter=inter,
+                                    allowed_mentions=self.allowed_mentions)
 
     @commands.slash_command(
         description="Display a profile card for either a Person or a Group."

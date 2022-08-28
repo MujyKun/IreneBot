@@ -50,9 +50,7 @@ class BotOwnerCog(commands.Cog):
     )
     async def list_eight_ball_response(self, inter: AppCmdInter):
         await helper.process_list_eight_ball_responses(
-            user_id=inter.author.id,
-            inter=inter,
-            allowed_mentions=self.allowed_mentions
+            user_id=inter.author.id, inter=inter, allowed_mentions=self.allowed_mentions
         )
 
     @commands.slash_command(

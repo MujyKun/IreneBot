@@ -1,7 +1,7 @@
 from IreneAPIWrapper.models import User, BiasGame as BiasGameModel, Person
 from disnake import AppCmdInter
 from disnake.ext import commands
-from ..helper import send_message, check_game_input
+from ..helper import send_message, check_game_input, in_game
 from models import BiasGame
 
 
@@ -47,6 +47,14 @@ async def process_bg(
     allowed_mentions=None,
 ):
     user = await User.get(user_id)
+    if await in_game(user):
+        return await send_message(
+            key="already_in_game",
+            ctx=ctx,
+            inter=inter,
+            allowed_mentions=allowed_mentions,
+            user=user,
+        )
 
     input_check = await check_game_input(
         user=user,

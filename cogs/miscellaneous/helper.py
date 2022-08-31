@@ -6,6 +6,7 @@ from re import findall
 from disnake.ext import commands
 from ..helper import send_message
 from models import all as all_games
+from keys import get_keys
 
 
 async def process_stop_games(
@@ -50,6 +51,18 @@ async def process_choose(
         ",".join(possible_choices),
         choice(possible_choices),
         key="choose_options",
+        ctx=ctx,
+        inter=inter,
+        allowed_mentions=allowed_mentions,
+        user=user,
+    )
+
+
+async def send_bot_invite(user_id: int, ctx: commands.Context = None,
+                          inter: AppCmdInter = None, allowed_mentions=None):
+    user = await User.get(user_id=user_id)
+    await send_message(
+        msg=f"{get_keys().bot_invite_url}",
         ctx=ctx,
         inter=inter,
         allowed_mentions=allowed_mentions,

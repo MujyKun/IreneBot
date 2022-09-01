@@ -12,4 +12,5 @@ cogs_list = [
     "twitter.TwitterCog",
     "moderator.ModeratorCog",
     "blockingmonitor.BlockingMonitorCog",
+    "usernotifications.UserNotificationsCog",
 ]

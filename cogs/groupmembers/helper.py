@@ -591,7 +591,9 @@ async def process_card(
     card_data = await obj.get_card(markdown=True, extra=True)
     avatar = None if not obj.display else obj.display.avatar
     banner = None if not obj.display else obj.display.banner
-    embed = await get_card_embed(card_info=card_data, avatar=avatar, banner=banner, title=str(obj))
+    embed = await get_card_embed(
+        card_info=card_data, avatar=avatar, banner=banner, title=str(obj)
+    )
     await send_message(user=user, ctx=ctx, inter=inter, embed=embed)
 
 
@@ -599,16 +601,13 @@ async def get_card_embed(card_info, avatar, banner, title):
     avatar = None if not avatar else avatar.url
     banner = None if not banner else banner.url
     embed = disnake.Embed(
-        color=disnake.Color.brand_green(),
-        title=title,
-        description="\n".join(card_info)
+        color=disnake.Color.brand_green(), title=title, description="\n".join(card_info)
     )
     if avatar:
         embed.set_thumbnail(avatar)
     if banner:
         embed.set_image(banner)
     return embed
-
 
 
 async def process_who_is(

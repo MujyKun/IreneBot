@@ -105,7 +105,7 @@ async def send_message(
     key: str = None,
     view: disnake.ui.View = None,
     delete_after: int = None,
-    embed: disnake.Embed = None
+    embed: disnake.Embed = None,
 ):
     """Send a message to a discord channel/interaction.
     :param custom_args:
@@ -157,7 +157,7 @@ async def send_message(
                 allowed_mentions=allowed_mentions,
                 view=view,
                 delete_after=delete_after,
-                embed=embed
+                embed=embed,
             )
         )
     if inter:
@@ -175,7 +175,7 @@ async def send_message(
                 allowed_mentions=allowed_mentions,
                 view=view,
                 delete_after=delete_after,
-                embed=embed
+                embed=embed,
             )
         )
     if channel:
@@ -185,7 +185,7 @@ async def send_message(
                 allowed_mentions=allowed_mentions,
                 view=view,
                 delete_after=delete_after,
-                embed=embed
+                embed=embed,
             )
         )
 

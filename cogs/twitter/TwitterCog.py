@@ -14,6 +14,9 @@ class TwitterCog(commands.Cog):
         self.allowed_mentions = disnake.AllowedMentions(everyone=False, roles=False)
         self._loop_running = False
 
+    def cog_unload(self) -> None:
+        self.twitter_updates.stop()
+
     @commands.group(
         name="twitter", description="Commands related to Twitter Subscriptions."
     )
@@ -122,19 +125,29 @@ class TwitterCog(commands.Cog):
         """
         Send updates to discord channels when a Twitter account posts.
         """
-        if not self.bot.api.connected or self._loop_running:
-            return
+        try:
+            if not self.bot.api.connected or self._loop_running:
+                return
 
-        self._loop_running = True
+            self._loop_running = True
 
-        accounts = list(await TwitterAccount.get_all())
-        for account in accounts:
-            timeline = await account.fetch_timeline()
-            new_tweets: List[Tweet] = timeline.new_tweets
-            timeline.new_tweets = []  # reset the new tweets.
-            await helper.send_twitter_notifications(self.bot, account, new_tweets)
+            accounts = list(await TwitterAccount.get_all())
+            for account in accounts:
+                try:
+                    timeline = await account.fetch_timeline()
+                    new_tweets: List[Tweet] = timeline.new_tweets
+                    timeline.new_tweets = []  # reset the new tweets.
+                    await helper.send_twitter_notifications(
+                        self.bot, account, new_tweets
+                    )
+                except Exception as e:
+                    self.bot.logger.error(f"Twitter Notification (Iter) Error -> {e}")
+                    print(f"{e}")
 
-        self._loop_running = False
+            self._loop_running = False
+        except Exception as e:
+            self.bot.logger.error(f"Twitter Notification Error -> {e}")
+            print(f"{e}")
 
 
 def setup(bot: Bot):

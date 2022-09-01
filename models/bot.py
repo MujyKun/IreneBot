@@ -1,13 +1,12 @@
 import asyncio
 from typing import List, Union
 
-import IreneAPIWrapper.models
 from disnake.ext.commands import AutoShardedBot, errors
 
 from cogs import cogs_list
 from datetime import datetime
 from util import logger
-from IreneAPIWrapper.models import IreneAPIClient, Preload
+from IreneAPIWrapper.models import IreneAPIClient, Preload, User, Guild
 from IreneAPIWrapper.exceptions import APIError
 import disnake
 
@@ -21,6 +20,7 @@ class Bot(AutoShardedBot):
             self.load_extension(f"cogs.{cog}")
 
         self.dev_mode = dev_mode
+        self.logger = logger
 
         api = IreneAPIClient(
             token=keys.api_token,
@@ -58,7 +58,7 @@ class Bot(AutoShardedBot):
         from cogs.helper import create_guild_model
 
         await create_guild_model(msg.guild)
-        guild = await IreneAPIWrapper.models.Guild.get(guild_id)
+        guild = await Guild.get(guild_id)
         if guild and guild.prefixes:
             return guild.prefixes
 
@@ -83,6 +83,99 @@ class Bot(AutoShardedBot):
         )
         print(msg)
         logger.info(msg)
+
+        await self.ensure_custom_roles()
+
+    async def ensure_custom_roles(self):
+        """
+        Confirm the patrons, super patrons, translators, data mods, proofreaders, ... are set correctly.
+
+        Should only be used when the bot is ready.
+        """
+        if not self.is_ready():
+            logger.warn("Did not ensure patrons since the bot was not ready.")
+            return
+
+        guild = self.get_guild(self.keys.support_server_id)
+        _users = []
+
+        await self._ensure_role(
+            role_to_find=self.keys.patron_role_id,
+            guild=guild,
+            async_callable_name="set_patron",
+            attr_flag="is_patron",
+            type_desc="Patron",
+        )
+        await self._ensure_role(
+            role_to_find=self.keys.super_patron_role_id,
+            guild=guild,
+            async_callable_name="set_super_patron",
+            attr_flag="is_super_patron",
+            type_desc="Super Patron",
+        )
+        await self._ensure_role(
+            role_to_find=self.keys.translator_role_id,
+            guild=guild,
+            async_callable_name="set_translator",
+            attr_flag="is_translator",
+            type_desc="Translator",
+        )
+        await self._ensure_role(
+            role_to_find=self.keys.proofreader_role_id,
+            guild=guild,
+            async_callable_name="set_proofreader",
+            attr_flag="is_proofreader",
+            type_desc="Proofreader",
+        )
+        await self._ensure_role(
+            role_to_find=self.keys.data_mod_role_id,
+            guild=guild,
+            async_callable_name="set_data_mod",
+            attr_flag="is_data_mod",
+            type_desc="Data Mod",
+        )
+
+        logger.info(
+            "Finished ensuring custom roles for users associated with the bots development."
+        )
+
+    async def _ensure_role(
+        self,
+        role_to_find: int,
+        guild: disnake.Guild,
+        async_callable_name: str,
+        attr_flag: str,
+        type_desc=None,
+    ):
+        """
+        role_to_find: int
+            The role to find in the guild.
+        guild: disnake.Guild
+            Disnake Guild
+        async_callable_name: Asynchronous Method Name
+            This will be the User method name that will be called if the user is in the role and the attr_flag
+            result ends up false.
+        attr_flag: bool
+            The attribute flag belonging to the User object.
+        type_desc: Optional[str]
+            The description of the type we are handling [Ex: Patron, Translator]
+        """
+        if not role_to_find:
+            return  # no need for logging, role was not added as an env variable.
+
+        role = guild.get_role(role_to_find)
+        if not role:
+            if type_desc:
+                logger.warning(f"{type_desc} role not found for updates.")
+            return
+
+        for member in role.members:
+            user = await User.get(member.id)
+            active_status = getattr(user, attr_flag)
+            if not active_status:
+                async_callable = getattr(user, async_callable_name)
+                await async_callable(active=True)
+                self.logger.info(f"Made {user.id} a {type_desc}.")
 
     async def handle_api_error(
         self,
@@ -143,3 +236,56 @@ class Bot(AutoShardedBot):
             )
         else:
             await self.process_commands(message)
+
+    async def on_member_update(self, before: disnake.Member, after: disnake.Member):
+        """Check for patron updates."""
+
+        # only check support server.
+        if after.guild.id != self.keys.support_server_id:
+            return
+
+        for func_kwargs in self.keys.role_update_kwargs:
+            await self._check_role_update(member=after, **func_kwargs)
+
+    async def _check_role_update(
+        self,
+        member: disnake.Member,
+        role_to_find: int,
+        async_callable_name: str,
+        attr_flag: str,
+        type_desc=None,
+    ):
+        """
+        role_to_find: int
+            The role to find in the guild.
+        async_callable_name: Asynchronous Method Name
+            This will be the User method name that will be called if the user is in the role and the attr_flag
+            result ends up false.
+        attr_flag: bool
+            The attribute flag belonging to the User object.
+        type_desc: Optional[str]
+            The description of the type we are handling [Ex: Patron, Translator]
+        """
+        if not role_to_find:
+            return  # no need for logging, role was not added as an env variable.
+
+        guild = member.guild
+        role = guild.get_role(role_to_find)
+        if not role:
+            if type_desc:
+                logger.warning(f"{type_desc} role not found for role updates.")
+            return
+        user = await User.get(member.id)
+
+        # check for active status
+        status_check = getattr(user, attr_flag)
+        async_callable = getattr(user, async_callable_name)
+
+        if role in member.roles and not status_check:
+            await async_callable(active=True)
+            self.logger.info(f"Made {user.id} a {type_desc}.")
+
+        # check for inactive status
+        if role not in member.roles and status_check:
+            await async_callable(active=False)
+            self.logger.info(f"Removed {user.id} as a Patron.")

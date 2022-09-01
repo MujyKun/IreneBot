@@ -58,8 +58,12 @@ async def process_choose(
     )
 
 
-async def send_bot_invite(user_id: int, ctx: commands.Context = None,
-                          inter: AppCmdInter = None, allowed_mentions=None):
+async def send_bot_invite(
+    user_id: int,
+    ctx: commands.Context = None,
+    inter: AppCmdInter = None,
+    allowed_mentions=None,
+):
     user = await User.get(user_id=user_id)
     await send_message(
         msg=f"{get_keys().bot_invite_url}",

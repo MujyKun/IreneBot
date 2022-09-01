@@ -13,7 +13,9 @@ class MiscellaneousCog(commands.Cog):
 
     @commands.command(name="invite", description="Get an invite link for the bot.")
     async def regular_invite(self, ctx: commands.Context):
-        await helper.send_bot_invite(user_id=ctx.author.id, ctx=ctx, allowed_mentions=self.allowed_mentions)
+        await helper.send_bot_invite(
+            user_id=ctx.author.id, ctx=ctx, allowed_mentions=self.allowed_mentions
+        )
 
     @commands.command(name="stopgames", description="Stop all games you are hosting.")
     async def regular_stop_games(self, ctx: commands.Context):
@@ -45,10 +47,13 @@ class MiscellaneousCog(commands.Cog):
     # SLASH COMMANDS
     ################
 
-    @commands.slash_command(name="invite", description="Get an invite link for the bot.")
+    @commands.slash_command(
+        name="invite", description="Get an invite link for the bot."
+    )
     async def invite(self, inter: AppCmdInter):
-        await helper.send_bot_invite(user_id=inter.author.id, inter=inter,
-                                     allowed_mentions=self.allowed_mentions)
+        await helper.send_bot_invite(
+            user_id=inter.author.id, inter=inter, allowed_mentions=self.allowed_mentions
+        )
 
     @commands.slash_command(
         name="stopgames", description="Stop all games you are hosting."

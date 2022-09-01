@@ -37,7 +37,9 @@ class BotOwnerCog(commands.Cog):
     @commands.command(
         name="deleteeightballresponse", description="Delete an 8ball response."
     )
-    async def regular_delete_eight_ball_response(self, ctx: commands.Context, response_id: int):
+    async def regular_delete_eight_ball_response(
+        self, ctx: commands.Context, response_id: int
+    ):
         await helper.process_delete_eight_ball_response(
             response_id=response_id,
             user_id=ctx.author.id,

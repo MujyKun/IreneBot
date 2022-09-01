@@ -97,43 +97,9 @@ class Bot(AutoShardedBot):
             return
 
         guild = self.get_guild(self.keys.support_server_id)
-        _users = []
 
-        await self._ensure_role(
-            role_to_find=self.keys.patron_role_id,
-            guild=guild,
-            async_callable_name="set_patron",
-            attr_flag="is_patron",
-            type_desc="Patron",
-        )
-        await self._ensure_role(
-            role_to_find=self.keys.super_patron_role_id,
-            guild=guild,
-            async_callable_name="set_super_patron",
-            attr_flag="is_super_patron",
-            type_desc="Super Patron",
-        )
-        await self._ensure_role(
-            role_to_find=self.keys.translator_role_id,
-            guild=guild,
-            async_callable_name="set_translator",
-            attr_flag="is_translator",
-            type_desc="Translator",
-        )
-        await self._ensure_role(
-            role_to_find=self.keys.proofreader_role_id,
-            guild=guild,
-            async_callable_name="set_proofreader",
-            attr_flag="is_proofreader",
-            type_desc="Proofreader",
-        )
-        await self._ensure_role(
-            role_to_find=self.keys.data_mod_role_id,
-            guild=guild,
-            async_callable_name="set_data_mod",
-            attr_flag="is_data_mod",
-            type_desc="Data Mod",
-        )
+        for func_kwargs in self.keys.role_update_kwargs:
+            await self._ensure_role(guild=guild, **func_kwargs)
 
         logger.info(
             "Finished ensuring custom roles for users associated with the bots development."
@@ -256,6 +222,8 @@ class Bot(AutoShardedBot):
         type_desc=None,
     ):
         """
+        member: disnake.Member
+            The Member to check the role status for.
         role_to_find: int
             The role to find in the guild.
         async_callable_name: Asynchronous Method Name

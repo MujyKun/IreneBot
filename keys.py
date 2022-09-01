@@ -304,39 +304,40 @@ class Keys:
         """Get the function kwargs for checking the status of a member's roles
         (ex: Patron, Translator)
 
+        Primarily used for functions `bot._ensure_role` and `bot._check_role_update`.
         Is a property since the env variables can be updated dynamically.
         """
         return [
             {
-                'role_to_find': self.patron_role_id,
-                'async_callable_name': "set_patron",
-                'attr_flag': "is_patron",
-                'type_desc': "Patron",
+                "role_to_find": self.patron_role_id,
+                "async_callable_name": "set_patron",
+                "attr_flag": "is_patron",
+                "type_desc": "Patron",
             },
             {
-                'role_to_find': self.super_patron_role_id,
-                'async_callable_name': "set_super_patron",
-                'attr_flag': "is_super_patron",
-                'type_desc': "Super Patron",
+                "role_to_find": self.super_patron_role_id,
+                "async_callable_name": "set_super_patron",
+                "attr_flag": "is_super_patron",
+                "type_desc": "Super Patron",
             },
             {
-                'role_to_find': self.translator_role_id,
-                'async_callable_name': "set_translator",
-                'attr_flag': "is_translator",
-                'type_desc': "Translator",
+                "role_to_find": self.translator_role_id,
+                "async_callable_name": "set_translator",
+                "attr_flag": "is_translator",
+                "type_desc": "Translator",
             },
             {
-                'role_to_find': self.proofreader_role_id,
-                'async_callable_name': "set_proofreader",
-                'attr_flag': "is_proofreader",
-                'type_desc': "Proofreader",
+                "role_to_find": self.proofreader_role_id,
+                "async_callable_name": "set_proofreader",
+                "attr_flag": "is_proofreader",
+                "type_desc": "Proofreader",
             },
             {
-                'role_to_find': self.data_mod_role_id,
-                'async_callable_name': "set_data_mod",
-                'attr_flag': "is_data_mod",
-                'type_desc': "Data Mod",
-            }
+                "role_to_find": self.data_mod_role_id,
+                "async_callable_name": "set_data_mod",
+                "attr_flag": "is_data_mod",
+                "type_desc": "Data Mod",
+            },
         ]
 
 

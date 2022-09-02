@@ -76,4 +76,4 @@ async def auto_complete_type_guild_prefixes(
     """Auto-complete typing for the command prefixes in a guild."""
     await create_guild_model(inter.guild_id)
     guild = await Guild.get(inter.guild_id)
-    return guild.prefixes
+    return guild.prefixes[:24]

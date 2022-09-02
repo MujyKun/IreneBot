@@ -159,7 +159,7 @@ async def auto_complete_type_subbed_channel(
 ) -> List[str]:
     """Auto-complete typing for the twitch accounts subscribed to in a guild."""
     accounts: List[TwitterAccount] = await get_subscribed(inter.guild)
-    return [account.name for account in accounts]
+    return [account.name for account in accounts][:24]
 
 
 async def send_twitter_notifications(

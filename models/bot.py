@@ -6,7 +6,7 @@ from disnake.ext.commands import AutoShardedBot, errors
 from cogs import cogs_list
 from datetime import datetime
 from util import logger
-from IreneAPIWrapper.models import IreneAPIClient, Preload, User, Guild
+from IreneAPIWrapper.models import IreneAPIClient, Preload, User, Guild, Notification
 from IreneAPIWrapper.exceptions import APIError
 import disnake
 
@@ -43,6 +43,7 @@ class Bot(AutoShardedBot):
         preload.languages = True
         preload.affiliations = True
         preload.eight_ball_responses = True
+        preload.notifications = True
         return preload
 
     async def prefix_check(
@@ -93,7 +94,7 @@ class Bot(AutoShardedBot):
         Should only be used when the bot is ready.
         """
         if not self.is_ready():
-            logger.warn("Did not ensure patrons since the bot was not ready.")
+            logger.warn("Did not ensure roles since the bot was not ready.")
             return
 
         guild = self.get_guild(self.keys.support_server_id)
@@ -202,9 +203,55 @@ class Bot(AutoShardedBot):
             )
         else:
             await self.process_commands(message)
+        await self.check_for_notification(message)
+
+    async def check_for_notification(self, message: disnake.Message):
+        """Check for a user notification and send it out."""
+        if not message.guild or message.guild is None or not message.content or message.author.bot:
+            return
+
+        notifications = await Notification.get_all(message.guild.id)
+        matches = [noti for noti in notifications if noti.phrase.lower() in message.content.lower()]
+        if not matches:
+            return
+
+        for noti in matches:
+            desc = f"""
+            Phrase: {noti.phrase}
+            Message Author: {message.author.display_name}
+            
+            **Message:** {message.content}
+            [Click to go to the Message]({message.jump_url})        
+            """
+            if noti.user_id == message.author.id:  # should not be notified of their own message.
+                continue
+
+            noti_member = message.guild.get_member(noti.user_id) or await message.guild.fetch_member(noti.user_id)
+            if not noti_member:
+                await noti.delete()  # user not in guild.
+                continue
+
+            if noti_member not in message.channel.members:
+                continue  # not able to view channel.
+
+            embed = disnake.Embed(color=disnake.Color.random(), title="Phrase Found", description=desc)
+            embed = await self.add_embed_footer_and_author(embed)
+            try:
+                await noti_member.send(embed=embed)
+            except Exception as e:
+                logger.warning(f"Could not send Noti DM to {noti_member} - {noti_member.id}. Removing Notification.")
+                await noti.delete()
+
+    async def add_embed_footer_and_author(self, embed: disnake.Embed) -> disnake.Embed:
+        """Add a footer and author to an embed."""
+        if self.keys.embed_icon_url:
+            embed.set_author(name="Irene", url=self.keys.bot_website_url, icon_url=self.keys.embed_icon_url)
+        if self.keys.embed_footer_url:
+            embed.set_footer(text="Thanks for using Irene!", icon_url=self.keys.embed_footer_url)
+        return embed
 
     async def on_member_update(self, before: disnake.Member, after: disnake.Member):
-        """Check for patron updates."""
+        """Check for custom role updates. (ex: patron/translator)"""
 
         # only check support server.
         if after.guild.id != self.keys.support_server_id:

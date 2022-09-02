@@ -177,14 +177,10 @@ async def auto_complete_type(inter: AppCmdInter, user_input: str) -> List[str]:
     item_type = inter.filled_options["item_type"]
     if item_type == "person":
         persons = await auto_complete_person(inter, user_input)
-        if len(persons) > 24:
-            persons = persons[0:24]
-        return persons
+        return persons[:24]
     elif item_type == "group":
         groups = await auto_complete_group(inter, user_input)
-        if len(groups) > 24:
-            groups = groups[0:24]
-        return groups
+        return groups[:24]
     else:
         raise RuntimeError(
             "item_type returned something other than 'person' or 'group'"
@@ -196,7 +192,7 @@ async def auto_complete_person(inter: AppCmdInter, user_input: str) -> List[str]
         f"{person.id}) {str(person.name)}"
         for person in await Person.get_all()
         if user_input.lower() in str(person.name).lower()
-    ]
+    ][:24]
 
 
 async def auto_complete_group(inter: AppCmdInter, user_input: str) -> List[str]:
@@ -204,7 +200,7 @@ async def auto_complete_group(inter: AppCmdInter, user_input: str) -> List[str]:
         f"{group.id}) {group.name}"
         for group in await Group.get_all()
         if user_input.lower() in group.name.lower()
-    ]
+    ][:24]
 
 
 async def get_call_count_leaderboard(

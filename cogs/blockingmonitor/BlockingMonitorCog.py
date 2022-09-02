@@ -7,6 +7,7 @@ import traceback
 import concurrent.futures
 import asyncio
 from util import logger
+from disnake import ApplicationCommandInteraction as AppCmdInter
 
 
 class BlockingMonitorCog(commands.Cog):
@@ -21,6 +22,10 @@ class BlockingMonitorCog(commands.Cog):
     async def cog_check(self, ctx: commands.Context) -> bool:
         """A local cog check to confirm the right owner."""
         return await ctx.bot.is_owner(ctx.author)
+
+    async def cog_slash_command_check(self, inter: AppCmdInter) -> bool:
+        """A local cog check to confirm the right owner."""
+        return await inter.bot.is_owner(inter.author)
 
     @commands.group(invoke_without_command=True)
     async def bmon(self, ctx):

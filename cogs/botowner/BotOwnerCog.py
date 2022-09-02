@@ -15,6 +15,10 @@ class BotOwnerCog(commands.Cog):
         """A local cog check to confirm the right owner."""
         return await ctx.bot.is_owner(ctx.author)
 
+    async def cog_slash_command_check(self, inter: AppCmdInter) -> bool:
+        """A local cog check to confirm the right owner."""
+        return await inter.bot.is_owner(inter.author)
+
     @commands.command(name="addeightballresponse", description="Add an 8ball response.")
     async def regular_add_eight_ball_response(
         self, ctx: commands.Context, *, response: str

@@ -211,6 +211,9 @@ class Bot(AutoShardedBot):
             return
 
         notifications = await Notification.get_all(message.guild.id)
+        if not notifications:
+            return
+
         matches = [noti for noti in notifications if noti.phrase.lower() in message.content.lower()]
         if not matches:
             return

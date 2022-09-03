@@ -11,6 +11,7 @@ from util import logger
 from ..helper import send_message
 from concurrent.futures import ThreadPoolExecutor
 from disnake.ext import commands
+from keys import get_keys
 
 _requests_today = 0
 _user_requests: Dict[int, int] = {}
@@ -29,19 +30,19 @@ async def check_user_requests():
         _requests_today = 0
 
 
-async def idol_send_on_message(bot, message: disnake.Message, prefixes: List):
-    """Detect an idol call and send media."""
+async def validate_message_idol_call(bot, message: disnake.Message, prefixes: List):
+    """Validate the environment in which the message was sent."""
     if not hasattr(message, "guild"):
-        return
+        return False
 
     if not message.guild:
-        return
+        return False
 
     content_replaced = False
     content = message.content  # we do not want to overwrite the message content.
 
     if not content:
-        return
+        return False
 
     for prefix in prefixes:
         if message.content.startswith(prefix):
@@ -50,8 +51,12 @@ async def idol_send_on_message(bot, message: disnake.Message, prefixes: List):
             break
 
     if not content_replaced:
-        return
+        return False
+    return content
 
+
+async def process_message_idol_call(bot, message, content):
+    """Complex operations for calling an idol."""
     person_comparisons: List[Comparison] = await search_for_obj(
         content, persons=True, split_name=True, return_similarity=True
     )
@@ -121,11 +126,11 @@ async def idol_send_on_message(bot, message: disnake.Message, prefixes: List):
     if not user:
         await User.insert(message.author.id)
         user = await User.get(message.author.id)
-    # if not user.is_patron:
-    #     user_request = _user_requests.get(user.id)
-    #     if user_request and user_request > get_keys().post_limit:
-    #         return await send_message(key="become_a_patron_limited", channel=message.channel, user=user,
-    #                                   delete_after=60)
+    if not user.is_considered_patron:
+        user_request = _user_requests.get(user.id)
+        if user_request and user_request > get_keys().post_limit:
+            return await send_message(key="become_a_patron_limited", channel=message.channel, user=user,
+                                      delete_after=60)
 
     try:
         media_url = await get_media_from_pool(obj_pool)
@@ -146,6 +151,16 @@ async def idol_send_on_message(bot, message: disnake.Message, prefixes: List):
 
     except Exception as e:
         logger.error(f"Failed to send photo to channel ID: {message.channel.id} - {e}")
+
+
+async def idol_send_on_message(bot, message: disnake.Message, prefixes: List):
+    """Detect an idol call and send media."""
+    content = await validate_message_idol_call(bot, message, prefixes)
+    if not content:
+        return
+    loop = asyncio.get_event_loop()
+    coro = process_message_idol_call(bot, message, content)
+    future = asyncio.run_coroutine_threadsafe(coro, loop)
 
 
 async def get_media_from_pool(object_pool: List[Union[Person, Group]]):

@@ -55,12 +55,8 @@ async def process_add(
 ):
     """Subscribe to a twitch account."""
     user = await User.get(user_id)
-    if ctx:
-        guild = ctx.guild
-    else:
-        guild = inter.guild
     accounts: List[TwitterAccount] = await get_subscribed(guild)
-    if len(accounts) >= get_keys().twitter_update_limit:
+    if len(accounts) >= get_keys().twitter_update_limit and not user.is_considered_patron:
         return await send_message(
             ctx=ctx,
             inter=inter,

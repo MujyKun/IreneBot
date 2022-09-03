@@ -176,6 +176,8 @@ class Bot(AutoShardedBot):
         ]
         if isinstance(exception, errors.CommandNotFound):
             return
+        elif isinstance(exception, errors.CheckFailure) or isinstance(exception, errors.NotOwner):
+            return await context.send("No Permissions.")
         elif isinstance(exception, errors.CommandInvokeError):
             if isinstance(exception.original, APIError):
                 return await self.handle_api_error(context, exception.original)

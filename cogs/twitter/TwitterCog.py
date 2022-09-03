@@ -134,6 +134,9 @@ class TwitterCog(commands.Cog):
             accounts = list(await TwitterAccount.get_all())
             for account in accounts:
                 try:
+                    if account is None:
+                        continue
+
                     timeline = await account.fetch_timeline()
                     new_tweets: List[Tweet] = timeline.new_tweets
                     timeline.new_tweets = []  # reset the new tweets.

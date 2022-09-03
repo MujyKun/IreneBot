@@ -5,7 +5,6 @@ cogs_list = [
     "miscellaneous.MiscellaneousCog",
     "profile.ProfileCog",
     "wolfram.WolframCog",
-    "testcog.TestCog",
     "guessinggame.GuessingGameCog",
     "unscramblegame.UnscrambleGameCog",
     "twitch.TwitchCog",

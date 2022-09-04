@@ -171,8 +171,10 @@ class Bot(AutoShardedBot):
     async def on_slash_command_error(
         self, interaction: AppCmdInter, exception: errors.CommandError
     ) -> None:
-        if isinstance(exception, (errors.CheckFailure, errors.NotOwner)):
+        if isinstance(exception, errors.NotOwner):
             return await interaction.send("Only the bot owner can use this command.")
+        elif isinstance(exception, errors.CheckFailure):
+            return await interaction.send(f"{exception}")
         else:
             logger.error(exception)
 

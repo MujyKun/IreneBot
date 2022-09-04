@@ -11,13 +11,15 @@ class BotOwnerCog(commands.Cog):
         self.bot = bot
         self.allowed_mentions = disnake.AllowedMentions(everyone=False, roles=False)
 
+    @commands.is_owner()
     async def cog_check(self, ctx: commands.Context) -> bool:
         """A local cog check to confirm the right owner."""
         return await ctx.bot.is_owner(ctx.author)
 
-    async def cog_slash_command_check(self, inter: AppCmdInter) -> bool:
+    async def cog_slash_command_check(self, inter: AppCmdInter):
         """A local cog check to confirm the right owner."""
-        return await inter.bot.is_owner(inter.author)
+        if not await inter.bot.is_owner(inter.author):
+            raise commands.NotOwner
 
     @commands.group(name="8ballresponse", description="Modify 8ball responses.")
     async def regular_eight_ball_response(self, ctx: commands.Context):

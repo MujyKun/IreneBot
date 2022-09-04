@@ -101,7 +101,7 @@ class BaseScoreGame(BaseRoundGame):
             """Check if a message contains the correct answer."""
             context = self.ctx if self.ctx else self.inter
             same_channel = message.channel == context.channel
-            correct_answer = message.content.lower() in self.correct_answers
+            correct_answer = message.content.lower() in self.correct_answers + ['skip']
             return same_channel and correct_answer
 
         try:
@@ -109,7 +109,10 @@ class BaseScoreGame(BaseRoundGame):
                 "message", check=check_for_answer, timeout=self.timeout
             )
             await msg.add_reaction("👍")
-            await self._accredit_player(msg.author.id)
-            await self._send_results(msg.author)
+            if msg.content.lower() == 'skip':
+                return await self._send_results()
+            else:
+                await self._accredit_player(msg.author.id)
+                return await self._send_results(msg.author)
         except asyncio.TimeoutError:
             await self._send_results()

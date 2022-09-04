@@ -165,6 +165,7 @@ async def send_twitter_notifications(
     bot: Bot, twitter_account: TwitterAccount, tweets: List[Tweet]
 ):
     """Send Twitter notifications to discord channels that need it."""
+    tweets = tweets or []  # make sure a list is passed in.
     failed_channels = []
     success_channels = []
 

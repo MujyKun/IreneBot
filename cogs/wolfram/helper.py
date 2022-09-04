@@ -42,7 +42,7 @@ async def process_wolfram_query(
             allowed_mentions=allowed_mentions,
             key="wolfram_query",
         )
-    if not user.is_patron:
+    if not user.is_considered_patron:
         return await send_message(
             user=user,
             ctx=ctx,

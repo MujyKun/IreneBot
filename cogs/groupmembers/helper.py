@@ -129,8 +129,12 @@ async def process_message_idol_call(bot, message, content):
     if not user.is_considered_patron:
         user_request = _user_requests.get(user.id)
         if user_request and user_request > get_keys().post_limit:
-            return await send_message(key="become_a_patron_limited", channel=message.channel, user=user,
-                                      delete_after=60)
+            return await send_message(
+                key="become_a_patron_limited",
+                channel=message.channel,
+                user=user,
+                delete_after=60,
+            )
 
     try:
         media_url = await get_media_from_pool(obj_pool)

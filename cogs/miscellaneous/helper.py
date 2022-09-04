@@ -9,6 +9,20 @@ from models import all as all_games
 from keys import get_keys
 
 
+async def process_ping(
+    latency, user_id: int, ctx=None, inter=None, allowed_mentions=None
+):
+    user = await User.get(user_id)
+    return await send_message(
+        latency,
+        key="ping",
+        user=user,
+        ctx=ctx,
+        inter=inter,
+        allowed_mentions=allowed_mentions,
+    )
+
+
 async def process_stop_games(
     user_id: int,
     ctx: commands.Context = None,

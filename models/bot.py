@@ -2,12 +2,14 @@ import asyncio
 from typing import List, Union
 
 from disnake.ext.commands import AutoShardedBot, errors
+from disnake import ApplicationCommandInteraction as AppCmdInter
 
 from cogs import cogs_list
 from datetime import datetime
 from util import logger
 from IreneAPIWrapper.models import IreneAPIClient, Preload, User, Guild, Notification
 from IreneAPIWrapper.exceptions import APIError
+from cogs import helper
 import disnake
 
 
@@ -44,6 +46,7 @@ class Bot(AutoShardedBot):
         preload.affiliations = True
         preload.eight_ball_responses = True
         preload.notifications = True
+        preload.interactions = True
         return preload
 
     async def prefix_check(
@@ -165,6 +168,14 @@ class Bot(AutoShardedBot):
         except disnake.errors.HTTPException as e:
             logger.error(f"Could not send embedded error to channel - {e}")
 
+    async def on_slash_command_error(
+        self, interaction: AppCmdInter, exception: errors.CommandError
+    ) -> None:
+        if isinstance(exception, (errors.CheckFailure, errors.NotOwner)):
+            return await interaction.send("Only the bot owner can use this command.")
+        else:
+            logger.error(exception)
+
     async def on_command_error(self, context, exception):
         # TODO: errors.Cooldown was not found - causes an AttributeError when put in return_error_to_user
         return_error_to_user = [
@@ -176,8 +187,6 @@ class Bot(AutoShardedBot):
         ]
         if isinstance(exception, errors.CommandNotFound):
             return
-        elif isinstance(exception, errors.CheckFailure) or isinstance(exception, errors.NotOwner):
-            return await context.send("No Permissions.")
         elif isinstance(exception, errors.CommandInvokeError):
             if isinstance(exception.original, APIError):
                 return await self.handle_api_error(context, exception.original)
@@ -207,20 +216,29 @@ class Bot(AutoShardedBot):
             await self.process_commands(message)
         await self.check_for_notification(message)
 
+    async def on_message_edit(self, before, after):
+        await self.on_message(after)
+
     async def check_for_notification(self, message: disnake.Message):
         """Check for a user notification and send it out."""
-        if not message.guild or message.guild is None or not message.content or message.author.bot:
+        if (
+            not message.guild
+            or message.guild is None
+            or not message.content
+            or message.author.bot
+        ):
             return
 
         notifications = await Notification.get_all(message.guild.id)
         if not notifications:
             return
 
-        matches = [noti for noti in notifications if noti.phrase.lower() in message.content.lower()]
-        if not matches:
-            return
+        for noti in notifications:
+            split_noti = noti.phrase.lower().split(" ")
+            split_content = message.content.lower().split(" ")
+            if not all(split_phrase in split_content for split_phrase in split_noti):
+                continue
 
-        for noti in matches:
             desc = f"""
             Phrase: {noti.phrase}
             Message Author: {message.author.display_name}
@@ -228,10 +246,14 @@ class Bot(AutoShardedBot):
             **Message:** {message.content}
             [Click to go to the Message]({message.jump_url})        
             """
-            if noti.user_id == message.author.id:  # should not be notified of their own message.
+            if (
+                noti.user_id == message.author.id
+            ):  # should not be notified of their own message.
                 continue
 
-            noti_member = message.guild.get_member(noti.user_id) or await message.guild.fetch_member(noti.user_id)
+            noti_member = message.guild.get_member(
+                noti.user_id
+            ) or await message.guild.fetch_member(noti.user_id)
             if not noti_member:
                 await noti.delete()  # user not in guild.
                 continue
@@ -239,21 +261,17 @@ class Bot(AutoShardedBot):
             if noti_member not in message.channel.members:
                 continue  # not able to view channel.
 
-            embed = disnake.Embed(color=disnake.Color.random(), title="Phrase Found", description=desc)
-            embed = await self.add_embed_footer_and_author(embed)
+            embed = disnake.Embed(
+                color=disnake.Color.random(), title="Phrase Found", description=desc
+            )
+            embed = await helper.add_embed_footer_and_author(embed)
             try:
                 await noti_member.send(embed=embed)
             except Exception as e:
-                logger.warning(f"Could not send Noti DM to {noti_member} - {noti_member.id}. Removing Notification.")
+                logger.warning(
+                    f"Could not send Noti DM to {noti_member} - {noti_member.id}. Removing Notification."
+                )
                 await noti.delete()
-
-    async def add_embed_footer_and_author(self, embed: disnake.Embed) -> disnake.Embed:
-        """Add a footer and author to an embed."""
-        if self.keys.embed_icon_url:
-            embed.set_author(name="Irene", url=self.keys.bot_website_url, icon_url=self.keys.embed_icon_url)
-        if self.keys.embed_footer_url:
-            embed.set_footer(text="Thanks for using Irene!", icon_url=self.keys.embed_footer_url)
-        return embed
 
     async def on_member_update(self, before: disnake.Member, after: disnake.Member):
         """Check for custom role updates. (ex: patron/translator)"""

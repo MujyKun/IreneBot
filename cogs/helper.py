@@ -1,10 +1,13 @@
 from IreneAPIWrapper.models import Channel, Guild, User, Language, PackMessage
 from IreneAPIWrapper.exceptions import IncorrectNumberOfItems
-from models import Bot
 from typing import Optional, Union
 from disnake.ext import commands
 from util import logger
 import disnake
+from keys import get_keys
+
+from typing import TYPE_CHECKING
+
 
 LIMIT_ROUNDS = [3, 60]
 LIMIT_TIMEOUT = [5, 60]
@@ -53,7 +56,7 @@ async def create_guild_model(guild):
 
 
 async def get_discord_channel(
-    bot: Bot, channel: Channel
+    bot, channel: Channel
 ) -> Optional[disnake.TextChannel]:
     """Get a discord channel without worrying about errors."""
     discord_channel = bot.get_channel(channel.id)
@@ -248,3 +251,19 @@ async def in_game(user: User):
     return any(
         [game for game in all_games if game.host_user == user and not game.is_complete]
     )
+
+
+async def add_embed_footer_and_author(embed: disnake.Embed) -> disnake.Embed:
+    """Add a footer and author to an embed."""
+    _keys = get_keys()
+    if _keys.embed_icon_url:
+        embed.set_author(
+            name="Irene",
+            url=_keys.bot_website_url,
+            icon_url=_keys.embed_icon_url,
+        )
+    if _keys.embed_footer_url:
+        embed.set_footer(
+            text="Thanks for using Irene!", icon_url=_keys.embed_footer_url
+        )
+    return embed

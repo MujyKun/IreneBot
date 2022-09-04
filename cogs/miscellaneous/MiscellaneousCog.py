@@ -43,6 +43,15 @@ class MiscellaneousCog(commands.Cog):
             allowed_mentions=self.allowed_mentions,
         )
 
+    @commands.command(name="ping", description="Get the ping of the bot.")
+    async def regular_ping(self, ctx: commands.Context):
+        await helper.process_ping(
+            latency=int(self.bot.latency * 1000),
+            user_id=ctx.author.id,
+            ctx=ctx,
+            allowed_mentions=self.allowed_mentions,
+        )
+
     ################
     # SLASH COMMANDS
     ################
@@ -145,9 +154,14 @@ class MiscellaneousCog(commands.Cog):
         embed = await botembed.add_embed_inline_fields(embed, fields)
         await inter.send(embed=embed)
 
-    @commands.slash_command(description="Get bot ping.")
+    @commands.slash_command(name="ping", description="Get the ping of the bot.")
     async def ping(self, inter: AppCmdInter):
-        await inter.send(f"> My ping is currently {int(self.bot.latency * 1000)}ms")
+        await helper.process_ping(
+            latency=int(self.bot.latency * 1000),
+            user_id=inter.author.id,
+            inter=inter,
+            allowed_mentions=self.allowed_mentions,
+        )
 
     @commands.slash_command(
         description="Show information about the bot and its creator."

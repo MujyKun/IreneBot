@@ -12,4 +12,5 @@ cogs_list = [
     "moderator.ModeratorCog",
     "blockingmonitor.BlockingMonitorCog",
     "usernotifications.UserNotificationsCog",
+    "interactions.InteractionsCog",
 ]

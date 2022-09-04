@@ -18,7 +18,9 @@ class UserNotificationsCog(commands.Cog):
     async def regular_noti(self, ctx):
         ...
 
-    @regular_noti.command(name="add", description="Add a phrase/word to be notified for.")
+    @regular_noti.command(
+        name="add", description="Add a phrase/word to be notified for."
+    )
     async def regular_add(self, ctx: commands.Context, *, phrase: str):
         await helper.process_add(
             phrase=phrase,
@@ -28,7 +30,9 @@ class UserNotificationsCog(commands.Cog):
             allowed_mentions=self.allowed_mentions,
         )
 
-    @regular_noti.command(name="remove", description="Remove a phrase/word to no longer be notified for.")
+    @regular_noti.command(
+        name="remove", description="Remove a phrase/word to no longer be notified for."
+    )
     async def regular_remove(self, ctx: commands.Context, *, phrase: str):
         await helper.process_remove(
             phrase=phrase,
@@ -38,7 +42,9 @@ class UserNotificationsCog(commands.Cog):
             allowed_mentions=self.allowed_mentions,
         )
 
-    @regular_noti.command(name="list", description="List all your user notifications in this server.")
+    @regular_noti.command(
+        name="list", description="List all your user notifications in this server."
+    )
     async def regular_list(self, ctx: commands.Context):
         await helper.process_list(
             guild_id=ctx.guild.id,

@@ -118,6 +118,7 @@ class GuessingGame(BaseScoreGame):
                     "There is no media available for your guessing game. "
                     "Try changing your selections."
                 )
+        self.rounds += 1
 
         media = choice(self.pool)
         self.current_media = media

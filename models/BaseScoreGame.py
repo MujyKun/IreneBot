@@ -101,7 +101,10 @@ class BaseScoreGame(BaseRoundGame):
             """Check if a message contains the correct answer."""
             context = self.ctx if self.ctx else self.inter
             same_channel = message.channel == context.channel
-            correct_answer = message.content.lower() in self.correct_answers + ['skip', 'stop']
+            correct_answer = message.content.lower() in self.correct_answers + [
+                "skip",
+                "stop",
+            ]
             return same_channel and correct_answer
 
         try:
@@ -109,9 +112,9 @@ class BaseScoreGame(BaseRoundGame):
                 "message", check=check_for_answer, timeout=self.timeout
             )
             await msg.add_reaction("👍")
-            if msg.content.lower() == 'skip':
+            if msg.content.lower() == "skip":
                 return await self._send_results()
-            if msg.content.lower() == 'stop':
+            if msg.content.lower() == "stop":
                 self.rounds = self.max_rounds + 1
                 return await self._send_results()
             else:

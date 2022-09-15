@@ -55,9 +55,7 @@ async def create_guild_model(guild):
         )
 
 
-async def get_discord_channel(
-    bot, channel: Channel
-) -> Optional[disnake.TextChannel]:
+async def get_discord_channel(bot, channel: Channel) -> Optional[disnake.TextChannel]:
     """Get a discord channel without worrying about errors."""
     discord_channel = bot.get_channel(channel.id)
     try:

@@ -57,19 +57,37 @@ class ModeratorCog(commands.Cog):
             allowed_mentions=self.allowed_mentions,
         )
 
-    @commands.command(name="clear", description="Clear messages in the text channel.", aliases=["prune"])
+    @commands.command(
+        name="clear",
+        description="Clear messages in the text channel.",
+        aliases=["prune"],
+    )
     async def regular_clear_messages(self, ctx: commands.Context, amount: int = 1):
-        await helper.process_prune(channel=ctx.channel, amount=amount + 1, user_id=ctx.author.id, ctx=ctx,
-                                   allowed_mentions=self.allowed_mentions)  # + 1 for own message.
+        await helper.process_prune(
+            channel=ctx.channel,
+            amount=amount + 1,
+            user_id=ctx.author.id,
+            ctx=ctx,
+            allowed_mentions=self.allowed_mentions,
+        )  # + 1 for own message.
 
     # ==============
     # SLASH COMMANDS
     # ==============
 
-    @commands.slash_command(name="clear", description="Clear messages in the text channel.")
-    async def clear_messages(self, inter: AppCmdInter, amount: commands.Range[1, 100] = 1):
-        await helper.process_prune(channel=inter.channel, amount=amount, user_id=inter.author.id, inter=inter,
-                                   allowed_mentions=self.allowed_mentions)
+    @commands.slash_command(
+        name="clear", description="Clear messages in the text channel."
+    )
+    async def clear_messages(
+        self, inter: AppCmdInter, amount: commands.Range[1, 100] = 1
+    ):
+        await helper.process_prune(
+            channel=inter.channel,
+            amount=amount,
+            user_id=inter.author.id,
+            inter=inter,
+            allowed_mentions=self.allowed_mentions,
+        )
 
     @commands.slash_command(
         name="prefix", description="Commands related to Guild Prefixes."

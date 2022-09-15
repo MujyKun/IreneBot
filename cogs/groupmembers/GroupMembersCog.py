@@ -195,7 +195,7 @@ class GroupMembersCog(commands.Cog):
             return await inter.send("You cannot compare words of that length.")
 
         await inter.send(
-            f"The search word has **{await helper.unblock_levenshtein_distance(search_word, target_word) * 100:.2f}%** "
+            f"The search word has **{await helper.search_distance(search_word, target_word) * 100:.2f}%** "
             f"similarity with the target word."
         )
 

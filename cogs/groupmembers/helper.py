@@ -65,56 +65,32 @@ async def process_message_idol_call(bot, message, content):
         content, persons=False, split_name=True, return_similarity=True
     )
 
+    person_comparisons.sort(key=lambda comp: comp.similarity, reverse=True)
+    group_comparisons.sort(key=lambda comp: comp.similarity, reverse=True)
+
     obj_pool: List[Union[Person, Group]] = []
     if not (person_comparisons or group_comparisons):
         return  # no results
-    elif len(person_comparisons) >= 1 and not group_comparisons:
-        # add based on highest similarity
-        _max_comps: Optional[List[Comparison]] = None
+    elif person_comparisons and not group_comparisons:
+        # add comps based on highest similarity
+        _max_comps: Optional[List[Comparison]] = []
         for person_comp in person_comparisons:
-            if not _max_comps:
-                _max_comps = [person_comp]
+            if not _max_comps or person_comp.similarity == _max_comps[0].similarity:
+                _max_comps.append(person_comp)
                 continue
 
-            if person_comp.similarity == _max_comps[0].similarity:
-                _max_comps.append(person_comp)
-            elif person_comp.similarity > _max_comps[0].similarity:
-                _max_comps = [person_comp]
-        obj_pool += [comp.obj for comp in person_comparisons]
-
-        # people with no group. -> Add them all to pool instead of only highest similarity.
-        # obj_pool.append(person_comparisons[0].obj)
+        obj_pool += [comp.obj for comp in _max_comps]
     elif len(person_comparisons) > 1 and not group_comparisons:
         obj_pool += [comp.obj for comp in person_comparisons]
-    elif len(person_comparisons) == 1 and len(group_comparisons) == 1:
-        # only a person and a group
-        person = person_comparisons[0].obj
-        group = group_comparisons[0].obj
-        obj_pool.append(person)
-        if not await person_in_group(person, group):
-            # person is not in group.
-            obj_pool.append(group)
-    elif len(person_comparisons) >= 1 and len(group_comparisons) >= 1:
-        # several persons and groups found in a message.
-        groups_tried = []  # avoid duplicate checks.
-        for group_comp in group_comparisons:
-            has_person = False
+    elif person_comparisons and group_comparisons:
+        # both persons and groups found in a message.
+        for group_comp, person_comp in zip(group_comparisons, person_comparisons):
             group = group_comp.obj
-            if group in groups_tried:
-                continue
-            groups_tried.append(group)
-            for person_comp in person_comparisons:
-                person = person_comp.obj
-                in_group = await person_in_group(person, group)
-                if in_group:
-                    has_person = True
-                    obj_pool.append(person)
-            # this has been disabled since there are solo groups that may cause a messed up filter.
-            # if not has_person:
-            #     # add the group to the pool. if there is no person found for the group.
-            #     obj_pool.append(group)
+            person = person_comp.obj
+            if await person_in_group(person, group):
+                obj_pool.append(person)
     elif len(group_comparisons) >= 1:
-        # groups with no people
+        # groups with no specified persons.
         obj_pool += [group_comp.obj for group_comp in group_comparisons]
     else:
         raise NotImplementedError()
@@ -282,6 +258,10 @@ class Comparison:
         return await search_distance(self.search_word, self.target_word)
 
     def __float__(self):
+        """Returns similarity."""
+        return self.similarity
+
+    def __int__(self):
         """Returns similarity."""
         return self.similarity
 

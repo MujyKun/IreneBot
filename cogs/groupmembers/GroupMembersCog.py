@@ -117,8 +117,12 @@ class GroupMembersCog(commands.Cog):
     )
     async def random_person(self, inter: AppCmdInter):
         """Send a photo of a random person."""
-        media: Media = random.choice(list(await Media.get_all()))
-        await inter.send(media.source.url)
+        person: Person = random.choice(list(await Person.get_all()))
+        while not person.media_count:
+            person: Person = random.choice(list(await Person.get_all()))
+
+        media = await Media.get_random(person.id, person=True)
+        return await inter.send(await media.fetch_image_host_url())
 
     @commands.slash_command(
         name="count", description="Get count for the media a person or group has."

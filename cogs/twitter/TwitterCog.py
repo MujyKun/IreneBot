@@ -140,6 +140,10 @@ class TwitterCog(commands.Cog):
                     timeline = await account.fetch_timeline()
                     new_tweets: List[Tweet] = timeline.new_tweets
                     timeline.new_tweets = []  # reset the new tweets.
+
+                    if not new_tweets:
+                        continue
+
                     await helper.send_twitter_notifications(
                         self.bot, account, new_tweets
                     )

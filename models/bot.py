@@ -97,18 +97,8 @@ class Bot(AutoShardedBot):
 
         self.loop.create_task(self.api.connect())
 
-        while not self.api.connected:
+        while not self.api.connected and not self.api.is_preloaded:
             await asyncio.sleep(0)
-
-        from time import perf_counter
-
-        start = perf_counter()
-        while not self.api.is_preloaded:
-            print("Cache is not preloaded.")
-            await asyncio.sleep(5)
-        end = perf_counter()
-
-        print(f"TIME: {end - start}")
 
         await self.start(
             self.keys.prod_bot_token if not self.dev_mode else self.keys.dev_bot_token

@@ -40,13 +40,37 @@ class Bot(AutoShardedBot):
     def get_preload():
         preload = Preload()
         preload.all_false()
-        preload.twitch_subscriptions = True
-        preload.twitter_accounts = True
-        preload.languages = True
-        preload.affiliations = True
-        preload.eight_ball_responses = True
-        preload.notifications = True
-        preload.interactions = True
+        preload.persons = (
+            preload.groups
+        ) = (
+            preload.twitch_subscriptions
+        ) = (
+            preload.twitter_accounts
+        ) = (
+            preload.languages
+        ) = (
+            preload.affiliations
+        ) = (
+            preload.eight_ball_responses
+        ) = (
+            preload.notifications
+        ) = (
+            preload.interactions
+        ) = (
+            preload.person_aliases
+        ) = (
+            preload.group_aliases
+        ) = (
+            preload.tags
+        ) = (
+            preload.socials
+        ) = (
+            preload.displays
+        ) = (
+            preload.companies
+        ) = (
+            preload.dates
+        ) = preload.names = preload.bloodtypes = preload.locations = True
         return preload
 
     async def prefix_check(
@@ -75,6 +99,16 @@ class Bot(AutoShardedBot):
 
         while not self.api.connected:
             await asyncio.sleep(0)
+
+        from time import perf_counter
+
+        start = perf_counter()
+        while not self.api.is_preloaded:
+            print("Cache is not preloaded.")
+            await asyncio.sleep(5)
+        end = perf_counter()
+
+        print(f"TIME: {end - start}")
 
         await self.start(
             self.keys.prod_bot_token if not self.dev_mode else self.keys.dev_bot_token

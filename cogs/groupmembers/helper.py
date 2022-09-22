@@ -58,12 +58,14 @@ async def validate_message_idol_call(bot, message: disnake.Message, prefixes: Li
 
 async def process_message_idol_call(bot, message, content):
     """Complex operations for calling an idol."""
-    person_comparisons: List[Comparison] = await search_for_obj(
-        content, persons=True, split_name=True, return_similarity=True
-    )
-    group_comparisons: List[Comparison] = await search_for_obj(
-        content, persons=False, split_name=True, return_similarity=True
-    )
+    person_comparisons: List[Comparison] = [
+        comp for comp in await search_for_obj(content, persons=True, split_name=True, return_similarity=True)
+        if comp.obj.media_count
+    ]
+    group_comparisons: List[Comparison] = [
+        comp for comp in await search_for_obj(content, persons=False, split_name=True, return_similarity=True)
+        if comp.obj.media_count
+    ]
 
     person_comparisons.sort(key=lambda comp: comp.similarity, reverse=True)
     group_comparisons.sort(key=lambda comp: comp.similarity, reverse=True)
@@ -280,7 +282,7 @@ class Comparison:
 
 async def search_for_obj(
     search_name, persons=True, split_name=False, return_similarity=False
-) -> Union[List[Person], List[Group], List[Comparison]]:
+) -> List[Union[Person, Comparison, Group]]:
     """
     Check if a name matches with an alias or a Person/Group's full name.
 
@@ -293,7 +295,7 @@ async def search_for_obj(
     :param return_similarity: bool
         Return the similarity of the searched objects.
 
-    :returns: Union[List[:ref:`Person`], List[:ref:`Group`]]
+    :returns: Union[List[:ref:`Person`], List[:ref:`Group`], List[:ref:`Comparison`]]
         A list of persons or groups that match the search filter.
     """
     objects: Union[List[Person], List[Group]] = (
@@ -358,8 +360,7 @@ async def _filter_by_name(
     if not return_similarity:
         if any(
             [
-                await search_distance(sub_name, alias.lower())
-                >= similarity_required
+                await search_distance(sub_name, alias.lower()) >= similarity_required
                 for sub_name in names
                 for alias in aliases
             ]
@@ -379,8 +380,7 @@ async def _filter_by_name(
     if not return_similarity:
         if any(
             [
-                await search_distance(sub_name, str(obj).lower())
-                >= similarity_required
+                await search_distance(sub_name, str(obj).lower()) >= similarity_required
                 for sub_name in names
             ]
         ):
@@ -400,9 +400,7 @@ async def _filter_by_name(
             if not return_similarity:
                 if any(
                     [
-                        await search_distance(
-                            sub_name, aff.stage_name.lower()
-                        )
+                        await search_distance(sub_name, aff.stage_name.lower())
                         >= similarity_required
                         for sub_name in names
                     ]

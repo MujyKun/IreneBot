@@ -134,7 +134,7 @@ class TwitterCog(commands.Cog):
             accounts = list(await TwitterAccount.get_all())
             for account in accounts:
                 try:
-                    if account is None:
+                    if not account:  # checks if any channels are following the account.
                         continue
 
                     timeline = await account.fetch_timeline()

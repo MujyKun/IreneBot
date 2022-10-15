@@ -175,6 +175,7 @@ class TwitchCog(commands.Cog):
         except Exception as e:
             self.bot.logger.error(f"Twitch Notification Error -> {e}")
             print(f"{e}")
+            self._loop_running = False
 
 
 def setup(bot: Bot):

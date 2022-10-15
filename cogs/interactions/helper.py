@@ -11,7 +11,6 @@ from ..helper import (
     add_embed_footer_and_author,
 )
 from keys import get_keys
-from disnake.embeds import EmptyEmbed
 
 
 async def process_interaction(
@@ -50,7 +49,7 @@ async def process_interaction(
         desc = f"[{msg}](https://www.cdc.gov/suicide/index.html)"
 
     embed = disnake.Embed(
-        color=disnake.Color.random(), title=title, description=desc or EmptyEmbed
+        color=disnake.Color.random(), title=title, description=desc or None
     )
     if image_url:
         embed.set_image(url=image_url)

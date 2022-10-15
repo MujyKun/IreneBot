@@ -49,7 +49,7 @@ class GroupMembersCog(commands.Cog):
         description="Display a profile card for either a Person or a Group.",
     )
     async def regular_card(
-        self, ctx, item_type: Literal["person", "group"], item_id: int
+        self, ctx, item_type: Literal["person", "group", "affiliation"], item_id: int
     ):
         await helper.process_card(
             item_type=item_type,
@@ -66,7 +66,7 @@ class GroupMembersCog(commands.Cog):
     async def whois(
         self,
         inter: AppCmdInter,
-        media_id: int = commands.Param("Media ID"),
+        media_id: int,
     ):
         """Figure out who a media object belongs to."""
         await helper.process_who_is(
@@ -77,15 +77,15 @@ class GroupMembersCog(commands.Cog):
         )
 
     @commands.slash_command(
-        description="Display a profile card for either a Person or a Group."
+        description="Display a profile card for either a Person, Group, or Affiliation."
     )
     async def card(
         self,
         inter: AppCmdInter,
-        item_type: Literal["person", "group"],
+        item_type: Literal["person", "group", "affiliation"],
         selection: str = commands.Param(autocomplete=helper.auto_complete_type),
     ):
-        """Display a profile card for either a Person or a Group."""
+        """Display a profile card for either a Person, Group, or Affiliation."""
         object_id = int(selection.split(")")[0])
         await helper.process_card(
             item_type=item_type,

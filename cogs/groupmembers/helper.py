@@ -5,7 +5,7 @@ import IreneAPIWrapper.exceptions
 import asyncio
 import disnake
 from disnake import ApplicationCommandInteraction as AppCmdInter
-from IreneAPIWrapper.models import Person, Group, Media, User
+from IreneAPIWrapper.models import Person, Group, Media, User, Affiliation
 from typing import List, Union, Optional, Tuple, Dict
 from util import logger
 from ..helper import send_message
@@ -17,6 +17,44 @@ from dataclasses import dataclass
 _requests_today = 0
 _user_requests: Dict[int, int] = {}
 _current_day = datetime.datetime.now().day
+
+
+@dataclass(frozen=False, order=True)
+class Comparison:
+    obj: Union[Person, Group] = None
+    search_word: str = None
+    target_word: str = None
+    similarity: Optional[float] = None
+
+    @staticmethod
+    async def create(obj: Union[Person, Group], search_word: str, target_word: str):
+        obj = Comparison(obj, search_word, target_word)
+        obj.similarity = await obj.calculate()
+        return obj
+
+    async def calculate(self):
+        """Calculate the distance."""
+        return await search_distance(self.search_word, self.target_word)
+
+    def __float__(self):
+        """Returns similarity."""
+        return self.similarity
+
+    def __int__(self):
+        """Returns similarity."""
+        return self.similarity
+
+    def __hash__(self):
+        return hash(
+            (
+                "obj",
+                self.obj,
+                "search_word",
+                self.search_word,
+                "target_word",
+                self.target_word,
+            )
+        )
 
 
 async def check_user_requests():
@@ -56,6 +94,17 @@ async def validate_message_idol_call(bot, message: disnake.Message, prefixes: Li
     return content
 
 
+async def get_max_similarities(comparisons: List[Comparison]):
+    """Get the similarities that match the highest similarity."""
+    # add comps based on highest similarity
+    _max_comps: Optional[List[Comparison]] = []
+    for comp in comparisons:
+        if not _max_comps or comp.similarity == _max_comps[0].similarity:
+            _max_comps.append(comp)
+            continue
+    return _max_comps
+
+
 async def process_message_idol_call(bot, message, content):
     """Complex operations for calling an idol."""
     person_comparisons: List[Comparison] = [
@@ -75,25 +124,33 @@ async def process_message_idol_call(bot, message, content):
         return  # no results
     elif person_comparisons and not group_comparisons:
         # add comps based on highest similarity
-        _max_comps: Optional[List[Comparison]] = []
-        for person_comp in person_comparisons:
-            if not _max_comps or person_comp.similarity == _max_comps[0].similarity:
-                _max_comps.append(person_comp)
-                continue
-
-        obj_pool += [comp.obj for comp in _max_comps]
-    elif len(person_comparisons) > 1 and not group_comparisons:
-        obj_pool += [comp.obj for comp in person_comparisons]
+        obj_pool += [comp.obj for comp in await get_max_similarities(person_comparisons)]
     elif person_comparisons and group_comparisons:
         # both persons and groups found in a message.
-        for group_comp, person_comp in zip(group_comparisons, person_comparisons):
+
+        # a group can be falsely triggered if the person's name is close to the group name.
+        # and a person can be falsely triggered if it's close to a person's name.
+        # counter this by:
+        #    1) Getting the max similarities of both persons and groups.
+        #    2) Zip the max group and max person similarities.
+        #    3) If there are no matches, then we get the max similarities of the person and group comparisons
+        #       and add them to the object pool.
+
+        max_person_similarities = await get_max_similarities(person_comparisons)
+        max_group_similarities = await get_max_similarities(group_comparisons)
+
+        for group_comp, person_comp in zip(max_group_similarities, max_person_similarities):
             group = group_comp.obj
             person = person_comp.obj
             if await person_in_group(person, group):
                 obj_pool.append(person)
+
+        if not obj_pool:
+            all_max_similarities = max_person_similarities + max_group_similarities
+            obj_pool += [comp.obj for comp in await get_max_similarities(all_max_similarities)]
     elif len(group_comparisons) >= 1:
         # groups with no specified persons.
-        obj_pool += [group_comp.obj for group_comp in group_comparisons]
+        obj_pool += [comp.obj for comp in await get_max_similarities(group_comparisons)]
     else:
         raise NotImplementedError()
 
@@ -172,6 +229,7 @@ async def person_in_group(person, group):
 
 
 async def auto_complete_type(inter: AppCmdInter, user_input: str) -> List[str]:
+    """Autocomplete the search for a person or group."""
     item_type = inter.filled_options["item_type"]
     if item_type == "person":
         persons = await auto_complete_person(inter, user_input)
@@ -179,30 +237,65 @@ async def auto_complete_type(inter: AppCmdInter, user_input: str) -> List[str]:
     elif item_type == "group":
         groups = await auto_complete_group(inter, user_input)
         return groups[:24]
+    elif item_type == "affiliation":
+        affs = await auto_complete_affiliation(inter, user_input)
+        return affs[:24]
     else:
         raise RuntimeError(
-            "item_type returned something other than 'person' or 'group'"
+            "item_type returned something other than 'person', 'group', or 'affiliation'"
         )
 
 
 async def auto_complete_person(inter: AppCmdInter, user_input: str) -> List[str]:
-    return [
-        f"{person.id}) {str(person.name)}"
-        for person in await Person.get_all()
-        if user_input.lower() in str(person.name).lower()
-    ][:24]
+    """Autocomplete person search."""
+    if user_input.isnumeric():
+        return [
+                   f"{person.id}) {str(person.name)}"
+                   for person in await Person.get_all()
+                   if str(person.id).startswith(user_input)
+               ][:24]
+    else:
+        return [
+                   f"{person.id}) {str(person.name)}"
+                   for person in await Person.get_all()
+                   if user_input.lower() in str(person.name).lower()
+               ][:24]
 
 
 async def auto_complete_group(inter: AppCmdInter, user_input: str) -> List[str]:
-    return [
-        f"{group.id}) {group.name}"
-        for group in await Group.get_all()
-        if user_input.lower() in group.name.lower()
-    ][:24]
+    """Autocomplete group search."""
+    if user_input.isnumeric():
+        return [
+                   f"{group.id}) {group.name}"
+                   for group in await Group.get_all()
+                   if str(group.id).startswith(user_input)
+               ][:24]
+    else:
+        return [
+                   f"{group.id}) {group.name}"
+                   for group in await Group.get_all()
+                   if user_input.lower() in group.name.lower()
+               ][:24]
+
+
+async def auto_complete_affiliation(inter: AppCmdInter, user_input: str) -> List[str]:
+    """Autocomplete affiliation search."""
+    if user_input.isnumeric():
+        return [
+                   f"{aff.id}) {aff.group.name} {aff.stage_name}"
+                   for aff in await Affiliation.get_all()
+                   if str(aff.id).startswith(user_input)
+               ][:24]
+    else:
+        return [
+                   f"{aff.id}) {aff.group.name} {aff.stage_name}"
+                   for aff in await Affiliation.get_all()
+                   if user_input.lower() in str(aff).lower()
+               ][:24]
 
 
 async def get_call_count_leaderboard(
-    objects: Union[List[Person], List[Group]]
+        objects: Union[List[Person], List[Group]]
 ) -> Optional[List[Tuple[Union[Person, Group], int]]]:
     """
     Get a list of sorted (descending) values for the call count of a Person or Group.
@@ -242,46 +335,8 @@ async def get_call_count_leaderboard(
         )
 
 
-@dataclass(frozen=False, order=True)
-class Comparison:
-    obj: Union[Person, Group] = None
-    search_word: str = None
-    target_word: str = None
-    similarity: Optional[float] = None
-
-    @staticmethod
-    async def create(obj: Union[Person, Group], search_word: str, target_word: str):
-        obj = Comparison(obj, search_word, target_word)
-        obj.similarity = await obj.calculate()
-        return obj
-
-    async def calculate(self):
-        """Calculate the distance."""
-        return await search_distance(self.search_word, self.target_word)
-
-    def __float__(self):
-        """Returns similarity."""
-        return self.similarity
-
-    def __int__(self):
-        """Returns similarity."""
-        return self.similarity
-
-    def __hash__(self):
-        return hash(
-            (
-                "obj",
-                self.obj,
-                "search_word",
-                self.search_word,
-                "target_word",
-                self.target_word,
-            )
-        )
-
-
 async def search_for_obj(
-    search_name, persons=True, split_name=False, return_similarity=False
+        search_name, persons=True, split_name=False, return_similarity=False
 ) -> List[Union[Person, Comparison, Group]]:
     """
     Check if a name matches with an alias or a Person/Group's full name.
@@ -327,11 +382,11 @@ async def search_for_obj(
 
 
 async def _filter_by_name(
-    obj: Union[Person, Group],
-    name: str,
-    similarity_required=0.75,
-    split_name=False,
-    return_similarity=True,
+        obj: Union[Person, Group],
+        name: str,
+        similarity_required=0.75,
+        split_name=False,
+        return_similarity=True,
 ):
     """
     Compares distance against person/group aliases.
@@ -348,7 +403,7 @@ async def _filter_by_name(
         similarity_required = 0.75
     elif 1 < similarity_required <= 100:
         similarity_required = (
-            similarity_required / 100
+                similarity_required / 100
         )  # putting as decimal between 0 and 1.
 
     final_results: List[Comparison] = []
@@ -359,11 +414,11 @@ async def _filter_by_name(
     # check for matching aliases
     if not return_similarity:
         if any(
-            [
-                await search_distance(sub_name, alias.lower()) >= similarity_required
-                for sub_name in names
-                for alias in aliases
-            ]
+                [
+                    await search_distance(sub_name, alias.lower()) >= similarity_required
+                    for sub_name in names
+                    for alias in aliases
+                ]
         ):
             return True
     else:
@@ -379,10 +434,10 @@ async def _filter_by_name(
     # check for matching group names or person full names.
     if not return_similarity:
         if any(
-            [
-                await search_distance(sub_name, str(obj).lower()) >= similarity_required
-                for sub_name in names
-            ]
+                [
+                    await search_distance(sub_name, str(obj).lower()) >= similarity_required
+                    for sub_name in names
+                ]
         ):
             return True
     else:
@@ -399,11 +454,11 @@ async def _filter_by_name(
         for aff in obj.affiliations:
             if not return_similarity:
                 if any(
-                    [
-                        await search_distance(sub_name, aff.stage_name.lower())
-                        >= similarity_required
-                        for sub_name in names
-                    ]
+                        [
+                            await search_distance(sub_name, aff.stage_name.lower())
+                            >= similarity_required
+                            for sub_name in names
+                        ]
                 ):
                     return True
             else:
@@ -439,9 +494,9 @@ def get_random_color():
 async def search_distance(search_word: str, target_word: str) -> Optional[float]:
     """Get the distance of two words/phrases with cache considered."""
     return (
-        _search_distance_dict(_distance_cache, search_word, target_word)
-        or _search_distance_dict(_distance_cache, target_word, search_word)
-        or await _get_string_distance(search_word, target_word)
+            _search_distance_dict(_distance_cache, search_word, target_word)
+            or _search_distance_dict(_distance_cache, target_word, search_word)
+            or await _get_string_distance(search_word, target_word)
     )
 
 
@@ -465,7 +520,7 @@ async def _get_string_distance(search_word: str, target_word: str):
 
 
 async def process_call(
-    item_type, item_id, user_id, ctx=None, inter=None, allowed_mentions=None
+        item_type, item_id, user_id, ctx=None, inter=None, allowed_mentions=None
 ):
     user = await User.get(user_id)
     if item_type == "group":
@@ -494,33 +549,55 @@ async def process_call(
 
 
 async def process_card(
-    item_type, item_id, user_id, ctx=None, inter=None, allowed_mentions=None
+        item_type, item_id, user_id, ctx=None, inter=None, allowed_mentions=None
 ):
     """Process a person/group card."""
     user = await User.get(user_id)
-    obj: Optional[Union[Person, Group]] = (
-        await Group.get(item_id)
-        if item_type.lower() == "group"
-        else await Person.get(item_id)
-    )
+    item_type = item_type.lower()
+    obj: Optional[Union[Person, Group, Affiliation]]
+    if item_type == "group":
+        obj = await Group.get(item_id)
+    elif item_type == "affiliation":
+        obj = await Affiliation.get(item_id)
+    else:
+        obj = await Person.get(item_id)
+
     if not obj:
         return await send_message(user=user, key="no_results", ctx=ctx, inter=inter)
 
     card_data = await obj.get_card(markdown=True, extra=True)
-    avatar = None if not obj.display else obj.display.avatar
-    banner = None if not obj.display else obj.display.banner
+    avatar, banner = None, None
+    if isinstance(obj, (Group, Person)):
+        avatar = None if not obj.display else obj.display.avatar
+        banner = None if not obj.display else obj.display.banner
+
     embed = await get_card_embed(
         card_info=card_data, avatar=avatar, banner=banner, title=str(obj)
     )
     await send_message(user=user, ctx=ctx, inter=inter, embed=embed)
 
 
+async def get_card_embed_desc(card_info):
+    """Get an embedded card's description."""
+    if not card_info:
+        return ""
+
+    desc = ""
+    for item in card_info:
+        if isinstance(item, list):
+            desc += await get_card_embed_desc(item)
+        else:
+            desc += f"{item}\n"
+    return desc
+
+
 async def get_card_embed(card_info, avatar, banner, title):
     avatar = None if not avatar else avatar.url
     banner = None if not banner else banner.url
-    embed = disnake.Embed(
-        color=disnake.Color.brand_green(), title=title, description="\n".join(card_info)
-    )
+
+    desc = await get_card_embed_desc(card_info)
+
+    embed = disnake.Embed(color=disnake.Color.brand_green(), title=title, description=desc)
     if avatar:
         embed.set_thumbnail(avatar)
     if banner:
@@ -529,11 +606,11 @@ async def get_card_embed(card_info, avatar, banner, title):
 
 
 async def process_who_is(
-    media_id: int,
-    user_id: int,
-    ctx: commands.Context = None,
-    inter: AppCmdInter = None,
-    allowed_mentions=None,
+        media_id: int,
+        user_id: int,
+        ctx: commands.Context = None,
+        inter: AppCmdInter = None,
+        allowed_mentions=None,
 ):
     """
     Process the whois command.

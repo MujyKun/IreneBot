@@ -22,8 +22,9 @@ class ModeratorCog(commands.Cog):
         the user has manage messages permissions."""
         if not inter.permissions.manage_permissions:
             raise commands.MissingPermissions(missing_permissions=["manage_messages"])
-        if inter.guild is not None:
+        if inter.guild is None:
             raise commands.NoPrivateMessage
+        return True
 
     @commands.group(name="prefix", description="Commands related to Guild Prefixes.")
     async def regular_prefix(self, ctx: commands.Context):

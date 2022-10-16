@@ -9,7 +9,7 @@ def add_to_cache(obj):
         bgs.append(obj)
     else:
         others.append(obj)
-    all.append(obj)
+    all_games.append(obj)
 
 
 ggs = []  # GuessingGame
@@ -18,7 +18,7 @@ uss = []  # UnscrambleGame
 bgs = []  # BiasGame
 bjs = []  # BlackJack
 others = []  # etc
-all = []
+all_games = []
 
 from dataclasses import dataclass
 from IreneAPIWrapper.models import User, UserStatus

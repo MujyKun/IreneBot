@@ -14,6 +14,15 @@ class MiscellaneousCog(commands.Cog):
     ##################
     # REGULAR COMMANDS
     ##################
+    @commands.command(name="serverinfo", description="Display server info.")
+    async def regular_server_info(self, ctx):
+        await helper.process_server_info(bot=self.bot, guild=ctx.guild, ctx=ctx)
+
+    @commands.command(
+        name="botinfo", description="Show information about the bot and its creator."
+    )
+    async def regular_bot_info(self, ctx):
+        await helper.process_bot_info(self.bot, ctx=ctx)
 
     @commands.command(name="invite", description="Get an invite link for the bot.")
     async def regular_invite(self, ctx: commands.Context):
@@ -50,11 +59,21 @@ class MiscellaneousCog(commands.Cog):
     @commands.command(name="ping", description="Get the ping of the bot.")
     async def regular_ping(self, ctx: commands.Context):
         await helper.process_ping(
-            latency=int(self.bot.latency * 1000),
+            latency=botinfo.get_bot_ping(self.bot),
             user_id=ctx.author.id,
             ctx=ctx,
             allowed_mentions=self.allowed_mentions,
         )
+
+    @commands.command(name="random", description="Pick a random number between a start and end number.")
+    async def regular_random(
+        self,
+        ctx,
+        start_number: int,
+        end_number: int
+    ):
+        await helper.process_random(start_number=start_number, end_number=end_number,
+                                    invoker_user_id=ctx.author.id, ctx=ctx)
 
     ################
     # SLASH COMMANDS
@@ -127,59 +146,39 @@ class MiscellaneousCog(commands.Cog):
         start_number: int = commands.Param(desc="start of range"),
         end_number: int = commands.Param(desc="end of range"),
     ):
-        if start_number > end_number:
-            await inter.send("Start number is greater than end number.", ephemeral=True)
-        await inter.send(
-            f"Random number between {start_number} and {end_number}: `{randint(start_number, end_number)}`"
-        )
+        await helper.process_random(start_number=start_number, end_number=end_number, invoker_user_id=inter.author.id,
+                                    inter=inter)
 
-    @commands.slash_command(description="Display server info.")
-    async def serverinfo(self, inter: AppCmdInter):
-        guild = inter.guild
-        embed = await botembed.create_bot_author_embed(
-            self.bot.keys, title=f"{guild.name} ({guild.id})", url=f"{guild.icon.url}"
-        )
-        embed.set_thumbnail(url=guild.icon.url)
-        fields = {
-            "Owner": f"{guild.owner} ({guild.owner.id})",
-            "Users": guild.member_count,
-            "Roles": f"{len(guild.roles)}",
-            "Emojis": f"{len(guild.emojis)}",
-            "Description": guild.description,
-            "Channels": f"{len(guild.channels)}",
-            "AFK Timeout": f"{guild.afk_timeout / 60} minutes",
-            "Since": guild.created_at,
-        }
-        embed = await botembed.add_embed_inline_fields(embed, fields)
-        await inter.send(embed=embed)
+    @commands.slash_command(name="serverinfo", description="Display server info.")
+    async def server_info(self, inter: AppCmdInter):
+        await helper.process_server_info(bot=self.bot, guild=inter.guild, inter=inter)
 
     @commands.slash_command(name="ping", description="Get the ping of the bot.")
     async def ping(self, inter: AppCmdInter):
         await helper.process_ping(
-            latency=int(self.bot.latency * 1000),
+            latency=botinfo.get_bot_ping(self.bot),
             user_id=inter.author.id,
             inter=inter,
             allowed_mentions=self.allowed_mentions,
         )
 
     @commands.slash_command(
-        description="Show information about the bot and its creator."
+        name="botinfo", description="Show information about the bot and its creator."
     )
-    async def botinfo(self, inter: AppCmdInter):
-        bot = self.bot
-        embed = await botembed.create_bot_author_embed(
-            bot.keys, title=f"I am {bot.keys.bot_name}!"
-        )
-        inline_fields = {
-            "Servers Connected": f"{botinfo.get_server_count(bot)}",
-            "Playing Guessing/Bias/Unscramble/Blackjack": "Not Implemented",
-            "Ping": f"{botinfo.get_bot_ping(bot)}ms",
-            "Shards": f"{bot.shard_count}",
-            "Bot Owner": f"<@{bot.keys.bot_owner_id}>",
-        }
-        embed = await botembed.add_embed_inline_fields(embed, inline_fields)
-        buttons = await get_bot_info_buttons(bot)
-        await inter.respond(embed=embed, components=buttons)
+    async def slash_bot_info(self, inter: AppCmdInter):
+        await helper.process_bot_info(self.bot, inter=inter)
+
+    @commands.slash_command(name="urban", description="Search Urban Dictionary")
+    async def slash_urban_dictionary(self, inter: AppCmdInter, phrase: str, definition_number: int = 1):
+        await inter.response.defer(with_message=True)
+        await helper.process_urban(phrase=phrase, definition_number=definition_number, invoker_user_id=inter.author.id,
+                                   inter=inter,  allowed_mentions=self.allowed_mentions, response_deferred=True)
+
+    @commands.command(name="urban", description="")
+    async def regular_urban_dictionary(self, ctx, phrase: str, definition_number=1):
+        """Search Urban Dictionary (Underscores are spaces)"""
+        await helper.process_urban(phrase=phrase.replace("_", " "), definition_number=definition_number,
+                                   invoker_user_id=ctx.author.id, ctx=ctx, allowed_mentions=self.allowed_mentions)
 
     ##################
     # MESSAGE COMMANDS

@@ -7,18 +7,18 @@ from typing import List, Dict
 from main import Bot
 
 
-async def create_bot_author_embed(botkeys: Keys, **kwargs) -> disnake.Embed:
+async def create_bot_author_embed(bot_keys: Keys, **kwargs) -> disnake.Embed:
     """Create a bot specific discord Embed with bot author and footer."""
     embed = disnake.Embed(**kwargs)
     if not embed.color:
         embed.colour = _get_random_color()
     embed.set_author(
-        name=botkeys.bot_name,
-        url=botkeys.bot_website_url,
-        icon_url=botkeys.embed_icon_url,
+        name=bot_keys.bot_name,
+        url=bot_keys.bot_website_url,
+        icon_url=bot_keys.embed_icon_url,
     )
     embed.set_footer(
-        text=f"Thanks for using {botkeys.bot_name}", icon_url=botkeys.embed_footer_url
+        text=f"Thanks for using {bot_keys.bot_name}", icon_url=bot_keys.embed_footer_url
     )
     return embed
 

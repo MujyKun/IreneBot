@@ -8,8 +8,6 @@ from util import logger
 import disnake
 from keys import get_keys
 
-from typing import TYPE_CHECKING
-
 
 LIMIT_ROUNDS = [3, 60]
 LIMIT_TIMEOUT = [5, 60]
@@ -210,13 +208,16 @@ async def send_message(
                 )
             )
         else:
-            await inter.edit_original_response(
-                msg,
-                allowed_mentions=allowed_mentions,
-                view=view,
-                embed=embed,
-                embeds=embeds,
-            )
+            try:
+                await inter.edit_original_response(
+                    msg,
+                    allowed_mentions=allowed_mentions,
+                    view=view,
+                    embed=embed,
+                    embeds=embeds,
+                )
+            except Exception as e:
+                print(e)
 
     return final_msgs
 
@@ -272,7 +273,7 @@ async def check_game_input(
 
 
 async def in_game(user: User):
-    from models import all as all_games
+    from models import all_games as all_games
 
     return any(
         [game for game in all_games if game.host_user == user and not game.is_complete]

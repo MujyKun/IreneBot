@@ -28,5 +28,34 @@ def get_voice_channel_count(bot: Bot) -> int:
 
 def get_user_count(bot: Bot) -> int:
     """Get the amount of users that the bot is watching over."""
-    member_count = sum([guild.member_count for guild in bot.guilds])
-    return member_count
+    return len(bot.users)
+
+
+def get_gg(finished=True):
+    from models import ggs
+
+    return [gg for gg in ggs if gg.is_complete is finished]
+
+
+def get_bg(finished=True):
+    from models import bgs
+
+    return [bg for bg in bgs if bg.is_complete is finished]
+
+
+def get_us(finished=True):
+    from models import uss
+
+    return [us for us in uss if us.is_complete is finished]
+
+
+def get_ggg(finished=True):
+    from models import gggs
+
+    return [ggg for ggg in gggs if ggg.is_complete is finished]
+
+
+def get_other_games(finished=True):
+    from models import others
+
+    return [other for other in others if other.is_complete is finished]

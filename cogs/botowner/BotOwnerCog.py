@@ -20,6 +20,7 @@ class BotOwnerCog(commands.Cog):
         """A local cog check to confirm the right owner."""
         if not await inter.bot.is_owner(inter.author):
             raise commands.NotOwner
+        return True
 
     @commands.group(name="8ballresponse", description="Modify 8ball responses.")
     async def regular_eight_ball_response(self, ctx: commands.Context):

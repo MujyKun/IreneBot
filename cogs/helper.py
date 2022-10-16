@@ -1,6 +1,8 @@
 from IreneAPIWrapper.models import Channel, Guild, User, Language, PackMessage
 from IreneAPIWrapper.exceptions import IncorrectNumberOfItems
-from typing import Optional, Union
+from typing import Optional, Union, List
+
+from disnake import Embed
 from disnake.ext import commands
 from util import logger
 import disnake
@@ -106,7 +108,10 @@ async def send_message(
     key: str = None,
     view: disnake.ui.View = None,
     delete_after: int = None,
-    embed: disnake.Embed = None,
+    embed: Optional[disnake.Embed] = None,
+    embeds: Optional[List[Embed]] = None,
+    response_deferred: bool = False,
+    ephemeral: bool = False,
 ):
     """Send a message to a discord channel/interaction.
     :param custom_args:
@@ -131,17 +136,25 @@ async def send_message(
         Howmany seconds to delete the message after.
     :param embed: disnake.Embed
         Embedded message to send.
+    :param embeds: List[disnake.Embed]
+        Embedded messages to send.
+    :param response_deferred: bool
+        Whether a response was deferred (a pre-message was sent as an acknowledgement).
+    :param ephemeral: bool
+        Whether a message should only be visible to the user. Only possible with interaction commands.
     """
     if (user and key) and not msg:
         msg = await get_message(user, key, *custom_args)
 
-    if not msg and not embed:
+    if not msg and not embed and not embeds:
         logger.error(
             f"No message to send -> "
             f"Custom Args: {custom_args}, "
             f"Message: {msg}, "
             f"CTX: {ctx}, "
             f"INTER: {inter}, "
+            f"EMBED: {embed},"
+            f"EMBEDS: {embeds},"
             f"Allowed Mentions: {allowed_mentions}, "
             f"Key: {key}"
         )
@@ -159,8 +172,20 @@ async def send_message(
                 view=view,
                 delete_after=delete_after,
                 embed=embed,
+                embeds=embeds,
             )
-        )
+        )  # ignore warning caused by embeds.
+    if channel:
+        final_msgs.append(
+            await channel.send(
+                msg,
+                allowed_mentions=allowed_mentions,
+                view=view,
+                delete_after=delete_after,
+                embed=embed,
+                embeds=embeds,
+            )
+        )  # ignore warning caused by embeds.
     if inter:
         if not view:
             view = disnake.utils.MISSING
@@ -170,25 +195,28 @@ async def send_message(
             delete_after = disnake.utils.MISSING
         if not embed:
             embed = disnake.utils.MISSING
-        final_msgs.append(
-            await inter.send(
+        if not embeds:
+            embeds = disnake.utils.MISSING
+        if not response_deferred:
+            final_msgs.append(
+                await inter.send(
+                    msg,
+                    allowed_mentions=allowed_mentions,
+                    view=view,
+                    delete_after=delete_after,
+                    embed=embed,
+                    embeds=embeds,
+                    ephemeral=ephemeral,
+                )
+            )
+        else:
+            await inter.edit_original_response(
                 msg,
                 allowed_mentions=allowed_mentions,
                 view=view,
-                delete_after=delete_after,
                 embed=embed,
+                embeds=embeds,
             )
-        )
-    if channel:
-        final_msgs.append(
-            await channel.send(
-                msg,
-                allowed_mentions=allowed_mentions,
-                view=view,
-                delete_after=delete_after,
-                embed=embed,
-            )
-        )
 
     return final_msgs
 

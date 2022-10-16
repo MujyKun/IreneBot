@@ -1,3 +1,5 @@
+from typing import Union
+
 from IreneAPIWrapper.models import User, EightBallResponse
 import disnake
 from disnake import ApplicationCommandInteraction as AppCmdInter
@@ -125,18 +127,37 @@ async def get_possible_choices(choices: str):
     return possible_choices
 
 
-async def send_emojis_from_string(inter: AppCmdInter, emoji_content: str):
-    if not emoji_content:
-        await inter.send("No emote detected.", ephemeral=True)
-        return
-    emoji_infos = findall(r"<a?:?\w+:[0-9]{18}>", emoji_content)
-    if not emoji_infos:
-        await inter.send(
-            "No emote content detected. It may be a default system emote.",
+async def process_display_emoji(
+    message: Union[disnake.Message, str],
+    invoker_user_id,
+    inter=None,
+    ctx=None,
+    allowed_mentions=None,
+):
+    user = await User.get(invoker_user_id)
+    urls = []
+    if isinstance(message, disnake.Message):
+        if message.stickers:
+            urls.append(message.stickers[0].url)
+        content = message.content
+    else:
+        content = message
+    if content:
+        emojis = findall(r"<a?:?\w+:[0-9]{18}>", content)
+        urls += [disnake.PartialEmoji.from_str(emoji_info).url for emoji_info in emojis]
+    if not urls:
+        return await send_message(
+            key="no_emojis_found",
+            user=user,
+            inter=inter,
+            ctx=ctx,
+            allowed_mentions=allowed_mentions,
             ephemeral=True,
         )
-        return
-    emoji_urls = [
-        disnake.PartialEmoji.from_str(emoji_info).url for emoji_info in emoji_infos
-    ]
-    await inter.send("\n".join(emoji_urls))
+    return await send_message(
+        msg="\n".join(urls),
+        user=user,
+        inter=inter,
+        ctx=ctx,
+        allowed_mentions=allowed_mentions,
+    )

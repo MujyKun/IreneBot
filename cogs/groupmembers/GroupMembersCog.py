@@ -12,10 +12,30 @@ class GroupMembersCog(commands.Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
         self.allowed_mentions = disnake.AllowedMentions(everyone=False, roles=False)
-        self.invalid_selection = (
-            "item_type returned something other than 'person' or 'group'"
+        self.invalid_selection = "item_type returned something other than 'person', 'group', or 'affiliation'."
+
+    ###################
+    # MESSAGE COMMANDS
+    ###################
+    @commands.message_command(
+        name="Who Is This?",
+        extras={"description": "Figure out who a media object belongs to."},
+    )
+    async def message_whois(self, inter: AppCmdInter, message: disnake.Message):
+        """Figure out who a media object belongs to."""
+        media_id = 0  # Cause the search to not find a result by default.
+        if message.content:
+            media_id = int("".join(filter(str.isdigit, message.content)) or 0)
+        await helper.process_who_is(
+            media_id=media_id,
+            user_id=inter.author.id,
+            inter=inter,
+            allowed_mentions=self.allowed_mentions,
         )
 
+    ###################
+    # REGULAR COMMANDS
+    ###################
     @commands.command(
         name="whois", description="Figure out who a media object belongs to."
     )
@@ -33,8 +53,11 @@ class GroupMembersCog(commands.Cog):
         )
 
     @commands.command(name="call", description="Call Media for an Idol/Group")
-    async def regular_call_person_or_group(
-        self, ctx: commands.Context, item_type: Literal["person", "group"], item_id: int
+    async def regular_call_media(
+        self,
+        ctx: commands.Context,
+        item_type: Literal["person", "group", "affiliation"],
+        item_id: int,
     ):
         await helper.process_call(
             item_type,
@@ -46,7 +69,7 @@ class GroupMembersCog(commands.Cog):
 
     @commands.command(
         name="card",
-        description="Display a profile card for either a Person or a Group.",
+        description="Display a profile card for either a Person, Group, or Affiliation.",
     )
     async def regular_card(
         self, ctx, item_type: Literal["person", "group", "affiliation"], item_id: int
@@ -96,13 +119,14 @@ class GroupMembersCog(commands.Cog):
         )
 
     @commands.slash_command(name="call", description="Call Media for an Idol/Group.")
-    async def call_person_or_group(
+    async def call_media(
         self,
         inter: AppCmdInter,
-        item_type: Literal["person", "group"],
+        item_type: Literal["person", "group", "affiliation"],
         selection: str = commands.Param(autocomplete=helper.auto_complete_type),
     ):
-        """Display the media for a specific Person or Group."""
+        """Display the media for a specific Person, Group, or Affiliation."""
+        await inter.response.defer(with_message=True)
         object_id = int(selection.split(")")[0])
         await helper.process_call(
             item_type,
@@ -110,6 +134,7 @@ class GroupMembersCog(commands.Cog):
             inter.user.id,
             inter=inter,
             allowed_mentions=self.allowed_mentions,
+            response_deferred=True,
         )
 
     @commands.slash_command(

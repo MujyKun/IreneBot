@@ -8,7 +8,7 @@ from disnake import ApplicationCommandInteraction as AppCmdInter
 from IreneAPIWrapper.models import Person, Group, Media, User, Affiliation
 from typing import List, Union, Optional, Tuple, Dict
 from util import logger
-from ..helper import send_message
+from ..helper import send_message, in_game
 from disnake.ext import commands
 from keys import get_keys
 from difflib import SequenceMatcher
@@ -532,15 +532,24 @@ async def _get_string_distance(search_word: str, target_word: str):
 
 
 async def process_call(
-    item_type, item_id, user_id, ctx=None, inter=None, allowed_mentions=None
+    item_type,
+    item_id,
+    user_id,
+    ctx=None,
+    inter=None,
+    allowed_mentions=None,
+    response_deferred: bool = False,
 ):
     user = await User.get(user_id)
     if item_type == "group":
         group = await Group.get(item_id)
-        medias: List[Media] = await Media.get_all(group.affiliations)
+        medias: List[Media] = await Media.get_all(group.affiliations, limit=50)
+    elif item_type == "affiliation":
+        affiliation = await Affiliation.get(item_id)
+        medias: List[Media] = await Media.get_all([affiliation], limit=50)
     else:
         person = await Person.get(item_id)
-        medias: List[Media] = await Media.get_all(person.affiliations)
+        medias: List[Media] = await Media.get_all(person.affiliations, limit=50)
 
     if not medias:
         return await send_message(
@@ -549,21 +558,23 @@ async def process_call(
             ctx=ctx,
             inter=inter,
             allowed_mentions=allowed_mentions,
+            response_deferred=response_deferred,
         )
 
     await send_message(
-        msg=(random.choice(medias)).source.url,
+        msg=await random.choice(medias).fetch_image_host_url(),
         user=user,
         ctx=ctx,
         inter=inter,
         allowed_mentions=allowed_mentions,
+        response_deferred=response_deferred,
     )
 
 
 async def process_card(
     item_type, item_id, user_id, ctx=None, inter=None, allowed_mentions=None
 ):
-    """Process a person/group card."""
+    """Process a person/group/affiliation card."""
     user = await User.get(user_id)
     item_type = item_type.lower()
     obj: Optional[Union[Person, Group, Affiliation]]
@@ -630,6 +641,17 @@ async def process_who_is(
     Process the whois command.
     """
     user = await User.get(user_id=user_id)
+
+    if await in_game(user):
+        return await send_message(
+            media_id,
+            key="nice_try_cheater",
+            ctx=ctx,
+            inter=inter,
+            allowed_mentions=allowed_mentions,
+            user=user,
+        )
+
     try:
         media = await Media.get(media_id)  # refresh objs
     except IreneAPIWrapper.exceptions.APIError as e:  # over int64

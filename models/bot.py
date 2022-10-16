@@ -100,6 +100,8 @@ class Bot(AutoShardedBot):
         while not self.api.connected and not self.api.is_preloaded:
             await asyncio.sleep(0)
 
+        await self.update_local_commands()
+
         await self.start(
             self.keys.prod_bot_token if not self.dev_mode else self.keys.dev_bot_token
         )
@@ -353,3 +355,9 @@ class Bot(AutoShardedBot):
         if role not in member.roles and status_check:
             await async_callable(active=False)
             self.logger.info(f"Removed {user.id} as a Patron.")
+
+    async def update_local_commands(self):
+        all_slash_cmds = self.all_slash_commands
+        all_regular_cmds = self.all_commands
+        all_msg_cmds = self.all_message_commands
+        all_user_cmds = self.all_user_commands

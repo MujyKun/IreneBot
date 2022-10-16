@@ -11,6 +11,10 @@ class MiscellaneousCog(commands.Cog):
         self.bot = bot
         self.allowed_mentions = disnake.AllowedMentions(everyone=False, roles=False)
 
+    ##################
+    # REGULAR COMMANDS
+    ##################
+
     @commands.command(name="invite", description="Get an invite link for the bot.")
     async def regular_invite(self, ctx: commands.Context):
         await helper.send_bot_invite(
@@ -100,20 +104,15 @@ class MiscellaneousCog(commands.Cog):
             allowed_mentions=self.allowed_mentions,
         )
 
-    @commands.slash_command(description="Display Emoji")
-    async def displayemoji(
+    @commands.slash_command(name="displayemoji", description="Display Emoji")
+    async def slash_display_emoji(
         self,
         inter: AppCmdInter,
         emoji_content: str = commands.Param(description="Emoji to be displayed"),
     ):
-        await send_emojis_from_string(inter, emoji_content)
-
-    @commands.message_command(name="Display Emojis")
-    async def message_display_emoji(self, inter: AppCmdInter, message: disnake.Message):
-        if message.stickers:
-            await inter.send(message.stickers[0].url)
-            return
-        await send_emojis_from_string(inter, message.content)
+        await helper.process_display_emoji(
+            message=emoji_content, invoker_user_id=inter.user.id, inter=inter
+        )
 
     @commands.slash_command(description="Flip a coin.")
     async def flip(self, inter: AppCmdInter):
@@ -181,6 +180,28 @@ class MiscellaneousCog(commands.Cog):
         embed = await botembed.add_embed_inline_fields(embed, inline_fields)
         buttons = await get_bot_info_buttons(bot)
         await inter.respond(embed=embed, components=buttons)
+
+    ##################
+    # MESSAGE COMMANDS
+    ##################
+    @commands.message_command(
+        name="Display Emojis", extras={"description": "Display Emojis in a Message."}
+    )
+    async def message_display_emoji(self, inter: AppCmdInter, message: disnake.Message):
+        await helper.process_display_emoji(
+            message, invoker_user_id=inter.user.id, inter=inter
+        )
+
+    @commands.message_command(
+        name="8ball", extras={"description": "Make this message an 8ball question."}
+    )
+    async def message_eight_ball(self, inter: AppCmdInter, message: disnake.Message):
+        await helper.process_8ball(
+            prompt=message.content or "None",
+            inter=inter,
+            user_id=inter.author.id,
+            allowed_mentions=self.allowed_mentions,
+        )
 
 
 def setup(bot: commands.AutoShardedBot):

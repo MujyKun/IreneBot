@@ -294,7 +294,9 @@ class Keys:
                 "twitch_secret": getenv("TWCH_SECRET"),
                 # IreneAPI
                 "api_token": getenv("API_TOKEN"),
-                "bot_owner_only_servers": make_list(getenv("BOT_OWNER_ONLY_SERVERS"), make_integer=True)
+                "bot_owner_only_servers": make_list(
+                    getenv("BOT_OWNER_ONLY_SERVERS"), make_integer=True
+                ),
             }
         )
 

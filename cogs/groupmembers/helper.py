@@ -148,7 +148,7 @@ async def process_message_idol_call(bot, message, content):
         max_group_similarities = await get_max_similarities(group_comparisons)
 
         for group_comp, person_comp in zip(
-                max_group_similarities, max_person_similarities
+            max_group_similarities, max_person_similarities
         ):
             group = group_comp.obj
             person = person_comp.obj
@@ -201,7 +201,9 @@ async def handle_user_media_usage(user):
     _requests_today += 1
 
 
-async def handle_non_patron_media_usage(user, ctx=None, inter=None, channel=None, response_deferred=False):
+async def handle_non_patron_media_usage(
+    user, ctx=None, inter=None, channel=None, response_deferred=False
+):
     """Handle non patron media usage.
 
     Returns True if it passes all checks."""
@@ -215,7 +217,7 @@ async def handle_non_patron_media_usage(user, ctx=None, inter=None, channel=None
             ctx=ctx,
             inter=inter,
             ephemeral=True,
-            response_deferred=response_deferred
+            response_deferred=response_deferred,
         )
         return False
     return True
@@ -278,52 +280,52 @@ async def auto_complete_person(inter: AppCmdInter, user_input: str) -> List[str]
     """Autocomplete person search."""
     if user_input.isnumeric():
         return [
-                   f"{person.id}) {str(person.name)}"
-                   for person in await Person.get_all()
-                   if str(person.id).startswith(user_input)
-               ][:24]
+            f"{person.id}) {str(person.name)}"
+            for person in await Person.get_all()
+            if str(person.id).startswith(user_input)
+        ][:24]
     else:
         return [
-                   f"{person.id}) {str(person.name)}"
-                   for person in await Person.get_all()
-                   if user_input.lower() in str(person.name).lower()
-               ][:24]
+            f"{person.id}) {str(person.name)}"
+            for person in await Person.get_all()
+            if user_input.lower() in str(person.name).lower()
+        ][:24]
 
 
 async def auto_complete_group(inter: AppCmdInter, user_input: str) -> List[str]:
     """Autocomplete group search."""
     if user_input.isnumeric():
         return [
-                   f"{group.id}) {group.name}"
-                   for group in await Group.get_all()
-                   if str(group.id).startswith(user_input)
-               ][:24]
+            f"{group.id}) {group.name}"
+            for group in await Group.get_all()
+            if str(group.id).startswith(user_input)
+        ][:24]
     else:
         return [
-                   f"{group.id}) {group.name}"
-                   for group in await Group.get_all()
-                   if user_input.lower() in group.name.lower()
-               ][:24]
+            f"{group.id}) {group.name}"
+            for group in await Group.get_all()
+            if user_input.lower() in group.name.lower()
+        ][:24]
 
 
 async def auto_complete_affiliation(inter: AppCmdInter, user_input: str) -> List[str]:
     """Autocomplete affiliation search."""
     if user_input.isnumeric():
         return [
-                   f"{aff.id}) {aff.group.name} {aff.stage_name}"
-                   for aff in await Affiliation.get_all()
-                   if str(aff.id).startswith(user_input)
-               ][:24]
+            f"{aff.id}) {aff.group.name} {aff.stage_name}"
+            for aff in await Affiliation.get_all()
+            if str(aff.id).startswith(user_input)
+        ][:24]
     else:
         return [
-                   f"{aff.id}) {aff.group.name} {aff.stage_name}"
-                   for aff in await Affiliation.get_all()
-                   if user_input.lower() in str(aff).lower()
-               ][:24]
+            f"{aff.id}) {aff.group.name} {aff.stage_name}"
+            for aff in await Affiliation.get_all()
+            if user_input.lower() in str(aff).lower()
+        ][:24]
 
 
 async def get_call_count_leaderboard(
-        objects: Union[List[Person], List[Group]]
+    objects: Union[List[Person], List[Group]]
 ) -> Optional[List[Tuple[Union[Person, Group], int]]]:
     """
     Get a list of sorted (descending) values for the call count of a Person or Group.
@@ -364,7 +366,7 @@ async def get_call_count_leaderboard(
 
 
 async def search_for_obj(
-        search_name, persons=True, split_name=False, return_similarity=False
+    search_name, persons=True, split_name=False, return_similarity=False
 ) -> List[Union[Person, Comparison, Group]]:
     """
     Check if a name matches with an alias or a Person/Group's full name.
@@ -410,11 +412,11 @@ async def search_for_obj(
 
 
 async def _filter_by_name(
-        obj: Union[Person, Group],
-        name: str,
-        similarity_required=0.75,
-        split_name=False,
-        return_similarity=True,
+    obj: Union[Person, Group],
+    name: str,
+    similarity_required=0.75,
+    split_name=False,
+    return_similarity=True,
 ):
     """
     Compares distance against person/group aliases.
@@ -431,7 +433,7 @@ async def _filter_by_name(
         similarity_required = 0.75
     elif 1 < similarity_required <= 100:
         similarity_required = (
-                similarity_required / 100
+            similarity_required / 100
         )  # putting as decimal between 0 and 1.
 
     final_results: List[Comparison] = []
@@ -442,11 +444,11 @@ async def _filter_by_name(
     # check for matching aliases
     if not return_similarity:
         if any(
-                [
-                    await search_distance(sub_name, alias.lower()) >= similarity_required
-                    for sub_name in names
-                    for alias in aliases
-                ]
+            [
+                await search_distance(sub_name, alias.lower()) >= similarity_required
+                for sub_name in names
+                for alias in aliases
+            ]
         ):
             return True
     else:
@@ -462,10 +464,10 @@ async def _filter_by_name(
     # check for matching group names or person full names.
     if not return_similarity:
         if any(
-                [
-                    await search_distance(sub_name, str(obj).lower()) >= similarity_required
-                    for sub_name in names
-                ]
+            [
+                await search_distance(sub_name, str(obj).lower()) >= similarity_required
+                for sub_name in names
+            ]
         ):
             return True
     else:
@@ -482,11 +484,11 @@ async def _filter_by_name(
         for aff in obj.affiliations:
             if not return_similarity:
                 if any(
-                        [
-                            await search_distance(sub_name, aff.stage_name.lower())
-                            >= similarity_required
-                            for sub_name in names
-                        ]
+                    [
+                        await search_distance(sub_name, aff.stage_name.lower())
+                        >= similarity_required
+                        for sub_name in names
+                    ]
                 ):
                     return True
             else:
@@ -522,9 +524,9 @@ def get_random_color():
 async def search_distance(search_word: str, target_word: str) -> Optional[float]:
     """Get the distance of two words/phrases with cache considered."""
     return (
-            _search_distance_dict(_distance_cache, search_word, target_word)
-            or _search_distance_dict(_distance_cache, target_word, search_word)
-            or await _get_string_distance(search_word, target_word)
+        _search_distance_dict(_distance_cache, search_word, target_word)
+        or _search_distance_dict(_distance_cache, target_word, search_word)
+        or await _get_string_distance(search_word, target_word)
     )
 
 
@@ -548,17 +550,19 @@ async def _get_string_distance(search_word: str, target_word: str):
 
 
 async def process_call(
-        item_type,
-        item_id,
-        user_id,
-        ctx=None,
-        inter=None,
-        allowed_mentions=None,
+    item_type,
+    item_id,
+    user_id,
+    ctx=None,
+    inter=None,
+    allowed_mentions=None,
 ):
     response_deferred = await defer_inter(inter)
     user = await User.get(user_id)
     if not user.is_considered_patron:
-        if not await handle_non_patron_media_usage(user, inter=inter, ctx=ctx, response_deferred=response_deferred):
+        if not await handle_non_patron_media_usage(
+            user, inter=inter, ctx=ctx, response_deferred=response_deferred
+        ):
             return
 
     if item_type == "group":
@@ -582,18 +586,18 @@ async def process_call(
         )
 
     if await send_message(
-            msg=await random.choice(medias).fetch_image_host_url(),
-            user=user,
-            ctx=ctx,
-            inter=inter,
-            allowed_mentions=allowed_mentions,
-            response_deferred=response_deferred,
+        msg=await random.choice(medias).fetch_image_host_url(),
+        user=user,
+        ctx=ctx,
+        inter=inter,
+        allowed_mentions=allowed_mentions,
+        response_deferred=response_deferred,
     ):
         await handle_user_media_usage(user)
 
 
 async def process_card(
-        item_type, item_id, user_id, ctx=None, inter=None, allowed_mentions=None
+    item_type, item_id, user_id, ctx=None, inter=None, allowed_mentions=None
 ):
     """Process a person/group/affiliation card."""
     user = await User.get(user_id)
@@ -652,11 +656,11 @@ async def get_card_embed(card_info, avatar, banner, title):
 
 
 async def process_who_is(
-        media_id: int,
-        user_id: int,
-        ctx: commands.Context = None,
-        inter: AppCmdInter = None,
-        allowed_mentions=None,
+    media_id: int,
+    user_id: int,
+    ctx: commands.Context = None,
+    inter: AppCmdInter = None,
+    allowed_mentions=None,
 ):
     """
     Process the whois command.
@@ -671,7 +675,8 @@ async def process_who_is(
             ctx=ctx,
             inter=inter,
             allowed_mentions=allowed_mentions,
-            user=user, response_deferred=response_deferred
+            user=user,
+            response_deferred=response_deferred,
         )
 
     try:
@@ -685,7 +690,8 @@ async def process_who_is(
             ctx=ctx,
             inter=inter,
             allowed_mentions=allowed_mentions,
-            user=user, response_deferred=response_deferred
+            user=user,
+            response_deferred=response_deferred,
         )
 
     aff = media.affiliation
@@ -705,19 +711,22 @@ async def process_who_is(
         ctx=ctx,
         inter=inter,
         allowed_mentions=allowed_mentions,
-        user=user, response_deferred=response_deferred
+        user=user,
+        response_deferred=response_deferred,
     )
 
 
 async def process_random_person(
-        user_id,
-        ctx=None,
-        inter=None,
+    user_id,
+    ctx=None,
+    inter=None,
 ):
     response_deferred = await defer_inter(inter)
     user = await User.get(user_id)
     if not user.is_considered_patron:
-        if not await handle_non_patron_media_usage(user, inter=inter, ctx=ctx, response_deferred=response_deferred):
+        if not await handle_non_patron_media_usage(
+            user, inter=inter, ctx=ctx, response_deferred=response_deferred
+        ):
             return
 
     all_persons = list(await Person.get_all())
@@ -728,17 +737,22 @@ async def process_random_person(
 
     media = await Media.get_random(person.id, person=True)
 
-    if await send_message(msg=await media.fetch_image_host_url(),
-                          user=user, inter=inter, ctx=ctx, response_deferred=response_deferred):
+    if await send_message(
+        msg=await media.fetch_image_host_url(),
+        user=user,
+        inter=inter,
+        ctx=ctx,
+        response_deferred=response_deferred,
+    ):
         await handle_user_media_usage(user)
 
 
 async def process_count(
-        item_type,
-        item_id,
-        user_id,
-        ctx=None,
-        inter=None,
+    item_type,
+    item_id,
+    user_id,
+    ctx=None,
+    inter=None,
 ):
     """Process the count of media a person/group/affiliation has."""
     response_deferred = await defer_inter(inter)
@@ -771,19 +785,32 @@ async def process_distance(search_phrase, target_phrase, user_id, inter=None, ct
     user = await User.get(user_id)
 
     if len(search_phrase) * len(target_phrase) > 2000000:
-        return await send_message(key="distance_too_long", user=user, inter=inter, ctx=ctx,
-                                  response_deferred=response_deferred)
-    distance_str = f"**{await search_distance(search_phrase, target_phrase) * 100:.2f}%**"
-    await send_message(distance_str, key="distance_measured", user=user, inter=inter, ctx=ctx,
-                       response_deferred=response_deferred)
+        return await send_message(
+            key="distance_too_long",
+            user=user,
+            inter=inter,
+            ctx=ctx,
+            response_deferred=response_deferred,
+        )
+    distance_str = (
+        f"**{await search_distance(search_phrase, target_phrase) * 100:.2f}%**"
+    )
+    await send_message(
+        distance_str,
+        key="distance_measured",
+        user=user,
+        inter=inter,
+        ctx=ctx,
+        response_deferred=response_deferred,
+    )
 
 
 async def process_aliases(
-        item_type,
-        item_id,
-        user_id,
-        ctx=None,
-        inter=None,
+    item_type,
+    item_id,
+    user_id,
+    ctx=None,
+    inter=None,
 ):
     """Process the aliases of a person/group."""
     response_deferred = await defer_inter(inter)
@@ -794,9 +821,11 @@ async def process_aliases(
     else:
         obj = await Person.get(item_id)
 
-    embed = await botembed.create_bot_author_embed(title=f"Aliases for {str(obj)}", color=disnake.Color.blurple(),
-                                                   description=", ".join(await obj.get_aliases_as_strings() or [])
-                                                               or "None")
+    embed = await botembed.create_bot_author_embed(
+        title=f"Aliases for {str(obj)}",
+        color=disnake.Color.blurple(),
+        description=", ".join(await obj.get_aliases_as_strings() or []) or "None",
+    )
 
     await send_message(
         embed=embed,
@@ -805,5 +834,6 @@ async def process_aliases(
         inter=inter,
         response_deferred=response_deferred,
     )
+
 
 _distance_cache: Dict[str, Dict[str, float]] = dict()

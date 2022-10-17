@@ -65,15 +65,17 @@ class MiscellaneousCog(commands.Cog):
             allowed_mentions=self.allowed_mentions,
         )
 
-    @commands.command(name="random", description="Pick a random number between a start and end number.")
-    async def regular_random(
-        self,
-        ctx,
-        start_number: int,
-        end_number: int
-    ):
-        await helper.process_random(start_number=start_number, end_number=end_number,
-                                    invoker_user_id=ctx.author.id, ctx=ctx)
+    @commands.command(
+        name="random",
+        description="Pick a random number between a start and end number.",
+    )
+    async def regular_random(self, ctx, start_number: int, end_number: int):
+        await helper.process_random(
+            start_number=start_number,
+            end_number=end_number,
+            invoker_user_id=ctx.author.id,
+            ctx=ctx,
+        )
 
     ################
     # SLASH COMMANDS
@@ -146,8 +148,12 @@ class MiscellaneousCog(commands.Cog):
         start_number: int = commands.Param(desc="start of range"),
         end_number: int = commands.Param(desc="end of range"),
     ):
-        await helper.process_random(start_number=start_number, end_number=end_number, invoker_user_id=inter.author.id,
-                                    inter=inter)
+        await helper.process_random(
+            start_number=start_number,
+            end_number=end_number,
+            invoker_user_id=inter.author.id,
+            inter=inter,
+        )
 
     @commands.slash_command(name="serverinfo", description="Display server info.")
     async def server_info(self, inter: AppCmdInter):
@@ -169,15 +175,27 @@ class MiscellaneousCog(commands.Cog):
         await helper.process_bot_info(self.bot, inter=inter)
 
     @commands.slash_command(name="urban", description="Search Urban Dictionary")
-    async def slash_urban_dictionary(self, inter: AppCmdInter, phrase: str, definition_number: int = 1):
-        await helper.process_urban(phrase=phrase, definition_number=definition_number, invoker_user_id=inter.author.id,
-                                   inter=inter,  allowed_mentions=self.allowed_mentions)
+    async def slash_urban_dictionary(
+        self, inter: AppCmdInter, phrase: str, definition_number: int = 1
+    ):
+        await helper.process_urban(
+            phrase=phrase,
+            definition_number=definition_number,
+            invoker_user_id=inter.author.id,
+            inter=inter,
+            allowed_mentions=self.allowed_mentions,
+        )
 
     @commands.command(name="urban", description="")
     async def regular_urban_dictionary(self, ctx, phrase: str, definition_number=1):
         """Search Urban Dictionary (Underscores are spaces)"""
-        await helper.process_urban(phrase=phrase.replace("_", " "), definition_number=definition_number,
-                                   invoker_user_id=ctx.author.id, ctx=ctx, allowed_mentions=self.allowed_mentions)
+        await helper.process_urban(
+            phrase=phrase.replace("_", " "),
+            definition_number=definition_number,
+            invoker_user_id=ctx.author.id,
+            ctx=ctx,
+            allowed_mentions=self.allowed_mentions,
+        )
 
     ##################
     # MESSAGE COMMANDS

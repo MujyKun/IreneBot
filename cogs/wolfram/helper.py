@@ -2,10 +2,7 @@ from IreneAPIWrapper.models import User, Wolfram
 from util import logger
 import numexpr
 import urllib.parse
-from ..helper import (
-    send_message,
-    get_message, defer_inter
-)
+from ..helper import send_message, get_message, defer_inter
 
 
 async def evaluate_math(query, user: User):
@@ -41,7 +38,8 @@ async def process_wolfram_query(
             ctx=ctx,
             inter=inter,
             allowed_mentions=allowed_mentions,
-            key="wolfram_query", response_deferred=response_deferred
+            key="wolfram_query",
+            response_deferred=response_deferred,
         )
     if not user.is_considered_patron:
         return await send_message(
@@ -49,7 +47,8 @@ async def process_wolfram_query(
             ctx=ctx,
             inter=inter,
             allowed_mentions=allowed_mentions,
-            key="error_wolfram_patron", response_deferred=response_deferred
+            key="error_wolfram_patron",
+            response_deferred=response_deferred,
         )
 
     parsed_query = urllib.parse.quote(query)
@@ -61,7 +60,8 @@ async def process_wolfram_query(
             ctx=ctx,
             inter=inter,
             allowed_mentions=allowed_mentions,
-            key="wolfram_no_results", response_deferred=response_deferred
+            key="wolfram_no_results",
+            response_deferred=response_deferred,
         )
 
     list_of_pods = results.get("pod")
@@ -98,5 +98,6 @@ async def process_wolfram_query(
             ctx=ctx,
             inter=inter,
             allowed_mentions=allowed_mentions,
-            key="wolfram_query", response_deferred=response_deferred
+            key="wolfram_query",
+            response_deferred=response_deferred,
         )

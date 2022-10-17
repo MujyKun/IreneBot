@@ -198,7 +198,9 @@ class Bot(AutoShardedBot):
         self, interaction: AppCmdInter, exception: errors.CommandError
     ) -> None:
         if isinstance(exception, errors.NotOwner):
-            return await interaction.send("Only the bot owner can use this command.", ephemeral=True)
+            return await interaction.send(
+                "Only the bot owner can use this command.", ephemeral=True
+            )
         elif isinstance(exception, errors.CheckFailure):
             return await interaction.send(f"{exception}", ephemeral=True)
         else:

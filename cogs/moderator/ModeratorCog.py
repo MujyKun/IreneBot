@@ -77,8 +77,9 @@ class ModeratorCog(commands.Cog):
     # ==============
 
     @commands.slash_command(
-        name="clear", description="Clear messages in the text channel.",
-        default_member_permissions=Permissions(manage_messages=True)
+        name="clear",
+        description="Clear messages in the text channel.",
+        default_member_permissions=Permissions(manage_messages=True),
     )
     async def clear_messages(
         self, inter: AppCmdInter, amount: commands.Range[1, 100] = 1
@@ -92,8 +93,9 @@ class ModeratorCog(commands.Cog):
         )
 
     @commands.slash_command(
-        name="prefix", description="Commands related to Guild Prefixes.",
-        default_member_permissions=Permissions(manage_messages=True)
+        name="prefix",
+        description="Commands related to Guild Prefixes.",
+        default_member_permissions=Permissions(manage_messages=True),
     )
     async def prefix(self, inter: AppCmdInter):
         ...

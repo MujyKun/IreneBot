@@ -89,10 +89,16 @@ class GroupMembersCog(commands.Cog):
         """Send a photo of a random person."""
         await helper.process_random_person(user_id=ctx.author.id, ctx=ctx)
 
-    @commands.command(name="distance", description="Get the Similarity Distance of two words.")
+    @commands.command(
+        name="distance", description="Get the Similarity Distance of two words."
+    )
     async def regular_distance(self, ctx, search_word, target_word):
-        await helper.process_distance(search_phrase=search_word, target_phrase=target_word,
-                                      user_id=ctx.author.id, ctx=ctx)
+        await helper.process_distance(
+            search_phrase=search_word,
+            target_phrase=target_word,
+            user_id=ctx.author.id,
+            ctx=ctx,
+        )
 
     ################
     # SLASH COMMANDS
@@ -155,7 +161,8 @@ class GroupMembersCog(commands.Cog):
         await helper.process_random_person(user_id=inter.author.id, inter=inter)
 
     @commands.slash_command(
-        name="count", description="Get count for the media a person, group, or affiliation has."
+        name="count",
+        description="Get count for the media a person, group, or affiliation has.",
     )
     async def count(
         self,
@@ -164,23 +171,36 @@ class GroupMembersCog(commands.Cog):
         selection: str = commands.Param(autocomplete=helper.auto_complete_type),
     ):
         object_id = int(selection.split(")")[0])
-        await helper.process_count(item_type=item_type, item_id=object_id,
-                                   inter=inter, user_id=inter.author.id)
+        await helper.process_count(
+            item_type=item_type, item_id=object_id, inter=inter, user_id=inter.author.id
+        )
 
     @commands.slash_command(
         name="aliases", description="Get the aliases of persons or groups."
     )
-    async def aliases(self, inter: AppCmdInter, item_type: Literal["person", "group"],
-                      selection: str = commands.Param(autocomplete=helper.auto_complete_type)):
+    async def aliases(
+        self,
+        inter: AppCmdInter,
+        item_type: Literal["person", "group"],
+        selection: str = commands.Param(autocomplete=helper.auto_complete_type),
+    ):
         object_id = int(selection.split(")")[0])
-        await helper.process_aliases(item_type=item_type, item_id=object_id, inter=inter, user_id=inter.author.id)
+        await helper.process_aliases(
+            item_type=item_type, item_id=object_id, inter=inter, user_id=inter.author.id
+        )
 
     @commands.slash_command(
         name="distance", description="Get the Similarity Distance of two words."
     )
-    async def distance(self, inter: AppCmdInter, search_phrase: str, target_phrase: str):
-        await helper.process_distance(search_phrase=search_phrase, target_phrase=target_phrase,
-                                      user_id=inter.author.id, inter=inter)
+    async def distance(
+        self, inter: AppCmdInter, search_phrase: str, target_phrase: str
+    ):
+        await helper.process_distance(
+            search_phrase=search_phrase,
+            target_phrase=target_phrase,
+            user_id=inter.author.id,
+            inter=inter,
+        )
 
     #
     # @commands.slash_command(

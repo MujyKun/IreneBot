@@ -209,13 +209,15 @@ async def send_message(
             )
         else:
             try:
-                final_msgs.append(await inter.edit_original_response(
-                    msg,
-                    allowed_mentions=allowed_mentions,
-                    view=view,
-                    embed=embed,
-                    embeds=embeds,
-                ))
+                final_msgs.append(
+                    await inter.edit_original_response(
+                        msg,
+                        allowed_mentions=allowed_mentions,
+                        view=view,
+                        embed=embed,
+                        embeds=embeds,
+                    )
+                )
             except Exception as e:
                 print(e)
 

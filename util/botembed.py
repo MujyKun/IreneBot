@@ -12,7 +12,9 @@ async def create_bot_author_embed(**kwargs) -> disnake.Embed:
     embed = disnake.Embed(**kwargs)
     if not embed.color:
         embed.colour = _get_random_color()
-    embed = await set_embed_bot_author_and_footer(embed, f"Thanks for using {get_keys().bot_name}.")
+    embed = await set_embed_bot_author_and_footer(
+        embed, f"Thanks for using {get_keys().bot_name}."
+    )
     return embed
 
 
@@ -46,7 +48,7 @@ def _get_random_color():
 
 
 async def add_embed_inline_fields(
-        embed: disnake.Embed, fields: Dict[str, str]
+    embed: disnake.Embed, fields: Dict[str, str]
 ) -> disnake.Embed:
     """Easily add fields to an embed through a dictionary of the field names and values. {name : value}
     All fields will be inline"""
@@ -56,7 +58,7 @@ async def add_embed_inline_fields(
 
 
 async def add_embed_listed_fields(
-        embed: disnake.Embed, fields: Dict[str, str]
+    embed: disnake.Embed, fields: Dict[str, str]
 ) -> disnake.Embed:
     """Easily add fields to an embed through a dictionary of the field names and values. {name : value}
     All fields will be not be inline."""
@@ -66,11 +68,11 @@ async def add_embed_listed_fields(
 
 
 async def create_embeds_from_list(
-        items: List[str], groupings: int = 10, title: str = None
+    items: List[str], groupings: int = 10, title: str = None
 ) -> List[disnake.Embed]:
     numbered_items = [f"{i + 1}) {items[i]}" for i in range(0, len(items))]
     grouped_items = [
-        "\n".join(numbered_items[i: i + groupings])
+        "\n".join(numbered_items[i : i + groupings])
         for i in range(0, len(numbered_items), groupings)
     ]
     embeds = [

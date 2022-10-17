@@ -115,8 +115,11 @@ class BotOwnerCog(commands.Cog):
     # SLASH COMMANDS
     ################
 
-    @commands.slash_command(name="8ballresponse", description="Modify 8ball responses.",
-                            guild_ids=get_keys().bot_owner_only_servers)
+    @commands.slash_command(
+        name="8ballresponse",
+        description="Modify 8ball responses.",
+        guild_ids=get_keys().bot_owner_only_servers,
+    )
     async def eight_ball_response(self, inter: AppCmdInter):
         ...
 
@@ -156,8 +159,11 @@ class BotOwnerCog(commands.Cog):
             allowed_mentions=self.allowed_mentions,
         )
 
-    @commands.slash_command(name="interaction", description="Interaction Commands",
-                            guild_ids=get_keys().bot_owner_only_servers)
+    @commands.slash_command(
+        name="interaction",
+        description="Interaction Commands",
+        guild_ids=get_keys().bot_owner_only_servers,
+    )
     async def interaction(self, inter: AppCmdInter):
         ...
 

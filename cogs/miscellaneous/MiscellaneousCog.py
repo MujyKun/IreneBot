@@ -16,7 +16,7 @@ class MiscellaneousCog(commands.Cog):
     ##################
     @commands.command(name="serverinfo", description="Display server info.")
     async def regular_server_info(self, ctx):
-        await helper.process_server_info(bot=self.bot, guild=ctx.guild, ctx=ctx)
+        await helper.process_server_info(guild=ctx.guild, ctx=ctx)
 
     @commands.command(
         name="botinfo", description="Show information about the bot and its creator."
@@ -151,7 +151,7 @@ class MiscellaneousCog(commands.Cog):
 
     @commands.slash_command(name="serverinfo", description="Display server info.")
     async def server_info(self, inter: AppCmdInter):
-        await helper.process_server_info(bot=self.bot, guild=inter.guild, inter=inter)
+        await helper.process_server_info(guild=inter.guild, inter=inter)
 
     @commands.slash_command(name="ping", description="Get the ping of the bot.")
     async def ping(self, inter: AppCmdInter):
@@ -170,9 +170,8 @@ class MiscellaneousCog(commands.Cog):
 
     @commands.slash_command(name="urban", description="Search Urban Dictionary")
     async def slash_urban_dictionary(self, inter: AppCmdInter, phrase: str, definition_number: int = 1):
-        await inter.response.defer(with_message=True)
         await helper.process_urban(phrase=phrase, definition_number=definition_number, invoker_user_id=inter.author.id,
-                                   inter=inter,  allowed_mentions=self.allowed_mentions, response_deferred=True)
+                                   inter=inter,  allowed_mentions=self.allowed_mentions)
 
     @commands.command(name="urban", description="")
     async def regular_urban_dictionary(self, ctx, phrase: str, definition_number=1):

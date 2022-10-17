@@ -7,7 +7,7 @@ from disnake import ApplicationCommandInteraction as AppCmdInter
 from random import choice, randint
 from re import findall
 from disnake.ext import commands
-from ..helper import send_message
+from ..helper import send_message, defer_inter
 from models import all_games as all_games
 from keys import get_keys
 from util import botembed, botinfo
@@ -168,9 +168,7 @@ async def process_display_emoji(
 
 async def process_bot_info(bot, ctx=None, inter=None):
     """Process Bot Info"""
-    embed = await botembed.create_bot_author_embed(
-        bot.keys, title=f"I am {bot.keys.bot_name}"
-    )
+    embed = await botembed.create_bot_author_embed(title=f"I am {bot.keys.bot_name}")
     active_games = [
         len(botinfo.get_gg(finished=False)),
         len(botinfo.get_ggg(finished=False)),
@@ -206,11 +204,9 @@ async def process_bot_info(bot, ctx=None, inter=None):
     return await send_message(ctx=ctx, inter=inter, embed=embed)
 
 
-async def process_server_info(bot, guild: disnake.Guild, inter=None, ctx=None):
+async def process_server_info(guild: disnake.Guild, inter=None, ctx=None):
     """Process Server Info"""
-    embed = await botembed.create_bot_author_embed(
-        bot.keys, title=f"{guild.name} ({guild.id})", url=f"{guild.icon.url}"
-    )
+    embed = await botembed.create_bot_author_embed(title=f"{guild.name} ({guild.id})", url=f"{guild.icon.url}")
     embed.set_thumbnail(url=guild.icon.url)
     fields = {
         "Owner": f"{guild.owner} ({guild.owner.id})",
@@ -235,8 +231,8 @@ async def process_random(start_number, end_number, invoker_user_id, ctx=None, in
                               user=user, ctx=ctx, inter=inter)
 
 
-async def process_urban(phrase, definition_number, invoker_user_id, ctx=None, inter=None, allowed_mentions=None,
-                        response_deferred=False):
+async def process_urban(phrase, definition_number, invoker_user_id, ctx=None, inter=None, allowed_mentions=None):
+    response_deferred = await defer_inter(inter)
     user = await User.get(invoker_user_id)
     results = _urban.get(phrase.lower())
     if not results:

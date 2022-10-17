@@ -82,6 +82,18 @@ class GroupMembersCog(commands.Cog):
             allowed_mentions=self.allowed_mentions,
         )
 
+    @commands.command(
+        name="randomperson", description="Display random media for a random Person."
+    )
+    async def regular_random_person(self, ctx):
+        """Send a photo of a random person."""
+        await helper.process_random_person(user_id=ctx.author.id, ctx=ctx)
+
+    @commands.command(name="distance", description="Get the Similarity Distance of two words.")
+    async def regular_distance(self, ctx, search_word, target_word):
+        await helper.process_distance(search_phrase=search_word, target_phrase=target_word,
+                                      user_id=ctx.author.id, ctx=ctx)
+
     ################
     # SLASH COMMANDS
     ################
@@ -126,7 +138,6 @@ class GroupMembersCog(commands.Cog):
         selection: str = commands.Param(autocomplete=helper.auto_complete_type),
     ):
         """Display the media for a specific Person, Group, or Affiliation."""
-        await inter.response.defer(with_message=True)
         object_id = int(selection.split(")")[0])
         await helper.process_call(
             item_type,
@@ -134,7 +145,6 @@ class GroupMembersCog(commands.Cog):
             inter.user.id,
             inter=inter,
             allowed_mentions=self.allowed_mentions,
-            response_deferred=True,
         )
 
     @commands.slash_command(
@@ -142,124 +152,69 @@ class GroupMembersCog(commands.Cog):
     )
     async def random_person(self, inter: AppCmdInter):
         """Send a photo of a random person."""
-        person: Person = random.choice(list(await Person.get_all()))
-        while not person.media_count:
-            person: Person = random.choice(list(await Person.get_all()))
-
-        media = await Media.get_random(person.id, person=True)
-        return await inter.send(await media.fetch_image_host_url())
+        await helper.process_random_person(user_id=inter.author.id, inter=inter)
 
     @commands.slash_command(
-        name="count", description="Get count for the media a person or group has."
+        name="count", description="Get count for the media a person, group, or affiliation has."
     )
     async def count(
         self,
         inter: AppCmdInter,
-        item_type: Literal["person", "group"],
+        item_type: Literal["person", "group", "affiliation"],
         selection: str = commands.Param(autocomplete=helper.auto_complete_type),
     ):
         object_id = int(selection.split(")")[0])
-        if item_type == "person":
-            person = await Person.get(object_id)
-            medias: List[Media] = await Media.get_all(person.affiliations)
-        elif item_type == "group":
-            group = await Group.get(object_id)
-            medias: List[Media] = await Media.get_all(group.affiliations)
-        else:
-            raise NotImplementedError(
-                f"An entity aside from a person or object has not been implemented. {item_type}"
-            )
-        await inter.send(
-            f"There is **{len(medias)}** known media for that {item_type}."
-        )
+        await helper.process_count(item_type=item_type, item_id=object_id,
+                                   inter=inter, user_id=inter.author.id)
 
     @commands.slash_command(
         name="aliases", description="Get the aliases of persons or groups."
     )
-    async def aliases(self, inter: AppCmdInter, name):
-        name = name.lower()
-        persons = await helper.search_for_obj(name)
-        groups = await helper.search_for_obj(name, False)
-
-        persons_aliases = []
-        for person in persons:
-            aliases_as_strings = await person.get_aliases_as_strings()
-            if not aliases_as_strings:
-                continue
-            persons_aliases.append(
-                f"{str(person.name)} [{person.id}] - {' | '.join(aliases_as_strings)}"
-            )
-
-        groups_aliases = []
-        for group in groups:
-            aliases_as_strings = await group.get_aliases_as_strings()
-            if not aliases_as_strings:
-                continue
-            groups_aliases.append(
-                f"{group.name} [{group.id}] - {' | '.join(aliases_as_strings)}"
-            )
-        persons_aliases_as_str = "\n".join(persons_aliases)
-        groups_aliases_as_str = "\n".join(groups_aliases)
-
-        description = (
-            f"**Person(s):**\n{persons_aliases_as_str}\n\n" if persons_aliases else ""
-        )
-        description += (
-            f"**Group(s):**\n{groups_aliases_as_str}" if groups_aliases else ""
-        )
-        description = description if description else "**No Results.**"
-
-        embed = disnake.Embed(
-            title=f"Aliases for {name}",
-            color=helper.get_random_color(),
-            description=description,
-        )
-        await inter.send(embed=embed)
+    async def aliases(self, inter: AppCmdInter, item_type: Literal["person", "group"],
+                      selection: str = commands.Param(autocomplete=helper.auto_complete_type)):
+        object_id = int(selection.split(")")[0])
+        await helper.process_aliases(item_type=item_type, item_id=object_id, inter=inter, user_id=inter.author.id)
 
     @commands.slash_command(
-        name="distance", description="Get the Levenshtein Distance of two words."
+        name="distance", description="Get the Similarity Distance of two words."
     )
-    async def distance(self, inter: AppCmdInter, search_word: str, target_word: str):
-        if len(search_word) * len(target_word) > 2000000:
-            return await inter.send("You cannot compare words of that length.")
+    async def distance(self, inter: AppCmdInter, search_phrase: str, target_phrase: str):
+        await helper.process_distance(search_phrase=search_phrase, target_phrase=target_phrase,
+                                      user_id=inter.author.id, inter=inter)
 
-        await inter.send(
-            f"The search word has **{await helper.search_distance(search_word, target_word) * 100:.2f}%** "
-            f"similarity with the target word."
-        )
-
-    @commands.slash_command(
-        name="countleaderboard",
-        description="Shows leaderboards for how many times a Person or Group has been called.",
-        aliases=["clb", "cb", "highestcount"],
-    )
-    async def countleaderboard(
-        self, inter: AppCmdInter, item_type: Literal["Persons", "Groups"]
-    ):
-        if item_type == "Persons":
-            objects = await Person.get_all()
-        elif item_type == "Groups":
-            objects = await Group.get_all()
-        else:
-            raise NotImplementedError(
-                f"An entity aside from a person or object has not been implemented. {item_type}"
-            )
-        sorted_leaderboard = await helper.get_call_count_leaderboard(objects)
-        if not sorted_leaderboard:
-            desc = "No Results."
-        else:
-            desc = ""
-            for count, content in enumerate(sorted_leaderboard, 1):
-                model = content[0]
-                call_count = content[1]
-                desc += f"**{count})** **{str(model.name)}** [{model.id}] -> Called **{call_count}** times.\n"
-
-        embed = disnake.Embed(
-            title=f"{item_type} Leaderboard",
-            color=helper.get_random_color(),
-            description=desc,
-        )
-        await inter.send(embed=embed)
+    #
+    # @commands.slash_command(
+    #     name="countleaderboard",
+    #     description="Shows leaderboards for how many times a Person or Group has been called.",
+    #     aliases=["clb", "cb", "highestcount"],
+    # )
+    # async def countleaderboard(
+    #     self, inter: AppCmdInter, item_type: Literal["Persons", "Groups"]
+    # ):
+    #     if item_type == "Persons":
+    #         objects = await Person.get_all()
+    #     elif item_type == "Groups":
+    #         objects = await Group.get_all()
+    #     else:
+    #         raise NotImplementedError(
+    #             f"An entity aside from a person or object has not been implemented. {item_type}"
+    #         )
+    #     sorted_leaderboard = await helper.get_call_count_leaderboard(objects)
+    #     if not sorted_leaderboard:
+    #         desc = "No Results."
+    #     else:
+    #         desc = ""
+    #         for count, content in enumerate(sorted_leaderboard, 1):
+    #             model = content[0]
+    #             call_count = content[1]
+    #             desc += f"**{count})** **{str(model.name)}** [{model.id}] -> Called **{call_count}** times.\n"
+    #
+    #     embed = disnake.Embed(
+    #         title=f"{item_type} Leaderboard",
+    #         color=helper.get_random_color(),
+    #         description=desc,
+    #     )
+    #     await inter.send(embed=embed)
 
 
 def setup(bot: Bot):

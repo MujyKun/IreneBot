@@ -2,8 +2,7 @@ from . import helper
 import disnake
 from disnake.ext import commands
 from disnake import ApplicationCommandInteraction as AppCmdInter
-from random import choice, randint
-from util import botembed, botinfo
+from keys import get_keys
 
 
 class BotOwnerCog(commands.Cog):
@@ -116,7 +115,8 @@ class BotOwnerCog(commands.Cog):
     # SLASH COMMANDS
     ################
 
-    @commands.slash_command(name="8ballresponse", description="Modify 8ball responses.")
+    @commands.slash_command(name="8ballresponse", description="Modify 8ball responses.",
+                            guild_ids=get_keys().bot_owner_only_servers)
     async def eight_ball_response(self, inter: AppCmdInter):
         ...
 
@@ -156,7 +156,8 @@ class BotOwnerCog(commands.Cog):
             allowed_mentions=self.allowed_mentions,
         )
 
-    @commands.slash_command(name="interaction", description="Interaction Commands")
+    @commands.slash_command(name="interaction", description="Interaction Commands",
+                            guild_ids=get_keys().bot_owner_only_servers)
     async def interaction(self, inter: AppCmdInter):
         ...
 

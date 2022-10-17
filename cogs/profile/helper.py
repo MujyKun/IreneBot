@@ -2,7 +2,7 @@ from typing import Union
 
 import disnake
 from IreneAPIWrapper.models import User
-from ..helper import send_message
+from ..helper import send_message, defer_inter
 
 
 async def display_avatar(
@@ -10,9 +10,9 @@ async def display_avatar(
     ctx=None,
     inter=None,
     allowed_mentions=None,
-    response_deferred=False,
 ):
     """Display the avatars of a user/member."""
+    response_deferred = await defer_inter(inter)
     user_avatar = disnake.Embed(
         title=f"{user.display_name}'s Avatar ({user.id})", url=user.avatar.url
     )
@@ -43,9 +43,9 @@ async def display_banner(
     ctx=None,
     inter=None,
     allowed_mentions=None,
-    response_deferred=False,
 ):
     """Display the banners of a user/member."""
+    response_deferred = await defer_inter(inter)
     banner = user.banner
     if not banner:
         fetched_user = await bot.fetch_user(user.id)

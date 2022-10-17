@@ -4,7 +4,7 @@ import numexpr
 import urllib.parse
 from ..helper import (
     send_message,
-    get_message,
+    get_message, defer_inter
 )
 
 
@@ -30,6 +30,7 @@ async def evaluate_math(query, user: User):
 async def process_wolfram_query(
     query, user_id, ctx=None, inter=None, allowed_mentions=None
 ):
+    response_deferred = await defer_inter(inter)
     user = await User.get(user_id)
     result = await evaluate_math(query, user)
     if result:
@@ -40,7 +41,7 @@ async def process_wolfram_query(
             ctx=ctx,
             inter=inter,
             allowed_mentions=allowed_mentions,
-            key="wolfram_query",
+            key="wolfram_query", response_deferred=response_deferred
         )
     if not user.is_considered_patron:
         return await send_message(
@@ -48,7 +49,7 @@ async def process_wolfram_query(
             ctx=ctx,
             inter=inter,
             allowed_mentions=allowed_mentions,
-            key="error_wolfram_patron",
+            key="error_wolfram_patron", response_deferred=response_deferred
         )
 
     parsed_query = urllib.parse.quote(query)
@@ -60,7 +61,7 @@ async def process_wolfram_query(
             ctx=ctx,
             inter=inter,
             allowed_mentions=allowed_mentions,
-            key="wolfram_no_results",
+            key="wolfram_no_results", response_deferred=response_deferred
         )
 
     list_of_pods = results.get("pod")
@@ -97,5 +98,5 @@ async def process_wolfram_query(
             ctx=ctx,
             inter=inter,
             allowed_mentions=allowed_mentions,
-            key="wolfram_query",
+            key="wolfram_query", response_deferred=response_deferred
         )

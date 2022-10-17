@@ -198,11 +198,12 @@ class Bot(AutoShardedBot):
         self, interaction: AppCmdInter, exception: errors.CommandError
     ) -> None:
         if isinstance(exception, errors.NotOwner):
-            return await interaction.send("Only the bot owner can use this command.")
+            return await interaction.send("Only the bot owner can use this command.", ephemeral=True)
         elif isinstance(exception, errors.CheckFailure):
-            return await interaction.send(f"{exception}")
+            return await interaction.send(f"{exception}", ephemeral=True)
         else:
             logger.error(exception)
+            return await interaction.send(f"{exception}", ephemeral=True)
 
     async def on_command_error(self, context, exception):
         # TODO: errors.Cooldown was not found - causes an AttributeError when put in return_error_to_user
@@ -231,6 +232,9 @@ class Bot(AutoShardedBot):
             logger.error(exception)
 
     async def on_message(self, message):
+        if message.author.bot:
+            return
+
         from cogs.groupmembers.helper import (
             idol_send_on_message,
         )  # avoids circular import
@@ -361,3 +365,4 @@ class Bot(AutoShardedBot):
         all_regular_cmds = self.all_commands
         all_msg_cmds = self.all_message_commands
         all_user_cmds = self.all_user_commands
+        _ = None

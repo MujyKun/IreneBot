@@ -30,7 +30,7 @@ class WolframCog(commands.Cog):
             query,
             user_id=inter.user.id,
             inter=inter,
-            allowed_mentions=self.allowed_mentions,
+            allowed_mentions=self.allowed_mentions
         )
 
 

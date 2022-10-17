@@ -209,13 +209,13 @@ async def send_message(
             )
         else:
             try:
-                await inter.edit_original_response(
+                final_msgs.append(await inter.edit_original_response(
                     msg,
                     allowed_mentions=allowed_mentions,
                     view=view,
                     embed=embed,
                     embeds=embeds,
-                )
+                ))
             except Exception as e:
                 print(e)
 
@@ -294,3 +294,11 @@ async def add_embed_footer_and_author(embed: disnake.Embed) -> disnake.Embed:
             text="Thanks for using Irene!", icon_url=_keys.embed_footer_url
         )
     return embed
+
+
+async def defer_inter(inter):
+    """Defer an interaction."""
+    response_deferred = False
+    if inter:
+        response_deferred = await inter.response.defer(with_message=True)
+    return response_deferred

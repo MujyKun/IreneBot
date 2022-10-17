@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from dotenv import load_dotenv
 from os import getenv
@@ -16,6 +16,15 @@ def make_int(var):
             f"{exc} (Exception) -> Failed to turn {var} of type {type(var)} into an integer. -> module.keys.make_int"
         )
         return None
+
+
+def make_list(var: str, make_integer=False):
+    if not var:
+        return []
+    split_list = var.split(",")
+    if make_integer:
+        return [make_int(val) for val in split_list]
+    return split_list
 
 
 def get_emoji(string):
@@ -158,6 +167,8 @@ class Keys:
         # IreneAPI
         self.api_token: str = ""
 
+        self.bot_owner_only_servers: List[int] = []
+
         self.refresh_env()
 
     def get_keys(self, *args) -> dict:
@@ -283,6 +294,7 @@ class Keys:
                 "twitch_secret": getenv("TWCH_SECRET"),
                 # IreneAPI
                 "api_token": getenv("API_TOKEN"),
+                "bot_owner_only_servers": make_list(getenv("BOT_OWNER_ONLY_SERVERS"), make_integer=True)
             }
         )
 

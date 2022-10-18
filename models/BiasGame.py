@@ -119,8 +119,18 @@ class PersonViews(disnake.ui.View):
         self.second_person: Person = pvp.player_two
 
         self.host_user = host_user
+
+        # default labels
         fp_label = str(self.first_person.name)
         sp_label = str(self.second_person.name)
+
+        if self.first_person.affiliations:
+            fp_aff = self.first_person.affiliations[0]
+            fp_label = f"{fp_aff.stage_name} from {fp_aff.group.name}"
+        if self.second_person.affiliations:
+            sp_aff = self.second_person.affiliations[0]
+            sp_label = f"{sp_aff.stage_name} from {sp_aff.group.name}"
+
         left_button = Button(
             label=fp_label, person=self.first_person, pvp=pvp, host_user=self.host_user
         )

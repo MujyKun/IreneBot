@@ -84,14 +84,17 @@ class PvP:
     def __eq__(self, other):
         return self.player_one == other.player_one and self.player_two == other.player_two
 
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
     def __hash__(self):
-        return self.get_dict()
+        return hash((self.player_one, self.player_two))
 
     def get_dict(self):
         return {
             "player_one": self.player_one.id,
             "player_two": self.player_two.id,
-            "winner": self.winner.id,
+            "winner": None if not self.winner else self.winner.id,
         }
 
     @property

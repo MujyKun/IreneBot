@@ -84,6 +84,9 @@ class PvP:
     def __eq__(self, other):
         return self.player_one == other.player_one and self.player_two == other.player_two
 
+    def __hash__(self):
+        return self.get_dict()
+
     def get_dict(self):
         return {
             "player_one": self.player_one.id,

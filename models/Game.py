@@ -1,6 +1,6 @@
 import disnake.ext.commands
 from typing import TYPE_CHECKING, Dict
-from . import PlayerScore
+from . import PlayerScore, add_to_cache
 
 if TYPE_CHECKING:
     from . import Bot
@@ -18,6 +18,7 @@ class Game:
         self.host_user = user
         self._complete = False
         self.players: Dict[int, PlayerScore] = {}
+        add_to_cache(self)
 
     @property
     def is_complete(self):

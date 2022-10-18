@@ -7,7 +7,7 @@ from IreneAPIWrapper.models import (
     Person,
     BiasGame as BiasGameModel,
 )
-from . import Game, add_to_cache, Bracket, PvP
+from . import Game, Bracket, PvP
 
 
 class BiasGame(Game):
@@ -21,10 +21,10 @@ class BiasGame(Game):
         inter=None,
     ):
         super(BiasGame, self).__init__(bot, user, ctx=ctx, inter=inter)
-        add_to_cache(self)
         self.gender = gender
         self._input_size = bracket_size
         self.bracket: Optional[Bracket] = None
+        self._images_generated: List[PvP] = []
 
         self._pool = None
 
@@ -33,14 +33,33 @@ class BiasGame(Game):
         if await self._generate_bracket() is False:
             return
 
-        await self._process_rounds()
+        while not self.is_complete:
+            await self._generate_images()
+            await self._process_rounds()
+
+    async def _generate_images(self):
+        for pvp in await self.bracket.get_known_pvps():
+            asyncio.create_task(self._generate_image(pvp))
+
+    async def _generate_image(self, pvp):
+        if pvp in self._images_generated:
+            return
+        if pvp.img_url:
+            self._images_generated.append(pvp)
+            return
+
+        pvp.img_url = await BiasGameModel.generate_pvp(
+            first_image_url=pvp.player_one.display.avatar.url,
+            second_image_url=pvp.player_two.display.avatar.url,
+        )
+
+        self._images_generated.append(pvp)
 
     async def _generate_bracket(self):
-        bracket = Bracket(self._input_size)
-        if not await bracket.select_from_pool(self._pool):
+        self.bracket = Bracket(self._input_size)
+        if not await self.bracket.select_from_pool(self._pool):
             await self.send_message(key="biasgame_not_enough")
             return False  # necessary
-        self.bracket = bracket
 
     async def _generate_pool(self):
         self._pool = []
@@ -69,12 +88,11 @@ class BiasGame(Game):
 
             await self.generate_question(pvp)
             while not pvp.winner:
-                await asyncio.sleep(1)
+                await asyncio.sleep(2)
 
         if await self.bracket.next_round():  # game ends
             await self._add_final_winner()
             return await self.send_results()
-        await self._process_rounds()  # recursive func
 
     async def _add_final_winner(self):
         if self.bracket.final_winner:
@@ -83,18 +101,14 @@ class BiasGame(Game):
             )
 
     async def generate_question(self, pvp: PvP):
-        person_one: Person = pvp.player_one
-        person_two: Person = pvp.player_two
-
-        img_url = await BiasGameModel.generate_pvp(
-            first_image_url=person_one.display.avatar.url,
-            second_image_url=person_two.display.avatar.url,
-        )
-        await self.send_message(msg=img_url, view=PersonViews(pvp, self.host_user))
+        while not pvp.img_url:
+            await asyncio.sleep(1.5)
+        await self.send_message(msg=pvp.img_url, view=PersonViews(pvp, self.host_user))
 
     async def send_results(self):
         bracket_img_url = await BiasGameModel.generate_bracket(self.bracket.get_dict())
         await self.send_message(msg=bracket_img_url)
+        self._complete = True
 
 
 class PersonViews(disnake.ui.View):

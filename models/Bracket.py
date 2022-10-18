@@ -33,6 +33,9 @@ class Bracket:
                 rounds_as_dict[key].append(pvp.get_dict())
         return rounds_as_dict
 
+    async def get_known_pvps(self):
+        return list(set([pvp for list_pvp in self.rounds.values() for pvp in list_pvp]))
+
     async def select_from_pool(self, pool: List[AbstractModel]) -> bool:
         if len(pool) < self.size:
             return False
@@ -76,6 +79,10 @@ class PvP:
         self.player_one = player_one
         self.player_two = player_two
         self.winner = None
+        self.img_url: Optional[str] = None
+
+    def __eq__(self, other):
+        return self.player_one == other.player_one and self.player_two == other.player_two
 
     def get_dict(self):
         return {

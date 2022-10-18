@@ -13,7 +13,7 @@ from IreneAPIWrapper.models import (
 from IreneAPIWrapper.exceptions import Empty
 
 from random import choice
-from . import BaseScoreGame, add_to_cache
+from . import BaseScoreGame
 
 
 class GuessingGame(BaseScoreGame):
@@ -32,7 +32,6 @@ class GuessingGame(BaseScoreGame):
         super(GuessingGame, self).__init__(
             bot, user, max_rounds, difficulty, gender, timeout, ctx=ctx, inter=inter
         )
-        add_to_cache(self)
         self.current_affiliation: Optional[Affiliation] = None
         self.current_media: Optional[Media] = None
         self.is_nsfw = is_nsfw

@@ -1,4 +1,4 @@
-from . import GuessingGame, add_to_cache
+from . import GuessingGame
 import disnake.ext.commands
 from IreneAPIWrapper.models import User, Media, Group, GROUP, Mode
 from IreneAPIWrapper.exceptions import Empty
@@ -32,7 +32,6 @@ class GroupGuessingGame(GuessingGame):
             ctx=ctx,
             inter=inter,
         )
-        add_to_cache(self)
         self._mode: Mode = GROUP
         ...
 

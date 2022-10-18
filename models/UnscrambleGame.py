@@ -12,7 +12,7 @@ from IreneAPIWrapper.models import (
 from IreneAPIWrapper.exceptions import Empty
 
 from random import choice
-from . import BaseScoreGame, add_to_cache
+from . import BaseScoreGame
 
 from typing import TYPE_CHECKING
 
@@ -32,7 +32,6 @@ class UnscrambleGame(BaseScoreGame):
         super(UnscrambleGame, self).__init__(
             bot, user, max_rounds, difficulty, gender, timeout, ctx=ctx, inter=inter
         )
-        add_to_cache(self)
         self.current_question: Optional[str] = None  # scrambled
         self.current_affiliation: Optional[Affiliation] = None
         self.__us: Optional[UnscrambleGameModel] = None

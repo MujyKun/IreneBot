@@ -1,4 +1,4 @@
-from typing import Union, Dict
+from typing import Union, Dict, List
 
 import IreneAPIWrapper.models
 from IreneAPIWrapper.models import User, EightBallResponse, Urban
@@ -257,9 +257,11 @@ async def process_urban(
     results = _urban.get(phrase.lower())
     if not results:
         results = await Urban.query(phrase) or {}
+        results = results.get("list")
+        results = sorted(results, key=lambda x: x.get('thumbs_up'), reverse=True)
         _urban[phrase.lower()] = results
 
-    definition_list = results.get("list") or []
+    definition_list = results or []
     definition_data = {}
     try:
         definition_data = definition_list[definition_number - 1]
@@ -295,4 +297,4 @@ async def process_urban(
     )
 
 
-_urban: Dict[str, dict] = dict()
+_urban: Dict[str, List] = dict()

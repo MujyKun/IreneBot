@@ -45,9 +45,7 @@ class UnscrambleGame(BaseScoreGame):
                 await self._determine_pool()
             except Empty:
                 self._complete = True
-                await self.send_message(
-                    "There are no available affiliations for your unscramble game."
-                )
+                await self.send_message(key="no_aff_results")
                 if self.players:
                     await self._print_final_winners()
                 return
@@ -61,9 +59,7 @@ class UnscrambleGame(BaseScoreGame):
                 await self._generate_new_question()
             )  # recursion until we run out of questions.
 
-        await self.send_message(
-            self.current_question, key="us_question", delete_after=self.timeout + 3
-        )
+        await self.send_message(self.current_question, key="us_question", delete_after=self.timeout + 3)
         await self._wait_for_answer()
 
     async def _send_results(self, winner: disnake.User = None):

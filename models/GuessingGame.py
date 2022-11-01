@@ -113,10 +113,7 @@ class GuessingGame(BaseScoreGame):
                 await self._determine_pool()
             except Empty:
                 self._complete = True
-                return await self.send_message(
-                    "There is no media available for your guessing game. "
-                    "Try changing your selections."
-                )
+                return await self.send_message(key="no_media_results")
         self.rounds += 1
 
         media = choice(self.pool)

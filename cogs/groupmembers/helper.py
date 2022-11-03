@@ -1,11 +1,11 @@
-import datetime
+from datetime import timedelta, datetime
 import random
 
 import IreneAPIWrapper.exceptions
 import asyncio
 import disnake
 from disnake import ApplicationCommandInteraction as AppCmdInter
-from IreneAPIWrapper.models import Person, Group, Media, User, Affiliation
+from IreneAPIWrapper.models import Person, Group, Media, User, Affiliation, AutoMedia, AffiliationTime
 from typing import List, Union, Optional, Tuple, Dict
 from util import logger, botembed
 from ..helper import send_message, in_game, defer_inter
@@ -16,7 +16,8 @@ from dataclasses import dataclass
 
 _requests_today = 0
 _user_requests: Dict[int, int] = {}
-_current_day = datetime.datetime.now().day
+_current_day = datetime.now().day
+NEXT_POST_KEYWORD = "next_post"
 
 
 @dataclass(frozen=False, order=True)
@@ -60,7 +61,7 @@ class Comparison:
 async def check_user_requests():
     """Check the user requests and execute day resets"""
     global _current_day
-    current_day = datetime.datetime.now().day
+    current_day = datetime.now().day
     if _current_day != current_day:
         _current_day = current_day
         global _user_requests
@@ -148,7 +149,7 @@ async def process_message_idol_call(bot, message, content):
         max_group_similarities = await get_max_similarities(group_comparisons)
 
         for group_comp, person_comp in zip(
-            max_group_similarities, max_person_similarities
+                max_group_similarities, max_person_similarities
         ):
             group = group_comp.obj
             person = person_comp.obj
@@ -202,7 +203,7 @@ async def handle_user_media_usage(user):
 
 
 async def handle_non_patron_media_usage(
-    user, ctx=None, inter=None, channel=None, response_deferred=False
+        user, ctx=None, inter=None, channel=None, response_deferred=False
 ):
     """Handle non patron media usage.
 
@@ -280,52 +281,52 @@ async def auto_complete_person(inter: AppCmdInter, user_input: str) -> List[str]
     """Autocomplete person search."""
     if user_input.isnumeric():
         return [
-            f"{person.id}) {str(person.name)}"
-            for person in await Person.get_all()
-            if str(person.id).startswith(user_input)
-        ][:24]
+                   f"{person.id}) {str(person.name)}"
+                   for person in await Person.get_all()
+                   if str(person.id).startswith(user_input)
+               ][:24]
     else:
         return [
-            f"{person.id}) {str(person.name)}"
-            for person in await Person.get_all()
-            if user_input.lower() in str(person.name).lower()
-        ][:24]
+                   f"{person.id}) {str(person.name)}"
+                   for person in await Person.get_all()
+                   if user_input.lower() in str(person.name).lower()
+               ][:24]
 
 
 async def auto_complete_group(inter: AppCmdInter, user_input: str) -> List[str]:
     """Autocomplete group search."""
     if user_input.isnumeric():
         return [
-            f"{group.id}) {group.name}"
-            for group in await Group.get_all()
-            if str(group.id).startswith(user_input)
-        ][:24]
+                   f"{group.id}) {group.name}"
+                   for group in await Group.get_all()
+                   if str(group.id).startswith(user_input)
+               ][:24]
     else:
         return [
-            f"{group.id}) {group.name}"
-            for group in await Group.get_all()
-            if user_input.lower() in group.name.lower()
-        ][:24]
+                   f"{group.id}) {group.name}"
+                   for group in await Group.get_all()
+                   if user_input.lower() in group.name.lower()
+               ][:24]
 
 
 async def auto_complete_affiliation(inter: AppCmdInter, user_input: str) -> List[str]:
     """Autocomplete affiliation search."""
     if user_input.isnumeric():
         return [
-            f"{aff.id}) {aff.group.name} {aff.stage_name}"
-            for aff in await Affiliation.get_all()
-            if str(aff.id).startswith(user_input)
-        ][:24]
+                   f"{aff.id}) {aff.group.name} {aff.stage_name}"
+                   for aff in await Affiliation.get_all()
+                   if str(aff.id).startswith(user_input)
+               ][:24]
     else:
         return [
-            f"{aff.id}) {aff.group.name} {aff.stage_name}"
-            for aff in await Affiliation.get_all()
-            if user_input.lower() in str(aff).lower()
-        ][:24]
+                   f"{aff.id}) {aff.group.name} {aff.stage_name}"
+                   for aff in await Affiliation.get_all()
+                   if user_input.lower() in str(aff).lower()
+               ][:24]
 
 
 async def get_call_count_leaderboard(
-    objects: Union[List[Person], List[Group]]
+        objects: Union[List[Person], List[Group]]
 ) -> Optional[List[Tuple[Union[Person, Group], int]]]:
     """
     Get a list of sorted (descending) values for the call count of a Person or Group.
@@ -366,7 +367,7 @@ async def get_call_count_leaderboard(
 
 
 async def search_for_obj(
-    search_name, persons=True, split_name=False, return_similarity=False
+        search_name, persons=True, split_name=False, return_similarity=False
 ) -> List[Union[Person, Comparison, Group]]:
     """
     Check if a name matches with an alias or a Person/Group's full name.
@@ -412,11 +413,11 @@ async def search_for_obj(
 
 
 async def _filter_by_name(
-    obj: Union[Person, Group],
-    name: str,
-    similarity_required=0.75,
-    split_name=False,
-    return_similarity=True,
+        obj: Union[Person, Group],
+        name: str,
+        similarity_required=0.75,
+        split_name=False,
+        return_similarity=True,
 ):
     """
     Compares distance against person/group aliases.
@@ -433,7 +434,7 @@ async def _filter_by_name(
         similarity_required = 0.75
     elif 1 < similarity_required <= 100:
         similarity_required = (
-            similarity_required / 100
+                similarity_required / 100
         )  # putting as decimal between 0 and 1.
 
     final_results: List[Comparison] = []
@@ -444,11 +445,11 @@ async def _filter_by_name(
     # check for matching aliases
     if not return_similarity:
         if any(
-            [
-                await search_distance(sub_name, alias.lower()) >= similarity_required
-                for sub_name in names
-                for alias in aliases
-            ]
+                [
+                    await search_distance(sub_name, alias.lower()) >= similarity_required
+                    for sub_name in names
+                    for alias in aliases
+                ]
         ):
             return True
     else:
@@ -464,10 +465,10 @@ async def _filter_by_name(
     # check for matching group names or person full names.
     if not return_similarity:
         if any(
-            [
-                await search_distance(sub_name, str(obj).lower()) >= similarity_required
-                for sub_name in names
-            ]
+                [
+                    await search_distance(sub_name, str(obj).lower()) >= similarity_required
+                    for sub_name in names
+                ]
         ):
             return True
     else:
@@ -484,11 +485,11 @@ async def _filter_by_name(
         for aff in obj.affiliations:
             if not return_similarity:
                 if any(
-                    [
-                        await search_distance(sub_name, aff.stage_name.lower())
-                        >= similarity_required
-                        for sub_name in names
-                    ]
+                        [
+                            await search_distance(sub_name, aff.stage_name.lower())
+                            >= similarity_required
+                            for sub_name in names
+                        ]
                 ):
                     return True
             else:
@@ -524,9 +525,9 @@ def get_random_color():
 async def search_distance(search_word: str, target_word: str) -> Optional[float]:
     """Get the distance of two words/phrases with cache considered."""
     return (
-        _search_distance_dict(_distance_cache, search_word, target_word)
-        or _search_distance_dict(_distance_cache, target_word, search_word)
-        or await _get_string_distance(search_word, target_word)
+            _search_distance_dict(_distance_cache, search_word, target_word)
+            or _search_distance_dict(_distance_cache, target_word, search_word)
+            or await _get_string_distance(search_word, target_word)
     )
 
 
@@ -550,18 +551,18 @@ async def _get_string_distance(search_word: str, target_word: str):
 
 
 async def process_call(
-    item_type,
-    item_id,
-    user_id,
-    ctx=None,
-    inter=None,
-    allowed_mentions=None,
+        item_type,
+        item_id,
+        user_id,
+        ctx=None,
+        inter=None,
+        allowed_mentions=None,
 ):
     response_deferred = await defer_inter(inter)
     user = await User.get(user_id)
     if not user.is_considered_patron:
         if not await handle_non_patron_media_usage(
-            user, inter=inter, ctx=ctx, response_deferred=response_deferred
+                user, inter=inter, ctx=ctx, response_deferred=response_deferred
         ):
             return
 
@@ -586,18 +587,18 @@ async def process_call(
         )
 
     if await send_message(
-        msg=await random.choice(medias).fetch_image_host_url(),
-        user=user,
-        ctx=ctx,
-        inter=inter,
-        allowed_mentions=allowed_mentions,
-        response_deferred=response_deferred,
+            msg=await random.choice(medias).fetch_image_host_url(),
+            user=user,
+            ctx=ctx,
+            inter=inter,
+            allowed_mentions=allowed_mentions,
+            response_deferred=response_deferred,
     ):
         await handle_user_media_usage(user)
 
 
 async def process_card(
-    item_type, item_id, user_id, ctx=None, inter=None, allowed_mentions=None
+        item_type, item_id, user_id, ctx=None, inter=None, allowed_mentions=None
 ):
     """Process a person/group/affiliation card."""
     user = await User.get(user_id)
@@ -656,11 +657,11 @@ async def get_card_embed(card_info, avatar, banner, title):
 
 
 async def process_who_is(
-    media_id: int,
-    user_id: int,
-    ctx: commands.Context = None,
-    inter: AppCmdInter = None,
-    allowed_mentions=None,
+        media_id: int,
+        user_id: int,
+        ctx: commands.Context = None,
+        inter: AppCmdInter = None,
+        allowed_mentions=None,
 ):
     """
     Process the whois command.
@@ -668,7 +669,7 @@ async def process_who_is(
     response_deferred = await defer_inter(inter)
     user = await User.get(user_id=user_id)
 
-    if await in_game(user):
+    if await in_game(user, must_be_host=False):
         return await send_message(
             media_id,
             key="nice_try_cheater",
@@ -717,15 +718,15 @@ async def process_who_is(
 
 
 async def process_random_person(
-    user_id,
-    ctx=None,
-    inter=None,
+        user_id,
+        ctx=None,
+        inter=None,
 ):
     response_deferred = await defer_inter(inter)
     user = await User.get(user_id)
     if not user.is_considered_patron:
         if not await handle_non_patron_media_usage(
-            user, inter=inter, ctx=ctx, response_deferred=response_deferred
+                user, inter=inter, ctx=ctx, response_deferred=response_deferred
         ):
             return
 
@@ -738,21 +739,21 @@ async def process_random_person(
     media = await Media.get_random(person.id, person=True)
 
     if await send_message(
-        msg=await media.fetch_image_host_url(),
-        user=user,
-        inter=inter,
-        ctx=ctx,
-        response_deferred=response_deferred,
+            msg=await media.fetch_image_host_url(),
+            user=user,
+            inter=inter,
+            ctx=ctx,
+            response_deferred=response_deferred,
     ):
         await handle_user_media_usage(user)
 
 
 async def process_count(
-    item_type,
-    item_id,
-    user_id,
-    ctx=None,
-    inter=None,
+        item_type,
+        item_id,
+        user_id,
+        ctx=None,
+        inter=None,
 ):
     """Process the count of media a person/group/affiliation has."""
     response_deferred = await defer_inter(inter)
@@ -806,11 +807,11 @@ async def process_distance(search_phrase, target_phrase, user_id, inter=None, ct
 
 
 async def process_aliases(
-    item_type,
-    item_id,
-    user_id,
-    ctx=None,
-    inter=None,
+        item_type,
+        item_id,
+        user_id,
+        ctx=None,
+        inter=None,
 ):
     """Process the aliases of a person/group."""
     response_deferred = await defer_inter(inter)
@@ -834,6 +835,80 @@ async def process_aliases(
         inter=inter,
         response_deferred=response_deferred,
     )
+
+
+async def process_auto_aff(channel_id, aff_id, user_id: int, ctx=None, inter=None, allowed_mentions=None,
+                           hours_to_send_after=12, remove=False):
+    """Process Auto Affiliation"""
+    response_deferred = await defer_inter(inter)
+    user = await User.get(user_id)
+
+    aff = await Affiliation.get(affiliation_id=aff_id)
+    if not aff:
+        return await send_message(aff_id, key="affiliation_does_not_exist", user=user, ctx=ctx,
+                                  inter=inter, allowed_mentions=allowed_mentions, response_deferred=response_deferred)
+
+    auto_media = await AutoMedia.get(channel_id)
+    if not remove:
+        if not user.is_considered_patron and len(auto_media.aff_times) >= get_keys().auto_send_limit:
+            return await send_message(key="become_a_patron_limited", ctx=ctx, user=user,
+                                      delete_after=60, inter=inter, ephemeral=True,
+                                      response_deferred=response_deferred,
+                                      )
+        await AutoMedia.insert(channel_id=channel_id, affiliation_id=aff_id, hours_after=hours_to_send_after)
+
+        await send_message(aff_id, channel_id, key="auto_media_added", user=user, ctx=ctx,
+                           inter=inter, allowed_mentions=allowed_mentions, response_deferred=response_deferred)
+    else:
+        for aff_time in auto_media.aff_times:
+            if aff_time.affiliation_id == aff_id:
+                await auto_media.delete_aff_time(aff_time)
+
+        await send_message(aff_id, channel_id, key="auto_media_removed", user=user, ctx=ctx,
+                           inter=inter, allowed_mentions=allowed_mentions, response_deferred=response_deferred)
+
+
+async def process_list_auto_aff(channel_id, user_id: int, ctx=None, inter=None, allowed_mentions=None):
+    """List the auto affiliations."""
+    response_deferred = await defer_inter(inter)
+    user = await User.get(user_id)
+    auto_media = await AutoMedia.get(channel_id)
+    results = '\n'.join([f"{aff_time.affiliation_id} | {aff_time.hours_after} hours" for aff_time in
+                         auto_media.aff_times])
+    await send_message(channel_id, results, key="auto_media_list", user=user, ctx=ctx, inter=inter,
+                       allowed_mentions=allowed_mentions, response_deferred=response_deferred)
+
+
+async def process_loop_auto_aff(bot):
+    """Process the loop for automatically sending affiliation media."""
+    for auto_media in await AutoMedia.get_all():
+        for aff_time in auto_media.aff_times:
+            if hasattr(aff_time, NEXT_POST_KEYWORD) and datetime.now() < getattr(aff_time, NEXT_POST_KEYWORD):
+                continue
+
+            media = await Media.get_random(object_id=aff_time.affiliation_id, affiliation=True)
+            if not media:
+                continue
+
+            url = await media.fetch_image_host_url()
+
+            text_channel = bot.get_channel(auto_media.id)
+            if not text_channel:
+                text_channel = await bot.fetch_channel(auto_media.id)
+
+            if not text_channel:
+                continue
+
+            try:
+                await send_message(msg=f"{url}", channel=text_channel)
+            except disnake.Forbidden:
+                # Only temporarily remove the channel. After the bot's next fetch, it will try again.
+                await auto_media.remove_from_cache(aff_time=aff_time)
+            except Exception as e:
+                bot.logger.error(f"Auto Affiliation (Inner) Loop Error -> {e}")
+
+            setattr(aff_time, NEXT_POST_KEYWORD,
+                    datetime.now() + timedelta(hours=aff_time.hours_after))
 
 
 _distance_cache: Dict[str, Dict[str, float]] = dict()

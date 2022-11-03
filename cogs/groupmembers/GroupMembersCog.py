@@ -2,10 +2,10 @@ import random
 import disnake
 from models import Bot
 from IreneAPIWrapper.models import Media, Person, Group, User
-from disnake.ext import commands
+from disnake.ext import commands, tasks
 from disnake import ApplicationCommandInteraction as AppCmdInter
 from . import helper
-from typing import Literal, List
+from typing import Literal, List, Optional
 
 
 class GroupMembersCog(commands.Cog):
@@ -36,6 +36,45 @@ class GroupMembersCog(commands.Cog):
     ###################
     # REGULAR COMMANDS
     ###################
+    @commands.guild_only()
+    @commands.has_guild_permissions(**{"manage_messages": True})
+    @commands.group(name="autoaff", description="Automatically send affiliation photos every 12 hours.")
+    async def regular_autoaff(self, ctx):
+        """Automatically send affiliation photos to a channel every 12 hours.
+
+        The time can be set manually using a slash command."""
+        ...
+
+    @regular_autoaff.command(name="add", description="Add an affiliation to send media every 12 hours.")
+    async def regular_auto_aff_add(self, ctx, affiliation_id: int, text_channel: disnake.TextChannel = None):
+        """Add an affiliation to send media every 12 hours.
+
+        The time can be set manually using a slash command.
+        """
+        if not text_channel:
+            text_channel = ctx.channel
+        await helper.process_auto_aff(channel_id=text_channel.id,
+                                      aff_id=affiliation_id,
+                                      user_id=ctx.author.id,
+                                      ctx=ctx,
+                                      allowed_mentions=self.allowed_mentions)
+
+    @regular_autoaff.command(name="remove", description="Delete an affiliation that sends media.")
+    async def regular_auto_aff_remove(self, ctx, affiliation_id: int, text_channel: disnake.TextChannel = None):
+        """Delete an affiliation that sends media."""
+        if not text_channel:
+            text_channel = ctx.channel
+        await helper.process_auto_aff(channel_id=text_channel.id, aff_id=affiliation_id, user_id=ctx.author.id,
+                                      ctx=ctx, allowed_mentions=self.allowed_mentions, remove=True)
+
+    @regular_autoaff.command(name="list", description="List the affiliations that automatically send media.")
+    async def regular_automatic_list(self, ctx, text_channel: disnake.TextChannel = None):
+        """List the affiliations that automatically send media."""
+        if not text_channel:
+            text_channel = ctx.channel
+        await helper.process_list_auto_aff(channel_id=text_channel.id, user_id=ctx.author.id, ctx=ctx,
+                                           allowed_mentions=self.allowed_mentions)
+
     @commands.command(
         name="whois", description="Figure out who a media object belongs to."
     )
@@ -103,7 +142,41 @@ class GroupMembersCog(commands.Cog):
     ################
     # SLASH COMMANDS
     ################
-    @commands.slash_command(description="Figure out who a media object belongs to.")
+    @commands.slash_command(name="autoaff", description="Automatically send affiliation photos to a channel.")
+    @commands.has_guild_permissions(**{"manage_messages": True})
+    @commands.guild_only()
+    async def autoaff(self, inter: AppCmdInter):
+        ...
+
+    @autoaff.sub_command(name="add", description="Automatically send affiliation photos every 12 hours.")
+    async def autoaff_add(self, inter: AppCmdInter, selection: str = commands.Param(autocomplete=
+                                                                                    helper.auto_complete_affiliation),
+                          text_channel: Optional[disnake.TextChannel] = None, hours_to_send_after: int = 12):
+        if not text_channel:
+            text_channel = inter.channel
+        affiliation_id = int(selection.split(")")[0])
+        await helper.process_auto_aff(channel_id=text_channel.id, aff_id=affiliation_id, user_id=inter.author.id,
+                                      inter=inter, allowed_mentions=self.allowed_mentions,
+                                      hours_to_send_after=hours_to_send_after)
+
+    @autoaff.sub_command(name="remove", description="Delete an affiliation that sends media.")
+    async def autoaff_remove(self, inter: AppCmdInter,
+                             selection: str = commands.Param(autocomplete=helper.auto_complete_affiliation),
+                             text_channel: Optional[disnake.TextChannel] = None):
+        if not text_channel:
+            text_channel = inter.channel
+        affiliation_id = int(selection.split(")")[0])
+        await helper.process_auto_aff(channel_id=text_channel.id, aff_id=affiliation_id, user_id=inter.author.id,
+                                      inter=inter, allowed_mentions=self.allowed_mentions, remove=True)
+
+    @autoaff.sub_command(name="list", description="List the affiliations that automatically send media.")
+    async def autoaff_list(self, inter: AppCmdInter, text_channel: Optional[disnake.TextChannel] = None):
+        if not text_channel:
+            text_channel = inter.channel
+        await helper.process_list_auto_aff(channel_id=text_channel.id, user_id=inter.author.id, inter=inter,
+                                           allowed_mentions=self.allowed_mentions)
+
+    @commands.slash_command(name="whois", description="Figure out who a media object belongs to.")
     async def whois(
         self,
         inter: AppCmdInter,
@@ -236,6 +309,18 @@ class GroupMembersCog(commands.Cog):
     #     )
     #     await inter.send(embed=embed)
 
+    @tasks.loop(minutes=5, seconds=0, reconnect=True)
+    async def loop_auto_aff(self):
+        """
+        Send automatic affiliation photos
+        """
+        try:
+            await helper.process_loop_auto_aff(self.bot)
+        except Exception as e:
+            self.bot.logger.error(f"Auto Affiliation Loop Error -> {e}")
+
 
 def setup(bot: Bot):
-    bot.add_cog(GroupMembersCog(bot))
+    cog = GroupMembersCog(bot)
+    bot.add_cog(cog)
+    cog.loop_auto_aff.start()

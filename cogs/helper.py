@@ -274,12 +274,27 @@ async def check_game_input(
     return True
 
 
-async def in_game(user: User):
-    from models import all_games as all_games
+async def in_game(user: User, must_be_host=True) -> bool:
+    """Check if a user is in a game.
 
-    return any(
+    :param user: IreneAPIWrapper.models.User
+        The user object.
+    :param must_be_host: bool
+        Whether the user needs to be the host of the game.
+    """
+    from models import all_games as all_games
+    in_game_not_host = False
+
+    if not must_be_host:
+        in_game_not_host = any(
+            [game for game in all_games if game.players.get(user.id) and not game.is_complete]
+        )
+
+    in_game_host = any(
         [game for game in all_games if game.host_user == user and not game.is_complete]
     )
+
+    return in_game_host or in_game_not_host
 
 
 async def add_embed_footer_and_author(embed: disnake.Embed) -> disnake.Embed:

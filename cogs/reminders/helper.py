@@ -21,7 +21,14 @@ def get_matching_period_time(period):
     return get_period_times()[index]
 
 
-async def process_reminder_add(user_id: int, reason: str, _in: float, period: str, inter=None, allowed_mentions=None):
+async def process_reminder_add(
+    user_id: int,
+    reason: str,
+    _in: float,
+    period: str,
+    inter=None,
+    allowed_mentions=None,
+):
     """
     Process the addition of a reminder.
 
@@ -48,11 +55,18 @@ async def process_reminder_add(user_id: int, reason: str, _in: float, period: st
     date = await Date.get(date_id)
     remind_id = await Reminder.insert(user_id, reason, date)
 
-    return await send_message(key="remind_success", user=user, inter=inter, allowed_mentions=allowed_mentions,
-                              response_deferred=response_deferred)
+    return await send_message(
+        key="remind_success",
+        user=user,
+        inter=inter,
+        allowed_mentions=allowed_mentions,
+        response_deferred=response_deferred,
+    )
 
 
-async def process_reminder_remove(user_id, remind_id: int, inter=None, allowed_mentions=None):
+async def process_reminder_remove(
+    user_id, remind_id: int, inter=None, allowed_mentions=None
+):
     """
     Process the removal of a reminder.
     :param user_id: int
@@ -70,21 +84,30 @@ async def process_reminder_remove(user_id, remind_id: int, inter=None, allowed_m
     if reminder:
         await reminder.delete()
 
-    return await send_message(key="reminder_deleted", user=user, inter=inter, allowed_mentions=allowed_mentions,
-                              response_deferred=response_deferred)
+    return await send_message(
+        key="reminder_deleted",
+        user=user,
+        inter=inter,
+        allowed_mentions=allowed_mentions,
+        response_deferred=response_deferred,
+    )
 
 
 async def post_reminder(bot, reminder: Reminder):
     """Post a reminder to a user's DM."""
     try:
-        user: disnake.User = bot.get_user(reminder.user_id) or await bot.fetch_user(reminder.user_id)
+        user: disnake.User = bot.get_user(reminder.user_id) or await bot.fetch_user(
+            reminder.user_id
+        )
     except Exception as e:
         return bot.logger.warn(f"Failed to fetch user id: {reminder.user_id}")
 
     if not user:
         return
 
-    desc = await get_message(await User.get(reminder.user_id),"reminder_description", f"{reminder.reason}")
+    desc = await get_message(
+        await User.get(reminder.user_id), "reminder_description", f"{reminder.reason}"
+    )
 
     embed = disnake.Embed(
         color=disnake.Color.random(), title="Reminder", description=desc
@@ -94,15 +117,20 @@ async def post_reminder(bot, reminder: Reminder):
     try:
         await user.send(embed=embed)
     except Exception as e:
-        return bot.logger.warn(f"Failed to send reminder id {reminder.id} to {reminder.user_id}")
+        return bot.logger.warn(
+            f"Failed to send reminder id {reminder.id} to {reminder.user_id}"
+        )
 
 
 async def auto_complete_get_reminders(inter, user_input: str):
     """Auto complete get the reminders of a user."""
     user_id = inter.author.id
     await User.get(user_id)
-    return [f"{reminder.id}) | Reason: {reminder.reason} | End Date: {str(reminder.date.end)}"
-            for reminder in await Reminder.get_all() if user_id == reminder.user_id]
+    return [
+        f"{reminder.id}) | Reason: {reminder.reason} | End Date: {str(reminder.date.end)}"
+        for reminder in await Reminder.get_all()
+        if user_id == reminder.user_id
+    ]
 
 
 async def process_reminder_loop(bot):
@@ -123,5 +151,7 @@ async def process_reminder_loop(bot):
                 await post_reminder(bot, reminder)
                 await reminder.delete()
             except Exception as e:
-                bot.logger.warn(f"{e} -> Failed to post/delete Reminder ID: {reminder.id} -> DATE ID: {reminder.date.id} "
-                                f"-> USER ID: {reminder.user_id} -> REASON: {reminder.reason}")
+                bot.logger.warn(
+                    f"{e} -> Failed to post/delete Reminder ID: {reminder.id} -> DATE ID: {reminder.date.id} "
+                    f"-> USER ID: {reminder.user_id} -> REASON: {reminder.reason}"
+                )

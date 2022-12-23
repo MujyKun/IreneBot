@@ -75,7 +75,9 @@ class Bot(AutoShardedBot):
             preload.dates
         ) = (
             preload.names
-        ) = preload.bloodtypes = preload.locations = preload.auto_media = preload.reminders = True
+        ) = (
+            preload.bloodtypes
+        ) = preload.locations = preload.auto_media = preload.reminders = True
         return preload
 
     async def prefix_check(

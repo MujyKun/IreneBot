@@ -1,6 +1,7 @@
 import asyncio
 from typing import List, Union
 
+import aiohttp
 from disnake.ext.commands import AutoShardedBot, errors
 from disnake import ApplicationCommandInteraction as AppCmdInter
 
@@ -33,6 +34,8 @@ class Bot(AutoShardedBot):
             verbose=True,
             logger=logger,
         )
+
+        self.http_session = aiohttp.ClientSession()
 
         self.api: IreneAPIClient = api
 
@@ -70,7 +73,9 @@ class Bot(AutoShardedBot):
             preload.companies
         ) = (
             preload.dates
-        ) = preload.names = preload.bloodtypes = preload.locations = preload.auto_media = True
+        ) = (
+            preload.names
+        ) = preload.bloodtypes = preload.locations = preload.auto_media = True
         return preload
 
     async def prefix_check(

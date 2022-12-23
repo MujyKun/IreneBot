@@ -38,42 +38,70 @@ class GroupMembersCog(commands.Cog):
     ###################
     @commands.guild_only()
     @commands.has_guild_permissions(**{"manage_messages": True})
-    @commands.group(name="autoaff", description="Automatically send affiliation photos every 12 hours.")
+    @commands.group(
+        name="autoaff",
+        description="Automatically send affiliation photos every 12 hours.",
+    )
     async def regular_autoaff(self, ctx):
         """Automatically send affiliation photos to a channel every 12 hours.
 
         The time can be set manually using a slash command."""
         ...
 
-    @regular_autoaff.command(name="add", description="Add an affiliation to send media every 12 hours.")
-    async def regular_auto_aff_add(self, ctx, affiliation_id: int, text_channel: disnake.TextChannel = None):
+    @regular_autoaff.command(
+        name="add", description="Add an affiliation to send media every 12 hours."
+    )
+    async def regular_auto_aff_add(
+        self, ctx, affiliation_id: int, text_channel: disnake.TextChannel = None
+    ):
         """Add an affiliation to send media every 12 hours.
 
         The time can be set manually using a slash command.
         """
         if not text_channel:
             text_channel = ctx.channel
-        await helper.process_auto_aff(channel_id=text_channel.id,
-                                      aff_id=affiliation_id,
-                                      user_id=ctx.author.id,
-                                      ctx=ctx,
-                                      allowed_mentions=self.allowed_mentions)
+        await helper.process_auto_aff(
+            channel_id=text_channel.id,
+            aff_id=affiliation_id,
+            user_id=ctx.author.id,
+            ctx=ctx,
+            allowed_mentions=self.allowed_mentions,
+            guild_id=ctx.guild.id,
+        )
 
-    @regular_autoaff.command(name="remove", description="Delete an affiliation that sends media.")
-    async def regular_auto_aff_remove(self, ctx, affiliation_id: int, text_channel: disnake.TextChannel = None):
+    @regular_autoaff.command(
+        name="remove", description="Delete an affiliation that sends media."
+    )
+    async def regular_auto_aff_remove(
+        self, ctx, affiliation_id: int, text_channel: disnake.TextChannel = None
+    ):
         """Delete an affiliation that sends media."""
         if not text_channel:
             text_channel = ctx.channel
-        await helper.process_auto_aff(channel_id=text_channel.id, aff_id=affiliation_id, user_id=ctx.author.id,
-                                      ctx=ctx, allowed_mentions=self.allowed_mentions, remove=True)
+        await helper.process_auto_aff(
+            channel_id=text_channel.id,
+            aff_id=affiliation_id,
+            user_id=ctx.author.id,
+            ctx=ctx,
+            allowed_mentions=self.allowed_mentions,
+            remove=True,
+        )
 
-    @regular_autoaff.command(name="list", description="List the affiliations that automatically send media.")
-    async def regular_automatic_list(self, ctx, text_channel: disnake.TextChannel = None):
+    @regular_autoaff.command(
+        name="list", description="List the affiliations that automatically send media."
+    )
+    async def regular_automatic_list(
+        self, ctx, text_channel: disnake.TextChannel = None
+    ):
         """List the affiliations that automatically send media."""
         if not text_channel:
             text_channel = ctx.channel
-        await helper.process_list_auto_aff(channel_id=text_channel.id, user_id=ctx.author.id, ctx=ctx,
-                                           allowed_mentions=self.allowed_mentions)
+        await helper.process_list_auto_aff(
+            channel_id=text_channel.id,
+            user_id=ctx.author.id,
+            ctx=ctx,
+            allowed_mentions=self.allowed_mentions,
+        )
 
     @commands.command(
         name="whois", description="Figure out who a media object belongs to."
@@ -97,6 +125,7 @@ class GroupMembersCog(commands.Cog):
         ctx: commands.Context,
         item_type: Literal["person", "group", "affiliation"],
         item_id: int,
+        file_type: str = None,
     ):
         await helper.process_call(
             item_type,
@@ -104,6 +133,7 @@ class GroupMembersCog(commands.Cog):
             ctx.author.id,
             ctx=ctx,
             allowed_mentions=self.allowed_mentions,
+            file_type=file_type,
         )
 
     @commands.command(
@@ -142,41 +172,77 @@ class GroupMembersCog(commands.Cog):
     ################
     # SLASH COMMANDS
     ################
-    @commands.slash_command(name="autoaff", description="Automatically send affiliation photos to a channel.")
+    @commands.slash_command(
+        name="autoaff",
+        description="Automatically send affiliation photos to a channel.",
+    )
     @commands.has_guild_permissions(**{"manage_messages": True})
     @commands.guild_only()
     async def autoaff(self, inter: AppCmdInter):
         ...
 
-    @autoaff.sub_command(name="add", description="Automatically send affiliation photos every 12 hours.")
-    async def autoaff_add(self, inter: AppCmdInter, selection: str = commands.Param(autocomplete=
-                                                                                    helper.auto_complete_affiliation),
-                          text_channel: Optional[disnake.TextChannel] = None, hours_to_send_after: int = 12):
+    @autoaff.sub_command(
+        name="add", description="Automatically send affiliation photos every 12 hours."
+    )
+    async def autoaff_add(
+        self,
+        inter: AppCmdInter,
+        selection: str = commands.Param(autocomplete=helper.auto_complete_affiliation),
+        text_channel: Optional[disnake.TextChannel] = None,
+        hours_to_send_after: int = 12,
+    ):
         if not text_channel:
             text_channel = inter.channel
         affiliation_id = int(selection.split(")")[0])
-        await helper.process_auto_aff(channel_id=text_channel.id, aff_id=affiliation_id, user_id=inter.author.id,
-                                      inter=inter, allowed_mentions=self.allowed_mentions,
-                                      hours_to_send_after=hours_to_send_after)
+        await helper.process_auto_aff(
+            channel_id=text_channel.id,
+            aff_id=affiliation_id,
+            user_id=inter.author.id,
+            inter=inter,
+            allowed_mentions=self.allowed_mentions,
+            hours_to_send_after=hours_to_send_after,
+            guild_id=inter.guild_id,
+        )
 
-    @autoaff.sub_command(name="remove", description="Delete an affiliation that sends media.")
-    async def autoaff_remove(self, inter: AppCmdInter,
-                             selection: str = commands.Param(autocomplete=helper.auto_complete_affiliation),
-                             text_channel: Optional[disnake.TextChannel] = None):
+    @autoaff.sub_command(
+        name="remove", description="Delete an affiliation that sends media."
+    )
+    async def autoaff_remove(
+        self,
+        inter: AppCmdInter,
+        selection: str = commands.Param(autocomplete=helper.auto_complete_affiliation),
+        text_channel: Optional[disnake.TextChannel] = None,
+    ):
         if not text_channel:
             text_channel = inter.channel
         affiliation_id = int(selection.split(")")[0])
-        await helper.process_auto_aff(channel_id=text_channel.id, aff_id=affiliation_id, user_id=inter.author.id,
-                                      inter=inter, allowed_mentions=self.allowed_mentions, remove=True)
+        await helper.process_auto_aff(
+            channel_id=text_channel.id,
+            aff_id=affiliation_id,
+            user_id=inter.author.id,
+            inter=inter,
+            allowed_mentions=self.allowed_mentions,
+            remove=True,
+        )
 
-    @autoaff.sub_command(name="list", description="List the affiliations that automatically send media.")
-    async def autoaff_list(self, inter: AppCmdInter, text_channel: Optional[disnake.TextChannel] = None):
+    @autoaff.sub_command(
+        name="list", description="List the affiliations that automatically send media."
+    )
+    async def autoaff_list(
+        self, inter: AppCmdInter, text_channel: Optional[disnake.TextChannel] = None
+    ):
         if not text_channel:
             text_channel = inter.channel
-        await helper.process_list_auto_aff(channel_id=text_channel.id, user_id=inter.author.id, inter=inter,
-                                           allowed_mentions=self.allowed_mentions)
+        await helper.process_list_auto_aff(
+            channel_id=text_channel.id,
+            user_id=inter.author.id,
+            inter=inter,
+            allowed_mentions=self.allowed_mentions,
+        )
 
-    @commands.slash_command(name="whois", description="Figure out who a media object belongs to.")
+    @commands.slash_command(
+        name="whois", description="Figure out who a media object belongs to."
+    )
     async def whois(
         self,
         inter: AppCmdInter,
@@ -215,6 +281,7 @@ class GroupMembersCog(commands.Cog):
         inter: AppCmdInter,
         item_type: Literal["person", "group", "affiliation"],
         selection: str = commands.Param(autocomplete=helper.auto_complete_type),
+        file_type: str = commands.Param(autocomplete=helper.auto_complete_file_type),
     ):
         """Display the media for a specific Person, Group, or Affiliation."""
         object_id = int(selection.split(")")[0])
@@ -224,6 +291,7 @@ class GroupMembersCog(commands.Cog):
             inter.user.id,
             inter=inter,
             allowed_mentions=self.allowed_mentions,
+            file_type=file_type,
         )
 
     @commands.slash_command(

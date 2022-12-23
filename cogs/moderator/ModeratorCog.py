@@ -1,3 +1,5 @@
+from typing import Union
+
 import disnake
 from models import Bot
 from disnake.ext import commands
@@ -11,11 +13,10 @@ class ModeratorCog(commands.Cog):
         self.allowed_mentions = disnake.AllowedMentions(everyone=False, roles=False)
 
     @commands.guild_only()
-    @commands.has_guild_permissions(**{"manage_messages": True})
     async def cog_check(self, ctx: commands.Context) -> bool:
         """A local cog check to confirm the command is used in a guild and
         the user has manage messages permissions."""
-        ...
+        return ctx.author.guild_permissions.manage_messages
 
     async def cog_slash_command_check(self, inter: AppCmdInter):
         """A local cog check to confirm the command is used in a guild and
@@ -25,6 +26,15 @@ class ModeratorCog(commands.Cog):
         if inter.guild is None:
             raise commands.NoPrivateMessage
         return True
+
+    @commands.command(name="addemoji", aliases=["yoink"])
+    @commands.has_guild_permissions(manage_emojis=True)
+    async def regular_add_emoji(
+        self, ctx, emoji: Union[disnake.PartialEmoji, str], emoji_name="EmojiName"
+    ):
+        await helper.process_add_emoji(
+            emoji=emoji, emoji_name=emoji_name, user_id=ctx.author.id, ctx=ctx
+        )
 
     @commands.group(name="prefix", description="Commands related to Guild Prefixes.")
     async def regular_prefix(self, ctx: commands.Context):
@@ -90,6 +100,15 @@ class ModeratorCog(commands.Cog):
             user_id=inter.author.id,
             inter=inter,
             allowed_mentions=self.allowed_mentions,
+        )
+
+    @commands.slash_command(name="addemoji", description="Add an emoji to the server.")
+    @commands.has_guild_permissions(manage_emojis=True)
+    async def add_emoji(
+        self, inter, emoji_url: str, emoji_name="EmojiName"
+    ):
+        await helper.process_add_emoji(
+            emoji=emoji_url, emoji_name=emoji_name, user_id=inter.author.id, inter=inter
         )
 
     @commands.slash_command(

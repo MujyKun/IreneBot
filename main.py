@@ -1,5 +1,6 @@
 import asyncio
 import disnake
+from disnake.ext import commands
 from keys import get_keys
 from models import Bot
 
@@ -19,8 +20,7 @@ if __name__ == "__main__":
         "owner_id": t_keys.bot_owner_id,
         "intents": intents,
         "test_guilds": None if not DEV_MODE else [t_keys.support_server_id],
-        "sync_commands_debug": True,
-        "sync_commands": True,
+        "command_sync_flags": commands.CommandSyncFlags.all()
     }
     loop = asyncio.get_event_loop()
 

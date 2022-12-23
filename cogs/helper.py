@@ -283,11 +283,16 @@ async def in_game(user: User, must_be_host=True) -> bool:
         Whether the user needs to be the host of the game.
     """
     from models import all_games as all_games
+
     in_game_not_host = False
 
     if not must_be_host:
         in_game_not_host = any(
-            [game for game in all_games if game.players.get(user.id) and not game.is_complete]
+            [
+                game
+                for game in all_games
+                if game.players.get(user.id) and not game.is_complete
+            ]
         )
 
     in_game_host = any(

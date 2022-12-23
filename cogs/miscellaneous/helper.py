@@ -258,7 +258,7 @@ async def process_urban(
     if not results:
         results = await Urban.query(phrase) or {}
         results = results.get("list")
-        results = sorted(results, key=lambda x: x.get('thumbs_up'), reverse=True)
+        results = sorted(results, key=lambda x: x.get("thumbs_up"), reverse=True)
         _urban[phrase.lower()] = results
 
     definition_list = results or []

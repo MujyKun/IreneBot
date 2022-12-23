@@ -82,7 +82,9 @@ class PvP:
         self.img_url: Optional[str] = None
 
     def __eq__(self, other):
-        return self.player_one == other.player_one and self.player_two == other.player_two
+        return (
+            self.player_one == other.player_one and self.player_two == other.player_two
+        )
 
     def __ne__(self, other):
         return not self.__eq__(other)

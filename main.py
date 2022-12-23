@@ -20,7 +20,7 @@ if __name__ == "__main__":
         "owner_id": t_keys.bot_owner_id,
         "intents": intents,
         "test_guilds": None if not DEV_MODE else [t_keys.support_server_id],
-        "command_sync_flags": commands.CommandSyncFlags.all()
+        "command_sync_flags": commands.CommandSyncFlags.all(),
     }
     loop = asyncio.get_event_loop()
 

@@ -119,9 +119,7 @@ async def process_add_emoji(
     try:
         async with http_session.get(url) as r:
             if r.status == 200:
-                await guild.create_custom_emoji(
-                    name=emoji_name, image=await r.read()
-                )
+                await guild.create_custom_emoji(name=emoji_name, image=await r.read())
                 key = "add_emoji_success"
     except aiohttp.InvalidURL:
         key = "invalid_url"

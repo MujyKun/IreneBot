@@ -104,9 +104,7 @@ class ModeratorCog(commands.Cog):
 
     @commands.slash_command(name="addemoji", description="Add an emoji to the server.")
     @commands.has_guild_permissions(manage_emojis=True)
-    async def add_emoji(
-        self, inter, emoji_url: str, emoji_name="EmojiName"
-    ):
+    async def add_emoji(self, inter, emoji_url: str, emoji_name="EmojiName"):
         await helper.process_add_emoji(
             emoji=emoji_url, emoji_name=emoji_name, user_id=inter.author.id, inter=inter
         )

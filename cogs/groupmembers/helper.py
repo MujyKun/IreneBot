@@ -683,7 +683,7 @@ async def process_who_is(
 
     if await in_game(user, must_be_host=False):
         return await send_message(
-            media_id,
+            # media_id,
             key="nice_try_cheater",
             ctx=ctx,
             inter=inter,

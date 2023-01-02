@@ -193,10 +193,13 @@ async def send_twitter_notifications(
         # getting and fetching the channel did not work.
         # or failed to send a message.
         # remove it from our subscriptions.
-        await twitter_account.unsubscribe(channel)
-        logger.info(
-            f"Unsubscribed Channel {channel.id} from Twitter Account {twitter_account.id} - {twitter_account.name} "
-            f"due to a fetching or message send failure."
-        )
+
+        # we no longer unsubscribe as it has been incorrectly unsubscribing from certain channels.
+        # await twitter_account.unsubscribe(channel)
+        # logger.info(
+        #     f"Unsubscribed Channel {channel.id} from Twitter Account {twitter_account.id} - {twitter_account.name} "
+        #     f"due to a fetching or message send failure."
+        # )
+        pass
 
     return success_channels

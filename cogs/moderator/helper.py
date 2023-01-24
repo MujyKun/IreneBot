@@ -2,9 +2,9 @@ from typing import List
 from util import logger
 import aiohttp
 import disnake
-from IreneAPIWrapper.models import Guild, User
+from IreneAPIWrapper.models import Guild, User, ReactionRoleMessage
 from disnake.ext import commands
-from disnake import AppCmdInter
+from disnake import AppCmdInter, MessageInteraction
 from ..helper import create_guild_model, send_message, defer_inter
 
 PRUNE_MAX = 100
@@ -179,3 +179,95 @@ async def auto_complete_type_guild_prefixes(
     await create_guild_model(inter.guild)
     guild = await Guild.get(inter.guild_id)
     return guild.prefixes[:24]
+
+
+async def process_add_reaction_role(
+    user_id, description, ctx=None, inter=None, allowed_mentions=None
+):
+    """
+    Add a reaction role.
+
+    :param user_id: int
+        Command Invoker
+    :param description: str
+        The description needed
+    :param ctx: disnake.Context
+        Command Context
+    :param inter: disnake.AppCmdInter
+        App Command
+    :param allowed_mentions:
+        The allowed mentions in a response.
+    """
+    user = await User.get(user_id)
+    response_deferred = await defer_inter(inter, ephemeral=True)
+    view = disnake.ui.View(timeout=None)
+    view.add_item(RoleDropdown(description))
+    await send_message(
+        key="choose_roles",
+        user=user,
+        view=view,
+        ephemeral=True,
+        response_deferred=response_deferred,
+        inter=inter,
+    )
+
+
+async def reaction_roles_post(inter: MessageInteraction, description, roles):
+    """
+    Post the reaction roles message
+
+    :param inter: AppCmdInter
+        Interaction Message
+    :param description: str
+        Content of the message.
+    :param roles: List[disnake.Role]
+        A list of discord roles.
+    """
+    view = disnake.ui.View(timeout=None)
+    for role in roles:
+        view.add_item(disnake.ui.Button(label=role.name, custom_id=role.id))
+    messages = await send_message(msg=description, channel=inter.channel, view=view)
+    for message in messages:
+        await ReactionRoleMessage.insert(message.id)
+
+
+async def handle_role_reaction_press(interaction: disnake.MessageInteraction):
+    """
+    Handles role reaction button presses.
+
+    A 'on_button_click' listener.
+
+    :param interaction: disnake.MessageInteraction
+        The interaction.
+    """
+    if interaction.message not in await ReactionRoleMessage.get_all():
+        return
+
+    role_id = int(interaction.component.custom_id)
+    member: disnake.Member = interaction.author
+    user = await User.get(member.id)
+    role = member.get_role(role_id)
+    if role:
+        await member.remove_roles(role, reason="Reaction Role Message")
+        await send_message(user=user, key="role_removed", inter=interaction, ephemeral=True)
+    else:
+        role = interaction.guild.get_role(role_id)
+        if role:
+            try:
+                await member.add_roles(role, reason="Reaction Role Message")
+                await send_message(user=user, key="role_added", inter=interaction, ephemeral=True)
+            except disnake.errors.Forbidden as e:
+                await send_message(user=user, key="no_permissions", inter=interaction, ephemeral=True)
+        else:
+            await send_message(user=user, key="role_not_found", inter=interaction, ephemeral=True)
+
+
+class RoleDropdown(disnake.ui.RoleSelect):
+    def __init__(self, desc):
+        self.desc = desc
+        super(RoleDropdown, self).__init__(min_values=1, max_values=25)
+
+    async def callback(self, interaction, /):
+        await reaction_roles_post(interaction, self.desc, self.values)
+        # prevent a failed interaction message.
+        await send_message(msg="Success.", inter=interaction, ephemeral=True)

@@ -1,10 +1,11 @@
-from typing import Union
+from typing import Union, List
 
 import disnake
 from models import Bot
 from disnake.ext import commands
 from disnake import ApplicationCommandInteraction as AppCmdInter, Permissions
 from cogs.moderator import helper
+from IreneAPIWrapper.models import ReactionRoleMessage
 
 
 class ModeratorCog(commands.Cog):
@@ -85,7 +86,6 @@ class ModeratorCog(commands.Cog):
     # ==============
     # SLASH COMMANDS
     # ==============
-
     @commands.slash_command(
         name="clear",
         description="Clear messages in the text channel.",
@@ -156,7 +156,19 @@ class ModeratorCog(commands.Cog):
             inter=inter, guild=inter.guild, allowed_mentions=self.allowed_mentions
         )
 
+    @commands.slash_command(name="reactionroles", description="Add reaction roles.")
+    async def slash_reaction_role(
+        self, inter: AppCmdInter, description="Press a button to get the role you want!"
+    ):
+        await helper.process_add_reaction_role(
+            inter.user.id,
+            description=description,
+            inter=inter,
+            allowed_mentions=self.allowed_mentions,
+        )
+
 
 def setup(bot: Bot):
     cog = ModeratorCog(bot)
+    bot.add_listener(helper.handle_role_reaction_press, "on_button_click")
     bot.add_cog(cog)

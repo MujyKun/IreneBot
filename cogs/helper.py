@@ -318,9 +318,11 @@ async def add_embed_footer_and_author(embed: disnake.Embed) -> disnake.Embed:
     return embed
 
 
-async def defer_inter(inter):
+async def defer_inter(inter, ephemeral=False):
     """Defer an interaction."""
     response_deferred = False
     if inter:
-        response_deferred = await inter.response.defer(with_message=True)
+        response_deferred = await inter.response.defer(
+            with_message=True, ephemeral=ephemeral
+        )
     return response_deferred

@@ -77,7 +77,11 @@ class Bot(AutoShardedBot):
             preload.names
         ) = (
             preload.bloodtypes
-        ) = preload.locations = preload.auto_media = preload.reminders = True
+        ) = (
+            preload.locations
+        ) = (
+            preload.auto_media
+        ) = preload.reminders = preload.reaction_role_messages = True
         return preload
 
     async def prefix_check(

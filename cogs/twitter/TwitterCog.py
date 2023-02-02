@@ -138,18 +138,13 @@ class TwitterCog(commands.Cog):
                         continue
 
                     timeline = await account.fetch_timeline()
-                    new_tweets: List[Tweet] = timeline.new_tweets
+                    # do not post retweets or replies.
+                    new_tweets: List[Tweet] = [tweet for tweet in timeline.new_tweets
+                                               if not tweet.is_reply and not tweet.is_retweet]
                     timeline.new_tweets = []  # reset the new tweets.
 
-                    if not new_tweets:
-                        continue
-
-                    # do not post retweets or replies.
-                    new_tweets = [tweet for tweet in new_tweets if not any([tweet.is_reply, tweet.is_retweet])]
-
-                    await helper.send_twitter_notifications(
-                        self.bot, account, new_tweets
-                    )
+                    if new_tweets:
+                        await helper.send_twitter_notifications(self.bot, account, new_tweets)
                 except Exception as e:
                     self.bot.logger.error(f"Twitter Notification (Iter) Error -> {e}")
                     print(f"{e}")

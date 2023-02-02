@@ -33,6 +33,9 @@ class ModeratorCog(commands.Cog):
     async def regular_add_emoji(
         self, ctx, emoji: Union[disnake.PartialEmoji, str], emoji_name="EmojiName"
     ):
+        if isinstance(emoji, disnake.PartialEmoji) and emoji_name == "EmojiName":
+            emoji_name = emoji.name
+
         await helper.process_add_emoji(
             emoji=emoji, emoji_name=emoji_name, user_id=ctx.author.id, ctx=ctx
         )

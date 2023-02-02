@@ -120,7 +120,7 @@ class TwitterCog(commands.Cog):
             allowed_mentions=self.allowed_mentions,
         )
 
-    @tasks.loop(minutes=2, seconds=45, reconnect=True)
+    @tasks.loop(minutes=3, seconds=0, reconnect=True)
     async def twitter_updates(self):
         """
         Send updates to discord channels when a Twitter account posts.
@@ -143,6 +143,9 @@ class TwitterCog(commands.Cog):
 
                     if not new_tweets:
                         continue
+
+                    # do not post retweets or replies.
+                    new_tweets = [tweet for tweet in new_tweets if not any([tweet.is_reply, tweet.is_retweet])]
 
                     await helper.send_twitter_notifications(
                         self.bot, account, new_tweets

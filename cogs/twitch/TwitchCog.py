@@ -131,7 +131,12 @@ class TwitchCog(commands.Cog):
 
             self._loop_running = True
 
-            accounts = await TwitchAccount.get_all()
+            # removes accounts that have no channels following
+            accounts = [acc for acc in await TwitchAccount.get_all() if acc]
+
+            if not accounts:
+                return
+
             _live_statuses: Dict[str, bool] = await TwitchAccount.check_live_bulk(
                 accounts=accounts
             )

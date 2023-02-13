@@ -131,12 +131,10 @@ class TwitterCog(commands.Cog):
 
             self._loop_running = True
 
-            accounts = list(await TwitterAccount.get_all())
+            # checks if any channels are following the account.
+            accounts = list(acc for acc in await TwitterAccount.get_all() if acc)
             for account in accounts:
                 try:
-                    if not account:  # checks if any channels are following the account.
-                        continue
-
                     timeline = await account.fetch_timeline()
                     # do not post retweets or replies.
                     new_tweets: List[Tweet] = [tweet for tweet in timeline.new_tweets

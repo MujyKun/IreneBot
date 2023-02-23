@@ -959,35 +959,37 @@ async def process_loop_auto_aff(bot):
                 aff_time, NEXT_POST_KEYWORD
             ):
                 continue
-
-            media = await Media.get_random(
-                object_id=aff_time.affiliation_id, affiliation=True
-            )
-            if not media:
-                continue
-
-            url = await media.fetch_image_host_url()
-
-            text_channel = bot.get_channel(auto_media.id)
-            if not text_channel:
-                text_channel = await bot.fetch_channel(auto_media.id)
-
-            if not text_channel:
-                continue
-
             try:
-                await send_message(msg=f"{url}", channel=text_channel)
-            except disnake.Forbidden:
-                # Only temporarily remove the channel. After the bot's next fetch, it will try again.
-                await auto_media.remove_from_cache(aff_time=aff_time)
-            except Exception as e:
-                bot.logger.error(f"Auto Affiliation (Inner) Loop Error -> {e}")
+                media = await Media.get_random(
+                    object_id=aff_time.affiliation_id, affiliation=True
+                )
+                if not media:
+                    continue
 
-            setattr(
-                aff_time,
-                NEXT_POST_KEYWORD,
-                datetime.now() + timedelta(hours=aff_time.hours_after),
-            )
+                url = await media.fetch_image_host_url()
+
+                text_channel = bot.get_channel(auto_media.id)
+                if not text_channel:
+                    text_channel = await bot.fetch_channel(auto_media.id)
+
+                if not text_channel:
+                    continue
+
+                try:
+                    await send_message(msg=f"{url}", channel=text_channel)
+                except disnake.Forbidden:
+                    # Only temporarily remove the channel. After the bot's next fetch, it will try again.
+                    await auto_media.remove_from_cache(aff_time=aff_time)
+                except Exception as e:
+                    bot.logger.error(f"Auto Affiliation (Inner) Loop Error -> {e}")
+
+                setattr(
+                    aff_time,
+                    NEXT_POST_KEYWORD,
+                    datetime.now() + timedelta(hours=aff_time.hours_after),
+                )
+            except Exception as e:
+                bot.logger.error(f"Auto Affiliation (Outer) Loop Error -> {e}")
 
 
 _distance_cache: Dict[str, Dict[str, float]] = dict()

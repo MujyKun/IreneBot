@@ -35,6 +35,8 @@ class PlayerScore(UserStatus):
         return f"{self.disnake_user.display_name} -> {self.status.score}."
 
 
+from .CommandTypes import UserCommand, Command, RegularCommand, \
+    MessageCommand, SubCommand, SlashCommand, get_cog_dicts
 from .Bracket import Bracket, PvP
 from .Game import Game
 from .BaseRoundGame import BaseRoundGame

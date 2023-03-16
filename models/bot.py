@@ -11,6 +11,7 @@ from util import logger
 from IreneAPIWrapper.models import IreneAPIClient, Preload, User, Guild, Notification
 from IreneAPIWrapper.exceptions import APIError
 from cogs import helper
+from models import UserCommand, RegularCommand, MessageCommand, SlashCommand, get_cog_dicts
 import disnake
 
 
@@ -85,7 +86,7 @@ class Bot(AutoShardedBot):
         return preload
 
     async def prefix_check(
-        self, bot: AutoShardedBot, msg: disnake.Message
+            self, bot: AutoShardedBot, msg: disnake.Message
     ) -> List[str]:
         """Get a list of prefixes for a Guild."""
         default = [self.default_prefix]
@@ -147,12 +148,12 @@ class Bot(AutoShardedBot):
         )
 
     async def _ensure_role(
-        self,
-        role_to_find: int,
-        guild: disnake.Guild,
-        async_callable_name: str,
-        attr_flag: str,
-        type_desc=None,
+            self,
+            role_to_find: int,
+            guild: disnake.Guild,
+            async_callable_name: str,
+            attr_flag: str,
+            type_desc=None,
     ):
         """
         role_to_find: int
@@ -185,9 +186,9 @@ class Bot(AutoShardedBot):
                 self.logger.info(f"Made {user.id} a {type_desc}.")
 
     async def handle_api_error(
-        self,
-        context: Union[disnake.Message, disnake.ext.commands.Context],
-        exception: APIError,
+            self,
+            context: Union[disnake.Message, disnake.ext.commands.Context],
+            exception: APIError,
     ):
         logger.error(f"{exception}")
         bug_channel_id = self.keys.bug_channel_id
@@ -206,7 +207,7 @@ class Bot(AutoShardedBot):
             logger.error(f"Could not send embedded error to channel - {e}")
 
     async def on_slash_command_error(
-        self, interaction: AppCmdInter, exception: errors.CommandError
+            self, interaction: AppCmdInter, exception: errors.CommandError
     ) -> None:
         if isinstance(exception, errors.NotOwner):
             return await interaction.send(
@@ -267,10 +268,10 @@ class Bot(AutoShardedBot):
     async def check_for_notification(self, message: disnake.Message):
         """Check for a user notification and send it out."""
         if (
-            not message.guild
-            or message.guild is None
-            or not message.content
-            or message.author.bot
+                not message.guild
+                or message.guild is None
+                or not message.content
+                or message.author.bot
         ):
             return
 
@@ -292,7 +293,7 @@ class Bot(AutoShardedBot):
             [Click to go to the Message]({message.jump_url})        
             """
             if (
-                noti.user_id == message.author.id
+                    noti.user_id == message.author.id
             ):  # should not be notified of their own message.
                 continue
 
@@ -329,12 +330,12 @@ class Bot(AutoShardedBot):
             await self._check_role_update(member=after, **func_kwargs)
 
     async def _check_role_update(
-        self,
-        member: disnake.Member,
-        role_to_find: int,
-        async_callable_name: str,
-        attr_flag: str,
-        type_desc=None,
+            self,
+            member: disnake.Member,
+            role_to_find: int,
+            async_callable_name: str,
+            attr_flag: str,
+            type_desc=None,
     ):
         """
         member: disnake.Member
@@ -374,8 +375,10 @@ class Bot(AutoShardedBot):
             self.logger.info(f"Removed {user.id} as a Patron.")
 
     async def update_local_commands(self):
-        all_slash_cmds = self.all_slash_commands
-        all_regular_cmds = self.all_commands
-        all_msg_cmds = self.all_message_commands
-        all_user_cmds = self.all_user_commands
-        _ = None
+        _commands = {
+            'Message Commands': get_cog_dicts(self.all_message_commands.values(), MessageCommand),
+            'Slash Commands': get_cog_dicts(self.all_slash_commands.values(), SlashCommand),
+            'Regular Commands': get_cog_dicts(self.all_commands.values(), RegularCommand),
+            'User Commands': get_cog_dicts(self.all_user_commands.values(), UserCommand)
+        }
+        await self.api.update_commands(_commands)

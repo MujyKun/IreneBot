@@ -1,0 +1,17 @@
+cogs_list = [
+    "botowner.BotOwnerCog",
+    "biasgame.BiasGameCog",
+    "groupmembers.GroupMembersCog",
+    "miscellaneous.MiscellaneousCog",
+    "profile.ProfileCog",
+    "wolfram.WolframCog",
+    "guessinggame.GuessingGameCog",
+    "unscramblegame.UnscrambleGameCog",
+    "twitch.TwitchCog",
+    "twitter.TwitterCog",
+    "moderator.ModeratorCog",
+    "blockingmonitor.BlockingMonitorCog",
+    "usernotifications.UserNotificationsCog",
+    "interactions.InteractionsCog",
+    "reminders.RemindersCog",
+]

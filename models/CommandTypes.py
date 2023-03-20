@@ -37,10 +37,16 @@ class MessageCommand(Command):
 class SubCommand(Command):
     def __init__(self, command: slash_core.SubCommand):
         name = command.qualified_name
-        try:
+
+        description = None
+        if hasattr(command, "body"):
             description = command.body.description
-        except AttributeError:
+        elif hasattr(command, "description"):
             description = command.description
+
+        if not description or description == "-":
+            description = command.extras.get("description", "None")
+
         syntax = command.extras.get("syntax", "None")
         permissions = command.extras.get("permissions", "None")
         notes = command.extras.get("notes", "This is a sub-command.")
@@ -51,7 +57,7 @@ class SubCommand(Command):
 class SlashCommand(Command):
     def __init__(self, command: InvokableSlashCommand):
         name = command.body.name or "None"
-        description = command.extras.get("description", "None")
+        description = command.description or command.extras.get("description", "None")
         syntax = command.extras.get("syntax", f"Type /{name} in chat to see the syntax.")
         permissions = command.extras.get("permissions", "None")
         notes = command.extras.get("notes", "None")
@@ -65,14 +71,34 @@ class RegularCommand(Command):
         cog_name = f"{command.cog_name}" if command.cog_name else "None"
         name = f"{get_keys().bot_prefix}{command.name}"
         description = command.description
-        try:
-            syntax = HelpCommand().get_command_signature(command)
-        except AttributeError:
-            syntax = "None"
+        syntax = self.get_signature(command) or "None"
         permissions = command.extras.get("permissions", "None")
         notes = command.extras.get("notes", "None")
         children = [SubCommand(_command) for _command in getattr(command, "all_commands", {}).values()]
         super().__init__(cog_name=cog_name, name=name, description=description, syntax=syntax, permissions=permissions, notes=notes, children=children)
+
+    @staticmethod
+    def get_signature(command):
+        parent = command.parent
+        entries = []
+        while parent is not None:
+            if not parent.signature or parent.invoke_without_command:
+                entries.append(parent.name)
+            else:
+                entries.append(f"{parent.name} {parent.signature}")
+            parent = parent.parent
+        parent_sig = " ".join(reversed(entries))
+
+        if len(command.aliases) > 0:
+            aliases = "|".join(command.aliases)
+            fmt = f"[{command.name}|{aliases}]"
+            if parent_sig:
+                fmt = f"{parent_sig} {fmt}"
+            alias = fmt
+        else:
+            alias = command.name if not parent_sig else f"{parent_sig} {command.name}"
+
+        return f"{get_keys().bot_prefix}{alias} {command.signature}"
 
 
 class UserCommand(Command):

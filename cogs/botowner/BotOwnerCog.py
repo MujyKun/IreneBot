@@ -58,7 +58,7 @@ class BotOwnerCog(commands.Cog):
             allowed_mentions=self.allowed_mentions,
         )
 
-    @commands.group(name="interaction", description="Interaction commands")
+    @commands.group(name="interaction", description="Interaction commands", extras={'permissions': "Bot Owner"})
     async def regular_interaction(self, ctx: commands.Context):
         ...
 
@@ -118,11 +118,14 @@ class BotOwnerCog(commands.Cog):
         name="8ballresponse",
         description="Modify 8ball responses.",
         guild_ids=get_keys().bot_owner_only_servers,
+        extras={'permissions': "Bot Owner"}
     )
     async def eight_ball_response(self, inter: AppCmdInter):
         ...
 
-    @eight_ball_response.sub_command(name="add", description="Add an 8ball response.")
+    @eight_ball_response.sub_command(name="add", description="Add an 8ball response.",
+                                     extras={'permissions': "Bot Owner",
+                                             "syntax": "/8ballresponse add (response)"})
     async def add_eight_ball_response(
         self,
         inter: AppCmdInter,
@@ -136,7 +139,8 @@ class BotOwnerCog(commands.Cog):
         )
 
     @eight_ball_response.sub_command(
-        name="list", description="List all 8ball responses."
+        name="list", description="List all 8ball responses.",
+        extras={'permissions': "Bot Owner", "syntax": "/8ballresponse list"}
     )
     async def list_eight_ball_response(self, inter: AppCmdInter):
         await helper.process_list_eight_ball_responses(
@@ -144,7 +148,8 @@ class BotOwnerCog(commands.Cog):
         )
 
     @eight_ball_response.sub_command(
-        name="delete", description="Delete an 8ball response."
+        name="delete", description="Delete an 8ball response.",
+        extras={'permissions': "Bot Owner", "syntax": "/8ballresponse delete (response id)"}
     )
     async def delete_eight_ball_response(
         self,
@@ -162,11 +167,13 @@ class BotOwnerCog(commands.Cog):
         name="interaction",
         description="Interaction Commands",
         guild_ids=get_keys().bot_owner_only_servers,
+        extras={'permissions': "Bot Owner"}
     )
     async def interaction(self, inter: AppCmdInter):
         ...
 
-    @interaction.sub_command(name="add", description="Add an interaction")
+    @interaction.sub_command(name="add", description="Add an interaction",
+                             extras={'permissions': "Bot Owner", "syntax": "/interaction add (url) (type name)"})
     async def interaction_add(
         self,
         inter: AppCmdInter,
@@ -183,7 +190,8 @@ class BotOwnerCog(commands.Cog):
             allowed_mentions=self.allowed_mentions,
         )
 
-    @interaction.sub_command(name="delete", description="Delete an interaction")
+    @interaction.sub_command(name="delete", description="Delete an interaction",
+                             extras={'permissions': "Bot Owner", "syntax": "/interaction delete (url) (type name)"})
     async def interaction_delete(
         self,
         inter: AppCmdInter,
@@ -200,11 +208,15 @@ class BotOwnerCog(commands.Cog):
             allowed_mentions=self.allowed_mentions,
         )
 
-    @interaction.sub_command_group(name="type")
+    @interaction.sub_command_group(name="type",
+                                   extras={'permissions': "Bot Owner", "notes": "This is a sub-command group.",
+                                           "syntax": "/interaction type (add/delete) (type name)",
+                                           "description": "Modify Interaction Types"})
     async def interaction_type(self, inter: AppCmdInter):
         ...
 
-    @interaction_type.sub_command(name="add", description="Add an interaction type")
+    @interaction_type.sub_command(name="add", description="Add an interaction type",
+                                  extras={'permissions': "Bot Owner", "syntax": "/interaction type add (type name)"})
     async def interaction_type_add(self, inter: AppCmdInter, type_name):
         await helper.process_interaction_type_add(
             type_name=type_name,
@@ -214,7 +226,7 @@ class BotOwnerCog(commands.Cog):
         )
 
     @interaction_type.sub_command(
-        name="delete", description="Delete an interaction type"
+        name="delete", description="Delete an interaction type", extras={'permissions': "Bot Owner", "syntax": "/interaction type delete (type name)"}
     )
     async def interaction_type_delete(
         self,

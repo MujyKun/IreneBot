@@ -281,8 +281,9 @@ class GroupMembersCog(commands.Cog):
         inter: AppCmdInter,
         item_type: Literal["person", "group", "affiliation"],
         selection: str = commands.Param(autocomplete=helper.auto_complete_type),
-        file_type: Optional[str] = commands.Param(default=None,
-                                                  autocomplete=helper.auto_complete_file_type),
+        file_type: Optional[str] = commands.Param(
+            default=None, autocomplete=helper.auto_complete_file_type
+        ),
     ):
         """Display the media for a specific Person, Group, or Affiliation."""
         object_id = int(selection.split(")")[0])

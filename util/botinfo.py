@@ -31,6 +31,35 @@ def get_user_count(bot: Bot) -> int:
     return len(bot.users)
 
 
+def get_count_active_games():
+    """Get a list of active games for each game type."""
+    return [
+        len(get_gg(finished=False)),
+        len(get_ggg(finished=False)),
+        len(get_bg(finished=False)),
+        len(get_us(finished=False)),
+        len(get_other_games(finished=False)),
+    ]
+
+
+def get_count_unfinished_games():
+    """Get a list of total unfinished games for each game type."""
+    return [
+        len(get_gg()),
+        len(get_ggg()),
+        len(get_bg()),
+        len(get_us()),
+        len(get_other_games()),
+    ]
+
+
+def get_count_total_games():
+    """Get a list of total amounts for each game type."""
+    from models import ggs, gggs, uss, bgs, bjs, others, all_games
+
+    return [len(ggs), len(gggs), len(bgs), len(uss), len(others), len(all_games)]
+
+
 def get_gg(finished=True):
     from models import ggs
 

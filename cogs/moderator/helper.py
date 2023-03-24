@@ -6,13 +6,14 @@ from IreneAPIWrapper.models import Guild, User, ReactionRoleMessage
 from disnake.ext import commands
 from disnake import AppCmdInter, MessageInteraction
 from ..helper import create_guild_model, send_message, defer_inter
+from io import BytesIO
 
 PRUNE_MAX = 100
 PRUNE_MIN = 0
 
 
 async def process_prune(
-    channel, amount, user_id: int, ctx=None, inter=None, allowed_mentions=None
+        channel, amount, user_id: int, ctx=None, inter=None, allowed_mentions=None
 ):
     """Process the prune/clear command."""
     user = await User.get(user_id)
@@ -40,12 +41,12 @@ async def process_prune(
 
 
 async def process_prefix_add_remove(
-    guild: disnake.Guild,
-    prefix: str,
-    ctx: commands.Context = None,
-    inter: AppCmdInter = None,
-    allowed_mentions=None,
-    add=False,
+        guild: disnake.Guild,
+        prefix: str,
+        ctx: commands.Context = None,
+        inter: AppCmdInter = None,
+        allowed_mentions=None,
+        add=False,
 ):
     """Add a command prefix to a guild.
 
@@ -78,12 +79,12 @@ async def process_prefix_add_remove(
 
 
 async def process_add_emoji(
-    emoji,
-    emoji_name,
-    user_id,
-    ctx: commands.Context = None,
-    inter: AppCmdInter = None,
-    allowed_mentions=None,
+        emoji,
+        emoji_name,
+        user_id,
+        ctx: commands.Context = None,
+        inter: AppCmdInter = None,
+        allowed_mentions=None,
 ):
     """
     Process the adding of an emoji to a server.
@@ -147,11 +148,94 @@ async def process_add_emoji(
     )
 
 
+async def process_add_sticker(
+        sticker_url,
+        sticker_name,
+        user_id,
+        ctx: commands.Context = None,
+        inter: AppCmdInter = None,
+        allowed_mentions=None,
+):
+    """
+    Process the adding of an emoji to a server.
+
+    :param sticker_url: str
+        The sticker to add.
+    :param sticker_name: str
+        The sticker name.
+    :param user_id: int
+        The command user's ID.
+    :param ctx: commands.Context
+        Context of the command.
+    :param inter: AppCmdInter
+        App Command Context
+    :param allowed_mentions: disnake.AllowedMentions
+        The settings for allowed mentions.
+    """
+    response_deferred = await defer_inter(inter)
+    user = await User.get(user_id)
+    args = tuple()
+    key = "add_sticker_fail"
+
+    if not sticker_url and ctx:
+        if ctx.message.stickers:
+            sticker = ctx.message.stickers[0]
+            sticker_url = sticker.url
+            sticker_name = sticker_name if sticker_name else sticker.name
+        else:
+            key = "no_sticker"
+
+    if key != "no_sticker":
+        if not sticker_name or len(sticker_name) < 2:
+            sticker_name = "StickerName"
+
+        if ctx:
+            http_session = ctx.bot.http_session
+            guild = ctx.guild
+        else:
+            http_session = inter.bot.http_session
+            guild = inter.guild
+
+        try:
+            # sometimes discord has a webp url instead of png just for display purposes.
+            sticker_url = sticker_url.replace(".webp", ".png")
+            async with http_session.get(sticker_url) as r:
+                if r.status == 200:
+                    sticker_io_bytes = BytesIO(await r.read())
+                    sticker = await guild.create_sticker(name=sticker_name, emoji=":smile:",
+                                                         file=disnake.File(sticker_io_bytes),
+                                                         reason=f"Created by {user_id}")
+                    key = "add_sticker_success"
+        except aiohttp.InvalidURL:
+            key = "invalid_url"
+        except disnake.HTTPException as e:
+            if e.code == 30039:
+                key = "max_stickers"
+            elif e.code == 50046:
+                key = "png_needed"
+        except Exception as e:
+            logger.error(
+                f"{e} - Processing AddSticker command failed. "
+                f"Sticker: {sticker_url} -> STICKER NAME: {sticker_name}, User ID: {user_id}"
+            )
+            key = "add_sticker_fail"
+
+    return await send_message(
+        *args,
+        key=key,
+        user=user,
+        inter=inter,
+        ctx=ctx,
+        allowed_mentions=allowed_mentions,
+        response_deferred=response_deferred,
+    )
+
+
 async def process_prefix_list(
-    guild: disnake.Guild,
-    ctx: commands.Context = None,
-    inter: AppCmdInter = None,
-    allowed_mentions=None,
+        guild: disnake.Guild,
+        ctx: commands.Context = None,
+        inter: AppCmdInter = None,
+        allowed_mentions=None,
 ):
     """Send the command prefixes of a guild.
 
@@ -173,7 +257,7 @@ async def process_prefix_list(
 
 
 async def auto_complete_type_guild_prefixes(
-    inter: disnake.AppCmdInter, user_input: str
+        inter: disnake.AppCmdInter, user_input: str
 ) -> List[str]:
     """Auto-complete typing for the command prefixes in a guild."""
     await create_guild_model(inter.guild)
@@ -182,7 +266,7 @@ async def auto_complete_type_guild_prefixes(
 
 
 async def process_add_reaction_role(
-    user_id, description, ctx=None, inter=None, allowed_mentions=None
+        user_id, description, ctx=None, inter=None, allowed_mentions=None
 ):
     """
     Add a reaction role.
@@ -249,17 +333,25 @@ async def handle_role_reaction_press(interaction: disnake.MessageInteraction):
     role = member.get_role(role_id)
     if role:
         await member.remove_roles(role, reason="Reaction Role Message")
-        await send_message(user=user, key="role_removed", inter=interaction, ephemeral=True)
+        await send_message(
+            user=user, key="role_removed", inter=interaction, ephemeral=True
+        )
     else:
         role = interaction.guild.get_role(role_id)
         if role:
             try:
                 await member.add_roles(role, reason="Reaction Role Message")
-                await send_message(user=user, key="role_added", inter=interaction, ephemeral=True)
+                await send_message(
+                    user=user, key="role_added", inter=interaction, ephemeral=True
+                )
             except disnake.errors.Forbidden as e:
-                await send_message(user=user, key="no_permissions", inter=interaction, ephemeral=True)
+                await send_message(
+                    user=user, key="no_permissions", inter=interaction, ephemeral=True
+                )
         else:
-            await send_message(user=user, key="role_not_found", inter=interaction, ephemeral=True)
+            await send_message(
+                user=user, key="role_not_found", inter=interaction, ephemeral=True
+            )
 
 
 class RoleDropdown(disnake.ui.RoleSelect):

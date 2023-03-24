@@ -3,6 +3,7 @@ import random
 
 import IreneAPIWrapper.exceptions
 import asyncio
+import tracemalloc
 import disnake
 from disnake import ApplicationCommandInteraction as AppCmdInter
 from IreneAPIWrapper.models import (
@@ -16,7 +17,13 @@ from IreneAPIWrapper.models import (
 )
 from typing import List, Union, Optional, Tuple, Dict
 from util import logger, botembed
-from ..helper import send_message, in_game, defer_inter, get_channel_model
+from ..helper import (
+    send_message,
+    in_game,
+    defer_inter,
+    get_channel_model,
+    increment_trackable,
+)
 from disnake.ext import commands
 from keys import get_keys
 from difflib import SequenceMatcher
@@ -240,6 +247,7 @@ async def idol_send_on_message(bot, message: disnake.Message, prefixes: List):
     loop = asyncio.get_event_loop()
     coro = process_message_idol_call(bot, message, content)
     future = asyncio.run_coroutine_threadsafe(coro, loop)
+    await increment_trackable("idol_commands_used")
 
 
 async def get_media_from_pool(object_pool: List[Union[Person, Group]]):

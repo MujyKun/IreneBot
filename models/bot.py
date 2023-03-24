@@ -11,7 +11,13 @@ from util import logger
 from IreneAPIWrapper.models import IreneAPIClient, Preload, User, Guild, Notification
 from IreneAPIWrapper.exceptions import APIError
 from cogs import helper
-from models import UserCommand, RegularCommand, MessageCommand, SlashCommand, get_cog_dicts
+from models import (
+    UserCommand,
+    RegularCommand,
+    MessageCommand,
+    SlashCommand,
+    get_cog_dicts,
+)
 import disnake
 
 
@@ -86,7 +92,7 @@ class Bot(AutoShardedBot):
         return preload
 
     async def prefix_check(
-            self, bot: AutoShardedBot, msg: disnake.Message
+        self, bot: AutoShardedBot, msg: disnake.Message
     ) -> List[str]:
         """Get a list of prefixes for a Guild."""
         default = [self.default_prefix]
@@ -148,12 +154,12 @@ class Bot(AutoShardedBot):
         )
 
     async def _ensure_role(
-            self,
-            role_to_find: int,
-            guild: disnake.Guild,
-            async_callable_name: str,
-            attr_flag: str,
-            type_desc=None,
+        self,
+        role_to_find: int,
+        guild: disnake.Guild,
+        async_callable_name: str,
+        attr_flag: str,
+        type_desc=None,
     ):
         """
         role_to_find: int
@@ -186,9 +192,9 @@ class Bot(AutoShardedBot):
                 self.logger.info(f"Made {user.id} a {type_desc}.")
 
     async def handle_api_error(
-            self,
-            context: Union[disnake.Message, disnake.ext.commands.Context],
-            exception: APIError,
+        self,
+        context: Union[disnake.Message, disnake.ext.commands.Context],
+        exception: APIError,
     ):
         logger.error(f"{exception}")
         bug_channel_id = self.keys.bug_channel_id
@@ -205,10 +211,13 @@ class Bot(AutoShardedBot):
             return await context.channel.send(embed=embed)
         except disnake.errors.HTTPException as e:
             logger.error(f"Could not send embedded error to channel - {e}")
+        await helper.increment_trackable("api_errors_from_bot")
 
     async def on_slash_command_error(
-            self, interaction: AppCmdInter, exception: errors.CommandError
+        self, interaction: AppCmdInter, exception: errors.CommandError
     ) -> None:
+        await helper.increment_trackable("slash_command_errors")
+        await helper.increment_trackable("all_command_errors")
         if isinstance(exception, errors.NotOwner):
             return await interaction.send(
                 "Only the bot owner can use this command.", ephemeral=True
@@ -228,6 +237,7 @@ class Bot(AutoShardedBot):
             errors.UserNotFound,
             errors.EmojiNotFound,
         ]
+        await helper.increment_trackable("all_command_errors")
         if isinstance(exception, errors.CommandNotFound):
             return
         elif isinstance(exception, errors.CommandInvokeError):
@@ -260,18 +270,21 @@ class Bot(AutoShardedBot):
             )
         else:
             await self.process_commands(message)
+            await helper.increment_trackable("commands_used")
         await self.check_for_notification(message)
+        await helper.increment_trackable("messages_received")
 
     async def on_message_edit(self, before, after):
         await self.on_message(after)
+        await helper.increment_trackable("messages_edited")
 
     async def check_for_notification(self, message: disnake.Message):
         """Check for a user notification and send it out."""
         if (
-                not message.guild
-                or message.guild is None
-                or not message.content
-                or message.author.bot
+            not message.guild
+            or message.guild is None
+            or not message.content
+            or message.author.bot
         ):
             return
 
@@ -293,7 +306,7 @@ class Bot(AutoShardedBot):
             [Click to go to the Message]({message.jump_url})        
             """
             if (
-                    noti.user_id == message.author.id
+                noti.user_id == message.author.id
             ):  # should not be notified of their own message.
                 continue
 
@@ -330,12 +343,12 @@ class Bot(AutoShardedBot):
             await self._check_role_update(member=after, **func_kwargs)
 
     async def _check_role_update(
-            self,
-            member: disnake.Member,
-            role_to_find: int,
-            async_callable_name: str,
-            attr_flag: str,
-            type_desc=None,
+        self,
+        member: disnake.Member,
+        role_to_find: int,
+        async_callable_name: str,
+        attr_flag: str,
+        type_desc=None,
     ):
         """
         member: disnake.Member
@@ -376,9 +389,17 @@ class Bot(AutoShardedBot):
 
     async def update_local_commands(self):
         _commands = {
-            'Message Commands': get_cog_dicts(self.all_message_commands.values(), MessageCommand),
-            'Slash Commands': get_cog_dicts(self.all_slash_commands.values(), SlashCommand),
-            'Regular Commands': get_cog_dicts(self.all_commands.values(), RegularCommand),
-            'User Commands': get_cog_dicts(self.all_user_commands.values(), UserCommand)
+            "Message Commands": get_cog_dicts(
+                self.all_message_commands.values(), MessageCommand
+            ),
+            "Slash Commands": get_cog_dicts(
+                self.all_slash_commands.values(), SlashCommand
+            ),
+            "Regular Commands": get_cog_dicts(
+                self.all_commands.values(), RegularCommand
+            ),
+            "User Commands": get_cog_dicts(
+                self.all_user_commands.values(), UserCommand
+            ),
         }
         await self.api.update_commands(_commands)

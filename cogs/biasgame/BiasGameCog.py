@@ -13,8 +13,15 @@ class BiasGameCog(commands.Cog):
         self.bot = bot
         self.allowed_mentions = disnake.AllowedMentions(everyone=False, roles=False)
 
-    @commands.command(name="biasgame", description="Play a BiasGame", aliases=["bg"],
-                      extras={"notes": "aliases: bg", "syntax": "[biasgame|bg] [bracket_size=8] [gender=mixed]"})
+    @commands.command(
+        name="biasgame",
+        description="Play a BiasGame",
+        aliases=["bg"],
+        extras={
+            "notes": "aliases: bg",
+            "syntax": "[biasgame|bg] [bracket_size=8] [gender=mixed]",
+        },
+    )
     async def regular_biasgame(
         self, ctx: commands.Context, bracket_size: int = 8, gender: str = "mixed"
     ):

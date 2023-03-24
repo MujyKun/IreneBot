@@ -23,8 +23,11 @@ class BlockingMonitorCog(commands.Cog):
         """A local cog check to confirm the right owner."""
         return await ctx.bot.is_owner(ctx.author)
 
-    @commands.group(invoke_without_command=True, description="Handle tracking blocked threads.",
-                    extras={"permissions": "Bot Owner"})
+    @commands.group(
+        invoke_without_command=True,
+        description="Handle tracking blocked threads.",
+        extras={"permissions": "Bot Owner"},
+    )
     async def bmon(self, ctx):
         ...
 
@@ -32,7 +35,13 @@ class BlockingMonitorCog(commands.Cog):
         """A local cog check to confirm the right owner."""
         return await inter.bot.is_owner(inter.author)
 
-    @bmon.command(extras={"description": "Stop tracking.", "permissions": "Bot Owner", "extras": "bmon stop"})
+    @bmon.command(
+        extras={
+            "description": "Stop tracking.",
+            "permissions": "Bot Owner",
+            "extras": "bmon stop",
+        }
+    )
     async def stop(self, ctx):
         """Stop BlockingMonitor"""
         if not self.monitor_thread:
@@ -43,7 +52,13 @@ class BlockingMonitorCog(commands.Cog):
         self.monitor_thread = None
         print("Blocking Monitor Stopped.")
 
-    @bmon.command(extras={"description": "Start tracking.", "permissions": "Bot Owner", "extras": "bmon start"})
+    @bmon.command(
+        extras={
+            "description": "Start tracking.",
+            "permissions": "Bot Owner",
+            "extras": "bmon start",
+        }
+    )
     async def start(self, ctx):
         """Start BlockingMonitor"""
         if self.monitor_thread:

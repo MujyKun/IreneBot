@@ -72,7 +72,7 @@ async def get_subbed_msg(channel_id, guild: disnake.Guild, user_id: int):
         sub_msg += f"{account.name} is subscribed in: {display_channels}\n"
 
     # return await get_message(user, "tiktok_list", guild.name, sub_msg)
-    return await get_message(user, "tiktok_list", "this channel", sub_msg)
+    return await get_message(user, "tiktok_list", "this channel:\n", sub_msg)
 
 
 async def check_user_subscribe_limit(user_id: int) -> bool:
@@ -189,7 +189,7 @@ async def send_tiktok_notifications(
         role_msg = "Hey " + "@everyone" if not role_id else f"<@&{role_id}>"
         msg = (
             role_msg
-            + f", {tiktok_account.id} has posted on TikTok at https://www.tiktok.com/@{tiktok_account.name}/video/{video_id} ! "
+            + f", {tiktok_account.id} has posted on TikTok at https://www.tiktok.com/@{tiktok_account.name}/video/{video_id}\n"
             f"Make sure to go check it out!"
         )
 

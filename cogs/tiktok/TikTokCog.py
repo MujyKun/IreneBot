@@ -113,7 +113,14 @@ class TikTokCog(commands.Cog):
             allowed_mentions=self.allowed_mentions,
         )
 
-    @tasks.loop(minutes=1, reconnect=True)
+    @tiktok.sub_command(
+        name="list",
+        description="List all TikTok channels being followed in this channel.",
+    )
+    async def list(self, inter: AppCmdInter):
+        await inter.send(await helper.get_subbed_msg(inter.channel_id, inter.guild, inter.user.id))
+
+    @tasks.loop(minutes=5, reconnect=True)
     async def tiktok_updates(self):
         """
         Send updates to discord channels when a TikTok account gets a new post.
@@ -135,8 +142,10 @@ class TikTokCog(commands.Cog):
                 try:
                     video_id = await account.get_latest_video_id()
                     previous_video_id = getattr(account, latest_vid_key, None)
-                    setattr(account, latest_vid_key, video_id)
-                    if not previous_video_id or video_id == previous_video_id:
+                    setattr(account, latest_vid_key, video_id or -1)
+                    if not previous_video_id or \
+                            video_id == previous_video_id or \
+                            video_id is None:
                         continue
 
                     channels_needing_posts = [channel for channel in account]

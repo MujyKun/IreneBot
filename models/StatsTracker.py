@@ -53,8 +53,11 @@ class StatsTracker:
     def __init__(self, trackables: Dict[str, Trackable] = None):
         self.trackables: Dict[str, Trackable] = trackables or dict()
 
-    async def update_to_api(self):
+    async def update_to_api(self, logger=None):
         """Update all trackables to the API if they need to be."""
         for trackable in self.trackables.values():
             if trackable.ready_to_update:
-                await trackable.update()
+                try:
+                    await trackable.update()
+                except Exception as e:
+                    logger.warn(f"Failed to update Stats key {trackable.name} to value {trackable.value} -> {e}")

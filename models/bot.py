@@ -88,7 +88,7 @@ class Bot(AutoShardedBot):
             preload.locations
         ) = (
             preload.auto_media
-        ) = preload.reminders = preload.reaction_role_messages = True
+        ) = preload.reminders = preload.reaction_role_messages = preload.tiktok_subscriptions = True
         return preload
 
     async def prefix_check(

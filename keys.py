@@ -98,6 +98,7 @@ class Keys:
         self.auto_send_limit: int = 0
         self.twitter_update_limit: int = 0
         self.reminder_limit: int = 0
+        self.tiktok_limit: int = 0
 
         # Reactions/Emotes - Accepts xxxxxxxx and discord supported emojis (never include the U at the start)
         self.trash_emoji: str = ""
@@ -242,6 +243,7 @@ class Keys:
                 "auto_send_limit": make_int(getenv("LIM_AUTO_SEND")),
                 "twitter_update_limit": make_int(getenv("LIM_TWT_UPDATE")),
                 "reminder_limit": make_int(getenv("LIM_RMD")),
+                "tiktok_limit": make_int(getenv("LIM_TIKTOK")),
                 # Reactions/Emotes - Accepts xxxxxxxx and discord supported emojis (never include the U at the start)
                 "trash_emoji": get_emoji(getenv("TRASH_EM")),
                 "checkmark_emoji": get_emoji(getenv("CHECKMARK_EM")),

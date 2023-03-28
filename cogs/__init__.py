@@ -14,4 +14,5 @@ cogs_list = [
     "usernotifications.UserNotificationsCog",
     "interactions.InteractionsCog",
     "reminders.RemindersCog",
+    "tiktok.TikTokCog",
 ]

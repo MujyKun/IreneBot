@@ -142,7 +142,7 @@ class TikTokCog(commands.Cog):
                 try:
                     video_id = await account.get_latest_video_id()
                     previous_video_id = getattr(account, latest_vid_key, None)
-                    setattr(account, latest_vid_key, video_id or -1)
+                    setattr(account, latest_vid_key, video_id or previous_video_id or -1)
                     if not previous_video_id or \
                             video_id == previous_video_id or \
                             video_id is None:

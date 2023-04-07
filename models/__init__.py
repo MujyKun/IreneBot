@@ -1,3 +1,8 @@
+from typing import Dict
+from datetime import datetime
+from concurrent import futures
+
+
 def add_to_cache(obj):
     if isinstance(obj, GroupGuessingGame):
         gggs.append(obj)
@@ -19,6 +24,14 @@ bgs = []  # BiasGame
 bjs = []  # BlackJack
 others = []  # etc
 all_games = []
+
+
+# groupmembers search
+distance_between_words: Dict[str, Dict[str, float]] = dict()
+requests_today = 0
+user_requests: Dict[int, int] = {}
+current_day = datetime.now().day
+request_executor = futures.ThreadPoolExecutor(max_workers=10)
 
 
 from .StatsTracker import StatsTracker, Trackable

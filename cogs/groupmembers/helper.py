@@ -3,8 +3,8 @@ import random
 
 import IreneAPIWrapper.exceptions
 import asyncio
-import tracemalloc
 import disnake
+import models
 from disnake import ApplicationCommandInteraction as AppCmdInter
 from IreneAPIWrapper.models import (
     Person,
@@ -13,9 +13,8 @@ from IreneAPIWrapper.models import (
     User,
     Affiliation,
     AutoMedia,
-    AffiliationTime,
 )
-from typing import List, Union, Optional, Tuple, Dict
+from typing import List, Union, Optional, Tuple
 from util import logger, botembed
 from ..helper import (
     send_message,
@@ -28,13 +27,7 @@ from disnake.ext import commands
 from keys import get_keys
 from difflib import SequenceMatcher
 from dataclasses import dataclass
-from concurrent import futures
 
-
-_requests_today = 0
-_user_requests: Dict[int, int] = {}
-_current_day = datetime.now().day
-_executor = futures.ThreadPoolExecutor(max_workers=10)
 NEXT_POST_KEYWORD = "next_post"
 
 
@@ -78,14 +71,11 @@ class Comparison:
 
 async def check_user_requests():
     """Check the user requests and execute day resets"""
-    global _current_day
     current_day = datetime.now().day
-    if _current_day != current_day:
-        _current_day = current_day
-        global _user_requests
-        global _requests_today
-        _user_requests = {}
-        _requests_today = 0
+    if models.current_day != current_day:
+        models.current_day = current_day
+        models.user_requests = {}
+        models.requests_today = 0
 
 
 async def validate_message_idol_call(bot, message: disnake.Message, prefixes: List):
@@ -211,13 +201,12 @@ async def process_message_idol_call(bot, message, content):
 
 async def handle_user_media_usage(user):
     """Increment the user's usage and handle the reset for a new day."""
-    current_score = _user_requests.get(user.id)
-    _user_requests[user.id] = 1 if not current_score else current_score + 1
+    current_score = models.user_requests.get(user.id)
+    models.user_requests[user.id] = 1 if not current_score else current_score + 1
 
-    global _requests_today
-    if _requests_today % 10 == 0:
+    if models.requests_today % 10 == 0:
         await check_user_requests()
-    _requests_today += 1
+    models.requests_today += 1
 
 
 async def handle_non_patron_media_usage(
@@ -226,7 +215,7 @@ async def handle_non_patron_media_usage(
     """Handle non patron media usage.
 
     Returns True if it passes all checks."""
-    user_request = _user_requests.get(user.id)
+    user_request = models.user_requests.get(user.id)
     if user_request and user_request > get_keys().post_limit:
         await send_message(
             key="become_a_patron_limited",
@@ -549,8 +538,8 @@ def get_random_color():
 async def search_distance(search_word: str, target_word: str) -> Optional[float]:
     """Get the distance of two words/phrases with cache considered."""
     return (
-        _search_distance_dict(_distance_cache, search_word, target_word)
-        or _search_distance_dict(_distance_cache, target_word, search_word)
+        _search_distance_dict(models.distance_between_words, search_word, target_word)
+        or _search_distance_dict(models.distance_between_words, target_word, search_word)
         or await _get_string_distance(search_word, target_word)
     )
 
@@ -565,11 +554,12 @@ def _search_distance_dict(dictionary, key_word, compared_word):
 async def _get_string_distance(search_word: str, target_word: str):
     """Get the similarity of one string to another string."""
     loop = asyncio.get_running_loop()
-    similarity = await loop.run_in_executor(_executor, SequenceMatcher(a=search_word, b=target_word).ratio)
-    if _distance_cache.get(search_word):
-        _distance_cache[search_word][target_word] = similarity
+    similarity = await loop.run_in_executor(models.request_executor,
+                                            SequenceMatcher(a=search_word, b=target_word).ratio)
+    if models.distance_between_words.get(search_word):
+        models.distance_between_words[search_word][target_word] = similarity
     else:
-        _distance_cache[search_word] = {target_word: similarity}
+        models.distance_between_words[search_word] = {target_word: similarity}
     return similarity
 
 
@@ -1000,6 +990,3 @@ async def process_loop_auto_aff(bot):
                 )
             except Exception as e:
                 bot.logger.error(f"Auto Affiliation (Outer) Loop Error -> {e}")
-
-
-_distance_cache: Dict[str, Dict[str, float]] = dict()

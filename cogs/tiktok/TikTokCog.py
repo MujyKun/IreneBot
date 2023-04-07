@@ -7,6 +7,8 @@ from disnake import ApplicationCommandInteraction as AppCmdInter
 from . import helper
 from typing import List, Optional, Dict
 
+LATEST_VID_KEY = "latest_video_id"
+
 
 class TikTokCog(commands.Cog):
     def __init__(self, bot: Bot):
@@ -137,24 +139,29 @@ class TikTokCog(commands.Cog):
             if not accounts:
                 return
 
-            latest_vid_key = "latest_video_id"
             for account in accounts:
                 try:
-                    video_id = await account.get_latest_video_id()
-                    previous_video_id = getattr(account, latest_vid_key, None)
-                    setattr(account, latest_vid_key, video_id or previous_video_id or -1)
-                    if not previous_video_id or \
-                            video_id == previous_video_id or \
-                            video_id is None:
+                    video_id = await account.get_latest_video_id() or None
+                    previous_video_id = getattr(account, LATEST_VID_KEY, None)
+                    setattr(account, LATEST_VID_KEY, video_id or previous_video_id)
+
+                    if not previous_video_id or not video_id or video_id == previous_video_id:
                         continue
 
                     channels_needing_posts = [channel for channel in account]
+
                     success_channels = await helper.send_tiktok_notifications(
                         bot=self.bot,
                         channels=channels_needing_posts,
                         tiktok_account=account,
                         video_id=video_id
                     )
+
+                    self.bot.logger.info(f"Video ID: {video_id} "
+                                         f"| Previous Video ID: {previous_video_id} "
+                                         f"| Channels To Post: {[channel.id for channel in account]}"
+                                         f"| Successful Channels: {[channel.id for channel in success_channels]}")
+
                 except Exception as e:
                     self.bot.logger.error(f"TikTok Notification (Iter) Error -> {e}")
                     print(f"{e}")

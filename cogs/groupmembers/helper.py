@@ -981,7 +981,14 @@ async def process_loop_auto_aff(bot):
 
                 text_channel = bot.get_channel(auto_media.id)
                 if not text_channel:
-                    text_channel = await bot.fetch_channel(auto_media.id)
+                    try:
+                        text_channel = await bot.fetch_channel(auto_media.id)
+                    except disnake.Forbidden:
+                        # Permanently remove the aff time. We don't want to keep making requests.
+                        await auto_media.delete_aff_time(aff_time=aff_time)
+                    except disnake.NotFound:
+                        # Permanently remove the media.
+                        await auto_media.delete_aff_time(aff_time=aff_time)
 
                 if not text_channel:
                     continue
@@ -989,8 +996,8 @@ async def process_loop_auto_aff(bot):
                 try:
                     await send_message(msg=f"{url}", channel=text_channel)
                 except disnake.Forbidden:
-                    # Only temporarily remove the channel. After the bot's next fetch, it will try again.
-                    await auto_media.remove_from_cache(aff_time=aff_time)
+                    # Permanently remove the aff time. We don't want to keep making requests.
+                    await auto_media.delete_aff_time(aff_time=aff_time)
                 except Exception as e:
                     bot.logger.error(f"Auto Affiliation (Inner) Loop Error -> {e}")
 

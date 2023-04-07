@@ -157,7 +157,8 @@ class TikTokCog(commands.Cog):
                         video_id=video_id
                     )
 
-                    self.bot.logger.info(f"Video ID: {video_id} "
+                    self.bot.logger.info(f"Updated Tiktok Notifications for @{account.id}"
+                                         f"| Video ID: {video_id} "
                                          f"| Previous Video ID: {previous_video_id} "
                                          f"| Channels To Post: {[channel.id for channel in account]}"
                                          f"| Successful Channels: {[channel.id for channel in success_channels]}")

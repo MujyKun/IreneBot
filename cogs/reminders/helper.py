@@ -139,7 +139,7 @@ async def process_reminder_loop(bot):
     # performance wise, there should be no noticeable difference
     # unless the database has millions of rows.
     # we can also get from the cache if needed be in the future.
-    reminders: List[Reminder] = await Reminder.fetch_all()
+    reminders: List[Reminder] = await Reminder.fetch_all(log_creation=False)
     for reminder in reminders:
         date = reminder.date
         if not date.end:

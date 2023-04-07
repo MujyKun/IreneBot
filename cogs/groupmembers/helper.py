@@ -25,8 +25,10 @@ from ..helper import (
 )
 from disnake.ext import commands
 from keys import get_keys
-from difflib import SequenceMatcher
 from dataclasses import dataclass
+import Levenshtein
+from difflib import SequenceMatcher
+
 
 NEXT_POST_KEYWORD = "next_post"
 
@@ -288,6 +290,14 @@ async def auto_complete_type(inter: AppCmdInter, user_input: str) -> List[str]:
 async def auto_complete_file_type(inter: AppCmdInter, user_input: str) -> List[str]:
     """Autocomplete the file types for media."""
     return ["gif", "jfif", "mp4", "png", "jpg", "webm", "webp", "jpeg"]
+
+
+async def auto_complete_call_count(inter: AppCmdInter, user_input: str) -> List[int]:
+    """Autocomplete the counts for calling media."""
+    if (await User.get(inter.user.id)).is_considered_patron:
+        return [1, 2, 3, 4, 5]
+    else:
+        return [1]
 
 
 async def auto_complete_person(inter: AppCmdInter, user_input: str) -> List[str]:
@@ -553,9 +563,7 @@ def _search_distance_dict(dictionary, key_word, compared_word):
 
 async def _get_string_distance(search_word: str, target_word: str):
     """Get the similarity of one string to another string."""
-    loop = asyncio.get_running_loop()
-    similarity = await loop.run_in_executor(models.request_executor,
-                                            SequenceMatcher(a=search_word, b=target_word).ratio)
+    similarity = Levenshtein.ratio(search_word, target_word)
     if models.distance_between_words.get(search_word):
         models.distance_between_words[search_word][target_word] = similarity
     else:
@@ -571,42 +579,45 @@ async def process_call(
     inter=None,
     allowed_mentions=None,
     file_type=None,
+    count=1
 ):
     response_deferred = await defer_inter(inter)
     user = await User.get(user_id)
+
     if not user.is_considered_patron:
         if not await handle_non_patron_media_usage(
             user, inter=inter, ctx=ctx, response_deferred=response_deferred
         ):
             return
 
-    media: Media = await Media.get_random(
-        object_id=item_id,
-        group=item_type == "group",
-        person=item_type == "person",
-        affiliation=item_type == "affiliation",
-        file_type=file_type,
-    )
+    for i in range(count):
+        media: Media = await Media.get_random(
+            object_id=item_id,
+            group=item_type == "group",
+            person=item_type == "person",
+            affiliation=item_type == "affiliation",
+            file_type=file_type,
+        )
 
-    if not media:
-        return await send_message(
-            key="no_results",
+        if not media:
+            return await send_message(
+                key="no_results",
+                user=user,
+                ctx=ctx,
+                inter=inter,
+                allowed_mentions=allowed_mentions,
+                response_deferred=response_deferred,
+            )
+
+        if await send_message(
+            msg=await media.fetch_image_host_url(),
             user=user,
             ctx=ctx,
             inter=inter,
             allowed_mentions=allowed_mentions,
             response_deferred=response_deferred,
-        )
-
-    if await send_message(
-        msg=await media.fetch_image_host_url(),
-        user=user,
-        ctx=ctx,
-        inter=inter,
-        allowed_mentions=allowed_mentions,
-        response_deferred=response_deferred,
-    ):
-        await handle_user_media_usage(user)
+        ):
+            await handle_user_media_usage(user)
 
 
 async def process_card(

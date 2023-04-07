@@ -379,9 +379,6 @@ class BotOwnerCog(commands.Cog):
 
                 "user_requests_today": botinfo.get_today_user_requests(),
                 "numbers_of_distance_words": botinfo.get_numbers_of_distance_words(),
-                "distance_words_active_threads": botinfo.get_distance_words_active_threads(),
-
-
             }
 
             for key, value in trackables_to_update.items():

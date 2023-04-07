@@ -31,7 +31,6 @@ distance_between_words: Dict[str, Dict[str, float]] = dict()
 requests_today = 0
 user_requests: Dict[int, int] = {}
 current_day = datetime.now().day
-request_executor = futures.ThreadPoolExecutor(max_workers=10)
 
 
 from .StatsTracker import StatsTracker, Trackable

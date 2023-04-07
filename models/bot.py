@@ -217,7 +217,7 @@ class Bot(AutoShardedBot):
     async def on_slash_command_error(
         self, interaction: AppCmdInter, exception: errors.CommandError
     ) -> None:
-        inter = await defer_inter(interaction, True)
+        inter = (await defer_inter(interaction, True)) or interaction
         await helper.increment_trackable("slash_command_errors")
         await helper.increment_trackable("all_command_errors")
 

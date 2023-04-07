@@ -28,10 +28,13 @@ from disnake.ext import commands
 from keys import get_keys
 from difflib import SequenceMatcher
 from dataclasses import dataclass
+from concurrent import futures
+
 
 _requests_today = 0
 _user_requests: Dict[int, int] = {}
 _current_day = datetime.now().day
+_executor = futures.ThreadPoolExecutor(max_workers=10)
 NEXT_POST_KEYWORD = "next_post"
 
 
@@ -556,14 +559,13 @@ def _search_distance_dict(dictionary, key_word, compared_word):
     """Search the distance dictionary for saved ratios."""
     cache = dictionary.get(key_word)
     if cache:
-        similarity = cache.get(compared_word)
-        if similarity:
-            return similarity
+        return cache.get(compared_word)  # similarity
 
 
 async def _get_string_distance(search_word: str, target_word: str):
     """Get the similarity of one string to another string."""
-    similarity = SequenceMatcher(a=search_word, b=target_word).ratio()
+    loop = asyncio.get_running_loop()
+    similarity = await loop.run_in_executor(_executor, SequenceMatcher(a=search_word, b=target_word).ratio)
     if _distance_cache.get(search_word):
         _distance_cache[search_word][target_word] = similarity
     else:

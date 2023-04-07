@@ -19,6 +19,7 @@ from models import (
     get_cog_dicts,
 )
 import disnake
+from cogs.helper import defer_inter
 
 
 class Bot(AutoShardedBot):
@@ -216,17 +217,20 @@ class Bot(AutoShardedBot):
     async def on_slash_command_error(
         self, interaction: AppCmdInter, exception: errors.CommandError
     ) -> None:
+        inter = await defer_inter(interaction, True)
         await helper.increment_trackable("slash_command_errors")
         await helper.increment_trackable("all_command_errors")
+
         if isinstance(exception, errors.NotOwner):
-            return await interaction.send(
-                "Only the bot owner can use this command.", ephemeral=True
-            )
+            error_message = "Only the bot owner can use this command."
         elif isinstance(exception, errors.CheckFailure):
-            return await interaction.send(f"{exception}", ephemeral=True)
+            error_message = str(exception)
         else:
             logger.error(exception)
-            return await interaction.send(f"{exception}", ephemeral=True)
+            error_message = str(exception)
+
+        if error_message:
+            await inter.send(error_message, ephemeral=True)
 
     async def on_command_error(self, context, exception):
         # TODO: errors.Cooldown was not found - causes an AttributeError when put in return_error_to_user

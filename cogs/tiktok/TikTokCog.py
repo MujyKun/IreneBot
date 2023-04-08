@@ -49,7 +49,9 @@ class TikTokCog(commands.Cog):
         name="list", description="List the TikTok accounts subscribed to."
     )
     async def regular_list(self, ctx: commands.Context):
-        await ctx.send(await helper.get_subbed_msg(ctx.channel.id, ctx.guild, ctx.author.id))
+        await ctx.send(
+            await helper.get_subbed_msg(ctx.channel.id, ctx.guild, ctx.author.id)
+        )
 
     @regular_tiktok.command(
         name="remove", description="Unsubscribe from a TikTok account."
@@ -120,7 +122,9 @@ class TikTokCog(commands.Cog):
         description="List all TikTok channels being followed in this channel.",
     )
     async def list(self, inter: AppCmdInter):
-        await inter.send(await helper.get_subbed_msg(inter.channel_id, inter.guild, inter.user.id))
+        await inter.send(
+            await helper.get_subbed_msg(inter.channel_id, inter.guild, inter.user.id)
+        )
 
     @tasks.loop(minutes=5, reconnect=True)
     async def tiktok_updates(self):
@@ -145,7 +149,11 @@ class TikTokCog(commands.Cog):
                     previous_video_id = getattr(account, LATEST_VID_KEY, None)
                     setattr(account, LATEST_VID_KEY, video_id or previous_video_id)
 
-                    if not previous_video_id or not video_id or video_id == previous_video_id:
+                    if (
+                        not previous_video_id
+                        or not video_id
+                        or video_id == previous_video_id
+                    ):
                         continue
 
                     channels_needing_posts = [channel for channel in account]
@@ -154,14 +162,16 @@ class TikTokCog(commands.Cog):
                         bot=self.bot,
                         channels=channels_needing_posts,
                         tiktok_account=account,
-                        video_id=video_id
+                        video_id=video_id,
                     )
 
-                    self.bot.logger.info(f"Updated Tiktok Notifications for @{account.id}"
-                                         f"| Video ID: {video_id} "
-                                         f"| Previous Video ID: {previous_video_id} "
-                                         f"| Channels To Post: {[channel.id for channel in account]}"
-                                         f"| Successful Channels: {[channel.id for channel in success_channels]}")
+                    self.bot.logger.info(
+                        f"Updated Tiktok Notifications for @{account.id}"
+                        f"| Video ID: {video_id} "
+                        f"| Previous Video ID: {previous_video_id} "
+                        f"| Channels To Post: {[channel.id for channel in account]}"
+                        f"| Successful Channels: {[channel.id for channel in success_channels]}"
+                    )
 
                 except Exception as e:
                     self.bot.logger.error(f"TikTok Notification (Iter) Error -> {e}")

@@ -2,7 +2,7 @@ from typing import List
 from util import logger
 import aiohttp
 import disnake
-from IreneAPIWrapper.models import Guild, User, ReactionRoleMessage
+from IreneAPIWrapper.models import Guild, User, ReactionRoleMessage, BanPhrase
 from disnake.ext import commands
 from disnake import AppCmdInter, MessageInteraction
 from ..helper import create_guild_model, send_message, defer_inter
@@ -12,8 +12,120 @@ PRUNE_MAX = 100
 PRUNE_MIN = 0
 
 
+async def process_add_ban_phrase(
+    user_id,
+    phrase,
+    guild,
+    punishment,
+    log_channel_id,
+    ctx=None,
+    inter=None,
+    allowed_mentions=None,
+):
+    """Process adding a ban phrase."""
+    user = await User.get(user_id)
+    phrase = phrase.lower()
+
+    if any(
+        [
+            ban_phrase
+            for ban_phrase in await BanPhrase.get_all(guild_id=guild.id)
+            if ban_phrase.phrase.lower() == phrase
+        ]
+    ):
+        return await send_message(
+            key="ban_phrase_exists",
+            user=user,
+            ctx=ctx,
+            inter=inter,
+            allowed_mentions=allowed_mentions,
+        )
+
+    await BanPhrase.insert(guild.id, phrase, punishment, log_channel_id)
+
+    return await send_message(
+        key="ban_phrase_added",
+        user=user,
+        ctx=ctx,
+        inter=inter,
+        allowed_mentions=allowed_mentions,
+    )
+
+
+async def process_remove_ban_phrase(
+    user_id, phrase, guild, ctx=None, inter=None, allowed_mentions=None
+):
+    """Process removing a ban phrase."""
+    user = await User.get(user_id)
+    phrase = phrase.lower()
+
+    for ban_phrase in await BanPhrase.get_all(guild_id=guild.id):
+        if ban_phrase.phrase.lower() == phrase:
+            await ban_phrase.delete()
+            return await send_message(
+                key="ban_phrase_removed",
+                user=user,
+                ctx=ctx,
+                inter=inter,
+                allowed_mentions=allowed_mentions,
+            )
+
+    return await send_message(
+        key="ban_phrase_does_not_exist",
+        user=user,
+        ctx=ctx,
+        inter=inter,
+        allowed_mentions=allowed_mentions,
+    )
+
+
+async def auto_complete_type_guild_banned_phrases(
+    inter: disnake.AppCmdInter, user_input: str
+) -> List[str]:
+    """Auto-complete typing for the banned phrases in a guild."""
+    return [
+        ban_phrase.phrase
+        for ban_phrase in await BanPhrase.get_all(guild_id=inter.guild.id)
+    ][:24]
+
+
+async def process_list_ban_phrases(
+    user_id, guild, ctx=None, inter=None, allowed_mentions=None
+):
+    """Process listing all ban phrases."""
+    response_deferred = await defer_inter(inter)
+    user = await User.get(user_id)
+    ban_phrases = await BanPhrase.get_all(guild_id=guild.id)
+    log_channel_id = next(
+        (f"<#{ban_phrase.log_channel_id}>" for ban_phrase in ban_phrases), "a non-existent channel"
+    )
+    messages = "\n".join(str(ban_phrase) for ban_phrase in ban_phrases)
+
+    return await send_message(
+        log_channel_id,
+        messages,
+        key="list_ban_phrases",
+        user=user,
+        ctx=ctx,
+        inter=inter,
+        allowed_mentions=allowed_mentions,
+        response_deferred=response_deferred
+    )
+
+
+async def mute_user(user: disnake.Member, guild: disnake.Guild = None):
+    """Mute a user in a guild."""
+    muted_role = disnake.utils.get(guild.roles, name="Muted")
+    if not muted_role:
+        muted_role = await guild.create_role(name="Muted", reason="To mute users.")
+
+        for channel in guild.text_channels:
+            await channel.set_permissions(muted_role, send_messages=False)
+    await user.add_roles(muted_role)
+
+
 async def process_prune(
-        channel, amount, user_id: int, ctx=None, inter=None, allowed_mentions=None
+    channel, amount, user_id: int, ctx=None, inter=None, allowed_mentions=None
 ):
     """Process the prune/clear command."""
     user = await User.get(user_id)
@@ -41,12 +153,12 @@ async def process_prune(
 
 
 async def process_prefix_add_remove(
-        guild: disnake.Guild,
-        prefix: str,
-        ctx: commands.Context = None,
-        inter: AppCmdInter = None,
-        allowed_mentions=None,
-        add=False,
+    guild: disnake.Guild,
+    prefix: str,
+    ctx: commands.Context = None,
+    inter: AppCmdInter = None,
+    allowed_mentions=None,
+    add=False,
 ):
     """Add a command prefix to a guild.
 
@@ -79,12 +191,12 @@ async def process_prefix_add_remove(
 
 
 async def process_add_emoji(
-        emoji,
-        emoji_name,
-        user_id,
-        ctx: commands.Context = None,
-        inter: AppCmdInter = None,
-        allowed_mentions=None,
+    emoji,
+    emoji_name,
+    user_id,
+    ctx: commands.Context = None,
+    inter: AppCmdInter = None,
+    allowed_mentions=None,
 ):
     """
     Process the adding of an emoji to a server.
@@ -149,12 +261,12 @@ async def process_add_emoji(
 
 
 async def process_add_sticker(
-        sticker_url,
-        sticker_name,
-        user_id,
-        ctx: commands.Context = None,
-        inter: AppCmdInter = None,
-        allowed_mentions=None,
+    sticker_url,
+    sticker_name,
+    user_id,
+    ctx: commands.Context = None,
+    inter: AppCmdInter = None,
+    allowed_mentions=None,
 ):
     """
     Process the adding of an emoji to a server.
@@ -202,9 +314,12 @@ async def process_add_sticker(
             async with http_session.get(sticker_url) as r:
                 if r.status == 200:
                     sticker_io_bytes = BytesIO(await r.read())
-                    sticker = await guild.create_sticker(name=sticker_name, emoji=":smile:",
-                                                         file=disnake.File(sticker_io_bytes),
-                                                         reason=f"Created by {user_id}")
+                    sticker = await guild.create_sticker(
+                        name=sticker_name,
+                        emoji=":smile:",
+                        file=disnake.File(sticker_io_bytes),
+                        reason=f"Created by {user_id}",
+                    )
                     key = "add_sticker_success"
         except aiohttp.InvalidURL:
             key = "invalid_url"
@@ -232,10 +347,10 @@ async def process_add_sticker(
 
 
 async def process_prefix_list(
-        guild: disnake.Guild,
-        ctx: commands.Context = None,
-        inter: AppCmdInter = None,
-        allowed_mentions=None,
+    guild: disnake.Guild,
+    ctx: commands.Context = None,
+    inter: AppCmdInter = None,
+    allowed_mentions=None,
 ):
     """Send the command prefixes of a guild.
 
@@ -257,7 +372,7 @@ async def process_prefix_list(
 
 
 async def auto_complete_type_guild_prefixes(
-        inter: disnake.AppCmdInter, user_input: str
+    inter: disnake.AppCmdInter, user_input: str
 ) -> List[str]:
     """Auto-complete typing for the command prefixes in a guild."""
     await create_guild_model(inter.guild)
@@ -266,7 +381,7 @@ async def auto_complete_type_guild_prefixes(
 
 
 async def process_add_reaction_role(
-        user_id, description, ctx=None, inter=None, allowed_mentions=None
+    user_id, description, ctx=None, inter=None, allowed_mentions=None
 ):
     """
     Add a reaction role.

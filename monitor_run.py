@@ -18,21 +18,24 @@ import subprocess
 import time
 
 MAX_MEMORY_USAGE = 4096 * 1024 * 1024  # 4,096 MB
+RESTART_ON_MAX = True
 
 
 def monitor_process():
     # Get path to poetry executable
-    poetry_path = shutil.which('poetry')
+    poetry_path = shutil.which("poetry")
     if not poetry_path:
-        raise RuntimeError('Poetry executable not found')
+        raise RuntimeError("Poetry executable not found")
 
     while True:
-        process = subprocess.Popen([poetry_path, 'run', 'python', 'main.py'])
+        process = subprocess.Popen([poetry_path, "run", "python", "main.py"])
         while True:
             if psutil.pid_exists(process.pid):
                 mem_info = psutil.Process(process.pid).memory_info()
-                print(f"Current Process Memory Usage: {mem_info.rss / (1024 ** 2)} (MBs)")
-                if mem_info.rss > MAX_MEMORY_USAGE:
+                print(
+                    f"Current Process Memory Usage: {mem_info.rss / (1024 ** 2)} (MBs)"
+                )
+                if mem_info.rss > MAX_MEMORY_USAGE and RESTART_ON_MAX:
                     process.kill()
                     break
                 time.sleep(60)
@@ -40,5 +43,5 @@ def monitor_process():
                 break
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     monitor_process()

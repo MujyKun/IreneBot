@@ -549,7 +549,9 @@ async def search_distance(search_word: str, target_word: str) -> Optional[float]
     """Get the distance of two words/phrases with cache considered."""
     return (
         _search_distance_dict(models.distance_between_words, search_word, target_word)
-        or _search_distance_dict(models.distance_between_words, target_word, search_word)
+        or _search_distance_dict(
+            models.distance_between_words, target_word, search_word
+        )
         or await _get_string_distance(search_word, target_word)
     )
 
@@ -579,7 +581,7 @@ async def process_call(
     inter=None,
     allowed_mentions=None,
     file_type=None,
-    count=1
+    count=1,
 ):
     response_deferred = await defer_inter(inter)
     user = await User.get(user_id)

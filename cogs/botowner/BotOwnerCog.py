@@ -336,7 +336,10 @@ class BotOwnerCog(commands.Cog):
             inactive_games = botinfo.get_count_unfinished_games()
             total_games = botinfo.get_count_total_games()
 
-            current_memory_usage, peak_memory_usage = await main_helper.get_memory_usage()
+            (
+                current_memory_usage,
+                peak_memory_usage,
+            ) = await main_helper.get_memory_usage()
 
             trackables_to_update = {
                 "active_gg": active_games[0],
@@ -376,7 +379,6 @@ class BotOwnerCog(commands.Cog):
                 "reaction_role_messages": len(await ReactionRoleMessage.get_all()),
                 "peak_memory_usage": peak_memory_usage,
                 "current_memory_usage": current_memory_usage,
-
                 "user_requests_today": botinfo.get_today_user_requests(),
                 "numbers_of_distance_words": botinfo.get_numbers_of_distance_words(),
             }

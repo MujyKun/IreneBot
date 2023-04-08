@@ -14,18 +14,21 @@ def get_server_count(bot: Bot) -> int:
 def get_today_user_requests():
     """Returns the GroupMember search requests from today."""
     from models import requests_today
+
     return requests_today
 
 
 def get_numbers_of_distance_words():
     """Returns the number of distance words in key cache. Used for GroupMembers search."""
     from models import distance_between_words
+
     return len(distance_between_words)
 
 
 def get_distance_words_active_threads():
     """Returns the number of active threads used in GroupMembers search"""
     from models import request_executor
+
     return len(request_executor._threads) - request_executor._work_queue.qsize()
 
 

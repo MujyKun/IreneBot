@@ -50,6 +50,7 @@ class StatsTracker:
     Track the stats of :ref:`Trackable` objects throughout the bot.
 
     """
+
     def __init__(self, trackables: Dict[str, Trackable] = None):
         self.trackables: Dict[str, Trackable] = trackables or dict()
 
@@ -60,4 +61,6 @@ class StatsTracker:
                 try:
                     await trackable.update()
                 except Exception as e:
-                    logger.warn(f"Failed to update Stats key {trackable.name} to value {trackable.value} -> {e}")
+                    logger.warn(
+                        f"Failed to update Stats key {trackable.name} to value {trackable.value} -> {e}"
+                    )

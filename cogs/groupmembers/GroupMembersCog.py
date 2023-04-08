@@ -284,7 +284,9 @@ class GroupMembersCog(commands.Cog):
         file_type: Optional[str] = commands.Param(
             default=None, autocomplete=helper.auto_complete_file_type
         ),
-        count: int = commands.Param(default=1, autocomplete=helper.auto_complete_call_count)
+        count: int = commands.Param(
+            default=1, autocomplete=helper.auto_complete_call_count
+        ),
     ):
         """Display the media for a specific Person, Group, or Affiliation."""
         object_id = int(selection.split(")")[0])
@@ -295,7 +297,7 @@ class GroupMembersCog(commands.Cog):
             inter=inter,
             allowed_mentions=self.allowed_mentions,
             file_type=file_type,
-            count=count
+            count=count,
         )
 
     @commands.slash_command(

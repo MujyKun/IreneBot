@@ -16,7 +16,9 @@ from keys import get_keys
 from util import logger
 
 
-async def _subscribe(tiktok_username, user_id, guild: disnake.Guild, channel_id, role_id=None):
+async def _subscribe(
+    tiktok_username, user_id, guild: disnake.Guild, channel_id, role_id=None
+):
     """Internal subscribe."""
     channel_model = await get_channel_model(channel_id, guild_id=guild.id)
     channel_model.guild_id = guild.id
@@ -28,7 +30,9 @@ async def _subscribe(tiktok_username, user_id, guild: disnake.Guild, channel_id,
             tiktok_username, user_id=user_id, channel_id=channel_id, role_id=role_id
         )
     else:
-        return await account.subscribe(channel=channel_model, role_id=role_id, user_id=user_id)
+        return await account.subscribe(
+            channel=channel_model, role_id=role_id, user_id=user_id
+        )
 
 
 async def _unsubscribe(tiktok_username, channel_id, guild_id):
@@ -77,7 +81,9 @@ async def get_subbed_msg(channel_id, guild: disnake.Guild, user_id: int):
 
 async def check_user_subscribe_limit(user_id: int) -> bool:
     """Check the user is within the limit of TikTok accounts to subscribe to."""
-    num_of_users = sum([user_id in account.user_ids for account in await TikTokAccount.get_all()])
+    num_of_users = sum(
+        [user_id in account.user_ids for account in await TikTokAccount.get_all()]
+    )
     return num_of_users < get_keys().tiktok_limit
 
 
@@ -173,7 +179,9 @@ async def auto_complete_type_subbed_channel(
     inter: disnake.AppCmdInter, user_input: str
 ) -> List[str]:
     """Auto-complete typing for the TikTok accounts subscribed to in a channel."""
-    accounts: List[TikTokAccount] = await get_subscribed(inter.channel_id, inter.guild_id)
+    accounts: List[TikTokAccount] = await get_subscribed(
+        inter.channel_id, inter.guild_id
+    )
     return [account.name for account in accounts][:24]
 
 

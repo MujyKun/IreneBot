@@ -89,7 +89,9 @@ class Bot(AutoShardedBot):
             preload.locations
         ) = (
             preload.auto_media
-        ) = preload.reminders = preload.reaction_role_messages = preload.tiktok_subscriptions = True
+        ) = (
+            preload.reminders
+        ) = preload.reaction_role_messages = preload.tiktok_subscriptions = True
         return preload
 
     async def prefix_check(
@@ -217,7 +219,8 @@ class Bot(AutoShardedBot):
     async def on_slash_command_error(
         self, interaction: AppCmdInter, exception: errors.CommandError
     ) -> None:
-        inter = (await defer_inter(interaction, True)) or interaction
+        inter = interaction
+        # inter = (await defer_inter(interaction, True)) or interaction
         await helper.increment_trackable("slash_command_errors")
         await helper.increment_trackable("all_command_errors")
 

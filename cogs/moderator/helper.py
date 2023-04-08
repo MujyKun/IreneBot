@@ -23,6 +23,7 @@ async def process_add_ban_phrase(
     allowed_mentions=None,
 ):
     """Process adding a ban phrase."""
+    response_deferred = await defer_inter(inter)
     user = await User.get(user_id)
     phrase = phrase.lower()
 
@@ -39,6 +40,7 @@ async def process_add_ban_phrase(
             ctx=ctx,
             inter=inter,
             allowed_mentions=allowed_mentions,
+            response_deferred=response_deferred
         )
 
     await BanPhrase.insert(guild.id, phrase, punishment, log_channel_id)
@@ -49,6 +51,7 @@ async def process_add_ban_phrase(
         ctx=ctx,
         inter=inter,
         allowed_mentions=allowed_mentions,
+        response_deferred=response_deferred
     )
 
 
@@ -56,6 +59,7 @@ async def process_remove_ban_phrase(
     user_id, phrase, guild, ctx=None, inter=None, allowed_mentions=None
 ):
     """Process removing a ban phrase."""
+    response_deferred = await defer_inter(inter)
     user = await User.get(user_id)
     phrase = phrase.lower()
 
@@ -68,6 +72,7 @@ async def process_remove_ban_phrase(
                 ctx=ctx,
                 inter=inter,
                 allowed_mentions=allowed_mentions,
+                response_deferred=response_deferred
             )
 
     return await send_message(
@@ -76,6 +81,7 @@ async def process_remove_ban_phrase(
         ctx=ctx,
         inter=inter,
         allowed_mentions=allowed_mentions,
+        response_deferred=response_deferred
     )
 
 
@@ -96,13 +102,15 @@ async def process_list_ban_phrases(
     response_deferred = await defer_inter(inter)
     user = await User.get(user_id)
     ban_phrases = await BanPhrase.get_all(guild_id=guild.id)
-    log_channel_id = next(
-        (f"<#{ban_phrase.log_channel_id}>" for ban_phrase in ban_phrases), "a non-existent channel"
-    )
+
+    log_channel_ids = ', '.join(list(set(f"<#{ban_phrase.log_channel_id}>"
+                                         for ban_phrase in ban_phrases))) \
+                      or "a non-existent channel"
+
     messages = "\n".join(str(ban_phrase) for ban_phrase in ban_phrases)
 
     return await send_message(
-        log_channel_id,
+        log_channel_ids,
         messages,
         key="list_ban_phrases",
         user=user,
@@ -111,17 +119,6 @@ async def process_list_ban_phrases(
         allowed_mentions=allowed_mentions,
         response_deferred=response_deferred
     )
-
-
-async def mute_user(user: disnake.Member, guild: disnake.Guild = None):
-    """Mute a user in a guild."""
-    muted_role = disnake.utils.get(guild.roles, name="Muted")
-    if not muted_role:
-        muted_role = await guild.create_role(name="Muted", reason="To mute users.")
-
-        for channel in guild.text_channels:
-            await channel.set_permissions(muted_role, send_messages=False)
-    await user.add_roles(muted_role)
 
 
 async def process_prune(

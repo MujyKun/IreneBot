@@ -8,7 +8,7 @@ from disnake import ApplicationCommandInteraction as AppCmdInter
 from cogs import cogs_list
 from datetime import datetime
 from util import logger
-from IreneAPIWrapper.models import IreneAPIClient, Preload, User, Guild, Notification
+from IreneAPIWrapper.models import IreneAPIClient, Preload, User, Guild, Notification, BanPhrase
 from IreneAPIWrapper.exceptions import APIError
 from cogs import helper
 from models import (
@@ -17,9 +17,10 @@ from models import (
     MessageCommand,
     SlashCommand,
     get_cog_dicts,
+    PUNISHMENTS
 )
 import disnake
-from cogs.helper import defer_inter
+
 
 
 class Bot(AutoShardedBot):
@@ -91,7 +92,7 @@ class Bot(AutoShardedBot):
             preload.auto_media
         ) = (
             preload.reminders
-        ) = preload.reaction_role_messages = preload.tiktok_subscriptions = True
+        ) = preload.reaction_role_messages = preload.tiktok_subscriptions = preload.banned_phrases = True
         return preload
 
     async def prefix_check(
@@ -279,17 +280,76 @@ class Bot(AutoShardedBot):
             await self.process_commands(message)
             await helper.increment_trackable("commands_used")
         await self.check_for_notification(message)
+        await self.check_for_ban_phrase(message)
         await helper.increment_trackable("messages_received")
 
     async def on_message_edit(self, before, after):
         await self.on_message(after)
         await helper.increment_trackable("messages_edited")
 
+    async def check_for_ban_phrase(self, message: disnake.Message):
+        """Detect and handle banned phrases."""
+        if not message.guild:
+            return
+
+        ban_phrases = await BanPhrase.get_all(message.guild.id)
+        if not ban_phrases:
+            return
+
+        for ban_phrase in ban_phrases:
+            if ban_phrase.phrase.lower() not in message.clean_content:
+                continue
+
+            await self.delete_message(message)
+
+            log_message = f"<@{message.author.id}> has {PUNISHMENTS[ban_phrase.punishment]} " \
+                          f"for saying the phrase `{ban_phrase.phrase}`\n" \
+                          f"Original Message: {message.clean_content}"
+            await self.send_message_to_channel(ban_phrase.log_channel_id, log_message)
+
+            if ban_phrase.punishment == "mute":
+                await self.mute_user(message.author, message.guild)
+            elif ban_phrase.punishment == "ban":
+                await self.ban_user(user=message.author, reason="Ban Phrase")
+
+    async def mute_user(self, user: disnake.Member, guild: disnake.Guild = None):
+        """Mute a user in a guild."""
+        try:
+            muted_role = disnake.utils.get(guild.roles, name="Muted")
+            if not muted_role:
+                muted_role = await guild.create_role(name="Muted", reason="To mute users.")
+
+                for channel in guild.text_channels:
+                    await channel.set_permissions(muted_role, send_messages=False)
+            await user.add_roles(muted_role)
+        except Exception as e:
+            self.logger.info(f"Failed to mute user id {user.id} -> {e}")
+
+    async def ban_user(self, user: disnake.Member, reason=None):
+        """Ban a user in a guild."""
+        try:
+            await user.ban(reason=reason)
+        except Exception as e:
+            self.logger.info(f"Failed to ban user id {user.id} -> {e}")
+    async def send_message_to_channel(self, channel_id, message):
+        """Send a message to a channel."""
+        try:
+            channel = self.get_channel(channel_id) or await self.fetch_channel(channel_id)
+            await channel.send(message)
+        except Exception as e:
+            self.logger.info(f"Issue sending message -> {e}")
+
+    async def delete_message(self, message: disnake.Message):
+        """Delete a message."""
+        try:
+            await message.delete()
+        except Exception as e:
+            self.logger.info(f"Failed to delete message id {message.id} -> {e}")
+
     async def check_for_notification(self, message: disnake.Message):
         """Check for a user notification and send it out."""
         if (
             not message.guild
-            or message.guild is None
             or not message.content
             or message.author.bot
         ):

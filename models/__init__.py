@@ -33,6 +33,13 @@ user_requests: Dict[int, int] = {}
 current_day = datetime.now().day
 
 
+PUNISHMENTS = {
+    'mute': 'been muted',
+    'ban': 'been banned',
+    'delete': 'had their message deleted'
+}
+
+
 from .StatsTracker import StatsTracker, Trackable
 
 

@@ -241,6 +241,7 @@ async def idol_send_on_message(bot, message: disnake.Message, prefixes: List):
     loop = asyncio.get_event_loop()
     coro = process_message_idol_call(bot, message, content)
     future = asyncio.run_coroutine_threadsafe(coro, loop)
+
     await increment_trackable("idol_commands_used")
 
 

@@ -118,7 +118,9 @@ class ModeratorCog(commands.Cog):
     async def ban_phrases(self, inter: AppCmdInter):
         ...
 
-    @ban_phrases.sub_command(name="add", description="Add a banned phrase.")
+    @ban_phrases.sub_command(name="add", description="Add a banned phrase.",
+                             extras={"permissions": "Manage Messages, Ban Members",
+                                     "syntax": "/banphrases add (phrase) (punishment) (log channel)"},)
     async def ban_add(
         self,
         inter: AppCmdInter,
@@ -136,7 +138,9 @@ class ModeratorCog(commands.Cog):
             allowed_mentions=self.allowed_mentions,
         )
 
-    @ban_phrases.sub_command(name="remove", description="Delete a banned phrase.")
+    @ban_phrases.sub_command(name="remove", description="Delete a banned phrase.",
+                             extras={"permissions": "Manage Messages, Ban Members",
+                                     "syntax": "/banphrases remove (phrase)"})
     async def ban_remove(
         self,
         inter: AppCmdInter,
@@ -153,8 +157,9 @@ class ModeratorCog(commands.Cog):
         )
 
     @ban_phrases.sub_command(
-        name="list", description="List all the current banned phrases."
-    )
+        name="list", description="List all the current banned phrases.",
+        extras={"permissions": "Manage Messages, Ban Members",
+                "syntax": "/banphrases list"})
     async def ban_list(self, inter: AppCmdInter):
         await helper.process_list_ban_phrases(
             user_id=inter.author.id,
@@ -216,7 +221,9 @@ class ModeratorCog(commands.Cog):
     async def prefix(self, inter: AppCmdInter):
         ...
 
-    @prefix.sub_command(name="add", description="Add a guild prefix.")
+    @prefix.sub_command(name="add", description="Add a guild prefix.",
+                        extras={"permissions": "Manage Messages",
+                                "syntax": "/prefix add (prefix)"})
     async def prefix_add(
         self,
         inter: AppCmdInter,
@@ -230,7 +237,9 @@ class ModeratorCog(commands.Cog):
             allowed_mentions=self.allowed_mentions,
         )
 
-    @prefix.sub_command(name="remove", description="Delete a guild prefix.")
+    @prefix.sub_command(name="remove", description="Delete a guild prefix.",
+                        extras={"permissions": "Manage Messages",
+                                "syntax": "/prefix remove (prefix)"})
     async def prefix_remove(
         self,
         inter: AppCmdInter,
@@ -249,6 +258,7 @@ class ModeratorCog(commands.Cog):
     @prefix.sub_command(
         name="list",
         description="List all the current guild prefixes.",
+        extras={"permissions": "Manage Messages", "syntax": "/prefix list"}
     )
     async def prefix_list(self, inter: AppCmdInter):
         await helper.process_prefix_list(

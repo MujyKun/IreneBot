@@ -182,7 +182,9 @@ class GroupMembersCog(commands.Cog):
         ...
 
     @autoaff.sub_command(
-        name="add", description="Automatically send affiliation photos every 12 hours."
+        name="add", description="Automatically send affiliation photos every 12 hours.",
+        extras={"permissions": "Manage Messages",
+                "syntax": "/autoaff add (selection) [text channel] [hours to send after]"}
     )
     async def autoaff_add(
         self,
@@ -205,7 +207,9 @@ class GroupMembersCog(commands.Cog):
         )
 
     @autoaff.sub_command(
-        name="remove", description="Delete an affiliation that sends media."
+        name="remove", description="Delete an affiliation that sends media.",
+        extras={"permissions": "Manage Messages",
+                "syntax": "/autoaff remove (selection) [text channel]"}
     )
     async def autoaff_remove(
         self,

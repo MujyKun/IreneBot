@@ -29,11 +29,11 @@ class TikTokCog(commands.Cog):
 
     @regular_tiktok.command(name="add", description="Subscribe to a TikTok account.")
     async def regular_add(
-        self,
-        ctx: commands.Context,
-        tiktok_username: str,
-        channel: Optional[disnake.TextChannel] = None,
-        role: Optional[disnake.Role] = None,
+            self,
+            ctx: commands.Context,
+            tiktok_username: str,
+            channel: Optional[disnake.TextChannel] = None,
+            role: Optional[disnake.Role] = None,
     ):
         await helper.process_add(
             ctx=ctx,
@@ -57,10 +57,10 @@ class TikTokCog(commands.Cog):
         name="remove", description="Unsubscribe from a TikTok account."
     )
     async def regular_remove(
-        self,
-        ctx: commands.Context,
-        tiktok_username: str,
-        channel: Optional[disnake.TextChannel] = None,
+            self,
+            ctx: commands.Context,
+            tiktok_username: str,
+            channel: Optional[disnake.TextChannel] = None,
     ):
         await helper.process_remove(
             ctx=ctx,
@@ -82,13 +82,15 @@ class TikTokCog(commands.Cog):
     async def tiktok(self, inter: AppCmdInter):
         ...
 
-    @tiktok.sub_command(name="add", description="Add a TikTok channel to subscribe to.")
+    @tiktok.sub_command(name="add", description="Add a TikTok channel to subscribe to.",
+                        extras={"permissions": "Manage Messages",
+                                "syntax": "/tiktok add (tiktok username) [channel] [role]"})
     async def add(
-        self,
-        inter: AppCmdInter,
-        tiktok_username: str,
-        channel: Optional[disnake.TextChannel] = None,
-        role: Optional[disnake.Role] = None,
+            self,
+            inter: AppCmdInter,
+            tiktok_username: str,
+            channel: Optional[disnake.TextChannel] = None,
+            role: Optional[disnake.Role] = None,
     ):
         await helper.process_add(
             inter=inter,
@@ -100,14 +102,17 @@ class TikTokCog(commands.Cog):
             allowed_mentions=self.allowed_mentions,
         )
 
-    @tiktok.sub_command(name="remove", description="Unsubscribe from a TikTok channel.")
+    @tiktok.sub_command(name="remove", description="Unsubscribe from a TikTok channel.",
+                        extras={"permissions": "Manage Messages",
+                                "syntax": "/tiktok remove (tiktok username) [text channel]"}
+                        )
     async def remove(
-        self,
-        inter: AppCmdInter,
-        tiktok_username: str = commands.Param(
-            autocomplete=helper.auto_complete_type_subbed_channel
-        ),
-        channel: Optional[disnake.TextChannel] = None,
+            self,
+            inter: AppCmdInter,
+            tiktok_username: str = commands.Param(
+                autocomplete=helper.auto_complete_type_subbed_channel
+            ),
+            channel: Optional[disnake.TextChannel] = None,
     ):
         await helper.process_remove(
             inter=inter,
@@ -120,6 +125,8 @@ class TikTokCog(commands.Cog):
     @tiktok.sub_command(
         name="list",
         description="List all TikTok channels being followed in this channel.",
+        extras={"permissions": "Manage Messages",
+                "syntax": "/tiktok list"}
     )
     async def list(self, inter: AppCmdInter):
         await inter.send(
@@ -150,9 +157,9 @@ class TikTokCog(commands.Cog):
                     setattr(account, LATEST_VID_KEY, video_id or previous_video_id)
 
                     if (
-                        not previous_video_id
-                        or not video_id
-                        or video_id == previous_video_id
+                            not previous_video_id
+                            or not video_id
+                            or video_id == previous_video_id
                     ):
                         continue
 

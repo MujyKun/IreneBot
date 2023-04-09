@@ -77,7 +77,10 @@ class TwitterCog(commands.Cog):
     async def twitter(self, inter: AppCmdInter):
         ...
 
-    @twitter.sub_command(name="add", description="Subscribe to a Twitter account.")
+    @twitter.sub_command(name="add", description="Subscribe to a Twitter account.",
+                         extras={"permissions": "Manage Messages",
+                                 "syntax": "/twitter add (twitter username) (text channel) [role to mention]"}
+                         )
     async def add(
         self,
         inter: AppCmdInter,
@@ -96,13 +99,17 @@ class TwitterCog(commands.Cog):
         )
 
     @twitter.sub_command(
-        name="list", description="List the Twitter accounts subscribed to."
+        name="list", description="List the Twitter accounts subscribed to.",
+        extras={"permissions": "Manage Messages",
+                "syntax": "/twitter list"}
     )
     async def list(self, inter: AppCmdInter):
         await inter.send(await helper.get_subbed_msg(inter.guild, inter.user.id))
 
     @twitter.sub_command(
-        name="remove", description="Unsubscribe from a Twitter account."
+        name="remove", description="Unsubscribe from a Twitter account.",
+        extras={"permissions": "Manage Messages",
+                "syntax": "/twitter remove (twitter username) [text channel]"}
     )
     async def remove(
         self,

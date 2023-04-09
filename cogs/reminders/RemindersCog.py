@@ -16,13 +16,14 @@ class RemindersCog(commands.Cog):
     async def slash_reminders(self, inter):
         ...
 
-    @slash_reminders.sub_command(name="add", description="Add a reminder.")
+    @slash_reminders.sub_command(name="add", description="Add a reminder.",
+                                 extras={"syntax": "/reminders add (reason) (in how long) (period)"})
     async def slash_reminders_add(
-        self,
-        inter,
-        reason: str,
-        _in: commands.Range[1.0, 86400.0],
-        period: str = commands.Param(autocomplete=helper.get_periods),
+            self,
+            inter,
+            reason: str,
+            _in: commands.Range[1.0, 86400.0],
+            period: str = commands.Param(autocomplete=helper.get_periods),
     ):
         await helper.process_reminder_add(
             user_id=inter.author.id,
@@ -33,11 +34,12 @@ class RemindersCog(commands.Cog):
             allowed_mentions=self.allowed_mentions,
         )
 
-    @slash_reminders.sub_command(name="remove", description="Remove a reminder.")
+    @slash_reminders.sub_command(name="remove", description="Remove a reminder.",
+                                 extras={"syntax": "/reminders remove (reminder)"})
     async def slash_reminders_remove(
-        self,
-        inter,
-        choices: str = commands.Param(autocomplete=helper.auto_complete_get_reminders),
+            self,
+            inter,
+            choices: str = commands.Param(autocomplete=helper.auto_complete_get_reminders),
     ):
         remind_id = int(choices.split(")")[0])
         await helper.process_reminder_remove(

@@ -22,7 +22,6 @@ from models import (
 import disnake
 
 
-
 class Bot(AutoShardedBot):
     def __init__(self, default_bot_prefix, keys, dev_mode=False, **settings):
         super(Bot, self).__init__(self.prefix_check, **settings)
@@ -112,7 +111,7 @@ class Bot(AutoShardedBot):
         if guild and guild.prefixes:
             return guild.prefixes
 
-        return [self.default_prefix]
+        return default
 
     async def run_api_before_bot(self):
         """Run the API and the Bot afterwards."""
@@ -331,6 +330,7 @@ class Bot(AutoShardedBot):
             await user.ban(reason=reason)
         except Exception as e:
             self.logger.info(f"Failed to ban user id {user.id} -> {e}")
+
     async def send_message_to_channel(self, channel_id, message):
         """Send a message to a channel."""
         try:

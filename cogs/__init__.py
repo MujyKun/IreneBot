@@ -1,6 +1,7 @@
 cogs_list = [
     "botowner.BotOwnerCog",
     "biasgame.BiasGameCog",
+    "datamod.DataModCog",
     "groupmembers.GroupMembersCog",
     "miscellaneous.MiscellaneousCog",
     "profile.ProfileCog",
@@ -8,7 +9,6 @@ cogs_list = [
     "guessinggame.GuessingGameCog",
     "unscramblegame.UnscrambleGameCog",
     "twitch.TwitchCog",
-    "twitter.TwitterCog",
     "moderator.ModeratorCog",
     "blockingmonitor.BlockingMonitorCog",
     "usernotifications.UserNotificationsCog",

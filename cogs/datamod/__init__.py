@@ -1,1 +1,1 @@
-from . import helper, BotOwnerCog
+from . import helper, DataModCog

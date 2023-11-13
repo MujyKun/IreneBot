@@ -14,7 +14,6 @@ from IreneAPIWrapper.models import (
     InteractionType,
     AutoMedia,
     TwitchAccount,
-    TwitterAccount,
     Reminder,
     Notification,
     ReactionRoleMessage,
@@ -373,7 +372,6 @@ class BotOwnerCog(commands.Cog):
                 "eight_ball_responses": len(await EightBallResponse.get_all()),
                 "count_of_auto_media": len(await AutoMedia.get_all()),
                 "twitch_channels_followed": len(await TwitchAccount.get_all()),
-                "twitter_accounts_followed": len(await TwitterAccount.get_all()),
                 "active_user_reminders": len(await Reminder.get_all()),
                 "user_notifications": len(await Notification.get_all()),
                 "reaction_role_messages": len(await ReactionRoleMessage.get_all()),
@@ -393,8 +391,18 @@ class BotOwnerCog(commands.Cog):
             self.bot.logger.error(f"Stats Error -> {e}")
             self._loop_running = False
 
+    @tasks.loop(hours=24, reconnect=True)
+    async def status_update(self):
+        """Confirm the bots status is changed every 24 hours."""
+        try:
+            await self.bot.change_presence(activity=disnake.Activity(type=disnake.ActivityType.listening,
+                                                                     name=f"{get_keys().bot_prefix}help | Click Me!"))
+        except Exception as e:
+            self.bot.logger.error(f"Bot Status Update: {e}")
+
 
 def setup(bot: commands.AutoShardedBot):
     cog = BotOwnerCog(bot)
     bot.add_cog(cog)
     cog.stats_updates.start()
+    cog.status_update.start()

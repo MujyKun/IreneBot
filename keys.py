@@ -69,7 +69,6 @@ class Keys:
         # Channel IDS (CID)
         self.add_idol_channel_id: int = 0
         self.add_group_channel_id: int = 0
-        self.twitter_channel_id: int = 0
         self.data_mod_channel_id: int = 0
         self.bug_channel_id: int = 0
         self.suggest_channel_id: int = 0
@@ -92,11 +91,10 @@ class Keys:
         self.biasgame_directory: str = ""
         self.blackjack_directory: str = ""
 
-        # Restrictions (LIM  LIMIT) (TWT  Twitter) (RMD = REMINDER)
+        # Restrictions (LIM  LIMIT) (RMD = REMINDER)
         self.post_limit: int = 0
         self.no_vote_limit: int = 0
         self.auto_send_limit: int = 0
-        self.twitter_update_limit: int = 0
         self.reminder_limit: int = 0
         self.tiktok_limit: int = 0
 
@@ -107,14 +105,6 @@ class Keys:
         self.caution_emoji: str = ""
         self.previous_emoji: str = ""
         self.next_emoji: str = ""
-
-        # Twitter (TWT) Bot Information
-        self.twitter_account_id: str = ""
-        self.twitter_username: str = ""
-        self.twitter_consumer_key: str = ""
-        self.twitter_consumer_secret: str = ""
-        self.twitter_access_key: str = ""
-        self.twitter_access_secret: str = ""
 
         # Spotify (SPO)
         self.spotify_id: str = ""
@@ -218,7 +208,6 @@ class Keys:
                 # Channel IDS (CID)
                 "add_idol_channel_id": make_int(getenv("ADD_IDOL_CID")),
                 "add_group_channel_id": make_int(getenv("ADD_GROUP_CID")),
-                "twitter_channel_id": make_int(getenv("TWITTER_CID")),
                 "data_mod_channel_id": make_int(getenv("DM_LOG_CID")),
                 "bug_channel_id": make_int(getenv("BUG_CID")),
                 "suggest_channel_id": make_int(getenv("SUGGEST_CID")),
@@ -241,7 +230,6 @@ class Keys:
                 "post_limit": make_int(getenv("LIM_POST")),
                 "no_vote_limit": make_int(getenv("LIM_NO_VOTE")),
                 "auto_send_limit": make_int(getenv("LIM_AUTO_SEND")),
-                "twitter_update_limit": make_int(getenv("LIM_TWT_UPDATE")),
                 "reminder_limit": make_int(getenv("LIM_RMD")),
                 "tiktok_limit": make_int(getenv("LIM_TIKTOK")),
                 # Reactions/Emotes - Accepts xxxxxxxx and discord supported emojis (never include the U at the start)
@@ -251,13 +239,6 @@ class Keys:
                 "caution_emoji": get_emoji(getenv("CAUTION_EM")),
                 "previous_emoji": get_emoji(getenv("PREVIOUS_EM")),
                 "next_emoji": get_emoji(getenv("NEXT_EM")),
-                # Twitter (TWT) Bot Information
-                "twitter_account_id": getenv("TWT_ACCOUNT_ID"),
-                "twitter_username": getenv("TWT_USERNAME"),
-                "twitter_consumer_key": getenv("TWT_CONSUMER_KEY"),
-                "twitter_consumer_secret": getenv("TWT_CONSUMER_SECRET"),
-                "twitter_access_key": getenv("TWT_ACCESS_KEY"),
-                "twitter_access_secret": getenv("TWT_ACCESS_SECRET"),
                 # Spotify (SPO)
                 "spotify_id": getenv("SPO_ID"),
                 "spotify_secret": getenv("SPO_SECRET"),

@@ -56,8 +56,6 @@ class Bot(AutoShardedBot):
         ) = (
             preload.twitch_subscriptions
         ) = (
-            preload.twitter_accounts
-        ) = (
             preload.languages
         ) = (
             preload.affiliations

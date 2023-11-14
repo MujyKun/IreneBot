@@ -116,8 +116,8 @@ class GuessingGameCog(commands.Cog):
     async def guessinggame(
         self,
         inter: AppCmdInter,
-        max_rounds: commands.Range[3, 60] = 20,
-        timeout: commands.Range[5, 60] = 20,
+        max_rounds: commands.Range[int, 3, 60] = 20,
+        timeout: commands.Range[int, 5, 60] = 20,
         gender: Literal["male", "female", "mixed"] = "mixed",
         difficulty: Literal["easy", "medium", "hard"] = "medium",
         contains_nsfw: Literal["Yes", "No"] = "No",
@@ -141,8 +141,8 @@ class GuessingGameCog(commands.Cog):
     async def groupguessinggame(
         self,
         inter: AppCmdInter,
-        max_rounds: commands.Range[3, 60] = 20,
-        timeout: commands.Range[5, 60] = 20,
+        max_rounds: commands.Range[int, 3, 60] = 20,
+        timeout: commands.Range[int, 5, 60] = 20,
         gender: Literal["male", "female", "mixed"] = "mixed",
         difficulty: Literal["easy", "medium", "hard"] = "medium",
         contains_nsfw: Literal["Yes", "No"] = "No",

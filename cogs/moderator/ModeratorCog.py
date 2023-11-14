@@ -174,7 +174,7 @@ class ModeratorCog(commands.Cog):
         default_member_permissions=Permissions(manage_messages=True),
     )
     async def clear_messages(
-        self, inter: AppCmdInter, amount: commands.Range[1, 100] = 1
+        self, inter: AppCmdInter, amount: commands.Range[int, 1, 100] = 1
     ):
         await helper.process_prune(
             channel=inter.channel,

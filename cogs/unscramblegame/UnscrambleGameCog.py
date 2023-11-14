@@ -37,8 +37,8 @@ class UnscrambleGameCog(commands.Cog):
     async def unscramblegame(
         self,
         inter: AppCmdInter,
-        max_rounds: commands.Range[3, 60] = 20,
-        timeout: commands.Range[5, 60] = 20,
+        max_rounds: commands.Range[int, 3, 60] = 20,
+        timeout: commands.Range[int, 5, 60] = 20,
         gender: Literal["male", "female", "mixed"] = "mixed",
         difficulty: Literal["easy", "medium", "hard"] = "medium",
     ):

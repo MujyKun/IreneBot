@@ -22,7 +22,7 @@ class RemindersCog(commands.Cog):
             self,
             inter,
             reason: str,
-            _in: commands.Range[1.0, 86400.0],
+            _in: commands.Range[float, 1.0, 86400.0],
             period: str = commands.Param(autocomplete=helper.get_periods),
     ):
         await helper.process_reminder_add(

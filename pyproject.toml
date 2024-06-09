@@ -2,7 +2,7 @@
 name = "IreneBot"
 version = "2.0"
 description = "The client for the discord bot Irene."
-authors = ["A-Phamfam <alextampham3000@gmail.com>", "MujyKun <mujy@irenebot.com>"]
+authors = ["MujyKun <mujy@irenebot.com>", "A-Phamfam <alextampham3000@gmail.com>"]
 classifiers = [
         "Development Status :: 5 - Production/Stable",
         "License :: OSI Approved :: MIT License",
@@ -17,15 +17,18 @@ license = "MIT"
 python = "^3.9"
 aiohttp = "3.9.5"
 asyncpg = "0.25.0"
-python-dotenv = "0.19.2"
+python-dotenv = "0.20.0"
 black = "^22.8.0"
 pre-commit = "2.19.0"
-mypy = "0.930"
+mypy = "0.961"
 numexpr = "^2.8.1"
 
-#ireneapiwrapper = {git = "https://github.com/MujyKun/IreneAPIWrapper.git"}
-ireneapiwrapper = {path = "../IreneAPIWrapper", develop=true}
+#ireneapiwrapper = "2.4"
+ireneapiwrapper = {git = "https://github.com/MujyKun/IreneAPIWrapper.git"}
+#ireneapiwrapper = {path = "../IreneAPIWrapper", develop=true}
 disnake = "^2.5.1"
+Levenshtein = "^0.20.9"
+psutil = "^5.9.4"
 
 [tool.poetry.dev-dependencies]
 

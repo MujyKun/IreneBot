@@ -1,11 +1,10 @@
 import disnake
-from disnake.ext import commands
 from typing import Union, List, Dict, Any
 
 
 class SingleEmbedPages(disnake.ui.View):
     def __init__(
-            self, author: Union[disnake.User, disnake.Member], embeds: List[disnake.Embed]
+        self, author: Union[disnake.User, disnake.Member], embeds: List[disnake.Embed]
     ):
         super().__init__(timeout=None)
         self.embeds = embeds
@@ -15,11 +14,11 @@ class SingleEmbedPages(disnake.ui.View):
 
 class ShortEmbedPages(disnake.ui.View):
     def __init__(
-            self,
-            author: Union[disnake.User, disnake.Member],
-            embeds: List[disnake.Embed],
-            timeout: int = 60,
-            only_author: bool = True,
+        self,
+        author: Union[disnake.User, disnake.Member],
+        embeds: List[disnake.Embed],
+        timeout: int = 60,
+        only_author: bool = True,
     ):
         super().__init__(timeout=timeout)
         self.author = author
@@ -51,7 +50,7 @@ class ShortEmbedPages(disnake.ui.View):
 
     @disnake.ui.button(label="Prev", style=disnake.ButtonStyle.grey)
     async def prev_page(
-            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         self.current_embed_idx -= 1
         embed = self.embeds[self.current_embed_idx]
@@ -64,7 +63,7 @@ class ShortEmbedPages(disnake.ui.View):
 
     @disnake.ui.button(label="Next", style=disnake.ButtonStyle.grey)
     async def next_page(
-            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         self.current_embed_idx += 1
         embed = self.embeds[self.current_embed_idx]
@@ -78,11 +77,11 @@ class ShortEmbedPages(disnake.ui.View):
 
 class LongEmbedPages(disnake.ui.View):
     def __init__(
-            self,
-            author: Union[disnake.User, disnake.Member],
-            embeds: List[disnake.Embed],
-            timeout: int = 60,
-            only_author: bool = True,
+        self,
+        author: Union[disnake.User, disnake.Member],
+        embeds: List[disnake.Embed],
+        timeout: int = 60,
+        only_author: bool = True,
     ):
         super().__init__(timeout=timeout)
         self.author = author
@@ -117,7 +116,7 @@ class LongEmbedPages(disnake.ui.View):
 
     @disnake.ui.button(label="First", style=disnake.ButtonStyle.grey)
     async def first_page(
-            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         self.current_embed_idx = 0
         embed = self.embeds[self.current_embed_idx]
@@ -132,7 +131,7 @@ class LongEmbedPages(disnake.ui.View):
 
     @disnake.ui.button(label="Prev", style=disnake.ButtonStyle.grey)
     async def prev_page(
-            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         self.current_embed_idx -= 1
         embed = self.embeds[self.current_embed_idx]
@@ -147,7 +146,7 @@ class LongEmbedPages(disnake.ui.View):
 
     @disnake.ui.button(label="Next", style=disnake.ButtonStyle.grey)
     async def next_page(
-            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         self.current_embed_idx += 1
         embed = self.embeds[self.current_embed_idx]
@@ -162,7 +161,7 @@ class LongEmbedPages(disnake.ui.View):
 
     @disnake.ui.button(label="Last", style=disnake.ButtonStyle.grey)
     async def last_page(
-            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         self.current_embed_idx = len(self.embeds) - 1
         embed = self.embeds[self.current_embed_idx]
@@ -177,10 +176,10 @@ class LongEmbedPages(disnake.ui.View):
 
 
 async def create_embed_paged_view(
-        author: Union[disnake.User, disnake.Member],
-        embeds: List[disnake.Embed],
-        timeout: int = 60,
-        only_author: bool = True,
+    author: Union[disnake.User, disnake.Member],
+    embeds: List[disnake.Embed],
+    timeout: int = 60,
+    only_author: bool = True,
 ) -> Union[SingleEmbedPages, ShortEmbedPages, LongEmbedPages]:
     if len(embeds) == 1:
         return SingleEmbedPages(author, embeds)
@@ -194,7 +193,10 @@ class MultiSelect(disnake.ui.Select):
     def __init__(self, all_selections: Dict[str, Any], selected_items: Dict[str, Any]):
         if selected_items:
             options = [
-                disnake.SelectOption(label=selection_label, default=(selection_label in selected_items.keys()))
+                disnake.SelectOption(
+                    label=selection_label,
+                    default=(selection_label in selected_items.keys()),
+                )
                 for selection_label in all_selections.keys()
             ]
         else:
@@ -212,12 +214,12 @@ class MultiSelect(disnake.ui.Select):
 
 class SinglePageDropDown(disnake.ui.View):
     def __init__(
-            self,
-            author: Union[disnake.User, disnake.Member],
-            all_selections: Dict[str, Any],
-            selected_items: Dict[str, Any] = None,
-            timeout: int = 60,
-            only_author: bool = True,
+        self,
+        author: Union[disnake.User, disnake.Member],
+        all_selections: Dict[str, Any],
+        selected_items: Dict[str, Any] = None,
+        timeout: int = 60,
+        only_author: bool = True,
     ):
         super().__init__(timeout=timeout)
         self.all_selections = all_selections
@@ -227,12 +229,13 @@ class SinglePageDropDown(disnake.ui.View):
 
     @disnake.ui.button(label="Confirm", style=disnake.ButtonStyle.green)
     async def confirm(
-            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         for child in self.children:
             child.disabled = True
-        await interaction.response.edit_message(f"Your choices were {', '.join(self.select_dropdown.values)}", view=self)
-
+        await interaction.response.edit_message(
+            f"Your choices were {', '.join(self.select_dropdown.values)}", view=self
+        )
 
 
 async def partition_dict_into_named_list(items: Dict[str, Any]):
@@ -240,11 +243,10 @@ async def partition_dict_into_named_list(items: Dict[str, Any]):
 
 
 async def create_paged_select_dropwdown(
-        author: Union[disnake.User, disnake.Member],
-        all_selections: Dict[str, Any],
-        selected_items: Dict[str, Any] = None,
-        timeout: int = 60,
-        only_author: bool = True,
+    author: Union[disnake.User, disnake.Member],
+    all_selections: Dict[str, Any],
+    selected_items: Dict[str, Any] = None,
+    timeout: int = 60,
+    only_author: bool = True,
 ):
     return SinglePageDropDown(author, all_selections)
-

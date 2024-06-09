@@ -1,1 +1,1 @@
-from . import GuessingGameCog
+from . import helper, GuessingGameCog

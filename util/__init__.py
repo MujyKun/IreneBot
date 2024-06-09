@@ -2,7 +2,7 @@ import logging
 from datetime import date
 from os import path, mkdir
 
-_log_level = "info"
+_log_level = "debug"
 
 _log_folder_name = "Logs"
 if not path.exists(_log_folder_name):

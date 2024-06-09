@@ -6,12 +6,13 @@ from IreneAPIWrapper.models import Media, Person, Group
 from disnake.ext import commands
 from disnake import ApplicationCommandInteraction as AppCmdInter
 from . import helper
-from typing import Literal
+from typing import Literal, List
 
 
 class GroupMembersCog(commands.Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
+        self.invalid_selection = "item_type returned something other than 'person' or 'group'"
 
     @commands.slash_command(description="Display a profile card for either a Person or a Group.")
     async def card(self, inter: AppCmdInter, item_type: Literal["person", "group"],
@@ -25,7 +26,22 @@ class GroupMembersCog(commands.Cog):
             group = await Group.get(object_id)
             await inter.send(str(group.name))
         else:
-            raise RuntimeError("item_type returned something other than 'person' or 'group'")
+            raise RuntimeError(self.invalid_selection)
+
+    @commands.slash_command(name="call", description="Call Media for an Idol/Group.")
+    async def call_person_or_group(self, inter: AppCmdInter, item_type: Literal["person", "group"],
+                                   selection: str = commands.Param(autocomplete=helper.auto_complete_type)):
+        """Display the media for a specific Person or Group."""
+        object_id = int(selection.split(')')[0])
+        if item_type == "person":
+            person = await Person.get(object_id)
+            medias: List[Media] = await Media.get_all(person.affiliations)
+        elif item_type == "group":
+            group = await Group.get(object_id)
+            medias: List[Media] = await Media.get_all(group.affiliations)
+        else:
+            raise RuntimeError(self.invalid_selection)
+        await inter.send((random.choice(medias)).source.url)
 
     @commands.slash_command(name="randomperson", description="Display media for a Person.")
     async def random_person(self, inter: AppCmdInter):

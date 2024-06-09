@@ -16,7 +16,7 @@ class Bot(AutoShardedBot):
         self.dev_mode = dev_mode
 
         api = IreneAPIClient(token=keys.api_token, user_id=keys.bot_owner_id,
-                             api_url=keys.api_url, port=keys.api_port)
+                             api_url=keys.api_url, port=keys.api_port, logger=logger, verbose=True)
 
         self.api: IreneAPIClient = api
 

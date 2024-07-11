@@ -1,5 +1,5 @@
 import disnake
-from IreneAPIWrapper.models import User, Date, Reminder
+from IreneAPIWrapper.models import User, Reminder
 from datetime import datetime, timedelta
 from ..helper import send_message, defer_inter, add_embed_footer_and_author, get_message
 from typing import List
@@ -51,9 +51,7 @@ async def process_reminder_add(
     seconds_to_complete = multiplier * _in
     start_time = datetime.utcnow()
     end_time = start_time + timedelta(seconds=seconds_to_complete)
-    date_id = await Date.insert(start_time, end_time)
-    date = await Date.get(date_id)
-    remind_id = await Reminder.insert(user_id, reason, date)
+    remind_id = await Reminder.insert(user_id, reason, end_time)
 
     return await send_message(
         key="remind_success",
@@ -139,19 +137,20 @@ async def process_reminder_loop(bot):
     # performance wise, there should be no noticeable difference
     # unless the database has millions of rows.
     # we can also get from the cache if needed be in the future.
-    reminders: List[Reminder] = await Reminder.fetch_all(log_creation=False)
-    for reminder in reminders:
-        date = reminder.date
-        if not date.end:
-            continue
-
-        end_date = datetime.strptime(date.end, "%Y-%m-%d %H:%M:%S.%f")
-        if datetime.utcnow() > end_date:
-            try:
-                await post_reminder(bot, reminder)
-                await reminder.delete()
-            except Exception as e:
-                bot.logger.warn(
-                    f"{e} -> Failed to post/delete Reminder ID: {reminder.id} -> DATE ID: {reminder.date.id} "
-                    f"-> USER ID: {reminder.user_id} -> REASON: {reminder.reason}"
-                )
+    return
+    # reminders: List[Reminder] = await Reminder.fetch_all(log_creation=False)
+    # for reminder in reminders:
+    #     date = reminder.date
+    #     if not date.end:
+    #         continue
+    #
+    #     end_date = datetime.strptime(date.end, "%Y-%m-%d %H:%M:%S.%f")
+    #     if datetime.utcnow() > end_date:
+    #         try:
+    #             await post_reminder(bot, reminder)
+    #             await reminder.delete()
+    #         except Exception as e:
+    #             bot.logger.warn(
+    #                 f"{e} -> Failed to post/delete Reminder ID: {reminder.id} -> DATE ID: {reminder.date.id} "
+    #                 f"-> USER ID: {reminder.user_id} -> REASON: {reminder.reason}"
+    #             )

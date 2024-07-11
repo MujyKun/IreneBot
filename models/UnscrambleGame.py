@@ -6,7 +6,6 @@ import disnake.ext.commands
 from IreneAPIWrapper.models import (
     User,
     Affiliation,
-    Date,
     UnscrambleGame as UnscrambleGameModel,
 )
 from IreneAPIWrapper.exceptions import Empty
@@ -151,12 +150,12 @@ class UnscrambleGame(BaseScoreGame):
         :param status: bool
             Whether to update the status IDs to the database.
         """
-        if not self._date or not self.__us:
-            date_id = await Date.insert(self.start_time, self.end_time)
-            self._date = await Date.get(date_id)
+        if not self.__us:
+            # date_id = await Date.insert(self.start_time, self.end_time)
+            # self._date = await Date.get(date_id)
 
             us_id = await UnscrambleGameModel.insert(
-                date_id=date_id,
+                start_date=datetime.utcnow(),
                 status_ids=[],
                 mode_id=self._mode.id,
                 difficulty_id=self.difficulty.id,
@@ -168,7 +167,5 @@ class UnscrambleGame(BaseScoreGame):
             await self.__us.update_status(status_ids)
 
         if finished:
-            self.end_time = datetime.now()
-
-            if self._date:
-                await self._date.update_end_date(end_date=self.end_time)
+            self.end_time = datetime.utcnow()
+            await self.__us.update_end_date(end_time=self.end_time)

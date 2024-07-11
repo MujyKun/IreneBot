@@ -19,6 +19,8 @@ class BaseScoreGame(BaseRoundGame):
         self.timeout = timeout
         self.correct_answers: List[str] = []
         self._mode: Mode = NORMAL
+        self._end_keywords = ["stop", "end"]
+        self._skip_keywords = ["skip"]
 
         # default difficulty - May differ in concrete objects.
         self.easy = 0.8
@@ -100,10 +102,7 @@ class BaseScoreGame(BaseRoundGame):
             """Check if a message contains the correct answer."""
             context = self.ctx if self.ctx else self.inter
             same_channel = message.channel == context.channel
-            correct_answer = message.content.lower() in self.correct_answers + [
-                "skip",
-                "stop",
-            ]
+            correct_answer = message.content.lower() in self.correct_answers + self._skip_keywords + self._end_keywords
             return same_channel and correct_answer
 
         try:
@@ -111,9 +110,9 @@ class BaseScoreGame(BaseRoundGame):
                 "message", check=check_for_answer, timeout=self.timeout
             )
             await msg.add_reaction("👍")
-            if msg.content.lower() == "skip":
+            if msg.content.lower() in self._skip_keywords:
                 return await self._send_results()
-            elif msg.content.lower() == "stop":
+            elif msg.content.lower() in self._end_keywords:
                 self.rounds = self.max_rounds + 1
                 return await self._send_results()
             else:

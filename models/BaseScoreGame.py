@@ -1,6 +1,6 @@
 from . import PlayerScore, Game, User, BaseRoundGame
 from typing import List, Optional
-from IreneAPIWrapper.models import UserStatus, get_difficulty, Date, Mode, NORMAL
+from IreneAPIWrapper.models import UserStatus, get_difficulty, Mode, NORMAL
 import asyncio
 import disnake
 
@@ -18,7 +18,6 @@ class BaseScoreGame(BaseRoundGame):
         self.gender = gender  # male / female / mixed
         self.timeout = timeout
         self.correct_answers: List[str] = []
-        self._date: Optional[Date] = None
         self._mode: Mode = NORMAL
 
         # default difficulty - May differ in concrete objects.
@@ -114,7 +113,7 @@ class BaseScoreGame(BaseRoundGame):
             await msg.add_reaction("👍")
             if msg.content.lower() == "skip":
                 return await self._send_results()
-            if msg.content.lower() == "stop":
+            elif msg.content.lower() == "stop":
                 self.rounds = self.max_rounds + 1
                 return await self._send_results()
             else:

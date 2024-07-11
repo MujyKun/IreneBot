@@ -7,7 +7,6 @@ from IreneAPIWrapper.models import (
     Affiliation,
     Media,
     Person,
-    Date,
     GuessingGame as GuessingGameModel,
 )
 from IreneAPIWrapper.exceptions import Empty
@@ -175,12 +174,9 @@ class GuessingGame(BaseScoreGame):
         :param media_and_status: bool
             Whether to update the media and status IDs to the database.
         """
-        if not self._date or not self.__gg:
-            date_id = await Date.insert(self.start_time, self.end_time)
-            self._date = await Date.get(date_id)
-
+        if not self.__gg:
             gg_id = await GuessingGameModel.insert(
-                date_id=date_id,
+                start_date=datetime.datetime.utcnow(),
                 media_ids=self.__played_media_ids,
                 status_ids=[],
                 mode_id=self._mode.id,
@@ -195,6 +191,5 @@ class GuessingGame(BaseScoreGame):
             await self.__gg.update_media_and_status(media_ids, status_ids)
 
         if finished:
-            self.end_time = datetime.datetime.now()
-            if self._date:
-                await self._date.update_end_date(end_date=self.end_time)
+            self.end_time = datetime.datetime.utcnow()
+            await self.__gg.update_end_date(end_time=self.end_time)

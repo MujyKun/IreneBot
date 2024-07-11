@@ -24,9 +24,9 @@ mypy = "0.961"
 numexpr = "^2.8.1"
 
 #ireneapiwrapper = "2.4"
-ireneapiwrapper = {git = "https://github.com/MujyKun/IreneAPIWrapper.git"}
-#ireneapiwrapper = {path = "../IreneAPIWrapper", develop=true}
-disnake = "^2.5.1"
+#ireneapiwrapper = {git = "https://github.com/MujyKun/IreneAPIWrapper.git"}
+ireneapiwrapper = {path = "../IreneAPIWrapper", develop=true}
+disnake = "2.9.2"
 Levenshtein = "^0.20.9"
 psutil = "^5.9.4"
 

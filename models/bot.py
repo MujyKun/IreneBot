@@ -78,8 +78,6 @@ class Bot(AutoShardedBot):
         ) = (
             preload.companies
         ) = (
-            preload.dates
-        ) = (
             preload.names
         ) = (
             preload.locations

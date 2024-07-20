@@ -1,3 +1,8 @@
+from typing import Dict
+from datetime import datetime
+from concurrent import futures
+
+
 def add_to_cache(obj):
     if isinstance(obj, GroupGuessingGame):
         gggs.append(obj)
@@ -20,6 +25,24 @@ bjs = []  # BlackJack
 others = []  # etc
 all_games = []
 
+
+# groupmembers search
+distance_between_words: Dict[str, Dict[str, float]] = dict()
+requests_today = 0
+user_requests: Dict[int, int] = {}
+current_day = datetime.now().day
+
+
+PUNISHMENTS = {
+    'mute': 'been muted',
+    'ban': 'been banned',
+    'delete': 'had their message deleted'
+}
+
+
+from .StatsTracker import StatsTracker, Trackable
+
+
 from dataclasses import dataclass
 from IreneAPIWrapper.models import User, UserStatus
 import disnake
@@ -35,8 +58,15 @@ class PlayerScore(UserStatus):
         return f"{self.disnake_user.display_name} -> {self.status.score}."
 
 
-from .CommandTypes import UserCommand, Command, RegularCommand, \
-    MessageCommand, SubCommand, SlashCommand, get_cog_dicts
+from .CommandTypes import (
+    UserCommand,
+    Command,
+    RegularCommand,
+    MessageCommand,
+    SubCommand,
+    SlashCommand,
+    get_cog_dicts,
+)
 from .Bracket import Bracket, PvP
 from .Game import Game
 from .BaseRoundGame import BaseRoundGame

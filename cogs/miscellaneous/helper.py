@@ -7,7 +7,7 @@ from disnake import ApplicationCommandInteraction as AppCmdInter
 from random import choice, randint
 from re import findall
 from disnake.ext import commands
-from ..helper import send_message, defer_inter
+from ..helper import send_message, defer_inter, increment_trackable
 from models import all_games as all_games
 from keys import get_keys
 from util import botembed, botinfo
@@ -169,21 +169,8 @@ async def process_display_emoji(
 async def process_bot_info(bot, ctx=None, inter=None):
     """Process Bot Info"""
     embed = await botembed.create_bot_author_embed(title=f"I am {bot.keys.bot_name}")
-    active_games = [
-        len(botinfo.get_gg(finished=False)),
-        len(botinfo.get_ggg(finished=False)),
-        len(botinfo.get_bg(finished=False)),
-        len(botinfo.get_us(finished=False)),
-        len(botinfo.get_other_games(finished=False)),
-    ]
-
-    inactive_games = [
-        len(botinfo.get_gg()),
-        len(botinfo.get_ggg()),
-        len(botinfo.get_bg()),
-        len(botinfo.get_us()),
-        len(botinfo.get_other_games()),
-    ]
+    active_games = botinfo.get_count_active_games()
+    inactive_games = botinfo.get_count_unfinished_games()
 
     inline_fields = {
         "Servers Connected": f"{botinfo.get_server_count(bot)}",
@@ -283,6 +270,8 @@ async def process_urban(
         f"{definition_data.get('definition')}\n<{definition_data.get('permalink')}> -> "
         f"{definition_data.get('thumbs_up')} Upvotes"
     )
+
+    await increment_trackable("urban_requests", frequency=86400)
 
     return await send_message(
         phrase.lower(),

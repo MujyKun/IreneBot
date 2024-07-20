@@ -8,10 +8,17 @@ from disnake import ApplicationCommandInteraction as AppCmdInter
 from cogs import cogs_list
 from datetime import datetime
 from util import logger
-from IreneAPIWrapper.models import IreneAPIClient, Preload, User, Guild, Notification
+from IreneAPIWrapper.models import IreneAPIClient, Preload, User, Guild, Notification, BanPhrase
 from IreneAPIWrapper.exceptions import APIError
 from cogs import helper
-from models import UserCommand, RegularCommand, MessageCommand, SlashCommand, get_cog_dicts
+from models import (
+    UserCommand,
+    RegularCommand,
+    MessageCommand,
+    SlashCommand,
+    get_cog_dicts,
+    PUNISHMENTS
+)
 import disnake
 
 
@@ -49,8 +56,6 @@ class Bot(AutoShardedBot):
         ) = (
             preload.twitch_subscriptions
         ) = (
-            preload.twitter_accounts
-        ) = (
             preload.languages
         ) = (
             preload.affiliations
@@ -73,20 +78,18 @@ class Bot(AutoShardedBot):
         ) = (
             preload.companies
         ) = (
-            preload.dates
-        ) = (
             preload.names
-        ) = (
-            preload.bloodtypes
         ) = (
             preload.locations
         ) = (
             preload.auto_media
-        ) = preload.reminders = preload.reaction_role_messages = True
+        ) = (
+            preload.reminders
+        ) = preload.reaction_role_messages = preload.tiktok_subscriptions = preload.banned_phrases = True
         return preload
 
     async def prefix_check(
-            self, bot: AutoShardedBot, msg: disnake.Message
+        self, bot: AutoShardedBot, msg: disnake.Message
     ) -> List[str]:
         """Get a list of prefixes for a Guild."""
         default = [self.default_prefix]
@@ -102,7 +105,7 @@ class Bot(AutoShardedBot):
         if guild and guild.prefixes:
             return guild.prefixes
 
-        return [self.default_prefix]
+        return default
 
     async def run_api_before_bot(self):
         """Run the API and the Bot afterwards."""
@@ -112,6 +115,7 @@ class Bot(AutoShardedBot):
         while not self.api.connected and not self.api.is_preloaded:
             await asyncio.sleep(0)
 
+        print(f"Connected to IreneAPI at {datetime.now()}")
         await self.update_local_commands()
 
         await self.start(
@@ -148,12 +152,12 @@ class Bot(AutoShardedBot):
         )
 
     async def _ensure_role(
-            self,
-            role_to_find: int,
-            guild: disnake.Guild,
-            async_callable_name: str,
-            attr_flag: str,
-            type_desc=None,
+        self,
+        role_to_find: int,
+        guild: disnake.Guild,
+        async_callable_name: str,
+        attr_flag: str,
+        type_desc=None,
     ):
         """
         role_to_find: int
@@ -186,9 +190,9 @@ class Bot(AutoShardedBot):
                 self.logger.info(f"Made {user.id} a {type_desc}.")
 
     async def handle_api_error(
-            self,
-            context: Union[disnake.Message, disnake.ext.commands.Context],
-            exception: APIError,
+        self,
+        context: Union[disnake.Message, disnake.ext.commands.Context],
+        exception: APIError,
     ):
         logger.error(f"{exception}")
         bug_channel_id = self.keys.bug_channel_id
@@ -205,19 +209,26 @@ class Bot(AutoShardedBot):
             return await context.channel.send(embed=embed)
         except disnake.errors.HTTPException as e:
             logger.error(f"Could not send embedded error to channel - {e}")
+        await helper.increment_trackable("api_errors_from_bot")
 
     async def on_slash_command_error(
-            self, interaction: AppCmdInter, exception: errors.CommandError
+        self, interaction: AppCmdInter, exception: errors.CommandError
     ) -> None:
+        inter = interaction
+        # inter = (await defer_inter(interaction, True)) or interaction
+        await helper.increment_trackable("slash_command_errors")
+        await helper.increment_trackable("all_command_errors")
+
         if isinstance(exception, errors.NotOwner):
-            return await interaction.send(
-                "Only the bot owner can use this command.", ephemeral=True
-            )
+            error_message = "Only the bot owner can use this command."
         elif isinstance(exception, errors.CheckFailure):
-            return await interaction.send(f"{exception}", ephemeral=True)
+            error_message = str(exception)
         else:
             logger.error(exception)
-            return await interaction.send(f"{exception}", ephemeral=True)
+            error_message = str(exception)
+
+        if error_message:
+            await inter.send(error_message, ephemeral=True)
 
     async def on_command_error(self, context, exception):
         # TODO: errors.Cooldown was not found - causes an AttributeError when put in return_error_to_user
@@ -228,6 +239,7 @@ class Bot(AutoShardedBot):
             errors.UserNotFound,
             errors.EmojiNotFound,
         ]
+        await helper.increment_trackable("all_command_errors")
         if isinstance(exception, errors.CommandNotFound):
             return
         elif isinstance(exception, errors.CommandInvokeError):
@@ -260,18 +272,81 @@ class Bot(AutoShardedBot):
             )
         else:
             await self.process_commands(message)
+            await helper.increment_trackable("commands_used")
         await self.check_for_notification(message)
+        await self.check_for_ban_phrase(message)
+        await helper.increment_trackable("messages_received")
 
     async def on_message_edit(self, before, after):
         await self.on_message(after)
+        await helper.increment_trackable("messages_edited")
+
+    async def check_for_ban_phrase(self, message: disnake.Message):
+        """Detect and handle banned phrases."""
+        if not message.guild:
+            return
+
+        ban_phrases = await BanPhrase.get_all(message.guild.id)
+        if not ban_phrases:
+            return
+
+        for ban_phrase in ban_phrases:
+            if ban_phrase.phrase.lower() not in message.clean_content:
+                continue
+
+            await self.delete_message(message)
+
+            log_message = f"<@{message.author.id}> has {PUNISHMENTS[ban_phrase.punishment]} " \
+                          f"for saying the phrase `{ban_phrase.phrase}`\n" \
+                          f"Original Message: {message.clean_content}"
+            await self.send_message_to_channel(ban_phrase.log_channel_id, log_message)
+
+            if ban_phrase.punishment == "mute":
+                await self.mute_user(message.author, message.guild)
+            elif ban_phrase.punishment == "ban":
+                await self.ban_user(user=message.author, reason="Ban Phrase")
+
+    async def mute_user(self, user: disnake.Member, guild: disnake.Guild = None):
+        """Mute a user in a guild."""
+        try:
+            muted_role = disnake.utils.get(guild.roles, name="Muted")
+            if not muted_role:
+                muted_role = await guild.create_role(name="Muted", reason="To mute users.")
+
+                for channel in guild.text_channels:
+                    await channel.set_permissions(muted_role, send_messages=False)
+            await user.add_roles(muted_role)
+        except Exception as e:
+            self.logger.info(f"Failed to mute user id {user.id} -> {e}")
+
+    async def ban_user(self, user: disnake.Member, reason=None):
+        """Ban a user in a guild."""
+        try:
+            await user.ban(reason=reason)
+        except Exception as e:
+            self.logger.info(f"Failed to ban user id {user.id} -> {e}")
+
+    async def send_message_to_channel(self, channel_id, message):
+        """Send a message to a channel."""
+        try:
+            channel = self.get_channel(channel_id) or await self.fetch_channel(channel_id)
+            await channel.send(message)
+        except Exception as e:
+            self.logger.info(f"Issue sending message -> {e}")
+
+    async def delete_message(self, message: disnake.Message):
+        """Delete a message."""
+        try:
+            await message.delete()
+        except Exception as e:
+            self.logger.info(f"Failed to delete message id {message.id} -> {e}")
 
     async def check_for_notification(self, message: disnake.Message):
         """Check for a user notification and send it out."""
         if (
-                not message.guild
-                or message.guild is None
-                or not message.content
-                or message.author.bot
+            not message.guild
+            or not message.content
+            or message.author.bot
         ):
             return
 
@@ -293,7 +368,7 @@ class Bot(AutoShardedBot):
             [Click to go to the Message]({message.jump_url})        
             """
             if (
-                    noti.user_id == message.author.id
+                noti.user_id == message.author.id
             ):  # should not be notified of their own message.
                 continue
 
@@ -330,12 +405,12 @@ class Bot(AutoShardedBot):
             await self._check_role_update(member=after, **func_kwargs)
 
     async def _check_role_update(
-            self,
-            member: disnake.Member,
-            role_to_find: int,
-            async_callable_name: str,
-            attr_flag: str,
-            type_desc=None,
+        self,
+        member: disnake.Member,
+        role_to_find: int,
+        async_callable_name: str,
+        attr_flag: str,
+        type_desc=None,
     ):
         """
         member: disnake.Member
@@ -376,9 +451,17 @@ class Bot(AutoShardedBot):
 
     async def update_local_commands(self):
         _commands = {
-            'Message Commands': get_cog_dicts(self.all_message_commands.values(), MessageCommand),
-            'Slash Commands': get_cog_dicts(self.all_slash_commands.values(), SlashCommand),
-            'Regular Commands': get_cog_dicts(self.all_commands.values(), RegularCommand),
-            'User Commands': get_cog_dicts(self.all_user_commands.values(), UserCommand)
+            "Message Commands": get_cog_dicts(
+                self.all_message_commands.values(), MessageCommand
+            ),
+            "Slash Commands": get_cog_dicts(
+                self.all_slash_commands.values(), SlashCommand
+            ),
+            "Regular Commands": get_cog_dicts(
+                self.all_commands.values(), RegularCommand
+            ),
+            "User Commands": get_cog_dicts(
+                self.all_user_commands.values(), UserCommand
+            ),
         }
         await self.api.update_commands(_commands)

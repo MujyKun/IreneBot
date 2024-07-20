@@ -2,13 +2,123 @@ from typing import List
 from util import logger
 import aiohttp
 import disnake
-from IreneAPIWrapper.models import Guild, User, ReactionRoleMessage
+from IreneAPIWrapper.models import Guild, User, ReactionRoleMessage, BanPhrase
 from disnake.ext import commands
 from disnake import AppCmdInter, MessageInteraction
 from ..helper import create_guild_model, send_message, defer_inter
+from io import BytesIO
 
 PRUNE_MAX = 100
 PRUNE_MIN = 0
+
+
+async def process_add_ban_phrase(
+    user_id,
+    phrase,
+    guild,
+    punishment,
+    log_channel_id,
+    ctx=None,
+    inter=None,
+    allowed_mentions=None,
+):
+    """Process adding a ban phrase."""
+    response_deferred = await defer_inter(inter)
+    user = await User.get(user_id)
+    phrase = phrase.lower()
+
+    if any(
+        [
+            ban_phrase
+            for ban_phrase in await BanPhrase.get_all(guild_id=guild.id)
+            if ban_phrase.phrase.lower() == phrase
+        ]
+    ):
+        return await send_message(
+            key="ban_phrase_exists",
+            user=user,
+            ctx=ctx,
+            inter=inter,
+            allowed_mentions=allowed_mentions,
+            response_deferred=response_deferred
+        )
+
+    await BanPhrase.insert(guild.id, phrase, punishment, log_channel_id)
+
+    return await send_message(
+        key="ban_phrase_added",
+        user=user,
+        ctx=ctx,
+        inter=inter,
+        allowed_mentions=allowed_mentions,
+        response_deferred=response_deferred
+    )
+
+
+async def process_remove_ban_phrase(
+    user_id, phrase, guild, ctx=None, inter=None, allowed_mentions=None
+):
+    """Process removing a ban phrase."""
+    response_deferred = await defer_inter(inter)
+    user = await User.get(user_id)
+    phrase = phrase.lower()
+
+    for ban_phrase in await BanPhrase.get_all(guild_id=guild.id):
+        if ban_phrase.phrase.lower() == phrase:
+            await ban_phrase.delete()
+            return await send_message(
+                key="ban_phrase_removed",
+                user=user,
+                ctx=ctx,
+                inter=inter,
+                allowed_mentions=allowed_mentions,
+                response_deferred=response_deferred
+            )
+
+    return await send_message(
+        key="ban_phrase_does_not_exist",
+        user=user,
+        ctx=ctx,
+        inter=inter,
+        allowed_mentions=allowed_mentions,
+        response_deferred=response_deferred
+    )
+
+
+async def auto_complete_type_guild_banned_phrases(
+    inter: disnake.AppCmdInter, user_input: str
+) -> List[str]:
+    """Auto-complete typing for the banned phrases in a guild."""
+    return [
+        ban_phrase.phrase
+        for ban_phrase in await BanPhrase.get_all(guild_id=inter.guild.id)
+    ][:24]
+
+
+async def process_list_ban_phrases(
+    user_id, guild, ctx=None, inter=None, allowed_mentions=None
+):
+    """Process listing all ban phrases."""
+    response_deferred = await defer_inter(inter)
+    user = await User.get(user_id)
+    ban_phrases = await BanPhrase.get_all(guild_id=guild.id)
+
+    log_channel_ids = ', '.join(list(set(f"<#{ban_phrase.log_channel_id}>"
+                                         for ban_phrase in ban_phrases))) \
+                      or "a non-existent channel"
+
+    messages = "\n".join(str(ban_phrase) for ban_phrase in ban_phrases)
+
+    return await send_message(
+        log_channel_ids,
+        messages,
+        key="list_ban_phrases",
+        user=user,
+        ctx=ctx,
+        inter=inter,
+        allowed_mentions=allowed_mentions,
+        response_deferred=response_deferred
+    )
 
 
 async def process_prune(
@@ -147,6 +257,92 @@ async def process_add_emoji(
     )
 
 
+async def process_add_sticker(
+    sticker_url,
+    sticker_name,
+    user_id,
+    ctx: commands.Context = None,
+    inter: AppCmdInter = None,
+    allowed_mentions=None,
+):
+    """
+    Process the adding of an emoji to a server.
+
+    :param sticker_url: str
+        The sticker to add.
+    :param sticker_name: str
+        The sticker name.
+    :param user_id: int
+        The command user's ID.
+    :param ctx: commands.Context
+        Context of the command.
+    :param inter: AppCmdInter
+        App Command Context
+    :param allowed_mentions: disnake.AllowedMentions
+        The settings for allowed mentions.
+    """
+    response_deferred = await defer_inter(inter)
+    user = await User.get(user_id)
+    args = tuple()
+    key = "add_sticker_fail"
+
+    if not sticker_url and ctx:
+        if ctx.message.stickers:
+            sticker = ctx.message.stickers[0]
+            sticker_url = sticker.url
+            sticker_name = sticker_name if sticker_name else sticker.name
+        else:
+            key = "no_sticker"
+
+    if key != "no_sticker":
+        if not sticker_name or len(sticker_name) < 2:
+            sticker_name = "StickerName"
+
+        if ctx:
+            http_session = ctx.bot.http_session
+            guild = ctx.guild
+        else:
+            http_session = inter.bot.http_session
+            guild = inter.guild
+
+        try:
+            # sometimes discord has a webp url instead of png just for display purposes.
+            sticker_url = sticker_url.replace(".webp", ".png")
+            async with http_session.get(sticker_url) as r:
+                if r.status == 200:
+                    sticker_io_bytes = BytesIO(await r.read())
+                    sticker = await guild.create_sticker(
+                        name=sticker_name,
+                        emoji=":smile:",
+                        file=disnake.File(sticker_io_bytes),
+                        reason=f"Created by {user_id}",
+                    )
+                    key = "add_sticker_success"
+        except aiohttp.InvalidURL:
+            key = "invalid_url"
+        except disnake.HTTPException as e:
+            if e.code == 30039:
+                key = "max_stickers"
+            elif e.code == 50046:
+                key = "png_needed"
+        except Exception as e:
+            logger.error(
+                f"{e} - Processing AddSticker command failed. "
+                f"Sticker: {sticker_url} -> STICKER NAME: {sticker_name}, User ID: {user_id}"
+            )
+            key = "add_sticker_fail"
+
+    return await send_message(
+        *args,
+        key=key,
+        user=user,
+        inter=inter,
+        ctx=ctx,
+        allowed_mentions=allowed_mentions,
+        response_deferred=response_deferred,
+    )
+
+
 async def process_prefix_list(
     guild: disnake.Guild,
     ctx: commands.Context = None,
@@ -249,17 +445,25 @@ async def handle_role_reaction_press(interaction: disnake.MessageInteraction):
     role = member.get_role(role_id)
     if role:
         await member.remove_roles(role, reason="Reaction Role Message")
-        await send_message(user=user, key="role_removed", inter=interaction, ephemeral=True)
+        await send_message(
+            user=user, key="role_removed", inter=interaction, ephemeral=True
+        )
     else:
         role = interaction.guild.get_role(role_id)
         if role:
             try:
                 await member.add_roles(role, reason="Reaction Role Message")
-                await send_message(user=user, key="role_added", inter=interaction, ephemeral=True)
+                await send_message(
+                    user=user, key="role_added", inter=interaction, ephemeral=True
+                )
             except disnake.errors.Forbidden as e:
-                await send_message(user=user, key="no_permissions", inter=interaction, ephemeral=True)
+                await send_message(
+                    user=user, key="no_permissions", inter=interaction, ephemeral=True
+                )
         else:
-            await send_message(user=user, key="role_not_found", inter=interaction, ephemeral=True)
+            await send_message(
+                user=user, key="role_not_found", inter=interaction, ephemeral=True
+            )
 
 
 class RoleDropdown(disnake.ui.RoleSelect):

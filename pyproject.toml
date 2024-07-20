@@ -15,16 +15,20 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-aiohttp = "3.8.1"
+aiohttp = "3.9.5"
 asyncpg = "0.25.0"
 python-dotenv = "0.20.0"
+black = "^22.8.0"
 pre-commit = "2.19.0"
 mypy = "0.961"
 numexpr = "^2.8.1"
-ireneapiwrapper = "2.3.3"
 
+#ireneapiwrapper = "2.4"
 #ireneapiwrapper = {git = "https://github.com/MujyKun/IreneAPIWrapper.git"}
-disnake = "^2.5.1"
+ireneapiwrapper = {path = "../IreneAPIWrapper", develop=true}
+disnake = "2.9.2"
+Levenshtein = "^0.20.9"
+psutil = "^5.9.4"
 
 [tool.poetry.dev-dependencies]
 

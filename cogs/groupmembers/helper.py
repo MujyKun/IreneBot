@@ -4,6 +4,7 @@ import random
 import IreneAPIWrapper.exceptions
 import asyncio
 import disnake
+import models
 from disnake import ApplicationCommandInteraction as AppCmdInter
 from IreneAPIWrapper.models import (
     Person,
@@ -12,19 +13,23 @@ from IreneAPIWrapper.models import (
     User,
     Affiliation,
     AutoMedia,
-    AffiliationTime,
 )
-from typing import List, Union, Optional, Tuple, Dict
+from typing import List, Union, Optional, Tuple
 from util import logger, botembed
-from ..helper import send_message, in_game, defer_inter, get_channel_model
+from ..helper import (
+    send_message,
+    in_game,
+    defer_inter,
+    get_channel_model,
+    increment_trackable,
+)
 from disnake.ext import commands
 from keys import get_keys
-from difflib import SequenceMatcher
 from dataclasses import dataclass
+import Levenshtein
+from difflib import SequenceMatcher
 
-_requests_today = 0
-_user_requests: Dict[int, int] = {}
-_current_day = datetime.now().day
+
 NEXT_POST_KEYWORD = "next_post"
 
 
@@ -68,14 +73,11 @@ class Comparison:
 
 async def check_user_requests():
     """Check the user requests and execute day resets"""
-    global _current_day
     current_day = datetime.now().day
-    if _current_day != current_day:
-        _current_day = current_day
-        global _user_requests
-        global _requests_today
-        _user_requests = {}
-        _requests_today = 0
+    if models.current_day != current_day:
+        models.current_day = current_day
+        models.user_requests = {}
+        models.requests_today = 0
 
 
 async def validate_message_idol_call(bot, message: disnake.Message, prefixes: List):
@@ -201,13 +203,12 @@ async def process_message_idol_call(bot, message, content):
 
 async def handle_user_media_usage(user):
     """Increment the user's usage and handle the reset for a new day."""
-    current_score = _user_requests.get(user.id)
-    _user_requests[user.id] = 1 if not current_score else current_score + 1
+    current_score = models.user_requests.get(user.id)
+    models.user_requests[user.id] = 1 if not current_score else current_score + 1
 
-    global _requests_today
-    if _requests_today % 10 == 0:
+    if models.requests_today % 10 == 0:
         await check_user_requests()
-    _requests_today += 1
+    models.requests_today += 1
 
 
 async def handle_non_patron_media_usage(
@@ -216,7 +217,7 @@ async def handle_non_patron_media_usage(
     """Handle non patron media usage.
 
     Returns True if it passes all checks."""
-    user_request = _user_requests.get(user.id)
+    user_request = models.user_requests.get(user.id)
     if user_request and user_request > get_keys().post_limit:
         await send_message(
             key="become_a_patron_limited",
@@ -240,6 +241,8 @@ async def idol_send_on_message(bot, message: disnake.Message, prefixes: List):
     loop = asyncio.get_event_loop()
     coro = process_message_idol_call(bot, message, content)
     future = asyncio.run_coroutine_threadsafe(coro, loop)
+
+    await increment_trackable("idol_commands_used")
 
 
 async def get_media_from_pool(object_pool: List[Union[Person, Group]]):
@@ -288,6 +291,14 @@ async def auto_complete_type(inter: AppCmdInter, user_input: str) -> List[str]:
 async def auto_complete_file_type(inter: AppCmdInter, user_input: str) -> List[str]:
     """Autocomplete the file types for media."""
     return ["gif", "jfif", "mp4", "png", "jpg", "webm", "webp", "jpeg"]
+
+
+async def auto_complete_call_count(inter: AppCmdInter, user_input: str) -> List[int]:
+    """Autocomplete the counts for calling media."""
+    if (await User.get(inter.user.id)).is_considered_patron:
+        return [1, 2, 3, 4, 5]
+    else:
+        return [1]
 
 
 async def auto_complete_person(inter: AppCmdInter, user_input: str) -> List[str]:
@@ -538,8 +549,10 @@ def get_random_color():
 async def search_distance(search_word: str, target_word: str) -> Optional[float]:
     """Get the distance of two words/phrases with cache considered."""
     return (
-        _search_distance_dict(_distance_cache, search_word, target_word)
-        or _search_distance_dict(_distance_cache, target_word, search_word)
+        _search_distance_dict(models.distance_between_words, search_word, target_word)
+        or _search_distance_dict(
+            models.distance_between_words, target_word, search_word
+        )
         or await _get_string_distance(search_word, target_word)
     )
 
@@ -548,18 +561,16 @@ def _search_distance_dict(dictionary, key_word, compared_word):
     """Search the distance dictionary for saved ratios."""
     cache = dictionary.get(key_word)
     if cache:
-        similarity = cache.get(compared_word)
-        if similarity:
-            return similarity
+        return cache.get(compared_word)  # similarity
 
 
 async def _get_string_distance(search_word: str, target_word: str):
     """Get the similarity of one string to another string."""
-    similarity = SequenceMatcher(a=search_word, b=target_word).ratio()
-    if _distance_cache.get(search_word):
-        _distance_cache[search_word][target_word] = similarity
+    similarity = Levenshtein.ratio(search_word, target_word)
+    if models.distance_between_words.get(search_word):
+        models.distance_between_words[search_word][target_word] = similarity
     else:
-        _distance_cache[search_word] = {target_word: similarity}
+        models.distance_between_words[search_word] = {target_word: similarity}
     return similarity
 
 
@@ -571,42 +582,45 @@ async def process_call(
     inter=None,
     allowed_mentions=None,
     file_type=None,
+    count=1,
 ):
     response_deferred = await defer_inter(inter)
     user = await User.get(user_id)
+
     if not user.is_considered_patron:
         if not await handle_non_patron_media_usage(
             user, inter=inter, ctx=ctx, response_deferred=response_deferred
         ):
             return
 
-    media: Media = await Media.get_random(
-        object_id=item_id,
-        group=item_type == "group",
-        person=item_type == "person",
-        affiliation=item_type == "affiliation",
-        file_type=file_type,
-    )
+    for i in range(count):
+        media: Media = await Media.get_random(
+            object_id=item_id,
+            group=item_type == "group",
+            person=item_type == "person",
+            affiliation=item_type == "affiliation",
+            file_type=file_type,
+        )
 
-    if not media:
-        return await send_message(
-            key="no_results",
+        if not media:
+            return await send_message(
+                key="no_results",
+                user=user,
+                ctx=ctx,
+                inter=inter,
+                allowed_mentions=allowed_mentions,
+                response_deferred=response_deferred,
+            )
+
+        if await send_message(
+            msg=await media.fetch_image_host_url(),
             user=user,
             ctx=ctx,
             inter=inter,
             allowed_mentions=allowed_mentions,
             response_deferred=response_deferred,
-        )
-
-    if await send_message(
-        msg=await media.fetch_image_host_url(),
-        user=user,
-        ctx=ctx,
-        inter=inter,
-        allowed_mentions=allowed_mentions,
-        response_deferred=response_deferred,
-    ):
-        await handle_user_media_usage(user)
+        ):
+            await handle_user_media_usage(user)
 
 
 async def process_card(
@@ -970,7 +984,14 @@ async def process_loop_auto_aff(bot):
 
                 text_channel = bot.get_channel(auto_media.id)
                 if not text_channel:
-                    text_channel = await bot.fetch_channel(auto_media.id)
+                    try:
+                        text_channel = await bot.fetch_channel(auto_media.id)
+                    except disnake.Forbidden:
+                        # Permanently remove the aff time. We don't want to keep making requests.
+                        await auto_media.delete_aff_time(aff_time=aff_time)
+                    except disnake.NotFound:
+                        # Permanently remove the media.
+                        await auto_media.delete_aff_time(aff_time=aff_time)
 
                 if not text_channel:
                     continue
@@ -978,8 +999,8 @@ async def process_loop_auto_aff(bot):
                 try:
                     await send_message(msg=f"{url}", channel=text_channel)
                 except disnake.Forbidden:
-                    # Only temporarily remove the channel. After the bot's next fetch, it will try again.
-                    await auto_media.remove_from_cache(aff_time=aff_time)
+                    # Permanently remove the aff time. We don't want to keep making requests.
+                    await auto_media.delete_aff_time(aff_time=aff_time)
                 except Exception as e:
                     bot.logger.error(f"Auto Affiliation (Inner) Loop Error -> {e}")
 
@@ -990,6 +1011,3 @@ async def process_loop_auto_aff(bot):
                 )
             except Exception as e:
                 bot.logger.error(f"Auto Affiliation (Outer) Loop Error -> {e}")
-
-
-_distance_cache: Dict[str, Dict[str, float]] = dict()

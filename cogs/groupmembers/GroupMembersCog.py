@@ -182,7 +182,9 @@ class GroupMembersCog(commands.Cog):
         ...
 
     @autoaff.sub_command(
-        name="add", description="Automatically send affiliation photos every 12 hours."
+        name="add", description="Automatically send affiliation photos every 12 hours.",
+        extras={"permissions": "Manage Messages",
+                "syntax": "/autoaff add (selection) [text channel] [hours to send after]"}
     )
     async def autoaff_add(
         self,
@@ -205,7 +207,9 @@ class GroupMembersCog(commands.Cog):
         )
 
     @autoaff.sub_command(
-        name="remove", description="Delete an affiliation that sends media."
+        name="remove", description="Delete an affiliation that sends media.",
+        extras={"permissions": "Manage Messages",
+                "syntax": "/autoaff remove (selection) [text channel]"}
     )
     async def autoaff_remove(
         self,
@@ -281,8 +285,12 @@ class GroupMembersCog(commands.Cog):
         inter: AppCmdInter,
         item_type: Literal["person", "group", "affiliation"],
         selection: str = commands.Param(autocomplete=helper.auto_complete_type),
-        file_type: Optional[str] = commands.Param(default=None,
-                                                  autocomplete=helper.auto_complete_file_type),
+        file_type: Optional[str] = commands.Param(
+            default=None, autocomplete=helper.auto_complete_file_type
+        ),
+        count: int = commands.Param(
+            default=1, autocomplete=helper.auto_complete_call_count
+        ),
     ):
         """Display the media for a specific Person, Group, or Affiliation."""
         object_id = int(selection.split(")")[0])
@@ -293,6 +301,7 @@ class GroupMembersCog(commands.Cog):
             inter=inter,
             allowed_mentions=self.allowed_mentions,
             file_type=file_type,
+            count=count,
         )
 
     @commands.slash_command(
@@ -343,40 +352,6 @@ class GroupMembersCog(commands.Cog):
             user_id=inter.author.id,
             inter=inter,
         )
-
-    #
-    # @commands.slash_command(
-    #     name="countleaderboard",
-    #     description="Shows leaderboards for how many times a Person or Group has been called.",
-    #     aliases=["clb", "cb", "highestcount"],
-    # )
-    # async def countleaderboard(
-    #     self, inter: AppCmdInter, item_type: Literal["Persons", "Groups"]
-    # ):
-    #     if item_type == "Persons":
-    #         objects = await Person.get_all()
-    #     elif item_type == "Groups":
-    #         objects = await Group.get_all()
-    #     else:
-    #         raise NotImplementedError(
-    #             f"An entity aside from a person or object has not been implemented. {item_type}"
-    #         )
-    #     sorted_leaderboard = await helper.get_call_count_leaderboard(objects)
-    #     if not sorted_leaderboard:
-    #         desc = "No Results."
-    #     else:
-    #         desc = ""
-    #         for count, content in enumerate(sorted_leaderboard, 1):
-    #             model = content[0]
-    #             call_count = content[1]
-    #             desc += f"**{count})** **{str(model.name)}** [{model.id}] -> Called **{call_count}** times.\n"
-    #
-    #     embed = disnake.Embed(
-    #         title=f"{item_type} Leaderboard",
-    #         color=helper.get_random_color(),
-    #         description=desc,
-    #     )
-    #     await inter.send(embed=embed)
 
     @tasks.loop(minutes=5, seconds=0, reconnect=True)
     async def loop_auto_aff(self):

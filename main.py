@@ -1,4 +1,6 @@
 import asyncio
+import tracemalloc
+
 import disnake
 from disnake.ext import commands
 from keys import get_keys
@@ -8,6 +10,7 @@ DEV_MODE = True
 
 
 if __name__ == "__main__":
+    tracemalloc.start()
     intents = disnake.Intents.default()
     intents.members = True  # turn on privileged members intent
     intents.messages = True
@@ -21,6 +24,7 @@ if __name__ == "__main__":
         "intents": intents,
         "test_guilds": None if not DEV_MODE else [t_keys.support_server_id],
         "command_sync_flags": commands.CommandSyncFlags.all(),
+        "chunk_guilds_at_startup": DEV_MODE
     }
     loop = asyncio.get_event_loop()
 
@@ -34,5 +38,6 @@ if __name__ == "__main__":
         # disconnect from the api.
         loop.run_until_complete(bot.api.disconnect())
     finally:
+        tracemalloc.stop()
         ...  # we want the API to finish everything in the queue before closing the loop.
         # loop.close()

@@ -2,7 +2,7 @@ from IreneAPIWrapper.models import User, Wolfram
 from util import logger
 import numexpr
 import urllib.parse
-from ..helper import send_message, get_message, defer_inter
+from ..helper import send_message, get_message, defer_inter, increment_trackable
 
 
 async def evaluate_math(query, user: User):
@@ -90,6 +90,8 @@ async def process_wolfram_query(
                 result_text = img_dict.get("@alt")
 
         result = f"{result_text} {result_image if result_image else ''}"
+
+        await increment_trackable("wolfram_requests", frequency=86400)
 
         return await send_message(
             query,

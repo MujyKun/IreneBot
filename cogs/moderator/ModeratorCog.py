@@ -1,11 +1,10 @@
-from typing import Union, List
+from typing import Union, List, Optional, Literal
 
 import disnake
 from models import Bot
 from disnake.ext import commands
 from disnake import ApplicationCommandInteraction as AppCmdInter, Permissions
 from cogs.moderator import helper
-from IreneAPIWrapper.models import ReactionRoleMessage
 
 
 class ModeratorCog(commands.Cog):
@@ -38,6 +37,28 @@ class ModeratorCog(commands.Cog):
 
         await helper.process_add_emoji(
             emoji=emoji, emoji_name=emoji_name, user_id=ctx.author.id, ctx=ctx
+        )
+
+    @commands.command(
+        name="addsticker",
+        aliases=["yoinksticker"],
+        extras={
+            "permissions": "Manage Emojis",
+            "notes": "You can use a sticker url, but to make it easier,"
+            " just type the command 'addsticker' and then add a sticker to the same message.",
+            "syntax": "addsticker [sticker name] [sticker url]",
+            "description": "Yoink/Add a sticker.",
+        },
+    )
+    @commands.has_guild_permissions(manage_emojis=True)
+    async def regular_add_sticker(
+        self, ctx, sticker_name: Optional[str] = None, sticker_url: Optional[str] = None
+    ):
+        await helper.process_add_sticker(
+            sticker_url=sticker_url,
+            sticker_name=sticker_name,
+            user_id=ctx.author.id,
+            ctx=ctx,
         )
 
     @commands.group(name="prefix", description="Commands related to Guild Prefixes.")
@@ -90,12 +111,70 @@ class ModeratorCog(commands.Cog):
     # SLASH COMMANDS
     # ==============
     @commands.slash_command(
+        name="banphrases",
+        description="Commands related to Ban Phrases.",
+        default_member_permissions=Permissions(manage_messages=True, ban_members=True),
+    )
+    async def ban_phrases(self, inter: AppCmdInter):
+        ...
+
+    @ban_phrases.sub_command(name="add", description="Add a banned phrase.",
+                             extras={"permissions": "Manage Messages, Ban Members",
+                                     "syntax": "/banphrases add (phrase) (punishment) (log channel)"},)
+    async def ban_add(
+        self,
+        inter: AppCmdInter,
+        phrase: str,
+        punishment: Literal["mute", "delete", "ban"],
+        log_channel: disnake.TextChannel,
+    ):
+        await helper.process_add_ban_phrase(
+            user_id=inter.author.id,
+            phrase=phrase,
+            guild=inter.guild,
+            log_channel_id=log_channel.id,
+            punishment=punishment,
+            inter=inter,
+            allowed_mentions=self.allowed_mentions,
+        )
+
+    @ban_phrases.sub_command(name="remove", description="Delete a banned phrase.",
+                             extras={"permissions": "Manage Messages, Ban Members",
+                                     "syntax": "/banphrases remove (phrase)"})
+    async def ban_remove(
+        self,
+        inter: AppCmdInter,
+        phrase: str = commands.Param(
+            autocomplete=helper.auto_complete_type_guild_banned_phrases
+        ),
+    ):
+        await helper.process_remove_ban_phrase(
+            user_id=inter.author.id,
+            phrase=phrase,
+            inter=inter,
+            guild=inter.guild,
+            allowed_mentions=self.allowed_mentions,
+        )
+
+    @ban_phrases.sub_command(
+        name="list", description="List all the current banned phrases.",
+        extras={"permissions": "Manage Messages, Ban Members",
+                "syntax": "/banphrases list"})
+    async def ban_list(self, inter: AppCmdInter):
+        await helper.process_list_ban_phrases(
+            user_id=inter.author.id,
+            inter=inter,
+            guild=inter.guild,
+            allowed_mentions=self.allowed_mentions,
+        )
+
+    @commands.slash_command(
         name="clear",
         description="Clear messages in the text channel.",
         default_member_permissions=Permissions(manage_messages=True),
     )
     async def clear_messages(
-        self, inter: AppCmdInter, amount: commands.Range[1, 100] = 1
+        self, inter: AppCmdInter, amount: commands.Range[int, 1, 100] = 1
     ):
         await helper.process_prune(
             channel=inter.channel,
@@ -113,6 +192,28 @@ class ModeratorCog(commands.Cog):
         )
 
     @commands.slash_command(
+        name="addsticker",
+        extras={
+            "permissions": "Manage Emojis",
+            "notes": "You can only use a sticker url with this slash command. "
+            "If you want to use a sticker, use a regular/prefix command.",
+            "syntax": "/addsticker (sticker url) [sticker name] ",
+            "description": "Yoink/Add a sticker.",
+        },
+        description="Yoink/Add a sticker to the server.",
+    )
+    @commands.has_guild_permissions(manage_emojis=True)
+    async def add_sticker(
+        self, inter, sticker_url: str, sticker_name: Optional[str] = None
+    ):
+        await helper.process_add_sticker(
+            sticker_url=sticker_url,
+            sticker_name=sticker_name,
+            user_id=inter.author.id,
+            inter=inter,
+        )
+
+    @commands.slash_command(
         name="prefix",
         description="Commands related to Guild Prefixes.",
         default_member_permissions=Permissions(manage_messages=True),
@@ -120,8 +221,10 @@ class ModeratorCog(commands.Cog):
     async def prefix(self, inter: AppCmdInter):
         ...
 
-    @prefix.sub_command(name="add", description="Add a guild prefix.")
-    async def add(
+    @prefix.sub_command(name="add", description="Add a guild prefix.",
+                        extras={"permissions": "Manage Messages",
+                                "syntax": "/prefix add (prefix)"})
+    async def prefix_add(
         self,
         inter: AppCmdInter,
         prefix: str,
@@ -134,8 +237,10 @@ class ModeratorCog(commands.Cog):
             allowed_mentions=self.allowed_mentions,
         )
 
-    @prefix.sub_command(name="remove", description="Delete a guild prefix.")
-    async def remove(
+    @prefix.sub_command(name="remove", description="Delete a guild prefix.",
+                        extras={"permissions": "Manage Messages",
+                                "syntax": "/prefix remove (prefix)"})
+    async def prefix_remove(
         self,
         inter: AppCmdInter,
         prefix: str = commands.Param(
@@ -153,8 +258,9 @@ class ModeratorCog(commands.Cog):
     @prefix.sub_command(
         name="list",
         description="List all the current guild prefixes.",
+        extras={"permissions": "Manage Messages", "syntax": "/prefix list"}
     )
-    async def list(self, inter: AppCmdInter):
+    async def prefix_list(self, inter: AppCmdInter):
         await helper.process_prefix_list(
             inter=inter, guild=inter.guild, allowed_mentions=self.allowed_mentions
         )

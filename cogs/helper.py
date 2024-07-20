@@ -7,7 +7,8 @@ from disnake.ext import commands
 from util import logger
 import disnake
 from keys import get_keys
-
+from models import Trackable, StatsTracker
+from tracemalloc import get_traced_memory
 
 LIMIT_ROUNDS = [3, 60]
 LIMIT_TIMEOUT = [5, 60]
@@ -15,6 +16,41 @@ BRACKET_SIZE_OPTIONS = [8, 16, 32, 64]
 DIFFICULTY_OPTIONS = ["easy", "medium", "hard"]
 GENDER_OPTIONS = ["male", "female", "mixed"]
 NSFW_OPTIONS = ["yes", "no"]
+
+
+async def set_trackable(name, value, frequency=None):
+    """Set a trackable to a new value."""
+    trackable = await get_trackable(name)
+    trackable.value = value
+    if frequency and trackable.frequency != frequency:
+        trackable.frequency = frequency
+
+
+async def get_trackable(name) -> Trackable:
+    """Get a trackable."""
+    stats_tracker = await get_tracker()
+    trackable: Optional[Trackable] = stats_tracker.trackables.get(name, None)
+    if not trackable:
+        trackable = Trackable(name)
+        stats_tracker.trackables[name] = trackable
+    return trackable
+
+
+async def increment_trackable(name, frequency=None):
+    """Increment a trackable by 1."""
+    trackable = await get_trackable(name)
+    trackable.value += 1
+
+    if frequency and trackable.frequency != frequency:
+        trackable.frequency = frequency
+
+
+async def get_tracker() -> StatsTracker:
+    """Get the available tracker."""
+    return _trackable
+
+
+_trackable = StatsTracker()
 
 
 async def get_channel_model(channel_id, guild_id) -> Channel:
@@ -326,3 +362,8 @@ async def defer_inter(inter, ephemeral=False):
             with_message=True, ephemeral=ephemeral
         )
     return response_deferred
+
+
+async def get_memory_usage():
+    current, peak = get_traced_memory()
+    return current, peak  # bytes -> Divide by 1048576 for MiB

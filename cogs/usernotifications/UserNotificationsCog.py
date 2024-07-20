@@ -19,8 +19,7 @@ class UserNotificationsCog(commands.Cog):
         ...
 
     @regular_noti.command(
-        name="add", description="Add a phrase/word to be notified for."
-    )
+        name="add", description="Add a phrase/word to be notified for.")
     async def regular_add(self, ctx: commands.Context, *, phrase: str):
         await helper.process_add(
             phrase=phrase,
@@ -63,7 +62,8 @@ class UserNotificationsCog(commands.Cog):
     async def noti(self, inter: AppCmdInter):
         ...
 
-    @noti.sub_command(name="add", description="Add a phrase/word to be notified for.")
+    @noti.sub_command(name="add", description="Add a phrase/word to be notified for.",
+                      extras={"syntax": "/noti add (phrase)"})
     async def add(self, inter: AppCmdInter, phrase: str):
         await helper.process_add(
             phrase=phrase,
@@ -74,7 +74,8 @@ class UserNotificationsCog(commands.Cog):
         )
 
     @noti.sub_command(
-        name="remove", description="Remove a phrase/word to no longer be notified for."
+        name="remove", description="Remove a phrase/word to no longer be notified for.",
+        extras={"syntax": "/noti remove (phrase)"}
     )
     async def remove(
         self,
@@ -90,7 +91,8 @@ class UserNotificationsCog(commands.Cog):
         )
 
     @noti.sub_command(
-        name="list", description="List all your user notifications in this server."
+        name="list", description="List all your user notifications in this server.",
+        extras={"syntax": "/noti list"}
     )
     async def list(self, inter: AppCmdInter):  # add auto complete
         await helper.process_list(

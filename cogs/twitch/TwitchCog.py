@@ -78,7 +78,9 @@ class TwitchCog(commands.Cog):
     async def twitch(self, inter: AppCmdInter):
         ...
 
-    @twitch.sub_command(name="add", description="Add a Twitch channel to subscribe to.")
+    @twitch.sub_command(name="add", description="Add a Twitch channel to subscribe to.",
+                        extras={"permissions": "Manage Messages",
+                                "syntax": "/twitch add (twitch username) [text channel] [role to mention]"})
     async def add(
         self,
         inter: AppCmdInter,
@@ -96,7 +98,10 @@ class TwitchCog(commands.Cog):
             allowed_mentions=self.allowed_mentions,
         )
 
-    @twitch.sub_command(name="remove", description="Unsubscribe from a Twitch channel.")
+    @twitch.sub_command(name="remove", description="Unsubscribe from a Twitch channel.",
+                        extras={"permissions": "Manage Messages",
+                                "syntax": "/twitch remove (twitch username) [text channel]"}
+                        )
     async def remove(
         self,
         inter: AppCmdInter,
@@ -116,6 +121,8 @@ class TwitchCog(commands.Cog):
     @twitch.sub_command(
         name="list",
         description="List all Twitch channels being followed in this guild.",
+        extras={"permissions": "Manage Messages",
+                "syntax": "/twitch list"}
     )
     async def list(self, inter: AppCmdInter):
         await inter.send(await helper.get_subbed_msg(inter.guild, inter.user.id))

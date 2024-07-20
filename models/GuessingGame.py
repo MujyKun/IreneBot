@@ -7,12 +7,11 @@ from IreneAPIWrapper.models import (
     Affiliation,
     Media,
     Person,
-    Date,
     GuessingGame as GuessingGameModel,
 )
 from IreneAPIWrapper.exceptions import Empty
 
-from random import choice
+from random import sample
 from . import BaseScoreGame
 
 
@@ -45,12 +44,12 @@ class GuessingGame(BaseScoreGame):
         person_ids = self.host_user.gg_filter_person_ids
         persons = [await Person.get(person_id) for person_id in person_ids]
 
-        affiliations_ = []
+        affiliations_ = set()
 
         for person in persons:
-            affiliations_ += person.affiliations
+            affiliations_.update(person.affiliations)
 
-        affiliations = list(dict.fromkeys(affiliations_))
+        affiliations = list(affiliations_)
 
         media_pool = await Media.get_all(affiliations, limit=1000)
 
@@ -85,20 +84,11 @@ class GuessingGame(BaseScoreGame):
                 continue
 
             difficulty = media.difficulty
-            if not difficulty:
-                media_pool.append(media)
-                continue
 
             # hard will contain easy & medium as well.
-            if difficulty >= self.easy:
-                media_pool.append(media)
-                continue
-
-            if difficulty >= self.medium and self.difficulty.name in ["hard", "medium"]:
-                media_pool.append(media)
-                continue
-
-            if difficulty >= self.hard and self.difficulty.name == "hard":
+            if not difficulty or (difficulty >= self.easy) or (
+                    difficulty >= self.medium and self.difficulty.name in ["hard", "medium"]) or (
+                    difficulty >= self.hard and self.difficulty.name == "hard"):
                 media_pool.append(media)
 
         if not media_pool:
@@ -116,7 +106,7 @@ class GuessingGame(BaseScoreGame):
                 return await self.send_message(key="no_media_results")
         self.rounds += 1
 
-        media = choice(self.pool)
+        media = sample(self.pool, 1)[0]
         self.current_media = media
         self.current_affiliation = media.affiliation
         self.__played_media_ids.append(media.id)
@@ -141,14 +131,7 @@ class GuessingGame(BaseScoreGame):
                 str(self.current_media.affiliation.person.former_name).lower()
             )
 
-        possible_names_no_dupes = []
-        [
-            possible_names_no_dupes.append(name)
-            for name in possible_names
-            if name not in possible_names_no_dupes
-        ]
-
-        self.correct_answers = possible_names_no_dupes
+        self.correct_answers = list(set(possible_names))  # remove dupes
 
     async def _send_results(self, winner: disnake.User = None):
         """Send the results of a round and continue/finish the game.
@@ -191,12 +174,9 @@ class GuessingGame(BaseScoreGame):
         :param media_and_status: bool
             Whether to update the media and status IDs to the database.
         """
-        if not self._date or not self.__gg:
-            date_id = await Date.insert(self.start_time, self.end_time)
-            self._date = await Date.get(date_id)
-
+        if not self.__gg:
             gg_id = await GuessingGameModel.insert(
-                date_id=date_id,
+                start_date=datetime.datetime.utcnow(),
                 media_ids=self.__played_media_ids,
                 status_ids=[],
                 mode_id=self._mode.id,
@@ -211,6 +191,5 @@ class GuessingGame(BaseScoreGame):
             await self.__gg.update_media_and_status(media_ids, status_ids)
 
         if finished:
-            self.end_time = datetime.datetime.now()
-            if self._date:
-                await self._date.update_end_date(end_date=self.end_time)
+            self.end_time = datetime.datetime.utcnow()
+            await self.__gg.update_end_date(end_time=self.end_time)

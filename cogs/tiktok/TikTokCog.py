@@ -192,6 +192,8 @@ class TikTokCog(commands.Cog):
 
 
 def setup(bot: Bot):
-    cog = TikTokCog(bot)
-    bot.add_cog(cog)
-    cog.tiktok_updates.start()
+    ...
+    # cog = TikTokCog(bot)
+    # bot.add_cog(cog)
+    # cog.tiktok_updates.start()
+

@@ -51,14 +51,8 @@ class Bot(AutoShardedBot):
     def get_preload():
         preload = Preload()
         preload.all_false()
-        preload.persons = (
-            preload.groups
-        ) = (
-            preload.twitch_subscriptions
-        ) = (
+        preload.twitch_subscriptions = (
             preload.languages
-        ) = (
-            preload.affiliations
         ) = (
             preload.eight_ball_responses
         ) = (
@@ -66,30 +60,12 @@ class Bot(AutoShardedBot):
         ) = (
             preload.interactions
         ) = (
-            preload.person_aliases
-        ) = (
-            preload.group_aliases
-        ) = (
-            preload.tags
-        ) = (
-            preload.socials
-        ) = (
-            preload.displays
-        ) = (
-            preload.companies
-        ) = (
-            preload.dates
-        ) = (
             preload.names
-        ) = (
-            preload.bloodtypes
         ) = (
             preload.locations
         ) = (
-            preload.auto_media
-        ) = (
             preload.reminders
-        ) = preload.reaction_role_messages = preload.tiktok_subscriptions = preload.banned_phrases = True
+        ) = preload.reaction_role_messages = preload.banned_phrases = True
         return preload
 
     async def prefix_check(
@@ -264,18 +240,8 @@ class Bot(AutoShardedBot):
         if message.author.bot:
             return
 
-        from cogs.groupmembers.helper import (
-            idol_send_on_message,
-        )  # avoids circular import
-
-        ctx = await self.get_context(message)
-        if not ctx.command:
-            await idol_send_on_message(
-                self, message, await self.prefix_check(self, message)
-            )
-        else:
-            await self.process_commands(message)
-            await helper.increment_trackable("commands_used")
+        await self.process_commands(message)
+        await helper.increment_trackable("commands_used")
         await self.check_for_notification(message)
         await self.check_for_ban_phrase(message)
         await helper.increment_trackable("messages_received")

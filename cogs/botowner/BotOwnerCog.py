@@ -135,6 +135,21 @@ class BotOwnerCog(commands.Cog):
     ################
 
     @commands.slash_command(
+        name="setavatar",
+        description="Set the avatar for the bot.",
+        guild_ids=get_keys().bot_owner_only_servers,
+        extras={"permissions": "Bot Owner"},
+    )
+    async def set_avatar(self, inter: AppCmdInter, url: str):
+        async with self.bot.http_session.get(url) as resp:
+            avatar = await resp.read()
+        try:
+            await self.bot.user.edit(avatar=avatar)
+            await inter.send("Avatar Set")
+        except Exception as e:
+            await inter.send(f"Failed - {e}")
+
+    @commands.slash_command(
         name="8ballresponse",
         description="Modify 8ball responses.",
         guild_ids=get_keys().bot_owner_only_servers,

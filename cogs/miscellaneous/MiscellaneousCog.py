@@ -30,12 +30,6 @@ class MiscellaneousCog(commands.Cog):
             user_id=ctx.author.id, ctx=ctx, allowed_mentions=self.allowed_mentions
         )
 
-    @commands.command(name="stopgames", description="Stop all games you are hosting.")
-    async def regular_stop_games(self, ctx: commands.Context):
-        await helper.process_stop_games(
-            user_id=ctx.author.id, ctx=ctx, allowed_mentions=self.allowed_mentions
-        )
-
     @commands.command(
         name="choose", description="Choose between a selection of options."
     )
@@ -87,14 +81,6 @@ class MiscellaneousCog(commands.Cog):
     async def invite(self, inter: AppCmdInter):
         await helper.send_bot_invite(
             user_id=inter.author.id, inter=inter, allowed_mentions=self.allowed_mentions
-        )
-
-    @commands.slash_command(
-        name="stopgames", description="Stop all games you are hosting."
-    )
-    async def stop_games(self, inter: AppCmdInter):
-        await helper.process_stop_games(
-            user_id=inter.user.id, inter=inter, allowed_mentions=self.allowed_mentions
         )
 
     @commands.slash_command(name="8ball", description="Ask the 8ball a question.")

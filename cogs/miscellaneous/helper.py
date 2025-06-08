@@ -8,7 +8,6 @@ from random import choice, randint
 from re import findall
 from disnake.ext import commands
 from ..helper import send_message, defer_inter, increment_trackable
-from models import all_games as all_games
 from keys import get_keys
 from util import botembed, botinfo
 
@@ -24,31 +23,6 @@ async def process_ping(
         ctx=ctx,
         inter=inter,
         allowed_mentions=allowed_mentions,
-    )
-
-
-async def process_stop_games(
-    user_id: int,
-    ctx: commands.Context = None,
-    inter: AppCmdInter = None,
-    allowed_mentions=None,
-):
-    user = await User.get(user_id)
-    if not user:
-        return
-
-    games = [
-        game for game in all_games if game.host_user == user and not game.is_complete
-    ]
-    for game in games:
-        await game.stop()
-
-    await send_message(
-        key="stop_games",
-        ctx=ctx,
-        inter=inter,
-        allowed_mentions=allowed_mentions,
-        user=user,
     )
 
 

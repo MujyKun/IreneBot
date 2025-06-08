@@ -17,3 +17,16 @@ _handler.setFormatter(
     logging.Formatter("%(asctime)s:%(levelname)s:%(name)s: %(message)s")
 )
 logger.addHandler(_handler)
+
+
+for filename in listdir(_log_folder_name):
+    if filename.endswith(".log"):
+        full_path = path.join(_log_folder_name, filename)
+        try:
+            # Get file's modification time
+            file_mtime = datetime.fromtimestamp(path.getmtime(full_path))
+            if file_mtime < cutoff_date:
+                remove(full_path)
+                print(f"Deleted old log file: {filename}")
+        except Exception as e:
+            print(f"Error while checking/deleting {filename}: {e}")

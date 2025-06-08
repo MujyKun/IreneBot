@@ -67,13 +67,5 @@ from .CommandTypes import (
     SlashCommand,
     get_cog_dicts,
 )
-from .Bracket import Bracket, PvP
-from .Game import Game
-from .BaseRoundGame import BaseRoundGame
-from .BaseScoreGame import BaseScoreGame
 
 from .bot import Bot
-from .GuessingGame import GuessingGame
-from .GroupGuessingGame import GroupGuessingGame
-from .UnscrambleGame import UnscrambleGame
-from .BiasGame import BiasGame
